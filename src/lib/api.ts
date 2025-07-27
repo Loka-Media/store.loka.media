@@ -1,0 +1,421 @@
+import { api } from './auth';
+
+// Product interfaces
+export interface Product {
+  id: number;
+  creator_id: number;
+  name: string;
+  description: string;
+  base_price: number;
+  markup_percentage: number;
+  category: string;
+  tags: string[];
+  thumbnail_url: string;
+  images: string[];
+  is_active: boolean;
+  creator_name: string;
+  creator_username: string;
+  variant_count: number;
+  min_price: number;
+  max_price: number;
+  created_at: string;
+}
+
+export interface ProductVariant {
+  id: number;
+  product_id: number;
+  printful_variant_id: number;
+  size: string;
+  color: string;
+  color_code: string;
+  price: number;
+  cost: number;
+  stock_status: string;
+  sku: string;
+  image_url: string;
+}
+
+export interface CartItem {
+  id: number;
+  user_id: number;
+  product_id: number;
+  variant_id: number;
+  quantity: number;
+  price: number;
+  product_name: string;
+  thumbnail_url: string;
+  creator_name: string;
+  size: string;
+  color: string;
+  color_code: string;
+  image_url: string;
+  stock_status: string;
+  total_price: number;
+}
+
+export interface CartSummary {
+  itemCount: number;
+  subtotal: string;
+  shipping: string;
+  total: string;
+}
+
+export interface Address {
+  address1: string;
+  address2?: string;
+  city: string;
+  state?: string;
+  zip: string;
+  country: string;
+}
+
+export interface Order {
+  id: number;
+  user_id: number;
+  order_number: string;
+  status: string;
+  total_amount: number;
+  shipping_address: Address;
+  billing_address?: Address;
+  payment_status: string;
+  payment_method: string;
+  created_at: string;
+  item_count: number;
+}
+
+export interface OrderItem {
+  id: number;
+  order_id: number;
+  product_id: number;
+  variant_id: number;
+  creator_id: number;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  product_name: string;
+  thumbnail_url: string;
+  size: string;
+  color: string;
+  image_url: string;
+  creator_name: string;
+}
+
+export interface ShippingOption {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+}
+
+// Product API
+export const productAPI = {
+  // Get all products (public)
+  getProducts: async (params?: {
+    category?: string;
+    search?: string;
+    creator?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+    sortOrder?: string;
+  }) => {
+    const response = await api.get('/api/products', { params });
+    return response.data;
+  },
+
+  // Get single product
+  getProduct: async (productId: string | number) => {
+    const response = await api.get(`/api/products/${productId}`);
+    return response.data;
+  },
+
+  // Get categories
+  getCategories: async () => {
+    const response = await api.get('/api/products/categories');
+    return response.data;
+  },
+
+  // Get creators
+  getCreators: async () => {
+    const response = await api.get('/api/products/creators');
+    return response.data;
+  },
+
+  // Creator: Create product
+  createProduct: async (productData: {
+    name: string;
+    description?: string;
+    basePrice: number;
+    markupPercentage?: number;
+    category?: string;
+    tags?: string[];
+    thumbnailUrl?: string;
+    images?: string[];
+    printfulSyncProductId: number;
+    variants: Array<{
+      printfulVariantId: number;
+      size: string;
+      color: string;
+      colorCode: string;
+      cost: number;
+      sku: string;
+      imageUrl?: string;
+    }>;
+  }) => {
+    const response = await api.post('/api/products', productData);
+    return response.data;
+  },
+
+  // Creator: Get my products
+  getCreatorProducts: async (params?: { limit?: number; offset?: number }) => {
+    const response = await api.get('/api/products/creator/my-products', { params });
+    return response.data;
+  },
+
+  // Creator: Update product
+  updateProduct: async (productId: string | number, productData: Partial<Product>) => {
+    const response = await api.put(`/api/products/${productId}`, productData);
+    return response.data;
+  },
+
+  // Creator: Delete product
+  deleteProduct: async (productId: string | number) => {
+    const response = await api.delete(`/api/products/${productId}`);
+    return response.data;
+  },
+};
+
+// Cart API
+export const cartAPI = {
+  // Get cart
+  getCart: async (): Promise<{ items: CartItem[]; summary: CartSummary }> => {
+    const response = await api.get('/api/cart');
+    return response.data;
+  },
+
+  // Get cart count
+  getCartCount: async (): Promise<{ count: number }> => {
+    const response = await api.get('/api/cart/count');
+    return response.data;
+  },
+
+  // Add to cart
+  addToCart: async (variantId: number, quantity: number = 1) => {
+    const response = await api.post('/api/cart/add', { variantId, quantity });
+    return response.data;
+  },
+
+  // Update cart item
+  updateCartItem: async (cartItemId: number, quantity: number) => {
+    const response = await api.put(`/api/cart/items/${cartItemId}`, { quantity });
+    return response.data;
+  },
+
+  // Remove from cart
+  removeFromCart: async (cartItemId: number) => {
+    const response = await api.delete(`/api/cart/items/${cartItemId}`);
+    return response.data;
+  },
+
+  // Clear cart
+  clearCart: async () => {
+    const response = await api.delete('/api/cart/clear');
+    return response.data;
+  },
+};
+
+// Checkout API
+export const checkoutAPI = {
+  // Get shipping estimates
+  getShippingEstimates: async (address: Address) => {
+    const response = await api.post('/api/checkout/shipping-estimates', { address });
+    return response.data;
+  },
+
+  // Create order
+  createOrder: async (orderData: {
+    shippingAddress: Address;
+    billingAddress?: Address;
+    paymentMethod: string;
+    shippingOption?: ShippingOption;
+    notes?: string;
+  }) => {
+    const response = await api.post('/api/checkout/orders', orderData);
+    return response.data;
+  },
+
+  // Get user orders
+  getUserOrders: async (params?: { limit?: number; offset?: number }) => {
+    const response = await api.get('/api/checkout/orders', { params });
+    return response.data;
+  },
+
+  // Get order details
+  getOrderDetails: async (orderId: string | number) => {
+    const response = await api.get(`/api/checkout/orders/${orderId}`);
+    return response.data;
+  },
+
+  // Cancel order
+  cancelOrder: async (orderId: string | number) => {
+    const response = await api.post(`/api/checkout/orders/${orderId}/cancel`);
+    return response.data;
+  },
+};
+
+// Helper functions
+export const formatPrice = (price: number | string): string => {
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(numPrice);
+};
+
+export const formatDate = (dateString: string): string => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
+// Printful API
+export const printfulAPI = {
+  // Initialize OAuth flow
+  initializeAuth: async () => {
+    const response = await api.get('/api/printful/auth/init');
+    return response.data;
+  },
+
+  // Get connection status
+  getConnectionStatus: async () => {
+    const response = await api.get('/api/printful/connection/status');
+    return response.data;
+  },
+
+  // Get Printful catalog
+  getCatalog: async (params?: {
+    category?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+    sortOrder?: string;
+  }) => {
+    const response = await api.get('/api/printful/catalog', { params });
+    return response.data;
+  },
+
+  // Get Printful categories
+  getCategories: async () => {
+    const response = await api.get('/api/printful/categories');
+    return response.data;
+  },
+
+  // Get product details with variants
+  getProductDetails: async (productId: number) => {
+    const response = await api.get(`/api/printful/catalog/${productId}`);
+    return response.data;
+  },
+
+  // Upload file to Printful
+  uploadFile: async (fileData: { filename: string; url: string; type?: string }) => {
+    try {
+      console.log('API uploadFile called with:', fileData);
+      
+      const response = await api.post('/api/printful/files', fileData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API uploadFile error:', error);
+      
+      // Fallback: try with fetch instead of axios
+      try {
+        console.log('Trying fallback with fetch...');
+        const token = localStorage.getItem('accessToken');
+        
+        const fetchResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/printful/files`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(fileData),
+        });
+        
+        const result = await fetchResponse.json();
+        console.log('Fetch response:', result);
+        
+        if (!fetchResponse.ok) {
+          throw new Error(result.error || 'Upload failed');
+        }
+        
+        return result;
+      } catch (fetchError) {
+        console.error('Fetch fallback also failed:', fetchError);
+        throw error; // throw original error
+      }
+    }
+  },
+
+  // Get uploaded files
+  getFiles: async () => {
+    const response = await api.get('/api/printful/files');
+    return response.data;
+  },
+
+  // Create sync product
+  createSyncProduct: async (productData: {
+    sync_product: {
+      name: string;
+      thumbnail: string;
+      external_id?: string;
+    };
+    sync_variants: Array<{
+      variant_id: number;
+      retail_price: string;
+      external_id?: string;
+      files: Array<{
+        url: string;
+        type: string;
+      }>;
+    }>;
+  }) => {
+    const response = await api.post('/api/printful/products', productData);
+    return response.data;
+  },
+
+  // Get sync products
+  getSyncProducts: async () => {
+    const response = await api.get('/api/printful/products/sync');
+    return response.data;
+  },
+
+  // Get single sync product
+  getSyncProduct: async (productId: number) => {
+    const response = await api.get(`/api/printful/products/sync/${productId}`);
+    return response.data;
+  },
+
+  // Sync products to database
+  syncProductsToDatabase: async () => {
+    const response = await api.post('/api/printful/products/sync-to-db');
+    return response.data;
+  },
+
+  // Access design canvas
+  getCanvas: async (productId?: number) => {
+    const response = await api.get('/api/printful/canvas', { 
+      params: productId ? { productId } : {} 
+    });
+    return response.data;
+  },
+};
