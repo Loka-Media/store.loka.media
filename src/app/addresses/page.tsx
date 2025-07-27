@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Address, addressAPI } from '@/lib/api';
-import { MapPin, Plus, Edit, Trash2, Check, Star } from 'lucide-react';
+import { MapPin, Plus, Edit, Trash2, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function AddressesPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -83,8 +83,8 @@ export default function AddressesPage() {
       
       resetForm();
       await fetchAddresses();
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to save address';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to save address';
       toast.error(message);
     } finally {
       setLoading(false);
@@ -116,8 +116,8 @@ export default function AddressesPage() {
       await addressAPI.deleteAddress(addressId);
       toast.success('Address deleted successfully');
       await fetchAddresses();
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to delete address';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to delete address';
       toast.error(message);
     } finally {
       setLoading(false);
@@ -130,8 +130,8 @@ export default function AddressesPage() {
       await addressAPI.setDefaultAddress(addressId, addressType);
       toast.success('Default address updated');
       await fetchAddresses();
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to update default address';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to update default address';
       toast.error(message);
     } finally {
       setLoading(false);

@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
   const { items, summary, loading, updateCartItem, removeFromCart, clearCart } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
 

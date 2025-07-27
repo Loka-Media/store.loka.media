@@ -48,7 +48,7 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const fetchProducts = async (customFilters?: typeof filters) => {
+  const fetchProducts = useCallback(async (customFilters?: typeof filters) => {
     try {
       setLoading(true);
       const params = customFilters || filters;
@@ -68,7 +68,7 @@ function ProductsContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, pagination.limit, pagination.offset]);
 
   // Initialize from URL params and fetch initial data
   useEffect(() => {
@@ -90,17 +90,17 @@ function ProductsContent() {
       sortBy: 'created_at', 
       sortOrder: 'DESC' 
     });
-  }, [searchParams]);
+  }, [searchParams, fetchProducts]);
 
   // Fetch products when filters change (after initial load)
   useEffect(() => {
     fetchProducts();
-  }, [filters.category, filters.search, filters.creator, filters.minPrice, filters.maxPrice, filters.sortBy, filters.sortOrder]);
+  }, [filters.category, filters.search, filters.creator, filters.minPrice, filters.maxPrice, filters.sortBy, filters.sortOrder, fetchProducts]);
 
   // Fetch products when pagination changes
   useEffect(() => {
     fetchProducts();
-  }, [pagination.limit, pagination.offset]);
+  }, [pagination.limit, pagination.offset, fetchProducts]);
 
   const fetchCategories = async () => {
     try {
@@ -133,10 +133,6 @@ function ProductsContent() {
     router.push(`/products?${params.toString()}`);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchProducts();
-  };
 
   const handleAddToCart = async (productId: number) => {
     if (!isAuthenticated) {
@@ -420,7 +416,7 @@ function ProductsContent() {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Show real creators from API */}
-            {creators.length > 0 ? creators.slice(0, 4).map((creator, index) => (
+            {creators.length > 0 ? creators.slice(0, 4).map((creator) => (
               <div 
                 key={creator.id} 
                 className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
@@ -443,8 +439,8 @@ function ProductsContent() {
               { name: 'Design Studio', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b743?w=100', products: 0, rating: '4.9' },
               { name: 'Creative Mind', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100', products: 0, rating: '4.7' },
               { name: 'Art Collective', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100', products: 0, rating: '4.8' }
-            ].map((creator, index) => (
-              <div key={index} className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
+            ].map((creator) => (
+              <div key={creator.name} className="text-center p-4 hover:bg-gray-50 rounded-lg transition-colors">
                 <div className="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden">
                   <Image
                     src={creator.avatar}

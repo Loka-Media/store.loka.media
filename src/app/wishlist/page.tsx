@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 export default function WishlistPage() {
   const { items, loading, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

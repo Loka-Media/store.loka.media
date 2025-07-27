@@ -6,13 +6,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { 
   ShoppingBag, 
-  User, 
   Menu, 
   X, 
   LogOut, 
   Store,
   Heart,
-  Search,
   MapPin
 } from 'lucide-react';
 

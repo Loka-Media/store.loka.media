@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { cartAPI, CartItem, CartSummary } from '@/lib/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
@@ -31,6 +31,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartCount, setCartCount] = useState(0);
   const { isAuthenticated, user } = useAuth();
 
+  const fetchCartCount = async () => {
+    try {
+      const response = await cartAPI.getCartCount();
+      setCartCount(response.count);
+    } catch (error) {
+      console.error('Failed to fetch cart count:', error);
+    }
+  };
+
+  const refreshCart = useCallback(async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      setLoading(true);
+      const response = await cartAPI.getCart();
+      setItems(response.items);
+      setSummary(response.summary);
+      setCartCount(response.summary.itemCount);
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+      toast.error('Failed to load cart');
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated]);
+
   // Fetch cart data when user is authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -47,33 +73,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       });
       setCartCount(0);
     }
-  }, [isAuthenticated, user]);
-
-  const fetchCartCount = async () => {
-    try {
-      const response = await cartAPI.getCartCount();
-      setCartCount(response.count);
-    } catch (error) {
-      console.error('Failed to fetch cart count:', error);
-    }
-  };
-
-  const refreshCart = async () => {
-    if (!isAuthenticated) return;
-    
-    try {
-      setLoading(true);
-      const response = await cartAPI.getCart();
-      setItems(response.items);
-      setSummary(response.summary);
-      setCartCount(response.summary.itemCount);
-    } catch (error) {
-      console.error('Failed to fetch cart:', error);
-      toast.error('Failed to load cart');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isAuthenticated, user, refreshCart]);
 
   const addToCart = async (variantId: number, quantity: number = 1): Promise<boolean> => {
     if (!isAuthenticated) {
@@ -86,8 +86,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       toast.success('Added to cart!');
       await refreshCart();
       return true;
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to add to cart';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to add to cart';
       toast.error(message);
       return false;
     }
@@ -104,8 +104,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       toast.success('Cart updated!');
       await refreshCart();
       return true;
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to update cart';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to update cart';
       toast.error(message);
       return false;
     }
@@ -122,8 +122,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       toast.success('Item removed from cart');
       await refreshCart();
       return true;
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to remove item';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to remove item';
       toast.error(message);
       return false;
     }
@@ -140,8 +140,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       toast.success('Cart cleared');
       await refreshCart();
       return true;
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to clear cart';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to clear cart';
       toast.error(message);
       return false;
     }

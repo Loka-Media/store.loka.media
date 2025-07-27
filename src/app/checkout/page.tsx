@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 export default function CheckoutPage() {
   const { items, summary, clearCart } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -95,8 +95,8 @@ export default function CheckoutPage() {
         address_type: 'shipping'
       });
       await fetchAddresses();
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to add address';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to add address';
       toast.error(message);
     } finally {
       setLoading(false);
@@ -119,7 +119,7 @@ export default function CheckoutPage() {
       
       const orderData = {
         shippingAddress: selectedShippingAddress,
-        billingAddress: useSameAddress ? selectedShippingAddress : selectedBillingAddress,
+        billingAddress: useSameAddress ? selectedShippingAddress : selectedBillingAddress || undefined,
         paymentMethod,
         notes: ''
       };
@@ -129,8 +129,8 @@ export default function CheckoutPage() {
       toast.success('Order placed successfully!');
       await clearCart();
       router.push(`/orders/${response.order.id}`);
-    } catch (error: any) {
-      const message = error?.response?.data?.error || 'Failed to place order';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to place order';
       toast.error(message);
     } finally {
       setLoading(false);
