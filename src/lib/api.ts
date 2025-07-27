@@ -61,12 +61,20 @@ export interface CartSummary {
 }
 
 export interface Address {
+  id?: number;
+  user_id?: number;
+  name: string;
   address1: string;
   address2?: string;
   city: string;
   state?: string;
   zip: string;
   country: string;
+  phone?: string;
+  is_default?: boolean;
+  address_type?: 'shipping' | 'billing' | 'both';
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Order {
@@ -222,6 +230,84 @@ export const cartAPI = {
   // Clear cart
   clearCart: async () => {
     const response = await api.delete('/api/cart/clear');
+    return response.data;
+  },
+};
+
+// Wishlist API
+export const wishlistAPI = {
+  // Get wishlist
+  getWishlist: async () => {
+    const response = await api.get('/api/wishlist');
+    return response.data;
+  },
+
+  // Get wishlist count
+  getWishlistCount: async () => {
+    const response = await api.get('/api/wishlist/count');
+    return response.data;
+  },
+
+  // Add to wishlist
+  addToWishlist: async (productId: number) => {
+    const response = await api.post('/api/wishlist/add', { productId });
+    return response.data;
+  },
+
+  // Remove from wishlist
+  removeFromWishlist: async (productId: number) => {
+    const response = await api.delete(`/api/wishlist/remove/${productId}`);
+    return response.data;
+  },
+
+  // Clear wishlist
+  clearWishlist: async () => {
+    const response = await api.delete('/api/wishlist/clear');
+    return response.data;
+  },
+
+  // Check if product is in wishlist
+  isInWishlist: async (productId: number) => {
+    const response = await api.get(`/api/wishlist/check/${productId}`);
+    return response.data;
+  },
+};
+
+// Address API
+export const addressAPI = {
+  // Get user addresses
+  getAddresses: async () => {
+    const response = await api.get('/api/addresses');
+    return response.data;
+  },
+
+  // Create new address
+  createAddress: async (addressData: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    const response = await api.post('/api/addresses', addressData);
+    return response.data;
+  },
+
+  // Update address
+  updateAddress: async (addressId: number, addressData: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    const response = await api.put(`/api/addresses/${addressId}`, addressData);
+    return response.data;
+  },
+
+  // Delete address
+  deleteAddress: async (addressId: number) => {
+    const response = await api.delete(`/api/addresses/${addressId}`);
+    return response.data;
+  },
+
+  // Set default address
+  setDefaultAddress: async (addressId: number, addressType: 'shipping' | 'billing' | 'both') => {
+    const response = await api.put(`/api/addresses/${addressId}/default`, { addressType });
+    return response.data;
+  },
+
+  // Get default address by type
+  getDefaultAddress: async (type: 'shipping' | 'billing') => {
+    const response = await api.get(`/api/addresses/default/${type}`);
     return response.data;
   },
 };

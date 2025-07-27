@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { 
   ShoppingBag, 
   User, 
@@ -11,11 +12,13 @@ import {
   LogOut, 
   Store,
   Heart,
-  Search
+  Search,
+  MapPin
 } from 'lucide-react';
 
 export default function Navigation() {
   const { user, logout, isAuthenticated } = useAuth();
+  const { cartCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -61,11 +64,23 @@ export default function Navigation() {
                         Wishlist
                       </Link>
                       <Link
-                        href="/cart"
+                        href="/addresses"
                         className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+                      >
+                        <MapPin className="w-4 h-4 mr-1" />
+                        Addresses
+                      </Link>
+                      <Link
+                        href="/cart"
+                        className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center relative"
                       >
                         <ShoppingBag className="w-4 h-4 mr-1" />
                         Cart
+                        {cartCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            {cartCount > 99 ? '99+' : cartCount}
+                          </span>
+                        )}
                       </Link>
                     </>
                   )}
@@ -150,11 +165,23 @@ export default function Navigation() {
                       Wishlist
                     </Link>
                     <Link
-                      href="/cart"
+                      href="/addresses"
                       className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
+                      Addresses
+                    </Link>
+                    <Link
+                      href="/cart"
+                      className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium relative"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
                       Cart
+                      {cartCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {cartCount > 99 ? '99+' : cartCount}
+                        </span>
+                      )}
                     </Link>
                   </>
                 )}

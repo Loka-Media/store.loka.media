@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { productAPI, Product, formatPrice } from '@/lib/api';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Search, Grid, List, Heart, Star, ShoppingCart, User } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -22,6 +25,10 @@ function ProductsContent() {
   const [creators, setCreators] = useState<{ id: number; name: string; username: string; product_count: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  const { addToCart } = useCart();
+  const { addToWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
   const [filters, setFilters] = useState({
     category: '',
     search: '',
@@ -131,6 +138,30 @@ function ProductsContent() {
     fetchProducts();
   };
 
+  const handleAddToCart = async (productId: number) => {
+    if (!isAuthenticated) {
+      toast.error('Please login to add items to cart');
+      return;
+    }
+
+    try {
+      // Fetch product variants to get the first available variant
+      const productData = await productAPI.getProduct(productId);
+      
+      if (!productData.variants || productData.variants.length === 0) {
+        toast.error('No variants available for this product');
+        return;
+      }
+
+      // Use the first available variant
+      const firstVariant = productData.variants[0];
+      await addToCart(firstVariant.id, 1);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      toast.error('Failed to add to cart');
+    }
+  };
+
   const ProductCard = ({ product }: { product: Product }) => {
     const imageUrl = product.thumbnail_url || product.images?.[0] || '/placeholder-product.svg';
     
@@ -172,7 +203,11 @@ function ProductsContent() {
               title="Add to wishlist"
               onClick={(e) => {
                 e.preventDefault();
-                toast.success('Added to wishlist!');
+                if (!isAuthenticated) {
+                  toast.error('Please login to add items to wishlist');
+                  return;
+                }
+                addToWishlist(product.id);
               }}
             >
               <Heart className="w-4 h-4" />
@@ -215,7 +250,7 @@ function ProductsContent() {
           
           <button
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
-            onClick={() => toast.success('Added to cart!')}
+            onClick={() => handleAddToCart(product.id)}
           >
             <ShoppingCart className="w-4 h-4" />
             <span>Add to Cart</span>
@@ -312,6 +347,13 @@ function ProductsContent() {
                 <button
                   className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                   title="Add to wishlist"
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.error('Please login to add items to wishlist');
+                      return;
+                    }
+                    addToWishlist(product.id);
+                  }}
                 >
                   <Heart className="w-5 h-5" />
                 </button>
