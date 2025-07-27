@@ -152,32 +152,6 @@ export default function FilesPage() {
     );
   };
 
-  const getFileIcon = (file: UploadedFile) => {
-    if (file.mime_type?.startsWith('image/')) {
-      return <ImageIcon className="w-5 h-5" />;
-    } else if (file.mime_type === 'application/pdf') {
-      return <FileText className="w-5 h-5" />;
-    }
-    return <File className="w-5 h-5" />;
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const formatDate = (timestamp: number): string => {
-    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const filteredFiles = files.filter(file => {
     const matchesSearch = !filters.search || 

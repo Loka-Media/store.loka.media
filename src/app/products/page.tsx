@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { productAPI, Product, formatPrice } from '@/lib/api';
+import { createProductSlug } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -90,17 +91,17 @@ function ProductsContent() {
       sortBy: 'created_at', 
       sortOrder: 'DESC' 
     });
-  }, [searchParams]);
+  }, [searchParams, fetchProducts]);
 
   // Fetch products when filters change (after initial load)
   useEffect(() => {
     fetchProducts();
-  }, [filters.category, filters.search, filters.creator, filters.minPrice, filters.maxPrice, filters.sortBy, filters.sortOrder]);
+  }, [filters.category, filters.search, filters.creator, filters.minPrice, filters.maxPrice, filters.sortBy, filters.sortOrder, fetchProducts]);
 
   // Fetch products when pagination changes
   useEffect(() => {
     fetchProducts();
-  }, [pagination.limit, pagination.offset]);
+  }, [pagination.limit, pagination.offset, fetchProducts]);
 
   const fetchCategories = async () => {
     try {
@@ -163,7 +164,7 @@ function ProductsContent() {
     
     return (
       <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-        <Link href={`/products/${product.id}`}>
+        <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
           <div className="aspect-square relative group">
             {/* Try Next.js Image first, fallback to regular img */}
             <Image
@@ -213,7 +214,7 @@ function ProductsContent() {
       </Link>
       
       <div className="p-5">
-        <Link href={`/products/${product.id}`}>
+        <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
           <h3 className="font-semibold text-gray-900 hover:text-indigo-600 transition-colors text-lg leading-tight">
             {product.name}
           </h3>
@@ -266,7 +267,7 @@ function ProductsContent() {
     return (
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
         <div className="flex">
-          <Link href={`/products/${product.id}`} className="flex-shrink-0">
+          <Link href={`/products/${createProductSlug(product.name, product.id)}`} className="flex-shrink-0">
             <div className="w-48 h-48 relative">
               <Image
                 src={imageUrl}
@@ -299,7 +300,7 @@ function ProductsContent() {
         <div className="flex-1 p-6">
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <Link href={`/products/${product.id}`}>
+              <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
                 <h3 className="text-xl font-semibold text-gray-900 hover:text-indigo-600 transition-colors">
                   {product.name}
                 </h3>
