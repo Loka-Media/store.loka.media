@@ -245,13 +245,7 @@ function ProductsContent() {
             )}
           </div>
           
-          <button
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
-            onClick={() => handleAddToCart(product.id)}
-          >
-            <ShoppingCart className="w-4 h-4" />
-            <span>Add to Cart</span>
-          </button>
+         
         </div>
         
         <div className="mt-3 flex items-center justify-between">
