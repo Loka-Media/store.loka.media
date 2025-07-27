@@ -20,6 +20,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -89,6 +90,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        const response = await authAPI.getMe();
+        setUser(response.user);
+      }
+    } catch (error) {
+      console.error('Refresh user failed:', error);
+    }
+  };
+
   const logout = async () => {
     try {
       await authAPI.logout();
@@ -108,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        refreshUser,
         isAuthenticated,
       }}
     >

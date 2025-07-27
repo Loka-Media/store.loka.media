@@ -9,20 +9,25 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 
 export default function CheckoutPage() {
   const { items, summary, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const [{ isPending, isResolved, isRejected }] = usePayPalScriptReducer();
+  
+  console.log('PayPal Script State:', { isPending, isResolved, isRejected });
   
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedShippingAddress, setSelectedShippingAddress] = useState<Address | null>(null);
   const [selectedBillingAddress, setSelectedBillingAddress] = useState<Address | null>(null);
   const [useSameAddress, setUseSameAddress] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('paypal');
   const [loading, setLoading] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [addressFormType, setAddressFormType] = useState<'shipping' | 'billing'>('shipping');
+  const [orderSuccess, setOrderSuccess] = useState(false);
 
   const [newAddress, setNewAddress] = useState<Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>>({
     name: '',
@@ -101,6 +106,49 @@ export default function CheckoutPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePayPalApprove = async (data: unknown, actions: unknown) => {
+    try {
+      setLoading(true);
+      
+      // Capture the payment
+      const details = await (actions as { order: { capture: () => Promise<{ id: string }> } }).order.capture();
+      
+      // Create order in our backend
+      if (!selectedShippingAddress) {
+        throw new Error('Shipping address is required');
+      }
+      
+      const orderData = {
+        shippingAddress: selectedShippingAddress,
+        billingAddress: useSameAddress ? selectedShippingAddress : selectedBillingAddress || undefined,
+        paymentMethod: 'paypal',
+        notes: `PayPal Transaction ID: ${details.id}`
+      };
+
+      const response = await checkoutAPI.createOrder(orderData);
+      
+      toast.success('Payment successful! Order placed.');
+      setOrderSuccess(true);
+      await clearCart();
+      
+      setTimeout(() => {
+        router.push(`/orders/${response.order.id}`);
+      }, 2000);
+      
+    } catch (error: unknown) {
+      console.error('PayPal payment error:', error);
+      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Payment failed';
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePayPalError = (error: unknown) => {
+    console.error('PayPal error:', error);
+    toast.error('PayPal payment failed. Please try again.');
   };
 
   const handlePlaceOrder = async () => {
@@ -209,7 +257,10 @@ export default function CheckoutPage() {
                             ? 'border-indigo-500 bg-indigo-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
-                        onClick={() => setSelectedShippingAddress(address)}
+                        onClick={() => {
+                          console.log('Selected shipping address:', address);
+                          setSelectedShippingAddress(address);
+                        }}
                       >
                         <div className="flex items-start justify-between">
                           <div>
@@ -292,23 +343,23 @@ export default function CheckoutPage() {
                   <label className="flex items-center">
                     <input
                       type="radio"
+                      value="paypal"
+                      checked={paymentMethod === 'paypal'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                    />
+                    <span className="ml-2 text-sm text-gray-900">PayPal (Recommended)</span>
+                  </label>
+                  
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
                       value="card"
                       checked={paymentMethod === 'card'}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                     />
                     <span className="ml-2 text-sm text-gray-900">Credit/Debit Card</span>
-                  </label>
-                  
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="paypal"
-                      checked={paymentMethod === 'paypal'}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                    />
-                    <span className="ml-2 text-sm text-gray-900">PayPal</span>
                   </label>
                 </div>
               </div>
@@ -374,13 +425,89 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="mt-6">
-                  <button
-                    onClick={handlePlaceOrder}
-                    disabled={loading || !selectedShippingAddress}
-                    className="w-full bg-indigo-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Placing Order...' : 'Place Order'}
-                  </button>
+                  {orderSuccess ? (
+                    <div className="text-center py-4">
+                      <div className="text-green-600 text-lg font-medium mb-2">✓ Payment Successful!</div>
+                      <p className="text-gray-600">Redirecting to your order...</p>
+                    </div>
+                  ) : paymentMethod === 'paypal' ? (
+                    <div className="space-y-3">
+                      <div className="text-xs text-gray-500 mb-2">
+                        Debug: Address={selectedShippingAddress ? 'Selected' : 'None'}, PayPal={isPending ? 'Loading' : isResolved ? 'Ready' : 'Error'}
+                      </div>
+                      {selectedShippingAddress ? (
+                        <>
+                          {isPending ? (
+                            <div className="text-center py-4">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                              <p className="text-gray-500 mt-2">Loading PayPal...</p>
+                            </div>
+                          ) : isRejected ? (
+                            <div className="text-center py-4 bg-red-50 border border-red-200 rounded-md">
+                              <p className="text-red-700">PayPal failed to load. Please refresh the page.</p>
+                              <button
+                                onClick={handlePlaceOrder}
+                                disabled={loading}
+                                className="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                              >
+                                Place Order Without PayPal
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <PayPalButtons
+                                style={{
+                                  layout: 'vertical',
+                                  color: 'blue',
+                                  shape: 'rect',
+                                  label: 'paypal',
+                                  height: 45
+                                }}
+                                createOrder={(data, actions) => {
+                                  console.log('Creating PayPal order with total:', summary.total);
+                                  return actions.order.create({
+                                    intent: 'CAPTURE',
+                                    purchase_units: [{
+                                      amount: {
+                                        value: summary.total.replace('$', '').replace(',', ''),
+                                        currency_code: 'USD'
+                                      },
+                                      description: `Order from Custom Catalog - ${items.length} item(s)`
+                                    }]
+                                  });
+                                }}
+                                onApprove={handlePayPalApprove}
+                                onError={handlePayPalError}
+                                disabled={loading}
+                              />
+                              <div className="text-center">
+                                <p className="text-sm text-gray-500">Or</p>
+                                <button
+                                  onClick={handlePlaceOrder}
+                                  disabled={loading}
+                                  className="mt-2 w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 disabled:opacity-50"
+                                >
+                                  {loading ? 'Processing...' : 'Continue Without PayPal'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-center py-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                          <p className="text-yellow-700">Please select a shipping address to continue with PayPal payment</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handlePlaceOrder}
+                      disabled={loading || !selectedShippingAddress}
+                      className="w-full bg-indigo-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? 'Placing Order...' : 'Place Order'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

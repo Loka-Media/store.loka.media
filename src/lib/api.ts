@@ -351,6 +351,18 @@ export const checkoutAPI = {
   },
 };
 
+// User Profile API
+export const userAPI = {
+  // Update user profile
+  updateProfile: async (userData: {
+    name?: string;
+    phone?: string;
+  }) => {
+    const response = await api.put('/auth/me', userData);
+    return response.data;
+  },
+};
+
 // Helper functions
 export const formatPrice = (price: number | string): string => {
   const numPrice = typeof price === 'string' ? parseFloat(price) : price;

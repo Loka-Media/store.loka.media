@@ -11,7 +11,8 @@ import {
   LogOut, 
   Store,
   Heart,
-  MapPin
+  MapPin,
+  User
 } from 'lucide-react';
 
 export default function Navigation() {
@@ -82,6 +83,14 @@ export default function Navigation() {
                       </Link>
                     </>
                   )}
+                  
+                  <Link
+                    href="/profile"
+                    className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+                  >
+                    <User className="w-4 h-4 mr-1" />
+                    Profile
+                  </Link>
                   
                   <div className="relative ml-3">
                     <div className="flex items-center space-x-2">
@@ -183,6 +192,14 @@ export default function Navigation() {
                     </Link>
                   </>
                 )}
+                
+                <Link
+                  href="/profile"
+                  className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Profile
+                </Link>
                 
                 <div className="border-t border-gray-200 pt-4 pb-3">
                   <div className="flex items-center px-3">
