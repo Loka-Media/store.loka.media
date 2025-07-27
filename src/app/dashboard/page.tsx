@@ -1,9 +1,17 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, Mail, Phone, Shield, CheckCircle, XCircle } from 'lucide-react';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  LogOut,
+  User,
+  Mail,
+  Phone,
+  Shield,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 
 export default function DashboardPage() {
   const { user, loading, logout, isAuthenticated } = useAuth();
@@ -11,13 +19,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/auth/login');
+      router.push("/auth/login");
     } else if (!loading && user) {
       // Redirect to role-specific dashboard
-      if (user.role === 'creator') {
-        router.push('/dashboard/creator');
-      } else if (user.role === 'admin') {
-        router.push('/dashboard/admin');
+      if (user.role === "creator") {
+        router.push("/dashboard/creator");
+      } else if (user.role === "admin") {
+        router.push("/dashboard/admin");
+      } else if (user.role === "user") {
+        router.push("/");
       }
       // Users stay on the main dashboard
     }
@@ -25,7 +35,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/auth/login');
+    router.push("/auth/login");
   };
 
   if (loading) {
@@ -42,24 +52,24 @@ export default function DashboardPage() {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'creator':
-        return 'bg-green-100 text-green-800';
-      case 'user':
-        return 'bg-blue-100 text-blue-800';
+      case "admin":
+        return "bg-red-100 text-red-800";
+      case "creator":
+        return "bg-green-100 text-green-800";
+      case "user":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'admin':
+      case "admin":
         return <Shield className="w-4 h-4" />;
-      case 'creator':
+      case "creator":
         return <User className="w-4 h-4" />;
-      case 'user':
+      case "user":
         return <User className="w-4 h-4" />;
       default:
         return <User className="w-4 h-4" />;
@@ -111,12 +121,16 @@ export default function DashboardPage() {
                         {user.isVerified ? (
                           <div className="flex items-center text-green-600">
                             <CheckCircle className="w-4 h-4 mr-1" />
-                            <span className="text-sm font-medium">Verified</span>
+                            <span className="text-sm font-medium">
+                              Verified
+                            </span>
                           </div>
                         ) : (
                           <div className="flex items-center text-red-600">
                             <XCircle className="w-4 h-4 mr-1" />
-                            <span className="text-sm font-medium">Unverified</span>
+                            <span className="text-sm font-medium">
+                              Unverified
+                            </span>
                           </div>
                         )}
                       </dd>
@@ -126,7 +140,11 @@ export default function DashboardPage() {
                         Role
                       </dt>
                       <dd>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getRoleColor(user.role)}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getRoleColor(
+                            user.role
+                          )}`}
+                        >
                           {getRoleIcon(user.role)}
                           <span className="ml-1">{user.role}</span>
                         </span>
@@ -157,7 +175,9 @@ export default function DashboardPage() {
                     <User className="w-4 h-4 mr-2" />
                     Username
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900">@{user.username}</dd>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    @{user.username}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500 flex items-center">
@@ -178,37 +198,47 @@ export default function DashboardPage() {
           </div>
 
           {/* Role-specific content */}
-          {user.role === 'admin' && (
+          {user.role === "admin" && (
             <div className="mt-8 bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                   Admin Panel
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Welcome to the admin dashboard. You have full access to all platform features.
+                  Welcome to the admin dashboard. You have full access to all
+                  platform features.
                 </p>
                 <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="bg-red-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-red-900">User Management</h4>
-                    <p className="text-sm text-red-700 mt-1">Manage all users and creators</p>
+                    <h4 className="font-medium text-red-900">
+                      User Management
+                    </h4>
+                    <p className="text-sm text-red-700 mt-1">
+                      Manage all users and creators
+                    </p>
                   </div>
                   <div className="bg-red-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-red-900">System Settings</h4>
-                    <p className="text-sm text-red-700 mt-1">Configure platform settings</p>
+                    <h4 className="font-medium text-red-900">
+                      System Settings
+                    </h4>
+                    <p className="text-sm text-red-700 mt-1">
+                      Configure platform settings
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {user.role === 'creator' && (
+          {user.role === "creator" && (
             <div className="mt-8 bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                   Creator Hub
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Welcome to your creator dashboard. Start selling your products!
+                  Welcome to your creator dashboard. Start selling your
+                  products!
                 </p>
                 <div className="mt-6">
                   <a
@@ -220,19 +250,27 @@ export default function DashboardPage() {
                 </div>
                 <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-green-900">Product Management</h4>
-                    <p className="text-sm text-green-700 mt-1">Add and manage your products</p>
+                    <h4 className="font-medium text-green-900">
+                      Product Management
+                    </h4>
+                    <p className="text-sm text-green-700 mt-1">
+                      Add and manage your products
+                    </p>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-green-900">Sales Analytics</h4>
-                    <p className="text-sm text-green-700 mt-1">Track your sales performance</p>
+                    <h4 className="font-medium text-green-900">
+                      Sales Analytics
+                    </h4>
+                    <p className="text-sm text-green-700 mt-1">
+                      Track your sales performance
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {user.role === 'user' && (
+          {user.role === "user" && (
             <div className="mt-8 bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
@@ -243,12 +281,18 @@ export default function DashboardPage() {
                 </p>
                 <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-blue-900">Browse Products</h4>
-                    <p className="text-sm text-blue-700 mt-1">Explore our product catalog</p>
+                    <h4 className="font-medium text-blue-900">
+                      Browse Products
+                    </h4>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Explore our product catalog
+                    </p>
                   </div>
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <h4 className="font-medium text-blue-900">Order History</h4>
-                    <p className="text-sm text-blue-700 mt-1">View your past purchases</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      View your past purchases
+                    </p>
                   </div>
                 </div>
               </div>
@@ -267,7 +311,8 @@ export default function DashboardPage() {
                   </h3>
                   <div className="mt-2 text-sm text-yellow-700">
                     <p>
-                      Your email address is not verified. Please check your email and verify your account to access all features.
+                      Your email address is not verified. Please check your
+                      email and verify your account to access all features.
                     </p>
                   </div>
                 </div>
