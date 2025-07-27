@@ -91,17 +91,17 @@ function ProductsContent() {
       sortBy: 'created_at', 
       sortOrder: 'DESC' 
     });
-  }, [searchParams, fetchProducts]);
+  }, [searchParams]);
 
   // Fetch products when filters change (after initial load)
   useEffect(() => {
     fetchProducts();
-  }, [filters.category, filters.search, filters.creator, filters.minPrice, filters.maxPrice, filters.sortBy, filters.sortOrder, fetchProducts]);
+  }, [filters.category, filters.search, filters.creator, filters.minPrice, filters.maxPrice, filters.sortBy, filters.sortOrder]);
 
   // Fetch products when pagination changes
   useEffect(() => {
     fetchProducts();
-  }, [pagination.limit, pagination.offset, fetchProducts]);
+  }, [pagination.limit, pagination.offset]);
 
   const fetchCategories = async () => {
     try {
