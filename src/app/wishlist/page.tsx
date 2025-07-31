@@ -5,7 +5,7 @@ import { useWishlist } from "@/contexts/WishlistContext";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatPrice, productAPI } from "@/lib/api";
-import { Heart, ShoppingCart, ArrowLeft, Trash2 } from "lucide-react";
+import { Heart, ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -23,7 +23,7 @@ export default function WishlistPage() {
     }
   }, [isAuthenticated, router]);
 
-  const handleAddToCart = async (productId: number) => {
+  const [/* handleAddToCart */] = [async (productId: number) => {
     if (!isAuthenticated) {
       toast.error("Please login to add items to cart");
       return;
@@ -45,7 +45,7 @@ export default function WishlistPage() {
       console.error("Failed to add to cart:", error);
       toast.error("Failed to add to cart");
     }
-  };
+  }];
 
   if (!isAuthenticated) {
     return (

@@ -24,15 +24,22 @@ export interface Product {
 export interface ProductVariant {
   id: number;
   product_id: number;
-  printful_variant_id: number;
-  size: string;
-  color: string;
-  color_code: string;
+  printful_variant_id?: number;
+  shopify_variant_id?: string;
+  title: string;
+  size?: string;
+  color?: string;
+  color_code?: string;
   price: number;
-  cost: number;
-  stock_status: string;
+  cost?: number;
+  stock_status?: string;
+  available_for_sale?: boolean;
+  inventory_quantity?: number;
   sku: string;
-  image_url: string;
+  image_url?: string;
+  compare_at_price?: number;
+  weight?: number;
+  weight_unit?: string;
 }
 
 export interface CartItem {
@@ -51,6 +58,7 @@ export interface CartItem {
   image_url: string;
   stock_status: string;
   total_price: number;
+  shopify_variant_id?: string;
 }
 
 export interface CartSummary {
@@ -128,6 +136,7 @@ export const productAPI = {
     offset?: number;
     sortBy?: string;
     sortOrder?: string;
+    source?: 'printful' | 'shopify' | 'all'; // Filter by product source
   }) => {
     const response = await api.get('/api/products', { params });
     return response.data;
@@ -517,3 +526,284 @@ export const printfulAPI = {
     return response.data;
   },
 };
+
+// Shopify API (NEW - Complete Integration)
+export const shopifyAPI = {
+  // Authentication & Connection
+  initializeAuth: async (shopDomain: string) => {
+    const response = await api.post('/api/shopify/auth/initialize', { shop: shopDomain });
+    return response.data;
+  },
+
+  getConnectionStatus: async () => {
+    const response = await api.get('/api/shopify/auth/status');
+    return response.data;
+  },
+
+  disconnect: async () => {
+    const response = await api.post('/api/shopify/auth/disconnect');
+    return response.data;
+  },
+
+  // Shop Information
+  getShopInfo: async () => {
+    const response = await api.get('/api/shopify/shop');
+    return response.data;
+  },
+
+  // Products
+  getProducts: async (params?: {
+    limit?: number;
+    page_info?: string;
+    fields?: string;
+  }) => {
+    const response = await api.get('/api/shopify/products', { params });
+    return response.data;
+  },
+
+  getProduct: async (productId: string | number) => {
+    const response = await api.get(`/api/shopify/products/${productId}`);
+    return response.data;
+  },
+
+  // Product Sync
+  syncProducts: async () => {
+    const response = await api.post('/api/shopify/products/sync');
+    return response.data;
+  },
+
+  getUserProducts: async () => {
+    const response = await api.get('/api/shopify/user/products');
+    return response.data;
+  },
+
+  // Webhooks
+  setupWebhooks: async () => {
+    const response = await api.post('/api/shopify/webhooks/setup');
+    return response.data;
+  },
+
+  // Shared Store Functions (Storefront API)
+  getAvailableProducts: async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) => {
+    const response = await api.get('/api/shopify-storefront/products/available', { params });
+    return response.data;
+  },
+
+  publishProductsToMarketplace: async (productIds: string[] | number[]) => {
+    const response = await api.post('/api/shopify-storefront/products/publish', { productIds });
+    return response.data;
+  },
+
+  // Admin Functions (Private App - No OAuth)
+  testShopifyConnection: async () => {
+    const response = await api.post('/api/shopify-storefront/test');
+    return response.data;
+  },
+
+  syncAllProducts: async () => {
+    const response = await api.post('/api/shopify-storefront/sync');
+    return response.data;
+  },
+
+  getSyncStatus: async () => {
+    const response = await api.get('/api/shopify-storefront/status');
+    return response.data;
+  },
+};
+
+// Shopify Types/Interfaces
+export interface ShopifyProduct {
+  id: number;
+  title: string;
+  handle: string;
+  body_html: string;
+  vendor: string;
+  product_type: string;
+  created_at: string;
+  updated_at: string;
+  published_at: string;
+  tags: string[];
+  images: ShopifyImage[];
+  variants: ShopifyVariant[];
+}
+
+export interface ShopifyVariant {
+  id: number;
+  product_id: number;
+  title: string;
+  price: string;
+  sku: string;
+  position: number;
+  option1: string;
+  option2?: string;
+  option3?: string;
+  created_at: string;
+  updated_at: string;
+  taxable: boolean;
+  barcode?: string;
+  weight: number;
+  weight_unit: string;
+  inventory_quantity: number;
+  image_id?: number;
+  compare_at_price?: string;
+}
+
+export interface ShopifyImage {
+  id: number;
+  product_id: number;
+  position: number;
+  created_at: string;
+  updated_at: string;
+  alt?: string;
+  width: number;
+  height: number;
+  src: string;
+  variant_ids: number[];
+}
+
+export interface ShopifyConnectionStatus {
+  connected: boolean;
+  adminAccount: boolean;
+  shared: boolean;
+  connectedAt?: string;
+  shopInfo?: {
+    name: string;
+    domain: string;
+    email: string;
+    country: string;
+  };
+  message: string;
+}
+
+export interface ShopifyAuthResponse {
+  message: string;
+  connected: boolean;
+  adminAccount: boolean;
+  needsAuth?: boolean;
+  authUrl?: string;
+  shopDomain?: string;
+  note: string;
+}
+
+// Extended Product interface to include source
+export interface ExtendedProduct extends Product {
+  product_source?: 'printful' | 'shopify' | 'custom';
+}
+
+// Shopify Checkout API
+export const shopifyCheckoutAPI = {
+  // Create checkout session from cart
+  createCheckoutSession: async (data?: {
+    shippingAddress?: Address;
+    discountCode?: string;
+  }) => {
+    const response = await api.post('/api/shopify-checkout/create', data);
+    return response.data;
+  },
+
+  // Get checkout session by ID
+  getCheckoutSession: async (sessionId: string | number) => {
+    const response = await api.get(`/api/shopify-checkout/session/${sessionId}`);
+    return response.data;
+  },
+
+  // Update checkout session
+  updateCheckoutSession: async (sessionId: string | number, data: {
+    action: 'update_address' | 'apply_discount' | 'add_items';
+    data: unknown;
+  }) => {
+    const response = await api.put(`/api/shopify-checkout/session/${sessionId}`, data);
+    return response.data;
+  },
+
+  // Complete checkout (called after successful Shopify payment)
+  completeCheckout: async (data: {
+    sessionId: string | number;
+    shopifyOrderId?: string;
+  }) => {
+    const response = await api.post('/api/shopify-checkout/complete', data);
+    return response.data;
+  },
+
+  // Get checkout history
+  getCheckoutHistory: async (params?: { limit?: number; offset?: number }) => {
+    const response = await api.get('/api/shopify-checkout/history', { params });
+    return response.data;
+  }
+};
+
+// Shopify Checkout Types
+export interface ShopifyCheckoutSession {
+  id: string;
+  url: string;
+  totalPrice: {
+    amount: string;
+    currencyCode: string;
+  };
+  subtotalPrice: {
+    amount: string;
+    currencyCode: string;
+  };
+  totalTax: {
+    amount: string;
+    currencyCode: string;
+  };
+  lineItems: ShopifyLineItem[];
+  shippingAddress?: ShopifyAddress;
+  discountApplications?: ShopifyDiscountApplication[];
+}
+
+export interface ShopifyLineItem {
+  id: string;
+  title: string;
+  quantity: number;
+  variant: {
+    id: string;
+    title: string;
+    price: {
+      amount: string;
+      currencyCode: string;
+    };
+    image?: {
+      url: string;
+      altText?: string;
+    };
+  };
+  customAttributes?: Array<{
+    key: string;
+    value: string;
+  }>;
+}
+
+export interface ShopifyAddress {
+  address1: string;
+  address2?: string;
+  city: string;
+  company?: string;
+  country: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  province: string;
+  zip: string;
+}
+
+export interface ShopifyDiscountApplication {
+  code?: string;
+  title: string;
+  value: {
+    amount?: string;
+    percentage?: number;
+  };
+  targetType: string;
+}
+
+export interface CheckoutSessionResponse {
+  success: boolean;
+  checkout: ShopifyCheckoutSession;
+  sessionId: string | number;
+}

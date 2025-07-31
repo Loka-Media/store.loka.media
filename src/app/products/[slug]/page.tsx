@@ -70,8 +70,8 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isImageZoomed, setIsImageZoomed] = useState(false);
-  const [addingToCart, setAddingToCart] = useState(false);
-  const [viewCount, setViewCount] = useState(Math.floor(Math.random() * 500) + 100);
+  const [/* addingToCart */, setAddingToCart] = useState(false);
+  const [viewCount] = useState(Math.floor(Math.random() * 500) + 100);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [canTruncate, setCanTruncate] = useState(false);
 
@@ -148,7 +148,33 @@ export default function ProductPage({ params }: ProductPageProps) {
     }
   }, [product?.description]);
 
- 
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product?.name || 'Product',
+          url: window.location.href
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+    }
+  };
+
+  const prevImage = () => {
+    setSelectedImageIndex((prev) => 
+      prev === 0 ? images.length - 1 : prev - 1
+    );
+  };
+
+  const nextImage = () => {
+    setSelectedImageIndex((prev) => 
+      prev === images.length - 1 ? 0 : prev + 1
+    );
+  };
 
   const handleAddToCart = async () => {
     if (!selectedVariant) {
@@ -201,8 +227,21 @@ export default function ProductPage({ params }: ProductPageProps) {
     if (!product?.variants) return [];
     const colors = new Map();
     product.variants.forEach(variant => {
-      if (!colors.has(variant.color)) {
-        colors.set(variant.color, variant.color_code);
+      let color;
+      if (variant.color) {
+        color = variant.color;
+      } else if (variant.title?.includes(' - ')) {
+        // Printful format: "2XL - Black" -> "Black"
+        color = variant.title.split(' - ')[1] || 'Default';
+      } else if (variant.title?.includes(' / ')) {
+        // Shopify format: "Wine / S" -> "Wine"
+        color = variant.title.split(' / ')[0] || 'Default';
+      } else {
+        color = 'Default';
+      }
+      const colorCode = variant.color_code || '#000000';
+      if (!colors.has(color)) {
+        colors.set(color, colorCode);
       }
     });
     return Array.from(colors.entries());
@@ -211,43 +250,89 @@ export default function ProductPage({ params }: ProductPageProps) {
   const getAvailableSizes = (selectedColor?: string) => {
     if (!product?.variants) return [];
     return product.variants
-      .filter(variant => !selectedColor || variant.color === selectedColor)
-      .map(variant => variant.size)
+      .filter(variant => {
+        if (!selectedColor) return true;
+        let color;
+        if (variant.color) {
+          color = variant.color;
+        } else if (variant.title?.includes(' - ')) {
+          // Printful format: "2XL - Black" -> "Black"
+          color = variant.title.split(' - ')[1] || 'Default';
+        } else if (variant.title?.includes(' / ')) {
+          // Shopify format: "Wine / S" -> "Wine"
+          color = variant.title.split(' / ')[0] || 'Default';
+        } else {
+          color = 'Default';
+        }
+        return color === selectedColor;
+      })
+      .map(variant => {
+        if (variant.size) {
+          return variant.size;
+        } else if (variant.title?.includes(' - ')) {
+          // Printful format: "2XL - Black" -> "2XL"
+          return variant.title.split(' - ')[0] || 'Default';
+        } else if (variant.title?.includes(' / ')) {
+          // Shopify format: "Wine / S" -> "S"
+          return variant.title.split(' / ')[1] || 'Default';
+        } else {
+          return 'Default';
+        }
+      })
       .filter((size, index, self) => self.indexOf(size) === index);
   };
 
-  const getCurrentVariant = (color: string, size: string) => {
-    return product?.variants.find(variant => 
-      variant.color === color && variant.size === size
-    );
-  };
-
-  const nextImage = () => {
-    if (!images) return;
-    setSelectedImageIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prevImage = () => {
-    if (!images) return;
-    setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: product?.name,
-          text: product?.description,
-          url: window.location.href,
-        });
-      } catch (error) {
-        navigator.clipboard.writeText(window.location.href);
-        toast.success('Link copied to clipboard!');
-      }
+  const getVariantColorAndSize = (variant: ProductVariant) => {
+    if (variant.color && variant.size) {
+      return { color: variant.color, size: variant.size };
+    } else if (variant.title?.includes(' - ')) {
+      // Printful format: "2XL - Black" 
+      const parts = variant.title.split(' - ');
+      return { 
+        size: parts[0] || 'Default',
+        color: parts[1] || 'Default'
+      };
+    } else if (variant.title?.includes(' / ')) {
+      // Shopify format: "Wine / S"
+      const parts = variant.title.split(' / ');
+      return {
+        color: parts[0] || 'Default',
+        size: parts[1] || 'Default'
+      };
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard!');
+      return { color: 'Default', size: 'Default' };
     }
+  };
+
+  const getCurrentVariant = (color: string, size: string) => {
+    return product?.variants.find(variant => {
+      const { color: variantColor, size: variantSize } = getVariantColorAndSize(variant);
+      return variantColor === color && variantSize === size;
+    });
+  };
+
+  const isVariantAvailable = (variant: ProductVariant) => {
+    // Check if this is a Printful product by looking for printful_variant_id
+    const isPrintfulProduct = !!variant.printful_variant_id || product?.source === 'printful';
+    
+    if (isPrintfulProduct) {
+      // For Printful variants, use available_for_sale if present, otherwise assume available
+      // Printful is print-on-demand, so inventory_quantity 0 doesn't mean out of stock
+      return variant.available_for_sale !== undefined ? variant.available_for_sale : true;
+    }
+    
+    // For Shopify-only variants (no printful_variant_id)
+    if (variant.available_for_sale !== undefined) {
+      return variant.available_for_sale && (variant.inventory_quantity || 0) > 0;
+    }
+    
+    // For variants with explicit stock_status
+    if (variant.stock_status) {
+      return variant.stock_status === 'in_stock';
+    }
+    
+    // Default to available
+    return true;
   };
 
   if (loading) {
@@ -278,7 +363,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     ? product.images 
     : [product.thumbnail_url || '/placeholder-product.svg'];
 
-  const selectedColor = selectedVariant?.color;
+  const selectedColor = selectedVariant ? getVariantColorAndSize(selectedVariant).color : undefined;
   const availableSizes = getAvailableSizes(selectedColor);
 
   return (
@@ -473,51 +558,49 @@ export default function ProductPage({ params }: ProductPageProps) {
 
 
                 {product.variants && product.variants.length > 0 && (
-                  <div className="mb-8 space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-4">
-                        Color: <span className="text-purple-300">{selectedVariant?.color}</span>
-                      </h3>
-                      <div className="flex space-x-3">
-                        {getUniqueColors().map(([colorName, colorCode]) => (
-                          <button
-                            key={colorName}
-                            onClick={() => {
-                              // ✨ FIXED: Find the first available variant for the new color
-                              const firstAvailableVariantForColor = product.variants.find(
-                                v => v.color === colorName && v.stock_status === 'in_stock'
-                              ) || product.variants.find(v => v.color === colorName); 
-                              
-                              if (firstAvailableVariantForColor) {
-                                setSelectedVariant(firstAvailableVariantForColor);
-                              }
-                            }}
-                            className={`relative w-12 h-12 rounded-xl border-2 transition-all duration-300 hover:scale-110 ${
-                              selectedVariant?.color === colorName
-                                ? 'border-white ring-4 ring-purple-500/50 shadow-lg shadow-purple-500/25'
-                                : 'border-slate-600 hover:border-white/60'
-                            }`}
-                            style={{ backgroundColor: colorCode }}
-                            title={colorName}
-                          >
-                            {selectedVariant?.color === colorName && (
-                              <Check className="absolute inset-0 m-auto w-5 h-5 text-white drop-shadow-lg" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                  <div className="mt-8">
+                    {/* Check if this has color/size structure or is in title format */}
+                    {(product.variants[0]?.color && product.variants[0]?.size) || 
+                     (product.variants[0]?.title?.includes(' - ') || product.variants[0]?.title?.includes(' / ')) ? (
+                      <>
+                        {/* Color Selection for Printful products */}
+                        <div className="mb-6">
+                          <h3 className="text-sm font-medium text-white mb-3">
+                            Color: {selectedVariant ? getVariantColorAndSize(selectedVariant).color : 'Select Color'}
+                          </h3>
+                          <div className="flex space-x-3">
+                            {getUniqueColors().map(([colorName, colorCode]) => (
+                              <button
+                                key={colorName}
+                                onClick={() => {
+                                  const currentSize = selectedVariant ? getVariantColorAndSize(selectedVariant).size : availableSizes[0];
+                                  const newVariant = getCurrentVariant(colorName, currentSize);
+                                  if (newVariant) setSelectedVariant(newVariant);
+                                }}
+                                className={`w-8 h-8 rounded-full border-2 ${
+                                  selectedVariant && getVariantColorAndSize(selectedVariant).color === colorName
+                                    ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-500'
+                                    : 'border-gray-300'
+                                }`}
+                                style={{ backgroundColor: colorCode }}
+                                title={colorName}
+                              />
+                            ))}
+                          </div>
+                        </div>
 
-                    {selectedColor && (
-                      <div>
-                        <h3 className="text-lg font-semibold text-white mb-4">
-                          Size: <span className="text-purple-300">{selectedVariant?.size}</span>
-                        </h3>
-                        <div className="grid grid-cols-4 gap-3">
-                          {availableSizes.map((size) => {
-                            const variant = getCurrentVariant(selectedColor, size);
-                            const isAvailable = variant?.stock_status === 'in_stock';
-                            const isSelected = selectedVariant?.size === size;
+                        {/* Size Selection for Printful products */}
+                        {getUniqueColors().length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-sm font-medium text-white mb-3">
+                              Size: {selectedVariant ? getVariantColorAndSize(selectedVariant).size : 'Select Size'}
+                            </h3>
+                            <div className="grid grid-cols-4 gap-2">
+                              {availableSizes.map((size) => {
+                                const currentColor = selectedVariant ? getVariantColorAndSize(selectedVariant).color : getUniqueColors()[0]?.[0];
+                                const variant = getCurrentVariant(currentColor, size);
+                                const isAvailable = variant ? isVariantAvailable(variant) : false;
+                                const isSelected = selectedVariant ? getVariantColorAndSize(selectedVariant).size === size : false;
                             
                             return (
                               <button
@@ -544,19 +627,57 @@ export default function ProductPage({ params }: ProductPageProps) {
                       </div>
                     )}
 
+                      </>
+                    ) : (
+                      /* Simple dropdown for Shopify products */
+                      <div className="mb-6">
+                        <h3 className="text-sm font-medium text-gray-900 mb-3">
+                          Variant
+                        </h3>
+                        <select
+                          value={selectedVariant?.id || ''}
+                          onChange={(e) => {
+                            const variant = product.variants.find(v => v.id === parseInt(e.target.value));
+                            if (variant) setSelectedVariant(variant);
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                          <option value="">Select a variant</option>
+                          {product.variants.map((variant) => (
+                            <option 
+                              key={variant.id} 
+                              value={variant.id}
+                              disabled={!isVariantAvailable(variant)}
+                            >
+                              {variant.title} - {formatPrice(variant.price)} 
+                              {!isVariantAvailable(variant) && ' (Out of Stock)'}
+                              {variant.inventory_quantity !== undefined && ` (${variant.inventory_quantity} available)`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Stock Status */}
                     {selectedVariant && (
-                      <div className="flex items-center p-4 bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-700">
-                        {selectedVariant.stock_status === 'in_stock' ? (
-                          <>
-                            <div className="w-3 h-3 bg-green-400 rounded-full mr-3 animate-pulse"></div>
-                            <span className="text-green-300 font-medium">In Stock - Ready to ship</span>
-                          </>
-                        ) : (
-                          <>
-                            <div className="w-3 h-3 bg-red-400 rounded-full mr-3"></div>
-                            <span className="text-red-300 font-medium">Out of Stock</span>
-                          </>
-                        )}
+                      <div className="mb-6">
+                        <div className="flex items-center">
+                          {isVariantAvailable(selectedVariant) ? (
+                            <>
+                              <Check className="w-5 h-5 text-green-500 mr-2" />
+                              <span className="text-sm text-green-600 font-medium">
+                                In Stock
+                                {selectedVariant.inventory_quantity !== undefined && 
+                                  ` (${selectedVariant.inventory_quantity} available)`}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <Package className="w-5 h-5 text-red-500 mr-2" />
+                              <span className="text-sm text-red-600 font-medium">Out of Stock</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -591,18 +712,11 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <div className="flex space-x-4 mb-8">
                   <button
                     onClick={handleAddToCart}
-                    disabled={!selectedVariant || selectedVariant.stock_status !== 'in_stock' || addingToCart}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 flex items-center justify-center relative overflow-hidden group"
+                    disabled={!selectedVariant || !isVariantAvailable(selectedVariant)}
+                    className="flex-1 bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
-                    {addingToCart ? (
-                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                    ) : (
-                      <>
-                        <ShoppingCart className="w-5 h-5 mr-2" />
-                        Add to Cart
-                      </>
-                    )}
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    {!selectedVariant ? 'Select Variant' : !isVariantAvailable(selectedVariant) ? 'Out of Stock' : 'Add to Cart'}
                   </button>
                   
                   <button

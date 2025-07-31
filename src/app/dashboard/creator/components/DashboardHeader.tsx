@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink, Package, Plus } from 'lucide-react';
+import { ExternalLink, Package, Plus, Store } from 'lucide-react';
 import Link from 'next/link';
 
 interface ConnectionStatus {
@@ -37,6 +37,13 @@ export function DashboardHeader({ connection, onConnectPrintful }: DashboardHead
               >
                 <Package className="w-4 h-4 mr-2" />
                 My Products
+              </Link>
+              <Link
+                href="/dashboard/creator/shopify-products"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <Store className="w-4 h-4 mr-2" />
+                Shopify Products
               </Link>
               <Link
                 href="/dashboard/creator/products/create"

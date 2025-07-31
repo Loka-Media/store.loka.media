@@ -3,8 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatPrice, Address, addressAPI, checkoutAPI } from '@/lib/api';
-import { CreditCard, MapPin, Package, ArrowLeft, Plus, Check } from 'lucide-react';
+import { 
+  formatPrice, 
+  Address, 
+  addressAPI, 
+  checkoutAPI,
+  shopifyCheckoutAPI,
+  CheckoutSessionResponse,
+  ShopifyCheckoutSession
+} from '@/lib/api';
+import { CreditCard, MapPin, Package, ArrowLeft, Plus, Check, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -23,11 +31,16 @@ export default function CheckoutPage() {
   const [selectedShippingAddress, setSelectedShippingAddress] = useState<Address | null>(null);
   const [selectedBillingAddress, setSelectedBillingAddress] = useState<Address | null>(null);
   const [useSameAddress, setUseSameAddress] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState('paypal');
+  const [paymentMethod, setPaymentMethod] = useState('shopify');
   const [loading, setLoading] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [addressFormType, setAddressFormType] = useState<'shipping' | 'billing'>('shipping');
   const [orderSuccess, setOrderSuccess] = useState(false);
+  
+  // Shopify checkout states
+  const [checkoutSession, setCheckoutSession] = useState<ShopifyCheckoutSession | null>(null);
+  const [, setSessionId] = useState<string | number | null>(null);
+  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
 
   const [newAddress, setNewAddress] = useState<Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>>({
     name: '',
@@ -55,6 +68,30 @@ export default function CheckoutPage() {
 
     fetchAddresses();
   }, [isAuthenticated, items.length, router]);
+
+  // Check if cart has only Shopify products
+  const hasOnlyShopifyProducts = () => {
+    if (!items || items.length === 0) return false;
+    
+    return items.every(item => {
+      // Check if item has shopify_variant_id or comes from Shopify source
+      return item.shopify_variant_id || (item as { source?: string }).source === 'shopify';
+    });
+  };
+
+  // Check if cart has mixed products
+  const hasMixedProducts = () => {
+    if (!items || items.length === 0) return false;
+    
+    const shopifyItems = items.filter(item => 
+      item.shopify_variant_id || (item as { source?: string }).source === 'shopify'
+    );
+    const printfulItems = items.filter(item => 
+      !item.shopify_variant_id && (item as { source?: string }).source !== 'shopify'
+    );
+    
+    return shopifyItems.length > 0 && printfulItems.length > 0;
+  };
 
   const fetchAddresses = async () => {
     try {
@@ -105,6 +142,50 @@ export default function CheckoutPage() {
       toast.error(message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Create Shopify checkout session
+  const createShopifyCheckout = async () => {
+    if (!items || items.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+
+    if (!hasOnlyShopifyProducts()) {
+      toast.error('Shopify checkout only supports Shopify products. Please remove non-Shopify items from your cart.');
+      return;
+    }
+
+    setIsCreatingCheckout(true);
+    try {
+      const data: CheckoutSessionResponse = await shopifyCheckoutAPI.createCheckoutSession({
+        shippingAddress: selectedShippingAddress || undefined,
+      });
+
+      if (data.success) {
+        setCheckoutSession(data.checkout);
+        setSessionId(data.sessionId);
+        toast.success('Checkout session created successfully!');
+      } else {
+        throw new Error('Failed to create checkout session');
+      }
+    } catch (error: unknown) {
+      console.error('Failed to create checkout session:', error);
+      const errorMessage = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to create checkout session';
+      toast.error(errorMessage);
+    } finally {
+      setIsCreatingCheckout(false);
+    }
+  };
+
+  // Proceed to Shopify payment
+  const proceedToShopifyPayment = () => {
+    if (checkoutSession?.url) {
+      // Open Shopify checkout in same window
+      window.location.href = checkoutSession.url;
+    } else {
+      toast.error('Checkout session not ready');
     }
   };
 
@@ -339,28 +420,71 @@ export default function CheckoutPage() {
                   Payment Method
                 </h3>
                 
-                <div className="space-y-3">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="paypal"
-                      checked={paymentMethod === 'paypal'}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                    />
-                    <span className="ml-2 text-sm text-gray-900">PayPal (Recommended)</span>
-                  </label>
+                <div className="space-y-4">
+                  {/* Show payment method selection based on cart contents */}
+                  {hasOnlyShopifyProducts() && (
+                    <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="radio"
+                        value="shopify"
+                        checked={paymentMethod === 'shopify'}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                      />
+                      <div className="ml-3">
+                        <span className="text-sm font-medium text-gray-900">Shopify Checkout</span>
+                        <span className="inline-block ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Recommended</span>
+                        <p className="text-xs text-gray-500 mt-1">Secure payment with Shopify&apos;s checkout system</p>
+                      </div>
+                    </label>
+                  )}
                   
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="card"
-                      checked={paymentMethod === 'card'}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                    />
-                    <span className="ml-2 text-sm text-gray-900">Credit/Debit Card</span>
-                  </label>
+                  {!hasOnlyShopifyProducts() && (
+                    <>
+                      <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          value="paypal"
+                          checked={paymentMethod === 'paypal'}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                        />
+                        <div className="ml-3">
+                          <span className="text-sm font-medium text-gray-900">PayPal</span>
+                          <p className="text-xs text-gray-500 mt-1">Pay with your PayPal account</p>
+                        </div>
+                      </label>
+                      
+                      <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          value="card"
+                          checked={paymentMethod === 'card'}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                        />
+                        <div className="ml-3">
+                          <span className="text-sm font-medium text-gray-900">Credit/Debit Card</span>
+                          <p className="text-xs text-gray-500 mt-1">Pay with your credit or debit card</p>
+                        </div>
+                      </label>
+                    </>
+                  )}
+
+                  {hasMixedProducts() && (
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex">
+                        <ShoppingCart className="w-5 h-5 text-yellow-400 mr-2 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium text-yellow-800">Mixed Cart Detected</p>
+                          <p className="text-xs text-yellow-700 mt-1">
+                            Your cart contains both Shopify and Printful products. For the best experience, 
+                            we recommend checking out with only one product type at a time.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -429,6 +553,43 @@ export default function CheckoutPage() {
                     <div className="text-center py-4">
                       <div className="text-green-600 text-lg font-medium mb-2">✓ Payment Successful!</div>
                       <p className="text-gray-600">Redirecting to your order...</p>
+                    </div>
+                  ) : paymentMethod === 'shopify' ? (
+                    <div className="space-y-4">
+                      {!checkoutSession ? (
+                        <button
+                          onClick={createShopifyCheckout}
+                          disabled={isCreatingCheckout || !selectedShippingAddress}
+                          className="w-full bg-indigo-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isCreatingCheckout ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                              Creating Checkout...
+                            </>
+                          ) : (
+                            'Create Shopify Checkout'
+                          )}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={proceedToShopifyPayment}
+                          className="w-full bg-green-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        >
+                          <CreditCard className="w-5 h-5 mr-2 inline-block" />
+                          Proceed to Shopify Payment
+                        </button>
+                      )}
+
+                      {!selectedShippingAddress && (
+                        <p className="text-sm text-red-600 text-center">
+                          Please select a shipping address to continue
+                        </p>
+                      )}
+
+                      <p className="text-xs text-gray-500 text-center">
+                        You will be redirected to Shopify&apos;s secure checkout to complete your payment
+                      </p>
                     </div>
                   ) : paymentMethod === 'paypal' ? (
                     <div className="space-y-3">

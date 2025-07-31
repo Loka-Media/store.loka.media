@@ -12,7 +12,8 @@ const nextConfig: NextConfig = {
       'source.unsplash.com',
       'img.freepik.com',
       'images.stockvault.net',
-      'burst.shopifycdn.com'
+      'burst.shopifycdn.com',
+      'cdn.shopify.com'
     ],
     remotePatterns: [
       {
@@ -24,6 +25,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.shopify.com',
         port: '',
         pathname: '/**',
       }

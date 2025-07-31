@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { productAPI, Product, formatPrice } from '@/lib/api';
+import { productAPI, formatPrice, ExtendedProduct } from '@/lib/api';
 import { createProductSlug } from '@/lib/utils';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, Grid, List, Heart, Star, ShoppingCart, User } from 'lucide-react';
+import { Search, Grid, List, Heart, Star, User } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
@@ -21,7 +21,7 @@ export default function ProductsPage() {
 }
 
 function ProductsContent() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ExtendedProduct[]>([]);
   const [categories, setCategories] = useState<{ category: string; product_count: number }[]>([]);
   const [creators, setCreators] = useState<{ id: number; name: string; username: string; product_count: number }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,8 @@ function ProductsContent() {
     minPrice: '',
     maxPrice: '',
     sortBy: 'created_at',
-    sortOrder: 'DESC'
+    sortOrder: 'DESC',
+    source: 'all' as 'printful' | 'shopify' | 'all'
   });
   const [pagination, setPagination] = useState({
     total: 0,
@@ -76,8 +77,9 @@ function ProductsContent() {
     const category = searchParams.get('category') || '';
     const search = searchParams.get('search') || '';
     const creator = searchParams.get('creator') || '';
+    const source = (searchParams.get('source') as 'printful' | 'shopify' | 'all') || 'all';
     
-    setFilters(prev => ({ ...prev, category, search, creator }));
+    setFilters(prev => ({ ...prev, category, search, creator, source }));
     fetchCategories();
     fetchCreators();
     
@@ -86,6 +88,7 @@ function ProductsContent() {
       category, 
       search, 
       creator,
+      source,
       minPrice: '', 
       maxPrice: '', 
       sortBy: 'created_at', 
@@ -96,12 +99,12 @@ function ProductsContent() {
   // Fetch products when filters change (after initial load)
   useEffect(() => {
     fetchProducts();
-  }, [filters.category, filters.search, filters.creator, filters.minPrice, filters.maxPrice, filters.sortBy, filters.sortOrder]);
+  }, [filters.category, filters.search, filters.creator, filters.source, filters.minPrice, filters.maxPrice, filters.sortBy, filters.sortOrder, fetchProducts]);
 
   // Fetch products when pagination changes
   useEffect(() => {
     fetchProducts();
-  }, [pagination.limit, pagination.offset]);
+  }, [pagination.limit, pagination.offset, fetchProducts]);
 
   const fetchCategories = async () => {
     try {
@@ -130,12 +133,13 @@ function ProductsContent() {
     if (newFilters.category) params.set('category', newFilters.category);
     if (newFilters.search) params.set('search', newFilters.search);
     if (newFilters.creator) params.set('creator', newFilters.creator);
+    if (newFilters.source && newFilters.source !== 'all') params.set('source', newFilters.source);
     
     router.push(`/products?${params.toString()}`);
   };
 
 
-  const handleAddToCart = async (productId: number) => {
+  const [/* handleAddToCart */] = [async (productId: number) => {
     if (!isAuthenticated) {
       toast.error('Please login to add items to cart');
       return;
@@ -157,9 +161,9 @@ function ProductsContent() {
       console.error('Failed to add to cart:', error);
       toast.error('Failed to add to cart');
     }
-  };
+  }];
 
-  const ProductCard = ({ product }: { product: Product }) => {
+  const ProductCard = ({ product }: { product: ExtendedProduct }) => {
     const imageUrl = product.thumbnail_url || product.images?.[0] || '/placeholder-product.svg';
     
     return (
@@ -249,9 +253,23 @@ function ProductsContent() {
         </div>
         
         <div className="mt-3 flex items-center justify-between">
-          <span className="inline-block bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full font-medium">
-            {product.category || 'Uncategorized'}
-          </span>
+          <div className="flex items-center space-x-2">
+            <span className="inline-block bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full font-medium">
+              {product.category || 'Uncategorized'}
+            </span>
+            {product.product_source && (
+              <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${
+                product.product_source === 'printful' 
+                  ? 'bg-purple-100 text-purple-700' 
+                  : product.product_source === 'shopify'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-700'
+              }`}>
+                {product.product_source === 'printful' ? '🎨 Printful' : 
+                 product.product_source === 'shopify' ? '🛍️ Shopify' : 'Custom'}
+              </span>
+            )}
+          </div>
           <span className="text-xs text-gray-500">
             {product.variant_count} options
           </span>
@@ -261,7 +279,7 @@ function ProductsContent() {
   );
 };
 
-  const ProductListItem = ({ product }: { product: Product }) => {
+  const ProductListItem = ({ product }: { product: ExtendedProduct }) => {
     const imageUrl = product.thumbnail_url || product.images?.[0] || '/placeholder-product.svg';
     
     return (
@@ -318,6 +336,18 @@ function ProductsContent() {
                 <span className="inline-block bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded">
                   {product.category || 'Uncategorized'}
                 </span>
+                {product.product_source && (
+                  <span className={`inline-block text-sm px-3 py-1 rounded font-medium ${
+                    product.product_source === 'printful' 
+                      ? 'bg-purple-100 text-purple-700' 
+                      : product.product_source === 'shopify'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {product.product_source === 'printful' ? '🎨 Printful' : 
+                     product.product_source === 'shopify' ? '🛍️ Shopify' : 'Custom'}
+                  </span>
+                )}
                 <span className="text-sm text-gray-500">
                   {product.variant_count} variants
                 </span>
@@ -464,6 +494,22 @@ function ProductsContent() {
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Filters</h3>
               
+              {/* Product Source */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Source
+                </label>
+                <select
+                  value={filters.source}
+                  onChange={(e) => handleFilterChange('source', e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="all">All Sources</option>
+                  <option value="printful">🎨 Printful Products</option>
+                  <option value="shopify">🛍️ Shopify Products</option>
+                </select>
+              </div>
+
               {/* Categories */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
