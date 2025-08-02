@@ -23,14 +23,15 @@ import toast from 'react-hot-toast';
 // API base URL
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://store-api-loka-media.vercel.app' 
-  : 'http://localhost:3001';
+  : 'http://localhost:3003';
 
 // Admin API functions
 const adminAPI = {
   getDashboardStats: async () => {
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/dashboard/stats`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       }
     });
     if (!response.ok) throw new Error('Failed to fetch dashboard stats');
@@ -38,10 +39,11 @@ const adminAPI = {
   },
 
   getPendingOrders: async (params = {}) => {
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
     const queryString = new URLSearchParams(params).toString();
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/orders/pending?${queryString}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       }
     });
     if (!response.ok) throw new Error('Failed to fetch pending orders');
@@ -49,9 +51,10 @@ const adminAPI = {
   },
 
   getOrderDetails: async (orderId: string) => {
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/orders/${orderId}/details`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       }
     });
     if (!response.ok) throw new Error('Failed to fetch order details');
@@ -59,11 +62,12 @@ const adminAPI = {
   },
 
   verifyPayment: async (orderId: string, data: any) => {
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/orders/${orderId}/verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(data)
     });
@@ -72,11 +76,12 @@ const adminAPI = {
   },
 
   releasePayment: async (orderId: string, data: any) => {
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/orders/${orderId}/release-payment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(data)
     });

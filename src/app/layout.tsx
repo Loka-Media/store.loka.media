@@ -5,7 +5,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { GuestCartProvider } from "@/contexts/GuestCartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { Toaster } from "react-hot-toast";
-import PayPalProvider from "@/components/PayPalProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,16 +31,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <PayPalProvider>
-          <AuthProvider>
-            <GuestCartProvider>
-              <WishlistProvider>
-                {children}
-                <Toaster position="top-right" />
-              </WishlistProvider>
-            </GuestCartProvider>
-          </AuthProvider>
-        </PayPalProvider>
+        <AuthProvider>
+          <GuestCartProvider>
+            <WishlistProvider>
+              {children}
+              <Toaster position="top-right" />
+            </WishlistProvider>
+          </GuestCartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

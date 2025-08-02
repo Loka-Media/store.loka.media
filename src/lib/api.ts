@@ -3,7 +3,7 @@ import { api } from './auth';
 // API base URL
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://store-api-loka-media.vercel.app' 
-  : 'http://localhost:3001';
+  : 'http://localhost:3003';
 
 // Product interfaces
 export interface Product {
