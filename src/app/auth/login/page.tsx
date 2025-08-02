@@ -164,9 +164,7 @@ function LoginPageContent() {
         {" "}
         {/* Increased width */}
         <div className="mx-auto w-full max-w-sm lg:max-w-xl">
-          {" "}
-          {/* Increased max-width */}
-          {/* Mobile Logo */}
+          {/* Logo */}
           <div className="flex justify-center mb-8 lg:hidden">
             <div className="flex items-center group">
               <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300">

@@ -14,6 +14,7 @@ import {
   MapPin,
   User,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function Navigation() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -27,11 +28,14 @@ export default function Navigation() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center group">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300">
-                <Store className="h-6 w-6 text-white" />
-              </div>
               <span className="ml-3 text-2xl font-black text-white tracking-tight">
-                LOKA
+                <Image
+                  src="/loka-logo/loka-main-white.png"
+                  alt="Logo"
+                  width={400}
+                  height={200}
+                  className="h-auto w-28 text-white"
+                />
               </span>
             </Link>
           </div>
