@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { productAPI, formatPrice, ExtendedProduct } from '@/lib/api';
 import { createProductSlug } from '@/lib/utils';
-import { useCart } from '@/contexts/CartContext';
+import { useGuestCart } from '@/contexts/GuestCartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Search, Grid, List, Heart, Star, User } from 'lucide-react';
@@ -27,7 +27,7 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  const { addToCart } = useCart();
+  const { addToCart } = useGuestCart();
   const { addToWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
   const [filters, setFilters] = useState({
@@ -140,11 +140,6 @@ function ProductsContent() {
 
 
   const [/* handleAddToCart */] = [async (productId: number) => {
-    if (!isAuthenticated) {
-      toast.error('Please login to add items to cart');
-      return;
-    }
-
     try {
       // Fetch product variants to get the first available variant
       const productData = await productAPI.getProduct(productId);

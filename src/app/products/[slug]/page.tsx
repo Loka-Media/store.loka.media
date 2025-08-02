@@ -3,7 +3,7 @@
 import { use, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { productAPI, ProductVariant, formatPrice, wishlistAPI } from '@/lib/api';
-import { useCart } from '@/contexts/CartContext';
+import { useGuestCart } from '@/contexts/GuestCartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { parseProductSlug, createProductSlug } from '@/lib/utils';
@@ -59,7 +59,7 @@ const TRUNCATE_LENGTH = 200;
 export default function ProductPage({ params }: ProductPageProps) {
   const { slug } = use(params);
   const router = useRouter();
-  const { addToCart } = useCart();
+  const { addToCart } = useGuestCart();
   const { addToWishlist, removeFromWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
 
@@ -179,11 +179,6 @@ export default function ProductPage({ params }: ProductPageProps) {
   const handleAddToCart = async () => {
     if (!selectedVariant) {
       toast.error('Please select a variant');
-      return;
-    }
-
-    if (!isAuthenticated) {
-      toast.error('Please login to add items to cart');
       return;
     }
 

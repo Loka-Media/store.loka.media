@@ -1,5 +1,10 @@
 import { api } from './auth';
 
+// API base URL
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://store-api-loka-media.vercel.app' 
+  : 'http://localhost:3001';
+
 // Product interfaces
 export interface Product {
   id: number;
@@ -807,3 +812,15 @@ export interface CheckoutSessionResponse {
   checkout: ShopifyCheckoutSession;
   sessionId: string | number;
 }
+
+// Public API (no authentication required - for guest users)
+export const publicAPI = {
+  // Get product variant details for guest cart
+  getProductVariant: async (variantId: number) => {
+    const response = await fetch(`${API_BASE_URL}/api/products/variants/${variantId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch product variant');
+    }
+    return response.json();
+  }
+};

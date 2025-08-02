@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCart } from '@/contexts/CartContext';
+import { useGuestCart } from '@/contexts/GuestCartContext';
 import { 
   ShoppingBag, 
   Menu, 
@@ -17,7 +17,7 @@ import {
 
 export default function Navigation() {
   const { user, logout, isAuthenticated } = useAuth();
-  const { cartCount } = useCart();
+  const { cartCount } = useGuestCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -109,6 +109,18 @@ export default function Navigation() {
                 </>
               ) : (
                 <>
+                  <Link
+                    href="/cart"
+                    className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center relative"
+                  >
+                    <ShoppingBag className="w-4 h-4 mr-1" />
+                    Cart
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {cartCount > 99 ? '99+' : cartCount}
+                      </span>
+                    )}
+                  </Link>
                   <Link
                     href="/auth/login"
                     className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -220,6 +232,18 @@ export default function Navigation() {
               </>
             ) : (
               <>
+                <Link
+                  href="/cart"
+                  className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium relative"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Cart
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </Link>
                 <Link
                   href="/auth/login"
                   className="text-gray-700 hover:text-indigo-600 block px-3 py-2 rounded-md text-base font-medium"

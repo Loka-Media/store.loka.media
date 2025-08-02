@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useWishlist } from "@/contexts/WishlistContext";
-import { useCart } from "@/contexts/CartContext";
+import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatPrice, productAPI } from "@/lib/api";
 import { Heart, ArrowLeft, Trash2 } from "lucide-react";
@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 
 export default function WishlistPage() {
   const { items, loading, removeFromWishlist, clearWishlist } = useWishlist();
-  const { addToCart } = useCart();
+  const { addToCart } = useGuestCart();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -24,11 +24,6 @@ export default function WishlistPage() {
   }, [isAuthenticated, router]);
 
   const [/* handleAddToCart */] = [async (productId: number) => {
-    if (!isAuthenticated) {
-      toast.error("Please login to add items to cart");
-      return;
-    }
-
     try {
       // Fetch product variants to get the first available variant
       const productData = await productAPI.getProduct(productId);

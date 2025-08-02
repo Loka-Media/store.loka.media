@@ -1,25 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useCart } from '@/contexts/CartContext';
+import { useState } from 'react';
+import { useGuestCart } from '@/contexts/GuestCartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice } from '@/lib/api';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
-  const { items, summary, loading, updateCartItem, removeFromCart, clearCart } = useCart();
+  const { items, summary, loading, updateCartItem, removeFromCart, clearCart } = useGuestCart();
   const { isAuthenticated } = useAuth();
-  const router = useRouter();
   const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-    }
-  }, [isAuthenticated, router]);
 
   const handleQuantityChange = async (cartItemId: number, newQuantity: number) => {
     if (newQuantity < 1 || newQuantity > 10) return;
@@ -42,25 +34,6 @@ export default function CartPage() {
       return newSet;
     });
   };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <ShoppingBag className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Please login to view your cart</h3>
-          <div className="mt-6">
-            <Link
-              href="/auth/login"
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
@@ -237,7 +210,7 @@ export default function CartPage() {
 
                   <div className="mt-6">
                     <Link
-                      href="/checkout"
+                      href="/checkout-unified"
                       className="w-full bg-indigo-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center"
                     >
                       Proceed to Checkout
