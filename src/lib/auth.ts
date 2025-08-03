@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 
   (process.env.NODE_ENV === 'production' 
-    ? 'https://store-api-loka-media.vercel.app' 
+    ? 'https://catalog.loka.media' 
     : 'http://localhost:3003');
 
 // Create axios instance
