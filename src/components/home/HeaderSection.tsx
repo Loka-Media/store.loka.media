@@ -50,7 +50,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
           {/* Primary CTA */}
           <div className="mb-8">
             <Link
-              href="#marketplace-section"
+              href="/products"
               className="inline-flex items-center px-10 py-4 sm:px-12 sm:py-5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg sm:text-xl rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/30 focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50"
             >
               <ShoppingBag className="mr-3 w-5 h-5 sm:w-6 sm:h-6" />
