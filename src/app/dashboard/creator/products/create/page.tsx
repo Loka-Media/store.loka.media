@@ -95,8 +95,10 @@ export default function CreateProductPage() {
 
     // Load selected Printful product from localStorage
     const savedProduct = localStorage.getItem('selectedPrintfulProduct');
+    console.log('Product creation page - savedProduct:', savedProduct);
     if (savedProduct) {
       const product = JSON.parse(savedProduct);
+      console.log('Product creation page - parsed product:', product);
       setSelectedPrintfulProduct(product);
       
       // Check if this is an embroidery product
@@ -130,6 +132,8 @@ export default function CreateProductPage() {
       })) || [];
       
       setProductVariants(variants);
+    } else {
+      console.log('Product creation page - no product found in localStorage');
     }
 
     fetchUploadedFiles();

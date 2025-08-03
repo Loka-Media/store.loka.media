@@ -896,6 +896,7 @@ function CanvasContent() {
                     ) : (
                       <div className="grid grid-cols-4 gap-3 mb-6">
                         {uploadedFiles.map((file) => (
+                          <>
                           <div key={file.id} className="group relative">
                             <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-500">
                               {file.thumbnail_url ? (
@@ -912,7 +913,9 @@ function CanvasContent() {
                               )}
                             </div>
                             <p className="mt-1 text-xs text-gray-600 truncate">{file.filename}</p>
-                            <div className="mt-2 flex space-x-1">
+                            
+                          </div>
+                          <div className="mt-2 flex space-x-1">
                               <button
                                 onClick={() => handleAddDesignFile(file, 'front')}
                                 className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200"
@@ -925,8 +928,8 @@ function CanvasContent() {
                               >
                                 + Back
                               </button>
-                            </div>
-                          </div>
+                            </div></>
+                          
                         ))}
                       </div>
                     )}

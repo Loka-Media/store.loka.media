@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { printfulAPI } from '@/lib/api';
 import { Search, Package, Plus, Eye, ArrowLeft } from 'lucide-react';
@@ -68,6 +69,7 @@ interface PrintfulProduct {
 
 export default function CreatorCatalogPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [products, setProducts] = useState<PrintfulProduct[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,9 +122,12 @@ export default function CreatorCatalogPage() {
   };
 
   const handleCreateProduct = (printfulProduct: PrintfulProduct) => {
-    // Store selected product in localStorage and navigate to product creation page
+    // Store selected product in localStorage and navigate to design workflow
+    console.log('Storing product and navigating:', printfulProduct);
     localStorage.setItem('selectedPrintfulProduct', JSON.stringify(printfulProduct));
-    window.location.href = `/dashboard/creator/products/create`;
+    
+    // Navigate to design canvas workflow with 4 steps
+    router.push(`/dashboard/creator/canvas?productId=${printfulProduct.id}`);
   };
 
   if (!user || (user.role !== 'creator' && user.role !== 'admin')) {
