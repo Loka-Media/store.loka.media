@@ -29,7 +29,7 @@ export function DashboardHeader({ connection, onConnectPrintful }: DashboardHead
             <div className="flex items-center space-x-4">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                 <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                Printful Ready (Admin Account)
+                Printful Ready (Shared Access)
               </span>
               <Link
                 href="/dashboard/creator/products"

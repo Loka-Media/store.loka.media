@@ -31,31 +31,49 @@ export const EMBROIDERY_FILE_TYPES = [
   'embroidery_back'
 ];
 
+interface ProductTechnique {
+  key: string;
+  display_name?: string;
+}
+
+interface ProductFile {
+  type: string;
+}
+
+interface PrintfulProduct {
+  type?: string;
+  techniques?: ProductTechnique[];
+  files?: ProductFile[];
+}
+
 // Check if a product supports embroidery
-export const isEmbroideryProduct = (product: any): boolean => {
+export const isEmbroideryProduct = (product: PrintfulProduct): boolean => {
   if (!product) return false;
   
+  // Check if product type is embroidery
+  const isEmbroideryType = product.type === 'EMBROIDERY' || product.type?.toLowerCase() === 'embroidery';
+  
   // Check if product has embroidery technique
-  const hasEmbroideryTechnique = product.techniques?.some((technique: any) => 
-    technique.key === 'EMBROIDERY' || 
-    technique.key === 'embroidery' ||
-    technique.display_name?.toLowerCase().includes('embroidery')
-  );
+  const hasEmbroideryTechnique = product.techniques?.some((technique: ProductTechnique) => {
+    return technique.key === 'EMBROIDERY' || 
+           technique.key === 'embroidery' ||
+           technique.display_name?.toLowerCase().includes('embroidery');
+  }) ?? false;
   
   // Check if product has embroidery file types
-  const hasEmbroideryFiles = product.files?.some((file: any) =>
-    EMBROIDERY_FILE_TYPES.includes(file.type)
-  );
+  const hasEmbroideryFiles = product.files?.some((file: ProductFile) => {
+    return EMBROIDERY_FILE_TYPES.includes(file.type);
+  }) ?? false;
   
-  return hasEmbroideryTechnique || hasEmbroideryFiles;
+  return isEmbroideryType || hasEmbroideryTechnique || hasEmbroideryFiles;
 };
 
 // Get the default embroidery file type for a product
-export const getDefaultEmbroideryType = (product: any): string => {
+export const getDefaultEmbroideryType = (product: PrintfulProduct): string => {
   if (!product?.files) return 'embroidery_chest_center';
   
   // Find the first embroidery file type available
-  const embroideryFile = product.files.find((file: any) =>
+  const embroideryFile = product.files.find((file: ProductFile) =>
     EMBROIDERY_FILE_TYPES.includes(file.type)
   );
   

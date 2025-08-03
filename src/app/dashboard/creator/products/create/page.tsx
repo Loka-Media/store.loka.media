@@ -15,7 +15,7 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
-import { isEmbroideryProduct, getDefaultEmbroideryType, requiresThreadColors } from '@/lib/printfulConstants';
+import { isEmbroideryProduct, getDefaultEmbroideryType } from '@/lib/printfulConstants';
 import ThreadColorSelector from '@/components/printful/ThreadColorSelector';
 
 interface SelectedPrintfulProduct {
@@ -194,7 +194,7 @@ export default function CreateProductPage() {
               ...variant, 
               designFiles: [...variant.designFiles, {
                 fileId: file.id,
-                type: isEmbroidery ? getDefaultEmbroideryType(selectedPrintfulProduct) : 'default',
+                type: isEmbroidery && selectedPrintfulProduct ? getDefaultEmbroideryType(selectedPrintfulProduct) : 'default',
                 url: file.url,
                 threadColors: isEmbroidery ? [...globalThreadColors] : undefined
               }]

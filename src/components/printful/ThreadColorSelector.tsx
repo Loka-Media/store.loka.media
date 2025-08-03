@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { THREAD_COLORS } from '@/lib/printfulConstants';
 
 interface ThreadColorSelectorProps {

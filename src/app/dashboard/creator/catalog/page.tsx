@@ -120,9 +120,9 @@ export default function CreatorCatalogPage() {
   };
 
   const handleCreateProduct = (printfulProduct: PrintfulProduct) => {
-    // Store selected product in localStorage and navigate to canvas for design
+    // Store selected product in localStorage and navigate to product creation page
     localStorage.setItem('selectedPrintfulProduct', JSON.stringify(printfulProduct));
-    window.location.href = `/dashboard/creator/canvas?productId=${printfulProduct.id}`;
+    window.location.href = `/dashboard/creator/products/create`;
   };
 
   if (!user || (user.role !== 'creator' && user.role !== 'admin')) {
