@@ -15,7 +15,7 @@ import {
   Star,
   User,
   Filter,
-  X,
+  // X, // Unused import
   ChevronDown,
   Eye,
   ShoppingCart,
@@ -803,7 +803,7 @@ function ProductsContent() {
                   Discovering amazing products...
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
-                  This won't take long
+                  This won&apos;t take long
                 </p>
               </div>
             ) : products.length === 0 ? (

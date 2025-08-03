@@ -67,7 +67,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
           
           setItems(cartItems);
           setSummary(cartSummary);
-          setCartCount(cartItems.reduce((sum, item) => sum + item.quantity, 0));
+          setCartCount(cartItems.reduce((sum: number, item: GuestCartItem) => sum + item.quantity, 0));
         } else {
           // Initialize empty guest cart
           setItems([]);
@@ -123,7 +123,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const fetchCartCount = async () => {
+  const fetchCartCount = useCallback(async () => {
     try {
       if (isAuthenticated) {
         const response = await cartAPI.getCartCount();
@@ -140,7 +140,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Failed to fetch cart count:', error);
     }
-  };
+  }, [isAuthenticated]);
 
   const refreshCart = useCallback(async () => {
     if (isAuthenticated) {
@@ -148,7 +148,12 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       try {
         setLoading(true);
         const response = await cartAPI.getCart();
-        setItems(response.items);
+        const guestCartItems: GuestCartItem[] = response.items.map((item: CartItem) => ({
+          ...item,
+          price: String(item.price),
+          total_price: String(item.total_price)
+        }));
+        setItems(guestCartItems);
         setSummary(response.summary);
         setCartCount(response.summary.itemCount);
       } catch (error) {
@@ -172,7 +177,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       // Load guest cart only
       loadGuestCart();
     }
-  }, [isAuthenticated, user, refreshCart, loadGuestCart]);
+  }, [isAuthenticated, user, refreshCart, loadGuestCart, fetchCartCount]);
 
   const addToCart = async (variantId: number, quantity: number = 1): Promise<boolean> => {
     if (isAuthenticated) {

@@ -13,8 +13,68 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://store-api-loka-media.vercel.app' 
   : 'http://localhost:3003';
 
+interface CheckoutData {
+  email: string;
+  customerInfo: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  shippingAddress: {
+    name: string;
+    address1: string;
+    address2: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+    phone: string;
+  };
+  cartItems: Array<{
+    product_id: string;
+    variant_id: string;
+    product_name: string;
+    price: string;
+    quantity: number;
+    image_url: string;
+    size: string;
+    color: string;
+    source?: string;
+  }>;
+}
+
+interface ProcessCheckoutData {
+  sessionToken: string;
+  paymentMethod: string;
+  loginCredentials?: {
+    email: string;
+    password: string;
+  };
+}
+
+interface Address {
+  id: number;
+  name: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  state?: string;
+  zip: string;
+  country: string;
+  phone?: string;
+  is_default?: boolean;
+  address_type?: string;
+}
+
+interface User {
+  name?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+}
+
 const unifiedCheckoutAPI = {
-  createGuestCheckout: async (data: any) => {
+  createGuestCheckout: async (data: CheckoutData) => {
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/guest/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -24,7 +84,7 @@ const unifiedCheckoutAPI = {
     return response.json();
   },
 
-  processCheckout: async (data: any) => {
+  processCheckout: async (data: ProcessCheckoutData) => {
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -56,17 +116,17 @@ const unifiedCheckoutAPI = {
 };
 
 export default function UnifiedCheckoutPage() {
-  const { items, summary, clearCart, addToCart } = useGuestCart();
+  const { items, summary, clearCart } = useGuestCart();
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState<'info' | 'payment' | 'complete' | 'cart-merge'>('info');
-  const [orderData, setOrderData] = useState<any>(null);
+  const [orderData, setOrderData] = useState<{ orderNumber: string } | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [isLoggedInUser, setIsLoggedInUser] = useState(false);
   
   // Address management
-  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [saveNewAddress, setSaveNewAddress] = useState(true);
@@ -76,7 +136,7 @@ export default function UnifiedCheckoutPage() {
     userCartCount: number;
     guestCartCount: number;
     token: string;
-    userInfo: any;
+    userInfo: User;
   } | null>(null);
 
   const [customerInfo, setCustomerInfo] = useState({
@@ -118,7 +178,7 @@ export default function UnifiedCheckoutPage() {
       setSavedAddresses(addresses.addresses || []);
       
       // Auto-select default shipping address if available
-      const defaultShipping = addresses.addresses?.find((addr: any) => 
+      const defaultShipping = addresses.addresses?.find((addr: Address) => 
         addr.is_default && (addr.address_type === 'shipping' || addr.address_type === 'both')
       );
       
@@ -140,7 +200,7 @@ export default function UnifiedCheckoutPage() {
     }
   };
 
-  const handleAddressSelect = (address: any) => {
+  const handleAddressSelect = (address: Address) => {
     setSelectedAddressId(address.id);
     setCustomerInfo(prev => ({
       ...prev,
@@ -205,15 +265,16 @@ export default function UnifiedCheckoutPage() {
       await checkCartMerge(result.tokens.accessToken, result.user);
       setShowLoginForm(false);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
-      toast.error(error.message || 'Login failed');
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const checkCartMerge = async (token: string, userInfo: any) => {
+  const checkCartMerge = async (token: string, userInfo: User) => {
     const guestCartItems = items;
     
     if (guestCartItems.length === 0) {
@@ -247,18 +308,18 @@ export default function UnifiedCheckoutPage() {
     }
   };
 
-  const fillUserInfo = (userInfo: any) => {
+  const fillUserInfo = (userInfo: User) => {
     if (userInfo.name) {
       setCustomerInfo(prev => ({
         ...prev,
-        name: userInfo.name,
-        email: userInfo.email,
+        name: userInfo.name || '',
+        email: userInfo.email || '',
         phone: userInfo.phone || prev.phone
       }));
     }
   };
 
-  const loadUserCartToGuestContext = async (token: string) => {
+  /* const loadUserCartToGuestContext = async (token: string) => {
     try {
       const userCartResponse = await fetch(`${API_BASE_URL}/api/cart`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -291,7 +352,7 @@ export default function UnifiedCheckoutPage() {
     } catch (error) {
       console.error('❌ Error loading user cart to guest context:', error);
     }
-  };
+  }; */
 
   const handleMergeConfirm = async () => {
     if (!cartMergeData) return;
@@ -411,12 +472,12 @@ export default function UnifiedCheckoutPage() {
           phone: customerInfo.phone
         },
         cartItems: items.map(item => ({
-          product_id: item.product_id,
-          variant_id: item.variant_id,
+          product_id: String(item.product_id),
+          variant_id: String(item.variant_id),
           product_name: item.product_name,
           price: item.price,
           quantity: item.quantity,
-          image_url: item.image_url,
+          image_url: item.image_url || '',
           size: item.size,
           color: item.color,
           source: item.source || 'printful'
@@ -455,9 +516,10 @@ export default function UnifiedCheckoutPage() {
         toast.success('Order created! Please complete payment.');
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Order creation error:', error);
-      toast.error(error.message || 'Failed to create order');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create order';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -558,7 +620,7 @@ export default function UnifiedCheckoutPage() {
         <div className="text-center bg-white shadow-sm rounded-lg p-8 max-w-md">
           <div className="text-green-600 text-6xl mb-4">✓</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Placed Successfully!</h2>
-          <p className="text-gray-600 mb-4">Thank you for your order. We've received your payment and will process your order shortly.</p>
+          <p className="text-gray-600 mb-4">Thank you for your order. We&apos;ve received your payment and will process your order shortly.</p>
           
           {wantsToSignup && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
@@ -690,7 +752,7 @@ export default function UnifiedCheckoutPage() {
                 <div className="mb-6">
                   <p className="text-sm text-gray-600 mb-3">Choose a saved address:</p>
                   <div className="grid gap-3">
-                    {savedAddresses.map((address) => (
+                    {savedAddresses.map((address: Address) => (
                       <div
                         key={address.id}
                         onClick={() => handleAddressSelect(address)}

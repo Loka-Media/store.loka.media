@@ -17,7 +17,6 @@ import {
   Lock,
   UserCheck,
   Store,
-  ArrowRight, // Added for the CTA button on the left
   Users, // Added for stats on the left
   ShoppingBag, // Added for stats on the left
   TrendingUp, // Added for stats on the left

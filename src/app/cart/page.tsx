@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useGuestCart } from '@/contexts/GuestCartContext';
-import { useAuth } from '@/contexts/AuthContext';
+// import { useAuth } from '@/contexts/AuthContext'; // Unused import
 import { formatPrice } from '@/lib/api';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -10,7 +10,7 @@ import Image from 'next/image';
 
 export default function CartPage() {
   const { items, summary, loading, updateCartItem, removeFromCart, clearCart } = useGuestCart();
-  const { isAuthenticated } = useAuth();
+  // const { isAuthenticated } = useAuth(); // Unused variable
   const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
 
   const handleQuantityChange = async (cartItemId: number, newQuantity: number) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { CreditCard } from 'lucide-react';
@@ -13,8 +13,12 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 
 const stripePromise = loadStripe('pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8');
 
+interface OrderData {
+  orderNumber: string;
+}
+
 interface StripePaymentFormProps {
-  orderData: any;
+  orderData: OrderData;
   clientSecret: string;
   onPaymentSuccess: () => void;
   totalAmount: number;
@@ -69,9 +73,10 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
         toast.success('Payment successful! Order placed.');
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Payment error:', error);
-      toast.error('Payment failed: ' + (error.message || 'Unknown error'));
+      toast.error('Payment failed: ' + errorMessage);
     } finally {
       setLoading(false);
     }

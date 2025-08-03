@@ -46,6 +46,7 @@ interface ProductDetails {
   creator_username: string;
   created_at: string;
   variants: ProductVariant[];
+  source?: string;
 }
 
 interface ProductPageProps {

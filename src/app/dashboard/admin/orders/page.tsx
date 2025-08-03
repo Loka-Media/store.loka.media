@@ -3,90 +3,45 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/auth';
 import { 
   Package, 
   DollarSign, 
-  Users, 
   Clock, 
   CheckCircle, 
   AlertTriangle,
   Eye,
-  CreditCard,
   Send,
   RefreshCw,
-  Filter,
-  Search,
-  Calendar
+  Search
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// API base URL
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://store-api-loka-media.vercel.app' 
-  : 'http://localhost:3003';
-
-// Admin API functions
+// Admin API functions using the configured axios instance
 const adminAPI = {
   getDashboardStats: async () => {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/dashboard/stats`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (!response.ok) throw new Error('Failed to fetch dashboard stats');
-    return response.json();
+    const response = await api.get('/api/unified-checkout/admin/dashboard/stats');
+    return response.data;
   },
 
   getPendingOrders: async (params = {}) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/orders/pending?${queryString}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (!response.ok) throw new Error('Failed to fetch pending orders');
-    return response.json();
+    const response = await api.get('/api/unified-checkout/admin/orders/pending', { params });
+    return response.data;
   },
 
   getOrderDetails: async (orderId: string) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/orders/${orderId}/details`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (!response.ok) throw new Error('Failed to fetch order details');
-    return response.json();
+    const response = await api.get(`/api/unified-checkout/admin/orders/${orderId}/details`);
+    return response.data;
   },
 
-  verifyPayment: async (orderId: string, data: any) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/orders/${orderId}/verify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error('Failed to verify payment');
-    return response.json();
+  verifyPayment: async (orderId: string, data: { bankAmountVerified: string; verificationNotes: string; approveOrder: boolean }) => {
+    const response = await api.post(`/api/unified-checkout/admin/orders/${orderId}/verify`, data);
+    return response.data;
   },
 
-  releasePayment: async (orderId: string, data: any) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/admin/orders/${orderId}/release-payment`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error('Failed to release payment');
-    return response.json();
+  releasePayment: async (orderId: string, data: { vendorEmail: string; notes: string }) => {
+    const response = await api.post(`/api/unified-checkout/admin/orders/${orderId}/release-payment`, data);
+    return response.data;
   }
 };
 
@@ -128,9 +83,20 @@ interface Order {
   priority?: string;
   verification_notes?: string;
   due_date?: string;
-  order_items?: any[];
-  shipping_address?: any;
-  metadata?: any;
+  order_items?: unknown[];
+  shipping_address?: {
+    name?: string;
+    address1?: string;
+    address2?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+    phone?: string;
+  };
+  metadata?: unknown;
+  vendor_payment_amount?: string;
+  admin_fee?: string;
 }
 
 export default function AdminOrdersPage() {
@@ -146,7 +112,7 @@ export default function AdminOrdersPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   
   // Filters
-  const [statusFilter, setStatusFilter] = useState('payment_received');
+  const [statusFilter, setStatusFilter] = useState('');
   const [orderTypeFilter, setOrderTypeFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -179,24 +145,67 @@ export default function AdminOrdersPage() {
     loadDashboardData();
   }, [isAuthenticated, user, router]);
 
+  // Auto-reload data when filters change
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'admin') {
+      loadDashboardData();
+    }
+  }, [statusFilter, orderTypeFilter, priorityFilter]);
+
+  // Debounced search
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'admin') {
+      const timeoutId = setTimeout(() => {
+        loadDashboardData();
+      }, 500);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchTerm]);
+
   const loadDashboardData = async () => {
     try {
       setLoading(true);
+      
+      // Check if we have a token before making API calls
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        toast.error('No authentication token found. Please log in again.');
+        router.push('/auth/login');
+        return;
+      }
+      
+      // Debug logs
+      console.log('Loading dashboard data...');
+      console.log('User:', user);
+      console.log('Token in storage:', token ? 'Present' : 'Missing');
+      
       const [statsData, ordersData] = await Promise.all([
         adminAPI.getDashboardStats(),
         adminAPI.getPendingOrders({
-          status: statusFilter,
+          status: statusFilter || undefined,
           orderType: orderTypeFilter || undefined,
           priority: priorityFilter || undefined,
+          search: searchTerm || undefined,
           limit: 50
         })
       ]);
 
       setStats(statsData.stats);
       setOrders(ordersData.orders);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to load dashboard data:', error);
-      toast.error('Failed to load dashboard data');
+      
+      const errorResponse = error as { response?: { status?: number; data?: { error?: string } } };
+      if (errorResponse?.response?.status === 401) {
+        toast.error('Authentication failed. Please log in again.');
+        router.push('/auth/login');
+      } else if (errorResponse?.response?.status === 403) {
+        toast.error('Admin access required');
+        router.push('/dashboard');
+      } else {
+        toast.error(errorResponse?.response?.data?.error || 'Failed to load dashboard data');
+      }
     } finally {
       setLoading(false);
     }
@@ -204,11 +213,20 @@ export default function AdminOrdersPage() {
 
   const handleOrderClick = async (order: Order) => {
     try {
+      console.log('Fetching order details for order ID:', order.id);
       const orderDetails = await adminAPI.getOrderDetails(order.id.toString());
+      console.log('Order details received:', orderDetails);
       setSelectedOrder({ ...order, ...orderDetails.order });
       setShowOrderModal(true);
-    } catch (error: any) {
-      toast.error('Failed to load order details');
+    } catch (error: unknown) {
+      console.error('Failed to load order details:', error);
+      const errorResponse = error as { response?: { status?: number; data?: { error?: string } } };
+      if (errorResponse?.response?.status === 401) {
+        toast.error('Authentication failed. Please log in again.');
+        router.push('/auth/login');
+      } else {
+        toast.error(errorResponse?.response?.data?.error || 'Failed to load order details');
+      }
     }
   };
 
@@ -228,7 +246,8 @@ export default function AdminOrdersPage() {
       });
       
       await loadDashboardData();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error('Payment verification error:', error);
       toast.error('Failed to verify payment');
     } finally {
       setLoading(false);
@@ -250,7 +269,8 @@ export default function AdminOrdersPage() {
       });
       
       await loadDashboardData();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error('Payment release error:', error);
       toast.error('Failed to release payment');
     } finally {
       setLoading(false);
@@ -288,18 +308,18 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Order Management</h1>
-            <p className="text-gray-600 mt-1">Manage and process marketplace orders</p>
+            <h1 className="text-2xl font-bold text-white">Order Management</h1>
+            <p className="text-gray-300 mt-1">Manage and process marketplace orders</p>
           </div>
           <button
             onClick={loadDashboardData}
             disabled={loading}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            className="inline-flex items-center px-4 py-2 border border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -309,17 +329,17 @@ export default function AdminOrdersPage() {
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-gray-800 rounded-lg shadow-sm p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Package className="h-8 w-8 text-blue-600" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Pending Orders
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-white">
                       {stats.orders.paymentReceived}
                     </dd>
                   </dl>
@@ -327,17 +347,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-gray-800 rounded-lg shadow-sm p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <DollarSign className="h-8 w-8 text-green-600" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Escrowed Funds
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-white">
                       ${stats.payments.totalEscrowed}
                     </dd>
                   </dl>
@@ -345,17 +365,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-gray-800 rounded-lg shadow-sm p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Clock className="h-8 w-8 text-yellow-600" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Verification Queue
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-white">
                       {stats.verification.totalPending}
                     </dd>
                   </dl>
@@ -363,17 +383,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-gray-800 rounded-lg shadow-sm p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <AlertTriangle className="h-8 w-8 text-red-600" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Urgent Items
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-white">
                       {stats.verification.urgent}
                     </dd>
                   </dl>
@@ -384,17 +404,19 @@ export default function AdminOrdersPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Status
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full p-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white"
               >
+                <option value="">All Orders</option>
+                <option value="pending">Pending</option>
                 <option value="payment_received">Payment Received</option>
                 <option value="verified">Verified</option>
                 <option value="processing">Processing</option>
@@ -404,13 +426,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Order Type
               </label>
               <select
                 value={orderTypeFilter}
                 onChange={(e) => setOrderTypeFilter(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full p-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white"
               >
                 <option value="">All Types</option>
                 <option value="printful">Printful</option>
@@ -420,13 +442,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Priority
               </label>
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full p-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white"
               >
                 <option value="">All Priorities</option>
                 <option value="urgent">Urgent</option>
@@ -437,7 +459,7 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Search
               </label>
               <div className="relative">
@@ -452,66 +474,57 @@ export default function AdminOrdersPage() {
               </div>
             </div>
           </div>
-
-          <div className="mt-4">
-            <button
-              onClick={loadDashboardData}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
-            >
-              Apply Filters
-            </button>
-          </div>
         </div>
 
         {/* Orders Table */}
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Orders</h3>
+        <div className="bg-gray-800 shadow-sm rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-700">
+            <h3 className="text-lg font-medium text-white">Orders</h3>
           </div>
           
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Order
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Type
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Priority
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Created
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-gray-800 divide-y divide-gray-700">
                 {orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
+                  <tr key={order.id} className="hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-white">
                         {order.order_number}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-white">
                         {order.customer_name || 'Guest'}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-400">
                         {order.customer_email}
                       </div>
                     </td>
@@ -520,7 +533,7 @@ export default function AdminOrdersPage() {
                         {order.order_type}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                       ${parseFloat(order.customer_payment_amount).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -535,7 +548,7 @@ export default function AdminOrdersPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -590,8 +603,8 @@ export default function AdminOrdersPage() {
           {orders.length === 0 && (
             <div className="text-center py-12">
               <Package className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No orders found</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <h3 className="mt-2 text-sm font-medium text-white">No orders found</h3>
+              <p className="mt-1 text-sm text-gray-400">
                 No orders match the current filters.
               </p>
             </div>
@@ -600,16 +613,16 @@ export default function AdminOrdersPage() {
 
         {/* Order Details Modal */}
         {showOrderModal && selectedOrder && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border border-gray-600 w-full max-w-4xl shadow-lg rounded-md bg-gray-800">
               <div className="mt-3">
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-medium text-white">
                     Order Details - {selectedOrder.order_number}
                   </h3>
                   <button
                     onClick={() => setShowOrderModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-200"
                   >
                     ×
                   </button>
@@ -619,22 +632,22 @@ export default function AdminOrdersPage() {
                   {/* Order Info */}
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Order Information</h4>
-                      <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                        <p><span className="font-medium">Type:</span> {selectedOrder.order_type}</p>
-                        <p><span className="font-medium">Status:</span> {selectedOrder.order_status}</p>
-                        <p><span className="font-medium">Payment Status:</span> {selectedOrder.payment_status}</p>
-                        <p><span className="font-medium">Amount:</span> ${parseFloat(selectedOrder.customer_payment_amount).toFixed(2)}</p>
-                        <p><span className="font-medium">Created:</span> {new Date(selectedOrder.created_at).toLocaleString()}</p>
+                      <h4 className="font-medium text-white mb-2">Order Information</h4>
+                      <div className="bg-gray-700 p-4 rounded-lg space-y-2">
+                        <p className="text-gray-300"><span className="font-medium text-white">Type:</span> {selectedOrder.order_type}</p>
+                        <p className="text-gray-300"><span className="font-medium text-white">Status:</span> {selectedOrder.order_status}</p>
+                        <p className="text-gray-300"><span className="font-medium text-white">Payment Status:</span> {selectedOrder.payment_status}</p>
+                        <p className="text-gray-300"><span className="font-medium text-white">Amount:</span> ${parseFloat(selectedOrder.customer_payment_amount).toFixed(2)}</p>
+                        <p className="text-gray-300"><span className="font-medium text-white">Created:</span> {new Date(selectedOrder.created_at).toLocaleString()}</p>
                       </div>
                     </div>
 
                     {/* Customer Info */}
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Customer Information</h4>
-                      <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                        <p><span className="font-medium">Name:</span> {selectedOrder.customer_name || 'Guest'}</p>
-                        <p><span className="font-medium">Email:</span> {selectedOrder.customer_email || 'N/A'}</p>
+                      <h4 className="font-medium text-white mb-2">Customer Information</h4>
+                      <div className="bg-gray-700 p-4 rounded-lg space-y-2">
+                        <p className="text-gray-300"><span className="font-medium text-white">Name:</span> {selectedOrder.customer_name || 'Guest'}</p>
+                        <p className="text-gray-300"><span className="font-medium text-white">Email:</span> {selectedOrder.customer_email || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
@@ -642,14 +655,14 @@ export default function AdminOrdersPage() {
                   {/* Shipping Address */}
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Shipping Address</h4>
+                      <h4 className="font-medium text-white mb-2">Shipping Address</h4>
                       {selectedOrder.shipping_address && (
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <p>{selectedOrder.shipping_address.name}</p>
-                          <p>{selectedOrder.shipping_address.address1}</p>
-                          {selectedOrder.shipping_address.address2 && <p>{selectedOrder.shipping_address.address2}</p>}
-                          <p>{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.zip}</p>
-                          <p>{selectedOrder.shipping_address.country}</p>
+                        <div className="bg-gray-700 p-4 rounded-lg">
+                          <p className="text-gray-300">{selectedOrder.shipping_address.name}</p>
+                          <p className="text-gray-300">{selectedOrder.shipping_address.address1}</p>
+                          {selectedOrder.shipping_address.address2 && <p className="text-gray-300">{selectedOrder.shipping_address.address2}</p>}
+                          <p className="text-gray-300">{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.zip}</p>
+                          <p className="text-gray-300">{selectedOrder.shipping_address.country}</p>
                           {selectedOrder.shipping_address.phone && <p>{selectedOrder.shipping_address.phone}</p>}
                         </div>
                       )}
@@ -657,17 +670,20 @@ export default function AdminOrdersPage() {
 
                     {/* Order Items */}
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Order Items</h4>
-                      <div className="bg-gray-50 p-4 rounded-lg max-h-48 overflow-y-auto">
-                        {selectedOrder.order_items && selectedOrder.order_items.map((item: any, index: number) => (
-                          <div key={index} className="border-b border-gray-200 last:border-b-0 pb-2 mb-2 last:mb-0">
-                            <p className="font-medium">{item.product_name}</p>
-                            <p className="text-sm text-gray-600">
-                              {item.size} • {item.color} • Qty: {item.quantity}
-                            </p>
-                            <p className="text-sm text-gray-600">${parseFloat(item.price).toFixed(2)} each</p>
-                          </div>
-                        ))}
+                      <h4 className="font-medium text-white mb-2">Order Items</h4>
+                      <div className="bg-gray-700 p-4 rounded-lg max-h-48 overflow-y-auto">
+                        {selectedOrder.order_items && selectedOrder.order_items.map((item: unknown, index: number) => {
+                          const orderItem = item as { product_name?: string; quantity?: number; price?: string; color?: string; size?: string };
+                          return (
+                            <div key={index} className="border-b border-gray-600 last:border-b-0 pb-2 mb-2 last:mb-0">
+                              <p className="font-medium text-white">{orderItem.product_name}</p>
+                              <p className="text-sm text-gray-300">
+                                {orderItem.size} • {orderItem.color} • Qty: {orderItem.quantity}
+                              </p>
+                              <p className="text-sm text-gray-300">${orderItem.price ? parseFloat(orderItem.price).toFixed(2) : '0.00'} each</p>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -676,7 +692,7 @@ export default function AdminOrdersPage() {
                 <div className="flex items-center justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setShowOrderModal(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600"
                   >
                     Close
                   </button>
@@ -688,16 +704,16 @@ export default function AdminOrdersPage() {
 
         {/* Payment Verification Modal */}
         {showVerificationModal && selectedOrder && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border border-gray-600 w-full max-w-md shadow-lg rounded-md bg-gray-800">
               <div className="mt-3">
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-medium text-white">
                     Verify Payment
                   </h3>
                   <button
                     onClick={() => setShowVerificationModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-200"
                   >
                     ×
                   </button>
@@ -705,7 +721,7 @@ export default function AdminOrdersPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Bank Amount Verified ($)
                     </label>
                     <input
@@ -716,13 +732,13 @@ export default function AdminOrdersPage() {
                         ...verificationForm,
                         bankAmountVerified: e.target.value
                       })}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full p-3 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white"
                       placeholder="Enter verified amount"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Verification Notes
                     </label>
                     <textarea
@@ -794,7 +810,7 @@ export default function AdminOrdersPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Vendor Email
                     </label>
                     <input
@@ -810,7 +826,7 @@ export default function AdminOrdersPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Notes
                     </label>
                     <textarea

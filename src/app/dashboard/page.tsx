@@ -5,13 +5,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LogOut,
-  User,
-  Mail,
-  Phone,
-  Shield,
-  CheckCircle,
-  XCircle,
-  Store,
 } from "lucide-react";
 
 export default function DashboardPage() {
