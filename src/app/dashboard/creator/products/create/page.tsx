@@ -15,6 +15,8 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import { isEmbroideryProduct, getDefaultEmbroideryType, requiresThreadColors } from '@/lib/printfulConstants';
+import ThreadColorSelector from '@/components/printful/ThreadColorSelector';
 
 interface SelectedPrintfulProduct {
   id: number;
@@ -56,6 +58,7 @@ interface ProductVariant {
     fileId: number;
     type: string;
     url: string;
+    threadColors?: string[];
   }>;
 }
 
@@ -68,6 +71,8 @@ export default function CreateProductPage() {
   const [productVariants, setProductVariants] = useState<ProductVariant[]>([]);
   const [uploading, setUploading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [globalThreadColors, setGlobalThreadColors] = useState<string[]>(['#000000']); // Default to black
+  const [isEmbroidery, setIsEmbroidery] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -93,6 +98,11 @@ export default function CreateProductPage() {
     if (savedProduct) {
       const product = JSON.parse(savedProduct);
       setSelectedPrintfulProduct(product);
+      
+      // Check if this is an embroidery product
+      const isEmbroideryProd = isEmbroideryProduct(product);
+      setIsEmbroidery(isEmbroideryProd);
+      
       setFormData(prev => ({
         ...prev,
         name: `Custom ${product.model}`,
@@ -184,8 +194,9 @@ export default function CreateProductPage() {
               ...variant, 
               designFiles: [...variant.designFiles, {
                 fileId: file.id,
-                type: 'default',
-                url: file.url
+                type: isEmbroidery ? getDefaultEmbroideryType(selectedPrintfulProduct) : 'default',
+                url: file.url,
+                threadColors: isEmbroidery ? [...globalThreadColors] : undefined
               }]
             }
           : variant
@@ -258,7 +269,22 @@ export default function CreateProductPage() {
           external_id: `var_${variant.printfulVariantId}_${Date.now()}`,
           files: variant.designFiles.map(file => ({
             url: file.url,
-            type: file.type
+            type: file.type,
+            position: {
+              area_width: 1800,
+              area_height: 2400,
+              width: 1200,
+              height: 1200,
+              top: 600,
+              left: 300,
+              limit_to_print_area: true
+            },
+            ...(file.threadColors && file.threadColors.length > 0 && {
+              options: [{
+                id: 'thread_colors',
+                value: file.threadColors
+              }]
+            })
           }))
         }))
       };
@@ -539,6 +565,36 @@ export default function CreateProductPage() {
               )}
             </div>
 
+            {/* Thread Colors - Only show for embroidery products */}
+            {isEmbroidery && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Embroidery Thread Colors</h3>
+                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <AlertCircle className="h-5 w-5 text-amber-400" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-amber-800">
+                        <strong>Embroidery Product Detected!</strong>
+                      </p>
+                      <p className="text-sm text-amber-700 mt-1">
+                        This product requires thread color selection for embroidery. Choose your preferred thread colors below.
+                        These colors will be applied to all design files on this product.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <ThreadColorSelector
+                  selectedColors={globalThreadColors}
+                  onColorsChange={setGlobalThreadColors}
+                  maxColors={5}
+                  className="w-full"
+                />
+              </div>
+            )}
+
             {/* Variants Selection */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Product Variants</h3>
@@ -582,16 +638,36 @@ export default function CreateProductPage() {
                         {variant.selected && (
                           <div>
                             <p className="text-sm font-medium text-gray-700 mb-2">Design Files:</p>
-                            <div className="flex flex-wrap gap-2 mb-2">
+                            <div className="space-y-2 mb-2">
                               {variant.designFiles.map((file) => (
-                                <div key={file.fileId} className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded text-xs">
-                                  <span>Design {file.fileId}</span>
-                                  <button
-                                    onClick={() => handleRemoveDesignFile(variant.printfulVariantId, file.fileId)}
-                                    className="text-red-600 hover:text-red-800"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
+                                <div key={file.fileId} className="bg-gray-50 p-3 rounded-lg border">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-gray-700">Design {file.fileId}</span>
+                                    <button
+                                      onClick={() => handleRemoveDesignFile(variant.printfulVariantId, file.fileId)}
+                                      className="text-red-600 hover:text-red-800"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                  <div className="text-xs text-gray-600 mb-1">
+                                    Type: <span className="font-medium">{file.type}</span>
+                                  </div>
+                                  {file.threadColors && file.threadColors.length > 0 && (
+                                    <div className="text-xs text-gray-600">
+                                      <span className="font-medium">Thread Colors:</span>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {file.threadColors.map((color) => (
+                                          <div key={color} className="flex items-center space-x-1">
+                                            <div 
+                                              className="w-3 h-3 rounded-full border border-gray-300"
+                                              style={{ backgroundColor: color }}
+                                            />
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -658,6 +734,12 @@ export default function CreateProductPage() {
                   <p className="text-sm text-gray-600">
                     {productVariants.filter(v => v.selected).length} variants selected
                   </p>
+                  {isEmbroidery && (
+                    <div className="mt-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-800">
+                      <span className="mr-1">🧵</span>
+                      Embroidery Product
+                    </div>
+                  )}
                 </div>
 
                 {formData.tags.length > 0 && (
