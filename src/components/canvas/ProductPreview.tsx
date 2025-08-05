@@ -53,11 +53,13 @@ interface ProductForm {
 }
 
 interface ProductPreviewProps {
-  selectedProduct:  any;
+  selectedProduct: any;
   productForm: ProductForm;
   designFiles: any[];
   selectedVariants: number[];
   loading: boolean;
+  mockupUrl?: string;
+  isGeneratingMockup?: boolean;
 }
 
 const ProductPreview: React.FC<ProductPreviewProps> = ({
@@ -66,6 +68,8 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
   designFiles,
   selectedVariants,
   loading,
+  mockupUrl,
+  isGeneratingMockup,
 }) => {
   if (!selectedProduct) return null;
 
@@ -116,7 +120,30 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
       </h3>
 
       <div className="aspect-square relative bg-gray-100 rounded-lg overflow-hidden mb-4">
-        {selectedProduct.image && (
+        {isGeneratingMockup ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+            <p className="text-sm text-gray-600 text-center">
+              Generating mockup preview...
+            </p>
+            <p className="text-xs text-gray-500 text-center mt-1">
+              This may take a few seconds
+            </p>
+          </div>
+        ) : mockupUrl ? (
+          <div className="relative h-full">
+            <Image
+              src={mockupUrl}
+              alt="Generated mockup preview"
+              fill
+              className="object-contain"
+              priority
+            />
+            <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-medium">
+              Live Preview
+            </div>
+          </div>
+        ) : selectedProduct.image ? (
           <Image
             src={selectedProduct.image}
             alt={
@@ -124,8 +151,12 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
             }
             fill
             className="object-cover"
-            priority // Good for important, visible images
+            priority
           />
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <span>No image available</span>
+          </div>
         )}
       </div>
 

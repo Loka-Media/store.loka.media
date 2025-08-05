@@ -1,15 +1,19 @@
+import { printfulAPI } from "./api";
 import { DesignFile } from "./types";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 type Placement = string;
 
-
 interface MockupData {
-  variant_ids: number[]; // Printful expects variant IDs as numbers
+  variant_ids: number[];
   format: "jpg" | "png";
-  files: {
+  width?: number;
+  product_options?: {
+    lifelike?: boolean;
+    [key: string]: unknown;
+  };
+  option_groups?: string[];
+  options?: string[];
+  files?: {
     placement: Placement;
     image_url: string;
     position?: {
@@ -21,6 +25,7 @@ interface MockupData {
       left: number;
     };
   }[];
+  product_template_id?: number;
 }
 
 interface TaskResponse {
@@ -32,31 +37,23 @@ interface TaskResponse {
 
 interface TaskStatusResponse {
   result?: {
-    mockup_url?: string;
+    mockups?: Array<{
+      variant_ids: number[];
+      placement: string;
+      mockup_url: string;
+    }>;
   };
   status: "pending" | "completed" | "failed";
   error?: string;
 }
 
 class MockupAPI {
-  async createMockupTask(mockupData: MockupData): Promise<TaskResponse> {
+  async createMockupTask(
+    productId: number,
+    mockupData: MockupData
+  ): Promise<TaskResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/printful/mockup-generator/create-task`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(mockupData),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
+      return await printfulAPI.createMockupTask(productId, mockupData as Parameters<typeof printfulAPI.createMockupTask>[1]);
     } catch (error) {
       console.error("Error creating mockup task:", error);
       throw error;
@@ -65,21 +62,7 @@ class MockupAPI {
 
   async getMockupTaskStatus(taskKey: string): Promise<TaskStatusResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/printful/mockup-tasks/${taskKey}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
+      return await printfulAPI.getMockupTaskStatus(taskKey);
     } catch (error) {
       console.error("Error getting mockup task status:", error);
       throw error;
@@ -88,8 +71,8 @@ class MockupAPI {
 
   async pollMockupStatus(
     taskKey: string,
-    maxAttempts = 30,
-    intervalMs = 2000
+    maxAttempts = 24, // 5 sec + (23 * 5 sec) = ~2 minutes total
+    onStatusUpdate?: (status: string, attempts: number) => void
   ): Promise<TaskStatusResponse> {
     let attempts = 0;
 
@@ -97,64 +80,101 @@ class MockupAPI {
       const poll = async () => {
         try {
           attempts++;
+          onStatusUpdate?.(`Checking mockup status (attempt ${attempts})...`, attempts);
+          
           const result = await this.getMockupTaskStatus(taskKey);
 
-          if (result.status === "completed") {
+          // Check for completion with multiple possible status formats
+          const status = result.status || result.result?.status;
+          
+          if (status === "completed") {
+            onStatusUpdate?.("Mockup completed successfully!", attempts);
             resolve(result);
-          } else if (result.status === "failed") {
+          } else if (status === "failed") {
             reject(new Error(result.error || "Mockup generation failed"));
           } else if (attempts >= maxAttempts) {
-            reject(new Error("Mockup generation timed out"));
+            reject(new Error("Mockup generation timed out after 2 minutes"));
           } else {
-            setTimeout(poll, intervalMs);
+            // Use 5-second intervals for polling
+            const nextInterval = 5000;
+            onStatusUpdate?.("Mockup still processing...", attempts);
+            setTimeout(poll, nextInterval);
           }
         } catch (error) {
+          console.error(`Polling attempt ${attempts} failed:`, error);
           if (attempts >= maxAttempts) {
             reject(error);
           } else {
-            setTimeout(poll, intervalMs);
+            // Continue polling even if individual requests fail
+            setTimeout(poll, 5000);
           }
         }
       };
 
-      poll();
+      // Initial delay of 5 seconds before first poll
+      onStatusUpdate?.("Mockup generation started. Waiting 5 seconds before checking status...", 0);
+      setTimeout(poll, 5000);
     });
   }
 
   async generateProductMockup({
+    productId,
     variantIds,
     designFiles,
     format = "jpg",
+    width,
+    productOptions,
+    optionGroups,
+    options,
+    productTemplateId,
+    onStatusUpdate,
   }: {
+    productId: number;
     variantIds: number[];
-    designFiles: DesignFile[];
+    designFiles?: DesignFile[];
     format?: "jpg" | "png";
-  }): Promise<string> {
+    width?: number;
+    productOptions?: { lifelike?: boolean; [key: string]: unknown };
+    optionGroups?: string[];
+    options?: string[];
+    productTemplateId?: number;
+    onStatusUpdate?: (status: string, attempts: number) => void;
+  }): Promise<Array<{url: string; placement: string; variant_ids: number[]; title?: string; option?: string; option_group?: string}>> {
     try {
-      const files: MockupData["files"] = designFiles.map((file) => ({
-        placement: file.placement,
-        image_url: file.url,
-        position: file.position
-          ? {
-              area_width: file.position.area_width,
-              area_height: file.position.area_height,
-              width: file.position.width,
-              height: file.position.height,
-              top: file.position.top,
-              left: file.position.left,
-            }
-          : undefined,
-      }));
-
       const mockupData: MockupData = {
         variant_ids: variantIds,
         format,
-        files,
       };
 
-      console.log("Creating mockup task with data:", mockupData);
+      // Add optional parameters
+      if (width) mockupData.width = width;
+      if (productOptions) mockupData.product_options = productOptions;
+      if (optionGroups && optionGroups.length > 0) mockupData.option_groups = optionGroups;
+      if (options && options.length > 0) mockupData.options = options;
+      if (productTemplateId) mockupData.product_template_id = productTemplateId;
 
-      const taskResponse = await this.createMockupTask(mockupData);
+      // Add files if provided
+      if (designFiles && designFiles.length > 0) {
+        mockupData.files = designFiles.map((file) => ({
+          placement: file.placement,
+          image_url: file.url,
+          position: file.position
+            ? {
+                area_width: file.position.area_width,
+                area_height: file.position.area_height,
+                width: file.position.width,
+                height: file.position.height,
+                top: file.position.top,
+                left: file.position.left,
+              }
+            : undefined,
+        }));
+      }
+
+      console.log("Creating mockup task with data:", mockupData);
+      onStatusUpdate?.("Creating mockup generation task...", 0);
+
+      const taskResponse = await this.createMockupTask(productId, mockupData);
 
       if (!taskResponse.result?.task_key) {
         throw new Error("No task key returned from mockup creation");
@@ -162,14 +182,48 @@ class MockupAPI {
 
       const taskKey = taskResponse.result.task_key;
       console.log("Mockup task created with key:", taskKey);
+      onStatusUpdate?.("Task created successfully. Starting polling...", 0);
 
-      const result = await this.pollMockupStatus(taskKey);
+      const result = await this.pollMockupStatus(taskKey, 24, onStatusUpdate);
 
-      if (result.result?.mockup_url) {
-        console.log("Mockup generated successfully:", result.result.mockup_url);
-        return result.result.mockup_url;
+      if (result.result?.mockups && result.result.mockups.length > 0) {
+        // Extract all mockup URLs including main and extra variations
+        const allMockups: Array<{url: string; placement: string; variant_ids: number[]; title?: string; option?: string; option_group?: string}> = [];
+        
+        result.result.mockups.forEach(mockup => {
+          // Add the main mockup URL
+          if (mockup.mockup_url) {
+            allMockups.push({
+              url: mockup.mockup_url,
+              placement: mockup.placement,
+              variant_ids: mockup.variant_ids,
+              title: `${mockup.placement} (Main)`,
+              option: 'Main',
+              option_group: 'Default'
+            });
+          }
+          
+          // Add all extra mockup variations
+          if (mockup.extra && Array.isArray(mockup.extra)) {
+            mockup.extra.forEach((extraMockup: any) => {
+              if (extraMockup.url) {
+                allMockups.push({
+                  url: extraMockup.url,
+                  placement: mockup.placement,
+                  variant_ids: mockup.variant_ids,
+                  title: extraMockup.title || `${mockup.placement} (${extraMockup.option || 'Variation'})`,
+                  option: extraMockup.option || 'Variation',
+                  option_group: extraMockup.option_group || 'Extra'
+                });
+              }
+            });
+          }
+        });
+        
+        console.log(`Mockups generated successfully: ${allMockups.length} total variations`, allMockups);
+        return allMockups;
       } else {
-        throw new Error("No mockup URL in completed task result");
+        throw new Error("No mockup URLs in completed task result");
       }
     } catch (error) {
       console.error("Error generating product mockup:", error);

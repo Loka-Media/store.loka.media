@@ -67,8 +67,13 @@ export function useCreatorDashboard() {
         connected: status.connected || false,
         adminAccount: status.adminAccount || true
       });
-    } catch (error) {
-      console.error('Failed to check connection:', error);
+    } catch (error: any) {
+      // Handle authentication errors gracefully
+      if (error?.response?.status === 401) {
+        console.log('Authentication required for Printful connection check');
+      } else {
+        console.error('Failed to check Printful connection:', error);
+      }
       // If connection check fails, assume Printful is available (admin account setup)
       // Only show connection prompt if there's a real configuration issue
       setConnection({ connected: true, adminAccount: true });

@@ -530,6 +530,84 @@ export const printfulAPI = {
     });
     return response.data;
   },
+
+  // Create mockup generation task
+  createMockupTask: async (
+    productId: number,
+    mockupData: {
+      variant_ids: number[];
+      format: string;
+      files: Array<{
+        placement: "front" | "back";
+        image_url: string;
+        position: {
+          area_width: number;
+          area_height: number;
+          width: number;
+          height: number;
+          top: number;
+          left: number;
+        };
+      }>;
+    }
+  ) => {
+    const response = await api.post(
+      `/api/printful/mockup-generator/create-task/${productId}`,
+      mockupData
+    );
+    return response.data;
+  },
+
+  // Get mockup task status
+  getMockupTaskStatus: async (taskKey: string) => {
+    const response = await api.get(`/api/printful/mockup-tasks/${taskKey}`);
+    return response.data;
+  },
+
+  // Get print files for a product
+  getPrintFiles: async (productId: number, technique?: string, orientation?: string) => {
+    const params = new URLSearchParams();
+    if (technique) params.append('technique', technique);
+    if (orientation) params.append('orientation', orientation);
+    
+    const url = `/api/printful/mockup-generator/printfiles/${productId}${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  // Get layout templates for a product
+  getLayoutTemplates: async (productId: number, technique?: string, orientation?: string) => {
+    const params = new URLSearchParams();
+    if (technique) params.append('technique', technique);
+    if (orientation) params.append('orientation', orientation);
+    
+    const url = `/api/printful/mockup-generator/templates/${productId}${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  // Upload file directly (multipart/form-data)
+  uploadFileDirectly: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await api.post('/api/printful/files', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Store mockups permanently to DigitalOcean
+  storeMockupsPermanently: async (mockupUrls: any[], productData: any, designFiles?: any[]) => {
+    const response = await api.post('/api/printful/mockups/store-permanently', {
+      mockupUrls,
+      productData,
+      designFiles
+    });
+    return response.data;
+  },
 };
 
 // Shopify API (NEW - Complete Integration)

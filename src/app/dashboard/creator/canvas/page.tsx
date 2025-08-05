@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
@@ -17,6 +17,8 @@ import DesignStep from "@/components/canvas/DesignStep";
 import VariantsStep from "@/components/canvas/VariantsStep";
 import FinalizeStep from "@/components/canvas/FinalizeStep";
 import ProductPreview from "@/components/canvas/ProductPreview";
+import UnifiedDesignEditor from "@/components/canvas/UnifiedDesignEditor";
+import ProductDetailsForm from "@/components/canvas/ProductDetailsForm";
 
 import {
   DesignFile,
@@ -43,6 +45,8 @@ export default function CanvasPage() {
 function CanvasContent() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const productId = searchParams.get('productId');
 
   const [selectedProduct, setSelectedProduct] =
     useState<PrintfulProduct | null>(null);
@@ -52,11 +56,13 @@ function CanvasContent() {
   const [uploading, setUploading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [step, setStep] = useState<
-    "upload" | "design" | "variants" | "finalize"
+    "upload" | "design" | "variants" | "finalize" | "unified-editor" | "product-details"
   >("upload");
   const [selectedVariants, setSelectedVariants] = useState<number[]>([]);
-  const [mockupUrl, setMockupUrl] = useState<string>("");
+  const [mockupUrls, setMockupUrls] = useState<Array<{url: string; placement: string; variant_ids: number[]; title?: string; option?: string; option_group?: string}>>([]);
   const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
+  const [mockupStatus, setMockupStatus] = useState<string>("");
+  const [printFiles, setPrintFiles] = useState<any>(null);
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: "",
@@ -69,6 +75,44 @@ function CanvasContent() {
   const initializeCanvas = useCallback(async () => {
     try {
       setLoading(true);
+
+      // Check if productId is provided in URL
+      if (productId) {
+        try {
+          const detailed = await printfulAPI.getProductDetails(parseInt(productId));
+          const product = detailed.result?.product || detailed.result;
+          const variants = detailed.result?.variants || detailed.result?.product?.variants;
+          
+          if (product) {
+            const productWithVariants = { ...product, variants };
+            setSelectedProduct(productWithVariants);
+            localStorage.setItem("selectedPrintfulProduct", JSON.stringify(productWithVariants));
+
+            setProductForm({
+              name: `Custom ${product.title || product.model}`,
+              description: product.description || "",
+              markupPercentage: "30",
+              category: product.type_name || product.type,
+              tags: [],
+            });
+
+            // Start with clean upload step - no demo files
+            setStep("upload");
+            toast.success("Product loaded! Start by uploading your design files.");
+
+            // Wait a bit for auth to be ready, then fetch files
+            setTimeout(() => {
+              fetchUploadedFiles();
+            }, 1000);
+            return;
+          }
+        } catch (error) {
+          console.error("Failed to load product from URL:", error);
+          toast.error("Failed to load product from URL");
+        }
+      }
+
+      // Fallback to localStorage
       const savedProduct = localStorage.getItem("selectedPrintfulProduct");
       if (savedProduct) {
         const product = JSON.parse(savedProduct);
@@ -99,21 +143,40 @@ function CanvasContent() {
         });
       }
 
-      await fetchUploadedFiles();
+      // Wait a bit for auth to be ready, then fetch files
+      setTimeout(() => {
+        fetchUploadedFiles();
+      }, 1000);
     } catch (error) {
       console.error("Canvas initialization failed:", error);
       toast.error("Failed to initialize canvas");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [productId]);
 
   const fetchUploadedFiles = async () => {
+    // Check if user is authenticated first
+    if (!user || (user.role !== "creator" && user.role !== "admin")) {
+      console.log("User not authenticated, skipping file fetch");
+      setUploadedFiles([]);
+      return;
+    }
+
     try {
       const response = await printfulAPI.getFiles();
-      setUploadedFiles(response.files || []);
-    } catch (err) {
-      console.error("Fetching files failed:", err);
+      console.log('Fetched files response:', response);
+      // Use the correct response format from our updated API
+      setUploadedFiles(response.result || []);
+    } catch (err: any) {
+      if (err?.response?.status === 401) {
+        console.log("Authentication required for file access");
+        // Don't show error for auth issues, just set empty array
+      } else {
+        console.error("Fetching files failed:", err);
+      }
+      // Set empty array on error
+      setUploadedFiles([]);
     }
   };
 
@@ -191,16 +254,16 @@ function CanvasContent() {
   };
 
   const handleNextStep = () => {
-    const steps = ["upload", "design", "variants", "finalize"] as const;
-    const index = steps.indexOf(step);
+    const steps = ["upload", "unified-editor", "product-details"] as const;
+    const index = steps.indexOf(step as any);
     if (index < steps.length - 1) {
       setStep(steps[index + 1]);
     }
   };
 
   const handlePrevStep = () => {
-    const steps = ["upload", "design", "variants", "finalize"] as const;
-    const index = steps.indexOf(step);
+    const steps = ["upload", "unified-editor", "product-details"] as const;
+    const index = steps.indexOf(step as any);
     if (index > 0) {
       setStep(steps[index - 1]);
     }
@@ -238,32 +301,222 @@ function CanvasContent() {
     );
   }
 
-  const generateMockup = async () => {
+  const handlePrintFilesLoaded = (printFilesData: any) => {
+    setPrintFiles(printFilesData);
+    console.log("Print files loaded:", printFilesData);
+  };
+
+  const generatePreview = async (advancedOptions?: {
+    technique?: string;
+    optionGroups?: string[];
+    options?: string[];
+    lifelike?: boolean;
+    width?: number;
+  }) => {
     if (!selectedProduct || !designFiles.length || !selectedVariants.length) {
-      toast.error("Missing product, design files, or variants.");
+      toast.error("Missing product, design files, or variants for mockup.");
+      return;
+    }
+
+    if (designFiles.some((file) => !file.url)) {
+      toast.error("One or more design files are missing an image URL.");
       return;
     }
 
     try {
       setIsGeneratingMockup(true);
+      setMockupStatus("Preparing mockup generation...");
+      setMockupUrls([]); // Clear previous mockups
 
       const variantIds = selectedVariants.map((v: any) =>
         typeof v === "number" ? v : v.id
       );
 
-      const mockupUrl = await mockupAPI.generateProductMockup({
-        variantIds,
-        designFiles,
-        format: "jpg", // or "png"
-      });
+      if (variantIds.length === 0 || variantIds.some((id) => !id)) {
+        toast.error("No valid variant IDs selected for the mockup.");
+        setIsGeneratingMockup(false);
+        setMockupStatus("");
+        return;
+      }
 
-      setMockupUrl(mockupUrl);
-      toast.success("Mockup generated!");
-    } catch (error) {
-      console.error("Mockup generation failed:", error);
-      toast.error("Failed to generate mockup.");
+      // Prepare advanced mockup options
+      const mockupOptions: any = {
+        productId: selectedProduct.id,
+        variantIds: variantIds.slice(0, 3), // Use first 3 variants for preview
+        designFiles,
+        format: "jpg" as const,
+        onStatusUpdate: (status: string, attempts: number) => {
+          setMockupStatus(status);
+          console.log(`Mockup status update: ${status} (attempt ${attempts})`);
+        }
+      };
+
+      // Add advanced options if provided
+      if (advancedOptions) {
+        if (advancedOptions.width) {
+          mockupOptions.width = advancedOptions.width;
+        }
+        
+        if (advancedOptions.lifelike !== undefined || advancedOptions.technique) {
+          mockupOptions.productOptions = {};
+          if (advancedOptions.lifelike !== undefined) {
+            mockupOptions.productOptions.lifelike = advancedOptions.lifelike;
+          }
+        }
+        
+        if (advancedOptions.optionGroups && advancedOptions.optionGroups.length > 0) {
+          mockupOptions.optionGroups = advancedOptions.optionGroups;
+        }
+        
+        if (advancedOptions.options && advancedOptions.options.length > 0) {
+          mockupOptions.options = advancedOptions.options;
+        }
+
+        // Log advanced options being used
+        console.log('Using advanced mockup options:', {
+          technique: advancedOptions.technique,
+          optionGroups: advancedOptions.optionGroups,
+          options: advancedOptions.options,
+          lifelike: advancedOptions.lifelike,
+          width: advancedOptions.width
+        });
+      }
+
+      const mockupUrls = await mockupAPI.generateProductMockup(mockupOptions);
+
+      setMockupUrls(mockupUrls);
+      setMockupStatus("Mockup completed successfully!");
+      toast.success("Preview generated successfully!");
+    } catch (error: any) {
+      console.error("Preview generation failed:", error);
+      const errorMessage =
+        error?.response?.data?.error ||
+        error.message ||
+        "Failed to generate preview.";
+      setMockupStatus(`Error: ${errorMessage}`);
+      toast.error(errorMessage);
     } finally {
       setIsGeneratingMockup(false);
+    }
+  };
+
+  const generateMockup = async () => {
+    if (!selectedProduct || !designFiles.length || !selectedVariants.length) {
+      toast.error("Missing product, design files, or variants for mockup.");
+      return;
+    }
+
+    if (designFiles.some((file) => !file.url)) {
+      toast.error("One or more design files are missing an image URL.");
+      return;
+    }
+
+    try {
+      setIsGeneratingMockup(true);
+      setMockupStatus("Preparing final mockup generation...");
+      setMockupUrls([]); // Clear previous mockups
+
+      const variantIds = selectedVariants.map((v: any) =>
+        typeof v === "number" ? v : v.id
+      );
+
+      if (variantIds.length === 0 || variantIds.some((id) => !id)) {
+        toast.error("No valid variant IDs selected for the mockup.");
+        setIsGeneratingMockup(false);
+        setMockupStatus("");
+        return;
+      }
+
+      const mockupUrls = await mockupAPI.generateProductMockup({
+        productId: selectedProduct.id,
+        variantIds,
+        designFiles,
+        format: "jpg",
+        onStatusUpdate: (status: string, attempts: number) => {
+          setMockupStatus(status);
+          console.log(`Final mockup status update: ${status} (attempt ${attempts})`);
+        }
+      });
+
+      setMockupUrls(mockupUrls);
+      setMockupStatus("Final mockup completed successfully!");
+      toast.success("Mockup generated successfully!");
+    } catch (error: any) {
+      console.error("Mockup generation failed:", error);
+      const errorMessage =
+        error?.response?.data?.error ||
+        error.message ||
+        "Failed to generate mockup.";
+      setMockupStatus(`Error: ${errorMessage}`);
+      toast.error(errorMessage);
+    } finally {
+      setIsGeneratingMockup(false);
+    }
+  };
+
+  // Handle going live to marketplace with product details
+  const handleGoLiveToMarketplace = async () => {
+    if (!mockupUrls || mockupUrls.length === 0) {
+      toast.error('No mockups available. Please generate mockups first.');
+      return;
+    }
+
+    try {
+      setCreating(true);
+      
+      const productData = {
+        id: selectedProduct?.id,
+        name: productForm.name.trim(),
+        description: productForm.description.trim(),
+        category: productForm.category,
+        markupPercentage: parseFloat(productForm.markupPercentage),
+        variants: selectedVariants,
+        base_product: selectedProduct
+      };
+
+      toast.loading('Publishing your product to marketplace...', { id: 'marketplace' });
+
+      const result = await printfulAPI.storeMockupsPermanently(
+        mockupUrls,
+        productData
+      );
+
+      toast.dismiss('marketplace');
+
+      if (result.success && result.marketplace_ready) {
+        toast.success(`🎉 "${productForm.name}" is now live in marketplace!`, {
+          duration: 6000
+        });
+        
+        // Show success details
+        setTimeout(() => {
+          toast.success(`✅ ${result.storage_stats.total_stored} product images stored permanently`, {
+            duration: 4000
+          });
+        }, 1000);
+        
+        // Clear current session and redirect
+        setTimeout(() => {
+          toast.success('🚀 Product published successfully! Redirecting...', {
+            duration: 3000
+          });
+          
+          // Reset form and redirect to products page
+          setMockupUrls([]);
+          setDesignFiles([]);
+          setStep("upload");
+          window.location.href = '/dashboard/creator/products';
+        }, 3000);
+        
+      } else {
+        toast.error(`Failed to publish product: ${result.details || result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Marketplace error:', error);
+      toast.dismiss('marketplace');
+      toast.error('Failed to publish to marketplace');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -283,73 +536,117 @@ function CanvasContent() {
             <p className="mt-4 text-gray-600">Loading design canvas...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              {step === "upload" && (
-                <UploadStep
-                  uploadedFiles={uploadedFiles}
-                  uploading={uploading}
-                  setUploading={setUploading}
-                  setUploadedFiles={setUploadedFiles}
-                  onNextStep={handleNextStep}
-                  printfulAPI={printfulAPI}
-                />
-              )}
-
-              {step === "design" && (
-                <DesignStep
-                  uploadedFiles={uploadedFiles}
-                  designFiles={designFiles}
-                  onAddDesignFile={handleAddDesignFile}
-                  onRemoveDesignFile={handleRemoveDesignFile}
-                  onUpdateDesignPosition={updateDesignPosition}
-                  onSetPresetPosition={setPresetPosition}
-                  onPrevStep={handlePrevStep}
-                  onNextStep={handleNextStep}
-                />
-              )}
-
-              {step === "variants" && (
-                <VariantsStep
-                  selectedProduct={selectedProduct}
-                  selectedVariants={selectedVariants}
-                  setSelectedVariants={setSelectedVariants}
-                  onPrevStep={handlePrevStep}
-                  onNextStep={handleNextStep}
-                />
-              )}
-
-              {step === "finalize" && (
-                <FinalizeStep
-                  productForm={productForm}
-                  setProductForm={setProductForm}
-                  selectedProduct={selectedProduct}
-                  selectedVariants={selectedVariants}
-                  designFiles={designFiles}
-                  mockupUrl={mockupUrl}
-                  onGenerateMockup={() => {
-                    console.log("Generate mockup");
-                    setIsGeneratingMockup(true);
-                    generateMockup();
-                    console.log("Mockup generated");
-                    setIsGeneratingMockup(false);
-                  }}
-                  isGeneratingMockup={isGeneratingMockup}
-                  onPrevStep={handlePrevStep}
-                />
-              )}
-            </div>
-
-            <div className="lg:col-span-1">
-              <ProductPreview
+          <>
+            {step === "unified-editor" ? (
+              <UnifiedDesignEditor
                 selectedProduct={selectedProduct}
-                productForm={productForm}
-                designFiles={designFiles}
                 selectedVariants={selectedVariants}
-                loading={loading}
+                setSelectedVariants={setSelectedVariants}
+                designFiles={designFiles}
+                setDesignFiles={setDesignFiles}
+                uploadedFiles={uploadedFiles}
+                printFiles={printFiles}
+                onGeneratePreview={generatePreview}
+                isGeneratingPreview={isGeneratingMockup}
+                mockupUrls={mockupUrls}
+                mockupStatus={mockupStatus}
+                onNext={handleNextStep}
+                onPrev={handlePrevStep}
+                onPrintFilesLoaded={handlePrintFilesLoaded}
+                onRefreshFiles={fetchUploadedFiles}
               />
-            </div>
-          </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                  {step === "upload" && (
+                    <UploadStep
+                      uploadedFiles={uploadedFiles}
+                      uploading={uploading}
+                      setUploading={setUploading}
+                      setUploadedFiles={setUploadedFiles}
+                      onNextStep={handleNextStep}
+                      printfulAPI={printfulAPI}
+                    />
+                  )}
+
+                  {step === "design" && (
+                    <DesignStep
+                      uploadedFiles={uploadedFiles}
+                      designFiles={designFiles}
+                      onAddDesignFile={handleAddDesignFile}
+                      onRemoveDesignFile={handleRemoveDesignFile}
+                      onUpdateDesignPosition={updateDesignPosition}
+                      onSetPresetPosition={setPresetPosition}
+                      onPrevStep={handlePrevStep}
+                      onNextStep={handleNextStep}
+                      printFiles={printFiles}
+                      onGeneratePreview={generatePreview}
+                      isGeneratingPreview={isGeneratingMockup}
+                    />
+                  )}
+
+                  {step === "variants" && (
+                    <VariantsStep
+                      selectedProduct={selectedProduct}
+                      selectedVariants={selectedVariants}
+                      setSelectedVariants={setSelectedVariants}
+                      onPrevStep={handlePrevStep}
+                      onNextStep={handleNextStep}
+                      onPrintFilesLoaded={handlePrintFilesLoaded}
+                    />
+                  )}
+
+                  {step === "finalize" && (
+                    <FinalizeStep
+                      productForm={productForm}
+                      setProductForm={setProductForm}
+                      selectedProduct={selectedProduct}
+                      selectedVariants={selectedVariants}
+                      designFiles={designFiles}
+                      mockupUrls={mockupUrls}
+                      onGenerateMockup={generateMockup}
+                      isGeneratingMockup={isGeneratingMockup}
+                      onPrevStep={handlePrevStep}
+                    />
+                  )}
+
+                  {step === "product-details" && (
+                    <ProductDetailsForm
+                      initialData={{
+                        name: productForm.name,
+                        description: productForm.description,
+                        markupPercentage: productForm.markupPercentage,
+                        category: productForm.category
+                      }}
+                      onSave={(data) => {
+                        setProductForm({
+                          ...productForm,
+                          name: data.name,
+                          description: data.description,
+                          markupPercentage: data.markupPercentage.toString(),
+                          category: data.category
+                        });
+                      }}
+                      onNext={handleGoLiveToMarketplace}
+                      isLoading={creating}
+                    />
+                  )}
+                </div>
+
+                <div className="lg:col-span-1">
+                  <ProductPreview
+                    selectedProduct={selectedProduct}
+                    productForm={productForm}
+                    designFiles={designFiles}
+                    selectedVariants={selectedVariants}
+                    loading={loading}
+                    mockupUrls={mockupUrls}
+                    isGeneratingMockup={isGeneratingMockup}
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

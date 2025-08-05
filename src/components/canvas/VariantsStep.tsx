@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/canvas/steps/VariantsStep.jsx
 'use client';
 
 import Image from 'next/image';
-import { Fragment } from 'react';
+import { useState, useEffect } from 'react';
+import { printfulAPI } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 // Interfaces for better type safety
 interface ProductVariant {
@@ -38,11 +39,12 @@ interface NoVariantsMessageProps {
 }
 
 interface VariantsStepProps {
-  selectedProduct:any;
+  selectedProduct: any;
   selectedVariants: number[];
   setSelectedVariants: (updater: (prev: number[]) => number[]) => void;
   onPrevStep: () => void;
   onNextStep: () => void;
+  onPrintFilesLoaded?: (printFiles: any) => void;
 }
 
 const VariantCard: React.FC<VariantCardProps> = ({ variant, isSelected, onToggle }) => {
@@ -159,25 +161,98 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
   selectedVariants, 
   setSelectedVariants,
   onPrevStep,
-  onNextStep
+  onNextStep,
+  onPrintFilesLoaded
 }) => {
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [loadingPrintFiles, setLoadingPrintFiles] = useState(false);
+  const [printFilesLoaded, setPrintFilesLoaded] = useState(false);
+  const [lastProductId, setLastProductId] = useState<number | null>(null);
+  
   const hasVariants = selectedProduct?.variants && selectedProduct.variants.length > 0;
 
-  const handleToggleAll = () => {
+  // Get unique sizes and colors
+  const uniqueSizes = [...new Set(selectedProduct?.variants?.map((v: any) => v.size) || [])];
+  
+  // Create a map to ensure unique colors by name, taking the first occurrence
+  const colorMap = new Map();
+  selectedProduct?.variants?.forEach((v: any) => {
+    if (!colorMap.has(v.color)) {
+      colorMap.set(v.color, {
+        name: v.color,
+        code: v.color_code,
+        image: v.image
+      });
+    }
+  });
+  const uniqueColors = Array.from(colorMap.values());
+
+  // Reset print files loading when product changes
+  useEffect(() => {
+    if (selectedProduct?.id && selectedProduct.id !== lastProductId) {
+      setPrintFilesLoaded(false);
+      setLastProductId(selectedProduct.id);
+    }
+  }, [selectedProduct?.id, lastProductId]);
+
+  // Update selected variants when size/color selection changes
+  useEffect(() => {
     if (!selectedProduct?.variants) return;
     
-    if (selectedVariants.length === selectedProduct.variants.length) {
-      setSelectedVariants(() => []);
-    } else {
-      setSelectedVariants(() => selectedProduct.variants.map(v => v.id));
+    const filteredVariants = selectedProduct.variants.filter((variant: any) => 
+      selectedSizes.includes(variant.size) && selectedColors.includes(variant.color)
+    );
+    
+    setSelectedVariants(() => filteredVariants.map((v: any) => v.id));
+  }, [selectedSizes, selectedColors, selectedProduct, setSelectedVariants]);
+
+  // Load print files when variants are selected (only once)
+  useEffect(() => {
+    const loadPrintFiles = async () => {
+      if (selectedVariants.length === 0 || !selectedProduct?.id || printFilesLoaded || loadingPrintFiles) {
+        return;
+      }
+      
+      try {
+        setLoadingPrintFiles(true);
+        
+        // Get print files using the correct backend API endpoint
+        const printFilesResponse = await printfulAPI.getPrintFiles(selectedProduct.id);
+        
+        if (printFilesResponse?.result) {
+          onPrintFilesLoaded?.(printFilesResponse.result);
+          setPrintFilesLoaded(true);
+          toast.success('Print files loaded successfully!');
+        } else {
+          console.warn('No print files data received');
+        }
+      } catch (error) {
+        console.error('Failed to load print files:', error);
+        toast.error('Failed to load print files');
+      } finally {
+        setLoadingPrintFiles(false);
+      }
+    };
+
+    if (selectedVariants.length > 0 && !printFilesLoaded && !loadingPrintFiles) {
+      loadPrintFiles();
     }
+  }, [selectedVariants.length, selectedProduct?.id, printFilesLoaded, loadingPrintFiles, onPrintFilesLoaded]);
+
+  const handleSizeToggle = (size: string) => {
+    setSelectedSizes(prev => 
+      prev.includes(size) 
+        ? prev.filter(s => s !== size)
+        : [...prev, size]
+    );
   };
 
-  const handleToggleVariant = (variantId: number) => {
-    setSelectedVariants(prev => 
-      prev.includes(variantId)
-        ? prev.filter(id => id !== variantId)
-        : [...prev, variantId]
+  const handleColorToggle = (color: string) => {
+    setSelectedColors(prev => 
+      prev.includes(color) 
+        ? prev.filter(c => c !== color)
+        : [...prev, color]
     );
   };
 
@@ -194,49 +269,80 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
     <div className="bg-white rounded-lg shadow p-6">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Select Product Variants</h3>
       <p className="text-sm text-gray-600 mb-6">
-        Choose which sizes and colors you want to offer for your product. Each variant will use your design files.
+        Choose sizes and colors for your product. Print files will be automatically loaded.
       </p>
       
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={handleToggleAll}
-            className="text-sm text-indigo-600 hover:text-indigo-700"
-          >
-            {selectedVariants.length === selectedProduct.variants.length ? 'Deselect All' : 'Select All'}
-          </button>
-          <span className="text-sm text-gray-500">
-            {selectedVariants.length} of {selectedProduct.variants.length} variants selected
-          </span>
+      {/* Size Selection */}
+      <div className="mb-6">
+        <h4 className="text-md font-medium text-gray-900 mb-3">Select Sizes</h4>
+        <div className="flex flex-wrap gap-2">
+          {uniqueSizes.map((size) => (
+            <button
+              key={size}
+              onClick={() => handleSizeToggle(size)}
+              className={`px-4 py-2 border rounded-lg text-sm font-medium transition-all ${
+                selectedSizes.includes(size)
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+              }`}
+            >
+              {size}
+            </button>
+          ))}
         </div>
-        <div className="text-sm text-gray-500">
-          {selectedVariants.length > 0 && (
-            <div>
-              Avg. cost: ${(selectedProduct.variants
-                .filter(v => selectedVariants.includes(v.id))
-                .reduce((sum, v) => sum + parseFloat(v.price), 0) / selectedVariants.length
-              ).toFixed(2)} per variant
+      </div>
+
+      {/* Color Selection */}
+      <div className="mb-6">
+        <h4 className="text-md font-medium text-gray-900 mb-3">Select Colors</h4>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {uniqueColors.map((color) => (
+            <div
+              key={color.name}
+              onClick={() => handleColorToggle(color.name)}
+              className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                selectedColors.includes(color.name)
+                  ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <div
+                  className="w-6 h-6 rounded-full border border-gray-300"
+                  style={{ backgroundColor: color.code }}
+                />
+                <span className="text-sm font-medium text-gray-900">{color.name}</span>
+              </div>
+              <div className="w-full h-16 bg-gray-100 rounded overflow-hidden">
+                <Image
+                  src={color.image}
+                  alt={color.name}
+                  width={100}
+                  height={64}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
-          )}
+          ))}
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-        {selectedProduct.variants.map((variant) => (
-          <VariantCard
-            key={variant.id}
-            variant={variant}
-            isSelected={selectedVariants.includes(variant.id)}
-            onToggle={handleToggleVariant}
-          />
-        ))}
-      </div>
-      
+
+      {/* Selected Variants Summary */}
       {selectedVariants.length > 0 && (
-        <VariantsSummary 
-          selectedProduct={selectedProduct} 
-          selectedVariants={selectedVariants} 
-        />
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-medium text-gray-900 mb-2">Selected Variants</h4>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">
+              {selectedVariants.length} variants selected ({selectedSizes.length} sizes × {selectedColors.length} colors)
+            </span>
+            {loadingPrintFiles && (
+              <div className="flex items-center space-x-2 text-indigo-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+                <span>Loading print files...</span>
+              </div>
+            )}
+          </div>
+        </div>
       )}
       
       <div className="mt-6 flex justify-end space-x-3">
@@ -248,10 +354,12 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
         </button>
         <button
           onClick={onNextStep}
-          disabled={selectedVariants.length === 0}
+          disabled={selectedVariants.length === 0 || loadingPrintFiles}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {selectedVariants.length === 0 ? 'Select Variants First' : `Continue with ${selectedVariants.length} Variants`}
+          {loadingPrintFiles ? 'Loading Print Files...' : 
+           selectedVariants.length === 0 ? 'Select Variants First' : 
+           `Continue with ${selectedVariants.length} Variants`}
         </button>
       </div>
     </div>

@@ -257,39 +257,28 @@ const UploadStep: React.FC<UploadStepProps> = ({
 
     try {
       for (const file of Array.from(files)) {
-        // Demo: Using a public image hosting service
-        const demoImageUrl = `https://picsum.photos/800/800?random=${Date.now()}`;
+        console.log("Uploading file:", file.name, "to DigitalOcean");
 
-        console.log("Uploading file:", file.name, "with URL:", demoImageUrl);
+        // Upload directly to DigitalOcean via our backend
+        const uploadResponse = await printfulAPI.uploadFileDirectly(file);
 
-        // Upload to Printful through backend
-        const printfulResponse = await printfulAPI.uploadFile({
-          filename: file.name,
-          url: demoImageUrl,
-          type: "default",
-        });
+        console.log("Upload response:", uploadResponse);
 
-        console.log("Printful response:", printfulResponse);
-
-        if (printfulResponse.result || printfulResponse.note) {
+        if (uploadResponse?.result) {
           const newFile: UploadedFile = {
-            id: printfulResponse.result?.id || Date.now() + Math.random(),
-            filename: file.name,
-            file_url: printfulResponse.result?.url || demoImageUrl,
-            thumbnail_url:
-              printfulResponse.result?.thumbnail_url || demoImageUrl,
-            printful_file_id: printfulResponse.result?.id,
+            id: uploadResponse.result.id || Date.now() + Math.random(),
+            filename: uploadResponse.result.filename,
+            file_url: uploadResponse.result.url,
+            thumbnail_url: uploadResponse.result.thumbnail_url || uploadResponse.result.url,
+            printful_file_id: uploadResponse.result.id,
             upload_status: "completed",
             created_at: new Date().toISOString(),
           };
 
+          // Add to local state immediately
           setUploadedFiles((prev) => [...prev, newFile]);
-
-          if (printfulResponse.note) {
-            toast.success(`${file.name} uploaded (Demo mode)`);
-          } else {
-            toast.success(`Uploaded ${file.name} to Printful`);
-          }
+          
+          toast.success(`✅ ${file.name} uploaded successfully!`);
         } else {
           throw new Error("No result from upload");
         }
@@ -297,7 +286,10 @@ const UploadStep: React.FC<UploadStepProps> = ({
 
       // Move to design step after successful upload
       if (files.length > 0) {
-        setTimeout(() => onNextStep(), 1000);
+        setTimeout(() => {
+          onNextStep();
+          toast.success("Ready to design! Your files are available in the editor.");
+        }, 1500);
       }
     } catch (error) {
       console.error("Failed to upload files:", error);
