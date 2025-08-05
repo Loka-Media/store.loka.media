@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { printfulAPI } from "./api";
 import { DesignFile } from "./types";
 
@@ -41,7 +42,9 @@ interface TaskStatusResponse {
       variant_ids: number[];
       placement: string;
       mockup_url: string;
+      extra?: { title?: string; option?: string; option_group?: string };
     }>;
+    status: string;
   };
   status: "pending" | "completed" | "failed";
   error?: string;
@@ -53,7 +56,10 @@ class MockupAPI {
     mockupData: MockupData
   ): Promise<TaskResponse> {
     try {
-      return await printfulAPI.createMockupTask(productId, mockupData as Parameters<typeof printfulAPI.createMockupTask>[1]);
+      return await printfulAPI.createMockupTask(
+        productId,
+        mockupData as Parameters<typeof printfulAPI.createMockupTask>[1]
+      );
     } catch (error) {
       console.error("Error creating mockup task:", error);
       throw error;
@@ -80,13 +86,16 @@ class MockupAPI {
       const poll = async () => {
         try {
           attempts++;
-          onStatusUpdate?.(`Checking mockup status (attempt ${attempts})...`, attempts);
-          
+          onStatusUpdate?.(
+            `Checking mockup status (attempt ${attempts})...`,
+            attempts
+          );
+
           const result = await this.getMockupTaskStatus(taskKey);
 
           // Check for completion with multiple possible status formats
           const status = result.status || result.result?.status;
-          
+
           if (status === "completed") {
             onStatusUpdate?.("Mockup completed successfully!", attempts);
             resolve(result);
@@ -112,7 +121,10 @@ class MockupAPI {
       };
 
       // Initial delay of 5 seconds before first poll
-      onStatusUpdate?.("Mockup generation started. Waiting 5 seconds before checking status...", 0);
+      onStatusUpdate?.(
+        "Mockup generation started. Waiting 5 seconds before checking status...",
+        0
+      );
       setTimeout(poll, 5000);
     });
   }
@@ -139,7 +151,16 @@ class MockupAPI {
     options?: string[];
     productTemplateId?: number;
     onStatusUpdate?: (status: string, attempts: number) => void;
-  }): Promise<Array<{url: string; placement: string; variant_ids: number[]; title?: string; option?: string; option_group?: string}>> {
+  }): Promise<
+    Array<{
+      url: string;
+      placement: string;
+      variant_ids: number[];
+      title?: string;
+      option?: string;
+      option_group?: string;
+    }>
+  > {
     try {
       const mockupData: MockupData = {
         variant_ids: variantIds,
@@ -149,7 +170,8 @@ class MockupAPI {
       // Add optional parameters
       if (width) mockupData.width = width;
       if (productOptions) mockupData.product_options = productOptions;
-      if (optionGroups && optionGroups.length > 0) mockupData.option_groups = optionGroups;
+      if (optionGroups && optionGroups.length > 0)
+        mockupData.option_groups = optionGroups;
       if (options && options.length > 0) mockupData.options = options;
       if (productTemplateId) mockupData.product_template_id = productTemplateId;
 
@@ -188,9 +210,16 @@ class MockupAPI {
 
       if (result.result?.mockups && result.result.mockups.length > 0) {
         // Extract all mockup URLs including main and extra variations
-        const allMockups: Array<{url: string; placement: string; variant_ids: number[]; title?: string; option?: string; option_group?: string}> = [];
-        
-        result.result.mockups.forEach(mockup => {
+        const allMockups: Array<{
+          url: string;
+          placement: string;
+          variant_ids: number[];
+          title?: string;
+          option?: string;
+          option_group?: string;
+        }> = [];
+
+        result.result.mockups.forEach((mockup) => {
           // Add the main mockup URL
           if (mockup.mockup_url) {
             allMockups.push({
@@ -198,11 +227,11 @@ class MockupAPI {
               placement: mockup.placement,
               variant_ids: mockup.variant_ids,
               title: `${mockup.placement} (Main)`,
-              option: 'Main',
-              option_group: 'Default'
+              option: "Main",
+              option_group: "Default",
             });
           }
-          
+
           // Add all extra mockup variations
           if (mockup.extra && Array.isArray(mockup.extra)) {
             mockup.extra.forEach((extraMockup: any) => {
@@ -211,16 +240,23 @@ class MockupAPI {
                   url: extraMockup.url,
                   placement: mockup.placement,
                   variant_ids: mockup.variant_ids,
-                  title: extraMockup.title || `${mockup.placement} (${extraMockup.option || 'Variation'})`,
-                  option: extraMockup.option || 'Variation',
-                  option_group: extraMockup.option_group || 'Extra'
+                  title:
+                    extraMockup.title ||
+                    `${mockup.placement} (${
+                      extraMockup.option || "Variation"
+                    })`,
+                  option: extraMockup.option || "Variation",
+                  option_group: extraMockup.option_group || "Extra",
                 });
               }
             });
           }
         });
-        
-        console.log(`Mockups generated successfully: ${allMockups.length} total variations`, allMockups);
+
+        console.log(
+          `Mockups generated successfully: ${allMockups.length} total variations`,
+          allMockups
+        );
         return allMockups;
       } else {
         throw new Error("No mockup URLs in completed task result");
