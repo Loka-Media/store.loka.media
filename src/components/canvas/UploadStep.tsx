@@ -24,13 +24,7 @@ interface UploadStepProps {
   setUploading: (isUploading: boolean) => void;
   setUploadedFiles: (updater: (prev: UploadedFile[]) => UploadedFile[]) => void;
   onNextStep: () => void;
-  printfulAPI: {
-    uploadFile: (data: {
-      filename: string;
-      url: string;
-      type: string;
-    }) => Promise<any>;
-  };
+  printfulAPI: any;
 }
 
 interface FileUploadZoneProps {
@@ -269,7 +263,8 @@ const UploadStep: React.FC<UploadStepProps> = ({
             id: uploadResponse.result.id || Date.now() + Math.random(),
             filename: uploadResponse.result.filename,
             file_url: uploadResponse.result.url,
-            thumbnail_url: uploadResponse.result.thumbnail_url || uploadResponse.result.url,
+            thumbnail_url:
+              uploadResponse.result.thumbnail_url || uploadResponse.result.url,
             printful_file_id: uploadResponse.result.id,
             upload_status: "completed",
             created_at: new Date().toISOString(),
@@ -277,7 +272,7 @@ const UploadStep: React.FC<UploadStepProps> = ({
 
           // Add to local state immediately
           setUploadedFiles((prev) => [...prev, newFile]);
-          
+
           toast.success(`✅ ${file.name} uploaded successfully!`);
         } else {
           throw new Error("No result from upload");
@@ -288,7 +283,9 @@ const UploadStep: React.FC<UploadStepProps> = ({
       if (files.length > 0) {
         setTimeout(() => {
           onNextStep();
-          toast.success("Ready to design! Your files are available in the editor.");
+          toast.success(
+            "Ready to design! Your files are available in the editor."
+          );
         }, 1500);
       }
     } catch (error) {
