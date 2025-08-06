@@ -661,7 +661,7 @@ function CanvasContent() {
                   )}
                 </div>
 
-                <div className="lg:col-span-1">
+                {/* <div className="lg:col-span-1">
                   <ProductPreview
                     selectedProduct={selectedProduct}
                     productForm={productForm}
@@ -671,7 +671,7 @@ function CanvasContent() {
                     mockupUrl={mockupUrls}
                     isGeneratingMockup={isGeneratingMockup}
                   />
-                </div>
+                </div> */}
               </div>
             )}
           </>
