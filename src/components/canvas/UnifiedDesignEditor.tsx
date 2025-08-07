@@ -1292,14 +1292,6 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
               Ready to continue when both are selected
             </p>
           </div>
-
-          <button
-            onClick={onNext}
-            disabled={designFiles.length === 0 || selectedVariants.length === 0}
-            className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed border-2 border-indigo-600 shadow-lg"
-          >
-            Continue to Finalize →
-          </button>
         </div>
       </div>
 

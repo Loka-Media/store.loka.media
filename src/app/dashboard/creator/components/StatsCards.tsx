@@ -12,87 +12,63 @@ interface StatsProps {
 }
 
 export function StatsCards({ stats }: StatsProps) {
+  const statItems = [
+    {
+      name: 'Total Products',
+      value: stats.totalProducts,
+      icon: Package,
+      color: 'text-blue-400',
+      bgColor: 'bg-blue-600',
+    },
+    {
+      name: 'Active Products',
+      value: stats.activeProducts,
+      icon: Eye,
+      color: 'text-green-400',
+      bgColor: 'bg-green-600',
+    },
+    {
+      name: 'Total Sales',
+      value: stats.totalSales,
+      icon: ShoppingBag,
+      color: 'text-purple-400',
+      bgColor: 'bg-purple-600',
+    },
+    {
+      name: 'Revenue',
+      value: `${stats.revenue.toFixed(2)}`,
+      icon: TrendingUp,
+      color: 'text-orange-400',
+      bgColor: 'bg-orange-600',
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Package className="h-6 w-6 text-gray-400" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">
-                  Total Products
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+      {statItems.map((item, index) => (
+        <div
+          key={index}
+          className="relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl shadow-lg overflow-hidden
+                     hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group"
+        >
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-gray-900 to-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+          <div className="p-6 relative z-10">
+            <div className="flex items-center">
+              <div className={`flex-shrink-0 ${item.bgColor} rounded-full p-3 group-hover:bg-opacity-80 transition-colors duration-300`}>
+                <item.icon className="h-7 w-7 text-white" />
+              </div>
+              <div className="ml-4">
+                <dt className="text-sm font-medium text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                  {item.name}
                 </dt>
-                <dd className="text-lg font-medium text-gray-900">
-                  {stats.totalProducts}
+                <dd className={`mt-1 text-3xl font-bold text-white ${item.color} group-hover:text-opacity-90 transition-colors duration-300`}>
+                  {item.value}
                 </dd>
-              </dl>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Eye className="h-6 w-6 text-gray-400" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">
-                  Active Products
-                </dt>
-                <dd className="text-lg font-medium text-gray-900">
-                  {stats.activeProducts}
-                </dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <ShoppingBag className="h-6 w-6 text-gray-400" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">
-                  Total Sales
-                </dt>
-                <dd className="text-lg font-medium text-gray-900">
-                  {stats.totalSales}
-                </dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <TrendingUp className="h-6 w-6 text-gray-400" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">
-                  Revenue
-                </dt>
-                <dd className="text-lg font-medium text-gray-900">
-                  ${stats.revenue.toFixed(2)}
-                </dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

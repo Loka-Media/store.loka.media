@@ -8,6 +8,7 @@ import { StatsCards } from "./components/StatsCards";
 import { QuickActions } from "./components/QuickActions";
 import { ProductsSection } from "./components/ProductsSection";
 import PrintfulConnectionPrompt from "./components/PrintfulConnectionPrompt";
+import Navigation from "@/components/Navigation";
 
 export default function CreatorDashboard() {
   const router = useRouter();
@@ -26,14 +27,15 @@ export default function CreatorDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardHeader
-        connection={connection}
-        onConnectPrintful={handleConnectPrintful}
-      />
+    <div className="min-h-screen bg-gray-950 text-white">
+      <Navigation />
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <div className="max-w-7xl mt-16 mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <DashboardHeader
+          connection={connection}
+          onConnectPrintful={handleConnectPrintful}
+        />
+        <div className="mt-8">
           {connection && !connection.connected ? (
             <PrintfulConnectionPrompt onConnect={handleConnectPrintful} />
           ) : (

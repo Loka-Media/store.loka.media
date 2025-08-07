@@ -4,102 +4,58 @@ import { ShoppingBag, Plus, Upload, Palette, Store } from 'lucide-react';
 import Link from 'next/link';
 
 export function QuickActions() {
+  const actions = [
+    {
+      href: '/dashboard/creator/catalog',
+      icon: ShoppingBag,
+      title: 'Browse Catalog',
+      description: 'Explore Printful products',
+    },
+    {
+      href: '/dashboard/creator/files',
+      icon: Upload,
+      title: 'Upload Files',
+      description: 'Manage your design files',
+    },
+    {
+      href: '/dashboard/creator/canvas',
+      icon: Palette,
+      title: 'Design Canvas',
+      description: 'Create and edit designs',
+    },
+    {
+      href: '/dashboard/creator/shopify-products',
+      icon: Store,
+      title: 'Shopify Products',
+      description: 'Browse & publish products',
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5 mb-8">
-      <Link
-        href="/dashboard/creator/catalog"
-        className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
-      >
-        <div className="p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-white" />
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+      {actions.map((action, index) => (
+        <Link href={action.href} key={index}>
+          <div className="relative group overflow-hidden rounded-xl border border-gray-800 bg-gradient-to-br from-gray-900 to-black shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-orange-500 to-red-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+            <div className="p-6 relative z-10">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-gray-800 rounded-full p-3 group-hover:bg-orange-600 transition-colors duration-300">
+                  <action.icon className="w-7 h-7 text-orange-500 group-hover:text-white transition-colors duration-300" />
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-bold text-white group-hover:text-orange-300 transition-colors duration-300">
+                    {action.title}
+                  </h3>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {action.description}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900">Browse Catalog</h3>
-              <p className="text-sm text-gray-500">Explore Printful products</p>
-            </div>
           </div>
-        </div>
-      </Link>
-
-      <Link
-        href="/dashboard/creator/products/create"
-        className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
-      >
-        <div className="p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                <Plus className="w-5 h-5 text-white" />
-              </div>
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900">Create Product</h3>
-              <p className="text-sm text-gray-500">Add new product</p>
-            </div>
-          </div>
-        </div>
-      </Link>
-
-      <Link
-        href="/dashboard/creator/files"
-        className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
-      >
-        <div className="p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
-                <Upload className="w-5 h-5 text-white" />
-              </div>
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900">Upload Files</h3>
-              <p className="text-sm text-gray-500">Manage design files</p>
-            </div>
-          </div>
-        </div>
-      </Link>
-
-      <Link
-        href="/dashboard/creator/canvas"
-        className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
-      >
-        <div className="p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
-                <Palette className="w-5 h-5 text-white" />
-              </div>
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900">Design Canvas</h3>
-              <p className="text-sm text-gray-500">Create designs</p>
-            </div>
-          </div>
-        </div>
-      </Link>
-
-      <Link
-        href="/dashboard/creator/shopify-products"
-        className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
-      >
-        <div className="p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                <Store className="w-5 h-5 text-white" />
-              </div>
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900">Shopify Products</h3>
-              <p className="text-sm text-gray-500">Browse & publish products</p>
-            </div>
-          </div>
-        </div>
-      </Link>
+        </Link>
+      ))}
     </div>
   );
 }
+
