@@ -1,17 +1,20 @@
-'use client';
-
-import Link from "next/link";
 import { Sparkles, ChevronDown, Star, User } from "lucide-react";
+import Link from "next/link";
 
-interface FeaturedCreatorsProps {
-  creators: { id: number; name: string; username: string; product_count: number }[];
+interface FeaturedCreatorsSectionProps {
+  creators: {
+    id: number;
+    name: string;
+    username: string;
+    product_count: number;
+  }[];
   handleFilterChange: (key: string, value: string) => void;
 }
 
-export function FeaturedCreators({
+export function FeaturedCreatorsSection({
   creators,
   handleFilterChange,
-}: FeaturedCreatorsProps) {
+}: FeaturedCreatorsSectionProps) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl shadow-2xl p-8 mb-12 border border-gray-700/50 backdrop-blur-sm">
@@ -42,9 +45,9 @@ export function FeaturedCreators({
                   className="group text-center p-6 hover:bg-gray-800/50 rounded-2xl transition-all duration-300 cursor-pointer border border-transparent hover:border-orange-500/30 backdrop-blur-sm"
                   onClick={() => handleFilterChange("creator", creator.name)}
                 >
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-r from-orange-500 to-purple-500 flex items-center justify-center">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-r from-orange-500 to-purple-500 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
                     <span className="text-white font-bold text-2xl">
-                      {creator.name.charAt(0)}
+                      {creator.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <h3 className="font-bold text-white text-lg group-hover:text-orange-400 transition-colors duration-200">
@@ -70,7 +73,7 @@ export function FeaturedCreators({
                   key={creator.name}
                   className="group text-center p-6 hover:bg-gray-800/50 rounded-2xl transition-all duration-300 border border-transparent hover:border-orange-500/30"
                 >
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-r from-orange-500 to-purple-500 flex items-center justify-center">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-r from-orange-500 to-purple-500 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
                     <span className="text-white font-bold text-2xl">
                       {creator.name.charAt(0)}
                     </span>

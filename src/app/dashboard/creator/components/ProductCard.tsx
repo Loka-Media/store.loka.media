@@ -7,11 +7,12 @@ import {
 import Image from 'next/image';
 import { useState } from 'react';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
-
+import { productAPI } from '@/lib/api';
+import { Switch } from "@/components/ui/switch";
 
 interface CreatorProduct {
   id: number;
-  is_active: boolean;
+  status: string;
   thumbnail_url: string;
   name: string;
   min_price: number;
@@ -21,6 +22,9 @@ interface CreatorProduct {
 
 export default function ProductCard({ product, onDelete }: { product: CreatorProduct, onDelete: (productId: number) => void }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
+  const [newStatus, setNewStatus] = useState<boolean | null>(null);
+
 
   const handleDelete = () => {
     setIsDeleteDialogOpen(true);
@@ -30,6 +34,30 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
     onDelete(product.id);
     setIsDeleteDialogOpen(false);
   };
+
+  const handleStatusChange = (status: boolean) => {
+    setNewStatus(status);
+    setShowStatusConfirmDialog(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (newStatus !== null) {
+      try {
+        await productAPI.updateProductStatus(product.id, newStatus);
+
+        // Optionally, refresh the product data or show a success message
+        console.log(`Product status updated to ${newStatus ? 'active' : 'inactive'}`);
+        // You might want to trigger a re-fetch of the product list here
+      } catch (error) {
+        console.error('Error updating product status:', error);
+        // Show an error message to the user
+      } finally {
+        setShowStatusConfirmDialog(false);
+        setNewStatus(null);
+      }
+    }
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -41,21 +69,31 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
     <div className="relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group">
       <div className="aspect-square relative overflow-hidden rounded-t-xl">
         <Image
-          src={product.thumbnail_url || '/placeholder-product.png'}
+          src={product.thumbnail_url || "/placeholder-product.png"}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            product.is_active ? 'bg-green-600 text-white' : 'bg-gray-600 text-white'
-          }`}>
-            {product.is_active ? 'Active' : 'Inactive'}
-          </span>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={product.status === "active"}
+              onCheckedChange={handleStatusChange}
+              id={`status-switch-${product.id}`}
+            />
+            <label
+              htmlFor={`status-switch-${product.id}`}
+              className="text-sm font-semibold text-white"
+            >
+              {product.status === "active" ? "Active" : "Inactive"}
+            </label>
+          </div>
         </div>
       </div>
       <div className="p-4">
-        <h3 className="font-bold text-lg text-white truncate mb-1">{product.name}</h3>
+        <h3 className="font-bold text-lg text-white truncate mb-1">
+          {product.name}
+        </h3>
         <div className="flex items-center justify-between">
           <span className="text-orange-400 font-semibold">
             {formatPrice(product.min_price)}
@@ -68,10 +106,18 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
           </span>
         </div>
         <div className="flex justify-end items-center mt-4 space-x-3">
-          <button className="p-2 rounded-full bg-gray-800 text-orange-400 hover:bg-orange-600 hover:text-white transition-colors duration-200" title="Edit Product">
+          <button
+            className="p-2 rounded-full bg-gray-800 text-orange-400 hover:bg-orange-600 hover:text-white transition-colors duration-200"
+            title="Edit Product"
+          >
             <Edit className="w-5 h-5" />
           </button>
-          <button onClick={handleDelete} className="p-2 rounded-full bg-gray-800 text-red-400 hover:bg-red-600 hover:text-white transition-colors duration-200" title="Delete Product">
+
+          <button
+            onClick={handleDelete}
+            className="p-2 rounded-full bg-gray-800 text-red-400 hover:bg-red-600 hover:text-white transition-colors duration-200"
+            title="Delete Product"
+          >
             <Trash2 className="w-5 h-5" />
           </button>
         </div>
@@ -82,6 +128,15 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
         onConfirm={confirmDelete}
         title="Are you sure?"
         description={`This will permanently delete the product "${product.name}". This action cannot be undone.`}
+      />
+      <ConfirmationDialog
+        isOpen={showStatusConfirmDialog}
+        onClose={() => setShowStatusConfirmDialog(false)}
+        onConfirm={confirmStatusChange}
+        title={`Confirm ${newStatus ? "Activation" : "Deactivation"}`}
+        description={`Are you sure you want to ${
+          newStatus ? "activate" : "deactivate"
+        } this product?`}
       />
     </div>
   );

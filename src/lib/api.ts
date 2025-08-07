@@ -214,6 +214,12 @@ export const productAPI = {
     const response = await api.delete(`/api/products/${productId}`);
     return response.data;
   },
+
+  // Creator: Update product status
+  updateProductStatus: async (productId: number, is_active: boolean) => {
+    const response = await api.patch(`/api/products/${productId}/status`, { is_active });
+    return response.data;
+  },
 };
 
 // Cart API
