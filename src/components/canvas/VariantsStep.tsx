@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { useState, useEffect } from 'react';
-import { printfulAPI } from '@/lib/api';
-import toast from 'react-hot-toast';
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import { printfulAPI } from "@/lib/api";
+import toast from "react-hot-toast";
 
 // Interfaces for better type safety
 interface ProductVariant {
@@ -47,13 +47,17 @@ interface VariantsStepProps {
   onPrintFilesLoaded?: (printFiles: any) => void;
 }
 
-const VariantCard: React.FC<VariantCardProps> = ({ variant, isSelected, onToggle }) => {
+const VariantCard: React.FC<VariantCardProps> = ({
+  variant,
+  isSelected,
+  onToggle,
+}) => {
   return (
     <div
       className={`border rounded-lg p-4 cursor-pointer transition-all ${
         isSelected
-          ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-          : 'border-gray-200 hover:border-gray-300'
+          ? "border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200"
+          : "border-gray-200 hover:border-gray-300"
       }`}
       onClick={() => onToggle(variant.id)}
     >
@@ -61,7 +65,7 @@ const VariantCard: React.FC<VariantCardProps> = ({ variant, isSelected, onToggle
         <div className="flex items-center space-x-2">
           <div
             className="w-4 h-4 rounded border-2 flex items-center justify-center"
-            style={{ borderColor: isSelected ? '#6366f1' : '#d1d5db' }}
+            style={{ borderColor: isSelected ? "#6366f1" : "#d1d5db" }}
           >
             {isSelected && (
               <div className="w-2 h-2 bg-indigo-600 rounded"></div>
@@ -75,7 +79,7 @@ const VariantCard: React.FC<VariantCardProps> = ({ variant, isSelected, onToggle
           <div>Cost: ${variant.price}</div>
         </div>
       </div>
-      
+
       <div className="flex items-center space-x-2 mb-2">
         <div
           className="w-6 h-6 rounded-full border border-gray-300"
@@ -84,11 +88,13 @@ const VariantCard: React.FC<VariantCardProps> = ({ variant, isSelected, onToggle
         ></div>
         <span className="text-sm text-gray-600">{variant.color}</span>
       </div>
-      
+
       <div className="text-xs text-gray-600 space-y-1">
-        <div>Production: {variant.in_stock ? '✅ In Stock' : '❌ Out of Stock'}</div>
+        <div>
+          Production: {variant.in_stock ? "✅ In Stock" : "❌ Out of Stock"}
+        </div>
       </div>
-      
+
       <div className="mt-2">
         <div className="w-full h-20 bg-gray-100 rounded overflow-hidden relative">
           <Image
@@ -103,18 +109,25 @@ const VariantCard: React.FC<VariantCardProps> = ({ variant, isSelected, onToggle
   );
 };
 
-const VariantsSummary: React.FC<VariantsSummaryProps> = ({ selectedProduct, selectedVariants }) => {
-  const selectedVariantData = selectedProduct?.variants?.filter(v => 
-    selectedVariants.includes(v.id)
-  ) || [];
-  
-  const avgCost = selectedVariantData.length > 0 
-    ? selectedVariantData.reduce((sum, v) => sum + parseFloat(v.price), 0) / selectedVariantData.length
-    : 0;
+const VariantsSummary: React.FC<VariantsSummaryProps> = ({
+  selectedProduct,
+  selectedVariants,
+}) => {
+  const selectedVariantData =
+    selectedProduct?.variants?.filter((v) => selectedVariants.includes(v.id)) ||
+    [];
+
+  const avgCost =
+    selectedVariantData.length > 0
+      ? selectedVariantData.reduce((sum, v) => sum + parseFloat(v.price), 0) /
+        selectedVariantData.length
+      : 0;
 
   return (
     <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-      <h4 className="font-medium text-gray-900 mb-2">Selected Variants Summary</h4>
+      <h4 className="font-medium text-gray-900 mb-2">
+        Selected Variants Summary
+      </h4>
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <span className="text-gray-600">Total variants:</span>
@@ -122,29 +135,43 @@ const VariantsSummary: React.FC<VariantsSummaryProps> = ({ selectedProduct, sele
         </div>
         <div>
           <span className="text-gray-600">Avg. cost:</span>
-          <span className="ml-2 font-medium">
-            ${avgCost.toFixed(2)}
-          </span>
+          <span className="ml-2 font-medium">${avgCost.toFixed(2)}</span>
         </div>
       </div>
       <p className="text-xs text-gray-500 mt-2">
-        You&apos;ll set your markup percentage in the next step to determine final selling prices.
+        You&apos;ll set your markup percentage in the next step to determine
+        final selling prices.
       </p>
     </div>
   );
 };
 
-const NoVariantsMessage: React.FC<NoVariantsMessageProps> = ({ onPrevStep }) => {
+const NoVariantsMessage: React.FC<NoVariantsMessageProps> = ({
+  onPrevStep,
+}) => {
   return (
     <div className="text-center py-12">
       <div className="text-gray-400 mb-4">
-        <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        <svg
+          className="mx-auto h-12 w-12"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+          />
         </svg>
       </div>
-      <h3 className="text-lg font-medium text-gray-900 mb-2">No Variants Available</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-2">
+        No Variants Available
+      </h3>
       <p className="text-gray-600 mb-4">
-        This product doesn&apos;t have any variants loaded. Please go back and select a different product.
+        This product doesn&apos;t have any variants loaded. Please go back and
+        select a different product.
       </p>
       <button
         onClick={onPrevStep}
@@ -156,25 +183,28 @@ const NoVariantsMessage: React.FC<NoVariantsMessageProps> = ({ onPrevStep }) => 
   );
 };
 
-const VariantsStep: React.FC<VariantsStepProps> = ({ 
-  selectedProduct, 
-  selectedVariants, 
+const VariantsStep: React.FC<VariantsStepProps> = ({
+  selectedProduct,
+  selectedVariants,
   setSelectedVariants,
   onPrevStep,
   onNextStep,
-  onPrintFilesLoaded
+  onPrintFilesLoaded,
 }) => {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [loadingPrintFiles, setLoadingPrintFiles] = useState(false);
   const [printFilesLoaded, setPrintFilesLoaded] = useState(false);
   const [lastProductId, setLastProductId] = useState<number | null>(null);
-  
-  const hasVariants = selectedProduct?.variants && selectedProduct.variants.length > 0;
+
+  const hasVariants =
+    selectedProduct?.variants && selectedProduct.variants.length > 0;
 
   // Get unique sizes and colors
-  const uniqueSizes = [...new Set(selectedProduct?.variants?.map((v: any) => v.size) || [])];
-  
+  const uniqueSizes = [
+    ...new Set(selectedProduct?.variants?.map((v: any) => v.size) || []),
+  ];
+
   // Create a map to ensure unique colors by name, taking the first occurrence
   const colorMap = new Map();
   selectedProduct?.variants?.forEach((v: any) => {
@@ -182,7 +212,7 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
       colorMap.set(v.color, {
         name: v.color,
         code: v.color_code,
-        image: v.image
+        image: v.image,
       });
     }
   });
@@ -199,67 +229,84 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
   // Update selected variants when size/color selection changes
   useEffect(() => {
     if (!selectedProduct?.variants) return;
-    
-    const filteredVariants = selectedProduct.variants.filter((variant: any) => 
-      selectedSizes.includes(variant.size) && selectedColors.includes(variant.color)
+
+    const filteredVariants = selectedProduct.variants.filter(
+      (variant: any) =>
+        selectedSizes.includes(variant.size) &&
+        selectedColors.includes(variant.color)
     );
-    
+
     setSelectedVariants(() => filteredVariants.map((v: any) => v.id));
   }, [selectedSizes, selectedColors, selectedProduct, setSelectedVariants]);
 
   // Load print files when variants are selected (only once)
   useEffect(() => {
     const loadPrintFiles = async () => {
-      if (selectedVariants.length === 0 || !selectedProduct?.id || printFilesLoaded || loadingPrintFiles) {
+      if (
+        selectedVariants.length === 0 ||
+        !selectedProduct?.id ||
+        printFilesLoaded ||
+        loadingPrintFiles
+      ) {
         return;
       }
-      
+
       try {
         setLoadingPrintFiles(true);
-        
+
         // Get print files using the correct backend API endpoint
-        const printFilesResponse = await printfulAPI.getPrintFiles(selectedProduct.id);
-        
+        const printFilesResponse = await printfulAPI.getPrintFiles(
+          selectedProduct.id
+        );
+
         if (printFilesResponse?.result) {
           onPrintFilesLoaded?.(printFilesResponse.result);
           setPrintFilesLoaded(true);
-          toast.success('Print files loaded successfully!');
+          toast.success("Print files loaded successfully!");
         } else {
-          console.warn('No print files data received');
+          console.warn("No print files data received");
         }
       } catch (error) {
-        console.error('Failed to load print files:', error);
-        toast.error('Failed to load print files');
+        console.error("Failed to load print files:", error);
+        toast.error("Failed to load print files");
       } finally {
         setLoadingPrintFiles(false);
       }
     };
 
-    if (selectedVariants.length > 0 && !printFilesLoaded && !loadingPrintFiles) {
+    if (
+      selectedVariants.length > 0 &&
+      !printFilesLoaded &&
+      !loadingPrintFiles
+    ) {
       loadPrintFiles();
     }
-  }, [selectedVariants.length, selectedProduct?.id, printFilesLoaded, loadingPrintFiles, onPrintFilesLoaded]);
+  }, [
+    selectedVariants.length,
+    selectedProduct?.id,
+    printFilesLoaded,
+    loadingPrintFiles,
+    onPrintFilesLoaded,
+  ]);
 
   const handleSizeToggle = (size: string) => {
-    setSelectedSizes(prev => 
-      prev.includes(size) 
-        ? prev.filter(s => s !== size)
-        : [...prev, size]
+    setSelectedSizes((prev) =>
+      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
     );
   };
 
   const handleColorToggle = (color: string) => {
-    setSelectedColors(prev => 
-      prev.includes(color) 
-        ? prev.filter(c => c !== color)
-        : [...prev, color]
+    setSelectedColors((prev) =>
+      prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
     );
   };
 
   if (!hasVariants) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Select Product Variants</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          Select Product Variants
+        </h3>
         <NoVariantsMessage onPrevStep={onPrevStep} />
       </div>
     );
@@ -267,26 +314,29 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Select Product Variants</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">
+        Select Product Variants
+      </h3>
       <p className="text-sm text-gray-600 mb-6">
-        Choose sizes and colors for your product. Print files will be automatically loaded.
+        Choose sizes and colors for your product. Print files will be
+        automatically loaded.
       </p>
-      
+
       {/* Size Selection */}
       <div className="mb-6">
         <h4 className="text-md font-medium text-gray-900 mb-3">Select Sizes</h4>
         <div className="flex flex-wrap gap-2">
           {uniqueSizes.map((size) => (
             <button
-              key={size}
-              onClick={() => handleSizeToggle(size)}
+              key={size as any}
+              onClick={() => handleSizeToggle(size as any)}
               className={`px-4 py-2 border rounded-lg text-sm font-medium transition-all ${
-                selectedSizes.includes(size)
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                selectedSizes.includes(size as any)
+                  ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                  : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
               }`}
             >
-              {size}
+              {size as any}
             </button>
           ))}
         </div>
@@ -294,7 +344,9 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
 
       {/* Color Selection */}
       <div className="mb-6">
-        <h4 className="text-md font-medium text-gray-900 mb-3">Select Colors</h4>
+        <h4 className="text-md font-medium text-gray-900 mb-3">
+          Select Colors
+        </h4>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {uniqueColors.map((color) => (
             <div
@@ -302,8 +354,8 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
               onClick={() => handleColorToggle(color.name)}
               className={`p-3 border rounded-lg cursor-pointer transition-all ${
                 selectedColors.includes(color.name)
-                  ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? "border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <div className="flex items-center space-x-3 mb-2">
@@ -311,7 +363,9 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
                   className="w-6 h-6 rounded-full border border-gray-300"
                   style={{ backgroundColor: color.code }}
                 />
-                <span className="text-sm font-medium text-gray-900">{color.name}</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {color.name}
+                </span>
               </div>
               <div className="w-full h-16 bg-gray-100 rounded overflow-hidden">
                 <Image
@@ -333,7 +387,8 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
           <h4 className="font-medium text-gray-900 mb-2">Selected Variants</h4>
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600">
-              {selectedVariants.length} variants selected ({selectedSizes.length} sizes × {selectedColors.length} colors)
+              {selectedVariants.length} variants selected (
+              {selectedSizes.length} sizes × {selectedColors.length} colors)
             </span>
             {loadingPrintFiles && (
               <div className="flex items-center space-x-2 text-indigo-600">
@@ -344,7 +399,7 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
           </div>
         </div>
       )}
-      
+
       <div className="mt-6 flex justify-end space-x-3">
         <button
           onClick={onPrevStep}
@@ -357,9 +412,11 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
           disabled={selectedVariants.length === 0 || loadingPrintFiles}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loadingPrintFiles ? 'Loading Print Files...' : 
-           selectedVariants.length === 0 ? 'Select Variants First' : 
-           `Continue with ${selectedVariants.length} Variants`}
+          {loadingPrintFiles
+            ? "Loading Print Files..."
+            : selectedVariants.length === 0
+            ? "Select Variants First"
+            : `Continue with ${selectedVariants.length} Variants`}
         </button>
       </div>
     </div>

@@ -1,9 +1,11 @@
-import { api } from './auth';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { api } from "./auth";
 
 // API base URL
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://catalog.loka.media' 
-  : 'http://localhost:3003';
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://catalog.loka.media"
+    : "http://localhost:3003";
 
 // Product interfaces
 export interface Product {
@@ -85,7 +87,7 @@ export interface Address {
   country: string;
   phone?: string;
   is_default?: boolean;
-  address_type?: 'shipping' | 'billing' | 'both';
+  address_type?: "shipping" | "billing" | "both";
   created_at?: string;
   updated_at?: string;
 }
@@ -141,9 +143,9 @@ export const productAPI = {
     offset?: number;
     sortBy?: string;
     sortOrder?: string;
-    source?: 'printful' | 'shopify' | 'all'; // Filter by product source
+    source?: "printful" | "shopify" | "all"; // Filter by product source
   }) => {
-    const response = await api.get('/api/products', { params });
+    const response = await api.get("/api/products", { params });
     return response.data;
   },
 
@@ -155,13 +157,13 @@ export const productAPI = {
 
   // Get categories
   getCategories: async () => {
-    const response = await api.get('/api/products/categories');
+    const response = await api.get("/api/products/categories");
     return response.data;
   },
 
   // Get creators
   getCreators: async () => {
-    const response = await api.get('/api/products/creators');
+    const response = await api.get("/api/products/creators");
     return response.data;
   },
 
@@ -186,18 +188,23 @@ export const productAPI = {
       imageUrl?: string;
     }>;
   }) => {
-    const response = await api.post('/api/products', productData);
+    const response = await api.post("/api/products", productData);
     return response.data;
   },
 
   // Creator: Get my products
   getCreatorProducts: async (params?: { limit?: number; offset?: number }) => {
-    const response = await api.get('/api/products/creator/my-products', { params });
+    const response = await api.get("/api/products/creator/my-products", {
+      params,
+    });
     return response.data;
   },
 
   // Creator: Update product
-  updateProduct: async (productId: string | number, productData: Partial<Product>) => {
+  updateProduct: async (
+    productId: string | number,
+    productData: Partial<Product>
+  ) => {
     const response = await api.put(`/api/products/${productId}`, productData);
     return response.data;
   },
@@ -213,25 +220,27 @@ export const productAPI = {
 export const cartAPI = {
   // Get cart
   getCart: async (): Promise<{ items: CartItem[]; summary: CartSummary }> => {
-    const response = await api.get('/api/cart');
+    const response = await api.get("/api/cart");
     return response.data;
   },
 
   // Get cart count
   getCartCount: async (): Promise<{ count: number }> => {
-    const response = await api.get('/api/cart/count');
+    const response = await api.get("/api/cart/count");
     return response.data;
   },
 
   // Add to cart
   addToCart: async (variantId: number, quantity: number = 1) => {
-    const response = await api.post('/api/cart/add', { variantId, quantity });
+    const response = await api.post("/api/cart/add", { variantId, quantity });
     return response.data;
   },
 
   // Update cart item
   updateCartItem: async (cartItemId: number, quantity: number) => {
-    const response = await api.put(`/api/cart/items/${cartItemId}`, { quantity });
+    const response = await api.put(`/api/cart/items/${cartItemId}`, {
+      quantity,
+    });
     return response.data;
   },
 
@@ -243,7 +252,7 @@ export const cartAPI = {
 
   // Clear cart
   clearCart: async () => {
-    const response = await api.delete('/api/cart/clear');
+    const response = await api.delete("/api/cart/clear");
     return response.data;
   },
 
@@ -258,19 +267,19 @@ export const cartAPI = {
 export const wishlistAPI = {
   // Get wishlist
   getWishlist: async () => {
-    const response = await api.get('/api/wishlist');
+    const response = await api.get("/api/wishlist");
     return response.data;
   },
 
   // Get wishlist count
   getWishlistCount: async () => {
-    const response = await api.get('/api/wishlist/count');
+    const response = await api.get("/api/wishlist/count");
     return response.data;
   },
 
   // Add to wishlist
   addToWishlist: async (productId: number) => {
-    const response = await api.post('/api/wishlist/add', { productId });
+    const response = await api.post("/api/wishlist/add", { productId });
     return response.data;
   },
 
@@ -282,7 +291,7 @@ export const wishlistAPI = {
 
   // Clear wishlist
   clearWishlist: async () => {
-    const response = await api.delete('/api/wishlist/clear');
+    const response = await api.delete("/api/wishlist/clear");
     return response.data;
   },
 
@@ -297,18 +306,23 @@ export const wishlistAPI = {
 export const addressAPI = {
   // Get user addresses
   getAddresses: async () => {
-    const response = await api.get('/api/addresses');
+    const response = await api.get("/api/addresses");
     return response.data;
   },
 
   // Create new address
-  createAddress: async (addressData: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-    const response = await api.post('/api/addresses', addressData);
+  createAddress: async (
+    addressData: Omit<Address, "id" | "user_id" | "created_at" | "updated_at">
+  ) => {
+    const response = await api.post("/api/addresses", addressData);
     return response.data;
   },
 
   // Update address
-  updateAddress: async (addressId: number, addressData: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+  updateAddress: async (
+    addressId: number,
+    addressData: Omit<Address, "id" | "user_id" | "created_at" | "updated_at">
+  ) => {
     const response = await api.put(`/api/addresses/${addressId}`, addressData);
     return response.data;
   },
@@ -320,13 +334,18 @@ export const addressAPI = {
   },
 
   // Set default address
-  setDefaultAddress: async (addressId: number, addressType: 'shipping' | 'billing' | 'both') => {
-    const response = await api.put(`/api/addresses/${addressId}/default`, { addressType });
+  setDefaultAddress: async (
+    addressId: number,
+    addressType: "shipping" | "billing" | "both"
+  ) => {
+    const response = await api.put(`/api/addresses/${addressId}/default`, {
+      addressType,
+    });
     return response.data;
   },
 
   // Get default address by type
-  getDefaultAddress: async (type: 'shipping' | 'billing') => {
+  getDefaultAddress: async (type: "shipping" | "billing") => {
     const response = await api.get(`/api/addresses/default/${type}`);
     return response.data;
   },
@@ -336,7 +355,9 @@ export const addressAPI = {
 export const checkoutAPI = {
   // Get shipping estimates
   getShippingEstimates: async (address: Address) => {
-    const response = await api.post('/api/checkout/shipping-estimates', { address });
+    const response = await api.post("/api/checkout/shipping-estimates", {
+      address,
+    });
     return response.data;
   },
 
@@ -348,13 +369,13 @@ export const checkoutAPI = {
     shippingOption?: ShippingOption;
     notes?: string;
   }) => {
-    const response = await api.post('/api/checkout/orders', orderData);
+    const response = await api.post("/api/checkout/orders", orderData);
     return response.data;
   },
 
   // Get user orders
   getUserOrders: async (params?: { limit?: number; offset?: number }) => {
-    const response = await api.get('/api/checkout/orders', { params });
+    const response = await api.get("/api/checkout/orders", { params });
     return response.data;
   },
 
@@ -374,29 +395,26 @@ export const checkoutAPI = {
 // User Profile API
 export const userAPI = {
   // Update user profile
-  updateProfile: async (userData: {
-    name?: string;
-    phone?: string;
-  }) => {
-    const response = await api.put('/auth/me', userData);
+  updateProfile: async (userData: { name?: string; phone?: string }) => {
+    const response = await api.put("/auth/me", userData);
     return response.data;
   },
 };
 
 // Helper functions
 export const formatPrice = (price: number | string): string => {
-  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  const numPrice = typeof price === "string" ? parseFloat(price) : price;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
   }).format(numPrice);
 };
 
 export const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };
 
@@ -404,13 +422,13 @@ export const formatDate = (dateString: string): string => {
 export const printfulAPI = {
   // Initialize OAuth flow
   initializeAuth: async () => {
-    const response = await api.get('/api/printful/auth/init');
+    const response = await api.get("/api/printful/auth/init");
     return response.data;
   },
 
   // Get connection status
   getConnectionStatus: async () => {
-    const response = await api.get('/api/printful/connection/status');
+    const response = await api.get("/api/printful/connection/status");
     return response.data;
   },
 
@@ -423,13 +441,13 @@ export const printfulAPI = {
     sortBy?: string;
     sortOrder?: string;
   }) => {
-    const response = await api.get('/api/printful/catalog', { params });
+    const response = await api.get("/api/printful/catalog", { params });
     return response.data;
   },
 
   // Get Printful categories
   getCategories: async () => {
-    const response = await api.get('/api/printful/categories');
+    const response = await api.get("/api/printful/categories");
     return response.data;
   },
 
@@ -440,45 +458,52 @@ export const printfulAPI = {
   },
 
   // Upload file to Printful
-  uploadFile: async (fileData: { filename: string; url: string; type?: string }) => {
+  uploadFile: async (fileData: {
+    filename: string;
+    url: string;
+    type?: string;
+  }) => {
     try {
-      console.log('API uploadFile called with:', fileData);
-      
-      const response = await api.post('/api/printful/files', fileData, {
+      console.log("API uploadFile called with:", fileData);
+
+      const response = await api.post("/api/printful/files", fileData, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
-      
-      console.log('API response:', response.data);
+
+      console.log("API response:", response.data);
       return response.data;
     } catch (error) {
-      console.error('API uploadFile error:', error);
-      
+      console.error("API uploadFile error:", error);
+
       // Fallback: try with fetch instead of axios
       try {
-        console.log('Trying fallback with fetch...');
-        const token = localStorage.getItem('accessToken');
-        
-        const fetchResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/printful/files`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify(fileData),
-        });
-        
+        console.log("Trying fallback with fetch...");
+        const token = localStorage.getItem("accessToken");
+
+        const fetchResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/printful/files`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(fileData),
+          }
+        );
+
         const result = await fetchResponse.json();
-        console.log('Fetch response:', result);
-        
+        console.log("Fetch response:", result);
+
         if (!fetchResponse.ok) {
-          throw new Error(result.error || 'Upload failed');
+          throw new Error(result.error || "Upload failed");
         }
-        
+
         return result;
       } catch (fetchError) {
-        console.error('Fetch fallback also failed:', fetchError);
+        console.error("Fetch fallback also failed:", fetchError);
         throw error; // throw original error
       }
     }
@@ -486,7 +511,7 @@ export const printfulAPI = {
 
   // Get uploaded files
   getFiles: async () => {
-    const response = await api.get('/api/printful/files');
+    const response = await api.get("/api/printful/files");
     return response.data;
   },
 
@@ -507,13 +532,13 @@ export const printfulAPI = {
       }>;
     }>;
   }) => {
-    const response = await api.post('/api/printful/products', productData);
+    const response = await api.post("/api/printful/products", productData);
     return response.data;
   },
 
   // Get sync products
   getSyncProducts: async () => {
-    const response = await api.get('/api/printful/products/sync');
+    const response = await api.get("/api/printful/products/sync");
     return response.data;
   },
 
@@ -525,14 +550,14 @@ export const printfulAPI = {
 
   // Sync products to database
   syncProductsToDatabase: async () => {
-    const response = await api.post('/api/printful/products/sync-to-db');
+    const response = await api.post("/api/printful/products/sync-to-db");
     return response.data;
   },
 
   // Access design canvas
   getCanvas: async (productId?: number) => {
-    const response = await api.get('/api/printful/canvas', { 
-      params: productId ? { productId } : {} 
+    const response = await api.get("/api/printful/canvas", {
+      params: productId ? { productId } : {},
     });
     return response.data;
   },
@@ -571,23 +596,35 @@ export const printfulAPI = {
   },
 
   // Get print files for a product
-  getPrintFiles: async (productId: number, technique?: string, orientation?: string) => {
+  getPrintFiles: async (
+    productId: number,
+    technique?: string,
+    orientation?: string
+  ) => {
     const params = new URLSearchParams();
-    if (technique) params.append('technique', technique);
-    if (orientation) params.append('orientation', orientation);
-    
-    const url = `/api/printful/mockup-generator/printfiles/${productId}${params.toString() ? `?${params.toString()}` : ''}`;
+    if (technique) params.append("technique", technique);
+    if (orientation) params.append("orientation", orientation);
+
+    const url = `/api/printful/mockup-generator/printfiles/${productId}${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
     const response = await api.get(url);
     return response.data;
   },
 
   // Get layout templates for a product
-  getLayoutTemplates: async (productId: number, technique?: string, orientation?: string) => {
+  getLayoutTemplates: async (
+    productId: number,
+    technique?: string,
+    orientation?: string
+  ) => {
     const params = new URLSearchParams();
-    if (technique) params.append('technique', technique);
-    if (orientation) params.append('orientation', orientation);
-    
-    const url = `/api/printful/mockup-generator/templates/${productId}${params.toString() ? `?${params.toString()}` : ''}`;
+    if (technique) params.append("technique", technique);
+    if (orientation) params.append("orientation", orientation);
+
+    const url = `/api/printful/mockup-generator/templates/${productId}${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
     const response = await api.get(url);
     return response.data;
   },
@@ -595,22 +632,26 @@ export const printfulAPI = {
   // Upload file directly (multipart/form-data)
   uploadFileDirectly: async (file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
-    
-    const response = await api.post('/api/printful/files', formData, {
+    formData.append("file", file);
+
+    const response = await api.post("/api/printful/files", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
   },
 
   // Store mockups permanently to DigitalOcean
-  storeMockupsPermanently: async (mockupUrls: any[], productData: any, designFiles?: any[]) => {
-    const response = await api.post('/api/printful/mockups/store-permanently', {
+  storeMockupsPermanently: async (
+    mockupUrls: any[],
+    productData: any,
+    designFiles?: any[]
+  ) => {
+    const response = await api.post("/api/printful/mockups/store-permanently", {
       mockupUrls,
       productData,
-      designFiles
+      designFiles,
     });
     return response.data;
   },
@@ -634,23 +675,25 @@ export const printfulAPI = {
 export const shopifyAPI = {
   // Authentication & Connection
   initializeAuth: async (shopDomain: string) => {
-    const response = await api.post('/api/shopify/auth/initialize', { shop: shopDomain });
+    const response = await api.post("/api/shopify/auth/initialize", {
+      shop: shopDomain,
+    });
     return response.data;
   },
 
   getConnectionStatus: async () => {
-    const response = await api.get('/api/shopify/auth/status');
+    const response = await api.get("/api/shopify/auth/status");
     return response.data;
   },
 
   disconnect: async () => {
-    const response = await api.post('/api/shopify/auth/disconnect');
+    const response = await api.post("/api/shopify/auth/disconnect");
     return response.data;
   },
 
   // Shop Information
   getShopInfo: async () => {
-    const response = await api.get('/api/shopify/shop');
+    const response = await api.get("/api/shopify/shop");
     return response.data;
   },
 
@@ -660,7 +703,7 @@ export const shopifyAPI = {
     page_info?: string;
     fields?: string;
   }) => {
-    const response = await api.get('/api/shopify/products', { params });
+    const response = await api.get("/api/shopify/products", { params });
     return response.data;
   },
 
@@ -671,18 +714,18 @@ export const shopifyAPI = {
 
   // Product Sync
   syncProducts: async () => {
-    const response = await api.post('/api/shopify/products/sync');
+    const response = await api.post("/api/shopify/products/sync");
     return response.data;
   },
 
   getUserProducts: async () => {
-    const response = await api.get('/api/shopify/user/products');
+    const response = await api.get("/api/shopify/user/products");
     return response.data;
   },
 
   // Webhooks
   setupWebhooks: async () => {
-    const response = await api.post('/api/shopify/webhooks/setup');
+    const response = await api.post("/api/shopify/webhooks/setup");
     return response.data;
   },
 
@@ -692,28 +735,34 @@ export const shopifyAPI = {
     limit?: number;
     search?: string;
   }) => {
-    const response = await api.get('/api/shopify-storefront/products/available', { params });
+    const response = await api.get(
+      "/api/shopify-storefront/products/available",
+      { params }
+    );
     return response.data;
   },
 
   publishProductsToMarketplace: async (productIds: string[] | number[]) => {
-    const response = await api.post('/api/shopify-storefront/products/publish', { productIds });
+    const response = await api.post(
+      "/api/shopify-storefront/products/publish",
+      { productIds }
+    );
     return response.data;
   },
 
   // Admin Functions (Private App - No OAuth)
   testShopifyConnection: async () => {
-    const response = await api.post('/api/shopify-storefront/test');
+    const response = await api.post("/api/shopify-storefront/test");
     return response.data;
   },
 
   syncAllProducts: async () => {
-    const response = await api.post('/api/shopify-storefront/sync');
+    const response = await api.post("/api/shopify-storefront/sync");
     return response.data;
   },
 
   getSyncStatus: async () => {
-    const response = await api.get('/api/shopify-storefront/status');
+    const response = await api.get("/api/shopify-storefront/status");
     return response.data;
   },
 
@@ -800,7 +849,7 @@ export interface ShopifyAuthResponse {
 
 // Extended Product interface to include source
 export interface ExtendedProduct extends Product {
-  product_source?: 'printful' | 'shopify' | 'custom';
+  product_source?: "printful" | "shopify" | "custom";
 }
 
 // Shopify Checkout API
@@ -810,22 +859,30 @@ export const shopifyCheckoutAPI = {
     shippingAddress?: Address;
     discountCode?: string;
   }) => {
-    const response = await api.post('/api/shopify-checkout/create', data);
+    const response = await api.post("/api/shopify-checkout/create", data);
     return response.data;
   },
 
   // Get checkout session by ID
   getCheckoutSession: async (sessionId: string | number) => {
-    const response = await api.get(`/api/shopify-checkout/session/${sessionId}`);
+    const response = await api.get(
+      `/api/shopify-checkout/session/${sessionId}`
+    );
     return response.data;
   },
 
   // Update checkout session
-  updateCheckoutSession: async (sessionId: string | number, data: {
-    action: 'update_address' | 'apply_discount' | 'add_items';
-    data: unknown;
-  }) => {
-    const response = await api.put(`/api/shopify-checkout/session/${sessionId}`, data);
+  updateCheckoutSession: async (
+    sessionId: string | number,
+    data: {
+      action: "update_address" | "apply_discount" | "add_items";
+      data: unknown;
+    }
+  ) => {
+    const response = await api.put(
+      `/api/shopify-checkout/session/${sessionId}`,
+      data
+    );
     return response.data;
   },
 
@@ -834,15 +891,15 @@ export const shopifyCheckoutAPI = {
     sessionId: string | number;
     shopifyOrderId?: string;
   }) => {
-    const response = await api.post('/api/shopify-checkout/complete', data);
+    const response = await api.post("/api/shopify-checkout/complete", data);
     return response.data;
   },
 
   // Get checkout history
   getCheckoutHistory: async (params?: { limit?: number; offset?: number }) => {
-    const response = await api.get('/api/shopify-checkout/history', { params });
+    const response = await api.get("/api/shopify-checkout/history", { params });
     return response.data;
-  }
+  },
 };
 
 // Shopify Checkout Types
@@ -921,10 +978,12 @@ export interface CheckoutSessionResponse {
 export const publicAPI = {
   // Get product variant details for guest cart
   getProductVariant: async (variantId: number) => {
-    const response = await fetch(`${API_BASE_URL}/api/products/variants/${variantId}`);
+    const response = await fetch(
+      `${API_BASE_URL}/api/products/variants/${variantId}`
+    );
     if (!response.ok) {
-      throw new Error('Failed to fetch product variant');
+      throw new Error("Failed to fetch product variant");
     }
     return response.json();
-  }
+  },
 };

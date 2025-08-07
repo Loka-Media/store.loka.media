@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// components/canvas/steps/UploadStep.jsx
 "use client";
 
-import { useState } from "react";
-import { Upload, Palette, AlertCircle, Loader2 } from "lucide-react";
+import { Upload, Palette, Loader2 } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
@@ -24,25 +22,12 @@ interface UploadStepProps {
   setUploading: (isUploading: boolean) => void;
   setUploadedFiles: (updater: (prev: UploadedFile[]) => UploadedFile[]) => void;
   onNextStep: () => void;
-  printfulAPI: {
-    uploadFile: (data: {
-      filename: string;
-      url: string;
-      type: string;
-    }) => Promise<any>;
-  };
+  printfulAPI: any;
 }
 
 interface FileUploadZoneProps {
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   uploading: boolean;
-}
-
-interface URLUploadSectionProps {
-  imageUrl: string;
-  setImageUrl: (url: string) => void;
-  onAddFromUrl: () => void;
-  addingFromUrl: boolean;
 }
 
 interface UploadedFilesListProps {
@@ -84,51 +69,6 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
           className="hidden"
         />
       </label>
-    </div>
-  );
-};
-
-const URLUploadSection: React.FC<URLUploadSectionProps> = ({
-  imageUrl,
-  setImageUrl,
-  onAddFromUrl,
-  addingFromUrl,
-}) => {
-  return (
-    <div className="mb-6">
-      <div className="border-t border-gray-200 pt-6">
-        <h4 className="text-md font-medium text-gray-900 mb-3">
-          Or add image from URL
-        </h4>
-        <div className="flex space-x-3">
-          <input
-            type="url"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="https://example.com/image.jpg"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
-            disabled={addingFromUrl}
-          />
-          <button
-            onClick={onAddFromUrl}
-            disabled={addingFromUrl || !imageUrl.trim()}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-          >
-            {addingFromUrl ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Adding...
-              </>
-            ) : (
-              "Add Image"
-            )}
-          </button>
-        </div>
-        <p className="text-xs text-gray-500 mt-2">
-          Enter a direct link to an image (JPG, PNG, etc.) that&apos;s publicly
-          accessible
-        </p>
-      </div>
     </div>
   );
 };
@@ -183,61 +123,6 @@ const UploadedFilesList: React.FC<UploadedFilesListProps> = ({
   );
 };
 
-const DemoNotices: React.FC = () => {
-  return (
-    <div className="mt-6 space-y-4">
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <AlertCircle className="h-5 w-5 text-yellow-400" />
-          </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-yellow-800">
-              Demo Mode Notice
-            </h3>
-            <div className="mt-2 text-sm text-yellow-700">
-              <p>This is a demo implementation. In production, you should:</p>
-              <ul className="mt-1 ml-4 list-disc">
-                <li>
-                  Upload files to your own cloud storage (AWS S3, Cloudinary,
-                  etc.)
-                </li>
-                <li>Provide actual image URLs to Printful</li>
-                <li>Implement proper file validation and processing</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <AlertCircle className="h-5 w-5 text-blue-400" />
-          </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800">
-              Example Image URLs for Testing
-            </h3>
-            <div className="mt-2 text-sm text-blue-700">
-              <p>You can test with these example URLs:</p>
-              <ul className="mt-1 ml-4 list-disc font-mono text-xs">
-                <li>https://picsum.photos/800/800?random=1</li>
-                <li>
-                  https://via.placeholder.com/800x800/FF6B6B/FFFFFF?text=Design
-                </li>
-                <li>
-                  https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=800&fit=crop
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const UploadStep: React.FC<UploadStepProps> = ({
   uploadedFiles,
   uploading,
@@ -246,9 +131,6 @@ const UploadStep: React.FC<UploadStepProps> = ({
   onNextStep,
   printfulAPI,
 }) => {
-  const [imageUrl, setImageUrl] = useState<string>("");
-  const [addingFromUrl, setAddingFromUrl] = useState<boolean>(false);
-
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -269,7 +151,8 @@ const UploadStep: React.FC<UploadStepProps> = ({
             id: uploadResponse.result.id || Date.now() + Math.random(),
             filename: uploadResponse.result.filename,
             file_url: uploadResponse.result.url,
-            thumbnail_url: uploadResponse.result.thumbnail_url || uploadResponse.result.url,
+            thumbnail_url:
+              uploadResponse.result.thumbnail_url || uploadResponse.result.url,
             printful_file_id: uploadResponse.result.id,
             upload_status: "completed",
             created_at: new Date().toISOString(),
@@ -277,7 +160,7 @@ const UploadStep: React.FC<UploadStepProps> = ({
 
           // Add to local state immediately
           setUploadedFiles((prev) => [...prev, newFile]);
-          
+
           toast.success(`✅ ${file.name} uploaded successfully!`);
         } else {
           throw new Error("No result from upload");
@@ -288,7 +171,9 @@ const UploadStep: React.FC<UploadStepProps> = ({
       if (files.length > 0) {
         setTimeout(() => {
           onNextStep();
-          toast.success("Ready to design! Your files are available in the editor.");
+          toast.success(
+            "Ready to design! Your files are available in the editor."
+          );
         }, 1500);
       }
     } catch (error) {
@@ -301,77 +186,6 @@ const UploadStep: React.FC<UploadStepProps> = ({
     }
   };
 
-  const handleAddFromUrl = async () => {
-    if (!imageUrl.trim()) {
-      toast.error("Please enter a valid image URL");
-      return;
-    }
-
-    setAddingFromUrl(true);
-
-    try {
-      // Validate URL format
-      const url = new URL(imageUrl);
-      if (!["http:", "https:"].includes(url.protocol)) {
-        throw new Error("Please use HTTP or HTTPS URLs only");
-      }
-
-      console.log("Adding image from URL:", imageUrl);
-
-      // Generate a filename from the URL
-      const filename =
-        url.pathname.split("/").pop() || `image_${Date.now()}.jpg`;
-
-      const uploadData = {
-        filename: filename,
-        url: imageUrl,
-        type: "default",
-      };
-
-      console.log("Sending upload data:", uploadData);
-
-      // Upload to Printful through backend
-      const printfulResponse = await printfulAPI.uploadFile(uploadData);
-
-      console.log("Printful response:", printfulResponse);
-
-      if (printfulResponse.result || printfulResponse.note) {
-        const newFile: UploadedFile = {
-          id: printfulResponse.result?.id || Date.now() + Math.random(),
-          filename: filename,
-          file_url: printfulResponse.result?.url || imageUrl,
-          thumbnail_url: printfulResponse.result?.thumbnail_url || imageUrl,
-          printful_file_id: printfulResponse.result?.id,
-          upload_status: "completed",
-          created_at: new Date().toISOString(),
-        };
-
-        setUploadedFiles((prev) => [...prev, newFile]);
-        setImageUrl(""); // Clear the input
-
-        if (printfulResponse.note) {
-          toast.success(`Image added from URL (Demo mode)`);
-        } else {
-          toast.success(`Added image from URL to Printful`);
-        }
-
-        // Move to design step if this is the first file
-        if (uploadedFiles.length === 0) {
-          setTimeout(() => onNextStep(), 1000);
-        }
-      } else {
-        throw new Error("No result from upload");
-      }
-    } catch (error) {
-      console.error("Failed to add image from URL:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to add image from URL";
-      toast.error(errorMessage);
-    } finally {
-      setAddingFromUrl(false);
-    }
-  };
-
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -380,19 +194,10 @@ const UploadStep: React.FC<UploadStepProps> = ({
 
       <FileUploadZone onFileUpload={handleFileUpload} uploading={uploading} />
 
-      <URLUploadSection
-        imageUrl={imageUrl}
-        setImageUrl={setImageUrl}
-        onAddFromUrl={handleAddFromUrl}
-        addingFromUrl={addingFromUrl}
-      />
-
       <UploadedFilesList
         uploadedFiles={uploadedFiles}
         onContinue={onNextStep}
       />
-
-      <DemoNotices />
     </div>
   );
 };

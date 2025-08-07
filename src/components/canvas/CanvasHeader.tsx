@@ -4,7 +4,13 @@ import { PrintfulProduct } from "@/lib/types";
 import { ArrowLeft, CheckCircle, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
 
-type Step = "upload" | "design" | "variants" | "finalize";
+type Step =
+  | "upload"
+  | "design"
+  | "variants"
+  | "finalize"
+  | "unified-editor"
+  | "product-details";
 
 interface StepIndicatorProps {
   step: Step;
@@ -59,7 +65,6 @@ const StepIndicator = ({ step }: StepIndicatorProps) => {
     </div>
   );
 };
-
 
 interface CanvasHeaderProps {
   selectedProduct?: PrintfulProduct | null;
