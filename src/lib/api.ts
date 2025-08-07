@@ -974,6 +974,39 @@ export interface CheckoutSessionResponse {
   sessionId: string | number;
 }
 
+// Inventory API
+export const inventoryAPI = {
+  // Sync all inventory
+  syncAllInventory: async () => {
+    const response = await api.post("/api/inventory/sync/all");
+    return response.data;
+  },
+
+  // Sync Printful inventory
+  syncPrintfulInventory: async () => {
+    const response = await api.post("/api/inventory/sync/printful");
+    return response.data;
+  },
+
+  // Sync Shopify inventory  
+  syncShopifyInventory: async () => {
+    const response = await api.post("/api/inventory/sync/shopify");
+    return response.data;
+  },
+
+  // Get inventory for specific product
+  getProductInventory: async (productId: number) => {
+    const response = await api.get(`/api/inventory/product/${productId}`);
+    return response.data;
+  },
+
+  // Get sync statistics
+  getSyncStats: async () => {
+    const response = await api.get("/api/inventory/sync/stats");
+    return response.data;
+  },
+};
+
 // Public API (no authentication required - for guest users)
 export const publicAPI = {
   // Get product variant details for guest cart

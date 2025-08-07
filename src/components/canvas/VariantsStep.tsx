@@ -14,6 +14,9 @@ interface ProductVariant {
   color_code: string;
   price: string; // Storing as string to handle currency from an API, will need to parse to float for calculations
   in_stock: boolean;
+  inventory_available?: boolean;
+  estimated_quantity?: number;
+  can_create_product?: boolean;
   image: string;
 }
 
@@ -52,14 +55,19 @@ const VariantCard: React.FC<VariantCardProps> = ({
   isSelected,
   onToggle,
 }) => {
+  const isAvailable = variant.inventory_available !== false && variant.in_stock !== false;
+  const canSelect = isAvailable;
+
   return (
     <div
-      className={`border rounded-lg p-4 cursor-pointer transition-all ${
-        isSelected
-          ? "border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200"
-          : "border-gray-200 hover:border-gray-300"
+      className={`border rounded-lg p-4 transition-all relative ${
+        !canSelect 
+          ? "border-red-200 bg-red-50 cursor-not-allowed opacity-75"
+          : isSelected
+          ? "border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200 cursor-pointer"
+          : "border-gray-200 hover:border-gray-300 cursor-pointer"
       }`}
-      onClick={() => onToggle(variant.id)}
+      onClick={() => canSelect && onToggle(variant.id)}
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
@@ -89,11 +97,32 @@ const VariantCard: React.FC<VariantCardProps> = ({
         <span className="text-sm text-gray-600">{variant.color}</span>
       </div>
 
-      <div className="text-xs text-gray-600 space-y-1">
-        <div>
-          Production: {variant.in_stock ? "✅ In Stock" : "❌ Out of Stock"}
+      <div className="text-xs space-y-1">
+        <div className={`flex items-center space-x-1 ${
+          isAvailable ? 'text-green-600' : 'text-red-600'
+        }`}>
+          <span>{isAvailable ? "✅" : "❌"}</span>
+          <span className="font-medium">
+            {isAvailable ? "Available" : "Out of Stock"}
+          </span>
+          {variant.estimated_quantity > 0 && (
+            <span className="text-gray-500">
+              ({variant.estimated_quantity === 999 ? "In Stock" : variant.estimated_quantity})
+            </span>
+          )}
         </div>
+        {!isAvailable && (
+          <div className="text-red-500 text-xs font-medium">
+            Cannot create product with this variant
+          </div>
+        )}
       </div>
+      
+      {!canSelect && (
+        <div className="absolute inset-0 bg-red-100 bg-opacity-75 rounded-lg flex items-center justify-center">
+          <span className="text-red-700 font-medium text-sm">Out of Stock</span>
+        </div>
+      )}
 
       <div className="mt-2">
         <div className="w-full h-20 bg-gray-100 rounded overflow-hidden relative">
@@ -199,6 +228,20 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
 
   const hasVariants =
     selectedProduct?.variants && selectedProduct.variants.length > 0;
+  
+  // Check if selected variants have available inventory
+  const getSelectedVariantsWithInventory = () => {
+    if (!selectedProduct?.variants) return [];
+    return selectedProduct.variants.filter((variant: any) => 
+      selectedVariants.includes(variant.id) && 
+      variant.inventory_available !== false && 
+      variant.in_stock !== false
+    );
+  };
+  
+  const selectedAvailableVariants = getSelectedVariantsWithInventory();
+  const hasAvailableVariants = selectedAvailableVariants.length > 0;
+  const allSelectedVariantsOutOfStock = selectedVariants.length > 0 && selectedAvailableVariants.length === 0;
 
   // Get unique sizes and colors
   const uniqueSizes = [
@@ -385,7 +428,7 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
       {selectedVariants.length > 0 && (
         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-medium text-gray-900 mb-2">Selected Variants</h4>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-sm mb-2">
             <span className="text-gray-600">
               {selectedVariants.length} variants selected (
               {selectedSizes.length} sizes × {selectedColors.length} colors)
@@ -396,6 +439,32 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
                 <span>Loading print files...</span>
               </div>
             )}
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className={`font-medium ${hasAvailableVariants ? 'text-green-600' : 'text-red-600'}`}>
+              {selectedAvailableVariants.length} available variants
+            </span>
+            {allSelectedVariantsOutOfStock && (
+              <span className="text-red-600 text-xs font-medium">
+                ⚠️ All selected variants are out of stock
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Inventory Warning */}
+      {allSelectedVariantsOutOfStock && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-start space-x-2">
+            <div className="text-red-500 mt-0.5">⚠️</div>
+            <div>
+              <h4 className="font-medium text-red-800 mb-1">Cannot Create Product</h4>
+              <p className="text-sm text-red-700">
+                All selected variants are currently out of stock. Please select different variants that are available 
+                or choose a different product to continue.
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -409,14 +478,16 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
         </button>
         <button
           onClick={onNextStep}
-          disabled={selectedVariants.length === 0 || loadingPrintFiles}
+          disabled={selectedVariants.length === 0 || loadingPrintFiles || allSelectedVariantsOutOfStock}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loadingPrintFiles
             ? "Loading Print Files..."
             : selectedVariants.length === 0
             ? "Select Variants First"
-            : `Continue with ${selectedVariants.length} Variants`}
+            : allSelectedVariantsOutOfStock
+            ? "All Variants Out of Stock"
+            : `Continue with ${selectedAvailableVariants.length} Available Variants`}
         </button>
       </div>
     </div>

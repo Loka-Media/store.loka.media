@@ -128,9 +128,20 @@ function CanvasContent() {
             }, 1000);
             return;
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error("Failed to load product from URL:", error);
-          toast.error("Failed to load product from URL");
+          
+          // Handle 404 errors for deprecated products
+          if (error?.response?.status === 404) {
+            const errorData = error?.response?.data;
+            const message = errorData?.message || "This product is no longer available in Printful catalog. Please select a different product.";
+            
+            toast.error(message, { duration: 5000 });
+            router.push("/dashboard/creator/catalog");
+            return;
+          } else {
+            toast.error("Failed to load product details. Please try again.");
+          }
         }
       }
 
@@ -661,7 +672,9 @@ function CanvasContent() {
                         description: productForm.description,
                         markupPercentage: productForm.markupPercentage,
                         category: productForm.category,
+                        regionalSettings: productForm.regionalSettings,
                       }}
+                      selectedProduct={selectedProduct}
                       onSave={(data) => {
                         setProductForm({
                           ...productForm,
@@ -669,6 +682,7 @@ function CanvasContent() {
                           description: data.description,
                           markupPercentage: data.markupPercentage.toString(),
                           category: data.category,
+                          regionalSettings: data.regionalSettings,
                         });
                       }}
                       onNext={handleGoLiveToMarketplace}

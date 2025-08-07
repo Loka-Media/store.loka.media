@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Save, Package, DollarSign, FileText, Tag } from 'lucide-react';
 import toast from 'react-hot-toast';
+import RegionalSelector, { RegionalSettings } from '../ui/RegionalSelector';
 
 interface ProductDetailsFormProps {
   initialData: {
@@ -10,12 +11,26 @@ interface ProductDetailsFormProps {
     description: string;
     markupPercentage: string;
     category: string;
+    regionalSettings?: RegionalSettings;
+  };
+  selectedProduct?: {
+    dynamic_regional_data?: {
+      regional_availability?: Record<string, {
+        available: boolean;
+        variant_count: number;
+        total_variants: number;
+        coverage_percentage: number;
+      }>;
+      recommended_regions?: string[];
+      recommended_primary_region?: string;
+    };
   };
   onSave: (data: {
     name: string;
     description: string;
     markupPercentage: number;
     category: string;
+    regionalSettings: RegionalSettings;
   }) => void;
   onNext: () => void;
   isLoading?: boolean;
@@ -23,6 +38,7 @@ interface ProductDetailsFormProps {
 
 const ProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
   initialData,
+  selectedProduct,
   onSave,
   onNext,
   isLoading = false
@@ -33,6 +49,14 @@ const ProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
     markupPercentage: initialData.markupPercentage || '30',
     category: initialData.category || 'apparel'
   });
+
+  const [regionalSettings, setRegionalSettings] = useState<RegionalSettings>(
+    initialData.regionalSettings || {
+      targetRegions: ['US'],
+      primaryRegion: 'US',
+      restrictToRegions: true
+    }
+  );
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
@@ -56,6 +80,11 @@ const ProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
       newErrors.markupPercentage = 'Markup must be between 0% and 500%';
     }
 
+    // Validate regional settings
+    if (regionalSettings.targetRegions.length === 0) {
+      newErrors.regionalSettings = 'Please select at least one region for product availability';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -72,7 +101,8 @@ const ProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
       name: formData.name.trim(),
       description: formData.description.trim(),
       markupPercentage: parseFloat(formData.markupPercentage),
-      category: formData.category
+      category: formData.category,
+      regionalSettings
     };
 
     onSave(productData);
@@ -188,6 +218,19 @@ const ProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
           </select>
         </div>
 
+        {/* Regional Settings */}
+        <div>
+          <RegionalSelector
+            value={regionalSettings}
+            onChange={setRegionalSettings}
+            showAdvanced={true}
+            productData={selectedProduct?.dynamic_regional_data}
+          />
+          {errors.regionalSettings && (
+            <p className="text-red-500 text-xs mt-2">{errors.regionalSettings}</p>
+          )}
+        </div>
+
         {/* Submit Button */}
         <div className="pt-4">
           <button
@@ -218,6 +261,8 @@ const ProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
           <li>• Include key features and benefits in description</li>
           <li>• Consider your target audience when setting markup</li>
           <li>• Choose the most relevant category for better discoverability</li>
+          <li>• Select regions based on your target market and shipping preferences</li>
+          <li>• More regions = wider reach but consider shipping costs and times</li>
         </ul>
       </div>
     </div>

@@ -9,11 +9,24 @@ export interface RegionalSettings {
   restrictToRegions: boolean;
 }
 
+interface ProductRegionalData {
+  regional_availability?: Record<string, {
+    available: boolean;
+    variant_count: number;
+    total_variants: number;
+    coverage_percentage: number;
+  }>;
+  recommended_regions?: string[];
+  recommended_primary_region?: string;
+  analysis_timestamp?: string;
+}
+
 interface RegionalSelectorProps {
   value: RegionalSettings;
   onChange: (settings: RegionalSettings) => void;
   className?: string;
   showAdvanced?: boolean;
+  productData?: ProductRegionalData;
 }
 
 const AVAILABLE_REGIONS = [
@@ -65,9 +78,27 @@ const RegionalSelector: React.FC<RegionalSelectorProps> = ({
   value,
   onChange,
   className = '',
-  showAdvanced = true
+  showAdvanced = true,
+  productData
 }) => {
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
+  
+  // Auto-populate regions based on product data on first load
+  const [hasInitialized, setHasInitialized] = useState(false);
+  
+  React.useEffect(() => {
+    if (productData && !hasInitialized && productData.recommended_regions && productData.recommended_regions.length > 0) {
+      // Only auto-populate if user hasn't made any selections yet
+      if (value.targetRegions.length <= 1 && value.targetRegions[0] === 'US') {
+        onChange({
+          targetRegions: productData.recommended_regions,
+          primaryRegion: productData.recommended_primary_region || productData.recommended_regions[0],
+          restrictToRegions: value.restrictToRegions
+        });
+      }
+      setHasInitialized(true);
+    }
+  }, [productData, hasInitialized, value, onChange]);
 
   const handleRegionToggle = (regionCode: string) => {
     const newRegions = value.targetRegions.includes(regionCode)
@@ -157,12 +188,20 @@ const RegionalSelector: React.FC<RegionalSelectorProps> = ({
             const isSelected = value.targetRegions.includes(region.code);
             const isPrimary = value.primaryRegion === region.code;
             
+            // Get product-specific availability data
+            const regionAvailability = productData?.regional_availability?.[region.code];
+            const isRecommended = productData?.recommended_regions?.includes(region.code);
+            
             return (
               <div
                 key={region.code}
                 className={`relative border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:border-blue-300 ${
                   isSelected 
                     ? 'border-blue-500 bg-blue-50' 
+                    : isRecommended
+                    ? 'border-green-300 bg-green-50 hover:border-green-400'
+                    : regionAvailability && !regionAvailability.available
+                    ? 'border-orange-300 bg-orange-50 hover:border-orange-400'
                     : 'border-gray-200 hover:bg-gray-50'
                 }`}
                 onClick={() => handleRegionToggle(region.code)}
@@ -174,11 +213,25 @@ const RegionalSelector: React.FC<RegionalSelectorProps> = ({
                     {region.flag}
                   </div>
                   <div className="flex-grow">
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium text-gray-900 flex items-center gap-2">
                       {region.name}
+                      {isRecommended && (
+                        <span className="text-xs bg-green-600 text-white px-1.5 py-0.5 rounded">
+                          ✓ Recommended
+                        </span>
+                      )}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {region.code}
+                    <div className="text-xs text-gray-500 flex items-center gap-2">
+                      <span>{region.code}</span>
+                      {regionAvailability && (
+                        <span className={`${
+                          regionAvailability.available 
+                            ? 'text-green-600' 
+                            : 'text-orange-600'
+                        }`}>
+                          {regionAvailability.coverage_percentage}% available
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -199,10 +252,19 @@ const RegionalSelector: React.FC<RegionalSelectorProps> = ({
                   </div>
                 </div>
 
-                {/* Tooltip */}
+                {/* Enhanced Tooltip */}
                 {showTooltip === region.code && (
-                  <div className="absolute z-10 bottom-full left-0 mb-2 p-2 bg-gray-900 text-white text-xs rounded shadow-lg whitespace-nowrap">
-                    {region.description}
+                  <div className="absolute z-10 bottom-full left-0 mb-2 p-3 bg-gray-900 text-white text-xs rounded shadow-lg min-w-max">
+                    <div className="font-medium mb-1">{region.description}</div>
+                    {regionAvailability && (
+                      <div className="border-t border-gray-700 pt-1 mt-1 space-y-1">
+                        <div>Product Coverage: {regionAvailability.coverage_percentage}%</div>
+                        <div>Available Variants: {regionAvailability.variant_count}/{regionAvailability.total_variants}</div>
+                        {isRecommended && (
+                          <div className="text-green-400">✓ Recommended for this product</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
