@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Search, Sparkles, TrendingUp } from "lucide-react";
 import { ExtendedProduct } from "@/lib/api";
 

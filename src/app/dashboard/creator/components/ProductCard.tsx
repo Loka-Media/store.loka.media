@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 
 interface CreatorProduct {
   id: number;
-  status: string;
+  status?: string;
   thumbnail_url: string;
   name: string;
   min_price: number;
