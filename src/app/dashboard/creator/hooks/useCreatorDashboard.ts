@@ -132,6 +132,17 @@ export function useCreatorDashboard() {
     }
   };
 
+  const deleteProduct = async (productId: number) => {
+    try {
+      await productAPI.deleteProduct(productId);
+      toast.success("Product deleted successfully");
+      fetchCreatorProducts(); // Refresh products list
+    } catch (error) {
+      console.error("Failed to delete product:", error);
+      toast.error("Failed to delete product");
+    }
+  };
+
   return {
     user,
     connection,
@@ -139,5 +150,6 @@ export function useCreatorDashboard() {
     loading,
     stats,
     handleConnectPrintful,
+    deleteProduct,
   };
 }

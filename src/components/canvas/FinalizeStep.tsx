@@ -307,7 +307,6 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({
   setProductForm,
   selectedProduct,
   selectedVariants,
-  designFiles,
   mockupUrl,
   onGenerateMockup,
   isGeneratingMockup,

@@ -8,7 +8,6 @@ import { useWishlist } from "@/contexts/WishlistContext";
 import toast from "react-hot-toast";
 import { SearchBar } from "./SearchBar";
 import { FeaturedCreators } from "./FeaturedCreators";
-import { ProductFilters } from "./ProductFilters";
 import { ProductGrid } from "./ProductGrid";
 import { Pagination } from "./Pagination";
 
