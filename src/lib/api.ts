@@ -246,6 +246,12 @@ export const cartAPI = {
     const response = await api.delete('/api/cart/clear');
     return response.data;
   },
+
+  // Validate cart inventory
+  validateCartInventory: async () => {
+    const response = await api.get('/api/cart/validate-inventory');
+    return response.data;
+  },
 };
 
 // Wishlist API
@@ -608,6 +614,20 @@ export const printfulAPI = {
     });
     return response.data;
   },
+
+  // Check inventory for Printful variants
+  checkInventory: async (
+    variantIds: number[], 
+    targetRegions: string[] = ['US', 'EU'], 
+    customerCountry?: string
+  ) => {
+    const response = await api.post('/api/printful/inventory/check', { 
+      variant_ids: variantIds,
+      target_regions: targetRegions,
+      customer_country: customerCountry
+    });
+    return response.data;
+  },
 };
 
 // Shopify API (NEW - Complete Integration)
@@ -694,6 +714,12 @@ export const shopifyAPI = {
 
   getSyncStatus: async () => {
     const response = await api.get('/api/shopify-storefront/status');
+    return response.data;
+  },
+
+  // Check inventory for Shopify variants
+  checkInventory: async (variantIds: number[]) => {
+    const response = await api.post('/api/shopify/inventory/check', { variant_ids: variantIds });
     return response.data;
   },
 };

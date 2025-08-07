@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { Eye, Loader2 } from "lucide-react";
+import RegionalSelector, { RegionalSettings } from "../ui/RegionalSelector";
 
 // Interfaces for better type safety
 interface ProductVariant {
@@ -42,6 +43,7 @@ interface ProductForm {
   markupPercentage: string;
   category: string;
   tags: string[];
+  regionalSettings: RegionalSettings;
 }
 
 interface MockupPreviewProps {
@@ -327,6 +329,20 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({
         productForm={productForm}
         setProductForm={setProductForm}
       />
+
+      {/* Regional Settings */}
+      <div className="mt-8">
+        <RegionalSelector
+          value={productForm.regionalSettings}
+          onChange={(settings) =>
+            setProductForm((prev) => ({
+              ...prev,
+              regionalSettings: settings,
+            }))
+          }
+          showAdvanced={true}
+        />
+      </div>
 
       <PricingPreview
         selectedProduct={selectedProduct}

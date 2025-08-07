@@ -128,6 +128,20 @@ export const printfulAPI = {
     const response = await api.get('/api/printful/products/user');
     return response.data;
   },
+
+  // Inventory management
+  checkInventory: async (
+    variantIds: number[], 
+    targetRegions: string[] = ['US', 'EU'], 
+    customerCountry?: string
+  ) => {
+    const response = await api.post('/api/printful/inventory/check', { 
+      variant_ids: variantIds,
+      target_regions: targetRegions,
+      customer_country: customerCountry
+    });
+    return response.data;
+  },
 };
 
 // Helper functions
@@ -153,6 +167,6 @@ export const printfulHelpers = {
 
   // Generate external ID for products
   generateExternalId: (prefix: string = 'custom'): string => {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   },
 };

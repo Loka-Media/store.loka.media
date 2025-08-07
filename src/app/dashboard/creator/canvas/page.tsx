@@ -70,6 +70,11 @@ function CanvasContent() {
     markupPercentage: "30",
     category: "",
     tags: [],
+    regionalSettings: {
+      targetRegions: ["US"],
+      primaryRegion: "US",
+      restrictToRegions: true
+    }
   });
 
   const initializeCanvas = useCallback(async () => {
@@ -94,6 +99,11 @@ function CanvasContent() {
               markupPercentage: "30",
               category: product.type_name || product.type,
               tags: [],
+              regionalSettings: {
+                targetRegions: ["US"],
+                primaryRegion: "US",
+                restrictToRegions: true
+              }
             });
 
             // Start with clean upload step - no demo files
@@ -140,6 +150,11 @@ function CanvasContent() {
           markupPercentage: "30",
           category: product.type_name || product.type,
           tags: [],
+          regionalSettings: {
+            targetRegions: ["US"],
+            primaryRegion: "US",
+            restrictToRegions: true
+          }
         });
       }
 
@@ -471,7 +486,8 @@ function CanvasContent() {
         category: productForm.category,
         markupPercentage: parseFloat(productForm.markupPercentage),
         variants: selectedVariants,
-        base_product: selectedProduct
+        base_product: selectedProduct,
+        regionalSettings: productForm.regionalSettings
       };
 
       toast.loading('Publishing your product to marketplace...', { id: 'marketplace' });
