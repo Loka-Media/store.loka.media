@@ -61,7 +61,7 @@ const VariantCard: React.FC<VariantCardProps> = ({
   return (
     <div
       className={`border rounded-lg p-4 transition-all relative ${
-        !canSelect 
+        !canSelect
           ? "border-red-200 bg-red-50 cursor-not-allowed opacity-75"
           : isSelected
           ? "border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200 cursor-pointer"
@@ -98,16 +98,22 @@ const VariantCard: React.FC<VariantCardProps> = ({
       </div>
 
       <div className="text-xs space-y-1">
-        <div className={`flex items-center space-x-1 ${
-          isAvailable ? 'text-green-600' : 'text-red-600'
-        }`}>
+        <div
+          className={`flex items-center space-x-1 ${
+            isAvailable ? "text-green-600" : "text-red-600"
+          }`}
+        >
           <span>{isAvailable ? "✅" : "❌"}</span>
           <span className="font-medium">
             {isAvailable ? "Available" : "Out of Stock"}
           </span>
-          {variant.estimated_quantity > 0 && (
+          {variant.estimated_quantity && variant.estimated_quantity > 0 && (
             <span className="text-gray-500">
-              ({variant.estimated_quantity === 999 ? "In Stock" : variant.estimated_quantity})
+              (
+              {variant.estimated_quantity === 999
+                ? "In Stock"
+                : variant.estimated_quantity}
+              )
             </span>
           )}
         </div>
@@ -117,7 +123,7 @@ const VariantCard: React.FC<VariantCardProps> = ({
           </div>
         )}
       </div>
-      
+
       {!canSelect && (
         <div className="absolute inset-0 bg-red-100 bg-opacity-75 rounded-lg flex items-center justify-center">
           <span className="text-red-700 font-medium text-sm">Out of Stock</span>

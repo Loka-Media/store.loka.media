@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface ProductsPaginationProps {
   hasNext: boolean;
   setPagination: React.Dispatch<React.SetStateAction<any>>;

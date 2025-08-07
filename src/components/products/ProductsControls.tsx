@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Grid, List, Filter } from "lucide-react";
 
 interface ProductsControlsProps {

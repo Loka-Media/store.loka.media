@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Filter } from "lucide-react";
 
 interface ProductsFilterTopBarProps {
