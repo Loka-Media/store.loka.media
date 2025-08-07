@@ -1,12 +1,13 @@
-'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { productAPI, formatPrice, ExtendedProduct } from '@/lib/api';
-import { createProductSlug } from '@/lib/utils';
-import { useGuestCart } from '@/contexts/GuestCartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { productAPI, formatPrice, ExtendedProduct } from "@/lib/api";
+import { createProductSlug } from "@/lib/utils";
+import { useGuestCart } from "@/contexts/GuestCartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Search,
   Grid,
@@ -210,7 +211,7 @@ function ProductsContent() {
       totalCount: number;
       loading: boolean;
     }>({ isAvailable: true, availableCount: 0, totalCount: 0, loading: false });
-    
+
     const imageUrl =
       product.thumbnail_url ||
       product.images?.[0] ||
@@ -219,26 +220,26 @@ function ProductsContent() {
     // Check inventory status when hovering
     const checkInventoryStatus = async () => {
       if (inventoryStatus.loading || inventoryStatus.totalCount > 0) return;
-      
+
       try {
-        setInventoryStatus(prev => ({ ...prev, loading: true }));
+        setInventoryStatus((prev) => ({ ...prev, loading: true }));
         const productData = await productAPI.getProduct(product.id);
         if (productData.variants && productData.variants.length > 0) {
-          const availableVariants = productData.variants.filter(v => 
-            v.inventory_available !== false && v.in_stock !== false
+          const availableVariants = productData.variants.filter(
+            (v: { inventory_available: boolean; in_stock: boolean; }) => v.inventory_available !== false && v.in_stock !== false
           );
           setInventoryStatus({
             isAvailable: availableVariants.length > 0,
             availableCount: availableVariants.length,
             totalCount: productData.variants.length,
-            loading: false
+            loading: false,
           });
         } else {
           setInventoryStatus({
             isAvailable: false,
             availableCount: 0,
             totalCount: 0,
-            loading: false
+            loading: false,
           });
         }
       } catch (error) {
@@ -246,7 +247,7 @@ function ProductsContent() {
           isAvailable: true, // Default to available if check fails
           availableCount: 0,
           totalCount: 0,
-          loading: false
+          loading: false,
         });
       }
     };
@@ -264,23 +265,27 @@ function ProductsContent() {
         const productData = await productAPI.getProduct(product.id);
         if (productData.variants && productData.variants.length > 0) {
           // Check if any variants are available
-          const availableVariants = productData.variants.filter(v => 
-            v.inventory_available !== false && v.in_stock !== false
+          const availableVariants = productData.variants.filter(
+            (v: { inventory_available: boolean; in_stock: boolean; }) => v.inventory_available !== false && v.in_stock !== false
           );
-          
+
           if (availableVariants.length === 0) {
             toast.error("Product is currently out of stock");
             return;
           }
-          
+
           await addToCart(availableVariants[0].id, 1);
           toast.success("Added to cart!");
         } else {
           toast.error("No variants available");
         }
       } catch (error) {
-        const errorMessage = (error as any)?.response?.data?.error || "Failed to add to cart";
-        if (errorMessage.includes('out of stock') || errorMessage.includes('unavailable')) {
+        const errorMessage =
+          (error as any)?.response?.data?.error || "Failed to add to cart";
+        if (
+          errorMessage.includes("out of stock") ||
+          errorMessage.includes("unavailable")
+        ) {
           toast.error("Product is currently out of stock");
         } else {
           toast.error(errorMessage);
@@ -316,20 +321,21 @@ function ProductsContent() {
         {/* Inventory status badge */}
         {inventoryStatus.totalCount > 0 && (
           <div className="absolute top-3 right-16 z-20">
-            <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center shadow-lg ${
-              inventoryStatus.isAvailable 
-                ? 'bg-green-500/90 text-white' 
-                : 'bg-red-500/90 text-white'
-            }`}>
+            <div
+              className={`px-3 py-1 rounded-full text-xs font-medium flex items-center shadow-lg ${
+                inventoryStatus.isAvailable
+                  ? "bg-green-500/90 text-white"
+                  : "bg-red-500/90 text-white"
+              }`}
+            >
               {inventoryStatus.isAvailable ? (
                 <CheckCircle className="w-3 h-3 mr-1" />
               ) : (
                 <AlertTriangle className="w-3 h-3 mr-1" />
               )}
-              {inventoryStatus.isAvailable 
+              {inventoryStatus.isAvailable
                 ? `${inventoryStatus.availableCount}/${inventoryStatus.totalCount} Available`
-                : 'Out of Stock'
-              }
+                : "Out of Stock"}
             </div>
           </div>
         )}
@@ -428,13 +434,19 @@ function ProductsContent() {
               </button>
               <button
                 onClick={handleAddToCart}
-                disabled={inventoryStatus.totalCount > 0 && !inventoryStatus.isAvailable}
+                disabled={
+                  inventoryStatus.totalCount > 0 && !inventoryStatus.isAvailable
+                }
                 className={`p-3 backdrop-blur-sm rounded-full transition-all duration-200 transform shadow-lg ${
                   inventoryStatus.totalCount > 0 && !inventoryStatus.isAvailable
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : 'bg-orange-500 text-white hover:bg-orange-600 hover:scale-110'
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-orange-500 text-white hover:bg-orange-600 hover:scale-110"
                 }`}
-                title={inventoryStatus.totalCount > 0 && !inventoryStatus.isAvailable ? "Out of stock" : "Add to cart"}
+                title={
+                  inventoryStatus.totalCount > 0 && !inventoryStatus.isAvailable
+                    ? "Out of stock"
+                    : "Add to cart"
+                }
               >
                 <ShoppingCart className="w-5 h-5" />
               </button>
@@ -975,7 +987,7 @@ function ProductsContent() {
       totalCount: number;
       loading: boolean;
     }>({ isAvailable: true, availableCount: 0, totalCount: 0, loading: false });
-    
+
     const imageUrl =
       product.thumbnail_url ||
       product.images?.[0] ||
@@ -984,26 +996,26 @@ function ProductsContent() {
     // Check inventory status
     const checkInventoryStatus = async () => {
       if (inventoryStatus.loading || inventoryStatus.totalCount > 0) return;
-      
+
       try {
-        setInventoryStatus(prev => ({ ...prev, loading: true }));
+        setInventoryStatus((prev) => ({ ...prev, loading: true }));
         const productData = await productAPI.getProduct(product.id);
         if (productData.variants && productData.variants.length > 0) {
-          const availableVariants = productData.variants.filter(v => 
-            v.inventory_available !== false && v.in_stock !== false
+          const availableVariants = productData.variants.filter(
+            (v: { inventory_available: boolean; in_stock: boolean; }) => v.inventory_available !== false && v.in_stock !== false
           );
           setInventoryStatus({
             isAvailable: availableVariants.length > 0,
             availableCount: availableVariants.length,
             totalCount: productData.variants.length,
-            loading: false
+            loading: false,
           });
         } else {
           setInventoryStatus({
             isAvailable: false,
             availableCount: 0,
             totalCount: 0,
-            loading: false
+            loading: false,
           });
         }
       } catch (error) {
@@ -1011,7 +1023,7 @@ function ProductsContent() {
           isAvailable: true, // Default to available if check fails
           availableCount: 0,
           totalCount: 0,
-          loading: false
+          loading: false,
         });
       }
     };
@@ -1021,23 +1033,27 @@ function ProductsContent() {
         const productData = await productAPI.getProduct(product.id);
         if (productData.variants && productData.variants.length > 0) {
           // Check if any variants are available
-          const availableVariants = productData.variants.filter(v => 
-            v.inventory_available !== false && v.in_stock !== false
+          const availableVariants = productData.variants.filter(
+            (v: { inventory_available: boolean; in_stock: boolean; }) => v.inventory_available !== false && v.in_stock !== false
           );
-          
+
           if (availableVariants.length === 0) {
             toast.error("Product is currently out of stock");
             return;
           }
-          
+
           await addToCart(availableVariants[0].id, 1);
           toast.success("Added to cart!");
         } else {
           toast.error("No variants available");
         }
       } catch (error) {
-        const errorMessage = (error as any)?.response?.data?.error || "Failed to add to cart";
-        if (errorMessage.includes('out of stock') || errorMessage.includes('unavailable')) {
+        const errorMessage =
+          (error as any)?.response?.data?.error || "Failed to add to cart";
+        if (
+          errorMessage.includes("out of stock") ||
+          errorMessage.includes("unavailable")
+        ) {
           toast.error("Product is currently out of stock");
         } else {
           toast.error(errorMessage);
@@ -1049,7 +1065,7 @@ function ProductsContent() {
     const isOnSale = Math.random() > 0.7;
 
     return (
-      <div 
+      <div
         className="group bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-700/50 hover:border-orange-500/30 backdrop-blur-sm"
         onMouseEnter={checkInventoryStatus}
       >
@@ -1121,28 +1137,29 @@ function ProductsContent() {
                     <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
                     <span className="text-yellow-200 font-medium">4.8</span>
                   </div>
-                  
+
                   {/* Inventory status */}
                   {inventoryStatus.totalCount > 0 && (
                     <div className="ml-4">
-                      <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center ${
-                        inventoryStatus.isAvailable 
-                          ? 'bg-green-500/20 text-green-300 border border-green-500/30' 
-                          : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                      }`}>
+                      <div
+                        className={`px-3 py-1 rounded-full text-xs font-medium flex items-center ${
+                          inventoryStatus.isAvailable
+                            ? "bg-green-500/20 text-green-300 border border-green-500/30"
+                            : "bg-red-500/20 text-red-300 border border-red-500/30"
+                        }`}
+                      >
                         {inventoryStatus.isAvailable ? (
                           <CheckCircle className="w-3 h-3 mr-1" />
                         ) : (
                           <AlertTriangle className="w-3 h-3 mr-1" />
                         )}
-                        {inventoryStatus.isAvailable 
+                        {inventoryStatus.isAvailable
                           ? `${inventoryStatus.availableCount}/${inventoryStatus.totalCount} Available`
-                          : 'Out of Stock'
-                        }
+                          : "Out of Stock"}
                       </div>
                     </div>
                   )}
-                  
+
                   {inventoryStatus.loading && (
                     <div className="ml-4">
                       <div className="bg-gray-600/30 text-gray-400 px-3 py-1 rounded-full text-xs font-medium flex items-center border border-gray-600/30">
@@ -1237,15 +1254,22 @@ function ProductsContent() {
                   </button>
                   <button
                     onClick={handleAddToCart}
-                    disabled={inventoryStatus.totalCount > 0 && !inventoryStatus.isAvailable}
+                    disabled={
+                      inventoryStatus.totalCount > 0 &&
+                      !inventoryStatus.isAvailable
+                    }
                     className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 transform flex items-center ${
-                      inventoryStatus.totalCount > 0 && !inventoryStatus.isAvailable
-                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30'
+                      inventoryStatus.totalCount > 0 &&
+                      !inventoryStatus.isAvailable
+                        ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30"
                     }`}
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
-                    {inventoryStatus.totalCount > 0 && !inventoryStatus.isAvailable ? 'Out of Stock' : 'Add to Cart'}
+                    {inventoryStatus.totalCount > 0 &&
+                    !inventoryStatus.isAvailable
+                      ? "Out of Stock"
+                      : "Add to Cart"}
                   </button>
                 </div>
               </div>

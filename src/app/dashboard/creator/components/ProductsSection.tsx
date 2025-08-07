@@ -17,9 +17,10 @@ interface CreatorProduct {
 interface ProductsSectionProps {
   products: CreatorProduct[];
   loading: boolean;
+  onDelete: (productId: number) => void;
 }
 
-export function ProductsSection({ products, loading }: ProductsSectionProps) {
+export function ProductsSection({ products, loading, onDelete }: ProductsSectionProps) {
   return (
     <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-lg shadow-lg overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between bg-gray-800/50">
@@ -64,11 +65,11 @@ export function ProductsSection({ products, loading }: ProductsSectionProps) {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.slice(0, 6).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} onDelete={onDelete} />
+        ))}
+      </div>
         )}
       </div>
     </div>

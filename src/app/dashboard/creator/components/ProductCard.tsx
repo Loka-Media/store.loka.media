@@ -5,6 +5,8 @@ import {
   Trash2
 } from 'lucide-react';
 import Image from 'next/image';
+import { useState } from 'react';
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 
 
 interface CreatorProduct {
@@ -17,7 +19,17 @@ interface CreatorProduct {
   variant_count: number;
 }
 
-export default function ProductCard({ product }: { product: CreatorProduct }) {
+export default function ProductCard({ product, onDelete }: { product: CreatorProduct, onDelete: (productId: number) => void }) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const handleDelete = () => {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    onDelete(product.id);
+    setIsDeleteDialogOpen(false);
+  };
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -59,11 +71,18 @@ export default function ProductCard({ product }: { product: CreatorProduct }) {
           <button className="p-2 rounded-full bg-gray-800 text-orange-400 hover:bg-orange-600 hover:text-white transition-colors duration-200" title="Edit Product">
             <Edit className="w-5 h-5" />
           </button>
-          <button className="p-2 rounded-full bg-gray-800 text-red-400 hover:bg-red-600 hover:text-white transition-colors duration-200" title="Delete Product">
+          <button onClick={handleDelete} className="p-2 rounded-full bg-gray-800 text-red-400 hover:bg-red-600 hover:text-white transition-colors duration-200" title="Delete Product">
             <Trash2 className="w-5 h-5" />
           </button>
         </div>
       </div>
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        title="Are you sure?"
+        description={`This will permanently delete the product "${product.name}". This action cannot be undone.`}
+      />
     </div>
   );
 }

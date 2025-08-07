@@ -12,7 +12,7 @@ import Navigation from "@/components/Navigation";
 
 export default function CreatorDashboard() {
   const router = useRouter();
-  const { user, connection, products, loading, stats, handleConnectPrintful } =
+  const { user, connection, products, loading, stats, handleConnectPrintful, deleteProduct } =
     useCreatorDashboard();
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function CreatorDashboard() {
             <>
               <StatsCards stats={stats} />
               <QuickActions />
-              <ProductsSection products={products} loading={loading} />
+              <ProductsSection products={products} loading={loading} onDelete={deleteProduct} />
             </>
           )}
         </div>
