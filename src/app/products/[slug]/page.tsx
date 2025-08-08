@@ -19,6 +19,7 @@ import { ProductVariantSelector } from '@/components/products/product-detail/Pro
 import { ProductActions } from '@/components/products/product-detail/ProductActions';
 import { ProductMeta } from '@/components/products/product-detail/ProductMeta';
 import { ProductShippingInfo } from '@/components/products/product-detail/ProductShippingInfo';
+import { RegionalAvailability } from '@/components/products/product-detail/RegionalAvailability';
 
 interface ProductDetails {
   id: number;
@@ -50,7 +51,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   const router = useRouter();
   const { addToCart } = useGuestCart();
   const { addToWishlist, removeFromWishlist } = useWishlist();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const [product, setProduct] = useState<ProductDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -268,6 +269,15 @@ export default function ProductPage({ params }: ProductPageProps) {
               onAddToCart={handleAddToCart}
               onWishlistToggle={handleWishlistToggle}
             />
+            
+            {/* Regional Availability - Show only for Printful products */}
+            {product.source === 'printful' && selectedVariant && (
+              <RegionalAvailability 
+                selectedVariant={selectedVariant} 
+                userRegion={user?.country || 'US'}
+              />
+            )}
+            
             <div className="pt-8 border-t border-gray-800">
               <ProductMeta
                 creatorName={product.creator_name}

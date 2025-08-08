@@ -47,6 +47,21 @@ export interface ProductVariant {
   compare_at_price?: number;
   weight?: number;
   weight_unit?: string;
+  availability_regions?: Record<string, string>;
+  availability_status?: Array<{
+    region: string;
+    status: string;
+  }>;
+  regional_availability?: {
+    available_regions: string[];
+    detailed_status: Array<{
+      region: string;
+      status: string;
+      last_checked?: string;
+    }>;
+    target_regions_available: string[];
+  };
+  material?: any[];
 }
 
 export interface CartItem {
@@ -403,6 +418,12 @@ export const userAPI = {
   // Update user profile
   updateProfile: async (userData: { name?: string; phone?: string }) => {
     const response = await api.put("/auth/me", userData);
+    return response.data;
+  },
+
+  // Update user location
+  updateLocation: async (locationData: { country: string; region?: string }) => {
+    const response = await api.put("/auth/me/location", locationData);
     return response.data;
   },
 };

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { printfulAPI } from "@/lib/api";
 import toast from "react-hot-toast";
+import { RegionalAvailabilityPreview } from "./RegionalAvailabilityPreview";
 
 // Interfaces for better type safety
 interface ProductVariant {
@@ -466,6 +467,16 @@ const VariantsStep: React.FC<VariantsStepProps> = ({
               </p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Regional Availability Preview */}
+      {selectedVariants.length > 0 && hasAvailableVariants && (
+        <div className="mb-6">
+          <RegionalAvailabilityPreview 
+            selectedProduct={selectedProduct}
+            selectedVariants={selectedVariants}
+          />
         </div>
       )}
 

@@ -11,28 +11,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { printfulAPI } from "@/lib/api";
 import { mockupAPI } from "@/lib/MockupAPI";
 
-import CanvasHeader from "@/components/canvas/CanvasHeader";
 import UploadStep from "@/components/canvas/UploadStep";
-import DesignStep from "@/components/canvas/DesignStep";
-import VariantsStep from "@/components/canvas/VariantsStep";
-import FinalizeStep from "@/components/canvas/FinalizeStep";
-import ProductPreview from "@/components/canvas/ProductPreview";
 import UnifiedDesignEditor from "@/components/canvas/UnifiedDesignEditor";
 import ProductDetailsForm from "@/components/canvas/ProductDetailsForm";
 
 import {
   DesignFile,
-  PrintfulProduct,
   ProductForm,
   PlacementPosition,
-} from "@/lib/types"; // You should create these interfaces in a separate file if not already created
+} from "@/lib/types";
 
-const DEFAULT_PRINT_AREAS = [
-  { type: "front", area_width: 1800, area_height: 2400, dpi: 150 },
-  { type: "back", area_width: 1800, area_height: 2400, dpi: 150 },
-  { type: "sleeve_left", area_width: 800, area_height: 600, dpi: 150 },
-  { type: "sleeve_right", area_width: 800, area_height: 600, dpi: 150 },
-];
 
 export default function CanvasPage() {
   return (
@@ -51,14 +39,11 @@ function CanvasContent() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
-  const [designFiles, setDesignFiles] = useState<any[]>([]);
+  const [designFiles, setDesignFiles] = useState<DesignFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [step, setStep] = useState<
     | "upload"
-    | "design"
-    | "variants"
-    | "finalize"
     | "unified-editor"
     | "product-details"
   >("upload");
@@ -73,12 +58,7 @@ function CanvasContent() {
     description: "",
     markupPercentage: "30",
     category: "",
-    tags: [],
-    regionalSettings: {
-      targetRegions: ["US"],
-      primaryRegion: "US",
-      restrictToRegions: true
-    }
+    tags: []
   });
 
   const initializeCanvas = useCallback(async () => {
@@ -108,12 +88,7 @@ function CanvasContent() {
               description: product.description || "",
               markupPercentage: "30",
               category: product.type_name || product.type,
-              tags: [],
-              regionalSettings: {
-                targetRegions: ["US"],
-                primaryRegion: "US",
-                restrictToRegions: true
-              }
+              tags: []
             });
 
             // Start with clean upload step - no demo files
@@ -172,12 +147,7 @@ function CanvasContent() {
           description: product.description || "",
           markupPercentage: "30",
           category: product.type_name || product.type,
-          tags: [],
-          regionalSettings: {
-            targetRegions: ["US"],
-            primaryRegion: "US",
-            restrictToRegions: true
-          }
+          tags: []
         });
       }
 
@@ -218,78 +188,6 @@ function CanvasContent() {
     }
   };
 
-  const handleAddDesignFile = (file: any, placement: string = "front") => {
-    const printArea = DEFAULT_PRINT_AREAS.find(
-      (area) => area.type === placement
-    );
-    if (!printArea) return toast.error("Invalid placement");
-
-    const defaultWidth = Math.min(printArea.area_width * 0.8, 1200);
-    const defaultHeight = Math.min(printArea.area_height * 0.8, 1200);
-
-    const designFile: DesignFile = {
-      id: Date.now() + Math.random(),
-      filename: file.filename,
-      url: file.file_url,
-      type: "design",
-      placement,
-      position: {
-        area_width: printArea.area_width,
-        area_height: printArea.area_height,
-        width: defaultWidth,
-        height: defaultHeight,
-        top: (printArea.area_height - defaultHeight) / 2,
-        left: (printArea.area_width - defaultWidth) / 2,
-        limit_to_print_area: true,
-      },
-    };
-
-    const exists = designFiles.find((f) => f.placement === placement);
-    if (exists) {
-      toast.error(`${placement} already has a design`);
-      return;
-    }
-
-    setDesignFiles((prev) => [...prev, designFile]);
-    toast.success(`Added design to ${placement}`);
-  };
-
-  const handleRemoveDesignFile = (fileId: number) => {
-    setDesignFiles((prev) => prev.filter((file) => file.id !== fileId));
-  };
-
-  const updateDesignPosition = (
-    fileId: number,
-    position: Partial<PlacementPosition>
-  ) => {
-    setDesignFiles((prev) =>
-      prev.map((file) =>
-        file.id === fileId
-          ? { ...file, position: { ...file.position, ...position } }
-          : file
-      )
-    );
-  };
-
-  const setPresetPosition = (fileId: number, preset: string) => {
-    const file = designFiles.find((f) => f.id === fileId);
-    if (!file || !file.position) return;
-
-    const { area_width, area_height, width, height } = file.position;
-    const presets: Record<string, [number, number]> = {
-      "top-left": [0, 0],
-      "top-center": [0, (area_width - width) / 2],
-      "top-right": [0, area_width - width],
-      center: [(area_height - height) / 2, (area_width - width) / 2],
-      "bottom-left": [area_height - height, 0],
-      "bottom-center": [area_height - height, (area_width - width) / 2],
-      "bottom-right": [area_height - height, area_width - width],
-    };
-
-    const [top, left] = presets[preset];
-    updateDesignPosition(fileId, { top, left });
-    toast.success(`Set position: ${preset}`);
-  };
 
   const handleNextStep = () => {
     const steps = ["upload", "unified-editor", "product-details"] as const;
@@ -317,23 +215,23 @@ function CanvasContent() {
 
   if (!selectedProduct && !loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-gray-400 mx-auto" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-center p-12 bg-black/60 backdrop-blur-sm rounded-3xl border border-gray-800 shadow-2xl">
+          <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-8 w-8 text-gray-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">
             No product selected
           </h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="text-gray-400 mb-8 font-medium">
             Please select a product from the catalog first.
           </p>
-          <div className="mt-6">
-            <Link
-              href="/dashboard/creator/catalog"
-              className="inline-flex items-center px-4 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-sm text-sm font-medium"
-            >
-              Browse Catalog
-            </Link>
-          </div>
+          <Link
+            href="/dashboard/creator/catalog"
+            className="inline-flex items-center px-8 py-4 text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-orange-500/25 font-bold transition-all duration-300 transform hover:scale-105"
+          >
+            Browse Catalog
+          </Link>
         </div>
       </div>
     );
@@ -351,13 +249,8 @@ function CanvasContent() {
     lifelike?: boolean;
     width?: number;
   }) => {
-    if (!selectedProduct || !designFiles.length || !selectedVariants.length) {
-      toast.error("Missing product, design files, or variants for mockup.");
-      return;
-    }
-
-    if (designFiles.some((file) => !file.url)) {
-      toast.error("One or more design files are missing an image URL.");
+    if (!selectedProduct || !selectedVariants.length) {
+      toast.error("Missing product or variants for mockup.");
       return;
     }
 
@@ -377,10 +270,32 @@ function CanvasContent() {
         return;
       }
 
+      // Debug logging to identify the mismatch
+      console.log("=== MOCKUP DEBUG INFO ===");
+      console.log("Selected Product ID:", selectedProduct.id);
+      console.log("Selected Product:", selectedProduct);
+      console.log("Selected Variant IDs:", variantIds);
+      console.log("Available Product Variants:", selectedProduct.variants);
+      console.log("Design Files:", designFiles);
+
+      // Validate that variant IDs actually belong to this product
+      const validVariantIds = variantIds.filter((variantId: number) => 
+        selectedProduct.variants?.some((v: any) => v.id === variantId)
+      );
+
+      console.log("Valid Variant IDs (filtered):", validVariantIds);
+
+      if (validVariantIds.length === 0) {
+        toast.error("No valid variants found for this product. Please reselect variants.");
+        setIsGeneratingMockup(false);
+        setMockupStatus("");
+        return;
+      }
+
       // Prepare advanced mockup options
       const mockupOptions: any = {
         productId: selectedProduct.id,
-        variantIds: variantIds.slice(0, 3), // Use first 3 variants for preview
+        variantIds: validVariantIds.slice(0, 3), // Use first 3 valid variants for preview
         designFiles,
         format: "jpg" as const,
         onStatusUpdate: (status: string, attempts: number) => {
@@ -444,61 +359,6 @@ function CanvasContent() {
     }
   };
 
-  const generateMockup = async () => {
-    if (!selectedProduct || !designFiles.length || !selectedVariants.length) {
-      toast.error("Missing product, design files, or variants for mockup.");
-      return;
-    }
-
-    if (designFiles.some((file) => !file.url)) {
-      toast.error("One or more design files are missing an image URL.");
-      return;
-    }
-
-    try {
-      setIsGeneratingMockup(true);
-      setMockupStatus("Preparing final mockup generation...");
-      setMockupUrls([]); // Clear previous mockups
-
-      const variantIds = selectedVariants.map((v: any) =>
-        typeof v === "number" ? v : v.id
-      );
-
-      if (variantIds.length === 0 || variantIds.some((id) => !id)) {
-        toast.error("No valid variant IDs selected for the mockup.");
-        setIsGeneratingMockup(false);
-        setMockupStatus("");
-        return;
-      }
-
-      const mockupUrls = await mockupAPI.generateProductMockup({
-        productId: selectedProduct.id,
-        variantIds,
-        designFiles,
-        format: "jpg",
-        onStatusUpdate: (status: string, attempts: number) => {
-          setMockupStatus(status);
-          console.log(
-            `Final mockup status update: ${status} (attempt ${attempts})`
-          );
-        },
-      });
-
-      setMockupUrls(mockupUrls);
-      setMockupStatus("Final mockup completed successfully!");
-      toast.success("Mockup generated successfully!");
-    } catch (error: any) {
-      console.error("Mockup generation failed:", error);
-      const errorMessage =
-        error?.response?.data?.error ||
-        error.message ||
-        "Failed to generate mockup.";
-      setMockupStatus(`Error: ${errorMessage}`);
-      toast.error(errorMessage);
-    } finally {
-      setIsGeneratingMockup(false);
-    }
-  };
 
   // Handle going live to marketplace with product details
   const handleGoLiveToMarketplace = async () => {
@@ -517,8 +377,7 @@ function CanvasContent() {
         category: productForm.category,
         markupPercentage: parseFloat(productForm.markupPercentage),
         variants: selectedVariants,
-        base_product: selectedProduct,
-        regionalSettings: productForm.regionalSettings
+        base_product: selectedProduct
       };
 
       toast.loading("Publishing your product to marketplace...", {
@@ -576,19 +435,19 @@ function CanvasContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <CanvasHeader
+    <div className="min-h-screen bg-black">
+      {/* <CanvasHeader
         selectedProduct={selectedProduct}
         step={step}
         creating={creating}
         onCreateProduct={() => {}}
-      />
+      /> */}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto" />
-            <p className="mt-4 text-gray-600">Loading design canvas...</p>
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto" />
+            <p className="mt-6 text-gray-300 text-lg font-medium">Loading design canvas...</p>
           </div>
         ) : (
           <>
@@ -623,7 +482,7 @@ function CanvasContent() {
                       printfulAPI={printfulAPI}
                     />
                   )}
-
+{/* 
                   {step === "design" && (
                     <DesignStep
                       uploadedFiles={uploadedFiles}
@@ -632,7 +491,7 @@ function CanvasContent() {
                       onRemoveDesignFile={handleRemoveDesignFile}
                       onUpdateDesignPosition={updateDesignPosition}
                       onSetPresetPosition={setPresetPosition}
-                      onPrevStep={handlePrevStep}
+                      onPrevStep={() => {}}
                       onNextStep={handleNextStep}
                       printFiles={printFiles}
                       onGeneratePreview={generatePreview}
@@ -645,7 +504,7 @@ function CanvasContent() {
                       selectedProduct={selectedProduct}
                       selectedVariants={selectedVariants}
                       setSelectedVariants={setSelectedVariants}
-                      onPrevStep={handlePrevStep}
+                      onPrevStep={() => {}}
                       onNextStep={handleNextStep}
                       onPrintFilesLoaded={handlePrintFilesLoaded}
                     />
@@ -661,9 +520,9 @@ function CanvasContent() {
                       mockupUrl={mockupUrls}
                       onGenerateMockup={generateMockup}
                       isGeneratingMockup={isGeneratingMockup}
-                      onPrevStep={handlePrevStep}
+                      onPrevStep={() => {}}
                     />
-                  )}
+                  )} */}
 
                   {step === "product-details" && (
                     <ProductDetailsForm
@@ -672,9 +531,7 @@ function CanvasContent() {
                         description: productForm.description,
                         markupPercentage: productForm.markupPercentage,
                         category: productForm.category,
-                        regionalSettings: productForm.regionalSettings,
                       }}
-                      selectedProduct={selectedProduct}
                       onSave={(data) => {
                         setProductForm({
                           ...productForm,
@@ -682,11 +539,12 @@ function CanvasContent() {
                           description: data.description,
                           markupPercentage: data.markupPercentage.toString(),
                           category: data.category,
-                          regionalSettings: data.regionalSettings,
                         });
                       }}
                       onNext={handleGoLiveToMarketplace}
                       isLoading={creating}
+                      selectedProduct={selectedProduct}
+                      selectedVariants={selectedVariants}
                     />
                   )}
                 </div>
