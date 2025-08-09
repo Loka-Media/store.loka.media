@@ -200,7 +200,12 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
 
     setDesignFiles([...designFiles, newDesign]);
     setSelectedDesignFile(newDesign);
-    toast.success(`Design added to ${placement}! (${existingDesignsOnPlacement.length + 1} total)`);
+    const totalCount = existingDesignsOnPlacement.length + 1;
+    if (totalCount === 1) {
+      toast.success(`Design added to ${placement}!`);
+    } else {
+      toast.success(`Design added to ${placement}! (${totalCount} total - most recent will be used in mockups)`);
+    }
   };
 
   const handleAddTextToDesign = () => {

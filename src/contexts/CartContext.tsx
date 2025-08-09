@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { cartAPI, CartItem, CartSummary } from '@/lib/api';
+import { cartAPI, CartItem, CartSummary, printfulAPI, productAPI } from '@/lib/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 
@@ -82,13 +82,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
+      // Add to cart - backend will handle availability validation if needed
       await cartAPI.addToCart(variantId, quantity);
       toast.success('Added to cart!');
       await refreshCart();
       return true;
     } catch (error: unknown) {
-      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to add to cart';
-      toast.error(message);
+      const errorResponse = error as { response?: { data?: { error?: string } } };
+      const message = errorResponse?.response?.data?.error || 'Failed to add to cart';
+      
+      // Handle specific availability errors from backend
+      // if (message.includes('out of stock') || message.includes('unavailable') || message.includes('not available')) {
+      //   toast.error('Product is currently out of stock');
+      // } else if (message.includes('insufficient inventory') || message.includes('not enough stock')) {
+      //   toast.error('Insufficient stock for the requested quantity');
+      // } else {
+        toast.error(message);
+      // }
       return false;
     }
   };

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { productAPI, formatPrice, ExtendedProduct } from "@/lib/api";
+import { productAPI, formatPrice, ExtendedProduct, printfulAPI } from "@/lib/api";
 import { createProductSlug } from "@/lib/utils";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
@@ -45,32 +45,68 @@ export function ProductCard({ product }: ProductCardProps) {
     product.images?.[0] ||
     "/placeholder-product.svg";
 
-  // Check inventory status when hovering
+  // Check inventory status when hovering using warehouse API for better accuracy
   const checkInventoryStatus = async () => {
     if (inventoryStatus.loading || inventoryStatus.totalCount > 0) return;
 
     try {
       setInventoryStatus((prev) => ({ ...prev, loading: true }));
+      
+      // First get product data
       const productData = await productAPI.getProduct(product.id);
-      if (productData.variants && productData.variants.length > 0) {
-        const availableVariants = productData.variants.filter(
-          (v: { inventory_available: boolean; in_stock: boolean }) =>
-            v.inventory_available !== false && v.in_stock !== false
-        );
-        setInventoryStatus({
-          isAvailable: availableVariants.length > 0,
-          availableCount: availableVariants.length,
-          totalCount: productData.variants.length,
-          loading: false,
-        });
-      } else {
+      if (!productData.variants || productData.variants.length === 0) {
         setInventoryStatus({
           isAvailable: false,
           availableCount: 0,
           totalCount: 0,
           loading: false,
         });
+        return;
       }
+
+      // For Printful products, check warehouse availability
+      if (product.product_source === 'printful') {
+        try {
+          // Check availability for all variants using warehouse API
+          const variantsToCheck = productData.variants.map((v: any) => ({
+            productId: product.id,
+            variantId: v.id,
+            quantity: 1
+          }));
+
+          const availabilityCheck = await printfulAPI.checkProductAvailability(variantsToCheck);
+          
+          if (availabilityCheck.success) {
+            const availableChecks = availabilityCheck.availability_checks?.filter(
+              (check: any) => check.available && check.stock_status !== 'out_of_stock'
+            ) || [];
+            
+            setInventoryStatus({
+              isAvailable: availableChecks.length > 0,
+              availableCount: availableChecks.length,
+              totalCount: productData.variants.length,
+              loading: false,
+            });
+            return;
+          }
+        } catch (warehouseError) {
+          console.warn('Warehouse check failed, falling back to variant data:', warehouseError);
+        }
+      }
+
+      // Fallback to original variant checking
+      const availableVariants = productData.variants.filter(
+        (v: { inventory_available: boolean; in_stock: boolean }) =>
+          v.inventory_available !== false && v.in_stock !== false
+      );
+      
+      setInventoryStatus({
+        isAvailable: availableVariants.length > 0,
+        availableCount: availableVariants.length,
+        totalCount: productData.variants.length,
+        loading: false,
+      });
+      
     } catch (error) {
       setInventoryStatus({
         isAvailable: true, // Default to available if check fails
@@ -90,25 +126,72 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
     try {
       const productData = await productAPI.getProduct(product.id);
-      if (productData.variants && productData.variants.length > 0) {
-        // Check if any variants are available
-        const availableVariants = productData.variants.filter(
+      if (!productData.variants || productData.variants.length === 0) {
+        toast.error("No variants available");
+        return;
+      }
+
+      let availableVariants = [];
+
+      // For Printful products, use warehouse API for real-time availability
+      if (product.product_source === 'printful') {
+        try {
+          const variantsToCheck = productData.variants.map((v: any) => ({
+            productId: product.id,
+            variantId: v.id,
+            quantity: 1
+          }));
+
+          const availabilityCheck = await printfulAPI.checkProductAvailability(variantsToCheck);
+          
+          if (availabilityCheck.success) {
+            const availableChecks = availabilityCheck.availability_checks?.filter(
+              (check: any) => check.available && check.stock_status !== 'out_of_stock'
+            ) || [];
+            
+            if (availableChecks.length === 0) {
+              toast.error("Product is currently out of stock");
+              return;
+            }
+
+            // Find the actual variant object for the first available check
+            const firstAvailableCheck = availableChecks[0];
+            const availableVariant = productData.variants.find((v: any) => v.id === firstAvailableCheck.variantId);
+            
+            if (!availableVariant) {
+              toast.error("Unable to find available variant");
+              return;
+            }
+
+            availableVariants = [availableVariant];
+          }
+        } catch (warehouseError) {
+          console.warn('Warehouse availability check failed, using fallback:', warehouseError);
+          // Fall back to original variant checking
+          availableVariants = productData.variants.filter(
+            (v: { inventory_available: boolean; in_stock: boolean }) =>
+              v.inventory_available !== false && v.in_stock !== false
+          );
+        }
+      } else {
+        // For non-Printful products, use original checking
+        availableVariants = productData.variants.filter(
           (v: { inventory_available: boolean; in_stock: boolean }) =>
             v.inventory_available !== false && v.in_stock !== false
         );
-
-        if (availableVariants.length === 0) {
-          toast.error("Product is currently out of stock");
-          return;
-        }
-
-        await addToCart(availableVariants[0].id, 1);
-        toast.success("Added to cart!");
-      } else {
-        toast.error("No variants available");
       }
+
+      if (availableVariants.length === 0) {
+        toast.error("Product is currently out of stock");
+        return;
+      }
+
+      // addToCart will handle its own availability checking, so we just pass the variant
+      await addToCart(availableVariants[0].id, 1);
+      
     } catch (error) {
       const errorMessage =
         (error as any)?.response?.data?.error || "Failed to add to cart";

@@ -356,7 +356,10 @@ function CanvasContent() {
         });
       }
 
-      const mockupUrls = await mockupAPI.generateProductMockup(mockupOptions);
+      const mockupUrls = await mockupAPI.generateProductMockup({
+        ...mockupOptions,
+        printFiles
+      });
 
       setMockupUrls(mockupUrls);
       setMockupStatus("Mockup completed successfully!");

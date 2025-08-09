@@ -4,8 +4,9 @@
 
 import { use, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { productAPI, ProductVariant, wishlistAPI } from '@/lib/api';
+import { productAPI, ProductVariant, wishlistAPI, printfulAPI } from '@/lib/api';
 import { useGuestCart } from '@/contexts/GuestCartContext';
+import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { parseProductSlug, createProductSlug } from '@/lib/utils';
@@ -49,7 +50,8 @@ interface ProductPageProps {
 export default function ProductPage({ params }: ProductPageProps) {
   const { slug } = use(params);
   const router = useRouter();
-  const { addToCart } = useGuestCart();
+  const { addToCart: addToGuestCart } = useGuestCart();
+  const { addToCart: addToAuthenticatedCart } = useCart();
   const { addToWishlist, removeFromWishlist } = useWishlist();
   const { isAuthenticated, user } = useAuth();
 
@@ -111,9 +113,66 @@ export default function ProductPage({ params }: ProductPageProps) {
       toast.error('Please select a variant');
       return;
     }
+
+    console.log('🛒 Add to cart called for product:', product?.name, 'source:', product?.source);
+
     try {
-      await addToCart(selectedVariant.id, quantity);
-      toast.success('Added to cart! 🎉');
+      // For Printful products, check warehouse availability first
+      /*
+      if (product?.source === 'printful') {
+        console.log('🏭 Printful product detected, checking warehouse availability...');
+        toast.loading('Checking availability...', { id: 'availability-check' });
+        
+        try {
+          console.log('📞 Making warehouse API call for:', {
+            productId: product.id,
+            variantId: selectedVariant.id,
+            quantity: quantity
+          });
+          const availabilityCheck = await printfulAPI.checkProductAvailabilityPublic([{
+            productId: product.id,
+            variantId: selectedVariant.id,
+            quantity: quantity
+          }]);
+          console.log('✅ Warehouse API response:', availabilityCheck);
+
+          toast.dismiss('availability-check');
+
+          if (!availabilityCheck.success || !availabilityCheck.can_fulfill_order) {
+            const unavailableItem = availabilityCheck.availability_checks?.find(
+              (check: any) => check.variantId === selectedVariant.id
+            );
+            
+            if (unavailableItem?.stock_status === 'out_of_stock') {
+              toast.error('This item is currently out of stock');
+              return;
+            } else if (unavailableItem?.stock_status === 'low_stock') {
+              if (unavailableItem.available_quantity < quantity) {
+                toast.error(`Only ${unavailableItem.available_quantity} items available. Please reduce quantity.`);
+                return;
+              } else {
+                toast.success(`Added to cart! Only ${unavailableItem.available_quantity} left in stock.`, { duration: 4000 });
+              }
+            } else {
+              toast.error('This item is currently unavailable');
+              return;
+            }
+          }
+        } catch (availabilityError) {
+          console.warn('Warehouse availability check failed, proceeding with add to cart:', availabilityError);
+          toast.dismiss('availability-check');
+        }
+      }
+      */
+
+      // Use appropriate cart based on authentication status
+      if (isAuthenticated) {
+        await addToAuthenticatedCart(selectedVariant.id, quantity);
+      } else {
+        await addToGuestCart(selectedVariant.id, quantity);
+      }
+      
+      // Success message will be shown by the cart context
     } catch (error) {
       console.error('Failed to add to cart:', error);
       toast.error('Failed to add to cart');
@@ -189,10 +248,15 @@ export default function ProductPage({ params }: ProductPageProps) {
   };
 
   const isVariantAvailable = (variant: ProductVariant, source?: string) => {
+    // For Printful products, we'll do real-time checking when user tries to add to cart
+    // Here we just do basic availability checking to show/hide the add to cart button
     const isPrintfulProduct = !!variant.printful_variant_id || source === 'printful';
     if (isPrintfulProduct) {
-      return variant.available_for_sale !== undefined ? variant.available_for_sale : true;
+      // For Printful, be more permissive here - real checking happens on add to cart
+      return variant.available_for_sale !== false;
     }
+    
+    // For other sources, use existing logic
     if (variant.available_for_sale !== undefined) {
       return variant.available_for_sale && (variant.inventory_quantity || 0) > 0;
     }
