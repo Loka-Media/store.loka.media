@@ -742,12 +742,14 @@ export const printfulAPI = {
   storeMockupsPermanently: async (
     mockupUrls: any[],
     productData: any,
-    designFiles?: any[]
+    designFiles?: any[],
+    mockupInputs?: any
   ) => {
     const response = await api.post("/api/printful/mockups/store-permanently", {
       mockupUrls,
       productData,
       designFiles,
+      mockupInputs,
     });
     return response.data;
   },
