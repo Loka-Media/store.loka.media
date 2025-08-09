@@ -1,10 +1,5 @@
 // types/canvas.ts
 
-export interface RegionalSettings {
-  targetRegions: string[];
-  primaryRegion?: string;
-  restrictToRegions: boolean;
-}
 
 export interface DesignFile {
   id: number;
@@ -29,7 +24,6 @@ export interface ProductForm {
   markupPercentage: string;
   category: string;
   tags: string[];
-  regionalSettings: RegionalSettings;
 }
 
 export interface Product {
@@ -85,7 +79,6 @@ export interface ProductForm {
   markupPercentage: string;
   category: string;
   tags: string[];
-  regionalSettings: RegionalSettings;
 }
 
 export interface PrintfulVariant {

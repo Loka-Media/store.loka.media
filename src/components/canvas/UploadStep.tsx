@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Upload, Palette, Loader2 } from "lucide-react";
+import { Upload, Palette, Loader2, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
@@ -40,23 +40,28 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   uploading,
 }) => {
   return (
-    <div className="mb-6">
+    <div className="mb-8">
       <label className="block">
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer">
+        <div className="border-2 border-dashed border-gray-800 rounded-2xl p-12 text-center hover:border-orange-500 transition-all duration-300 cursor-pointer bg-black/60 hover:bg-black/80 backdrop-blur-sm transform hover:scale-[1.01] hover:shadow-2xl hover:shadow-orange-500/10">
           {uploading ? (
-            <Loader2 className="mx-auto h-12 w-12 text-indigo-600 animate-spin" />
+            <div className="animate-bounce">
+              <Loader2 className="mx-auto h-14 w-14 text-orange-500 animate-spin" />
+            </div>
           ) : (
-            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+            <div className="animate-pulse hover:animate-none transition-all duration-300">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Upload className="w-8 h-8 text-white" />
+              </div>
+            </div>
           )}
-          <div className="mt-4">
-            <p className="text-lg text-gray-600">
+          <div className="mt-8">
+            <p className="text-2xl font-bold text-white">
               {uploading
-                ? "Uploading..."
+                ? "Uploading your design..."
                 : "Drop your design files here or click to browse"}
             </p>
-            <p className="text-sm text-gray-500 mt-2">
-              PNG, JPG, PDF up to 10MB each • Recommended: 300 DPI, RGB color
-              mode
+            <p className="text-sm text-gray-400 mt-4 font-medium">
+              PNG, JPG, PDF up to 10MB each • Recommended: 300 DPI, RGB color mode
             </p>
           </div>
         </div>
@@ -80,43 +85,53 @@ const UploadedFilesList: React.FC<UploadedFilesListProps> = ({
   if (uploadedFiles.length === 0) return null;
 
   return (
-    <div>
-      <h4 className="text-md font-medium text-gray-900 mb-3">Uploaded Files</h4>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {uploadedFiles.map((file) => (
-          <div key={file.id} className="group relative">
-            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+    <div className="animate-fadeIn">
+      <div className="flex items-center gap-2 mb-4">
+        <CheckCircle className="w-5 h-5 text-orange-500" />
+        <h4 className="text-lg font-bold text-black">Uploaded Files</h4>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+        {uploadedFiles.map((file, index) => (
+          <div 
+            key={file.id} 
+            className="group relative animate-slideInUp transform hover:scale-105 transition-all duration-300"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <div className="aspect-square bg-black/80 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-800 hover:border-orange-500/30">
               {file.thumbnail_url ? (
                 <Image
                   src={file.thumbnail_url}
                   alt={file.filename}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Palette className="w-8 h-8 text-gray-400" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                    <Palette className="w-6 h-6 text-white" />
+                  </div>
                 </div>
               )}
             </div>
-            <p className="mt-2 text-xs text-gray-600 truncate">
+            <p className="mt-4 text-sm font-semibold text-white truncate">
               {file.filename}
             </p>
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                ✓
-              </span>
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-0 group-hover:scale-100">
+              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-sm">✓</span>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 flex justify-end">
+      <div className="mt-8 flex justify-end">
         <button
           onClick={onContinue}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+          className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-2xl hover:from-orange-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-orange-500/25"
         >
-          Continue to Design
+          <span className="mr-3">Continue to Design</span>
+          <div className="transform group-hover:translate-x-1 transition-transform duration-300">→</div>
         </button>
       </div>
     </div>
@@ -187,10 +202,20 @@ const UploadStep: React.FC<UploadStepProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">
-        Upload Design Files
-      </h3>
+    <div className="bg-black/90 backdrop-blur-sm rounded-3xl shadow-2xl p-10 border border-gray-800 animate-fadeIn">
+      <div className="mb-8">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg">
+            <Upload className="w-7 h-7 text-white" />
+          </div>
+          <h3 className="text-3xl font-bold text-white tracking-tight">
+            Upload Design Files
+          </h3>
+        </div>
+        <p className="text-gray-400 font-medium text-lg">
+          Start by uploading your creative designs to bring your product to life
+        </p>
+      </div>
 
       <FileUploadZone onFileUpload={handleFileUpload} uploading={uploading} />
 
