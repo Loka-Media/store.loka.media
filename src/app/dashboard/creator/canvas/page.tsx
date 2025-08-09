@@ -525,10 +525,19 @@ function CanvasContent() {
         id: "marketplace",
       });
 
+      const storedMockupInputs = localStorage.getItem(`mockup_request_${selectedProduct.id}`);
+      const mockupInputs = storedMockupInputs ? JSON.parse(storedMockupInputs) : null;
+
       const result = await printfulAPI.storeMockupsPermanently(
         mockupUrls,
-        productData
+        productData,
+        designFiles,
+        mockupInputs
       );
+
+      if (result.success) {
+        localStorage.removeItem(`mockup_request_${selectedProduct.id}`);
+      }
 
       toast.dismiss("marketplace");
 
