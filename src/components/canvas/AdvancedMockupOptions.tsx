@@ -104,7 +104,7 @@ const AdvancedMockupOptions: React.FC<AdvancedMockupOptionsProps> = ({
           }
         } else {
           // If no available_techniques in response, use fallback
-          const fallbackTechniques = ['DTFILM', 'DTG'];
+          const fallbackTechniques = ['DTG', 'DTFILM'];
           setAvailableTechniques(fallbackTechniques);
           
           if (!selectedTechnique || !fallbackTechniques.includes(selectedTechnique)) {
@@ -136,7 +136,7 @@ const AdvancedMockupOptions: React.FC<AdvancedMockupOptionsProps> = ({
           }
         } else {
           // Ultimate fallback
-          const fallbackTechniques = ['DTFILM'];
+          const fallbackTechniques = ['DTG'];
           setAvailableTechniques(fallbackTechniques);
           
           if (!selectedTechnique || !fallbackTechniques.includes(selectedTechnique)) {

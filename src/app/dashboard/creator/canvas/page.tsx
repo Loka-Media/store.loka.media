@@ -91,10 +91,10 @@ function CanvasContent() {
               tags: []
             });
 
-            // Start with clean upload step - no demo files
-            setStep("upload");
+            // Skip upload step and go directly to unified editor
+            setStep("unified-editor");
             toast.success(
-              "Product loaded! Start by uploading your design files."
+              "Product loaded! Start designing your product."
             );
 
             // Wait a bit for auth to be ready, then fetch files
@@ -443,7 +443,7 @@ function CanvasContent() {
         onCreateProduct={() => {}}
       /> */}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="">
         {loading ? (
           <div className="text-center py-20">
             <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto" />

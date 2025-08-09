@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { ArrowRight, ShoppingBag, Star, Shield, Zap } from "lucide-react";
+import Ballpit from './Ballpit';
 
 interface HeroSectionProps {
   isAuthenticated: boolean;
@@ -13,23 +14,17 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
   return (
     <section className="relative pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen flex items-center mt-9">
       {/* Video Background */}
-      <div className="absolute inset-0 z-0">
-        <video
-          className="w-full h-full object-cover scale-110"
-          style={{ filter: "invert(2)" }}
-          autoPlay
-          muted
-          loop
-          playsInline
-        >
-          <source
-            src="https://cdn.fourthwall.com/sr-creators/resources/5a12e460-1e27-4680-b206-77074242703a/RackMultipart20250320-81-gjs25c.mp4"
-            type="video/mp4"
+        <div style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%'}}>
+          <Ballpit
+            count={200}
+            gravity={0.02}
+            friction={.95}
+            wallBounce={0.95}
+            followCursor={true}
           />
-        </video>
+        </div>
         {/* Gradient overlay with better blending */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-orange-900/40"></div>
-      </div>
 
       {/* Floating geometric shapes */}
       <div className="absolute inset-0 z-[1] pointer-events-none">

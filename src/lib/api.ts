@@ -536,11 +536,23 @@ export const printfulAPI = {
     }
   },
 
-  // Get uploaded files
+  // Get uploaded files from catalog API
   getFiles: async () => {
-    const response = await api.get("/api/printful/files");
-    return response.data;
+    try {
+      const response = await fetch("https://catalog.loka.media/api/printful/files");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch files from catalog API:", error);
+      // Fallback to local API
+      const response = await api.get("/api/printful/files");
+      return response.data;
+    }
   },
+
 
   // Create sync product
   createSyncProduct: async (productData: {
@@ -595,10 +607,17 @@ export const printfulAPI = {
     mockupData: {
       variant_ids: number[];
       format: string;
-      files: Array<{
-        placement: "front" | "back";
+      width?: number;
+      product_options?: {
+        lifelike?: boolean;
+        [key: string]: unknown;
+      };
+      option_groups?: string[];
+      options?: string[];
+      files?: Array<{
+        placement: string;
         image_url: string;
-        position: {
+        position?: {
           area_width: number;
           area_height: number;
           width: number;
@@ -607,8 +626,10 @@ export const printfulAPI = {
           left: number;
         };
       }>;
+      product_template_id?: number;
     }
   ) => {
+    console.log("Creating mockup task with data:", mockupData);
     const response = await api.post(
       `/api/printful/mockup-generator/create-task/${productId}`,
       mockupData
@@ -622,7 +643,7 @@ export const printfulAPI = {
     return response.data;
   },
 
-  // Get print files for a product
+  // Get print files for a product - First fetch from catalog API to get complete product information
   getPrintFiles: async (
     productId: number,
     technique?: string,
@@ -632,10 +653,58 @@ export const printfulAPI = {
     if (technique) params.append("technique", technique);
     if (orientation) params.append("orientation", orientation);
 
-    const url = `/api/printful/mockup-generator/printfiles/${productId}${
+    try {
+      // First, fetch from catalog API to get complete product information
+      const catalogUrl = `https://catalog.loka.media/api/printful/mockup-generator/printfiles/${productId}${
+        params.toString() ? `?${params.toString()}` : ""
+      }`;
+      
+      console.log("Fetching print files from catalog API:", catalogUrl);
+      const catalogResponse = await fetch(catalogUrl);
+      
+      if (catalogResponse.ok) {
+        const catalogData = await catalogResponse.json();
+        console.log("Catalog API response:", catalogData);
+        
+        // Return catalog data if successful
+        if (catalogData.code === 200 && catalogData.result) {
+          console.log("Successfully fetched print files from catalog API");
+          return catalogData;
+        } else if (catalogData.code === 400 && catalogData.error) {
+          // If catalog API returned a technique error, propagate it so frontend can handle it
+          console.log("Catalog API returned technique error, propagating:", catalogData);
+          throw new Error(catalogData.result || catalogData.error.message || 'Invalid technique');
+        } else {
+          console.warn("Catalog API returned invalid data structure:", catalogData);
+        }
+      } else {
+        const errorText = await catalogResponse.text();
+        console.warn("Catalog API returned status:", catalogResponse.status, errorText);
+        
+        // Try to parse error response for technique validation
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.code === 400 && errorData.error) {
+            throw new Error(errorData.result || errorData.error.message || 'Invalid technique');
+          }
+        } catch (parseError) {
+          // If we can't parse, continue with fallback
+        }
+      }
+    } catch (error) {
+      // If the error is technique-related, propagate it to frontend for handling
+      if (error.message && error.message.includes('technique')) {
+        console.log("Propagating technique error to frontend:", error.message);
+        throw error;
+      }
+      console.warn("Catalog API failed, falling back to local API:", error);
+    }
+
+    // Fallback to local API if catalog API fails
+    const localUrl = `/api/printful/mockup-generator/printfiles/${productId}${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-    const response = await api.get(url);
+    const response = await api.get(localUrl);
     return response.data;
   },
 

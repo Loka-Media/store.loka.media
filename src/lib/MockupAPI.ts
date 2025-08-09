@@ -175,9 +175,17 @@ class MockupAPI {
       if (options && options.length > 0) mockupData.options = options;
       if (productTemplateId) mockupData.product_template_id = productTemplateId;
 
-      // Add files if provided
+      // Add files if provided (deduplicate by placement - only one design per placement)
       if (designFiles && designFiles.length > 0) {
-        mockupData.files = designFiles.map((file) => ({
+        // Group designs by placement and take only the first one for each placement
+        const uniqueDesignsByPlacement = designFiles.reduce<Record<string, DesignFile>>((acc, file) => {
+          if (file.placement && !acc[file.placement]) {
+            acc[file.placement] = file;
+          }
+          return acc;
+        }, {});
+
+        mockupData.files = Object.values(uniqueDesignsByPlacement).map((file) => ({
           placement: file.placement,
           image_url: file.url,
           position: file.position
@@ -191,6 +199,8 @@ class MockupAPI {
               }
             : undefined,
         }));
+        
+        console.log(`Deduplicated designs: ${designFiles.length} -> ${mockupData.files.length} unique placements`);
       }
 
       console.log("Creating mockup task with data:", mockupData);
