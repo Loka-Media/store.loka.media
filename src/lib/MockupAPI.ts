@@ -194,6 +194,19 @@ class MockupAPI {
       }
 
       console.log("Creating mockup task with data:", mockupData);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(
+            `mockup_request_${productId}`,
+            JSON.stringify(mockupData)
+          );
+          console.log(
+            `Mockup request for product ${productId} stored in local storage.`
+          );
+        } catch (e) {
+          console.error("Error storing mockup request in local storage:", e);
+        }
+      }
       onStatusUpdate?.("Creating mockup generation task...", 0);
 
       const taskResponse = await this.createMockupTask(productId, mockupData);
