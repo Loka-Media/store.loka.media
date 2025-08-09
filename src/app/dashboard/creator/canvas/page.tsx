@@ -304,40 +304,55 @@ function CanvasContent() {
         },
       };
 
-      // Add advanced options if provided
+      // Add advanced options if provided, but be conservative with filters
       if (advancedOptions) {
-        if (advancedOptions.width) {
-          mockupOptions.width = advancedOptions.width;
-        }
+        // Always set a reasonable width
+        mockupOptions.width = advancedOptions.width || 1600;
 
-        if (
-          advancedOptions.lifelike !== undefined ||
-          advancedOptions.technique
-        ) {
-          mockupOptions.productOptions = {};
-          if (advancedOptions.lifelike !== undefined) {
-            mockupOptions.productOptions.lifelike = advancedOptions.lifelike;
-          }
-        }
+        // Set product options (lifelike rendering)
+        mockupOptions.productOptions = {
+          lifelike: advancedOptions.lifelike !== undefined ? advancedOptions.lifelike : true
+        };
 
-        if (
-          advancedOptions.optionGroups &&
-          advancedOptions.optionGroups.length > 0
-        ) {
+        // IMPORTANT: Only add option filters if user explicitly selected specific ones
+        // Having ALL options selected is more restrictive than having NONE selected
+        const hasSpecificOptionGroups = advancedOptions.optionGroups && 
+          advancedOptions.optionGroups.length > 0 && 
+          advancedOptions.optionGroups.length < 4; // Less than all 4 option groups
+          
+        const hasSpecificOptions = advancedOptions.options && 
+          advancedOptions.options.length > 0 && 
+          advancedOptions.options.length < 6; // Less than all 6 options
+
+        if (hasSpecificOptionGroups) {
           mockupOptions.optionGroups = advancedOptions.optionGroups;
+          console.log('✅ Adding selective option groups filter:', advancedOptions.optionGroups);
+        } else {
+          console.log('⭕ Skipping option groups filter (allowing all styles)');
         }
 
-        if (advancedOptions.options && advancedOptions.options.length > 0) {
+        if (hasSpecificOptions) {
           mockupOptions.options = advancedOptions.options;
+          console.log('✅ Adding selective options filter:', advancedOptions.options);
+        } else {
+          console.log('⭕ Skipping options filter (allowing all options)');
         }
 
-        // Log advanced options being used
-        console.log("Using advanced mockup options:", {
-          technique: advancedOptions.technique,
-          optionGroups: advancedOptions.optionGroups,
-          options: advancedOptions.options,
-          lifelike: advancedOptions.lifelike,
-          width: advancedOptions.width,
+        // Debug: Log what we're sending to the API
+        console.log("🔍 Advanced Options Debug:", {
+          provided: {
+            technique: advancedOptions.technique,
+            optionGroups: advancedOptions.optionGroups,
+            options: advancedOptions.options,
+            lifelike: advancedOptions.lifelike,
+            width: advancedOptions.width,
+          },
+          sending: {
+            width: mockupOptions.width,
+            productOptions: mockupOptions.productOptions,
+            optionGroups: mockupOptions.optionGroups,
+            options: mockupOptions.options,
+          }
         });
       }
 

@@ -166,7 +166,22 @@ const AdvancedTabContent: React.FC<AdvancedTabContentProps> = ({
 
       {/* Option Groups */}
       <div className="space-y-4">
-        <div className="text-sm font-bold text-gray-200">Mockup Style Groups</div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-bold text-gray-200">Mockup Style Groups</div>
+            {selectedOptionGroups.length > 0 && (
+              <button
+                onClick={() => setSelectedOptionGroups([])}
+                className="text-xs text-orange-400 hover:text-orange-300"
+              >
+                Clear All
+              </button>
+            )}
+          </div>
+          <div className="text-xs text-gray-400">
+            ⚠️ Select specific groups to filter results (leave empty for all styles)
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           {optionGroups.map((group) => (
             <button
@@ -192,7 +207,22 @@ const AdvancedTabContent: React.FC<AdvancedTabContentProps> = ({
 
       {/* Specific Options */}
       <div className="space-y-4">
-        <div className="text-sm font-bold text-gray-200">Style Options</div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-bold text-gray-200">Style Options</div>
+            {selectedOptions.length > 0 && (
+              <button
+                onClick={() => setSelectedOptions([])}
+                className="text-xs text-orange-400 hover:text-orange-300"
+              >
+                Clear All
+              </button>
+            )}
+          </div>
+          <div className="text-xs text-gray-400">
+            ⚠️ Select specific options to filter results (leave empty for all options)
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           {options.map((option) => (
             <button

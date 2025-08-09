@@ -175,19 +175,14 @@ class MockupAPI {
       if (options && options.length > 0) mockupData.options = options;
       if (productTemplateId) mockupData.product_template_id = productTemplateId;
 
-      // Add files if provided (deduplicate by placement - only one design per placement)
+      // Add files if provided - support multiple designs per placement
       if (designFiles && designFiles.length > 0) {
-        // Group designs by placement and take only the first one for each placement
-        const uniqueDesignsByPlacement = designFiles.reduce<Record<string, DesignFile>>((acc, file) => {
-          if (file.placement && !acc[file.placement]) {
-            acc[file.placement] = file;
-          }
-          return acc;
-        }, {});
-
-        mockupData.files = Object.values(uniqueDesignsByPlacement).map((file) => ({
+        // Include all design files, allowing multiple per placement
+        mockupData.files = designFiles
+          .filter(file => file.placement && file.url) // Only include files with placement and URL
+          .map((file) => ({
           placement: file.placement,
-          image_url: file.url,
+          image_url: file.url, // This should be the full URL to the uploaded file
           position: file.position
             ? {
                 area_width: file.position.area_width,
@@ -200,7 +195,22 @@ class MockupAPI {
             : undefined,
         }));
         
-        console.log(`Deduplicated designs: ${designFiles.length} -> ${mockupData.files.length} unique placements`);
+        // Debug: Log file URLs to check they are valid
+        console.log('Design file URLs being sent to API:', 
+          mockupData.files.map(f => ({ placement: f.placement, url: f.image_url })));
+        
+        // Validate that all files have valid URLs
+        const invalidFiles = mockupData.files.filter(f => 
+          !f.image_url || 
+          (!f.image_url.startsWith('http') && !f.image_url.startsWith('data:'))
+        );
+        
+        if (invalidFiles.length > 0) {
+          console.error('Invalid file URLs found:', invalidFiles);
+          throw new Error(`Invalid file URLs: ${invalidFiles.map(f => f.placement).join(', ')}`);
+        }
+        
+        console.log(`Including all design files: ${designFiles.length} designs -> ${mockupData.files.length} files sent to API`);
       }
 
       console.log("Creating mockup task with data:", mockupData);
