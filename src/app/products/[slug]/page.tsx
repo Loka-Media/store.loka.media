@@ -118,7 +118,6 @@ export default function ProductPage({ params }: ProductPageProps) {
 
     try {
       // For Printful products, check warehouse availability first
-      /*
       if (product?.source === 'printful') {
         console.log('🏭 Printful product detected, checking warehouse availability...');
         toast.loading('Checking availability...', { id: 'availability-check' });
@@ -163,7 +162,6 @@ export default function ProductPage({ params }: ProductPageProps) {
           toast.dismiss('availability-check');
         }
       }
-      */
 
       // Use appropriate cart based on authentication status
       if (isAuthenticated) {

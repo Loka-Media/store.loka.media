@@ -92,13 +92,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const message = errorResponse?.response?.data?.error || 'Failed to add to cart';
       
       // Handle specific availability errors from backend
-      // if (message.includes('out of stock') || message.includes('unavailable') || message.includes('not available')) {
-      //   toast.error('Product is currently out of stock');
-      // } else if (message.includes('insufficient inventory') || message.includes('not enough stock')) {
-      //   toast.error('Insufficient stock for the requested quantity');
-      // } else {
+      if (message.includes('out of stock') || message.includes('unavailable') || message.includes('not available')) {
+        toast.error('Product is currently out of stock');
+      } else if (message.includes('insufficient inventory') || message.includes('not enough stock')) {
+        toast.error('Insufficient stock for the requested quantity');
+      } else {
         toast.error(message);
-      // }
+      }
       return false;
     }
   };

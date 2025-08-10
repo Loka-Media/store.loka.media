@@ -283,38 +283,7 @@ export const cartAPI = {
     return response.data;
   },
 
-  // Check cart availability with detailed warehouse data
-  checkCartAvailability: async () => {
-    try {
-      // First get cart items
-      const cart = await cartAPI.getCart();
-      
-      if (!cart.items || cart.items.length === 0) {
-        return {
-          success: true,
-          all_available: true,
-          can_fulfill_order: true,
-          availability_checks: [],
-          summary: { total_items: 0, available_items: 0, unavailable_items: 0, low_stock_items: 0 }
-        };
-      }
-
-      // Prepare products for availability check
-      const products = cart.items.map((item: CartItem) => ({
-        productId: item.product_id,
-        variantId: item.variant_id,
-        quantity: item.quantity
-      }));
-
-      // Check availability using warehouse API
-      const availability = await printfulAPI.checkProductAvailability(products);
-      
-      return availability;
-    } catch (error) {
-      console.error('Failed to check cart availability:', error);
-      throw error;
-    }
-  },
+  // Cart availability checking removed - using existing regional inventory system
 };
 
 // Wishlist API
@@ -802,41 +771,7 @@ export const printfulAPI = {
     return response.data;
   },
 
-  // Get warehouse products (available inventory)
-  getWarehouseProducts: async (params?: {
-    query?: string;
-    limit?: number;
-    offset?: number;
-  }) => {
-    const response = await api.get('/api/printful/warehouse/products', { params });
-    return response.data;
-  },
-
-  // Get specific warehouse product
-  getWarehouseProduct: async (productId: number) => {
-    const response = await api.get(`/api/printful/warehouse/products/${productId}`);
-    return response.data;
-  },
-
-  // Check product availability for cart (authenticated users)
-  checkProductAvailability: async (products: Array<{
-    productId: number;
-    variantId: number;
-    quantity: number;
-  }>) => {
-    const response = await api.post('/api/printful/warehouse/check-availability', { products });
-    return response.data;
-  },
-
-  // Public product availability check (for guests and all users)
-  checkProductAvailabilityPublic: async (products: Array<{
-    productId: number;
-    variantId: number;
-    quantity: number;
-  }>) => {
-    const response = await api.post('/api/printful/public/check-availability', { products });
-    return response.data;
-  },
+  // Warehouse API functions removed - using existing regional inventory system
 };
 
 // Shopify API (NEW - Complete Integration)
