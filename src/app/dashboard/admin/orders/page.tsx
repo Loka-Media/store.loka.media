@@ -314,14 +314,18 @@ export default function AdminOrdersPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-white">Order Management</h1>
-            <p className="text-gray-300 mt-1">Manage and process marketplace orders</p>
+            <p className="text-gray-300 mt-1">
+              Manage and process marketplace orders
+            </p>
           </div>
           <button
             onClick={loadDashboardData}
             disabled={loading}
             className="inline-flex items-center px-4 py-2 border border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 disabled:opacity-50"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
+            />
             Refresh
           </button>
         </div>
@@ -481,7 +485,7 @@ export default function AdminOrdersPage() {
           <div className="px-6 py-4 border-b border-gray-700">
             <h3 className="text-lg font-medium text-white">Orders</h3>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-700">
               <thead className="bg-gray-900">
@@ -522,7 +526,7 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-white">
-                        {order.customer_name || 'Guest'}
+                        {order.customer_name || "Guest"}
                       </div>
                       <div className="text-sm text-gray-400">
                         {order.customer_email}
@@ -537,13 +541,21 @@ export default function AdminOrdersPage() {
                       ${parseFloat(order.customer_payment_amount).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.order_status)}`}>
-                        {order.order_status.replace('_', ' ')}
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          order.order_status
+                        )}`}
+                      >
+                        {order.order_status.replace("_", " ")}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {order.priority && (
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(order.priority)}`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(
+                            order.priority
+                          )}`}
+                        >
                           {order.priority}
                         </span>
                       )}
@@ -559,15 +571,16 @@ export default function AdminOrdersPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        
-                        {order.order_status === 'payment_received' && (
+
+                        {order.order_status && (
                           <button
                             onClick={() => {
                               setSelectedOrder(order);
                               setVerificationForm({
-                                bankAmountVerified: order.customer_payment_amount,
-                                verificationNotes: '',
-                                approveOrder: true
+                                bankAmountVerified:
+                                  order.customer_payment_amount,
+                                verificationNotes: "",
+                                approveOrder: true,
                               });
                               setShowVerificationModal(true);
                             }}
@@ -576,14 +589,17 @@ export default function AdminOrdersPage() {
                             <CheckCircle className="w-4 h-4" />
                           </button>
                         )}
-                        
-                        {order.order_status === 'verified' && (
+
+                        {order.order_status && (
                           <button
                             onClick={() => {
                               setSelectedOrder(order);
                               setPaymentForm({
-                                vendorEmail: order.order_type === 'shopify' ? 'shopify@vendor.com' : 'printful@vendor.com',
-                                notes: `Payment for order ${order.order_number}`
+                                vendorEmail:
+                                  order.order_type === "shopify"
+                                    ? "shopify@vendor.com"
+                                    : "printful@vendor.com",
+                                notes: `Payment for order ${order.order_number}`,
                               });
                               setShowPaymentModal(true);
                             }}
@@ -603,7 +619,9 @@ export default function AdminOrdersPage() {
           {orders.length === 0 && (
             <div className="text-center py-12">
               <Package className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-white">No orders found</h3>
+              <h3 className="mt-2 text-sm font-medium text-white">
+                No orders found
+              </h3>
               <p className="mt-1 text-sm text-gray-400">
                 No orders match the current filters.
               </p>
@@ -632,22 +650,58 @@ export default function AdminOrdersPage() {
                   {/* Order Info */}
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-white mb-2">Order Information</h4>
+                      <h4 className="font-medium text-white mb-2">
+                        Order Information
+                      </h4>
                       <div className="bg-gray-700 p-4 rounded-lg space-y-2">
-                        <p className="text-gray-300"><span className="font-medium text-white">Type:</span> {selectedOrder.order_type}</p>
-                        <p className="text-gray-300"><span className="font-medium text-white">Status:</span> {selectedOrder.order_status}</p>
-                        <p className="text-gray-300"><span className="font-medium text-white">Payment Status:</span> {selectedOrder.payment_status}</p>
-                        <p className="text-gray-300"><span className="font-medium text-white">Amount:</span> ${parseFloat(selectedOrder.customer_payment_amount).toFixed(2)}</p>
-                        <p className="text-gray-300"><span className="font-medium text-white">Created:</span> {new Date(selectedOrder.created_at).toLocaleString()}</p>
+                        <p className="text-gray-300">
+                          <span className="font-medium text-white">Type:</span>{" "}
+                          {selectedOrder.order_type}
+                        </p>
+                        <p className="text-gray-300">
+                          <span className="font-medium text-white">
+                            Status:
+                          </span>{" "}
+                          {selectedOrder.order_status}
+                        </p>
+                        <p className="text-gray-300">
+                          <span className="font-medium text-white">
+                            Payment Status:
+                          </span>{" "}
+                          {selectedOrder.payment_status}
+                        </p>
+                        <p className="text-gray-300">
+                          <span className="font-medium text-white">
+                            Amount:
+                          </span>{" "}
+                          $
+                          {parseFloat(
+                            selectedOrder.customer_payment_amount
+                          ).toFixed(2)}
+                        </p>
+                        <p className="text-gray-300">
+                          <span className="font-medium text-white">
+                            Created:
+                          </span>{" "}
+                          {new Date(selectedOrder.created_at).toLocaleString()}
+                        </p>
                       </div>
                     </div>
 
                     {/* Customer Info */}
                     <div>
-                      <h4 className="font-medium text-white mb-2">Customer Information</h4>
+                      <h4 className="font-medium text-white mb-2">
+                        Customer Information
+                      </h4>
                       <div className="bg-gray-700 p-4 rounded-lg space-y-2">
-                        <p className="text-gray-300"><span className="font-medium text-white">Name:</span> {selectedOrder.customer_name || 'Guest'}</p>
-                        <p className="text-gray-300"><span className="font-medium text-white">Email:</span> {selectedOrder.customer_email || 'N/A'}</p>
+                        <p className="text-gray-300">
+                          <span className="font-medium text-white">Name:</span>{" "}
+                          {selectedOrder.customer_name || "Guest"}
+                        </p>
+                        <p className="text-gray-300">
+                          <span className="font-medium text-white">Email:</span>{" "}
+                          {selectedOrder.customer_email || "N/A"}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -655,35 +709,76 @@ export default function AdminOrdersPage() {
                   {/* Shipping Address */}
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-white mb-2">Shipping Address</h4>
+                      <h4 className="font-medium text-white mb-2">
+                        Shipping Address
+                      </h4>
                       {selectedOrder.shipping_address && (
                         <div className="bg-gray-700 p-4 rounded-lg">
-                          <p className="text-gray-300">{selectedOrder.shipping_address.name}</p>
-                          <p className="text-gray-300">{selectedOrder.shipping_address.address1}</p>
-                          {selectedOrder.shipping_address.address2 && <p className="text-gray-300">{selectedOrder.shipping_address.address2}</p>}
-                          <p className="text-gray-300">{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state} {selectedOrder.shipping_address.zip}</p>
-                          <p className="text-gray-300">{selectedOrder.shipping_address.country}</p>
-                          {selectedOrder.shipping_address.phone && <p>{selectedOrder.shipping_address.phone}</p>}
+                          <p className="text-gray-300">
+                            {selectedOrder.shipping_address.name}
+                          </p>
+                          <p className="text-gray-300">
+                            {selectedOrder.shipping_address.address1}
+                          </p>
+                          {selectedOrder.shipping_address.address2 && (
+                            <p className="text-gray-300">
+                              {selectedOrder.shipping_address.address2}
+                            </p>
+                          )}
+                          <p className="text-gray-300">
+                            {selectedOrder.shipping_address.city},{" "}
+                            {selectedOrder.shipping_address.state}{" "}
+                            {selectedOrder.shipping_address.zip}
+                          </p>
+                          <p className="text-gray-300">
+                            {selectedOrder.shipping_address.country}
+                          </p>
+                          {selectedOrder.shipping_address.phone && (
+                            <p>{selectedOrder.shipping_address.phone}</p>
+                          )}
                         </div>
                       )}
                     </div>
 
                     {/* Order Items */}
                     <div>
-                      <h4 className="font-medium text-white mb-2">Order Items</h4>
+                      <h4 className="font-medium text-white mb-2">
+                        Order Items
+                      </h4>
                       <div className="bg-gray-700 p-4 rounded-lg max-h-48 overflow-y-auto">
-                        {selectedOrder.order_items && selectedOrder.order_items.map((item: unknown, index: number) => {
-                          const orderItem = item as { product_name?: string; quantity?: number; price?: string; color?: string; size?: string };
-                          return (
-                            <div key={index} className="border-b border-gray-600 last:border-b-0 pb-2 mb-2 last:mb-0">
-                              <p className="font-medium text-white">{orderItem.product_name}</p>
-                              <p className="text-sm text-gray-300">
-                                {orderItem.size} • {orderItem.color} • Qty: {orderItem.quantity}
-                              </p>
-                              <p className="text-sm text-gray-300">${orderItem.price ? parseFloat(orderItem.price).toFixed(2) : '0.00'} each</p>
-                            </div>
-                          );
-                        })}
+                        {selectedOrder.order_items &&
+                          selectedOrder.order_items.map(
+                            (item: unknown, index: number) => {
+                              const orderItem = item as {
+                                product_name?: string;
+                                quantity?: number;
+                                price?: string;
+                                color?: string;
+                                size?: string;
+                              };
+                              return (
+                                <div
+                                  key={index}
+                                  className="border-b border-gray-600 last:border-b-0 pb-2 mb-2 last:mb-0"
+                                >
+                                  <p className="font-medium text-white">
+                                    {orderItem.product_name}
+                                  </p>
+                                  <p className="text-sm text-gray-300">
+                                    {orderItem.size} • {orderItem.color} • Qty:{" "}
+                                    {orderItem.quantity}
+                                  </p>
+                                  <p className="text-sm text-gray-300">
+                                    $
+                                    {orderItem.price
+                                      ? parseFloat(orderItem.price).toFixed(2)
+                                      : "0.00"}{" "}
+                                    each
+                                  </p>
+                                </div>
+                              );
+                            }
+                          )}
                       </div>
                     </div>
                   </div>
@@ -728,10 +823,12 @@ export default function AdminOrdersPage() {
                       type="number"
                       step="0.01"
                       value={verificationForm.bankAmountVerified}
-                      onChange={(e) => setVerificationForm({
-                        ...verificationForm,
-                        bankAmountVerified: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setVerificationForm({
+                          ...verificationForm,
+                          bankAmountVerified: e.target.value,
+                        })
+                      }
                       className="w-full p-3 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white"
                       placeholder="Enter verified amount"
                     />
@@ -743,10 +840,12 @@ export default function AdminOrdersPage() {
                     </label>
                     <textarea
                       value={verificationForm.verificationNotes}
-                      onChange={(e) => setVerificationForm({
-                        ...verificationForm,
-                        verificationNotes: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setVerificationForm({
+                          ...verificationForm,
+                          verificationNotes: e.target.value,
+                        })
+                      }
                       rows={3}
                       className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="Enter verification notes..."
@@ -758,10 +857,12 @@ export default function AdminOrdersPage() {
                       <input
                         type="checkbox"
                         checked={verificationForm.approveOrder}
-                        onChange={(e) => setVerificationForm({
-                          ...verificationForm,
-                          approveOrder: e.target.checked
-                        })}
+                        onChange={(e) =>
+                          setVerificationForm({
+                            ...verificationForm,
+                            approveOrder: e.target.checked,
+                          })
+                        }
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                       />
                       <span className="ml-2 text-sm text-gray-900">
@@ -780,10 +881,14 @@ export default function AdminOrdersPage() {
                   </button>
                   <button
                     onClick={handleVerifyPayment}
-                    disabled={loading || !verificationForm.bankAmountVerified || !verificationForm.verificationNotes}
+                    disabled={
+                      loading ||
+                      !verificationForm.bankAmountVerified ||
+                      !verificationForm.verificationNotes
+                    }
                     className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50"
                   >
-                    {loading ? 'Verifying...' : 'Verify Payment'}
+                    {loading ? "Verifying..." : "Verify Payment"}
                   </button>
                 </div>
               </div>
@@ -816,10 +921,12 @@ export default function AdminOrdersPage() {
                     <input
                       type="email"
                       value={paymentForm.vendorEmail}
-                      onChange={(e) => setPaymentForm({
-                        ...paymentForm,
-                        vendorEmail: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setPaymentForm({
+                          ...paymentForm,
+                          vendorEmail: e.target.value,
+                        })
+                      }
                       className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="vendor@example.com"
                     />
@@ -831,10 +938,12 @@ export default function AdminOrdersPage() {
                     </label>
                     <textarea
                       value={paymentForm.notes}
-                      onChange={(e) => setPaymentForm({
-                        ...paymentForm,
-                        notes: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setPaymentForm({
+                          ...paymentForm,
+                          notes: e.target.value,
+                        })
+                      }
                       rows={3}
                       className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="Payment notes..."
@@ -843,8 +952,11 @@ export default function AdminOrdersPage() {
 
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <p className="text-sm text-yellow-800">
-                      <strong>Amount to release:</strong> ${selectedOrder.vendor_payment_amount || 'Calculating...'}<br/>
-                      <strong>Admin fee:</strong> ${selectedOrder.admin_fee || 'Calculating...'}
+                      <strong>Amount to release:</strong> $
+                      {selectedOrder.vendor_payment_amount || "Calculating..."}
+                      <br />
+                      <strong>Admin fee:</strong> $
+                      {selectedOrder.admin_fee || "Calculating..."}
                     </p>
                   </div>
                 </div>
@@ -861,7 +973,7 @@ export default function AdminOrdersPage() {
                     disabled={loading || !paymentForm.vendorEmail}
                     className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 disabled:opacity-50"
                   >
-                    {loading ? 'Releasing...' : 'Release Payment'}
+                    {loading ? "Releasing..." : "Release Payment"}
                   </button>
                 </div>
               </div>
