@@ -88,11 +88,42 @@ export default function CreatorCatalogPage() {
   const fetchCatalog = useCallback(async (categoryId: number) => {
     try {
       setLoading(true);
-      const response = await printfulAPI.getCatalog({ ...filters, category: categoryId.toString() });
+      console.log(`🔄 Fetching catalog for category ${categoryId} with filters:`, filters);
+      
+      // Use basic filtering - show all products but filter out deprecated ones
+      const response = await printfulAPI.getCatalog({ 
+        ...filters, 
+        category: categoryId.toString(),
+        // Don't use strict_inventory_check by default - let users see all products
+        include_unavailable: false, // Still filter out clearly deprecated products
+      });
+      
+      console.log(`📦 API Response:`, response);
+      console.log(`📦 Fetched ${response.result?.length || 0} products from category ${categoryId}`);
+      
+      if (response.filtered_count !== undefined) {
+        console.log(`📊 Showing ${response.filtered_count} available out of ${response.original_count} total products`);
+      }
+      
+      if (!response.result || response.result.length === 0) {
+        console.warn(`⚠️ No products returned for category ${categoryId}`);
+        toast.warning('No products found in this category', { duration: 4000 });
+      }
+      
       setProducts(response.result || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch catalog:', error);
-      toast.error('Failed to load Printful catalog');
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      if (error.response?.status === 401) {
+        toast.error('Please log in again to view catalog');
+      } else {
+        toast.error(`Failed to load catalog: ${error.message || 'Unknown error'}`);
+      }
     } finally {
       setLoading(false);
     }

@@ -9,6 +9,109 @@ import toast from 'react-hot-toast';
 import StripePaymentForm from '@/components/StripePaymentForm';
 import { addressAPI } from '@/lib/api';
 
+// Printful countries and states data
+interface PrintfulState {
+  code: string;
+  name: string;
+}
+
+interface PrintfulCountry {
+  code: string;
+  name: string;
+  states: PrintfulState[];
+  region: string;
+}
+
+// ZIP code lookup utility using multiple services
+const lookupZipCode = async (zipCode: string, countryCode: string = 'US') => {
+  if (!zipCode || zipCode.length < 4) return null;
+  
+  try {
+    // First try Zippopotam.us for US ZIP codes
+    if (countryCode === 'US' && zipCode.length === 5) {
+      const response = await fetch(`https://api.zippopotam.us/us/${zipCode}`);
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          city: data.places[0]['place name'],
+          state: data.places[0]['state abbreviation']
+        };
+      }
+    }
+    
+    // Fallback: Canadian postal codes
+    if (countryCode === 'CA' && zipCode.length >= 6) {
+      const response = await fetch(`https://api.zippopotam.us/ca/${zipCode.substring(0, 3)}`);
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          city: data.places[0]['place name'],
+          state: data.places[0]['state abbreviation']
+        };
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('ZIP code lookup failed:', error);
+    return null;
+  }
+};
+
+// Get Printful countries and states
+const getPrintfulCountries = async (): Promise<PrintfulCountry[]> => {
+  try {
+    const response = await fetch('https://api.printful.com/countries');
+    if (!response.ok) throw new Error('Failed to fetch countries');
+    
+    const data = await response.json();
+    return data.result || [];
+  } catch (error) {
+    console.error('Failed to fetch Printful countries:', error);
+    // Fallback to basic US/CA data if Printful API fails
+    return [
+      {
+        code: 'US',
+        name: 'United States',
+        states: [
+          { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
+          { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
+          { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
+          { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
+          { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
+          { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
+          { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
+          { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
+          { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
+          { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
+          { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
+          { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
+          { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
+          { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
+          { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
+          { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
+          { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }
+        ],
+        region: 'north_america'
+      },
+      {
+        code: 'CA',
+        name: 'Canada',
+        states: [
+          { code: 'AB', name: 'Alberta' }, { code: 'BC', name: 'British Columbia' },
+          { code: 'MB', name: 'Manitoba' }, { code: 'NB', name: 'New Brunswick' },
+          { code: 'NL', name: 'Newfoundland and Labrador' }, { code: 'NS', name: 'Nova Scotia' },
+          { code: 'ON', name: 'Ontario' }, { code: 'PE', name: 'Prince Edward Island' },
+          { code: 'QC', name: 'Quebec' }, { code: 'SK', name: 'Saskatchewan' },
+          { code: 'NT', name: 'Northwest Territories' }, { code: 'NU', name: 'Nunavut' },
+          { code: 'YT', name: 'Yukon' }
+        ],
+        region: 'north_america'
+      }
+    ];
+  }
+};
+
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://catalog.loka.media' 
   : 'http://localhost:3003';
@@ -144,6 +247,11 @@ export default function UnifiedCheckoutPage() {
     city: '', state: '', zip: '', country: 'US'
   });
   
+  // Printful countries and states
+  const [printfulCountries, setPrintfulCountries] = useState<PrintfulCountry[]>([]);
+  const [availableStates, setAvailableStates] = useState<PrintfulState[]>([]);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  
   const [wantsToSignup, setWantsToSignup] = useState(false);
   const [signupInfo, setSignupInfo] = useState({ password: '', confirmPassword: '' });
   const [loginInfo, setLoginInfo] = useState({ email: '', password: '' });
@@ -171,6 +279,34 @@ export default function UnifiedCheckoutPage() {
       setSelectedAddressId(null);
     }
   }, [isAuthenticated, user]);
+
+  // Load Printful countries on component mount
+  useEffect(() => {
+    const loadPrintfulCountries = async () => {
+      const countries = await getPrintfulCountries();
+      setPrintfulCountries(countries);
+      
+      // Set initial states for US
+      const usCountry = countries.find(c => c.code === 'US');
+      if (usCountry) {
+        setAvailableStates(usCountry.states);
+      }
+    };
+    
+    loadPrintfulCountries();
+  }, []);
+
+  // Update available states when country changes
+  useEffect(() => {
+    const selectedCountry = printfulCountries.find(c => c.code === customerInfo.country);
+    if (selectedCountry) {
+      setAvailableStates(selectedCountry.states);
+      // Clear state if country changed
+      if (customerInfo.state && !selectedCountry.states.find(s => s.code === customerInfo.state)) {
+        setCustomerInfo(prev => ({ ...prev, state: '' }));
+      }
+    }
+  }, [customerInfo.country, printfulCountries]);
 
   const loadUserAddresses = async () => {
     try {
@@ -228,6 +364,34 @@ export default function UnifiedCheckoutPage() {
     }));
     setShowNewAddressForm(true);
     console.log('✅ Creating new address');
+  };
+
+  // Handle ZIP code changes with auto-fill
+  const handleZipCodeChange = async (zipCode: string) => {
+    // Update ZIP code immediately
+    setCustomerInfo(prev => ({ ...prev, zip: zipCode }));
+    
+    // Auto-fill city and state for valid ZIP codes
+    if (zipCode.length >= 5 && (customerInfo.country === 'US' || customerInfo.country === 'CA')) {
+      setIsLoadingLocation(true);
+      const locationData = await lookupZipCode(zipCode, customerInfo.country);
+      
+      if (locationData) {
+        // Validate state against Printful states
+        const validState = availableStates.find(s => s.code === locationData.state);
+        
+        setCustomerInfo(prev => ({
+          ...prev,
+          city: locationData.city,
+          state: validState ? locationData.state : prev.state
+        }));
+        
+        toast.success(`📍 Auto-filled: ${locationData.city}, ${locationData.state}`, {
+          duration: 2000
+        });
+      }
+      setIsLoadingLocation(false);
+    }
   };
 
   const calculateTotal = () => {
@@ -813,14 +977,66 @@ export default function UnifiedCheckoutPage() {
                     <input type="text" placeholder="Address Line 1 *" value={customerInfo.address1} onChange={(e) => setCustomerInfo({ ...customerInfo, address1: e.target.value })} className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" />
                     <input type="text" placeholder="Address Line 2 (Optional)" value={customerInfo.address2} onChange={(e) => setCustomerInfo({ ...customerInfo, address2: e.target.value })} className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" />
                     <div className="grid grid-cols-2 gap-4">
-                      <input type="text" placeholder="City *" value={customerInfo.city} onChange={(e) => setCustomerInfo({ ...customerInfo, city: e.target.value })} className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" />
-                      <input type="text" placeholder="State" value={customerInfo.state} onChange={(e) => setCustomerInfo({ ...customerInfo, state: e.target.value })} className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" />
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          placeholder="City *" 
+                          value={customerInfo.city} 
+                          onChange={(e) => setCustomerInfo({ ...customerInfo, city: e.target.value })} 
+                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" 
+                        />
+                        {isLoadingLocation && (
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-indigo-600 border-t-transparent"></div>
+                          </div>
+                        )}
+                      </div>
+                      <select 
+                        value={customerInfo.state} 
+                        onChange={(e) => setCustomerInfo({ ...customerInfo, state: e.target.value })} 
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      >
+                        <option value="">Select State</option>
+                        {availableStates.map(state => (
+                          <option key={state.code} value={state.code}>
+                            {state.name} ({state.code})
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <input type="text" placeholder="ZIP Code *" value={customerInfo.zip} onChange={(e) => setCustomerInfo({ ...customerInfo, zip: e.target.value })} className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" />
-                      <select value={customerInfo.country} onChange={(e) => setCustomerInfo({ ...customerInfo, country: e.target.value })} className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="US">United States</option>
-                        <option value="CA">Canada</option>
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          placeholder="ZIP/Postal Code *" 
+                          value={customerInfo.zip} 
+                          onChange={(e) => handleZipCodeChange(e.target.value)} 
+                          className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" 
+                          maxLength={customerInfo.country === 'CA' ? 7 : 5}
+                        />
+                        {isLoadingLocation && (
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-indigo-600 border-t-transparent"></div>
+                          </div>
+                        )}
+                      </div>
+                      <select 
+                        value={customerInfo.country} 
+                        onChange={(e) => setCustomerInfo({ ...customerInfo, country: e.target.value })} 
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      >
+                        {printfulCountries.length > 0 ? (
+                          printfulCountries.map(country => (
+                            <option key={country.code} value={country.code}>
+                              {country.name}
+                            </option>
+                          ))
+                        ) : (
+                          <>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                          </>
+                        )}
                       </select>
                     </div>
                   </div>

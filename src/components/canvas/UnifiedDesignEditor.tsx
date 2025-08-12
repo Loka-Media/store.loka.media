@@ -45,7 +45,11 @@ import {
 import {
   getActivePrintFile,
   isEmbroideryProduct,
-  applyQuickPosition
+  applyQuickPosition,
+  calculateAspectRatioAwareDimensions,
+  validateDesignForPrintful,
+  autoFixDesignForPrintful,
+  validateOrderDesigns
 } from "./utils";
 import { printfulAPI } from "@/lib/api";
 
@@ -111,6 +115,63 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
   const isEmbroideryProd = isEmbroideryProduct(selectedProduct, selectedTechnique);
   
   const embroideryProductOptions = (selectedProduct as any)?.options || [];
+
+  // CRITICAL: Comprehensive pre-order validation system
+  const validateBeforeOrderProcessing = (): boolean => {
+    console.log("🔍 Starting comprehensive order validation...");
+    
+    // 1. Check if we have design files
+    if (designFiles.length === 0) {
+      toast.error("No designs added yet! Please add at least one design before proceeding.", {
+        duration: 6000
+      });
+      return false;
+    }
+
+    // 2. Check if variants are selected
+    if (selectedVariants.length === 0) {
+      toast.error("No product variants selected! Please select at least one variant.", {
+        duration: 6000
+      });
+      return false;
+    }
+
+    // 3. Comprehensive design validation
+    const orderValidation = validateOrderDesigns(designFiles, printFiles, selectedVariants);
+    
+    if (!orderValidation.isValid) {
+      console.error("❌ Order validation failed:", orderValidation.errors);
+      toast.error(`Design validation failed: ${orderValidation.errors[0]}`, {
+        duration: 8000
+      });
+      return false;
+    }
+
+    if (orderValidation.warnings.length > 0) {
+      console.log("⚠️ Order validation warnings:", orderValidation.warnings);
+      toast(`⚠️ Warning: ${orderValidation.warnings[0]}`, {
+        icon: '⚠️',
+        duration: 5000
+      });
+    }
+
+    console.log(`✅ Order validation passed! ${orderValidation.validatedDesigns.length} designs are ready for Printful.`);
+    return true;
+  };
+
+  // Enhanced preview generation with validation
+  const handleValidatedPreviewGeneration = (advancedOptions?: any) => {
+    console.log("🎯 Starting validated preview generation...");
+    
+    // CRITICAL: Always validate before proceeding
+    if (!validateBeforeOrderProcessing()) {
+      return;
+    }
+
+    // All validations passed - proceed with original preview generation
+    console.log("✅ All validations passed, generating preview...");
+    onGeneratePreview(advancedOptions);
+  };
   
   // Parse thread color options for each placement
   const getThreadColorOptions = (placementKey: string) => {
@@ -165,46 +226,136 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
     }
   };
 
-  const handleAddDesign = (file: UploadedFile, placement: string): void => {
+  const handleAddDesign = async (file: UploadedFile, placement: string): Promise<void> => {
     const activePrintFile = getActivePrintFile(printFiles, selectedVariants, placement);
-    if (!activePrintFile) return;
+    if (!activePrintFile) {
+      toast.error("No print file available for this placement");
+      return;
+    }
 
     // Calculate position offset for multiple designs on same placement
     const existingDesignsOnPlacement = designFiles.filter(df => df.placement === placement);
     const offsetMultiplier = existingDesignsOnPlacement.length;
     const baseOffset = 20;
 
-    const defaultWidth = Math.min(activePrintFile.width * 0.6, activePrintFile.width);
-    const defaultHeight = Math.min(activePrintFile.height * 0.6, activePrintFile.height);
+    try {
+      // SMART IMAGE ADAPTATION: Auto-adapt any image to work perfectly
+      const imageUrl = file.file_url || file.thumbnail_url || '';
+      const dimensionResult = await calculateAspectRatioAwareDimensions(
+        imageUrl, 
+        activePrintFile, 
+        0.7, // Max 70% of print area for better visibility
+        true // Enable smart adaptation
+      );
+      
+      const { width: aspectAwareWidth, height: aspectAwareHeight, adapted } = dimensionResult;
 
-    // Calculate position with slight offset for multiple designs
-    const baseTop = (activePrintFile.height - defaultHeight) / 2;
-    const baseLeft = (activePrintFile.width - defaultWidth) / 2;
-    
-    const newDesign: DesignFile = {
-      id: Date.now() + offsetMultiplier, // Ensure unique IDs
-      filename: file.filename,
-      url: file.file_url || file.thumbnail_url || '',
-      type: "design",
-      placement,
-      position: {
-        area_width: activePrintFile.width,
-        area_height: activePrintFile.height,
-        width: defaultWidth,
-        height: defaultHeight,
-        top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
-        left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
-        limit_to_print_area: true,
-      },
-    };
+      // Calculate position with slight offset for multiple designs
+      const baseTop = (activePrintFile.height - aspectAwareHeight) / 2;
+      const baseLeft = (activePrintFile.width - aspectAwareWidth) / 2;
+      
+      const newDesign: DesignFile = {
+        id: Date.now() + offsetMultiplier, // Ensure unique IDs
+        filename: file.filename,
+        url: imageUrl,
+        type: "design",
+        placement,
+        position: {
+          area_width: activePrintFile.width,
+          area_height: activePrintFile.height,
+          width: aspectAwareWidth,
+          height: aspectAwareHeight,
+          top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
+          left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
+          limit_to_print_area: true,
+        },
+      };
 
-    setDesignFiles([...designFiles, newDesign]);
-    setSelectedDesignFile(newDesign);
-    const totalCount = existingDesignsOnPlacement.length + 1;
-    if (totalCount === 1) {
-      toast.success(`Design added to ${placement}!`);
-    } else {
-      toast.success(`Design added to ${placement}! (${totalCount} total - most recent will be used in mockups)`);
+      // CRITICAL: Validate design against Printful requirements before adding
+      const validation = validateDesignForPrintful(newDesign, activePrintFile, true);
+      
+      if (!validation.isValid) {
+        // Auto-fix the design if possible
+        console.log("⚠️ Design validation failed, attempting auto-fix:", validation.errors);
+        const fixedDesign = autoFixDesignForPrintful(newDesign, activePrintFile);
+        
+        // Re-validate the fixed design
+        const fixedValidation = validateDesignForPrintful(fixedDesign, activePrintFile, true);
+        
+        if (fixedValidation.isValid) {
+          console.log("✅ Auto-fix successful");
+          setDesignFiles([...designFiles, fixedDesign]);
+          setSelectedDesignFile(fixedDesign);
+          toast.success(`${file.filename} added with automatic corrections for Printful compatibility!`, {
+            icon: '🔧',
+            duration: 4000
+          });
+        } else {
+          // Even auto-fix failed - this should be very rare
+          console.error("❌ Auto-fix failed:", fixedValidation.errors);
+          toast.error(`Unable to add ${file.filename}: ${fixedValidation.errors[0]}`, {
+            duration: 6000
+          });
+          return;
+        }
+      } else {
+        // Design is already valid
+        console.log("✅ Design validation passed");
+        setDesignFiles([...designFiles, newDesign]);
+        setSelectedDesignFile(newDesign);
+        
+        if (validation.warnings.length > 0) {
+          console.log("⚠️ Design warnings:", validation.warnings);
+        }
+        
+        // Success message with smart adaptation info
+        const totalCount = existingDesignsOnPlacement.length + 1;
+        if (adapted) {
+          toast.success(`${file.filename} auto-adapted to perfect ${placement} fit! 🎯`, {
+            icon: '✨',
+            duration: 4000
+          });
+        } else if (totalCount === 1) {
+          toast.success(`${file.filename} added to ${placement}! ✅ Perfect fit`, {
+            icon: '✨',
+            duration: 3000
+          });
+        } else {
+          toast.success(`${file.filename} added to ${placement}! (${totalCount} total)`, {
+            duration: 3000
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to calculate aspect-ratio aware dimensions:", error);
+      
+      // Fallback to safe default dimensions that maintain print area aspect ratio
+      const safeWidth = activePrintFile.width * 0.6;
+      const safeHeight = activePrintFile.height * 0.6;
+      
+      const baseTop = (activePrintFile.height - safeHeight) / 2;
+      const baseLeft = (activePrintFile.width - safeWidth) / 2;
+      
+      const newDesign: DesignFile = {
+        id: Date.now() + offsetMultiplier,
+        filename: file.filename,
+        url: file.file_url || file.thumbnail_url || '',
+        type: "design",
+        placement,
+        position: {
+          area_width: activePrintFile.width,
+          area_height: activePrintFile.height,
+          width: Math.round(safeWidth),
+          height: Math.round(safeHeight),
+          top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
+          left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
+          limit_to_print_area: true,
+        },
+      };
+
+      setDesignFiles([...designFiles, newDesign]);
+      setSelectedDesignFile(newDesign);
+      toast.success(`Design added to ${placement}! (Using safe dimensions)`);
     }
   };
 
@@ -216,6 +367,29 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
 
     const dataUrl = `data:text/plain;charset=utf-8,${encodeURIComponent(textContent.trim())}`;
 
+    // Calculate text dimensions that maintain reasonable aspect ratio
+    // Text typically has a wider aspect ratio than most print areas
+    const textAspectRatio = 3.33; // Typical text width:height ratio (200:60)
+    const printAreaAspectRatio = activePrintFile.width / activePrintFile.height;
+    
+    let textWidth: number;
+    let textHeight: number;
+    
+    // Scale text to fit nicely within print area while maintaining readability
+    if (textAspectRatio > printAreaAspectRatio) {
+      // Text is wider than print area - constrain by width
+      textWidth = Math.min(activePrintFile.width * 0.6, 300); // Max 300px width
+      textHeight = textWidth / textAspectRatio;
+    } else {
+      // Print area is wider - constrain by a reasonable text height
+      textHeight = Math.min(activePrintFile.height * 0.2, 80); // Max 80px height
+      textWidth = textHeight * textAspectRatio;
+    }
+
+    // Ensure minimum readable size
+    textWidth = Math.max(textWidth, 100);
+    textHeight = Math.max(textHeight, 30);
+
     const newDesign: DesignFile = {
       id: Date.now(),
       filename: `${textContent.trim().substring(0, 20)}.txt`,
@@ -225,10 +399,10 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
       position: {
         area_width: activePrintFile.width,
         area_height: activePrintFile.height,
-        width: 200,
-        height: 60,
-        top: (activePrintFile.height - 60) / 2,
-        left: (activePrintFile.width - 200) / 2,
+        width: Math.round(textWidth),
+        height: Math.round(textHeight),
+        top: Math.round((activePrintFile.height - textHeight) / 2),
+        left: Math.round((activePrintFile.width - textWidth) / 2),
         limit_to_print_area: true,
       },
     };
@@ -236,10 +410,10 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
     setDesignFiles([...designFiles, newDesign]);
     setSelectedDesignFile(newDesign);
     setTextContent("");
-    toast.success(`Text added to ${activePlacement}!`);
+    toast.success(`Text added to ${activePlacement}! ✨ Optimized for print compatibility`);
   };
 
-  const handleTextImageCreated = (imageUrl: string, filename: string) => {
+  const handleTextImageCreated = async (imageUrl: string, filename: string) => {
     if (!activePlacement) {
       toast.error('Please select a placement first');
       return;
@@ -253,36 +427,110 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
     const offsetMultiplier = existingDesignsOnPlacement.length;
     const baseOffset = 20;
 
-    const defaultWidth = Math.min(300, activePrintFile.width * 0.8);
-    const defaultHeight = Math.min(100, activePrintFile.height * 0.3);
-    
-    // Calculate position with slight offset for multiple designs
-    const baseTop = (activePrintFile.height - defaultHeight) / 2;
-    const baseLeft = (activePrintFile.width - defaultWidth) / 2;
+    try {
+      // SMART TEXT ADAPTATION: Auto-adapt text to print area
+      const dimensionResult = await calculateAspectRatioAwareDimensions(
+        imageUrl, 
+        activePrintFile, 
+        0.6, // Max 60% of print area for text images
+        true // Enable smart adaptation for text
+      );
+      
+      const { width: aspectAwareWidth, height: aspectAwareHeight, adapted } = dimensionResult;
 
-    const newDesign: DesignFile = {
-      id: Date.now() + offsetMultiplier, // Ensure unique IDs
-      filename,
-      url: imageUrl,
-      type: "design",
-      placement: activePlacement,
-      position: {
-        area_width: activePrintFile.width,
-        area_height: activePrintFile.height,
-        width: defaultWidth,
-        height: defaultHeight,
-        top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
-        left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
-        limit_to_print_area: true,
-      },
-    };
+      // Calculate position with slight offset for multiple designs
+      const baseTop = (activePrintFile.height - aspectAwareHeight) / 2;
+      const baseLeft = (activePrintFile.width - aspectAwareWidth) / 2;
 
-    setDesignFiles([...designFiles, newDesign]);
-    setSelectedDesignFile(newDesign);
-    toast.success(`Text image added to ${activePlacement}! (${existingDesignsOnPlacement.length + 1} total)`);
+      const newDesign: DesignFile = {
+        id: Date.now() + offsetMultiplier, // Ensure unique IDs
+        filename,
+        url: imageUrl,
+        type: "design",
+        placement: activePlacement,
+        position: {
+          area_width: activePrintFile.width,
+          area_height: activePrintFile.height,
+          width: aspectAwareWidth,
+          height: aspectAwareHeight,
+          top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
+          left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
+          limit_to_print_area: true,
+        },
+      };
+
+      // CRITICAL: Validate text design against Printful requirements
+      const validation = validateDesignForPrintful(newDesign, activePrintFile, true);
+      
+      if (!validation.isValid) {
+        console.log("⚠️ Text design validation failed, attempting auto-fix:", validation.errors);
+        const fixedDesign = autoFixDesignForPrintful(newDesign, activePrintFile);
+        const fixedValidation = validateDesignForPrintful(fixedDesign, activePrintFile, true);
+        
+        if (fixedValidation.isValid) {
+          setDesignFiles([...designFiles, fixedDesign]);
+          setSelectedDesignFile(fixedDesign);
+          toast.success(`Text added to ${activePlacement} with automatic corrections!`, {
+            icon: '🔧',
+            duration: 4000
+          });
+        } else {
+          toast.error(`Unable to add text: ${fixedValidation.errors[0]}`, {
+            duration: 6000
+          });
+          return;
+        }
+      } else {
+        setDesignFiles([...designFiles, newDesign]);
+        setSelectedDesignFile(newDesign);
+        
+        if (adapted) {
+          toast.success(`Text auto-adapted to perfect ${activePlacement} fit! 📝🎯`, {
+            icon: '✨',
+            duration: 4000
+          });
+        } else {
+          toast.success(`Text added to ${activePlacement}! ✅ Perfect fit`, {
+            icon: '📝',
+            duration: 3000
+          });
+        }
+      }
+      
+    } catch (error) {
+      console.error("Failed to calculate aspect-ratio aware dimensions for text image:", error);
+      
+      // Fallback to typical text dimensions (wider than tall)
+      const textWidth = Math.min(300, activePrintFile.width * 0.7);
+      const textHeight = Math.min(80, textWidth / 4); // 4:1 aspect ratio for text
+      
+      const baseTop = (activePrintFile.height - textHeight) / 2;
+      const baseLeft = (activePrintFile.width - textWidth) / 2;
+      
+      const newDesign: DesignFile = {
+        id: Date.now() + offsetMultiplier,
+        filename,
+        url: imageUrl,
+        type: "design",
+        placement: activePlacement,
+        position: {
+          area_width: activePrintFile.width,
+          area_height: activePrintFile.height,
+          width: textWidth,
+          height: textHeight,
+          top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
+          left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
+          limit_to_print_area: true,
+        },
+      };
+
+      setDesignFiles([...designFiles, newDesign]);
+      setSelectedDesignFile(newDesign);
+      toast.success(`Text image added to ${activePlacement}! (Using safe text dimensions)`);
+    }
   };
 
-  const handleClipartImageCreated = (imageUrl: string, filename: string) => {
+  const handleClipartImageCreated = async (imageUrl: string, filename: string) => {
     if (!activePlacement) {
       toast.error('Please select a placement first');
       return;
@@ -296,33 +544,106 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
     const offsetMultiplier = existingDesignsOnPlacement.length;
     const baseOffset = 20;
 
-    const defaultWidth = Math.min(150, activePrintFile.width * 0.4);
-    const defaultHeight = Math.min(150, activePrintFile.height * 0.4);
-    
-    // Calculate position with slight offset for multiple designs
-    const baseTop = (activePrintFile.height - defaultHeight) / 2;
-    const baseLeft = (activePrintFile.width - defaultWidth) / 2;
+    try {
+      // SMART CLIPART ADAPTATION: Auto-adapt clipart to print area
+      const dimensionResult = await calculateAspectRatioAwareDimensions(
+        imageUrl, 
+        activePrintFile, 
+        0.4, // Max 40% of print area for clipart (smaller than regular designs)
+        true // Enable smart adaptation for clipart
+      );
+      
+      const { width: aspectAwareWidth, height: aspectAwareHeight, adapted } = dimensionResult;
 
-    const newDesign: DesignFile = {
-      id: Date.now() + offsetMultiplier, // Ensure unique IDs
-      filename,
-      url: imageUrl,
-      type: "design",
-      placement: activePlacement,
-      position: {
-        area_width: activePrintFile.width,
-        area_height: activePrintFile.height,
-        width: defaultWidth,
-        height: defaultHeight,
-        top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
-        left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
-        limit_to_print_area: true,
-      },
-    };
+      // Calculate position with slight offset for multiple designs
+      const baseTop = (activePrintFile.height - aspectAwareHeight) / 2;
+      const baseLeft = (activePrintFile.width - aspectAwareWidth) / 2;
 
-    setDesignFiles([...designFiles, newDesign]);
-    setSelectedDesignFile(newDesign);
-    toast.success(`Clipart added to ${activePlacement}! (${existingDesignsOnPlacement.length + 1} total)`);
+      const newDesign: DesignFile = {
+        id: Date.now() + offsetMultiplier, // Ensure unique IDs
+        filename,
+        url: imageUrl,
+        type: "design",
+        placement: activePlacement,
+        position: {
+          area_width: activePrintFile.width,
+          area_height: activePrintFile.height,
+          width: aspectAwareWidth,
+          height: aspectAwareHeight,
+          top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
+          left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
+          limit_to_print_area: true,
+        },
+      };
+
+      // CRITICAL: Validate clipart design against Printful requirements
+      const validation = validateDesignForPrintful(newDesign, activePrintFile, true);
+      
+      if (!validation.isValid) {
+        console.log("⚠️ Clipart design validation failed, attempting auto-fix:", validation.errors);
+        const fixedDesign = autoFixDesignForPrintful(newDesign, activePrintFile);
+        const fixedValidation = validateDesignForPrintful(fixedDesign, activePrintFile, true);
+        
+        if (fixedValidation.isValid) {
+          setDesignFiles([...designFiles, fixedDesign]);
+          setSelectedDesignFile(fixedDesign);
+          toast.success(`Clipart added to ${activePlacement} with automatic corrections!`, {
+            icon: '🔧',
+            duration: 4000
+          });
+        } else {
+          toast.error(`Unable to add clipart: ${fixedValidation.errors[0]}`, {
+            duration: 6000
+          });
+          return;
+        }
+      } else {
+        setDesignFiles([...designFiles, newDesign]);
+        setSelectedDesignFile(newDesign);
+        
+        if (adapted) {
+          toast.success(`Clipart auto-adapted to perfect ${activePlacement} fit! 🎨🎯`, {
+            icon: '✨',
+            duration: 4000
+          });
+        } else {
+          toast.success(`Clipart added to ${activePlacement}! ✅ Perfect fit`, {
+            icon: '🎨',
+            duration: 3000
+          });
+        }
+      }
+      
+    } catch (error) {
+      console.error("Failed to calculate aspect-ratio aware dimensions for clipart:", error);
+      
+      // Fallback to square dimensions that should work for most clipart
+      const fallbackSize = Math.min(200, activePrintFile.width * 0.3, activePrintFile.height * 0.3);
+      
+      const baseTop = (activePrintFile.height - fallbackSize) / 2;
+      const baseLeft = (activePrintFile.width - fallbackSize) / 2;
+      
+      const newDesign: DesignFile = {
+        id: Date.now() + offsetMultiplier,
+        filename,
+        url: imageUrl,
+        type: "design",
+        placement: activePlacement,
+        position: {
+          area_width: activePrintFile.width,
+          area_height: activePrintFile.height,
+          width: fallbackSize,
+          height: fallbackSize, // Square fallback
+          top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
+          left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
+          limit_to_print_area: true,
+        },
+      };
+
+      setDesignFiles([...designFiles, newDesign]);
+      setSelectedDesignFile(newDesign);
+      toast.success(`Clipart added to ${activePlacement}! (Using safe square dimensions)`);
+    }
   };
 
   const updateDesignPosition = (
@@ -344,15 +665,10 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
     }
   };
 
-  const handleSelectFileForPlacement = (file: UploadedFile) => {
-    setSelectedFileForPlacement(file);
-    setShowPlacementPanel(true);
-    setChildPanelOpen(false);
-  };
 
-  const handlePlaceFileOnPlacement = (placement: string) => {
+  const handlePlaceFileOnPlacement = async (placement: string) => {
     if (selectedFileForPlacement) {
-      handleAddDesign(selectedFileForPlacement, placement);
+      await handleAddDesign(selectedFileForPlacement, placement);
       setSelectedFileForPlacement(null);
       setShowPlacementPanel(false);
     }
@@ -485,7 +801,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
             isGeneratingPreview={isGeneratingPreview}
             selectedTechnique={selectedTechnique}
             advancedOptions={advancedOptions}
-            onGeneratePreview={onGeneratePreview}
+            onGeneratePreview={handleValidatedPreviewGeneration}
           />
         );
 
@@ -693,7 +1009,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
             isGeneratingPreview={isGeneratingPreview}
             selectedTechnique={selectedTechnique}
             advancedOptions={advancedOptions}
-            onGeneratePreview={onGeneratePreview}
+            onGeneratePreview={handleValidatedPreviewGeneration}
           />
         ) : (
           <ProductOverviewTab

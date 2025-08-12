@@ -114,55 +114,9 @@ export default function ProductPage({ params }: ProductPageProps) {
       return;
     }
 
-    console.log('🛒 Add to cart called for product:', product?.name, 'source:', product?.source);
+    console.log('🛒 Add to cart called for product:', product?.name, 'variant:', selectedVariant.id);
 
     try {
-      // For Printful products, check warehouse availability first
-      if (product?.source === 'printful') {
-        console.log('🏭 Printful product detected, checking warehouse availability...');
-        toast.loading('Checking availability...', { id: 'availability-check' });
-        
-        try {
-          console.log('📞 Making warehouse API call for:', {
-            productId: product.id,
-            variantId: selectedVariant.id,
-            quantity: quantity
-          });
-          const availabilityCheck = await printfulAPI.checkProductAvailabilityPublic([{
-            productId: product.id,
-            variantId: selectedVariant.id,
-            quantity: quantity
-          }]);
-          console.log('✅ Warehouse API response:', availabilityCheck);
-
-          toast.dismiss('availability-check');
-
-          if (!availabilityCheck.success || !availabilityCheck.can_fulfill_order) {
-            const unavailableItem = availabilityCheck.availability_checks?.find(
-              (check: any) => check.variantId === selectedVariant.id
-            );
-            
-            if (unavailableItem?.stock_status === 'out_of_stock') {
-              toast.error('This item is currently out of stock');
-              return;
-            } else if (unavailableItem?.stock_status === 'low_stock') {
-              if (unavailableItem.available_quantity < quantity) {
-                toast.error(`Only ${unavailableItem.available_quantity} items available. Please reduce quantity.`);
-                return;
-              } else {
-                toast.success(`Added to cart! Only ${unavailableItem.available_quantity} left in stock.`, { duration: 4000 });
-              }
-            } else {
-              toast.error('This item is currently unavailable');
-              return;
-            }
-          }
-        } catch (availabilityError) {
-          console.warn('Warehouse availability check failed, proceeding with add to cart:', availabilityError);
-          toast.dismiss('availability-check');
-        }
-      }
-
       // Use appropriate cart based on authentication status
       if (isAuthenticated) {
         await addToAuthenticatedCart(selectedVariant.id, quantity);

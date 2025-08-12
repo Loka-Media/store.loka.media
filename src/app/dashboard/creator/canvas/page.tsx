@@ -18,7 +18,6 @@ import ProductDetailsForm from "@/components/canvas/ProductDetailsForm";
 import {
   DesignFile,
   ProductForm,
-  PlacementPosition,
 } from "@/lib/types";
 
 
@@ -68,6 +67,30 @@ function CanvasContent() {
       // Check if productId is provided in URL
       if (productId) {
         try {
+          // First, check product availability
+          console.log(`🔍 Checking availability for product ${productId}...`);
+          const availabilityCheck = await printfulAPI.checkProductAvailability(parseInt(productId));
+          
+          if (!availabilityCheck.result.can_create_product) {
+            toast.error(`❌ ${availabilityCheck.result.message}`);
+            toast.error("Please select a different product from the catalog", {
+              duration: 6000
+            });
+            router.push('/dashboard/creator/canvas');
+            return;
+          }
+          
+          // Show availability warnings if any
+          if (availabilityCheck.result.warnings && availabilityCheck.result.warnings.length > 0) {
+            availabilityCheck.result.warnings.forEach(warning => {
+              toast(`⚠️ ${warning}`, { 
+                icon: '⚠️',
+                duration: 4000
+              });
+            });
+          }
+          
+          // If available, proceed to get product details
           const detailed = await printfulAPI.getProductDetails(
             parseInt(productId)
           );
@@ -76,7 +99,76 @@ function CanvasContent() {
             detailed.result?.variants || detailed.result?.product?.variants;
 
           if (product) {
-            const productWithVariants = { ...product, variants };
+            // Get all variant IDs for dynamic availability checking
+            const allVariantIds = variants?.map(v => v.id) || [];
+            
+            console.log(`🔍 Checking availability for ${allVariantIds.length} variants dynamically...`);
+            
+            let availableVariants = variants;
+            
+            try {
+              // Check variant availability dynamically using API
+              const variantCheck = await printfulAPI.checkVariantAvailability(allVariantIds);
+              
+              if (variantCheck.result && variantCheck.result.variants) {
+                // Create a map of variant availability
+                const availabilityMap = new Map();
+                variantCheck.result.variants.forEach(v => {
+                  availabilityMap.set(v.variant_id, v);
+                });
+                
+                // Filter variants based on API results
+                availableVariants = variants?.filter(variant => {
+                  const availabilityInfo = availabilityMap.get(variant.id);
+                  
+                  // Check multiple conditions
+                  const isInAvailabilityResults = availabilityCheck.result.available_variant_ids.includes(variant.id);
+                  const canCreateFromAPI = availabilityInfo?.can_create_product !== false;
+                  const variantCanCreate = variant.can_create_product !== false;
+                  
+                  const isAvailable = isInAvailabilityResults && canCreateFromAPI && variantCanCreate;
+                  
+                  if (!isAvailable && availabilityInfo) {
+                    console.log(`⚠️ Filtering out variant ${variant.id} (${variant.name}): ${availabilityInfo.reason}`);
+                  }
+                  
+                  return isAvailable;
+                }) || variants;
+                
+                // Show summary of filtering
+                const originalCount = variants?.length || 0;
+                const filteredCount = availableVariants?.length || 0;
+                const filteredOut = originalCount - filteredCount;
+                
+                if (filteredOut > 0) {
+                  toast(`⚠️ ${filteredOut} variant${filteredOut > 1 ? 's' : ''} filtered out (discontinued/unavailable)`, {
+                    icon: '⚠️',
+                    duration: 4000
+                  });
+                  console.log(`📊 Variant filtering: ${filteredCount}/${originalCount} variants available`);
+                }
+                
+              } else {
+                console.warn('⚠️ Could not get dynamic variant availability, using basic filtering');
+                // Fallback to basic filtering
+                availableVariants = variants?.filter(variant => 
+                  availabilityCheck.result.available_variant_ids.includes(variant.id) &&
+                  variant.can_create_product !== false
+                ) || variants;
+              }
+              
+            } catch (variantError) {
+              console.error('⚠️ Dynamic variant check failed:', variantError);
+              toast.error('Could not verify all variant availability. Some variants may be discontinued.');
+              
+              // Fallback to basic filtering
+              availableVariants = variants?.filter(variant => 
+                availabilityCheck.result.available_variant_ids.includes(variant.id) &&
+                variant.can_create_product !== false
+              ) || variants;
+            }
+
+            const productWithVariants = { ...product, variants: availableVariants };
             setSelectedProduct(productWithVariants);
             localStorage.setItem(
               "selectedPrintfulProduct",
@@ -93,9 +185,14 @@ function CanvasContent() {
 
             // Skip upload step and go directly to unified editor
             setStep("unified-editor");
-            toast.success(
-              "Product loaded! Start designing your product."
-            );
+            
+            const availabilityStatus = availabilityCheck.result.status === 'available' 
+              ? '✅ Product is fully available' 
+              : `⚠️ Product is ${availabilityCheck.result.availability_details.availability_percentage}% available`;
+            
+            toast.success(`${availabilityStatus} - Start designing!`, {
+              duration: 3000
+            });
 
             // Wait a bit for auth to be ready, then fetch files
             setTimeout(() => {
@@ -292,11 +389,101 @@ function CanvasContent() {
         return;
       }
 
+      // ASPECT RATIO VALIDATION AND CORRECTION
+      setMockupStatus("Validating design aspect ratios...");
+      console.log("🔍 Performing aspect ratio validation before mockup generation...");
+      
+      let correctedDesignFiles = [...designFiles];
+      let aspectRatioIssuesFixed = 0;
+      
+      for (let i = 0; i < correctedDesignFiles.length; i++) {
+        const designFile = correctedDesignFiles[i];
+        if (!designFile.position) continue;
+
+        const { width: designWidth, height: designHeight, area_width, area_height } = designFile.position;
+        
+        if (area_width && area_height) {
+          // Import the validation function dynamically
+          const { validateAspectRatioCompatibility } = await import('@/components/canvas/utils');
+          
+          const validation = validateAspectRatioCompatibility(
+            designWidth, 
+            designHeight, 
+            area_width, 
+            area_height, 
+            0.02 // 2% tolerance
+          );
+          
+          if (!validation.isValid) {
+            console.log(`⚠️ Aspect ratio mismatch detected for design ${i + 1}:`);
+            console.log(`   Design ratio: ${validation.designRatio.toFixed(3)}, Area ratio: ${validation.areaRatio.toFixed(3)}`);
+            console.log(`   Difference: ${(validation.difference * 100).toFixed(1)}% (tolerance: 2%)`);
+            
+            // SMART FIX: Adjust dimensions to maintain aspect ratio while fitting in print area
+            // This preserves the design's aspect ratio without breaking the UI
+            const designRatio = designWidth / designHeight;
+            const areaRatio = area_width / area_height;
+            
+            let correctedPosition;
+            
+            if (designRatio > areaRatio) {
+              // Design is wider - fit to width, adjust height
+              const newHeight = area_width / designRatio;
+              const topOffset = (area_height - newHeight) / 2; // Center vertically
+              
+              correctedPosition = {
+                area_width,
+                area_height,
+                width: area_width,
+                height: newHeight,
+                top: Math.max(0, topOffset),
+                left: 0
+              };
+            } else {
+              // Design is taller - fit to height, adjust width  
+              const newWidth = area_height * designRatio;
+              const leftOffset = (area_width - newWidth) / 2; // Center horizontally
+              
+              correctedPosition = {
+                area_width,
+                area_height, 
+                width: newWidth,
+                height: area_height,
+                top: 0,
+                left: Math.max(0, leftOffset)
+              };
+            }
+            
+            correctedDesignFiles[i] = {
+              ...designFile,
+              position: correctedPosition
+            };
+            
+            aspectRatioIssuesFixed++;
+            console.log(`✅ Fixed aspect ratio by smart scaling: ${designWidth}x${designHeight} → ${correctedPosition.width}x${correctedPosition.height} (centered in ${area_width}x${area_height})`);
+            toast.success(`Fixed aspect ratio for design ${i + 1} - smart scaled and centered`, { duration: 3000 });
+          } else {
+            console.log(`✅ Design ${i + 1} aspect ratio is valid (${validation.designRatio.toFixed(3)})`);
+          }
+        }
+      }
+      
+      if (aspectRatioIssuesFixed > 0) {
+        setDesignFiles(correctedDesignFiles);
+        toast.success(`Fixed ${aspectRatioIssuesFixed} aspect ratio issue${aspectRatioIssuesFixed > 1 ? 's' : ''}`, { 
+          duration: 4000,
+          icon: '🔧' 
+        });
+        console.log(`🔧 Applied aspect ratio corrections to ${aspectRatioIssuesFixed} design files`);
+      } else {
+        console.log("✅ All design files have valid aspect ratios");
+      }
+
       // Prepare advanced mockup options
       const mockupOptions: any = {
         productId: selectedProduct.id,
         variantIds: validVariantIds.slice(0, 3), // Use first 3 valid variants for preview
-        designFiles,
+        designFiles: correctedDesignFiles, // Use aspect-ratio corrected design files
         format: "jpg" as const,
         onStatusUpdate: (status: string, attempts: number) => {
           setMockupStatus(status);
@@ -385,8 +572,48 @@ function CanvasContent() {
       return;
     }
 
+    if (!selectedVariants || selectedVariants.length === 0) {
+      toast.error("No variants selected. Please select at least one size/color combination.");
+      return;
+    }
+
     try {
       setCreating(true);
+
+      // FINAL VALIDATION: Ensure all selected variants are still available before publishing
+      console.log("🔍 Performing final variant availability check before publishing...");
+      toast.loading("Validating product variants...", { id: "final-validation" });
+      
+      try {
+        const finalValidation = await printfulAPI.checkVariantAvailability(selectedVariants);
+        
+        if (finalValidation.result && finalValidation.result.variants) {
+          const unavailableVariants = finalValidation.result.variants.filter(
+            (v: any) => !v.can_create_product
+          );
+          
+          if (unavailableVariants.length > 0) {
+            toast.dismiss("final-validation");
+            const unavailableNames = unavailableVariants.map((v: any) => 
+              `Variant ID ${v.variant_id} (${v.reason})`
+            ).join(', ');
+            
+            toast.error(
+              `❌ Cannot publish: ${unavailableVariants.length} variant${unavailableVariants.length > 1 ? 's are' : ' is'} no longer available: ${unavailableNames}. Please refresh the page and reselect variants.`,
+              { duration: 8000 }
+            );
+            console.error("❌ Final validation failed - unavailable variants:", unavailableVariants);
+            return;
+          }
+        }
+        
+        toast.dismiss("final-validation");
+        console.log("✅ Final validation passed - all variants available for publishing");
+      } catch (validationError) {
+        toast.dismiss("final-validation");
+        console.warn("⚠️ Final validation check failed, proceeding with caution:", validationError);
+        toast.warning("Could not verify all variants - proceeding with publication", { duration: 4000 });
+      }
 
       const productData = {
         id: selectedProduct?.id,

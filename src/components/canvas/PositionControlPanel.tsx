@@ -56,19 +56,52 @@ const PositionControlPanel: React.FC<PositionControlPanelProps> = ({
     if (isNaN(numValue)) return;
 
     const updates: any = {};
-    switch (field) {
-      case 'x':
-        updates.left = numValue;
-        break;
-      case 'y':
-        updates.top = numValue;
-        break;
-      case 'width':
-        updates.width = numValue;
-        break;
-      case 'height':
-        updates.height = numValue;
-        break;
+    
+    // CRITICAL: Maintain ACTUAL DESIGN aspect ratio for width/height changes to prevent Printful errors
+    if (field === 'width' || field === 'height') {
+      if (!selectedDesignFile?.position) {
+        console.error('No design file position - cannot maintain aspect ratio');
+        return;
+      }
+      
+      // Use the CURRENT design aspect ratio (which should match the actual image ratio)
+      const currentDesignRatio = selectedDesignFile.position.width / selectedDesignFile.position.height;
+      console.log(`🔒 Maintaining current design aspect ratio ${currentDesignRatio.toFixed(4)} for ${field} adjustment`);
+      
+      if (field === 'width') {
+        // Adjust width, calculate height to maintain current design ratio
+        const newWidth = numValue;
+        const newHeight = newWidth / currentDesignRatio;
+        
+        updates.width = newWidth;
+        updates.height = Math.round(newHeight);
+        
+        console.log(`📐 Width adjusted: ${newWidth}px → Height auto-calculated: ${Math.round(newHeight)}px`);
+      } else if (field === 'height') {
+        // Adjust height, calculate width to maintain current design ratio
+        const newHeight = numValue;
+        const newWidth = newHeight * currentDesignRatio;
+        
+        updates.height = newHeight;
+        updates.width = Math.round(newWidth);
+        
+        console.log(`📐 Height adjusted: ${newHeight}px → Width auto-calculated: ${Math.round(newWidth)}px`);
+      }
+      
+      // Show user feedback about aspect ratio maintenance
+      const finalRatio = updates.width / updates.height;
+      console.log(`✅ Final aspect ratio maintained: ${finalRatio.toFixed(4)} (matches design: ${currentDesignRatio.toFixed(4)})`);
+      
+    } else {
+      // Position changes (x, y) don't affect aspect ratio
+      switch (field) {
+        case 'x':
+          updates.left = numValue;
+          break;
+        case 'y':
+          updates.top = numValue;
+          break;
+      }
     }
     
     updateDesignPosition(selectedDesignFile.id, updates);

@@ -201,16 +201,79 @@ export const useAutoSelectVariants = (
     }
   }, [selectedColors]);
 
-  // Update selected variants when size/color changes
+  // Update selected variants when size/color changes with availability validation
   useEffect(() => {
     if (!selectedProduct?.variants) return;
 
-    const filteredVariants = selectedProduct.variants.filter(
-      (variant) =>
-        selectedSizes.includes(variant.size) &&
-        selectedColors.includes(variant.color)
-    );
+    const validateAndSetVariants = async () => {
+      const filteredVariants = selectedProduct.variants.filter(
+        (variant) =>
+          selectedSizes.includes(variant.size) &&
+          selectedColors.includes(variant.color)
+      );
 
-    setSelectedVariants(filteredVariants.map((v) => v.id));
+      if (filteredVariants.length === 0) {
+        setSelectedVariants([]);
+        return;
+      }
+
+      // Extract variant IDs for availability check
+      const variantIds = filteredVariants.map((v) => v.id);
+      console.log(`🔍 Validating availability for ${variantIds.length} selected variants...`);
+
+      try {
+        // Check variant availability dynamically
+        const availabilityResponse = await printfulAPI.checkVariantAvailability(variantIds);
+        
+        if (availabilityResponse.result && availabilityResponse.result.variants) {
+          // Create map of availability results
+          const availabilityMap = new Map();
+          availabilityResponse.result.variants.forEach((v: any) => {
+            availabilityMap.set(v.variant_id, v);
+          });
+          
+          // Filter out unavailable variants
+          const availableVariants = filteredVariants.filter(variant => {
+            const availabilityInfo = availabilityMap.get(variant.id);
+            return availabilityInfo?.can_create_product !== false;
+          });
+          
+          // Count filtered variants
+          const originalCount = filteredVariants.length;
+          const availableCount = availableVariants.length;
+          const filteredOutCount = originalCount - availableCount;
+          
+          if (filteredOutCount > 0) {
+            console.warn(`⚠️ ${filteredOutCount} variant${filteredOutCount > 1 ? 's' : ''} filtered out (discontinued/unavailable)`);
+            
+            // Show user-friendly notification
+            const filteredVariantNames = filteredVariants
+              .filter(variant => {
+                const availabilityInfo = availabilityMap.get(variant.id);
+                return availabilityInfo?.can_create_product === false;
+              })
+              .map(v => `${v.color} ${v.size}`)
+              .join(', ');
+              
+            if (filteredVariantNames) {
+              console.log(`Filtered out variants: ${filteredVariantNames}`);
+            }
+          }
+          
+          setSelectedVariants(availableVariants.map((v) => v.id));
+          console.log(`✅ ${availableCount}/${originalCount} variants available for selection`);
+        } else {
+          // If availability check fails, log warning but allow variants
+          console.warn('⚠️ Could not verify variant availability, proceeding with filtered variants');
+          setSelectedVariants(variantIds);
+        }
+      } catch (error) {
+        console.error('❌ Variant availability check failed:', error);
+        // Fallback: allow variants but log the issue
+        setSelectedVariants(variantIds);
+      }
+    };
+
+    validateAndSetVariants();
   }, [selectedSizes, selectedColors, selectedProduct, setSelectedVariants]);
 };

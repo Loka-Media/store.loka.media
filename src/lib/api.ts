@@ -469,6 +469,10 @@ export const printfulAPI = {
     offset?: number;
     sortBy?: string;
     sortOrder?: string;
+    strict_inventory_check?: string;
+    target_regions?: string;
+    include_unavailable?: boolean;
+    customer_country?: string;
   }) => {
     const response = await api.get("/api/printful/catalog", { params });
     return response.data;
@@ -483,6 +487,23 @@ export const printfulAPI = {
   // Get product details with variants
   getProductDetails: async (productId: number) => {
     const response = await api.get(`/api/printful/catalog/${productId}`);
+    return response.data;
+  },
+
+  // Check product availability before creation
+  checkProductAvailability: async (productId: number, targetRegions: string[] = ['US', 'EU']) => {
+    const params = new URLSearchParams();
+    params.append('target_regions', targetRegions.join(','));
+    
+    const response = await api.get(`/api/printful/catalog/${productId}/availability?${params}`);
+    return response.data;
+  },
+
+  // Check individual variant availability dynamically
+  checkVariantAvailability: async (variantIds: number[]) => {
+    const response = await api.post('/api/printful/variants/check-availability', {
+      variantIds
+    });
     return response.data;
   },
 

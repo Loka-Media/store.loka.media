@@ -7,7 +7,7 @@ interface TextTabContentProps {
   setTextContent: (content: string) => void;
   handleAddTextToDesign: () => void;
   activePlacement: string;
-  onTextImageCreated?: (imageUrl: string, filename: string) => void;
+  onTextImageCreated?: (imageUrl: string, filename: string) => Promise<void>;
   userId?: number;
 }
 
@@ -47,7 +47,7 @@ const TextTabContent: React.FC<TextTabContentProps> = ({
       );
       
       // Call the callback to add the text image to designs
-      onTextImageCreated?.(url, filename);
+      await onTextImageCreated?.(url, filename);
       
       toast.success('Text converted to image successfully!');
       setTextContent(''); // Clear the text input

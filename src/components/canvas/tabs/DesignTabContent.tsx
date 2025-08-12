@@ -32,7 +32,7 @@ interface DesignTabContentProps {
   setSelectedDesignFile: (file: DesignFile | null) => void;
   updateDesignPosition: (designId: number, updates: any) => void;
   uploadedFiles: UploadedFile[];
-  handleAddDesign: (file: UploadedFile, placement: string) => void;
+  handleAddDesign: (file: UploadedFile, placement: string) => Promise<void>;
   onShowPositionPanel: () => void;
   selectedFile: UploadedFile | null;
   setSelectedFile: (file: UploadedFile | null) => void;
@@ -81,13 +81,15 @@ const DesignTabContent: React.FC<DesignTabContentProps> = ({
     }
   };
 
-  const handleImageSelect = (file: UploadedFile) => {
+  const handleImageSelect = async (file: UploadedFile) => {
     setSelectedFile(file);
     if (activePlacement) {
-      handleAddDesign(file, activePlacement);
+      // AUTOMATIC: Adjust image to valid aspect ratio instead of rejecting
+      await handleAddDesign(file, activePlacement);
       setCurrentStep('position');
     }
   };
+  
 
   const handleRemoveDesign = (placement: string) => {
     const design = designFiles.find(df => df.placement === placement);

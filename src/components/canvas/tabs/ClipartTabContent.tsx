@@ -12,7 +12,7 @@ import { convertIconToImage, uploadIconAsImage, getIconSvgData } from '../../../
 import toast from 'react-hot-toast';
 
 interface ClipartTabContentProps {
-  onClipartImageCreated?: (imageUrl: string, filename: string) => void;
+  onClipartImageCreated?: (imageUrl: string, filename: string) => Promise<void>;
 }
 
 const ClipartTabContent: React.FC<ClipartTabContentProps> = ({
@@ -83,7 +83,7 @@ const ClipartTabContent: React.FC<ClipartTabContentProps> = ({
       const { url, filename } = await uploadIconAsImage(imageBlob, iconName);
 
       // Call the callback to add the clipart image to designs
-      onClipartImageCreated?.(url, filename);
+      await onClipartImageCreated?.(url, filename);
 
       toast.success('Clipart converted to image successfully!');
       setSelectedIcon(null); // Clear selection

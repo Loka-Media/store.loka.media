@@ -398,7 +398,7 @@ export function ProductCard({ product }: ProductCardProps) {
               <span className="text-sm text-gray-500 line-through">
                 $
                 {(
-                  parseFloat(product.min_price.toString().replace("$", "")) *
+                  parseFloat(product.min_price?.toString().replace("$", "")) *
                   (1 + discountPercentage / 100)
                 ).toFixed(2)}
               </span>

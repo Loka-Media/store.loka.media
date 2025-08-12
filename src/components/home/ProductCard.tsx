@@ -8,7 +8,6 @@ import {
   Star,
   Tag,
   Globe,
-  ShoppingCart,
   Eye,
   Zap,
 } from "lucide-react";
@@ -55,12 +54,6 @@ export function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     toast.success("Quick view coming soon!");
-  };
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toast.success("Added to cart!");
   };
 
   const discountPercentage = Math.floor(Math.random() * 30) + 5; // Mock discount
@@ -162,13 +155,6 @@ export function ProductCard({
             >
               <Eye className="w-5 h-5" />
             </button>
-            <button
-              onClick={handleAddToCart}
-              className="p-3 bg-orange-500 backdrop-blur-sm rounded-full text-white hover:bg-orange-600 transition-all duration-200 transform hover:scale-110 shadow-lg"
-              title="Add to cart"
-            >
-              <ShoppingCart className="w-5 h-5" />
-            </button>
           </div>
         </div>
       </Link>
@@ -204,7 +190,7 @@ export function ProductCard({
               <span className="text-sm text-gray-500 line-through">
                 $
                 {(
-                  parseFloat(product.min_price.toString().replace("$", "")) *
+                  parseFloat(product.min_price?.toString().replace("$", "")) *
                   (1 + discountPercentage / 100)
                 ).toFixed(2)}
               </span>
