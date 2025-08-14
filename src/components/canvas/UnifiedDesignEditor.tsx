@@ -31,11 +31,12 @@ import ProductOverviewTab from "./ProductOverviewTab";
 import PositionControlPanel from "./PositionControlPanel";
 
 // Import types, hooks and utils
-import {
-  UnifiedDesignEditorProps,
-  TabType,
-  DesignFile,
-  UploadedFile,
+import { 
+  AspectRatioIssue, 
+  UnifiedDesignEditorProps, 
+  TabType, 
+  DesignFile, 
+  UploadedFile, 
 } from "./types";
 import {
   useDesignEditorState,
@@ -78,6 +79,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showPositionPanel, setShowPositionPanel] = useState(false);
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
+  const [aspectRatioIssues, setAspectRatioIssues] = useState<AspectRatioIssue[]>([]);
 
   // Use custom hooks for state management
   const stateHook = useDesignEditorState(selectedProduct);
@@ -872,17 +874,24 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
           {tabs.map((tab) => {
             const IconComponent = tab.icon;
             const isActive = activeTab === tab.id;
-            
+            const isPreviewTab = tab.id === "preview";
+            const isPreviewDisabled = isPreviewTab && aspectRatioIssues.length > 0;
+
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => !isPreviewDisabled && setActiveTab(tab.id)}
                 className={`w-full p-3 flex flex-col items-center justify-center transition-all duration-200 group relative ${
                   isActive
                     ? "bg-orange-500 text-white shadow-lg"
                     : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                } ${
+                  isPreviewDisabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                 }`}
                 title={tab.label}
+                disabled={isPreviewDisabled}
               >
                 <IconComponent className="w-5 h-5 mb-1" />
                 <span className="text-xs font-medium">{tab.label}</span>
@@ -1000,6 +1009,8 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
             setSelectedDesignFile={setSelectedDesignFile}
             activePrintFile={getActivePrintFile(printFiles, selectedVariants, activePlacement)}
             updateDesignPosition={updateDesignPosition}
+            onAspectRatioIssues={setAspectRatioIssues}
+            aspectRatioIssues={aspectRatioIssues}
           />
         ) : activeTab === "preview" ? (
           <PreviewTab
