@@ -39,7 +39,7 @@ export const OrderSummary = ({
           <div key={item.id} className="flex items-center justify-between">
             <div>
               <p className="font-medium text-sm text-white">{item.product_name}</p>
-              <p className="text-xs text-gray-400">{item.size} • {item.color} • Qty: {item.quantity}</p>
+              <p className="text-xs text-gray-400">{item.size} • {item.color || 'Default'} • Qty: {item.quantity}</p>
             </div>
             <p className="font-medium text-white">${item.total_price}</p>
           </div>

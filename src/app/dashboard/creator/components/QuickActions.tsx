@@ -8,25 +8,13 @@ export function QuickActions() {
     {
       href: '/dashboard/creator/catalog',
       icon: ShoppingBag,
-      title: 'Browse Catalog',
-      description: 'Explore Printful products',
+      title: 'Custom Catalog',
+      description: 'Customizable products',
     },
     {
-      href: '/dashboard/creator/files',
-      icon: Upload,
-      title: 'Upload Files',
-      description: 'Manage your design files',
-    },
-    {
-      href: '/dashboard/creator/canvas',
-      icon: Palette,
-      title: 'Design Canvas',
-      description: 'Create and edit designs',
-    },
-    {
-      href: '/dashboard/creator/shopify-products',
+      href: '/dashboard/creator/loka-products',
       icon: Store,
-      title: 'Shopify Products',
+      title: 'Loka Products',
       description: 'Browse & publish products',
     },
   ];

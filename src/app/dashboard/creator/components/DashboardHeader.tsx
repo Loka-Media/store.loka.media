@@ -27,30 +27,12 @@ export function DashboardHeader({ connection, onConnectPrintful }: DashboardHead
           
           {connection?.connected ? (
             <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-900 text-green-300">
-                <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                Printful Connected
-              </span>
               <Link
                 href="/dashboard/creator/products"
                 className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 hover:border-orange-500 transition-colors"
               >
                 <Package className="w-4 h-4 mr-2" />
                 My Products
-              </Link>
-              <Link
-                href="/dashboard/creator/shopify-products"
-                className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 hover:border-orange-500 transition-colors"
-              >
-                <Store className="w-4 h-4 mr-2" />
-                Shopify Products
-              </Link>
-              <Link
-                href="/dashboard/creator/products/create"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create New Product
               </Link>
             </div>
           ) : (

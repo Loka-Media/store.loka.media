@@ -1134,14 +1134,7 @@ export const inventoryAPI = {
 
 // Public API (no authentication required - for guest users)
 export const publicAPI = {
-  // Get product variant details for guest cart
-  getProductVariant: async (variantId: number) => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/products/variants/${variantId}`
-    );
-    if (!response.ok) {
-      throw new Error("Failed to fetch product variant");
-    }
-    return response.json();
-  },
+  // Note: Product variant details for guest cart are now cached in localStorage
+  // when users add items to cart from product listings or detail pages
+  // This eliminates the need for a public API endpoint
 };

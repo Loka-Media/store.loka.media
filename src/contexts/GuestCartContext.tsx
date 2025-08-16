@@ -63,6 +63,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated) {
       try {
         const savedCart = localStorage.getItem('guestCart');
+        
         if (savedCart) {
           const guestCartData = JSON.parse(savedCart);
           const cartItems = guestCartData.items || [];
@@ -106,10 +107,11 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
   const saveGuestCart = useCallback((cartItems: GuestCartItem[], cartSummary: CartSummary) => {
     if (!isAuthenticated) {
       try {
-        localStorage.setItem('guestCart', JSON.stringify({
+        const cartData = {
           items: cartItems,
           summary: cartSummary
-        }));
+        };
+        localStorage.setItem('guestCart', JSON.stringify(cartData));
       } catch (error) {
         console.error('Failed to save guest cart to localStorage:', error);
       }
@@ -278,84 +280,100 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
     } else {
-      // Guest cart logic - we need to fetch product variant details
+      // Guest cart logic - directly handle guest cart without trying authenticated API
       try {
-        // For guest cart, we need to get product details first
-        // Use the existing cartAPI for consistency but handle the auth error
+        // Try to get cached product data from localStorage
+        let newItem: GuestCartItem;
+        
         try {
-          await cartAPI.addToCart(variantId, quantity);
-          toast.success('Added to cart!');
-          // This means user got authenticated in the meantime, refresh the whole cart
-          await refreshCart();
-          return true;
-        } catch (authError) {
-          // Auth failed, continue with guest cart logic
-          // Fetch real product variant details
-          let newItem: GuestCartItem;
+          const productCache = localStorage.getItem(`product_variant_${variantId}`);
+          let cachedData = null;
           
-          try {
-            const variantData = await publicAPI.getProductVariant(variantId);
-            
+          if (productCache) {
+            cachedData = JSON.parse(productCache);
+          }
+          
+          if (cachedData) {
             newItem = {
               id: Date.now(), // Temporary ID for guest cart
-              product_id: variantData.product_id,
+              product_id: cachedData.product_id || 0,
               variant_id: variantId,
-              product_name: variantData.product_name,
-              price: variantData.final_price,
+              product_name: cachedData.product_name || 'Product',
+              price: cachedData.price || '25.00',
               quantity,
-              total_price: (parseFloat(variantData.final_price) * quantity).toFixed(2),
-              size: variantData.size || variantData.title?.split(' / ')[1] || 'One Size',
-              color: variantData.color || variantData.title?.split(' / ')[0] || 'Default',
-              color_code: variantData.color_code,
-              image_url: variantData.image_url || variantData.thumbnail_url,
-              thumbnail_url: variantData.thumbnail_url,
-              creator_name: variantData.creator_name,
-              source: variantData.source || 'unknown',
-              shopify_variant_id: variantData.shopify_variant_id,
-              printful_variant_id: variantData.printful_variant_id
+              total_price: (parseFloat(cachedData.price || '25.00') * quantity).toFixed(2),
+              size: cachedData.size || 'One Size',
+              color: cachedData.color || 'Default',
+              color_code: cachedData.color_code || '#808080',
+              image_url: cachedData.image_url || cachedData.thumbnail_url,
+              thumbnail_url: cachedData.thumbnail_url,
+              creator_name: cachedData.creator_name || 'Creator',
+              source: cachedData.source || 'unknown',
+              shopify_variant_id: cachedData.shopify_variant_id,
+              printful_variant_id: cachedData.printful_variant_id
             };
-          } catch (variantError) {
-            console.error('Failed to fetch variant details:', variantError);
-            // Fallback to placeholder data if API fails
+          } else {
+            // Ultimate fallback when no cached data
             newItem = {
               id: Date.now(),
               product_id: 0,
               variant_id: variantId,
-              product_name: `Product Variant ${variantId}`,
+              product_name: `Product (Please login to see details)`,
               price: '25.00',
               quantity,
               total_price: (25.00 * quantity).toFixed(2),
               size: 'One Size',
               color: 'Default',
+              color_code: '#808080',
               source: 'unknown'
             };
           }
-          
-          // Check if item already exists in guest cart
-          const existingItemIndex = items.findIndex(item => item.variant_id === variantId);
-          let updatedItems: GuestCartItem[];
-          
-          if (existingItemIndex >= 0) {
-            // Update existing item quantity
-            updatedItems = [...items];
-            updatedItems[existingItemIndex].quantity += quantity;
-            updatedItems[existingItemIndex].total_price = (parseFloat(updatedItems[existingItemIndex].price) * updatedItems[existingItemIndex].quantity).toFixed(2);
-          } else {
-            // Add new item
-            updatedItems = [...items, newItem];
-          }
-          
-          const newSummary = calculateSummary(updatedItems);
-          
-          setItems(updatedItems);
-          setSummary(newSummary);
-          setCartCount(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
-          saveGuestCart(updatedItems, newSummary);
-          
-          toast.success('Added to cart!');
-          return true;
+        } catch (error) {
+          console.error('Failed to get cached product data:', error);
+          // Ultimate fallback
+          newItem = {
+            id: Date.now(),
+            product_id: 0,
+            variant_id: variantId,
+            product_name: `Product (Please login to see details)`,
+            price: '25.00',
+            quantity,
+            total_price: (25.00 * quantity).toFixed(2),
+            size: 'One Size',
+            color: 'Default',
+            color_code: '#808080',
+            source: 'unknown'
+          };
         }
+        
+        // Check if item already exists in guest cart
+        const existingItemIndex = items.findIndex(item => item.variant_id === variantId);
+        let updatedItems: GuestCartItem[];
+        
+        if (existingItemIndex >= 0) {
+          // Update existing item quantity
+          updatedItems = [...items];
+          updatedItems[existingItemIndex].quantity += quantity;
+          updatedItems[existingItemIndex].total_price = (parseFloat(updatedItems[existingItemIndex].price) * updatedItems[existingItemIndex].quantity).toFixed(2);
+        } else {
+          // Add new item
+          updatedItems = [...items, newItem];
+        }
+        
+        const newSummary = calculateSummary(updatedItems);
+        
+        setItems(updatedItems);
+        setSummary(newSummary);
+        setCartCount(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
+        saveGuestCart(updatedItems, newSummary);
+        
+        // Force re-fetch cart count to update navigation
+        await fetchCartCount();
+        
+        toast.success('Added to cart!');
+        return true;
       } catch (error) {
+        console.error('Failed to add to guest cart:', error);
         toast.error('Failed to add to cart');
         return false;
       }

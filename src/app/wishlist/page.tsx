@@ -35,6 +35,30 @@ export default function WishlistPage() {
 
       // Use the first available variant
       const firstVariant = productData.variants[0];
+      
+      // Cache variant data for guest cart before adding to cart
+      const variantCacheData = {
+        product_id: productData.id,
+        product_name: productData.name,
+        price: firstVariant.price?.toString() || productData.min_price?.toString() || '25.00',
+        size: firstVariant.size || firstVariant.title?.split(' / ')[1] || 'One Size',
+        color: firstVariant.color || firstVariant.title?.split(' / ')[0] || 'Default',
+        color_code: firstVariant.color_code || '#808080',
+        image_url: firstVariant.image_url || productData.thumbnail_url || productData.images?.[0],
+        thumbnail_url: productData.thumbnail_url || productData.images?.[0],
+        creator_name: productData.creator_name,
+        source: productData.product_source || 'unknown',
+        shopify_variant_id: firstVariant.shopify_variant_id,
+        printful_variant_id: firstVariant.printful_variant_id
+      };
+      
+      // Store in localStorage for guest cart
+      try {
+        localStorage.setItem(`product_variant_${firstVariant.id}`, JSON.stringify(variantCacheData));
+      } catch (error) {
+        console.warn('Failed to cache variant data:', error);
+      }
+      
       await addToCart(firstVariant.id, 1);
     } catch (error) {
       console.error("Failed to add to cart:", error);

@@ -42,7 +42,7 @@ export default function CartPage() {
   }, []); // Empty dependency array - only run on mount
 
   // Function to get the actual color code for display
-  const getColorCode = (colorName: string, colorCode?: string) => {
+  const getColorCode = (colorName: string | null | undefined, colorCode?: string) => {
     const colorMap: { [key: string]: string } = {
       'charcoal': '#36454F',
       'black': '#000000',
@@ -66,6 +66,11 @@ export default function CartPage() {
       'silver': '#C0C0C0',
       'fuchsia': '#FF00FF'
     };
+    
+    // Handle null, undefined, or empty color names
+    if (!colorName || typeof colorName !== 'string') {
+      return colorCode || '#808080';
+    }
     
     const normalizedColor = colorName.toLowerCase().trim();
     return colorMap[normalizedColor] || colorCode || '#808080';
@@ -192,7 +197,7 @@ export default function CartPage() {
                                     className="ml-1 w-4 h-4 rounded-full border border-gray-600"
                                     style={{ backgroundColor: getColorCode(item.color, item.color_code) }}
                                   ></span>
-                                  <span className="ml-1">{item.color}</span>
+                                  <span className="ml-1">{item.color || 'Default'}</span>
                                 </span>
                               </div>
                             </div>

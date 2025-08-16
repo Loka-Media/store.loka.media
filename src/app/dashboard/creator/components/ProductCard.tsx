@@ -5,10 +5,12 @@ import {
   Trash2
 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { productAPI } from '@/lib/api';
 import { Switch } from "@/components/ui/switch";
+import { createProductSlug } from '@/lib/utils';
 
 interface CreatorProduct {
   id: number;
@@ -25,8 +27,9 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
   const [newStatus, setNewStatus] = useState<boolean | null>(null);
 
-
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsDeleteDialogOpen(true);
   };
 
@@ -38,6 +41,11 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
   const handleStatusChange = (status: boolean) => {
     setNewStatus(status);
     setShowStatusConfirmDialog(true);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const confirmStatusChange = async () => {
@@ -66,78 +74,88 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
   };
 
   return (
-    <div className="relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group">
-      <div className="aspect-square relative overflow-hidden rounded-t-xl">
-        <Image
-          src={product.thumbnail_url || "/placeholder-product.png"}
-          alt={product.name}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={product.status === "active"}
-              onCheckedChange={handleStatusChange}
-              id={`status-switch-${product.id}`}
-            />
-            <label
-              htmlFor={`status-switch-${product.id}`}
-              className="text-sm font-semibold text-white"
+    <>
+    <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
+      <div className="relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group cursor-pointer hover:border-orange-500/50">
+        <div className="aspect-square relative overflow-hidden rounded-t-xl">
+          <Image
+            src={product.thumbnail_url || "/placeholder-product.png"}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+            <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+              <Switch
+                checked={product.status === "active"}
+                onCheckedChange={handleStatusChange}
+                id={`status-switch-${product.id}`}
+              />
+              <label
+                htmlFor={`status-switch-${product.id}`}
+                className="text-sm font-semibold text-white"
+              >
+                {product.status === "active" ? "Active" : "Inactive"}
+              </label>
+            </div>
+          </div>
+          
+          {/* Action buttons overlay */}
+          <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Link
+              href={`/dashboard/creator/products/${product.id}/edit`}
+              className="p-2 bg-gray-900/80 text-orange-400 hover:text-white hover:bg-orange-600 rounded-lg transition-colors backdrop-blur-sm"
+              title="Edit Product"
+              onClick={handleEdit}
             >
-              {product.status === "active" ? "Active" : "Inactive"}
-            </label>
+              <Edit className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="p-2 bg-gray-900/80 text-red-400 hover:text-white hover:bg-red-600 rounded-lg transition-colors backdrop-blur-sm"
+              title="Delete Product"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        <div className="p-4">
+          <h3 className="font-bold text-lg text-white truncate mb-1 group-hover:text-orange-300 transition-colors">
+            {product.name}
+          </h3>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-orange-400 font-semibold">
+              {formatPrice(product.min_price)}
+              {product.max_price > product.min_price && (
+                <span> - {formatPrice(product.max_price)}</span>
+              )}
+            </span>
+            <span className="text-sm text-gray-400 bg-gray-800/50 px-2 py-1 rounded-lg">
+              {product.variant_count} variants
+            </span>
+          </div>
+          <div className="text-xs text-gray-500 bg-gray-800/30 px-3 py-2 rounded-lg">
+            Click to view full product details
           </div>
         </div>
       </div>
-      <div className="p-4">
-        <h3 className="font-bold text-lg text-white truncate mb-1">
-          {product.name}
-        </h3>
-        <div className="flex items-center justify-between">
-          <span className="text-orange-400 font-semibold">
-            {formatPrice(product.min_price)}
-            {product.max_price > product.min_price && (
-              <span> - {formatPrice(product.max_price)}</span>
-            )}
-          </span>
-          <span className="text-sm text-gray-400">
-            {product.variant_count} variants
-          </span>
-        </div>
-        <div className="flex justify-end items-center mt-4 space-x-3">
-          <button
-            className="p-2 rounded-full bg-gray-800 text-orange-400 hover:bg-orange-600 hover:text-white transition-colors duration-200"
-            title="Edit Product"
-          >
-            <Edit className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={handleDelete}
-            className="p-2 rounded-full bg-gray-800 text-red-400 hover:bg-red-600 hover:text-white transition-colors duration-200"
-            title="Delete Product"
-          >
-            <Trash2 className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-      <ConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={confirmDelete}
-        title="Are you sure?"
-        description={`This will permanently delete the product "${product.name}". This action cannot be undone.`}
-      />
-      <ConfirmationDialog
-        isOpen={showStatusConfirmDialog}
-        onClose={() => setShowStatusConfirmDialog(false)}
-        onConfirm={confirmStatusChange}
-        title={`Confirm ${newStatus ? "Activation" : "Deactivation"}`}
-        description={`Are you sure you want to ${
-          newStatus ? "activate" : "deactivate"
-        } this product?`}
-      />
-    </div>
+    </Link>
+    <ConfirmationDialog
+      isOpen={isDeleteDialogOpen}
+      onClose={() => setIsDeleteDialogOpen(false)}
+      onConfirm={confirmDelete}
+      title="Are you sure?"
+      description={`This will permanently delete the product "${product.name}". This action cannot be undone.`}
+    />
+    <ConfirmationDialog
+      isOpen={showStatusConfirmDialog}
+      onClose={() => setShowStatusConfirmDialog(false)}
+      onConfirm={confirmStatusChange}
+      title={`Confirm ${newStatus ? "Activation" : "Deactivation"}`}
+      description={`Are you sure you want to ${
+        newStatus ? "activate" : "deactivate"
+      } this product?`}
+    />
+  </>
   );
 }
