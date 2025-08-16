@@ -374,16 +374,19 @@ function CanvasContent() {
       console.log("Selected Variant IDs:", variantIds);
       console.log("Available Product Variants:", selectedProduct.variants);
       console.log("Design Files:", designFiles);
+      console.log("advancedOptions", advancedOptions);
 
       // Validate that variant IDs actually belong to this product
-      const validVariantIds = variantIds.filter((variantId: number) => 
+      const validVariantIds = variantIds.filter((variantId: number) =>
         selectedProduct.variants?.some((v: any) => v.id === variantId)
       );
 
       console.log("Valid Variant IDs (filtered):", validVariantIds);
 
       if (validVariantIds.length === 0) {
-        toast.error("No valid variants found for this product. Please reselect variants.");
+        toast.error(
+          "No valid variants found for this product. Please reselect variants."
+        );
         setIsGeneratingMockup(false);
         setMockupStatus("");
         return;
@@ -395,42 +398,59 @@ function CanvasContent() {
       
       const correctedDesignFiles = [...designFiles];
       let aspectRatioIssuesFixed = 0;
-      
+
       for (let i = 0; i < correctedDesignFiles.length; i++) {
         const designFile = correctedDesignFiles[i];
         if (!designFile.position) continue;
 
-        const { width: designWidth, height: designHeight, area_width, area_height } = designFile.position;
-        
+        const {
+          width: designWidth,
+          height: designHeight,
+          area_width,
+          area_height,
+        } = designFile.position;
+
         if (area_width && area_height) {
           // Import the validation function dynamically
-          const { validateAspectRatioCompatibility } = await import('@/components/canvas/utils');
-          
+          const { validateAspectRatioCompatibility } = await import(
+            "@/components/canvas/utils"
+          );
+
           const validation = validateAspectRatioCompatibility(
-            designWidth, 
-            designHeight, 
-            area_width, 
-            area_height, 
+            designWidth,
+            designHeight,
+            area_width,
+            area_height,
             0.02 // 2% tolerance
           );
-          
+
           if (!validation.isValid) {
-            console.log(`⚠️ Aspect ratio mismatch detected for design ${i + 1}:`);
-            console.log(`   Design ratio: ${validation.designRatio.toFixed(3)}, Area ratio: ${validation.areaRatio.toFixed(3)}`);
-            console.log(`   Difference: ${(validation.difference * 100).toFixed(1)}% (tolerance: 2%)`);
-            
+            console.log(
+              `⚠️ Aspect ratio mismatch detected for design ${i + 1}:`
+            );
+            console.log(
+              `   Design ratio: ${validation.designRatio.toFixed(
+                3
+              )}, Area ratio: ${validation.areaRatio.toFixed(3)}`
+            );
+            console.log(
+              `   Difference: ${(validation.difference * 100).toFixed(
+                1
+              )}% (tolerance: 2%)`
+            );
+
             // SMART FIX: Adjust dimensions to maintain aspect ratio while fitting in print area
             // This preserves the design's aspect ratio without breaking the UI
             const designRatio = designWidth / designHeight;
             const areaRatio = area_width / area_height;
-            
+
             let correctedPosition;
-            
+
             if (designRatio > areaRatio) {
               // Design is wider - fit to width, adjust height
               const newHeight = area_width / designRatio;
               const topOffset = (area_height - newHeight) / 2; // Center vertically
-              
+
               correctedPosition = {
                 area_width,
                 area_height,
@@ -441,13 +461,13 @@ function CanvasContent() {
                 limit_to_print_area: true
               };
             } else {
-              // Design is taller - fit to height, adjust width  
+              // Design is taller - fit to height, adjust width
               const newWidth = area_height * designRatio;
               const leftOffset = (area_width - newWidth) / 2; // Center horizontally
-              
+
               correctedPosition = {
                 area_width,
-                area_height, 
+                area_height,
                 width: newWidth,
                 height: area_height,
                 top: 0,
@@ -455,28 +475,46 @@ function CanvasContent() {
                 limit_to_print_area: true
               };
             }
-            
+
             correctedDesignFiles[i] = {
               ...designFile,
-              position: correctedPosition
+              position: correctedPosition,
             };
-            
+
             aspectRatioIssuesFixed++;
-            console.log(`✅ Fixed aspect ratio by smart scaling: ${designWidth}x${designHeight} → ${correctedPosition.width}x${correctedPosition.height} (centered in ${area_width}x${area_height})`);
-            toast.success(`Fixed aspect ratio for design ${i + 1} - smart scaled and centered`, { duration: 3000 });
+            console.log(
+              `✅ Fixed aspect ratio by smart scaling: ${designWidth}x${designHeight} → ${correctedPosition.width}x${correctedPosition.height} (centered in ${area_width}x${area_height})`
+            );
+            toast.success(
+              `Fixed aspect ratio for design ${
+                i + 1
+              } - smart scaled and centered`,
+              { duration: 3000 }
+            );
           } else {
-            console.log(`✅ Design ${i + 1} aspect ratio is valid (${validation.designRatio.toFixed(3)})`);
+            console.log(
+              `✅ Design ${
+                i + 1
+              } aspect ratio is valid (${validation.designRatio.toFixed(3)})`
+            );
           }
         }
       }
-      
+
       if (aspectRatioIssuesFixed > 0) {
         setDesignFiles(correctedDesignFiles);
-        toast.success(`Fixed ${aspectRatioIssuesFixed} aspect ratio issue${aspectRatioIssuesFixed > 1 ? 's' : ''}`, { 
-          duration: 4000,
-          icon: '🔧' 
-        });
-        console.log(`🔧 Applied aspect ratio corrections to ${aspectRatioIssuesFixed} design files`);
+        toast.success(
+          `Fixed ${aspectRatioIssuesFixed} aspect ratio issue${
+            aspectRatioIssuesFixed > 1 ? "s" : ""
+          }`,
+          {
+            duration: 4000,
+            icon: "🔧",
+          }
+        );
+        console.log(
+          `🔧 Applied aspect ratio corrections to ${aspectRatioIssuesFixed} design files`
+        );
       } else {
         console.log("✅ All design files have valid aspect ratios");
       }
@@ -485,7 +523,7 @@ function CanvasContent() {
       const mockupOptions: any = {
         productId: selectedProduct.id,
         variantIds: validVariantIds.slice(0, 3), // Use first 3 valid variants for preview
-        designFiles: correctedDesignFiles, // Use aspect-ratio corrected design files
+        designFiles: designFiles, // Use aspect-ratio corrected design files
         format: "jpg" as const,
         onStatusUpdate: (status: string, attempts: number) => {
           setMockupStatus(status);
@@ -500,31 +538,42 @@ function CanvasContent() {
 
         // Set product options (lifelike rendering)
         mockupOptions.productOptions = {
-          lifelike: advancedOptions.lifelike !== undefined ? advancedOptions.lifelike : true
+          lifelike:
+            advancedOptions.lifelike !== undefined
+              ? advancedOptions.lifelike
+              : true,
         };
 
         // IMPORTANT: Only add option filters if user explicitly selected specific ones
         // Having ALL options selected is more restrictive than having NONE selected
-        const hasSpecificOptionGroups = advancedOptions.optionGroups && 
-          advancedOptions.optionGroups.length > 0 && 
+        const hasSpecificOptionGroups =
+          advancedOptions.optionGroups &&
+          advancedOptions.optionGroups.length > 0 &&
           advancedOptions.optionGroups.length < 4; // Less than all 4 option groups
-          
-        const hasSpecificOptions = advancedOptions.options && 
-          advancedOptions.options.length > 0 && 
+
+        const hasSpecificOptions =
+          advancedOptions.options &&
+          advancedOptions.options.length > 0 &&
           advancedOptions.options.length < 6; // Less than all 6 options
 
         if (hasSpecificOptionGroups) {
           mockupOptions.optionGroups = advancedOptions.optionGroups;
-          console.log('✅ Adding selective option groups filter:', advancedOptions.optionGroups);
+          console.log(
+            "✅ Adding selective option groups filter:",
+            advancedOptions.optionGroups
+          );
         } else {
-          console.log('⭕ Skipping option groups filter (allowing all styles)');
+          console.log("⭕ Skipping option groups filter (allowing all styles)");
         }
 
         if (hasSpecificOptions) {
           mockupOptions.options = advancedOptions.options;
-          console.log('✅ Adding selective options filter:', advancedOptions.options);
+          console.log(
+            "✅ Adding selective options filter:",
+            advancedOptions.options
+          );
         } else {
-          console.log('⭕ Skipping options filter (allowing all options)');
+          console.log("⭕ Skipping options filter (allowing all options)");
         }
 
         // Debug: Log what we're sending to the API
@@ -541,9 +590,10 @@ function CanvasContent() {
             productOptions: mockupOptions.productOptions,
             optionGroups: mockupOptions.optionGroups,
             options: mockupOptions.options,
-          }
+          },
         });
       }
+      console.log("🔍 Mockup Options Debug:", mockupOptions);
 
       const mockupUrls = await mockupAPI.generateProductMockup({
         ...mockupOptions,

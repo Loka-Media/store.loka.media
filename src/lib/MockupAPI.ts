@@ -212,6 +212,7 @@ class MockupAPI {
               }, {});
             finalDesigns = Object.values(uniqueDesignsByPlacement);
           }
+
           
           mockupData.files = finalDesigns.map((file) => ({
           placement: file.placement,
