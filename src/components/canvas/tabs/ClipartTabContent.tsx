@@ -184,10 +184,10 @@ const ClipartTabContent: React.FC<ClipartTabContentProps> = ({
             className="w-16 h-16 border border-gray-300 rounded-md flex items-center justify-center"
             style={{ backgroundColor: backgroundColor === 'transparent' ? '#f9fafb' : backgroundColor }}
           >
-            <selectedIcon 
-              className="w-8 h-8" 
-              style={{ color: iconColor }}
-            />
+            {React.createElement(selectedIcon as any, {
+              size: 32,
+              color: iconColor
+            })}
           </div>
         </div>
       )}

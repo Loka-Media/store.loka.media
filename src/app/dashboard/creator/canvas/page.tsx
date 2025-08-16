@@ -82,7 +82,7 @@ function CanvasContent() {
           
           // Show availability warnings if any
           if (availabilityCheck.result.warnings && availabilityCheck.result.warnings.length > 0) {
-            availabilityCheck.result.warnings.forEach(warning => {
+            availabilityCheck.result.warnings.forEach((warning: string) => {
               toast(`⚠️ ${warning}`, { 
                 icon: '⚠️',
                 duration: 4000
@@ -100,7 +100,7 @@ function CanvasContent() {
 
           if (product) {
             // Get all variant IDs for dynamic availability checking
-            const allVariantIds = variants?.map(v => v.id) || [];
+            const allVariantIds = variants?.map((v: any) => v.id) || [];
             
             console.log(`🔍 Checking availability for ${allVariantIds.length} variants dynamically...`);
             
@@ -113,12 +113,12 @@ function CanvasContent() {
               if (variantCheck.result && variantCheck.result.variants) {
                 // Create a map of variant availability
                 const availabilityMap = new Map();
-                variantCheck.result.variants.forEach(v => {
+                variantCheck.result.variants.forEach((v: any) => {
                   availabilityMap.set(v.variant_id, v);
                 });
                 
                 // Filter variants based on API results
-                availableVariants = variants?.filter(variant => {
+                availableVariants = variants?.filter((variant: any) => {
                   const availabilityInfo = availabilityMap.get(variant.id);
                   
                   // Check multiple conditions
@@ -151,7 +151,7 @@ function CanvasContent() {
               } else {
                 console.warn('⚠️ Could not get dynamic variant availability, using basic filtering');
                 // Fallback to basic filtering
-                availableVariants = variants?.filter(variant => 
+                availableVariants = variants?.filter((variant: any) => 
                   availabilityCheck.result.available_variant_ids.includes(variant.id) &&
                   variant.can_create_product !== false
                 ) || variants;
@@ -162,7 +162,7 @@ function CanvasContent() {
               toast.error('Could not verify all variant availability. Some variants may be discontinued.');
               
               // Fallback to basic filtering
-              availableVariants = variants?.filter(variant => 
+              availableVariants = variants?.filter((variant: any) => 
                 availabilityCheck.result.available_variant_ids.includes(variant.id) &&
                 variant.can_create_product !== false
               ) || variants;
@@ -393,7 +393,7 @@ function CanvasContent() {
       setMockupStatus("Validating design aspect ratios...");
       console.log("🔍 Performing aspect ratio validation before mockup generation...");
       
-      let correctedDesignFiles = [...designFiles];
+      const correctedDesignFiles = [...designFiles];
       let aspectRatioIssuesFixed = 0;
       
       for (let i = 0; i < correctedDesignFiles.length; i++) {
@@ -437,7 +437,8 @@ function CanvasContent() {
                 width: area_width,
                 height: newHeight,
                 top: Math.max(0, topOffset),
-                left: 0
+                left: 0,
+                limit_to_print_area: true
               };
             } else {
               // Design is taller - fit to height, adjust width  
@@ -450,7 +451,8 @@ function CanvasContent() {
                 width: newWidth,
                 height: area_height,
                 top: 0,
-                left: Math.max(0, leftOffset)
+                left: Math.max(0, leftOffset),
+                limit_to_print_area: true
               };
             }
             
@@ -612,7 +614,10 @@ function CanvasContent() {
       } catch (validationError) {
         toast.dismiss("final-validation");
         console.warn("⚠️ Final validation check failed, proceeding with caution:", validationError);
-        toast.warning("Could not verify all variants - proceeding with publication", { duration: 4000 });
+        toast("⚠️ Could not verify all variants - proceeding with publication", { 
+          icon: '⚠️',
+          duration: 4000 
+        });
       }
 
       const productData = {

@@ -458,6 +458,7 @@ class Y extends MeshPhysicalMaterial {
     thicknessPower: { value: 2 },
     thicknessScale: { value: 10 },
   };
+  defines: { [key: string]: string } = {};
 
   constructor(params: any) {
     super(params);

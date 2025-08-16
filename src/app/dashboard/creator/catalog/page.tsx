@@ -107,7 +107,7 @@ export default function CreatorCatalogPage() {
       
       if (!response.result || response.result.length === 0) {
         console.warn(`⚠️ No products returned for category ${categoryId}`);
-        toast.warning('No products found in this category', { duration: 4000 });
+        toast('No products found in this category', { duration: 4000 });
       }
       
       setProducts(response.result || []);

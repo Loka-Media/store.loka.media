@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { cartAPI, CartItem, CartSummary, publicAPI } from '@/lib/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
@@ -49,6 +49,14 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const { isAuthenticated, user } = useAuth();
+
+  // Refs for optimization
+  const lastRefreshTime = useRef<number>(0);
+  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialized = useRef<boolean>(false);
+
+  // Minimum time between refreshes (in milliseconds)
+  const MIN_REFRESH_INTERVAL = 2000; // 2 seconds
 
   // Load cart from localStorage for guest users
   const loadGuestCart = useCallback(() => {
@@ -129,20 +137,46 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         const response = await cartAPI.getCartCount();
         setCartCount(response.count);
       } else {
-        // Count guest cart items
-        const savedCart = localStorage.getItem('guestCart');
-        if (savedCart) {
-          const guestCartData = JSON.parse(savedCart);
-          const totalQuantity = guestCartData.items?.reduce((sum: number, item: GuestCartItem) => sum + item.quantity, 0) || 0;
+        // Count guest cart items from current state first, then fallback to localStorage
+        if (items.length > 0) {
+          const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
           setCartCount(totalQuantity);
+        } else {
+          // Fallback to localStorage
+          const savedCart = localStorage.getItem('guestCart');
+          if (savedCart) {
+            const guestCartData = JSON.parse(savedCart);
+            const totalQuantity = guestCartData.items?.reduce((sum: number, item: GuestCartItem) => sum + item.quantity, 0) || 0;
+            setCartCount(totalQuantity);
+          } else {
+            setCartCount(0);
+          }
         }
       }
     } catch (error) {
       console.error('Failed to fetch cart count:', error);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, items]);
 
-  const refreshCart = useCallback(async () => {
+  // Debounced refresh function to prevent excessive API calls
+  const debouncedRefreshCart = useCallback(async (forceRefresh: boolean = false) => {
+    const now = Date.now();
+    
+    // Check if enough time has passed since last refresh
+    if (!forceRefresh && (now - lastRefreshTime.current) < MIN_REFRESH_INTERVAL) {
+      // Schedule refresh for later if not already scheduled
+      if (!refreshTimeoutRef.current) {
+        const remainingTime = MIN_REFRESH_INTERVAL - (now - lastRefreshTime.current);
+        refreshTimeoutRef.current = setTimeout(() => {
+          refreshTimeoutRef.current = null;
+          debouncedRefreshCart(true);
+        }, remainingTime);
+      }
+      return;
+    }
+
+    lastRefreshTime.current = now;
+
     if (isAuthenticated) {
       // Use authenticated cart API
       try {
@@ -158,7 +192,10 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         setCartCount(response.summary.itemCount);
       } catch (error) {
         console.error('Failed to fetch cart:', error);
-        toast.error('Failed to load cart');
+        // Don't show error toast on background refreshes to avoid spam
+        if (forceRefresh) {
+          toast.error('Failed to load cart');
+        }
       } finally {
         setLoading(false);
       }
@@ -168,16 +205,64 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, loadGuestCart]);
 
-  // Load cart data on mount and when auth status changes
+  // Public refresh function (for backward compatibility)
+  const refreshCart = useCallback(async () => {
+    await debouncedRefreshCart(true);
+  }, [debouncedRefreshCart]);
+
+  // Load cart data on mount and when auth status changes (optimized)
   useEffect(() => {
-    if (isAuthenticated && user) {
-      refreshCart();
-      fetchCartCount();
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      // Initial load
+      if (isAuthenticated && user) {
+        debouncedRefreshCart(true);
+        fetchCartCount();
+      } else {
+        loadGuestCart();
+        fetchCartCount();
+      }
     } else {
-      // Load guest cart only
-      loadGuestCart();
+      // Auth status changed after initialization
+      if (isAuthenticated && user) {
+        debouncedRefreshCart(true);
+        fetchCartCount();
+      } else {
+        loadGuestCart();
+        fetchCartCount();
+      }
     }
-  }, [isAuthenticated, user, refreshCart, loadGuestCart, fetchCartCount]);
+  }, [isAuthenticated, user]);
+
+  // Add page visibility API listener with rate limiting
+  useEffect(() => {
+    let lastVisibilityChange = 0;
+    const VISIBILITY_THROTTLE = 5000; // 5 seconds
+
+    const handleVisibilityChange = () => {
+      const now = Date.now();
+      if (!document.hidden && (now - lastVisibilityChange) > VISIBILITY_THROTTLE) {
+        lastVisibilityChange = now;
+        // Page became visible, refresh cart with debouncing
+        debouncedRefreshCart(false); // Don't force, let debouncing handle it
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [debouncedRefreshCart]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const addToCart = async (variantId: number, quantity: number = 1): Promise<boolean> => {
     if (isAuthenticated) {

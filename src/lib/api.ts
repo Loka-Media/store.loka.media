@@ -81,6 +81,7 @@ export interface CartItem {
   stock_status: string;
   total_price: number;
   shopify_variant_id?: string;
+  source?: string;
 }
 
 export interface CartSummary {
@@ -716,7 +717,7 @@ export const printfulAPI = {
       }
     } catch (error) {
       // If the error is technique-related, propagate it to frontend for handling
-      if (error.message && error.message.includes('technique')) {
+      if (error instanceof Error && error.message && error.message.includes('technique')) {
         console.log("Propagating technique error to frontend:", error.message);
         throw error;
       }

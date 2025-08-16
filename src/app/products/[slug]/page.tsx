@@ -1,45 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 'use client';
 
-import { use, useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { productAPI, ProductVariant, wishlistAPI, printfulAPI } from '@/lib/api';
-import { useGuestCart } from '@/contexts/GuestCartContext';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { parseProductSlug, createProductSlug } from '@/lib/utils';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import toast from 'react-hot-toast';
+import { use, useEffect } from 'react';
+import { useProductData } from '@/hooks/useProductData';
+import { useVariantSelection } from '@/hooks/useVariantSelection';
+import { useProductWishlist } from '@/hooks/useProductWishlist';
+import { useProductCart } from '@/hooks/useProductCart';
 
 import { ProductImageGallery } from '@/components/products/product-detail/ProductImageGallery';
 import { ProductInfo } from '@/components/products/product-detail/ProductInfo';
 import { ProductVariantSelector } from '@/components/products/product-detail/ProductVariantSelector';
 import { ProductActions } from '@/components/products/product-detail/ProductActions';
 import { ProductMeta } from '@/components/products/product-detail/ProductMeta';
-import { ProductShippingInfo } from '@/components/products/product-detail/ProductShippingInfo';
-import { RegionalAvailability } from '@/components/products/product-detail/RegionalAvailability';
-
-interface ProductDetails {
-  id: number;
-  creator_id: number;
-  name: string;
-  description: string;
-  base_price: number;
-  markup_percentage: number;
-  category: string;
-  tags: string[];
-  thumbnail_url: string;
-  images: string[];
-  is_active: boolean;
-  creator_name: string;
-  creator_username: string;
-  created_at: string;
-  variants: ProductVariant[];
-  source?: string;
-}
+import { ProductPageLoader } from '@/components/products/product-detail/ProductPageLoader';
+import { ProductNotFound } from '@/components/products/product-detail/ProductNotFound';
+import { ProductPageNavigation } from '@/components/products/product-detail/ProductPageNavigation';
 
 interface ProductPageProps {
   params: Promise<{
@@ -49,194 +23,34 @@ interface ProductPageProps {
 
 export default function ProductPage({ params }: ProductPageProps) {
   const { slug } = use(params);
-  const router = useRouter();
-  const { addToCart: addToGuestCart } = useGuestCart();
-  const { addToCart: addToAuthenticatedCart } = useCart();
-  const { addToWishlist, removeFromWishlist } = useWishlist();
-  const { isAuthenticated, user } = useAuth();
+  
+  const { product, loading, isVariantAvailable } = useProductData(slug);
+  
+  const {
+    selectedVariant,
+    setSelectedVariant,
+    getVariantColorAndSize,
+    getUniqueColors,
+    getAvailableSizes,
+    getCurrentVariant,
+    initializeSelectedVariant
+  } = useVariantSelection(product, isVariantAvailable);
+  
+  const { isWishlisted, handleWishlistToggle } = useProductWishlist(product);
+  const { handleAddToCart } = useProductCart(product, selectedVariant);
 
-  const [product, setProduct] = useState<ProductDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
-  const [isWishlisted, setIsWishlisted] = useState(false);
-
-  const fetchProduct = useCallback(async () => {
-    try {
-      setLoading(true);
-      const parsedSlug = parseProductSlug(slug);
-      const productId = parsedSlug ? parsedSlug.id : slug;
-
-      const response = await productAPI.getProduct(productId);
-      setProduct(response);
-
-      if (!parsedSlug && response.name) {
-        const correctSlug = createProductSlug(response.name, response.id);
-        router.replace(`/products/${correctSlug}`);
-        return;
-      }
-
-      if (response.variants && response.variants.length > 0) {
-        const firstInStock = response.variants.find((v: any) => isVariantAvailable(v, response.source));
-        setSelectedVariant(firstInStock || response.variants[0]);
-      }
-    } catch (error) {
-      console.error('Failed to fetch product:', error);
-      toast.error('Product not found');
-      router.push('/products');
-    } finally {
-      setLoading(false);
-    }
-  }, [slug, router]);
-
-  const checkWishlistStatus = useCallback(async () => {
-    if (!product) return;
-    try {
-      const response = await wishlistAPI.isInWishlist(product.id);
-      setIsWishlisted(response.isInWishlist);
-    } catch (error) {
-      console.error('Failed to check wishlist status:', error);
-    }
-  }, [product]);
-
+  // Product fetching is now handled automatically by the hook
+  
   useEffect(() => {
-    fetchProduct();
-  }, [fetchProduct]);
-
-  useEffect(() => {
-    if (product && isAuthenticated) {
-      checkWishlistStatus();
-    }
-  }, [product, isAuthenticated, checkWishlistStatus]);
-
-  const handleAddToCart = async (quantity: number) => {
-    if (!selectedVariant) {
-      toast.error('Please select a variant');
-      return;
-    }
-
-    console.log('🛒 Add to cart called for product:', product?.name, 'variant:', selectedVariant.id);
-
-    try {
-      // Use appropriate cart based on authentication status
-      if (isAuthenticated) {
-        await addToAuthenticatedCart(selectedVariant.id, quantity);
-      } else {
-        await addToGuestCart(selectedVariant.id, quantity);
-      }
-      
-      // Success message will be shown by the cart context
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-      toast.error('Failed to add to cart');
-    }
-  };
-
-  const handleWishlistToggle = async () => {
-    if (!product) return;
-    if (!isAuthenticated) {
-      toast.error('Please login to manage wishlist');
-      return;
-    }
-    try {
-      if (isWishlisted) {
-        await removeFromWishlist(product.id);
-        setIsWishlisted(false);
-        toast.success('Removed from wishlist');
-      } else {
-        await addToWishlist(product.id);
-        setIsWishlisted(true);
-        toast.success('Added to wishlist ❤️');
-      }
-    } catch (error) {
-      console.error('Failed to update wishlist:', error);
-      toast.error('Failed to update wishlist');
-    }
-  };
-
-  // Variant helper functions (passed to selector component)
-  const getVariantColorAndSize = (variant: ProductVariant) => {
-    if (variant.color && variant.size) {
-      return { color: variant.color, size: variant.size };
-    } else if (variant.title?.includes(' - ')) {
-      const parts = variant.title.split(' - ');
-      return { size: parts[0] || 'Default', color: parts[1] || 'Default' };
-    } else if (variant.title?.includes(' / ')) {
-      const parts = variant.title.split(' / ');
-      return { color: parts[0] || 'Default', size: parts[1] || 'Default' };
-    } else {
-      return { color: 'Default', size: 'Default' };
-    }
-  };
-
-  const getUniqueColors = () => {
-    if (!product?.variants) return [];
-    const colors = new Map();
-    product.variants.forEach(variant => {
-      const color = getVariantColorAndSize(variant).color;
-      const colorCode = variant.color_code || '#000000';
-      if (!colors.has(color)) {
-        colors.set(color, colorCode);
-      }
-    });
-    return Array.from(colors.entries());
-  };
-
-  const getAvailableSizes = (selectedColor?: string) => {
-    if (!product?.variants) return [];
-    return product.variants
-      .filter(variant => {
-        if (!selectedColor) return true;
-        return getVariantColorAndSize(variant).color === selectedColor;
-      })
-      .map(variant => getVariantColorAndSize(variant).size)
-      .filter((size, index, self) => self.indexOf(size) === index);
-  };
-
-  const getCurrentVariant = (color: string, size: string) => {
-    return product?.variants.find(variant => {
-      const { color: variantColor, size: variantSize } = getVariantColorAndSize(variant);
-      return variantColor === color && variantSize === size;
-    });
-  };
-
-  const isVariantAvailable = (variant: ProductVariant, source?: string) => {
-    // For Printful products, we'll do real-time checking when user tries to add to cart
-    // Here we just do basic availability checking to show/hide the add to cart button
-    const isPrintfulProduct = !!variant.printful_variant_id || source === 'printful';
-    if (isPrintfulProduct) {
-      // For Printful, be more permissive here - real checking happens on add to cart
-      return variant.available_for_sale !== false;
-    }
-    
-    // For other sources, use existing logic
-    if (variant.available_for_sale !== undefined) {
-      return variant.available_for_sale && (variant.inventory_quantity || 0) > 0;
-    }
-    if (variant.stock_status) {
-      return variant.stock_status === 'in_stock';
-    }
-    return true;
-  };
+    initializeSelectedVariant();
+  }, [initializeSelectedVariant]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500"></div>
-      </div>
-    );
+    return <ProductPageLoader />;
   }
 
   if (!product) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Product Not Found</h2>
-          <Link href="/products" className="bg-orange-500 text-white font-bold py-3 px-6 rounded-md hover:bg-orange-600 transition-colors">
-            Browse Products
-          </Link>
-        </div>
-      </div>
-    );
+    return <ProductNotFound />;
   }
 
   const images = product.images && product.images.length > 0
@@ -246,13 +60,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="bg-black text-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Link
-          href="/products"
-          className="inline-flex items-center mb-8 text-gray-400 hover:text-white group transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Products</span>
-        </Link>
+        <ProductPageNavigation />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <ProductImageGallery productName={product.name} images={images} />
@@ -285,14 +93,6 @@ export default function ProductPage({ params }: ProductPageProps) {
               onAddToCart={handleAddToCart}
               onWishlistToggle={handleWishlistToggle}
             />
-            
-            {/* Regional Availability - Show only for Printful products */}
-            {product.source === 'printful' && selectedVariant && (
-              <RegionalAvailability 
-                selectedVariant={selectedVariant} 
-                userRegion={user?.country || 'US'}
-              />
-            )}
             
             <div className="pt-8 border-t border-gray-800">
               <ProductMeta

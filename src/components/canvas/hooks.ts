@@ -206,13 +206,13 @@ export const useAutoSelectVariants = (
     if (!selectedProduct?.variants) return;
 
     const validateAndSetVariants = async () => {
-      const filteredVariants = selectedProduct.variants.filter(
+      const filteredVariants = selectedProduct.variants?.filter(
         (variant) =>
           selectedSizes.includes(variant.size) &&
           selectedColors.includes(variant.color)
       );
 
-      if (filteredVariants.length === 0) {
+      if (!filteredVariants || filteredVariants.length === 0) {
         setSelectedVariants([]);
         return;
       }

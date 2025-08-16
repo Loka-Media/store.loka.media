@@ -13,7 +13,6 @@ interface ProductsControlsProps {
   setFilters: React.Dispatch<React.SetStateAction<any>>;
   viewMode: "grid" | "list";
   setViewMode: React.Dispatch<React.SetStateAction<"grid" | "list">>;
-  
 }
 
 export function ProductsControls({
@@ -23,27 +22,26 @@ export function ProductsControls({
   setFilters,
   viewMode,
   setViewMode,
-  
 }: ProductsControlsProps) {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-      <div className="text-gray-400">
-        {loading ? (
-          <div className="flex items-center">
-            <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-            Loading products...
-          </div>
-        ) : (
-          <span className="text-lg">
-            <span className="text-orange-400 font-bold">
-              {pagination.total}
-            </span>{" "}
-            products found
-          </span>
-        )}
-      </div>
+        <div className="text-gray-400">
+          {loading ? (
+            <div className="flex items-center">
+              <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+              Loading products...
+            </div>
+          ) : (
+            <span className="text-lg">
+              <span className="text-orange-400 font-bold">
+                {pagination.total}
+              </span>{" "}
+              products found
+            </span>
+          )}
+        </div>
 
-      <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4">
         {/* Enhanced Sort */}
         <select
           value={`${filters.sortBy}-${filters.sortOrder}`}
@@ -84,8 +82,6 @@ export function ProductsControls({
             <List className="w-5 h-5" />
           </button>
         </div>
-
-        
       </div>
     </div>
   );

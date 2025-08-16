@@ -113,8 +113,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
     }
   };
 
-  const discountPercentage = Math.floor(Math.random() * 30) + 5;
-  const isOnSale = Math.random() > 0.7;
+  // Remove fake discount logic
 
   return (
     <div
@@ -124,16 +123,9 @@ export function ProductListItem({ product }: ProductListItemProps) {
       <div className="flex flex-col md:flex-row">
         <Link
           href={`/products/${createProductSlug(product.name, product.id)}`}
-          className="relative md:w-80 h-64 md:h-auto flex-shrink-0"
+          className="relative md:w-40 h-32 md:h-auto flex-shrink-0"
         >
-          {isOnSale && (
-            <div className="absolute top-3 left-3 z-10">
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center shadow-lg">
-                <Zap className="w-3 h-3 mr-1" />
-                {discountPercentage}% OFF
-              </div>
-            </div>
-          )}
+          {/* Sale badge removed - no fake discounts */}
           <div className="w-full h-full relative overflow-hidden">
             <Image
               src={imageUrl}
@@ -164,7 +156,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
           </div>
         </Link>
 
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4">
           <div className="flex justify-between items-start h-full">
             <div className="flex-1">
               <Link
@@ -173,112 +165,101 @@ export function ProductListItem({ product }: ProductListItemProps) {
                   product.id
                 )}`}
               >
-                <h3 className="text-2xl font-bold text-white hover:text-orange-400 transition-colors duration-200 mb-2">
+                <h3 className="text-lg font-bold text-white hover:text-orange-400 transition-colors duration-200 mb-1">
                   {product.name}
                 </h3>
               </Link>
 
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mr-3">
-                  <User className="w-4 h-4 text-white" />
+              <div className="flex items-center mb-2">
+                <div className="w-4 h-4 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mr-2">
+                  <User className="w-2 h-2 text-white" />
                 </div>
-                <span className="text-gray-300 font-medium">
+                <span className="text-gray-300 font-medium text-sm">
                   by {product.creator_name}
                 </span>
-                <div className="flex items-center ml-4">
-                  <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                  <span className="text-yellow-200 font-medium">4.8</span>
+                <div className="flex items-center ml-3">
+                  <Star className="w-3 h-3 text-yellow-400 fill-current mr-1" />
+                  <span className="text-yellow-200 font-medium text-sm">4.8</span>
                 </div>
 
                 {/* Inventory status */}
                 {inventoryStatus.totalCount > 0 && (
-                  <div className="ml-4">
+                  <div className="ml-3">
                     <div
-                      className={`px-3 py-1 rounded-full text-xs font-medium flex items-center ${
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium flex items-center ${
                         inventoryStatus.isAvailable
-                          ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                          : "bg-red-500/20 text-red-300 border border-red-500/30"
+                          ? "bg-green-500/20 text-green-300"
+                          : "bg-red-500/20 text-red-300"
                       }`}
                     >
                       {inventoryStatus.isAvailable ? (
-                        <CheckCircle className="w-3 h-3 mr-1" />
+                        <CheckCircle className="w-2 h-2 mr-0.5" />
                       ) : (
-                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        <AlertTriangle className="w-2 h-2 mr-0.5" />
                       )}
                       {inventoryStatus.isAvailable
-                        ? `${inventoryStatus.availableCount}/${inventoryStatus.totalCount} Available`
-                        : "Out of Stock"}
+                        ? `${inventoryStatus.availableCount}/${inventoryStatus.totalCount}`
+                        : "Out"}
                     </div>
                   </div>
                 )}
 
                 {inventoryStatus.loading && (
-                  <div className="ml-4">
-                    <div className="bg-gray-600/30 text-gray-400 px-3 py-1 rounded-full text-xs font-medium flex items-center border border-gray-600/30">
-                      <Package className="w-3 h-3 mr-1 animate-spin" />
-                      Checking...
+                  <div className="ml-3">
+                    <div className="bg-gray-600/30 text-gray-400 px-2 py-0.5 rounded-full text-xs font-medium flex items-center">
+                      <Package className="w-2 h-2 mr-0.5 animate-spin" />
+                      ...
                     </div>
                   </div>
                 )}
               </div>
 
-              <p className="text-gray-400 mb-6 line-clamp-3 text-lg leading-relaxed">
+              <p className="text-gray-400 mb-3 line-clamp-2 text-sm leading-relaxed">
                 {product.description ||
                   "Discover this amazing product with unique design and premium quality craftsmanship."}
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 mb-6">
+              <div className="flex flex-wrap items-center gap-1 mb-3">
                 {product.category && (
-                  <span className="inline-flex items-center bg-gradient-to-r from-orange-800/80 to-orange-700/80 text-orange-200 text-sm px-4 py-2 rounded-full font-medium border border-orange-600/30">
-                    {product.category}
+                  <span className="inline-flex items-center bg-orange-800/60 text-orange-200 text-xs px-2 py-1 rounded-md font-medium">
+                    {product.category.slice(0, 8)}
                   </span>
                 )}
                 {product.product_source && (
                   <span
-                    className={`inline-flex items-center text-sm px-4 py-2 rounded-full font-medium border ${
+                    className={`inline-flex items-center text-xs px-2 py-1 rounded-md font-medium ${
                       product.product_source === "printful"
-                        ? "bg-purple-900/80 text-purple-300 border-purple-600/30"
+                        ? "bg-purple-900/60 text-purple-300"
                         : product.product_source === "shopify"
-                        ? "bg-green-900/80 text-green-300 border-green-600/30"
-                        : "bg-gray-800/80 text-gray-400 border-gray-600/30"
+                        ? "bg-green-900/60 text-green-300"
+                        : "bg-gray-800/60 text-gray-400"
                     }`}
                   >
                     {product.product_source === "printful"
-                      ? "🎨 Printful"
+                      ? "PF"
                       : product.product_source === "shopify"
-                      ? "🛍️ Shopify"
-                      : "Custom"}
+                      ? "SP"
+                      : "CS"}
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="text-right ml-8 flex flex-col items-end">
-              <div className="mb-4">
-                {isOnSale && (
-                  <div className="text-lg text-gray-500 line-through mb-1">
-                    {/* Original price calculation for display */}$
-                    {(
-                      parseFloat(
-                        product.min_price.toString().replace(/,/g, "")
-                      ) *
-                      (1 + discountPercentage / 100)
-                    ).toFixed(2)}
-                  </div>
-                )}
-                <div className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <div className="text-right ml-4 flex flex-col items-end">
+              <div className="mb-2">
+                <div className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                   {formatPrice(product.min_price)}
                   {product.max_price > product.min_price && (
-                    <div className="text-xl text-gray-400 mt-1">
+                    <div className="text-sm text-gray-400 mt-0.5">
                       - {formatPrice(product.max_price)}
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
                 <button
-                  className={`p-3 rounded-xl transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                  className={`p-2 rounded-lg transition-all duration-200 focus:outline-none ${
                     isWishlisted
                       ? "bg-red-500 text-white"
                       : "bg-gray-800/80 text-gray-400 hover:text-red-400 hover:bg-gray-700/80"
@@ -299,7 +280,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
                   }}
                 >
                   <Heart
-                    className={`w-5 h-5 ${
+                    className={`w-4 h-4 ${
                       isWishlisted ? "fill-current" : ""
                     }`}
                   />
@@ -310,18 +291,18 @@ export function ProductListItem({ product }: ProductListItemProps) {
                     inventoryStatus.totalCount > 0 &&
                     !inventoryStatus.isAvailable
                   }
-                  className={`px-6 py-3 rounded-xl font-bold transition-all duration-300 transform flex items-center ${
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center text-sm ${
                     inventoryStatus.totalCount > 0 &&
                     !inventoryStatus.isAvailable
                       ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                      : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30"
+                      : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
                   }`}
                 >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  <ShoppingCart className="w-4 h-4 mr-1" />
                   {inventoryStatus.totalCount > 0 &&
                   !inventoryStatus.isAvailable
-                    ? "Out of Stock"
-                    : "Add to Cart"}
+                    ? "Out"
+                    : "Add"}
                 </button>
               </div>
             </div>

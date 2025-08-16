@@ -50,12 +50,6 @@ export function ProductCard({
     );
   };
 
-  const handleQuickView = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toast.success("Quick view coming soon!");
-  };
-
   const discountPercentage = Math.floor(Math.random() * 30) + 5; // Mock discount
   const isOnSale = Math.random() > 0.7; // 30% chance of being on sale
 
@@ -140,22 +134,6 @@ export function ProductCard({
             </button>
           </div>
 
-          {/* Hover overlay with quick actions */}
-          <div
-            className={`absolute inset-0 flex items-center justify-center space-x-3 transition-all duration-300 ${
-              isHovered
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
-            }`}
-          >
-            <button
-              onClick={handleQuickView}
-              className="p-3 bg-white/90 backdrop-blur-sm rounded-full text-gray-800 hover:bg-white transition-all duration-200 transform hover:scale-110 shadow-lg"
-              title="Quick view"
-            >
-              <Eye className="w-5 h-5" />
-            </button>
-          </div>
         </div>
       </Link>
 

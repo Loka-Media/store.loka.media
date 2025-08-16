@@ -2,11 +2,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 
 import { ProductsHero } from "@/components/products/ProductsHero";
-import { FeaturedCreatorsSection } from "@/components/products/FeaturedCreatorsSection";
 import { ProductsFilterTopBar } from "@/components/products/ProductsFilterTopBar";
 import { ProductsControls } from "@/components/products/ProductsControls";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
@@ -43,6 +42,7 @@ function ProductsContent() {
     { id: number; name: string; username: string; product_count: number }[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
 
@@ -64,31 +64,48 @@ function ProductsContent() {
   });
 
   const searchParams = useSearchParams();
-  const router = useRouter();
+  // Router removed - using window.history for URL updates
 
   const fetchProducts = useCallback(
-    async (customFilters?: typeof filters) => {
+    async (customFilters?: typeof filters, customPagination?: { limit: number; offset: number }, appendMode = false) => {
       try {
-        setLoading(true);
+        if (appendMode) {
+          setLoadingMore(true); // Only show loading on Load More button
+        } else {
+          setLoading(true); // Show full loading for initial/filter changes
+        }
+        
         const params = customFilters || filters;
+        const paginationParams = customPagination || { limit: pagination.limit, offset: pagination.offset };
+        
         const response = await productAPI.getProducts({
           ...params,
           minPrice: params.minPrice ? Number(params.minPrice) : undefined,
           maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
-          limit: pagination.limit,
-          offset: pagination.offset,
+          limit: paginationParams.limit,
+          offset: paginationParams.offset,
         });
 
-        setProducts(response.products);
-        setPagination(response.pagination);
+        if (appendMode) {
+          // Append new products to existing ones
+          setProducts(prev => [...prev, ...response.products]);
+        } else {
+          // Replace products (for initial load or filter changes)
+          setProducts(response.products);
+        }
+        
+        setPagination(prev => ({ ...prev, ...response.pagination }));
       } catch (error) {
         console.error("Failed to fetch products:", error);
-        // toast.error("Failed to load products");
       } finally {
-        setLoading(false);
+        if (appendMode) {
+          setLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
       }
     },
-    [filters, pagination.limit, pagination.offset]
+    []
   );
 
   // Initialize from URL params and fetch initial data
@@ -99,12 +116,7 @@ function ProductsContent() {
     const source =
       (searchParams.get("source") as "printful" | "shopify" | "all") || "all";
 
-    setFilters((prev) => ({ ...prev, category, search, creator, source }));
-    fetchCategories();
-    fetchCreators();
-
-    // Fetch products immediately with URL params
-    fetchProducts({
+    const initialFilters = {
       category,
       search,
       creator,
@@ -113,12 +125,26 @@ function ProductsContent() {
       maxPrice: "",
       sortBy: "created_at",
       sortOrder: "DESC",
-    });
-  }, [searchParams]);
+    };
 
-  // Fetch products when filters change (after initial load)
+    setFilters(initialFilters);
+    fetchCategories();
+    fetchCreators();
+
+    // Fetch products immediately with URL params and reset pagination
+    setPagination(prev => ({ ...prev, offset: 0 }));
+    fetchProducts(initialFilters, { limit: 20, offset: 0 });
+  }, [searchParams, fetchProducts]);
+
+  // Fetch products when filters change (but not on initial load)
   useEffect(() => {
-    fetchProducts();
+    // Skip if this is the initial load (filters are empty/default)
+    const isInitialLoad = !filters.category && !filters.search && !filters.creator && filters.source === "all";
+    if (isInitialLoad) return;
+    
+    // Reset pagination when filters change
+    setPagination(prev => ({ ...prev, offset: 0 }));
+    fetchProducts(filters, { limit: pagination.limit, offset: 0 });
   }, [
     filters.category,
     filters.search,
@@ -131,10 +157,11 @@ function ProductsContent() {
     fetchProducts,
   ]);
 
-  // Fetch products when pagination changes
+  // Fetch products when pagination changes (but not when offset is reset to 0)
   useEffect(() => {
-    fetchProducts();
-  }, [pagination.limit, pagination.offset, fetchProducts]);
+    if (pagination.offset === 0) return; // Skip if offset was just reset
+    fetchProducts(filters, { limit: pagination.limit, offset: pagination.offset }, true); // true for append mode
+  }, [pagination.offset, fetchProducts]);
 
   const fetchCategories = async () => {
     try {
@@ -158,7 +185,7 @@ function ProductsContent() {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
 
-    // Update URL
+    // Update URL without triggering navigation
     const params = new URLSearchParams();
     if (newFilters.category) params.set("category", newFilters.category);
     if (newFilters.search) params.set("search", newFilters.search);
@@ -166,11 +193,12 @@ function ProductsContent() {
     if (newFilters.source && newFilters.source !== "all")
       params.set("source", newFilters.source);
 
-    router.push(`/products?${params.toString()}`);
+    // Use replace instead of push to avoid triggering searchParams change
+    window.history.replaceState({}, '', `/products?${params.toString()}`);
   };
 
   const clearFilters = () => {
-    setFilters({
+    const clearedFilters = {
       category: "",
       search: "",
       creator: "",
@@ -178,9 +206,14 @@ function ProductsContent() {
       maxPrice: "",
       sortBy: "created_at",
       sortOrder: "DESC",
-      source: "all",
-    });
-    router.push("/products");
+      source: "all" as const,
+    };
+    setFilters(clearedFilters);
+    
+    // Update URL and fetch products
+    window.history.replaceState({}, '', '/products');
+    setPagination(prev => ({ ...prev, offset: 0 }));
+    fetchProducts(clearedFilters, { limit: pagination.limit, offset: 0 });
   };
 
   return (
@@ -194,12 +227,7 @@ function ProductsContent() {
         categories={categories}
       />
 
-      <FeaturedCreatorsSection
-        creators={creators}
-        handleFilterChange={handleFilterChange}
-      />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <ProductsFilterTopBar
           filters={filters}
           setFilters={setFilters}
@@ -210,7 +238,7 @@ function ProductsContent() {
           creators={creators}
         />
 
-        <div className="flex-1">
+        <div className="-z-40">
             <ProductsControls
               loading={loading}
               pagination={pagination}
@@ -234,8 +262,14 @@ function ProductsContent() {
 
                 <ProductsPagination
                   hasNext={pagination.hasNext}
-                  setPagination={setPagination}
-                  fetchProducts={fetchProducts}
+                  loading={loadingMore}
+                  onLoadMore={() => {
+                    // Load more products by updating offset
+                    setPagination(prev => ({
+                      ...prev,
+                      offset: prev.offset + prev.limit,
+                    }));
+                  }}
                 />
               </>
             )}

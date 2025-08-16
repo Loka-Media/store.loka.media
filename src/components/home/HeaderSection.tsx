@@ -44,7 +44,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
 
           {/* Main Brand with enhanced typography */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black mb-8 tracking-tight leading-none">
-            <span className="bg-gradient-to-r from-orange-300 via-orange-400 to-orange-500 bg-clip-text text-transparent animate-pulse">
+            <span className="bg-gradient-to-r from-orange-300 via-orange-400 to-orange-500 bg-clip-text text-transparent">
               The Ultimate
             </span>
             <br />
@@ -82,7 +82,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
           </div>
 
           {/* Enhanced Secondary Actions with glassmorphism */}
-          <div className="flex flex-wrap justify-center gap-6 mb-16">
+          <div className="flex flex-wrap justify-center gap-6 mb-2">
             {!isAuthenticated ? (
               <>
                 <Link
@@ -93,7 +93,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                 </Link>
                 <Link
                   href="/auth/login"
-                  className="group px-8 py-4 sm:px-10 sm:py-4 text-gray-300 hover:text-orange-300 font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 relative"
+                  className="group px-8 py-4 sm:px-10 sm:py-4 border-2 border-orange-400/50 hover:border-orange-400 text-gray-200 hover:text-white font-semibold rounded-full transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-50 backdrop-blur-md bg-gradient-to-r from-black/30 to-orange-900/30 hover:from-orange-500/20 hover:to-orange-600/20 relative overflow-hidden"
                 >
                   <span className="group-hover:mr-2 transition-all duration-300">
                     Sign In
@@ -112,53 +112,6 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                 <span className="relative">Go to Dashboard</span>
               </Link>
             )}
-          </div>
-
-          {/* Enhanced Trust Indicators with floating animation */}
-          <div className="flex flex-wrap justify-center items-center gap-y-6 gap-x-12 text-gray-300 text-sm md:text-base">
-            <div className="group flex items-center hover:text-orange-300 transition-all duration-300 cursor-default">
-              <div className="relative">
-                <Star className="w-5 h-5 text-orange-500 mr-3 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300" />
-                <div className="absolute inset-0 w-5 h-5 bg-orange-500/30 rounded-full blur-sm group-hover:animate-ping"></div>
-              </div>
-              <span className="font-medium">Enterprise Ready</span>
-            </div>
-            <div className="group flex items-center hover:text-orange-300 transition-all duration-300 cursor-default">
-              <div className="relative">
-                <Shield className="w-5 h-5 text-orange-500 mr-3 group-hover:scale-110 transition-all duration-300" />
-                <div className="absolute inset-0 w-5 h-5 bg-orange-500/30 rounded-full blur-sm group-hover:animate-ping"></div>
-              </div>
-              <span className="font-medium">Bank-Level Security</span>
-            </div>
-            <div className="group flex items-center hover:text-orange-300 transition-all duration-300 cursor-default">
-              <div className="relative">
-                <Zap className="w-5 h-5 text-orange-500 mr-3 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300" />
-                <div className="absolute inset-0 w-5 h-5 bg-orange-500/30 rounded-full blur-sm group-hover:animate-ping"></div>
-              </div>
-              <span className="font-medium">Lightning Fast</span>
-            </div>
-          </div>
-
-          {/* Floating stats cards */}
-          <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="group p-6 rounded-2xl bg-gradient-to-br from-black/40 to-orange-900/20 backdrop-blur-md border border-orange-500/20 hover:border-orange-500/40 transition-all duration-500 hover:transform hover:scale-105">
-              <div className="text-3xl font-bold text-orange-400 mb-2">
-                10K+
-              </div>
-              <div className="text-gray-300 text-sm">Active Creators</div>
-            </div>
-            <div className="group p-6 rounded-2xl bg-gradient-to-br from-black/40 to-orange-900/20 backdrop-blur-md border border-orange-500/20 hover:border-orange-500/40 transition-all duration-500 hover:transform hover:scale-105">
-              <div className="text-3xl font-bold text-orange-400 mb-2">
-                $2M+
-              </div>
-              <div className="text-gray-300 text-sm">Revenue Generated</div>
-            </div>
-            <div className="group p-6 rounded-2xl bg-gradient-to-br from-black/40 to-orange-900/20 backdrop-blur-md border border-orange-500/20 hover:border-orange-500/40 transition-all duration-500 hover:transform hover:scale-105">
-              <div className="text-3xl font-bold text-orange-400 mb-2">
-                99.9%
-              </div>
-              <div className="text-gray-300 text-sm">Uptime Guarantee</div>
-            </div>
           </div>
         </div>
       </div>

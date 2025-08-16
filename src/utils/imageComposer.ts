@@ -4,7 +4,12 @@ import { DesignFile } from '../lib/types';
 interface PrintFile {
   width: number;
   height: number;
-  [key: string]: any;
+  [key: string]: unknown;
+}
+
+interface PrintFiles {
+  available_placements?: Record<string, PrintFile>;
+  [key: string]: unknown;
 }
 
 export interface CompositeImageResult {
@@ -71,7 +76,7 @@ export const mergeDesignsIntoComposite = async (
               }, 'image/png');
             }
           } catch (error) {
-            reject(new Error(`Failed to draw image ${index}: ${error.message}`));
+            reject(new Error(`Failed to draw image ${index}: ${error instanceof Error ? error.message : 'Unknown error'}`));
           }
         };
         
@@ -92,7 +97,7 @@ export const mergeDesignsIntoComposite = async (
       });
       
     } catch (error) {
-      reject(new Error(`Failed to create composite image: ${error.message}`));
+      reject(new Error(`Failed to create composite image: ${error instanceof Error ? error.message : 'Unknown error'}`));
     }
   });
 };
@@ -166,7 +171,7 @@ export const uploadCompositeImage = async (
 // Main function to merge designs per placement and upload composite images
 export const createCompositeImagesForPlacements = async (
   designs: DesignFile[],
-  printFiles: any
+  printFiles: PrintFiles
 ): Promise<DesignFile[]> => {
   // Group designs by placement
   const designsByPlacement = designs.reduce<Record<string, DesignFile[]>>((acc, design) => {

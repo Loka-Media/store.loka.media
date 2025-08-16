@@ -7,10 +7,10 @@ import { getCanvasDimensions } from './utils';
 
 interface DesignCanvasTabProps {
   designFiles: DesignFile[];
-  setDesignFiles: (files: DesignFile[]) => void;
+  setDesignFiles: React.Dispatch<React.SetStateAction<DesignFile[]>>;
   activePlacement: string;
   selectedPlacements: string[];
-  setSelectedPlacements: (placements: string[]) => void;
+  setSelectedPlacements: React.Dispatch<React.SetStateAction<string[]>>;
   setActivePlacement: (placement: string) => void;
   selectedDesignFile: DesignFile | null;
   setSelectedDesignFile: (file: DesignFile | null) => void;

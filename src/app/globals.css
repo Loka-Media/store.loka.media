@@ -11,6 +11,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-fascinate-inline: var(--font-fascinate-inline);
 }
 
 body {
@@ -61,4 +62,10 @@ body {
 
 .animate-pulse-gentle {
   animation: pulse 2s ease-in-out infinite;
+}
+
+.fascinate-inline-regular {
+  font-family: "Fascinate Inline", system-ui;
+  font-weight: 400;
+  font-style: normal;
 }

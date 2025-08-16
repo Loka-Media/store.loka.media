@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface PrintFile {
   printfile_id: number;
   width: number;
@@ -64,7 +66,7 @@ export interface UnifiedDesignEditorProps {
   selectedVariants: number[];
   setSelectedVariants: (variants: number[]) => void;
   designFiles: DesignFile[];
-  setDesignFiles: (files: DesignFile[]) => void;
+  setDesignFiles: React.Dispatch<React.SetStateAction<DesignFile[]>>;
   uploadedFiles: UploadedFile[];
   printFiles: PrintFilesData | null;
   onGeneratePreview: (advancedOptions?: {
