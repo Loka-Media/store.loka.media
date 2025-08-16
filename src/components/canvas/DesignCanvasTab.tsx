@@ -2,14 +2,9 @@ import React, { useEffect } from "react";
 import { Rnd } from "react-rnd";
 import { Zap, X } from "lucide-react";
 import toast from "react-hot-toast";
-import { DesignFile, PrintFile } from "./types";
+import { DesignFile, PrintFile, AspectRatioIssue } from "./types";
 import { getCanvasDimensions } from "./utils";
 import { aspectRatioValidation } from "@/utils/aspectRatioValidation";
-
-interface AspectRatioIssue {
-  designId: number;
-  message: string;
-}
 
 interface DesignCanvasTabProps {
   designFiles: DesignFile[];
@@ -53,7 +48,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
           design.position.height
         )
           .then(({ isValid, percentDifference, correctedDimensions }) => {
-            if (!isValid) {
+            if (!isValid && correctedDimensions) {
               return {
                 designId: design.id,
                 message: `Warning: Aspect ratio of image is off by ${percentDifference.toFixed(

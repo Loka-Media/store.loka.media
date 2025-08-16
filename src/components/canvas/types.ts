@@ -113,3 +113,8 @@ export interface ColorInfo {
   code: string;
   image: string;
 }
+
+export interface AspectRatioIssue {
+  designId: number;
+  message: string;
+}
