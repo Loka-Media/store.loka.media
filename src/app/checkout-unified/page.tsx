@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect } from 'react';
@@ -81,6 +82,21 @@ export default function UnifiedCheckoutPage() {
     );
   }, [checkoutState.customerInfo.country, locationLookup.printfulCountries]);
 
+  // Fetch shipping rates when address information changes
+  useEffect(() => {
+    const { address1, city, state, zip, country } = checkoutState.customerInfo;
+    if (address1 && city && state && zip && country && items.length > 0) {
+      checkoutState.fetchShippingRates(items);
+    }
+  }, [
+    checkoutState.customerInfo.address1,
+    checkoutState.customerInfo.city,
+    checkoutState.customerInfo.state,
+    checkoutState.customerInfo.zip,
+    checkoutState.customerInfo.country,
+    items // Only depend on items and customerInfo address fields
+  ]);
+
   // Create wrapper functions for hooks
   const handleAddressSelect = (address: Address) => {
     addressManagement.handleAddressSelect(address, checkoutState.updateCustomerInfo);
@@ -127,8 +143,14 @@ export default function UnifiedCheckoutPage() {
     try {
       setLoading(true);
 
-      if (!customerInfo.name || !customerInfo.email || !customerInfo.address1 || !customerInfo.city || !customerInfo.zip) {
-        toast.error('Please fill in all required fields');
+      if (
+        !customerInfo.name ||
+        !customerInfo.email ||
+        !customerInfo.address1 ||
+        !customerInfo.city ||
+        !customerInfo.zip
+      ) {
+        toast.error("Please fill in all required fields");
         return;
       }
 
@@ -139,15 +161,15 @@ export default function UnifiedCheckoutPage() {
 
       if (wantsToSignup) {
         if (!signupInfo.password || !signupInfo.confirmPassword) {
-          toast.error('Please fill in password fields to create account');
+          toast.error("Please fill in password fields to create account");
           return;
         }
         if (signupInfo.password !== signupInfo.confirmPassword) {
-          toast.error('Passwords do not match');
+          toast.error("Passwords do not match");
           return;
         }
         if (signupInfo.password.length < 6) {
-          toast.error('Password must be at least 6 characters long');
+          toast.error("Password must be at least 6 characters long");
           return;
         }
       }
@@ -157,7 +179,7 @@ export default function UnifiedCheckoutPage() {
         customerInfo: {
           name: customerInfo.name,
           email: customerInfo.email,
-          phone: customerInfo.phone
+          phone: customerInfo.phone,
         },
         shippingAddress: {
           name: customerInfo.name,
@@ -167,30 +189,30 @@ export default function UnifiedCheckoutPage() {
           state: customerInfo.state,
           zip: customerInfo.zip,
           country: customerInfo.country,
-          phone: customerInfo.phone
+          phone: customerInfo.phone,
         },
-        cartItems: items.map(item => ({
+        cartItems: items.map((item) => ({
           product_id: String(item.product_id),
           variant_id: String(item.variant_id),
           product_name: item.product_name,
           price: String(item.price),
           quantity: item.quantity,
-          image_url: item.image_url || '',
+          image_url: item.image_url || "",
           size: item.size,
           color: item.color,
-          source: item.source || 'printful'
-        }))
+          source: item.source || "printful",
+        })),
       });
 
       const orderResult = await unifiedCheckoutAPI.processCheckout({
         sessionToken: sessionData.session.session_token,
-        paymentMethod: 'stripe',
+        paymentMethod: "stripe",
         ...(wantsToSignup && {
           loginCredentials: {
             email: customerInfo.email,
-            password: signupInfo.password
-          }
-        })
+            password: signupInfo.password,
+          },
+        }),
       });
 
       const totalAmount = checkoutState.calculateTotal(summary.subtotal);
@@ -201,22 +223,24 @@ export default function UnifiedCheckoutPage() {
       );
 
       if (!paymentIntentResult.success) {
-        throw new Error('Failed to create payment intent');
+        throw new Error("Failed to create payment intent");
       }
 
       setOrderData(orderResult.order);
       setClientSecret(paymentIntentResult.clientSecret);
-      setCurrentStep('payment');
-      
-      if (wantsToSignup) {
-        toast.success('Account created and order ready! Complete your payment to finish.');
-      } else {
-        toast.success('Order created! Please complete payment.');
-      }
+      setCurrentStep("payment");
 
+      if (wantsToSignup) {
+        toast.success(
+          "Account created and order ready! Complete your payment to finish."
+        );
+      } else {
+        toast.success("Order created! Please complete payment.");
+      }
     } catch (error: unknown) {
-      console.error('Order creation error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create order';
+      console.error("Order creation error:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create order";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -227,9 +251,9 @@ export default function UnifiedCheckoutPage() {
     try {
       checkoutState.setCurrentStep('complete');
       await clearCart();
-      toast.success('Payment successful! Order placed.');
+      toast.success("Payment successful! Order placed.");
     } catch (error) {
-      console.error('Payment success handling error:', error);
+      console.error("Payment success handling error:", error);
     }
   };
 
@@ -332,6 +356,10 @@ export default function UnifiedCheckoutPage() {
               calculateTotal={() => checkoutState.calculateTotal(summary.subtotal)}
               onCreateOrder={handleCreateOrder}
               loading={checkoutState.loading}
+              shippingCost={checkoutState.selectedShippingRate?.rate || 0} // Derived from selectedShippingRate
+              shippingRates={checkoutState.shippingRates}
+              selectedShippingRate={checkoutState.selectedShippingRate || null} // Use selectedShippingRate.id
+              setSelectedShippingRate={checkoutState.setSelectedShippingRate} // Use setSelectedShippingRate
             />
           </div>
         </div>
