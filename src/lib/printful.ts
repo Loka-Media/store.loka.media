@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from './auth';
 
 export interface PrintfulConnection {
@@ -77,69 +78,84 @@ export interface CreateSyncProductData {
 export const printfulAPI = {
   // Connection management
   getConnectionStatus: async (): Promise<PrintfulConnection> => {
-    const response = await api.get('/api/printful/connection/status');
+    const response = await api.get("/api/printful/connection/status");
     return response.data;
   },
 
   initializeAuth: async (): Promise<{ authUrl: string }> => {
-    const response = await api.get('/api/printful/auth/init');
+    const response = await api.get("/api/printful/auth/init");
     return response.data;
   },
 
   disconnect: async (): Promise<{ message: string }> => {
-    const response = await api.post('/api/printful/connection/disconnect');
+    const response = await api.post("/api/printful/connection/disconnect");
     return response.data;
   },
 
   // Catalog
-  getCatalog: async (params?: { category?: string; limit?: number; offset?: number }) => {
-    const response = await api.get('/api/printful/catalog', { params });
+  getCatalog: async (params?: {
+    category?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const response = await api.get("/api/printful/catalog", { params });
     return response.data;
   },
 
   getProduct: async (productId: string | number) => {
-    const response = await api.get(`/api/printful/catalog/product/${productId}`);
+    const response = await api.get(
+      `/api/printful/catalog/product/${productId}`
+    );
     return response.data;
   },
 
   // File management
-  uploadFile: async (fileData: { filename: string; url: string; type?: string }) => {
-    const response = await api.post('/api/printful/files', fileData);
+  uploadFile: async (fileData: {
+    filename: string;
+    url: string;
+    type?: string;
+  }) => {
+    const response = await api.post("/api/printful/files", fileData);
     return response.data;
   },
 
   getFiles: async () => {
-    const response = await api.get('/api/printful/files');
+    const response = await api.get("/api/printful/files");
     return response.data;
   },
 
   // Product management
   createSyncProduct: async (productData: CreateSyncProductData) => {
-    const response = await api.post('/api/printful/products', productData);
+    const response = await api.post("/api/printful/products", productData);
     return response.data;
   },
 
   getSyncProducts: async (params?: { limit?: number; offset?: number }) => {
-    const response = await api.get('/api/printful/products/sync', { params });
+    const response = await api.get("/api/printful/products/sync", { params });
     return response.data;
   },
 
   getUserProducts: async () => {
-    const response = await api.get('/api/printful/products/user');
+    const response = await api.get("/api/printful/products/user");
     return response.data;
   },
 
   // Inventory management
   checkInventory: async (
-    variantIds: number[], 
-    targetRegions: string[] = ['US', 'EU'], 
+    variantIds: number[],
+    targetRegions: string[] = ["US", "EU"],
     customerCountry?: string
   ) => {
-    const response = await api.post('/api/printful/inventory/check', { 
+    const response = await api.post("/api/printful/inventory/check", {
       variant_ids: variantIds,
       target_regions: targetRegions,
-      customer_country: customerCountry
+      customer_country: customerCountry,
     });
+    return response.data;
+  },
+
+  getShippingRates: async (request: any) => {
+    const response = await api.post("/api/printful/shipping/rates", request);
     return response.data;
   },
 };
