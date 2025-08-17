@@ -13,10 +13,8 @@ export const useLocationLookup = () => {
       const countries = await getPrintfulCountries();
       setPrintfulCountries(countries);
       
-      const usCountry = countries.find(c => c.code === 'US');
-      if (usCountry) {
-        setAvailableStates(usCountry.states);
-      }
+      // No default country/state selection
+      setAvailableStates([]);
     };
     
     loadPrintfulCountries();
@@ -25,8 +23,8 @@ export const useLocationLookup = () => {
   const updateAvailableStates = useCallback((countryCode: string, currentState: string, updateCustomerInfo: (updates: Partial<CustomerInfo>) => void) => {
     const selectedCountry = printfulCountries.find(c => c.code === countryCode);
     if (selectedCountry) {
-      setAvailableStates(selectedCountry.states);
-      if (currentState && !selectedCountry.states.find(s => s.code === currentState)) {
+      setAvailableStates(selectedCountry.states || []);
+      if (currentState && !selectedCountry.states?.find(s => s.code === currentState)) {
         updateCustomerInfo({ state: '' });
       }
     }

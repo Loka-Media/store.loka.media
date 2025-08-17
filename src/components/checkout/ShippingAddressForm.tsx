@@ -111,18 +111,21 @@ export const ShippingAddressForm = ({
                   </div>
                 )}
               </div>
+              {availableStates.length > 0 && (
               <select 
                 value={customerInfo.state} 
                 onChange={(e) => updateCustomerInfo({ state: e.target.value })} 
                 className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500"
+                disabled={!customerInfo.country || availableStates.length === 0}
               >
-                <option value="">Select State</option>
+                <option value="">{customerInfo.country ? 'Select State' : 'Select Country First'}</option>
                 {availableStates.map(state => (
                   <option key={state.code} value={state.code}>
                     {state.name} ({state.code})
                   </option>
                 ))}
               </select>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
