@@ -99,6 +99,46 @@ interface Order {
   admin_fee?: string;
 }
 
+interface ReleasePaymentResponse {
+  success: boolean;
+  message: string;
+  payout: {
+    payoutId: string;
+    amount: string;
+    recipient: string;
+  };
+  order: {
+    id: number;
+    orderNumber: string;
+    status: string;
+    paymentStatus: string;
+  };
+  fulfillment: {
+    printful?: any;
+    shopify?: {
+      id: string;
+      checkout_url?: string;
+      status: string;
+      total_amount?: string;
+      items_count?: number;
+      note?: string;
+    };
+  };
+  summary: {
+    printfulItems: number;
+    shopifyItems: number;
+    totalPlatforms: number;
+  };
+  actions?: {
+    shopifyCheckout?: {
+      url: string;
+      message: string;
+      amount: string;
+      currency: string;
+    };
+  };
+}
+
 export default function AdminOrdersPage() {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -259,9 +299,59 @@ export default function AdminOrdersPage() {
 
     try {
       setLoading(true);
-      const result = await adminAPI.releasePayment(selectedOrder.id.toString(), paymentForm);
+      const result: ReleasePaymentResponse = await adminAPI.releasePayment(selectedOrder.id.toString(), paymentForm);
       
-      toast.success(result.message);
+      // Handle different fulfillment scenarios
+      const hasPrintful = result.fulfillment.printful && result.summary.printfulItems > 0;
+      const hasShopify = result.actions?.shopifyCheckout?.url && result.fulfillment.shopify;
+      
+      if (hasShopify && hasPrintful) {
+        // Mixed order: Both Printful and Shopify
+        const popup = window.open(result.actions!.shopifyCheckout!.url, '_blank');
+        
+        if (!popup) {
+          toast.error(
+            `⚠️ Popup blocked! Please manually open:\n${result.actions!.shopifyCheckout!.url}`,
+            { duration: 10000 }
+          );
+        }
+        
+        toast.success(
+          `✅ Payment Released Successfully!\n\n` +
+          `🖨️ Printful: ${result.summary.printfulItems} items sent to production\n` +
+          `🛒 Shopify: ${result.fulfillment.shopify!.items_count || 0} items checkout opened in new tab\n` +
+          `💰 Shopify Amount: $${result.actions!.shopifyCheckout!.amount}`,
+          { duration: 8000 }
+        );
+      } else if (hasShopify) {
+        // Shopify only
+        const popup = window.open(result.actions!.shopifyCheckout!.url, '_blank');
+        
+        if (!popup) {
+          toast.error(
+            `⚠️ Popup blocked! Please manually open:\n${result.actions!.shopifyCheckout!.url}`,
+            { duration: 10000 }
+          );
+        }
+        
+        toast.success(
+          `✅ Payment Released!\n\n` +
+          `🛒 Shopify checkout opened in new tab\n` +
+          `💰 Amount: $${result.actions!.shopifyCheckout!.amount} (${result.fulfillment.shopify!.items_count || 0} items)`,
+          { duration: 6000 }
+        );
+      } else if (hasPrintful) {
+        // Printful only
+        toast.success(
+          `✅ Payment Released Successfully!\n\n` +
+          `🖨️ ${result.summary.printfulItems} items sent to Printful for production`,
+          { duration: 4000 }
+        );
+      } else {
+        // Fallback
+        toast.success(result.message);
+      }
+      
       setShowPaymentModal(false);
       setPaymentForm({
         vendorEmail: '',
