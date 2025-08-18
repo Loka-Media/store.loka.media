@@ -216,6 +216,12 @@ export const productAPI = {
     return response.data;
   },
 
+  // Creator: Get single product for editing
+  getCreatorProduct: async (productId: string | number) => {
+    const response = await api.get(`/api/products/creator/${productId}`);
+    return response.data;
+  },
+
   // Creator: Update product
   updateProduct: async (
     productId: string | number,

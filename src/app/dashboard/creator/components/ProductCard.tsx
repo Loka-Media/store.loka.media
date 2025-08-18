@@ -44,8 +44,8 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
   };
 
   const handleEdit = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent card click
+    // Don't preventDefault - let the Link navigate
   };
 
   const confirmStatusChange = async () => {
