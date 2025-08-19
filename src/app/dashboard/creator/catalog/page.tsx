@@ -11,6 +11,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import Navigation from '@/components/Navigation';
+import CreatorProtectedRoute from '@/components/CreatorProtectedRoute';
 
 interface Category {
   id: number;
@@ -130,12 +131,8 @@ export default function CreatorCatalogPage() {
   }, [filters]);
 
   useEffect(() => {
-    if (user?.role !== 'creator' && user?.role !== 'admin') {
-      return;
-    }
-    
     fetchCategories();
-  }, [user]);
+  }, []);
 
   const fetchCategories = async () => {
     try {
@@ -169,33 +166,30 @@ export default function CreatorCatalogPage() {
     router.push(`/dashboard/creator/canvas?productId=${printfulProduct.id}`);
   };
 
-  if (!user || (user.role !== 'creator' && user.role !== 'admin')) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Navigation />
+    <CreatorProtectedRoute>
+      <div className="min-h-screen bg-black text-white">
+        <Navigation />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {!selectedCategory ? (
-          <CategorySelection 
-            categories={categories}
-            onSelectCategory={handleSelectCategory} 
-          />
-        ) : (
-          <ProductView 
-            products={products}
-            loading={loading}
-            filters={filters}
-            setFilters={setFilters}
-            fetchCatalog={() => fetchCatalog(selectedCategory.id)}
-            handleCreateProduct={handleCreateProduct}
-            setSelectedProduct={setSelectedProduct}
-            onBackToCategories={handleBackToCategories}
-          />
-        )}
-      </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {!selectedCategory ? (
+            <CategorySelection 
+              categories={categories}
+              onSelectCategory={handleSelectCategory} 
+            />
+          ) : (
+            <ProductView 
+              products={products}
+              loading={loading}
+              filters={filters}
+              setFilters={setFilters}
+              fetchCatalog={() => fetchCatalog(selectedCategory.id)}
+              handleCreateProduct={handleCreateProduct}
+              setSelectedProduct={setSelectedProduct}
+              onBackToCategories={handleBackToCategories}
+            />
+          )}
+        </div>
 
       {/* Product Details Modal */}
       {selectedProduct && (
@@ -205,7 +199,8 @@ export default function CreatorCatalogPage() {
           onCreateProduct={handleCreateProduct}
         />
       )}
-    </div>
+      </div>
+    </CreatorProtectedRoute>
   );
 }
 

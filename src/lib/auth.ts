@@ -71,6 +71,7 @@ export interface User {
   phone: string;
   role: 'user' | 'creator' | 'admin';
   isVerified: boolean;
+  creatorStatus?: 'pending' | 'approved' | 'rejected' | null;
 }
 
 export interface AuthResponse {
@@ -89,6 +90,7 @@ export interface RegisterData {
   phone: string;
   password: string;
   role?: 'user' | 'creator';
+  creatorUrl?: string;
 }
 
 export interface LoginData {
@@ -99,6 +101,11 @@ export interface LoginData {
 export const authAPI = {
   register: async (data: RegisterData) => {
     const response = await api.post('/api/auth/register', data);
+    return response.data;
+  },
+
+  createCreatorRequest: async (data: { email: string; creatorUrl: string }) => {
+    const response = await api.post('/api/auth/creator-request', data);
     return response.data;
   },
 
@@ -149,6 +156,24 @@ export const authAPI = {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', newRefreshToken);
 
+    return response.data;
+  },
+};
+
+// Admin APIs for creator management
+export const adminAPI = {
+  getCreatorRequests: async () => {
+    const response = await api.get('/api/admin/creator-requests');
+    return response.data;
+  },
+
+  approveCreatorRequest: async (requestId: number) => {
+    const response = await api.post(`/api/admin/creator-requests/${requestId}/approve`);
+    return response.data;
+  },
+
+  rejectCreatorRequest: async (requestId: number) => {
+    const response = await api.post(`/api/admin/creator-requests/${requestId}/reject`);
     return response.data;
   },
 };

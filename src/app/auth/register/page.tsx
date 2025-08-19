@@ -20,6 +20,8 @@ import {
   Users, // Added for stats on the left
   ShoppingBag, // Added for stats on the left
   TrendingUp, // Added for stats on the left
+  Link as LinkIcon,
+  AlertCircle,
 } from "lucide-react";
 
 // Import the LottieAnimation component (ensure this path is correct and component is defined as discussed)
@@ -40,10 +42,20 @@ const registerSchema = z
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
     role: z.enum(["user", "creator"]),
+    creatorUrl: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
+  })
+  .refine((data) => {
+    if (data.role === "creator" && (!data.creatorUrl || data.creatorUrl.trim() === "")) {
+      return false;
+    }
+    return true;
+  }, {
+    message: "Creator URL is required for creator accounts",
+    path: ["creatorUrl"],
   });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -58,6 +70,7 @@ function RegisterPageContent() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -65,6 +78,8 @@ function RegisterPageContent() {
       role: "user",
     },
   });
+
+  const selectedRole = watch("role");
 
   const onSubmit = async (data: RegisterForm) => {
     setLoading(true);
@@ -259,6 +274,52 @@ function RegisterPageContent() {
                     </div>
                   </fieldset>
                 </div>
+
+                {/* Creator URL Field - Conditionally shown */}
+                {selectedRole === "creator" && (
+                  <div>
+                    <label
+                      htmlFor="creatorUrl"
+                      className="block text-xs sm:text-sm font-semibold text-white mb-2"
+                    >
+                      Creator Handle/Profile URL
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <LinkIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                      </div>
+                      <input
+                        {...register("creatorUrl")}
+                        type="url"
+                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        placeholder="https://instagram.com/yourhandle or YouTube/TikTok URL"
+                      />
+                    </div>
+                    {errors.creatorUrl && (
+                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-400">
+                        {errors.creatorUrl.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Creator Approval Notice */}
+                {selectedRole === "creator" && (
+                  <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-4">
+                    <div className="flex items-start">
+                      <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-sm font-semibold text-blue-400 mb-1">
+                          Creator Account Approval Required
+                        </h4>
+                        <p className="text-xs text-blue-200 leading-relaxed">
+                          You will initially register as a user. Your creator request will be reviewed by our admin team. 
+                          Once approved, you&apos;ll gain access to creator features including product uploads and sales tracking.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Form Fields Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">

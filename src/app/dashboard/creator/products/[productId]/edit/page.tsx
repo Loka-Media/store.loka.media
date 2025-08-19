@@ -42,12 +42,13 @@ interface MockupFile {
   };
 }
 
-export default function EditProductPage({ params }: { params: { productId: string } }) {
+export default function EditProductPage({ params }: { params: Promise<{ productId: string }> }) {
   const { user } = useAuth();
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [productId, setProductId] = useState<string>('');
   
   const [formData, setFormData] = useState({
     name: '',
@@ -69,18 +70,26 @@ export default function EditProductPage({ params }: { params: { productId: strin
   const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
+    params.then((resolvedParams) => {
+      setProductId(resolvedParams.productId);
+    });
+  }, [params]);
+
+  useEffect(() => {
     if (!user || (user.role !== 'creator' && user.role !== 'admin')) {
       router.push('/');
       return;
     }
     
-    fetchProduct();
-  }, [user, params.productId]);
+    if (productId) {
+      fetchProduct();
+    }
+  }, [user, productId]);
 
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await productAPI.getCreatorProduct(params.productId);
+      const response = await productAPI.getCreatorProduct(productId);
       const productData = response.product;
       
       setProduct(productData);
@@ -151,7 +160,7 @@ export default function EditProductPage({ params }: { params: { productId: strin
         mockupGenerationInputs: mockupData.files.length > 0 ? mockupData : null
       };
 
-      await productAPI.updateProduct(params.productId, updateData);
+      await productAPI.updateProduct(productId, updateData);
       
       toast.success('Product updated successfully!');
       router.push('/dashboard/creator/products');

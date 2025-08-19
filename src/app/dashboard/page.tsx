@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import CreatorApprovalStatus from "@/components/CreatorApprovalStatus";
 import {
   LogOut,
 } from "lucide-react";
@@ -16,14 +18,14 @@ export default function DashboardPage() {
       router.push("/auth/login");
     } else if (!loading && user) {
       // Redirect to role-specific dashboard
-      if (user.role === "creator") {
+      if (user.role === "creator" && user.creatorStatus === "approved") {
         router.push("/dashboard/creator");
       } else if (user.role === "admin") {
         router.push("/dashboard/admin");
-      } else if (user.role === "user") {
+      } else if (user.role === "user" && !user.creatorStatus) {
         router.push("/");
       }
-      // Users stay on the main dashboard
+      // Users with pending/rejected creator status stay on main dashboard
     }
   }, [loading, isAuthenticated, user, router]);
 
@@ -68,6 +70,34 @@ export default function DashboardPage() {
           </div>
         </div>
       </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <CreatorApprovalStatus />
+        
+        {/* Dashboard Content */}
+        <div className="bg-gray-800/50 backdrop-blur-md border border-gray-700 rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Your Dashboard</h2>
+          <p className="text-gray-300">
+            Welcome to your dashboard. You can browse products, manage your profile, and track your orders from here.
+          </p>
+          
+          <div className="mt-6 flex flex-wrap gap-4">
+            <Link
+              href="/products"
+              className="inline-flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition-colors"
+            >
+              Browse Products
+            </Link>
+            <Link
+              href="/profile"
+              className="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
+            >
+              Manage Profile
+            </Link>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

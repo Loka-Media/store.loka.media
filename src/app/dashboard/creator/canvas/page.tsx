@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { printfulAPI } from "@/lib/api";
 import { mockupAPI } from "@/lib/MockupAPI";
+import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 
 import UploadStep from "@/components/canvas/UploadStep";
 import UnifiedDesignEditor from "@/components/canvas/UnifiedDesignEditor";
@@ -308,11 +309,10 @@ function CanvasContent() {
     }
   }, [user, initializeCanvas]);
 
-  if (!user || (user.role !== "creator" && user.role !== "admin")) return null;
-
   if (!selectedProduct && !loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
+      <CreatorProtectedRoute>
+        <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center p-12 bg-black/60 backdrop-blur-sm rounded-3xl border border-gray-800 shadow-2xl">
           <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="h-8 w-8 text-gray-400" />
@@ -330,7 +330,8 @@ function CanvasContent() {
             Browse Catalog
           </Link>
         </div>
-      </div>
+        </div>
+      </CreatorProtectedRoute>
     );
   }
 
@@ -744,7 +745,8 @@ function CanvasContent() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <CreatorProtectedRoute>
+      <div className="min-h-screen bg-black">
       {/* <CanvasHeader
         selectedProduct={selectedProduct}
         step={step}
@@ -874,6 +876,7 @@ function CanvasContent() {
           </>
         )}
       </div>
-    </div>
+      </div>
+    </CreatorProtectedRoute>
   );
 }

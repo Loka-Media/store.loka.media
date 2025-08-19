@@ -16,12 +16,12 @@ export default function AdminDashboard() {
       stats: 'Sync 40K+ products'
     },
     {
-      title: 'User Management',
-      description: 'Manage creators, customers, and user permissions',
+      title: 'Creator Requests',
+      description: 'Review and approve creator account applications',
       icon: Users,
-      href: '/dashboard/admin/users',
+      href: '/dashboard/admin/creator-requests',
       color: 'bg-blue-500',
-      stats: 'Active users'
+      stats: 'Pending approvals'
     },
     {
       title: 'Order Management',
