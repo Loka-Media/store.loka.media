@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Store, Settings, Users, Package, BarChart3, ShoppingCart } from 'lucide-react';
+import { Store, Users, Package, ShoppingCart } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 
 export default function AdminDashboard() {

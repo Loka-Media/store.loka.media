@@ -46,35 +46,27 @@ export function Footer() {
 
         {/* Links grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 lg:gap-8">
-          {/* Loka Media */}
+          {/* Platform */}
           <div>
-            <h3 className="text-white font-semibold mb-3">Loka Media</h3>
+            <h3 className="text-white font-semibold mb-3">Platform</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link href="/shops" className="hover:text-white transition-colors">Shops</Link></li>
-              <li><Link href="/homepages" className="hover:text-white transition-colors">Homepages</Link></li>
-              <li><Link href="/memberships" className="hover:text-white transition-colors">Memberships</Link></li>
-              <li><Link href="/catalog" className="hover:text-white transition-colors">Product catalog</Link></li>
-              <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-              <li><Link href="/design" className="hover:text-white transition-colors">Design & sell</Link></li>
-              <li><Link href="/twitch" className="hover:text-white transition-colors">For Twitch creators</Link></li>
-              <li><Link href="/youtube" className="hover:text-white transition-colors">For YouTubers</Link></li>
-              <li><Link href="/tiktok" className="hover:text-white transition-colors">For Tiktokers</Link></li>
-              <li><Link href="/artists" className="hover:text-white transition-colors">For Artists</Link></li>
+              <li><Link href="/products" className="hover:text-white transition-colors">Browse Products</Link></li>
+              <li><Link href="/dashboard/creator/canvas" className="hover:text-white transition-colors">Design Studio</Link></li>
+              <li><Link href="/dashboard/creator/products" className="hover:text-white transition-colors">Creator Dashboard</Link></li>
+              <li><Link href="/auth/register" className="hover:text-white transition-colors">Start Creating</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">How it Works</Link></li>
             </ul>
           </div>
 
-          {/* Learn */}
+          {/* Support */}
           <div>
-            <h3 className="text-white font-semibold mb-3">Learn</h3>
+            <h3 className="text-white font-semibold mb-3">Support</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link href="/examples" className="hover:text-white transition-colors">Examples</Link></li>
-              <li><Link href="/designers" className="hover:text-white transition-colors">Designers</Link></li>
-              <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
-              <li><Link href="/help" className="hover:text-white transition-colors">Help center</Link></li>
-              <li><Link href="/discord" className="hover:text-white transition-colors">Discord community</Link></li>
-              <li><Link href="/api" className="hover:text-white transition-colors">APIs & developer docs</Link></li>
-              <li><Link href="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
-              <li><Link href="/glossary" className="hover:text-white transition-colors">Glossary</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+              <li><Link href="/returns" className="hover:text-white transition-colors">Returns & FAQ</Link></li>
+              <li><Link href="/orders" className="hover:text-white transition-colors">Track Orders</Link></li>
+              <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
+              <li><Link href="/shipping" className="hover:text-white transition-colors">Shipping Info</Link></li>
             </ul>
           </div>
 
@@ -82,50 +74,47 @@ export function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-3">Company</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
+              <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Contact us</Link></li>
-              <li><Link href="/shop" className="hover:text-white transition-colors">Loka Media shop</Link></li>
+              <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
+              <li><Link href="/press" className="hover:text-white transition-colors">Press Kit</Link></li>
+              <li><Link href="/partners" className="hover:text-white transition-colors">Partners</Link></li>
             </ul>
           </div>
 
-          {/* Compare to */}
+          {/* Creator Resources */}
           <div>
-            <h3 className="text-white font-semibold mb-3">Compare to</h3>
+            <h3 className="text-white font-semibold mb-3">Creator Resources</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link href="/vs-shopify" className="hover:text-white transition-colors">Shopify</Link></li>
-              <li><Link href="/vs-spring" className="hover:text-white transition-colors">Spring</Link></li>
-              <li><Link href="/vs-redbubble" className="hover:text-white transition-colors">Redbubble</Link></li>
-              <li><Link href="/vs-spreadshop" className="hover:text-white transition-colors">Spreadshop</Link></li>
-              <li><Link href="/vs-streamlabs" className="hover:text-white transition-colors">Streamlabs</Link></li>
-              <li><Link href="/vs-bonfire" className="hover:text-white transition-colors">Bonfire</Link></li>
-              <li><Link href="/vs-patreon" className="hover:text-white transition-colors">Patreon</Link></li>
-              <li><Link href="/compare" className="hover:text-white transition-colors">Compare all</Link></li>
+              <li><Link href="/creator-guide" className="hover:text-white transition-colors">Creator Guide</Link></li>
+              <li><Link href="/design-tips" className="hover:text-white transition-colors">Design Tips</Link></li>
+              <li><Link href="/quality-standards" className="hover:text-white transition-colors">Quality Standards</Link></li>
+              <li><Link href="/creator-earnings" className="hover:text-white transition-colors">Earnings Info</Link></li>
+              <li><Link href="/community" className="hover:text-white transition-colors">Community</Link></li>
             </ul>
           </div>
 
-          {/* Socials */}
+          {/* Legal */}
           <div>
-            <h3 className="text-white font-semibold mb-3">Socials</h3>
+            <h3 className="text-white font-semibold mb-3">Legal</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link href="https://instagram.com" className="hover:text-white transition-colors">Instagram</Link></li>
-              <li><Link href="https://twitter.com" className="hover:text-white transition-colors">X (Twitter)</Link></li>
-              <li><Link href="https://twitch.tv" className="hover:text-white transition-colors">Twitch</Link></li>
-              <li><Link href="https://discord.com" className="hover:text-white transition-colors">Discord</Link></li>
-              <li><Link href="https://youtube.com" className="hover:text-white transition-colors">YouTube</Link></li>
+              <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/cookies" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+              <li><Link href="/intellectual-property" className="hover:text-white transition-colors">IP Policy</Link></li>
+              <li><Link href="/acceptable-use" className="hover:text-white transition-colors">Acceptable Use</Link></li>
             </ul>
           </div>
 
-          {/* Guides */}
+          {/* Connect */}
           <div>
-            <h3 className="text-white font-semibold mb-3">Guides</h3>
+            <h3 className="text-white font-semibold mb-3">Connect</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link href="/getting-started" className="hover:text-white transition-colors">Getting started</Link></li>
-              <li><Link href="/creating-products" className="hover:text-white transition-colors">Creating products</Link></li>
-              <li><Link href="/ordering-samples" className="hover:text-white transition-colors">Ordering samples</Link></li>
-              <li><Link href="/launch-planning" className="hover:text-white transition-colors">Launch planning</Link></li>
-              <li><Link href="/launch-checklist" className="hover:text-white transition-colors">Launch checklist</Link></li>
-              <li><Link href="/after-launch" className="hover:text-white transition-colors">After launch</Link></li>
-              <li><Link href="/growing-brand" className="hover:text-white transition-colors">Growing your brand</Link></li>
+              <li><a href="https://instagram.com/lokamedia" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a></li>
+              <li><a href="https://twitter.com/lokamedia" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Twitter</a></li>
+              <li><a href="https://youtube.com/lokamedia" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">YouTube</a></li>
+              <li><a href="https://discord.gg/lokamedia" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Discord</a></li>
+              <li><a href="https://tiktok.com/@lokamedia" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">TikTok</a></li>
             </ul>
           </div>
         </div>
@@ -145,10 +134,10 @@ export function Footer() {
 
           {/* Center - Legal links */}
           <div className="flex flex-wrap justify-center items-center space-x-6 text-xs text-gray-500 mb-6 lg:mb-0">
-            <span>© Loka Media</span>
-            <Link href="/terms" className="hover:text-white transition-colors">ACCEPTABLE USE POLICY</Link>
+            <span>© 2024 Loka Media</span>
             <Link href="/terms" className="hover:text-white transition-colors">TERMS OF SERVICE</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">PRIVACY POLICY</Link>
+            <Link href="/returns" className="hover:text-white transition-colors">RETURNS & FAQ</Link>
           </div>
 
           {/* Right side - Scroll to top */}
