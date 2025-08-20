@@ -8,14 +8,6 @@ import Navigation from '@/components/Navigation';
 export default function AdminDashboard() {
   const adminFeatures = [
     {
-      title: 'Shopify Product Sync',
-      description: 'Sync products from Shopify store and manage marketplace inventory',
-      icon: Store,
-      href: '/dashboard/admin/shopify-sync',
-      color: 'bg-green-500',
-      stats: 'Sync 40K+ products'
-    },
-    {
       title: 'Creator Requests',
       description: 'Review and approve creator account applications',
       icon: Users,
@@ -154,18 +146,15 @@ export default function AdminDashboard() {
         <div className="mt-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-semibold mb-2">Ready to sync products?</h3>
+              <h3 className="text-xl font-semibold mb-2">Automated Product Sync</h3>
               <p className="text-orange-100">
-                Connect to your Shopify store and sync thousands of products for creators to choose from.
+                Products are automatically synced from Shopify every 6 hours. No manual intervention required.
               </p>
             </div>
-            <Link
-              href="/dashboard/admin/shopify-sync"
-              className="inline-flex items-center px-6 py-3 bg-white text-orange-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Store className="w-5 h-5 mr-2" />
-              Start Shopify Sync
-            </Link>
+            <div className="text-white text-sm">
+              <p className="font-semibold">Next sync in: {/* TODO: Add countdown timer */}</p>
+              <p className="text-orange-100">Automated sync active</p>
+            </div>
           </div>
         </div>
       </div>

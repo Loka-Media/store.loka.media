@@ -887,11 +887,6 @@ export const shopifyAPI = {
     return response.data;
   },
 
-  syncAllProducts: async () => {
-    const response = await api.post("/api/shopify-storefront/sync");
-    return response.data;
-  },
-
   getSyncStatus: async () => {
     const response = await api.get("/api/shopify-storefront/status");
     return response.data;
