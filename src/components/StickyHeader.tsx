@@ -19,7 +19,7 @@ export default function StickyHeader() {
   const { cartCount } = useGuestCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [isDark, setIsDark] = useState(true); // Default to dark for dark theme site
+  const isDark = true; // Default to dark for dark theme site
   
   // Glass morphism refs and IDs
   const uniqueId = useId().replace(/:/g, '-');
