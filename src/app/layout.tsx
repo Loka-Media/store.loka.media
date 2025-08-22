@@ -6,6 +6,8 @@ import { CartProvider } from "@/contexts/CartContext";
 import { GuestCartProvider } from "@/contexts/GuestCartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { Toaster } from "react-hot-toast";
+import Navigation from "@/components/Navigation";
+import StickyHeader from "@/components/StickyHeader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +44,8 @@ export default function RootLayout({
           <CartProvider>
             <GuestCartProvider>
               <WishlistProvider>
+                <Navigation />
+                <StickyHeader />
                 {children}
                 <Toaster position="top-right" />
               </WishlistProvider>

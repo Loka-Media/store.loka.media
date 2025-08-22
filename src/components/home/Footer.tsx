@@ -1,6 +1,6 @@
 "use client";
 
-import { Instagram, LinkedinIcon, Youtube } from "lucide-react";
+import { Instagram, Linkedin, Youtube } from "lucide-react";
 import Image from "next/image";
 
 export function Footer() {
@@ -12,10 +12,11 @@ export function Footer() {
           <div className="flex flex-col space-y-4 lg:space-y-6 col-span-1 md:col-span-2 lg:col-span-2">
             <Image
               src="/loka-logo/loka-main-white.png"
-              alt="Logo"
+              alt="Loka Media Logo"
               width={160}
-              height={40}
+              height={66}
               className="object-contain"
+              priority
             />
             <div className="space-y-2">
               <p className="text-sm text-gray-300">WINNIPEG | TORONTO | LOS ANGELES | INDIA</p>
@@ -64,7 +65,7 @@ export function Footer() {
               <Instagram className="w-6 h-6 hover:text-orange-500 transition-colors" />
             </a>
             <a href="#" aria-label="LinkedIn">
-              <LinkedinIcon className="w-6 h-6 hover:text-orange-500 transition-colors" />
+              <Linkedin className="w-6 h-6 hover:text-orange-500 transition-colors" />
             </a>
             <a href="#" aria-label="YouTube">
               <Youtube className="w-6 h-6 hover:text-orange-500 transition-colors" />
