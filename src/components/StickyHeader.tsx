@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGuestCart } from "@/contexts/GuestCartContext";
@@ -19,11 +19,198 @@ export default function StickyHeader() {
   const { cartCount } = useGuestCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isDark, setIsDark] = useState(true); // Default to dark for dark theme site
+  
+  // Glass morphism refs and IDs
+  const uniqueId = useId().replace(/:/g, '-');
+  const filterId = `glass-filter-${uniqueId}`;
+  const redGradId = `red-grad-${uniqueId}`;
+  const blueGradId = `blue-grad-${uniqueId}`;
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const feImageRef = useRef<SVGFEImageElement>(null);
+  const redChannelRef = useRef<SVGFEDisplacementMapElement>(null);
+  const greenChannelRef = useRef<SVGFEDisplacementMapElement>(null);
+  const blueChannelRef = useRef<SVGFEDisplacementMapElement>(null);
+  const gaussianBlurRef = useRef<SVGFEGaussianBlurElement>(null);
+  
+  // Glass morphism parameters
+  const glassParams = {
+    borderRadius: 24,
+    borderWidth: 0.07,
+    brightness: 50,
+    opacity: 0.93,
+    blur: 15,
+    displace: 2,
+    backgroundOpacity: 0.1,
+    saturation: 1.5,
+    distortionScale: -180,
+    redOffset: 0,
+    greenOffset: 10,
+    blueOffset: 20,
+    xChannel: "R" as const,
+    yChannel: "G" as const,
+    mixBlendMode: "difference" as const,
+  };
+  
+  const generateDisplacementMap = () => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    const actualWidth = rect?.width || 800;
+    const actualHeight = rect?.height || 80;
+    const edgeSize = Math.min(actualWidth, actualHeight) * (glassParams.borderWidth * 0.5);
 
+    const svgContent = `
+      <svg viewBox="0 0 ${actualWidth} ${actualHeight}" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="${redGradId}" x1="100%" y1="0%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#0000"/>
+            <stop offset="100%" stop-color="red"/>
+          </linearGradient>
+          <linearGradient id="${blueGradId}" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0000"/>
+            <stop offset="100%" stop-color="blue"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="${actualWidth}" height="${actualHeight}" fill="black"></rect>
+        <rect x="0" y="0" width="${actualWidth}" height="${actualHeight}" rx="${glassParams.borderRadius}" fill="url(#${redGradId})" />
+        <rect x="0" y="0" width="${actualWidth}" height="${actualHeight}" rx="${glassParams.borderRadius}" fill="url(#${blueGradId})" style="mix-blend-mode: ${glassParams.mixBlendMode}" />
+        <rect x="${edgeSize}" y="${edgeSize}" width="${actualWidth - edgeSize * 2}" height="${actualHeight - edgeSize * 2}" rx="${glassParams.borderRadius}" fill="hsl(0 0% ${glassParams.brightness}% / ${glassParams.opacity})" style="filter:blur(${glassParams.blur}px)" />
+      </svg>
+    `;
+
+    return `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
+  };
+  
+  const updateDisplacementMap = () => {
+    feImageRef.current?.setAttribute("href", generateDisplacementMap());
+  };
+  
+  const supportsSVGFilters = () => {
+    if (typeof window === "undefined") return false;
+    const isWebkit = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    const isFirefox = /Firefox/.test(navigator.userAgent);
+
+    if (isWebkit || isFirefox) {
+      return false;
+    }
+
+    const div = document.createElement("div");
+    div.style.backdropFilter = `url(#${filterId})`;
+    return div.style.backdropFilter !== "";
+  };
+  
+  const supportsBackdropFilter = () => {
+    if (typeof window === "undefined") return false;
+    return CSS.supports("backdrop-filter", "blur(10px)");
+  };
+  
+  const getGlassStyles = (): React.CSSProperties => {
+    const svgSupported = supportsSVGFilters();
+    const backdropFilterSupported = supportsBackdropFilter();
+
+    if (svgSupported) {
+      return {
+        background: isDark
+          ? `hsl(0 0% 0% / ${glassParams.backgroundOpacity})`
+          : `hsl(0 0% 100% / ${glassParams.backgroundOpacity})`,
+        backdropFilter: `url(#${filterId}) saturate(${glassParams.saturation})`,
+        boxShadow: isDark
+          ? `0 0 2px 1px color-mix(in oklch, white, transparent 65%) inset,
+             0 0 10px 4px color-mix(in oklch, white, transparent 85%) inset,
+             0px 4px 16px rgba(17, 17, 26, 0.1),
+             0px 8px 24px rgba(17, 17, 26, 0.1),
+             0px 16px 56px rgba(17, 17, 26, 0.1)`
+          : `0 0 2px 1px color-mix(in oklch, black, transparent 85%) inset,
+             0 0 10px 4px color-mix(in oklch, black, transparent 90%) inset,
+             0px 4px 16px rgba(17, 17, 26, 0.05),
+             0px 8px 24px rgba(17, 17, 26, 0.05),
+             0px 16px 56px rgba(17, 17, 26, 0.05)`,
+      };
+    } else {
+      if (isDark) {
+        if (!backdropFilterSupported) {
+          return {
+            background: "rgba(0, 0, 0, 0.6)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+                        inset 0 -1px 0 0 rgba(255, 255, 255, 0.1)`,
+          };
+        } else {
+          return {
+            background: "rgba(255, 255, 255, 0.1)",
+            backdropFilter: "blur(20px) saturate(1.8) brightness(1.2)",
+            WebkitBackdropFilter: "blur(20px) saturate(1.8) brightness(1.2)",
+            border: "1px solid rgba(255, 255, 255, 0.18)",
+            boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+                        inset 0 -1px 0 0 rgba(255, 255, 255, 0.1),
+                        0 8px 32px 0 rgba(0, 0, 0, 0.3)`,
+          };
+        }
+      } else {
+        if (!backdropFilterSupported) {
+          return {
+            background: "rgba(255, 255, 255, 0.4)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
+                        inset 0 -1px 0 0 rgba(255, 255, 255, 0.3)`,
+          };
+        } else {
+          return {
+            background: "rgba(255, 255, 255, 0.25)",
+            backdropFilter: "blur(12px) saturate(1.8) brightness(1.1)",
+            WebkitBackdropFilter: "blur(12px) saturate(1.8) brightness(1.1)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            boxShadow: `0 8px 32px 0 rgba(31, 38, 135, 0.2),
+                        0 2px 16px 0 rgba(31, 38, 135, 0.1),
+                        inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
+                        inset 0 -1px 0 0 rgba(255, 255, 255, 0.2)`,
+          };
+        }
+      }
+    }
+  };
+
+  // Initialize glass morphism effects
+  useEffect(() => {
+    updateDisplacementMap();
+    [
+      { ref: redChannelRef, offset: glassParams.redOffset },
+      { ref: greenChannelRef, offset: glassParams.greenOffset },
+      { ref: blueChannelRef, offset: glassParams.blueOffset },
+    ].forEach(({ ref, offset }) => {
+      if (ref.current) {
+        ref.current.setAttribute(
+          "scale",
+          (glassParams.distortionScale + offset).toString()
+        );
+        ref.current.setAttribute("xChannelSelector", glassParams.xChannel);
+        ref.current.setAttribute("yChannelSelector", glassParams.yChannel);
+      }
+    });
+
+    gaussianBlurRef.current?.setAttribute("stdDeviation", glassParams.displace.toString());
+  }, []);
+  
+  // Resize observer for glass morphism
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      setTimeout(updateDisplacementMap, 0);
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+  
   useEffect(() => {
     const handleScroll = () => {
-      // Show sticky header after scrolling 100px
-      setIsVisible(window.scrollY > 100);
+      // Show sticky header after scrolling 100px, only hide when very close to top
+      const scrollY = window.scrollY;
+      setIsVisible(scrollY > 100);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -31,11 +218,102 @@ export default function StickyHeader() {
   }, []);
 
   return (
-    <div className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${
-      isVisible ? 'translate-y-0' : '-translate-y-full'
+    <div className={`w-3/5 max-w-4xl fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 ease-out ${
+      isVisible 
+        ? 'translate-y-0 opacity-100 scale-100' 
+        : '-translate-y-full opacity-0 scale-95'
     }`}>
-      <nav className="bg-black/90 backdrop-blur-md border-b border-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav 
+        ref={containerRef}
+        className="rounded-3xl overflow-hidden relative transition-opacity duration-300 ease-out"
+        style={getGlassStyles()}
+      >
+        {/* Advanced Glass Morphism SVG Filters */}
+        <svg
+          className="w-full h-full pointer-events-none absolute inset-0 opacity-0 -z-10"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <filter
+              id={filterId}
+              colorInterpolationFilters="sRGB"
+              x="0%"
+              y="0%"
+              width="100%"
+              height="100%"
+            >
+              <feImage
+                ref={feImageRef}
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                preserveAspectRatio="none"
+                result="map"
+              />
+
+              <feDisplacementMap
+                ref={redChannelRef}
+                in="SourceGraphic"
+                in2="map"
+                id="redchannel"
+                result="dispRed"
+              />
+              <feColorMatrix
+                in="dispRed"
+                type="matrix"
+                values="1 0 0 0 0
+                        0 0 0 0 0
+                        0 0 0 0 0
+                        0 0 0 1 0"
+                result="red"
+              />
+
+              <feDisplacementMap
+                ref={greenChannelRef}
+                in="SourceGraphic"
+                in2="map"
+                id="greenchannel"
+                result="dispGreen"
+              />
+              <feColorMatrix
+                in="dispGreen"
+                type="matrix"
+                values="0 0 0 0 0
+                        0 1 0 0 0
+                        0 0 0 0 0
+                        0 0 0 1 0"
+                result="green"
+              />
+
+              <feDisplacementMap
+                ref={blueChannelRef}
+                in="SourceGraphic"
+                in2="map"
+                id="bluechannel"
+                result="dispBlue"
+              />
+              <feColorMatrix
+                in="dispBlue"
+                type="matrix"
+                values="0 0 0 0 0
+                        0 0 0 0 0
+                        0 0 1 0 0
+                        0 0 0 1 0"
+                result="blue"
+              />
+
+              <feBlend in="red" in2="green" mode="screen" result="rg" />
+              <feBlend in="rg" in2="blue" mode="screen" result="output" />
+              <feGaussianBlur
+                ref={gaussianBlurRef}
+                in="output"
+                stdDeviation="0.7"
+              />
+            </filter>
+          </defs>
+        </svg>
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
@@ -169,8 +447,17 @@ export default function StickyHeader() {
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-800/50">
-            <div className="px-4 pt-2 pb-3 space-y-1 bg-black/95">
+          <div className="md:hidden border-t border-white/10 animate-in slide-in-from-top-2 duration-300 ease-out">
+            <div 
+              className="px-4 pt-2 pb-3 space-y-1 rounded-b-3xl"
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(20px) saturate(1.8) brightness(1.2)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8) brightness(1.2)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderTop: 'none',
+              }}
+            >
               <Link
                 href="/products"
                 className="text-gray-300 hover:text-white hover:bg-white/10 block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300"
