@@ -125,8 +125,8 @@ const Threads = ({
   enableMouseInteraction = false,
   ...rest
 }) => {
-  const containerRef = useRef(null);
-  const animationFrameId = useRef();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const animationFrameId = useRef<number | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -174,7 +174,7 @@ const Threads = ({
     let currentMouse = [0.5, 0.5];
     let targetMouse = [0.5, 0.5];
 
-    function handleMouseMove(e) {
+    function handleMouseMove(e: MouseEvent) {
       const rect = container.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
       const y = 1.0 - (e.clientY - rect.top) / rect.height;
@@ -188,7 +188,7 @@ const Threads = ({
       container.addEventListener("mouseleave", handleMouseLeave);
     }
 
-    function update(t) {
+    function update(t: number) {
       if (enableMouseInteraction) {
         const smoothing = 0.05;
         currentMouse[0] += smoothing * (targetMouse[0] - currentMouse[0]);

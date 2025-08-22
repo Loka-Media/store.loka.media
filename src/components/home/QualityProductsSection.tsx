@@ -9,7 +9,7 @@ export  function QualityProductsSection() {
   );
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const images = ["/images/q1.webp", "/images/q2.webp", "/images/q3.webp"];
+  const images = ["/images/1.jpeg", "/images/2.jpeg", "/images/3.jpeg", "/images/4.jpeg", "/images/5.jpeg"];
 
   useEffect(() => {
     const interval = setInterval(() => {
