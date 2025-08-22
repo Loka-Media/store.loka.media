@@ -52,7 +52,9 @@ export default function PrintfulDashboardContent() {
   const handleConnect = async () => {
     try {
       const { authUrl } = await printfulAPI.initializeAuth();
-      window.location.href = authUrl;
+      if (typeof window !== 'undefined') {
+        window.location.href = authUrl;
+      }
     } catch (error) {
       console.error("Failed to initialize auth:", error);
       toast.error("Failed to initialize Printful connection");
@@ -60,7 +62,7 @@ export default function PrintfulDashboardContent() {
   };
 
   const handleDisconnect = async () => {
-    if (
+    if (typeof window !== 'undefined' &&
       !confirm("Are you sure you want to disconnect your Printful account?")
     ) {
       return;
