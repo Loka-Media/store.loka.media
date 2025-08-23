@@ -51,16 +51,22 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const refreshWishlist = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      setItems([]);
+      setWishlistCount(0);
+      return;
+    }
     
     try {
       setLoading(true);
       const response = await wishlistAPI.getWishlist();
-      setItems(response.items);
-      setWishlistCount(response.count);
+      setItems(response.items || []);
+      setWishlistCount(response.count || 0);
     } catch (error) {
       console.error('Failed to fetch wishlist:', error);
-      toast.error('Failed to load wishlist');
+      // Don't show toast error on initial load to avoid spam
+      setItems([]);
+      setWishlistCount(0);
     } finally {
       setLoading(false);
     }
@@ -70,13 +76,28 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isAuthenticated && user) {
       refreshWishlist();
-      // Don't call fetchWishlistCount separately since refreshWishlist already updates count
     } else {
       // Clear wishlist data when user logs out
       setItems([]);
       setWishlistCount(0);
     }
-  }, [isAuthenticated, user]); // Removed refreshWishlist from dependencies to prevent loop
+  }, [isAuthenticated, user, refreshWishlist]);
+
+  // Add page visibility listener to refresh wishlist when user returns
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isAuthenticated && user) {
+        // Page became visible, refresh wishlist data
+        refreshWishlist();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAuthenticated, user, refreshWishlist]);
 
   const addToWishlist = async (productId: number): Promise<boolean> => {
     if (!isAuthenticated) {
@@ -85,30 +106,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const response = await wishlistAPI.addToWishlist(productId);
+      await wishlistAPI.addToWishlist(productId);
       toast.success('Added to wishlist!');
       
-      // Update local state instead of full refresh
-      setWishlistCount(prev => prev + 1);
-      
-      // Add item to local wishlist for immediate UI updates
-      // We'll add a basic wishlist item that will be replaced on next refresh
-      setItems(prev => [...prev, {
-        id: Date.now(), // temporary ID
-        user_id: user?.id || 0,
-        product_id: productId,
-        product_name: `Product ${productId}`, // will be updated on next refresh
-        description: '',
-        thumbnail_url: '',
-        category: '',
-        creator_id: 0,
-        creator_name: '',
-        creator_username: '',
-        min_price: 0,
-        max_price: 0,
-        variant_count: 1,
-        created_at: new Date().toISOString()
-      }]);
+      // Refresh the entire wishlist to get accurate data
+      await refreshWishlist();
       
       return true;
     } catch (error: unknown) {
@@ -128,9 +130,8 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       await wishlistAPI.removeFromWishlist(productId);
       toast.success('Removed from wishlist');
       
-      // Update local state instead of full refresh
-      setWishlistCount(prev => Math.max(0, prev - 1));
-      setItems(prev => prev.filter(item => item.product_id !== productId));
+      // Refresh the entire wishlist to get accurate data
+      await refreshWishlist();
       
       return true;
     } catch (error: unknown) {
@@ -150,7 +151,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       await wishlistAPI.clearWishlist();
       toast.success('Wishlist cleared');
       
-      // Update local state instead of full refresh
+      // Clear state immediately since we know the result
       setItems([]);
       setWishlistCount(0);
       

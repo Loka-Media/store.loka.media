@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGuestCart } from "@/contexts/GuestCartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import {
   ShoppingBag,
   Menu,
@@ -19,6 +20,7 @@ import Image from "next/image";
 export default function Navigation() {
   const { user, logout, isAuthenticated } = useAuth();
   const { cartCount } = useGuestCart();
+  const { wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -74,10 +76,15 @@ export default function Navigation() {
                     <>
                       <Link
                         href="/wishlist"
-                        className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center"
+                        className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center relative"
                       >
                         <Heart className="w-4 h-4 mr-2" />
                         Wishlist
+                        {wishlistCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">
+                            {wishlistCount > 99 ? "99+" : wishlistCount}
+                          </span>
+                        )}
                       </Link>
                       <Link
                         href="/addresses"
