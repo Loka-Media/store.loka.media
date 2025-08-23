@@ -218,44 +218,21 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       isInitialized.current = true;
       // Initial load
       if (isAuthenticated && user) {
-        debouncedRefreshCart(true);
-        fetchCartCount();
+        debouncedRefreshCart(true); // This will update cart count automatically
       } else {
-        loadGuestCart();
-        fetchCartCount();
+        loadGuestCart(); // This will update cart count automatically
       }
     } else {
       // Auth status changed after initialization
       if (isAuthenticated && user) {
-        debouncedRefreshCart(true);
-        fetchCartCount();
+        debouncedRefreshCart(true); // This will update cart count automatically
       } else {
-        loadGuestCart();
-        fetchCartCount();
+        loadGuestCart(); // This will update cart count automatically
       }
     }
   }, [isAuthenticated, user]);
 
-  // Add page visibility API listener with rate limiting
-  useEffect(() => {
-    let lastVisibilityChange = 0;
-    const VISIBILITY_THROTTLE = 5000; // 5 seconds
-
-    const handleVisibilityChange = () => {
-      const now = Date.now();
-      if (!document.hidden && (now - lastVisibilityChange) > VISIBILITY_THROTTLE) {
-        lastVisibilityChange = now;
-        // Page became visible, refresh cart with debouncing
-        debouncedRefreshCart(false); // Don't force, let debouncing handle it
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [debouncedRefreshCart]);
+  // Removed visibility change handler to reduce unnecessary API calls
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -367,8 +344,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         setCartCount(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
         saveGuestCart(updatedItems, newSummary);
         
-        // Force re-fetch cart count to update navigation
-        await fetchCartCount();
+        // Cart count is already updated above, no need for API call
         
         toast.success('Added to cart!');
         return true;

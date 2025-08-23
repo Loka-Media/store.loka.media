@@ -41,16 +41,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${fascinateInline.variable} antialiased`}
       >
         <AuthProvider>
-          <CartProvider>
+          {/* <CartProvider> - Disabled to prevent duplicate API calls */}
             <GuestCartProvider>
               <WishlistProvider>
                 <Navigation />
                 <StickyHeader />
-                {children}
+                <div className="bg-black text-white pt-20">
+                  {children}
+                </div>
                 <Toaster position="top-right" />
               </WishlistProvider>
             </GuestCartProvider>
-          </CartProvider>
+          {/* </CartProvider> */}
         </AuthProvider>
       </body>
     </html>

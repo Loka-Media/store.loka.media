@@ -3,7 +3,6 @@
 
 import { useEffect } from 'react';
 import { useGuestCart } from '@/contexts/GuestCartContext';
-import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -30,13 +29,8 @@ import { unifiedCheckoutAPI } from '@/lib/checkout-api';
 export default function UnifiedCheckoutPage() {
   const { user, isAuthenticated } = useAuth();
   
-  // Use appropriate cart context based on authentication
-  const guestCart = useGuestCart();
-  const authCart = useCart();
-  
-  // Select the appropriate cart based on authentication status
-  const currentCart = isAuthenticated ? authCart : guestCart;
-  const { items, summary, clearCart } = currentCart;
+  // Use GuestCart for both authenticated and guest users (handles both cases)
+  const { items, summary, clearCart } = useGuestCart();
   
   const checkoutState = useCheckoutState();
   const addressManagement = useAddressManagement();

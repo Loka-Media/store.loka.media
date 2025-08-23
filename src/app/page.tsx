@@ -25,7 +25,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <Navigation />
       <BackgroundPattern />
 
       <div className="relative z-10">

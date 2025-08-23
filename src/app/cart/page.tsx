@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useGuestCart } from '@/contexts/GuestCartContext';
-import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice } from '@/lib/api';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -13,13 +12,8 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/
 export default function CartPage() {
   const { isAuthenticated } = useAuth();
   
-  // Use appropriate cart context based on authentication
-  const guestCart = useGuestCart();
-  const authCart = useCart();
-  
-  // Select the appropriate cart based on authentication status
-  const currentCart = isAuthenticated ? authCart : guestCart;
-  const { items, summary, loading, updateCartItem, removeFromCart, clearCart, refreshCart } = currentCart;
+  // Use GuestCart for both authenticated and guest users (handles both cases)
+  const { items, summary, loading, updateCartItem, removeFromCart, clearCart, refreshCart } = useGuestCart();
   
   const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
   const [deleteConfirm, setDeleteConfirm] = useState<{

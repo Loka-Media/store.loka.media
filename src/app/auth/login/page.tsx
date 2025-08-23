@@ -71,7 +71,7 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex">
+    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 flex">
       {/* Left Side - Hero Section */}
       <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
         {/* Background Overlay */}
@@ -343,7 +343,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className=" bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
         </div>
       }

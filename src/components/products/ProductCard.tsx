@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatPrice, ExtendedProduct } from "@/lib/api";
 import { createProductSlug } from "@/lib/utils";
 // Cart functionality removed - useGuestCart no longer needed
@@ -23,8 +23,18 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const { addToWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, items: wishlistItems } = useWishlist();
   const { isAuthenticated } = useAuth();
+
+  // Sync with wishlist context state for real-time updates - NO API calls needed!
+  useEffect(() => {
+    if (isAuthenticated) {
+      const inWishlist = wishlistItems.some(item => item.product_id === product.id);
+      setIsWishlisted(inWishlist);
+    } else {
+      setIsWishlisted(false);
+    }
+  }, [isAuthenticated, product.id, wishlistItems]);
 
   const imageUrl =
     product.thumbnail_url ||
@@ -78,20 +88,27 @@ export function ProductCard({ product }: ProductCardProps) {
                   : "bg-black/70 text-gray-300 hover:text-red-400 hover:bg-black/90"
               }`}
               title="Add to wishlist"
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 if (!isAuthenticated) {
                   toast.error("Please login to add items to wishlist");
                   return;
                 }
-                setIsWishlisted(!isWishlisted);
-                addToWishlist(product.id);
-                toast.success(
-                  isWishlisted
-                    ? "Removed from wishlist!"
-                    : "Added to wishlist!"
-                );
+                
+                try {
+                  if (isWishlisted) {
+                    // If already wishlisted, remove it
+                    await removeFromWishlist(product.id);
+                    // State will be updated automatically by useEffect watching wishlistItems
+                  } else {
+                    // If not wishlisted, add it
+                    await addToWishlist(product.id);
+                    // State will be updated automatically by useEffect watching wishlistItems
+                  }
+                } catch (error) {
+                  console.error('Wishlist operation failed:', error);
+                }
               }}
             >
               <Heart

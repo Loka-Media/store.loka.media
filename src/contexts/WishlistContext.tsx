@@ -29,7 +29,7 @@ interface WishlistContextType {
   addToWishlist: (productId: number) => Promise<boolean>;
   removeFromWishlist: (productId: number) => Promise<boolean>;
   clearWishlist: () => Promise<boolean>;
-  isInWishlist: (productId: number) => Promise<boolean>;
+  isInWishlist: (productId: number) => boolean; // Changed to synchronous
   refreshWishlist: () => Promise<void>;
 }
 
@@ -70,13 +70,13 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isAuthenticated && user) {
       refreshWishlist();
-      fetchWishlistCount();
+      // Don't call fetchWishlistCount separately since refreshWishlist already updates count
     } else {
       // Clear wishlist data when user logs out
       setItems([]);
       setWishlistCount(0);
     }
-  }, [isAuthenticated, user, refreshWishlist]);
+  }, [isAuthenticated, user]); // Removed refreshWishlist from dependencies to prevent loop
 
   const addToWishlist = async (productId: number): Promise<boolean> => {
     if (!isAuthenticated) {
@@ -85,9 +85,31 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      await wishlistAPI.addToWishlist(productId);
+      const response = await wishlistAPI.addToWishlist(productId);
       toast.success('Added to wishlist!');
-      await refreshWishlist();
+      
+      // Update local state instead of full refresh
+      setWishlistCount(prev => prev + 1);
+      
+      // Add item to local wishlist for immediate UI updates
+      // We'll add a basic wishlist item that will be replaced on next refresh
+      setItems(prev => [...prev, {
+        id: Date.now(), // temporary ID
+        user_id: user?.id || 0,
+        product_id: productId,
+        product_name: `Product ${productId}`, // will be updated on next refresh
+        description: '',
+        thumbnail_url: '',
+        category: '',
+        creator_id: 0,
+        creator_name: '',
+        creator_username: '',
+        min_price: 0,
+        max_price: 0,
+        variant_count: 1,
+        created_at: new Date().toISOString()
+      }]);
+      
       return true;
     } catch (error: unknown) {
       const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to add to wishlist';
@@ -105,7 +127,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     try {
       await wishlistAPI.removeFromWishlist(productId);
       toast.success('Removed from wishlist');
-      await refreshWishlist();
+      
+      // Update local state instead of full refresh
+      setWishlistCount(prev => Math.max(0, prev - 1));
+      setItems(prev => prev.filter(item => item.product_id !== productId));
+      
       return true;
     } catch (error: unknown) {
       const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to remove item';
@@ -123,7 +149,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     try {
       await wishlistAPI.clearWishlist();
       toast.success('Wishlist cleared');
-      await refreshWishlist();
+      
+      // Update local state instead of full refresh
+      setItems([]);
+      setWishlistCount(0);
+      
       return true;
     } catch (error: unknown) {
       const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to clear wishlist';
@@ -132,16 +162,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const isInWishlist = async (productId: number): Promise<boolean> => {
+  const isInWishlist = (productId: number): boolean => {
     if (!isAuthenticated) return false;
 
-    try {
-      const response = await wishlistAPI.isInWishlist(productId);
-      return response.inWishlist;
-    } catch (error) {
-      console.error('Failed to check wishlist status:', error);
-      return false;
-    }
+    // Only use local state - no API calls needed since we have all wishlist data
+    return items.some(item => item.product_id === productId);
   };
 
   return (

@@ -97,14 +97,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       isInitialized.current = true;
       // Initial load
       if (isAuthenticated && user) {
-        debouncedRefreshCart(true);
-        fetchCartCount();
+        debouncedRefreshCart(true); // This will update cart count automatically
       }
     } else {
       // Auth status changed after initialization
       if (isAuthenticated && user) {
-        debouncedRefreshCart(true);
-        fetchCartCount();
+        debouncedRefreshCart(true); // This will update cart count automatically
       } else {
         // Clear cart data when user logs out
         setItems([]);

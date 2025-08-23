@@ -217,7 +217,7 @@ function ProductsContent() {
   };
 
   return (
-    <div className=" bg-black text-white pt-20">
+    <div className=" bg-black text-white">
       <ProductsHero
         filters={filters}
         setFilters={setFilters}
