@@ -30,13 +30,13 @@ export function Footer() {
             <h3 className="text-lg font-semibold text-orange-500">Quick Links</h3>
             <nav className="flex flex-col space-y-2">
               <a href="/help" className="text-sm text-gray-300 hover:text-white transition-colors">
-                Help
+                Help & Center
               </a>
               <a href="/about" className="text-sm text-gray-300 hover:text-white transition-colors">
-                About
+                About Us
               </a>
               <a href="/contact" className="text-sm text-gray-300 hover:text-white transition-colors">
-                Contact
+                Contact Us
               </a>
             </nav>
           </div>
@@ -46,13 +46,13 @@ export function Footer() {
             <h3 className="text-lg font-semibold text-orange-500">Legal</h3>
             <nav className="flex flex-col space-y-2">
               <a href="/privacy" className="text-sm text-gray-300 hover:text-white transition-colors">
-                Privacy
+                Privacy Policy
               </a>
               <a href="/terms" className="text-sm text-gray-300 hover:text-white transition-colors">
-                Terms
+                Terms of Service
               </a>
               <a href="/returns" className="text-sm text-gray-300 hover:text-white transition-colors">
-                Returns
+                Returns & Refunds
               </a>
             </nav>
           </div>

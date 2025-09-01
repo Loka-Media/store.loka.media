@@ -13,7 +13,7 @@ export function HowItWorksSection() {
     {
       step: "01",
       icon: (
-        <UserPlus className="w-8 h-8 text-blue-400 group-hover:text-white transition-colors duration-300" />
+        <UserPlus className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-400 group-hover:text-white transition-colors duration-500" />
       ),
       title: "Create Your Account",
       description:
@@ -22,7 +22,7 @@ export function HowItWorksSection() {
     {
       step: "02",
       icon: (
-        <ShieldCheck className="w-8 h-8 text-green-400 group-hover:text-white transition-colors duration-300" />
+        <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-emerald-400 group-hover:text-white transition-colors duration-500" />
       ),
       title: "Secure Your Identity",
       description:
@@ -31,7 +31,7 @@ export function HowItWorksSection() {
     {
       step: "03",
       icon: (
-        <Palette className="w-8 h-8 text-purple-400 group-hover:text-white transition-colors duration-300" />
+        <Palette className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-purple-400 group-hover:text-white transition-colors duration-500" />
       ),
       title: "Design & Launch Products",
       description:
@@ -40,7 +40,7 @@ export function HowItWorksSection() {
     {
       step: "04",
       icon: (
-        <Rocket className="w-8 h-8 text-orange-400 group-hover:text-white transition-colors duration-300" />
+        <Rocket className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-orange-400 group-hover:text-white transition-colors duration-500" />
       ),
       title: "Sell & Get Paid",
       description:
@@ -49,74 +49,75 @@ export function HowItWorksSection() {
   ];
 
   return (
-    <section className="py-20 px-4 bg-gray-950 relative overflow-hidden font-sans">
-      {/* Background blobs for a modern, ethereal feel */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-blob opacity-40"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-blob animation-delay-1000 opacity-40"></div>
+    <section className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gray-950 relative overflow-hidden">
+      {/* Refined background elements with iOS-style subtlety */}
+      <div className="absolute top-0 left-0 w-48 sm:w-64 md:w-80 lg:w-96 h-48 sm:h-64 md:h-80 lg:h-96 bg-gradient-to-br from-blue-500/8 to-indigo-500/6 rounded-full blur-3xl animate-blob opacity-60"></div>
+      <div className="absolute bottom-0 right-0 w-48 sm:w-64 md:w-80 lg:w-96 h-48 sm:h-64 md:h-80 lg:h-96 bg-gradient-to-br from-purple-500/8 to-pink-500/6 rounded-full blur-3xl animate-blob animation-delay-1000 opacity-60"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 sm:w-48 md:w-64 h-32 sm:h-48 md:h-64 bg-gradient-to-br from-orange-500/6 to-red-500/4 rounded-full blur-3xl animate-blob animation-delay-2000 opacity-40"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-16 md:mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-            A Seamless Journey from Idea to{" "}
-            <span className="text-orange-400">Launch</span>
+        {/* Header with iOS-style typography */}
+        <div className="text-center mb-12 sm:mb-16 md:mb-20">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 sm:mb-6 leading-tight tracking-tight">
+            A Seamless Journey from{" "}
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-orange-400 bg-clip-text text-transparent">
+              Idea to Launch
+            </span>
           </h2>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 max-w-xl sm:max-w-2xl lg:max-w-3xl mx-auto leading-relaxed font-light">
             Our streamlined process empowers you to build and grow your brand
-            with ease and confidence.
+            with professional tools and seamless workflows.
           </p>
         </div>
 
         <div className="relative">
-          {/* Connecting line with a glowing effect */}
-          <div className="hidden lg:block absolute top-[100px] left-0 right-0 h-0.5 bg-gray-800">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-orange-500 opacity-50 animate-pulse"></div>
+          {/* iOS-style connecting line */}
+          <div className="hidden lg:block absolute top-[120px] left-0 right-0 h-px">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-orange-500/30 animate-pulse"></div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 relative z-10">
             {steps.map((step, index) => (
               <div
                 key={index}
-                className="relative group transition-all duration-300 animate-fade-in-up"
-                style={{ animationDelay: `${index * 150}ms` }}
+                className="relative group transition-all duration-300 ease-out"
               >
-                {/* The card container with glassmorphism effect */}
-                <div className="relative bg-white/5 backdrop-blur-md border border-gray-800 rounded-2xl p-8 h-full flex flex-col items-center text-center transition-all duration-300 group-hover:border-orange-500/50 group-hover:shadow-2xl group-hover:shadow-orange-500/10 group-hover:-translate-y-2 group-hover:rotate-1">
-                  {/* Step number and icon wrapper */}
-                  <div className="relative w-24 h-24 mb-6">
-                    {/* The circle behind the number */}
-                    <div
-                      className={`absolute inset-0 rounded-full bg-gradient-to-br from-gray-800 to-black transition-all duration-300 transform group-hover:scale-110 shadow-lg`}
-                    ></div>
-
-                    {/* The number and icon itself */}
-                    <div
-                      className={`relative w-full h-full text-white font-bold text-lg flex items-center justify-center`}
-                    >
-                      <span className="absolute top-2 left-2 text-4xl text-gray-600/70 font-extrabold transition-all duration-300 group-hover:text-gray-500/70">
-                        {step.step}
-                      </span>
-                      <div className="z-10 transition-transform duration-300 transform group-hover:scale-125">
+                {/* iOS-style glass card */}
+                <div className="relative backdrop-blur-xl bg-white/[0.08] border border-white/[0.12] rounded-3xl p-6 sm:p-7 md:p-8 h-full flex flex-col items-center text-center transition-all duration-300 group-hover:bg-white/[0.12] group-hover:border-white/[0.2] group-hover:shadow-xl group-hover:shadow-black/10 group-hover:-translate-y-1">
+                  
+                  {/* Subtle inner glow */}
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/[0.04] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  {/* Professional step indicator */}
+                  <div className="relative w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 mb-5 sm:mb-6">
+                    {/* Glass background circle */}
+                    <div className="absolute inset-0 rounded-full backdrop-blur-md bg-white/[0.06] border border-white/[0.15] shadow-inner transition-all duration-300 group-hover:bg-white/[0.1] group-hover:border-white/[0.25]"></div>
+                    
+                    {/* Icon container */}
+                    <div className="relative w-full h-full flex items-center justify-center z-10">
+                      <div className="transition-transform duration-300 group-hover:scale-110">
                         {step.icon}
                       </div>
                     </div>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-orange-400 transition-colors duration-300">
+                  {/* Title with iOS typography */}
+                  <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white mb-3 sm:mb-4 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:via-purple-400 group-hover:to-orange-400 group-hover:bg-clip-text transition-all duration-300 leading-tight">
                     {step.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-gray-400 text-sm leading-relaxed flex-grow">
+                  <p className="text-xs sm:text-sm md:text-base text-gray-400 leading-relaxed flex-grow font-light group-hover:text-gray-300 transition-colors duration-300">
                     {step.description}
                   </p>
                 </div>
 
-                {/* Arrow icon for visual flow, now with a more elegant bounce */}
+                {/* Refined arrow for desktop */}
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:flex absolute top-[100px] left-[calc(100%+8px)] transform -translate-y-1/2 items-center justify-center z-20">
-                    <div className="flex items-center space-x-2 animate-bounce-x">
-                      <ArrowRight className="w-8 h-8 text-gray-700 group-hover:text-orange-400 transition-colors duration-300" />
+                  <div className="hidden lg:flex absolute top-[120px] left-[calc(100%+16px)] transform -translate-y-1/2 items-center justify-center z-20">
+                    <div className="w-8 h-8 rounded-full backdrop-blur-md bg-white/[0.06] border border-white/[0.12] flex items-center justify-center group-hover:bg-white/[0.1] group-hover:border-white/[0.2] transition-all duration-300">
+                      <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-orange-400 transition-colors duration-300" />
                     </div>
                   </div>
                 )}
@@ -125,20 +126,27 @@ export function HowItWorksSection() {
           </div>
         </div>
 
-        {/* Enhanced CTA section */}
-        <div className="mt-20 text-center">
-          <div className="relative bg-white/5 backdrop-blur-md border border-gray-800 rounded-3xl p-10 md:p-16 max-w-5xl mx-auto shadow-2xl overflow-hidden group">
-            <div className="relative z-10">
-              <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">
-                Ready to Join the Creator Economy?
-              </h3>
-              <p className="text-gray-400 mb-8 text-lg">
-                Start your journey today and turn your passion into a profitable
-                brand.
-              </p>
-              <button className="group bg-gradient-to-r from-orange-500 to-red-500 text-white px-10 py-4 rounded-xl font-semibold text-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-orange-500/30 relative overflow-hidden">
-                <span className="relative z-10">Start Selling Now</span>
-                <div className="absolute inset-0 bg-[linear-gradient(270deg,rgba(255,255,255,0)_-50%,rgba(255,255,255,0.4)_50%,rgba(255,255,255,0)_150%)] animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        {/* Modern minimal CTA section */}
+        <div className="mt-16 sm:mt-20 md:mt-24 text-center">
+          <div className="max-w-2xl mx-auto">
+            <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-4 sm:mb-6 leading-tight tracking-tight">
+              Start Building Your Brand
+            </h3>
+            <p className="text-sm sm:text-base md:text-lg text-gray-400 mb-8 sm:mb-10 leading-relaxed font-light">
+              Join thousands of creators already earning with our platform
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
+              <button className="group relative backdrop-blur-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl font-semibold text-sm sm:text-base transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25 border border-white/10 hover:border-white/20 overflow-hidden w-full sm:w-auto">
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative flex items-center justify-center">
+                  Get Started Free
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </span>
+              </button>
+              
+              <button className="group relative backdrop-blur-xl bg-white/5 hover:bg-white/10 text-white px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl font-medium text-sm sm:text-base transition-all duration-300 border border-white/20 hover:border-white/30 w-full sm:w-auto">
+                <span className="relative">View Products</span>
               </button>
             </div>
           </div>
@@ -146,84 +154,40 @@ export function HowItWorksSection() {
       </div>
 
       <style jsx>{`
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes pulse {
-          0%,
-          100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
-        }
-
         @keyframes blob {
           0% {
             transform: translate(0px, 0px) scale(1);
           }
           33% {
-            transform: translate(30px, -50px) scale(1.1);
+            transform: translate(20px, -30px) scale(1.05);
           }
           66% {
-            transform: translate(-20px, 20px) scale(0.9);
+            transform: translate(-15px, 15px) scale(0.95);
           }
           100% {
             transform: translate(0px, 0px) scale(1);
           }
         }
 
-        @keyframes bounce-x {
-          0%,
-          100% {
-            transform: translateX(0);
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0.6;
           }
           50% {
-            transform: translateX(5px);
+            opacity: 0.8;
           }
-        }
-
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-150%);
-          }
-          100% {
-            transform: translateX(150%);
-          }
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)
-            forwards;
-        }
-
-        .animate-pulse {
-          animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
         .animate-blob {
-          animation: blob 7s infinite cubic-bezier(0.4, 0, 0.6, 1);
-        }
-
-        .animate-bounce-x {
-          animation: bounce-x 1.5s infinite;
-        }
-
-        .animate-shimmer {
-          animation: shimmer 1.5s infinite;
+          animation: blob 8s infinite cubic-bezier(0.4, 0, 0.6, 1);
         }
 
         .animation-delay-1000 {
           animation-delay: 1000ms;
+        }
+
+        .animation-delay-2000 {
+          animation-delay: 2000ms;
         }
       `}</style>
     </section>

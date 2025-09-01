@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Delius&family=Fascinate+Inline&family=Michroma&family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 @import "tailwindcss";
 
 /* Force dark mode - no light mode option */
@@ -6,18 +7,94 @@
   --foreground: #ededed;
 }
 
+:root {
+  --font-sansation: "Sansation", sans-serif;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sansation);
   --font-mono: var(--font-geist-mono);
   --font-fascinate-inline: var(--font-fascinate-inline);
+  --font-michroma: var(--font-michroma);
+  --font-delius: var(--font-delius);
+  --font-sansation: var(--font-sansation);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Sansation", sans-serif;
+}
+
+/* Global font classes */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Fascinate Inline", system-ui;
+}
+
+/* Body text uses Sansation */
+p, span, div, button, input, select, textarea, a, li, td, th {
+  font-family: "Sansation", sans-serif;
+}
+
+/* Force all text to use Sansation - higher specificity */
+* {
+  font-family: "Sansation", sans-serif !important;
+}
+
+/* Headings use Fascinate Inline */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Fascinate Inline", system-ui !important;
+}
+
+/* Bold text maintains Sansation */
+.font-bold, .font-semibold, .font-black, .font-extrabold, 
+strong, b, [class*="font-bold"], [class*="font-semibold"], 
+[class*="font-black"], [class*="font-extrabold"] {
+  font-family: "Sansation", sans-serif !important;
+}
+
+/* Ensure button text uses Sansation */
+button, .btn, [role="button"] {
+  font-family: "Sansation", sans-serif !important;
+}
+
+/* Sansation font weight classes */
+.sansation-light {
+  font-family: "Sansation", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.sansation-regular {
+  font-family: "Sansation", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.sansation-bold {
+  font-family: "Sansation", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.sansation-light-italic {
+  font-family: "Sansation", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.sansation-regular-italic {
+  font-family: "Sansation", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.sansation-bold-italic {
+  font-family: "Sansation", sans-serif;
+  font-weight: 700;
+  font-style: italic;
 }
 
 /* Custom animations for UploadStep */

@@ -4,12 +4,10 @@ import { BackgroundPattern } from "@/components/home/BackgroundPattern";
 import { Footer } from "@/components/home/Footer";
 import { HeroSection } from "@/components/home/HeaderSection";
 import { QualityProductsSection } from "@/components/home/QualityProductsSection";
-import { CustomizableShopsSection } from "@/components/home/CustomizableShopsSection";
 import { MakeAndSellSection } from "@/components/home/MakeAndSellSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { TestimonialSection } from "@/components/home/TestimonialSection";
 import { FAQSection } from "@/components/home/FAQSection";
-import Navigation from "@/components/Navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
@@ -35,7 +33,6 @@ export default function Home() {
         <HowItWorksSection />
         <TestimonialSection />
         <FAQSection />
-        <Footer />
       </div>
     </div>
   );
