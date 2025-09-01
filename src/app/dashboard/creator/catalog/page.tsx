@@ -4,10 +4,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { printfulAPI } from '@/lib/api';
 import { Search, Package, Plus, Eye, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import Navigation from '@/components/Navigation';
@@ -71,7 +69,6 @@ interface PrintfulProduct {
 }
 
 export default function CreatorCatalogPage() {
-  const { user } = useAuth();
   const router = useRouter();
   const [products, setProducts] = useState<PrintfulProduct[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -143,9 +140,6 @@ export default function CreatorCatalogPage() {
     }
   };
 
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
 
   const handleSelectCategory = (category: Category) => {
     setSelectedCategory(category);

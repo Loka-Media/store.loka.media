@@ -10,7 +10,6 @@ import {
   Search, 
   Edit, 
   Trash2, 
-  Eye, 
   Package,
   Grid,
   List

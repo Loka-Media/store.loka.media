@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { printfulAPI } from "./api";
 import { DesignFile } from "./types";
-import { createCompositeImagesForPlacements } from "../utils/imageComposer";
 
 type Placement = string;
 
@@ -153,7 +152,7 @@ class MockupAPI {
     options?: string[];
     productTemplateId?: number;
     onStatusUpdate?: (status: string, attempts: number) => void;
-    printFiles?: any;
+    printFiles?: any; // Keep for compatibility but not used in new implementation
   }): Promise<
     Array<{
       url: string;
@@ -178,45 +177,36 @@ class MockupAPI {
       if (options && options.length > 0) mockupData.options = options;
       if (productTemplateId) mockupData.product_template_id = productTemplateId;
 
-      // Add files if provided - Create composite images for multiple designs per placement
+      // Add files if provided - Designs should already be processed/composited by this point
       if (designFiles && designFiles.length > 0) {
-        onStatusUpdate?.("Processing design files for mockup generation...", 0);
+        onStatusUpdate?.("Preparing design files for mockup API...", 0);
         
-        try {
-          // Check if we have multiple designs per placement
-          const designsByPlacement = designFiles.reduce<Record<string, DesignFile[]>>((acc, design) => {
-            if (!acc[design.placement]) acc[design.placement] = [];
-            acc[design.placement].push(design);
-            return acc;
-          }, {});
-          
-          const needsCompositing = Object.values(designsByPlacement).some(designs => designs.length > 1);
-          
-          let finalDesigns: DesignFile[];
-          
-          if (needsCompositing && printFiles) {
-            onStatusUpdate?.("Creating composite images for multiple designs per placement...", 0);
-            finalDesigns = await createCompositeImagesForPlacements(
-              designFiles.filter(file => file.placement && file.url),
-              printFiles
-            );
-          } else {
-            // No compositing needed or no print files available - use most recent per placement
-            const uniqueDesignsByPlacement = designFiles
-              .filter(file => file.placement && file.url)
-              .reduce<Record<string, DesignFile>>((acc, file) => {
-                if (!acc[file.placement] || file.id > acc[file.placement].id) {
-                  acc[file.placement] = file;
-                }
-                return acc;
-              }, {});
-            finalDesigns = Object.values(uniqueDesignsByPlacement);
+        // Since composite images are now created in generatePreview, 
+        // we expect to receive final design files (one per placement)
+        console.log('📤 MockupAPI received design files:', designFiles.length);
+        designFiles.forEach((file, index) => {
+          console.log(`  MockupAPI Design ${index + 1}: ${file.placement} - ${file.filename} - Full URL: ${file.url}`);
+        });
+        
+        // Validate that we're not getting duplicate designs per placement
+        const placementCount = designFiles.reduce<Record<string, number>>((acc, file) => {
+          acc[file.placement] = (acc[file.placement] || 0) + 1;
+          return acc;
+        }, {});
+        console.log('📊 Designs per placement:', placementCount);
+        
+        Object.entries(placementCount).forEach(([placement, count]) => {
+          if (count > 1) {
+            console.warn(`⚠️  WARNING: ${count} designs found for placement '${placement}' - composite should have reduced this to 1`);
           }
-
-          
-          mockupData.files = finalDesigns.map((file) => ({
+        });
+        
+        // Use design files as-is (should already be composited if needed)
+        const finalDesigns = designFiles.filter(file => file.placement && file.url);
+        
+        mockupData.files = finalDesigns.map((file) => ({
           placement: file.placement,
-          image_url: file.url, // This should be the full URL to the uploaded file
+          image_url: file.url, // This should be the composite URL if multiple designs existed
           position: file.position
             ? {
                 area_width: file.position.area_width,
@@ -229,8 +219,8 @@ class MockupAPI {
             : undefined,
         }));
         
-        // Debug: Log file URLs to check they are valid
-        console.log('Design file URLs being sent to API:', 
+        // Debug: Log file URLs being sent to Printful API
+        console.log('🎯 Final URLs being sent to Printful API:', 
           mockupData.files.map(f => ({ placement: f.placement, url: f.image_url })));
         
         // Validate that all files have valid URLs
@@ -240,39 +230,11 @@ class MockupAPI {
         );
         
         if (invalidFiles.length > 0) {
-          console.error('Invalid file URLs found:', invalidFiles);
+          console.error('❌ Invalid file URLs found:', invalidFiles);
           throw new Error(`Invalid file URLs: ${invalidFiles.map(f => f.placement).join(', ')}`);
         }
         
-        console.log(`Processed designs for mockup: ${designFiles.length} total designs -> ${mockupData.files.length} final images sent to Printful API`);
-        
-        } catch (error) {
-          console.error('Error processing design files:', error);
-          onStatusUpdate?.("Error processing designs, using fallback approach...", 0);
-          
-          // Fallback: use most recent design per placement
-          const uniqueDesignsByPlacement = designFiles
-            .filter(file => file.placement && file.url)
-            .reduce<Record<string, DesignFile>>((acc, file) => {
-              if (!acc[file.placement] || file.id > acc[file.placement].id) {
-                acc[file.placement] = file;
-              }
-              return acc;
-            }, {});
-            
-          mockupData.files = Object.values(uniqueDesignsByPlacement).map((file) => ({
-            placement: file.placement,
-            image_url: file.url,
-            position: file.position ? {
-              area_width: file.position.area_width,
-              area_height: file.position.area_height,
-              width: file.position.width,
-              height: file.position.height,
-              top: file.position.top,
-              left: file.position.left,
-            } : undefined,
-          }));
-        }
+        console.log(`✅ Sending ${mockupData.files.length} final design(s) to Printful mockup API`);
       }
 
       console.log("Creating mockup task with data:", mockupData);

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { productAPI } from '@/lib/api';
-import { ArrowLeft, Save, Eye, Upload, X, Plus } from 'lucide-react';
+import { ArrowLeft, Save, Eye, X, Plus } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';

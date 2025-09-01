@@ -111,25 +111,6 @@ const ProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
         </p>
       </div>
 
-      {/* Regional Availability Section */}
-      {selectedProduct && selectedVariants.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-              <Globe className="w-5 h-5 text-white" />
-            </div>
-            <h3 className="text-xl font-bold text-white">Regional Availability</h3>
-          </div>
-          <div className="bg-black/60 rounded-2xl border border-gray-800 shadow-inner">
-            <RegionalAvailabilityPreview 
-              selectedProduct={selectedProduct}
-              selectedVariants={selectedVariants}
-              className="bg-transparent border-0"
-            />
-          </div>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Product Name */}
         <div>
@@ -264,10 +245,7 @@ const ProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
             <span className="text-orange-500 mr-2">•</span>
             Choose the most relevant category for better discoverability
           </li>
-          <li className="flex items-start">
-            <span className="text-orange-500 mr-2">•</span>
-            Regional availability is automatically determined by Printful
-          </li>
+         
           <li className="flex items-start">
             <span className="text-orange-500 mr-2">•</span>
             Higher markup = more profit but consider competitive pricing

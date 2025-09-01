@@ -92,7 +92,7 @@ export interface UnifiedDesignEditorProps {
   onRefreshFiles?: () => void;
 }
 
-export type TabType = "product" | "upload" | "text" | "clipart" | "placement" | "embroidery" | "advanced" | "preview";
+export type TabType = "product" | "upload" | "text" | "clipart" | "emoji" | "placement" | "embroidery" | "advanced" | "preview";
 
 export interface AdvancedMockupOptions {
   width: number;

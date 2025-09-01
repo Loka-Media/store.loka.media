@@ -13,7 +13,7 @@ export function aspectRatioValidation(
   imageUrl: string,
   positionWidth: number,
   positionHeight: number,
-  tolerancePercent: number = 2
+  tolerancePercent: number = 1 // Stricter tolerance for Printful compliance
 ): Promise<AspectRatioResult> {
   return new Promise((resolve, reject) => {
     if (!imageUrl || !positionWidth || !positionHeight) {

@@ -35,49 +35,82 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   onAspectRatioIssues,
   aspectRatioIssues,
 }) => {
+  const [allValidationResults, setAllValidationResults] = React.useState<AspectRatioIssue[]>([]);
   const canvasDims = getCanvasDimensions(activePrintFile);
 
   useEffect(() => {
-    console.log("🎯 Starting aspect ratio validation for active placement");
-    const validationPromises = designFiles
-      .filter((design) => design.placement === activePlacement && design.url)
-      .map((design) =>
-        aspectRatioValidation(
-          design.url,
-          design.position.width,
-          design.position.height
-        )
-          .then(({ isValid, percentDifference, correctedDimensions }) => {
+    const designsForPlacement = designFiles.filter((design) => design.placement === activePlacement && design.url);
+    console.log("🎯 Starting aspect ratio validation for active placement:", activePlacement);
+    console.log("🎯 Found designs for validation:", designsForPlacement.length, designsForPlacement.map(d => d.filename));
+    
+    if (designsForPlacement.length === 0) {
+      console.log("🎯 No designs found for validation, clearing issues");
+      onAspectRatioIssues([]);
+      return;
+    }
+    
+    const validationPromises = designsForPlacement.map((design) =>
+      aspectRatioValidation(
+        design.url,
+        design.position.width,
+        design.position.height,
+        0.5 // Very strict tolerance for Printful order compliance
+      )
+        .then(({ isValid, percentDifference, correctedDimensions }) => {
+          console.log(`🎯 Validation result for ${design.filename}:`, { isValid, percentDifference });
+          
+          // Show validation results even for valid designs if there's any difference
+          if (percentDifference > 0.1) { // Show if difference is more than 0.1%
             if (!isValid && correctedDimensions) {
               return {
                 designId: design.id,
-                message: `Warning: Aspect ratio of image is off by ${percentDifference.toFixed(
+                message: `🚫 CRITICAL: Aspect ratio off by ${percentDifference.toFixed(
                   2
-                )}%. Recommended dimensions: ${correctedDimensions.width.toFixed(
+                )}%. Must fix to: ${correctedDimensions.width.toFixed(
                   0
-                )}x${correctedDimensions.height.toFixed(0)}`,
+                )}x${correctedDimensions.height.toFixed(0)}px for Printful compliance`,
+              };
+            } else if (isValid) {
+              return {
+                designId: design.id,
+                message: `✅ GOOD: Aspect ratio variance ${percentDifference.toFixed(
+                  2
+                )}% (within tolerance). Printful compatible!`,
               };
             }
-            return null;
-          })
-          .catch((err) => {
-            console.error(
-              "Aspect ratio validation error for",
-              design.url,
-              ":",
-              err
-            );
-            return {
-              designId: design.id,
-              message: `Error validating aspect ratio for ${design.filename}.`,
-            };
-          })
-      );
+          }
+          return null;
+        })
+        .catch((err) => {
+          console.error(
+            "Aspect ratio validation error for",
+            design.url,
+            ":",
+            err
+          );
+          return {
+            designId: design.id,
+            message: `Error validating aspect ratio for ${design.filename}.`,
+          };
+        })
+    );
 
     Promise.all(validationPromises).then((results) => {
-      onAspectRatioIssues(
-        results.filter((r) => r !== null) as AspectRatioIssue[]
-      );
+      const allResults = results.filter((r) => r !== null) as AspectRatioIssue[];
+      const criticalIssues = allResults.filter(issue => issue.message.includes('🚫 CRITICAL'));
+      const goodResults = allResults.filter(issue => issue.message.includes('✅ GOOD'));
+      
+      console.log("🎯 Final validation results:", { 
+        total: allResults.length, 
+        critical: criticalIssues.length, 
+        good: goodResults.length 
+      });
+      
+      // Only pass critical issues to block workflow, but show all results in display
+      onAspectRatioIssues(criticalIssues);
+      
+      // Store all results for display purposes
+      setAllValidationResults(allResults);
     });
   }, [designFiles, activePlacement, onAspectRatioIssues]);
 
@@ -249,14 +282,54 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
           <div>Designs: {designFiles.length}</div>
         </div>
 
-        {/* Aspect Ratio Issues */}
-        <div className="mt-4 text-center">
-          {aspectRatioIssues.map((issue) => (
-            <div key={issue.designId} className="text-yellow-500 text-sm">
-              {issue.message}
-            </div>
-          ))}
-        </div>
+        {/* Aspect Ratio Validation Results */}
+        {allValidationResults.length > 0 && (
+          <div className="mt-4 space-y-3">
+            {/* Critical Issues */}
+            {aspectRatioIssues.length > 0 && (
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                <div className="flex items-center justify-center mb-2">
+                  <div className="text-sm font-bold text-red-400">
+                    ⚠️ PRINTFUL COMPLIANCE REQUIRED ({aspectRatioIssues.length} critical issues)
+                  </div>
+                </div>
+                <div className="space-y-2 mb-4">
+                  {aspectRatioIssues.map((issue) => (
+                    <div key={issue.designId} className="text-red-300 text-xs text-center">
+                      {issue.message}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-red-200 mb-2">
+                    ❌ Mockup generation and order creation will be blocked until these issues are resolved.
+                  </div>
+                  <div className="text-xs text-red-100">
+                    💡 Tip: Resize your designs to match the exact dimensions shown above.
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Good Results */}
+            {allValidationResults.filter(r => r.message.includes('✅ GOOD')).length > 0 && (
+              <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl">
+                <div className="text-sm font-bold text-green-400 mb-2 text-center">
+                  ✅ Aspect Ratio Status
+                </div>
+                <div className="space-y-1">
+                  {allValidationResults
+                    .filter(r => r.message.includes('✅ GOOD'))
+                    .map((result) => (
+                      <div key={result.designId} className="text-green-300 text-xs text-center">
+                        {result.message}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

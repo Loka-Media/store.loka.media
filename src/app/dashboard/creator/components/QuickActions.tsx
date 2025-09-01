@@ -1,6 +1,6 @@
 'use client';
 
-import { ShoppingBag, Plus, Upload, Palette, Store } from 'lucide-react';
+import { ShoppingBag, Store } from 'lucide-react';
 import Link from 'next/link';
 
 export function QuickActions() {

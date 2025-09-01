@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink, Package, Plus, Store } from 'lucide-react';
+import { ExternalLink, Package } from 'lucide-react';
 import Link from 'next/link';
 
 interface ConnectionStatus {

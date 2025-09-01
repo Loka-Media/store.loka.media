@@ -10,7 +10,7 @@ import Navigation from "@/components/Navigation";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 
 export default function CreatorDashboard() {
-  const { user, connection, products, loading, stats, handleConnectPrintful, deleteProduct } =
+  const { connection, products, loading, stats, handleConnectPrintful, deleteProduct } =
     useCreatorDashboard();
 
   return (
@@ -18,7 +18,7 @@ export default function CreatorDashboard() {
       <div className="min-h-screen bg-gray-950 text-white">
         <Navigation />
 
-        <div className="max-w-7xl mt-16 mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <DashboardHeader
             connection={connection}
             onConnectPrintful={handleConnectPrintful}

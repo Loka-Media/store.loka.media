@@ -138,14 +138,6 @@ const RegionalSelector: React.FC<RegionalSelectorProps> = ({
             <GlobeIcon className="w-5 h-5 text-blue-600" />
           </div>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">
-            Regional Availability
-          </h3>
-          <p className="text-sm text-gray-500">
-            Choose where your product will be available for purchase
-          </p>
-        </div>
       </div>
 
       {/* Selection Summary */}

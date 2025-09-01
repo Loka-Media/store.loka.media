@@ -393,138 +393,121 @@ function CanvasContent() {
         return;
       }
 
-      // ASPECT RATIO VALIDATION AND CORRECTION
-      setMockupStatus("Validating design aspect ratios...");
-      console.log("🔍 Performing aspect ratio validation before mockup generation...");
+      // COMPOSITE IMAGE CREATION for multiple designs per placement
+      setMockupStatus("Processing multiple designs per placement...");
+      console.log("🎨 Processing designs for mockup generation...");
+      console.log("🔧 printFiles state:", printFiles);
       
-      const correctedDesignFiles = [...designFiles];
-      let aspectRatioIssuesFixed = 0;
-
-      for (let i = 0; i < correctedDesignFiles.length; i++) {
-        const designFile = correctedDesignFiles[i];
-        if (!designFile.position) continue;
-
-        const {
-          width: designWidth,
-          height: designHeight,
-          area_width,
-          area_height,
-        } = designFile.position;
-
-        if (area_width && area_height) {
-          // Import the validation function dynamically
-          const { validateAspectRatioCompatibility } = await import(
-            "@/components/canvas/utils"
+      let finalDesignFiles = [...designFiles];
+      
+      // Check if we have multiple designs per placement that need compositing
+      const designsByPlacement = designFiles.reduce<Record<string, typeof designFiles>>((acc, design) => {
+        if (!acc[design.placement]) acc[design.placement] = [];
+        acc[design.placement].push(design);
+        return acc;
+      }, {});
+      
+      const needsCompositing = Object.values(designsByPlacement).some(designs => designs.length > 1);
+      
+      console.log('🔍 COMPOSITING DECISION:');
+      console.log('  needsCompositing:', needsCompositing);
+      console.log('  printFiles available:', !!printFiles);
+      console.log('  designsByPlacement:', designsByPlacement);
+      
+      // Debug: Log the composite decision logic
+      Object.values(designsByPlacement).forEach((designs, index) => {
+        console.log(`  Placement ${index + 1}: ${designs.length} designs - ${designs.length > 1 ? 'NEEDS COMPOSITE' : 'single design'}`);
+      });
+      
+      if (!needsCompositing) {
+        console.log('🚫 COMPOSITING SKIPPED - No placements have multiple designs');
+      }
+      if (!printFiles) {
+        console.log('🚫 COMPOSITING SKIPPED - printFiles is null/undefined');
+      }
+      
+      if (needsCompositing && printFiles) {
+        try {
+          setMockupStatus("Creating composite images for multiple designs...");
+          console.log("🔧 Multiple designs detected, creating composite images...");
+          console.log(`Input designs for compositing:`, designFiles.map(d => ({placement: d.placement, filename: d.filename, url: d.url.substring(0, 60)})));
+          
+          // Import the composite image creator
+          const { createCompositeImagesForPlacements } = await import('../../../../utils/imageComposer');
+          
+          // Create composite images for placements with multiple designs
+          const compositeDesigns = await createCompositeImagesForPlacements(
+            designFiles.filter(file => file.placement && file.url),
+            printFiles
           );
-
-          const validation = validateAspectRatioCompatibility(
-            designWidth,
-            designHeight,
-            area_width,
-            area_height,
-            0.02 // 2% tolerance
-          );
-
-          if (!validation.isValid) {
-            console.log(
-              `⚠️ Aspect ratio mismatch detected for design ${i + 1}:`
-            );
-            console.log(
-              `   Design ratio: ${validation.designRatio.toFixed(
-                3
-              )}, Area ratio: ${validation.areaRatio.toFixed(3)}`
-            );
-            console.log(
-              `   Difference: ${(validation.difference * 100).toFixed(
-                1
-              )}% (tolerance: 2%)`
-            );
-
-            // SMART FIX: Adjust dimensions to maintain aspect ratio while fitting in print area
-            // This preserves the design's aspect ratio without breaking the UI
-            const designRatio = designWidth / designHeight;
-            const areaRatio = area_width / area_height;
-
-            let correctedPosition;
-
-            if (designRatio > areaRatio) {
-              // Design is wider - fit to width, adjust height
-              const newHeight = area_width / designRatio;
-              const topOffset = (area_height - newHeight) / 2; // Center vertically
-
-              correctedPosition = {
-                area_width,
-                area_height,
-                width: area_width,
-                height: newHeight,
-                top: Math.max(0, topOffset),
-                left: 0,
-                limit_to_print_area: true
-              };
-            } else {
-              // Design is taller - fit to height, adjust width
-              const newWidth = area_height * designRatio;
-              const leftOffset = (area_width - newWidth) / 2; // Center horizontally
-
-              correctedPosition = {
-                area_width,
-                area_height,
-                width: newWidth,
-                height: area_height,
-                top: 0,
-                left: Math.max(0, leftOffset),
-                limit_to_print_area: true
-              };
-            }
-
-            correctedDesignFiles[i] = {
-              ...designFile,
-              position: correctedPosition,
-            };
-
-            aspectRatioIssuesFixed++;
-            console.log(
-              `✅ Fixed aspect ratio by smart scaling: ${designWidth}x${designHeight} → ${correctedPosition.width}x${correctedPosition.height} (centered in ${area_width}x${area_height})`
-            );
-            toast.success(
-              `Fixed aspect ratio for design ${
-                i + 1
-              } - smart scaled and centered`,
-              { duration: 3000 }
-            );
-          } else {
-            console.log(
-              `✅ Design ${
-                i + 1
-              } aspect ratio is valid (${validation.designRatio.toFixed(3)})`
-            );
+          
+          console.log(`✅ Composite creation complete: ${designFiles.length} original → ${compositeDesigns.length} final designs`);
+          
+          // CRITICAL VALIDATION: Ensure compositeDesigns is valid
+          if (!compositeDesigns || compositeDesigns.length === 0) {
+            throw new Error('Composite creation returned empty result');
           }
+          
+          // Validate that we actually have composite designs (not fallback individual designs)
+          const hasActualComposites = Object.values(designsByPlacement).some(designs => 
+            designs.length > 1 && compositeDesigns.some(comp => 
+              comp.placement === designs[0].placement && comp.url !== designs[0].url
+            )
+          );
+          
+          if (!hasActualComposites) {
+            console.warn('⚠️ WARNING: No actual composite images were created - all were fallbacks');
+          }
+          
+          // CRITICAL: Make sure we're using the composite designs
+          finalDesignFiles = compositeDesigns;
+          
+          // Update the design state with composite designs for future operations (async)
+          setDesignFiles(compositeDesigns);
+          
+          console.log('🎯 COMPOSITE RESULTS - finalDesignFiles updated with:');
+          finalDesignFiles.forEach((design, index) => {
+            console.log(`  COMPOSITE ${index + 1}: ${design.placement} - ${design.filename} - ${design.url}`);
+          });
+          
+        } catch (error) {
+          console.error("❌ COMPOSITE CREATION FAILED:", error);
+          console.error("❌ Error type:", typeof error);
+          console.error("❌ Error message:", error instanceof Error ? error.message : String(error));
+          console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+          console.error("❌ Failed with designFiles count:", designFiles.length);
+          console.error("❌ Failed with printFiles:", printFiles);
+          
+          setMockupStatus("Composite creation failed, using individual designs...");
+          // Continue with original design files
+          finalDesignFiles = [...designFiles];
+          
+          console.log('💥 FALLBACK - Using original designs:');
+          finalDesignFiles.forEach((design, index) => {
+            console.log(`  FALLBACK ${index + 1}: ${design.placement} - ${design.filename} - ${design.url}`);
+          });
+        }
+      } else {
+        console.log('ℹ️  No compositing needed - using original designs as-is');
+        if (!needsCompositing) {
+          console.log('   Reason: needsCompositing = false');
+          console.log('   designsByPlacement:', Object.keys(designsByPlacement).map(placement => `${placement}: ${designsByPlacement[placement].length} designs`));
+        }
+        if (!printFiles) {
+          console.log('   Reason: printFiles not available');
         }
       }
-
-      if (aspectRatioIssuesFixed > 0) {
-        setDesignFiles(correctedDesignFiles);
-        toast.success(
-          `Fixed ${aspectRatioIssuesFixed} aspect ratio issue${
-            aspectRatioIssuesFixed > 1 ? "s" : ""
-          }`,
-          {
-            duration: 4000,
-            icon: "🔧",
-          }
-        );
-        console.log(
-          `🔧 Applied aspect ratio corrections to ${aspectRatioIssuesFixed} design files`
-        );
-      } else {
-        console.log("✅ All design files have valid aspect ratios");
-      }
+      
+      console.log(`📸 Final design files for mockup: ${finalDesignFiles.length} designs`);
+      finalDesignFiles.forEach((design, index) => {
+        console.log(`  ${index + 1}. ${design.placement}: ${design.filename} - ${design.url.substring(0, 60)}...`);
+      });
 
       // Prepare advanced mockup options
       const mockupOptions: any = {
         productId: selectedProduct.id,
         variantIds: validVariantIds.slice(0, 3), // Use first 3 valid variants for preview
-        designFiles: designFiles, // Use aspect-ratio corrected design files
+        designFiles: finalDesignFiles, // CRITICAL: Use finalDesignFiles (composite if created, original if not)
         format: "jpg" as const,
         onStatusUpdate: (status: string, attempts: number) => {
           setMockupStatus(status);
@@ -595,6 +578,33 @@ function CanvasContent() {
         });
       }
       console.log("🔍 Mockup Options Debug:", mockupOptions);
+
+      // CRITICAL DEBUG: Log what we're actually sending to the mockup API
+      console.log('🚀 FINAL CHECK - About to send to mockupAPI.generateProductMockup:');
+      console.log('mockupOptions.designFiles length:', mockupOptions.designFiles?.length);
+      console.log('mockupOptions.designFiles full data:', JSON.stringify(mockupOptions.designFiles, null, 2));
+      
+      if (mockupOptions.designFiles) {
+        mockupOptions.designFiles.forEach((design: any, index: number) => {
+          console.log(`  FINAL DESIGN ${index + 1}: ${design.placement} - ${design.filename} - ${design.url}`);
+        });
+        
+        // Count designs per placement to detect if compositing worked
+        const placementCount = mockupOptions.designFiles.reduce((acc: any, design: any) => {
+          acc[design.placement] = (acc[design.placement] || 0) + 1;
+          return acc;
+        }, {});
+        console.log('🔢 CRITICAL CHECK - Designs per placement in mockupOptions:', placementCount);
+        
+        // If we still have multiple designs per placement, something went wrong
+        Object.entries(placementCount).forEach(([placement, count]) => {
+          if ((count as number) > 1) {
+            console.error(`🚨 CRITICAL ERROR: Still have ${count} designs for placement '${placement}' - composite creation failed!`);
+          }
+        });
+      } else {
+        console.error('🚨 CRITICAL ERROR: mockupOptions.designFiles is undefined!');
+      }
 
       const mockupUrls = await mockupAPI.generateProductMockup({
         ...mockupOptions,

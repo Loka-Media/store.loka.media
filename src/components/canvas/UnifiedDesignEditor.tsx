@@ -14,6 +14,7 @@ import {
   Scissors,
   PlayCircle,
   X,
+  Heart,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -22,6 +23,7 @@ import ProductTabContent from "./tabs/ProductTabContent";
 import UploadTabContent from "./tabs/UploadTabContent";
 import TextTabContent from "./tabs/TextTabContent";
 import ClipartTabContent from "./tabs/ClipartTabContent";
+import EmojiTabContent from "./tabs/EmojiTabContent";
 import DesignTabContent from "./tabs/DesignTabContent";
 import EmbroideryTabContent from "./tabs/EmbroideryTabContent";
 import AdvancedTabContent from "./tabs/AdvancedTabContent";
@@ -170,6 +172,16 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
       return;
     }
 
+    // CRITICAL: Check for aspect ratio issues before mockup generation
+    if (aspectRatioIssues.length > 0) {
+      console.error("❌ Cannot generate mockup with aspect ratio issues:", aspectRatioIssues);
+      toast.error("Please fix aspect ratio issues before generating mockups. Your designs must match the placement requirements for Printful orders.", {
+        duration: 8000,
+        icon: '⚠️'
+      });
+      return;
+    }
+
     // All validations passed - proceed with original preview generation
     console.log("✅ All validations passed, generating preview...");
     onGeneratePreview(advancedOptions);
@@ -228,15 +240,33 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
     }
   };
 
-  const handleAddDesign = async (file: UploadedFile, placement: string): Promise<void> => {
-    const activePrintFile = getActivePrintFile(printFiles, selectedVariants, placement);
+  const handleAddDesign = async (file: UploadedFile, placement?: string): Promise<void> => {
+    // If no placement specified, use the first available placement
+    let targetPlacement = placement;
+    if (!targetPlacement && printFiles?.available_placements) {
+      const availablePlacements = Object.keys(printFiles.available_placements);
+      targetPlacement = availablePlacements[0]; // Use first available placement
+    }
+    
+    if (!targetPlacement) {
+      toast.error("No placements available for this product");
+      return;
+    }
+
+    const activePrintFile = getActivePrintFile(printFiles, selectedVariants, targetPlacement);
     if (!activePrintFile) {
       toast.error("No print file available for this placement");
       return;
     }
+    
+    // Set active placement for proper display
+    setActivePlacement(targetPlacement);
+    if (!selectedPlacements.includes(targetPlacement)) {
+      setSelectedPlacements([...selectedPlacements, targetPlacement]);
+    }
 
     // Calculate position offset for multiple designs on same placement
-    const existingDesignsOnPlacement = designFiles.filter(df => df.placement === placement);
+    const existingDesignsOnPlacement = designFiles.filter(df => df.placement === targetPlacement);
     const offsetMultiplier = existingDesignsOnPlacement.length;
     const baseOffset = 20;
 
@@ -261,7 +291,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         filename: file.filename,
         url: imageUrl,
         type: "design",
-        placement,
+        placement: targetPlacement,
         position: {
           area_width: activePrintFile.width,
           area_height: activePrintFile.height,
@@ -273,57 +303,45 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         },
       };
 
-      // CRITICAL: Validate design against Printful requirements before adding
-      const validation = validateDesignForPrintful(newDesign, activePrintFile, true);
+      // CRITICAL: Auto-fix design to ensure Printful compatibility before validation
+      console.log("🔧 Pre-emptively fixing design for Printful compatibility");
+      const preFixedDesign = autoFixDesignForPrintful(newDesign, activePrintFile);
+      
+      // CRITICAL: Validate the pre-fixed design against Printful requirements
+      const validation = validateDesignForPrintful(preFixedDesign, activePrintFile, true);
       
       if (!validation.isValid) {
-        // Auto-fix the design if possible
-        console.log("⚠️ Design validation failed, attempting auto-fix:", validation.errors);
-        const fixedDesign = autoFixDesignForPrintful(newDesign, activePrintFile);
-        
-        // Re-validate the fixed design
-        const fixedValidation = validateDesignForPrintful(fixedDesign, activePrintFile, true);
-        
-        if (fixedValidation.isValid) {
-          console.log("✅ Auto-fix successful");
-          setDesignFiles([...designFiles, fixedDesign]);
-          setSelectedDesignFile(fixedDesign);
-          toast.success(`${file.filename} added with automatic corrections for Printful compatibility!`, {
-            icon: '🔧',
-            duration: 4000
-          });
-        } else {
-          // Even auto-fix failed - this should be very rare
-          console.error("❌ Auto-fix failed:", fixedValidation.errors);
-          toast.error(`Unable to add ${file.filename}: ${fixedValidation.errors[0]}`, {
-            duration: 6000
-          });
-          return;
-        }
+        // If even the auto-fixed design fails, reject it
+        console.error("❌ Design cannot be made Printful-compliant:", validation.errors);
+        toast.error(`Unable to add ${file.filename}: Design cannot be adapted for Printful requirements. ${validation.errors[0]}`, {
+          duration: 8000,
+          icon: '❌'
+        });
+        return;
       } else {
-        // Design is already valid
-        console.log("✅ Design validation passed");
-        setDesignFiles([...designFiles, newDesign]);
-        setSelectedDesignFile(newDesign);
+        // Use the pre-fixed design which is guaranteed to be Printful-compliant
+        console.log("✅ Design is Printful-compliant after auto-fix");
+        setDesignFiles([...designFiles, preFixedDesign]);
+        setSelectedDesignFile(preFixedDesign);
         
         if (validation.warnings.length > 0) {
-          console.log("⚠️ Design warnings:", validation.warnings);
+          console.log("⚠️ Design warnings (acceptable):", validation.warnings);
         }
         
-        // Success message with smart adaptation info
+        // Success message emphasizing compliance
         const totalCount = existingDesignsOnPlacement.length + 1;
         if (adapted) {
-          toast.success(`${file.filename} auto-adapted to perfect ${placement} fit! 🎯`, {
+          toast.success(`${file.filename} optimized for perfect Printful compatibility! 🎯✅`, {
             icon: '✨',
             duration: 4000
           });
         } else if (totalCount === 1) {
-          toast.success(`${file.filename} added to ${placement}! ✅ Perfect fit`, {
+          toast.success(`${file.filename} added to ${placement}! ✅ Printful-ready`, {
             icon: '✨',
             duration: 3000
           });
         } else {
-          toast.success(`${file.filename} added to ${placement}! (${totalCount} total)`, {
+          toast.success(`${file.filename} added to ${placement}! (${totalCount} total) ✅ All Printful-ready`, {
             duration: 3000
           });
         }
@@ -343,7 +361,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         filename: file.filename,
         url: file.file_url || file.thumbnail_url || '',
         type: "design",
-        placement,
+        placement: targetPlacement,
         position: {
           area_width: activePrintFile.width,
           area_height: activePrintFile.height,
@@ -533,16 +551,27 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
   };
 
   const handleClipartImageCreated = async (imageUrl: string, filename: string) => {
-    if (!activePlacement) {
-      toast.error('Please select a placement first');
+    // Auto-select first available placement if none selected
+    let targetPlacement = activePlacement;
+    if (!targetPlacement && printFiles?.available_placements) {
+      const availablePlacements = Object.keys(printFiles.available_placements);
+      targetPlacement = availablePlacements[0];
+      setActivePlacement(targetPlacement);
+      if (!selectedPlacements.includes(targetPlacement)) {
+        setSelectedPlacements([...selectedPlacements, targetPlacement]);
+      }
+    }
+    
+    if (!targetPlacement) {
+      toast.error('No placements available for this product');
       return;
     }
 
-    const activePrintFile = getActivePrintFile(printFiles, selectedVariants, activePlacement);
+    const activePrintFile = getActivePrintFile(printFiles, selectedVariants, targetPlacement);
     if (!activePrintFile) return;
 
     // Calculate position offset for multiple designs on same placement
-    const existingDesignsOnPlacement = designFiles.filter(df => df.placement === activePlacement);
+    const existingDesignsOnPlacement = designFiles.filter(df => df.placement === targetPlacement);
     const offsetMultiplier = existingDesignsOnPlacement.length;
     const baseOffset = 20;
 
@@ -566,7 +595,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         filename,
         url: imageUrl,
         type: "design",
-        placement: activePlacement,
+        placement: targetPlacement,
         position: {
           area_width: activePrintFile.width,
           area_height: activePrintFile.height,
@@ -589,7 +618,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         if (fixedValidation.isValid) {
           setDesignFiles([...designFiles, fixedDesign]);
           setSelectedDesignFile(fixedDesign);
-          toast.success(`Clipart added to ${activePlacement} with automatic corrections!`, {
+          toast.success(`Clipart added to ${targetPlacement} with automatic corrections!`, {
             icon: '🔧',
             duration: 4000
           });
@@ -604,12 +633,12 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         setSelectedDesignFile(newDesign);
         
         if (adapted) {
-          toast.success(`Clipart auto-adapted to perfect ${activePlacement} fit! 🎨🎯`, {
+          toast.success(`Clipart auto-adapted to perfect ${targetPlacement} fit! 🎨🎯`, {
             icon: '✨',
             duration: 4000
           });
         } else {
-          toast.success(`Clipart added to ${activePlacement}! ✅ Perfect fit`, {
+          toast.success(`Clipart added to ${targetPlacement}! ✅ Perfect fit`, {
             icon: '🎨',
             duration: 3000
           });
@@ -630,7 +659,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         filename,
         url: imageUrl,
         type: "design",
-        placement: activePlacement,
+        placement: targetPlacement,
         position: {
           area_width: activePrintFile.width,
           area_height: activePrintFile.height,
@@ -644,7 +673,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
 
       setDesignFiles([...designFiles, newDesign]);
       setSelectedDesignFile(newDesign);
-      toast.success(`Clipart added to ${activePlacement}! (Using safe square dimensions)`);
+      toast.success(`Clipart added to ${targetPlacement}! (Using safe square dimensions)`);
     }
   };
 
@@ -736,6 +765,14 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         return (
           <ClipartTabContent 
             onClipartImageCreated={handleClipartImageCreated}
+          />
+        );
+
+      case "emoji":
+        return (
+          <EmojiTabContent
+            onEmojiImageCreated={handleClipartImageCreated} // Reuse the same handler
+            onSwitchToDesignTab={() => setActiveTab("placement")}
           />
         );
 
@@ -843,6 +880,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
     { id: "placement" as TabType, label: "Design", icon: Zap },
     { id: "text" as TabType, label: "Text", icon: Type },
     { id: "clipart" as TabType, label: "Clipart", icon: Smile },
+    { id: "emoji" as TabType, label: "Emoji", icon: Heart },
   ];
 
   const embroideryTab = isEmbroideryProd 
@@ -1048,8 +1086,18 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
           </div>
 
           <button
-            onClick={onNext}
-            disabled={designFiles.length === 0 || (mockupUrls?.length === 0)}
+            onClick={() => {
+              // Check for aspect ratio issues before proceeding
+              if (aspectRatioIssues.length > 0) {
+                toast.error("Please fix all aspect ratio issues before continuing. Your designs must be compatible with Printful's requirements.", {
+                  duration: 6000,
+                  icon: '⚠️'
+                });
+                return;
+              }
+              onNext?.();
+            }}
+            disabled={designFiles.length === 0 || (mockupUrls?.length === 0) || aspectRatioIssues.length > 0}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Continue to Product Details
