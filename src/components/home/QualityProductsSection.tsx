@@ -117,9 +117,7 @@ export  function QualityProductsSection() {
                 >
                   <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
                     <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-5 md:mb-6 font-light">
-                      From apparel to plushies to hot sauce, we've teamed up
-                      with top manufacturers to bring your ideas to life. No
-                      minimums required.
+                      From apparel to makeup to your own product lines, we've teamed up with top brands and manufacturers to bring your ideas to life. No minimums required.
                     </p>
                     <button className="relative group/btn bg-gradient-to-r from-white to-gray-100 text-black px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-full font-semibold overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-white/20 text-sm sm:text-base">
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-orange-600 opacity-0 group-hover/btn:opacity-10 transition-opacity duration-300"></div>
@@ -163,9 +161,7 @@ export  function QualityProductsSection() {
                 >
                   <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
                     <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed font-light">
-                      Set up your custom storefront and start selling your
-                      products with our easy-to-use platform. Full customization
-                      available.
+                      Set up your free custom shop and start selling your products with our easy-to-use platform across all social platforms. Full customization available. Ask us about your own fully branded website.
                     </p>
                   </div>
                 </div>
@@ -203,9 +199,7 @@ export  function QualityProductsSection() {
                 >
                   <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
                     <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed font-light">
-                      Focus on creating while we handle order fulfillment,
-                      customer service, and worldwide shipping for your
-                      products.
+                      Join trendsetting creators already earning across all socials with our platform.
                     </p>
                   </div>
                 </div>

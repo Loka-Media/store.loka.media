@@ -10,7 +10,7 @@ export function TestimonialSection() {
   const testimonials = [
     {
       quote:
-        "Loka Media transformed my side hustle into a six-figure business. The quality is incredible and my customers love every product. I've never looked back!",
+        "Loka transformed my side hustle into a six-figure business. The quality is incredible and my customers love every product. I've never looked back!",
       author: "Maya Patel",
       title: "Content Creator & Entrepreneur",
       platform: "@mayacreates",

@@ -10,10 +10,10 @@ export default function TermsOfServicePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mt-16">
         <div className="prose prose-lg prose-invert max-w-none">
           <h1 className="text-4xl font-bold text-white mb-8">Terms of Service</h1>
-          <p className="text-gray-400 mb-8">Last Updated: December 20, 2024</p>
+          <p className="text-gray-400 mb-8">Last Updated: July 7, 2025</p>
 
           <p>
-            Welcome, and thank you for your interest in Loka Media Store ("Loka Media," "we," or "us") and our website at https://store.loka.media (the "Service"). These Terms of Service are a legally binding contract between you and Loka Media regarding your use of the Service.
+            Welcome, and thank you for your interest in Loka Store ("Loka," "we," or "us") and our website at https://store.loka.media (the "Service"). These Terms of Service are a legally binding contract between you and Loka regarding your use of the Service.
           </p>
 
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">PLEASE READ THE FOLLOWING TERMS CAREFULLY</h2>
@@ -22,13 +22,12 @@ export default function TermsOfServicePage() {
             <strong>BY CLICKING "I ACCEPT," OR BY OTHERWISE ACCESSING OR USING THE SERVICE, YOU AGREE THAT YOU HAVE READ AND UNDERSTOOD, AND, AS A CONDITION TO YOUR USE OF THE SERVICE, YOU AGREE TO BE BOUND BY, THE FOLLOWING TERMS AND CONDITIONS, INCLUDING LOKA MEDIA'S PRIVACY POLICY (TOGETHER, THESE "TERMS"). IF YOU ARE NOT ELIGIBLE, OR DO NOT AGREE TO THE TERMS, THEN YOU DO NOT HAVE OUR PERMISSION TO USE THE SERVICE.</strong>
           </p>
 
-          <h2 className="text-2xl font-bold text-white mt-8 mb-4">1. Loka Media Service Overview</h2>
+          <h2 className="text-2xl font-bold text-white mt-8 mb-4">1. Loka Service Overview</h2>
           
           <p>We offer a creative marketplace platform where:</p>
           <ul>
             <li>Creators can design and sell custom merchandise using our design tools</li>
             <li>Customers can browse and purchase unique creator-designed products</li>
-            <li>Products are fulfilled through our integrated partners (Printful, Shopify)</li>
             <li>We provide design tools, canvas editors, and product customization features</li>
           </ul>
 
@@ -93,7 +92,7 @@ export default function TermsOfServicePage() {
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">8. Intellectual Property</h2>
           
           <p>
-            The Service is owned and operated by Loka Media. The visual interfaces, graphics, design, compilation, information, data, computer code, products, software, services, and all other elements of the Service are protected by intellectual property and other laws.
+            The Service is owned and operated by Loka. The visual interfaces, graphics, design, compilation, information, data, computer code, products, software, services, and all other elements of the Service are protected by intellectual property and other laws.
           </p>
 
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">9. Disclaimers and Limitation of Liability</h2>

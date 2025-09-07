@@ -60,7 +60,6 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
               {" "}
               across all social platforms.
             </span>
-            .
           </p>
 
           {/* Primary CTA */}

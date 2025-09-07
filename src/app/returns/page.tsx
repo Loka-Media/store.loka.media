@@ -69,7 +69,7 @@ export default function ReturnsAndFAQPage() {
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">Shipping and Delivery</h2>
           
           <p>
-            All products are printed and shipped by our fulfillment partners (primarily Printful). Standard shipping times vary by location:
+            All products are printed and shipped by our fulfillment partners. Standard shipping times vary by location:
           </p>
 
           <ul>
@@ -110,7 +110,7 @@ export default function ReturnsAndFAQPage() {
             <li>Durable materials for accessories</li>
           </ul>
 
-          <h3 className="text-xl font-semibold text-white mt-6 mb-3">How do I become a creator on Loka Media?</h3>
+          <h3 className="text-xl font-semibold text-white mt-6 mb-3">How do I become a creator on Loka?</h3>
           <p>
             Visit our <a href="/auth/register" className="text-blue-400 hover:text-blue-300">creator signup page</a> and submit an application. Our team reviews all applications and will contact you with next steps if approved.
           </p>

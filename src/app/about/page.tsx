@@ -10,19 +10,19 @@ export default function AboutPage() {
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mt-16">
         <div className="prose prose-lg prose-invert max-w-none">
-          <h1 className="text-4xl font-bold text-white mb-8">About Loka Media</h1>
+          <h1 className="text-4xl font-bold text-white mb-8">About Loka</h1>
           
           <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/20 p-8 rounded-lg mb-8">
             <h2 className="text-2xl font-bold text-white mb-4">Empowering Creators to Build Their Brand</h2>
             <p className="text-lg text-gray-300">
-              Loka Media is a creative marketplace platform that empowers creators to design, customize, and sell unique products while building their brand and community.
+              Loka is a creative marketplace platform that empowers creators to design, customize, and sell unique products while building their brand and community.
             </p>
           </div>
 
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">Our Mission</h2>
           
           <p>
-            We believe every creator deserves the tools and platform to turn their creativity into a sustainable business. Whether you're an artist, content creator, influencer, or entrepreneur, Loka Media provides everything you need to design, sell, and grow your brand.
+            We believe every creator deserves the tools and platform to turn their creativity into a sustainable business. Whether you're an artist, content creator, influencer, or entrepreneur, Loka provides everything you need to design, sell, and grow your brand.
           </p>
 
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">What We Offer</h2>
@@ -64,7 +64,6 @@ export default function AboutPage() {
           </p>
 
           <ul>
-            <li><strong>Print-on-Demand:</strong> Powered by Printful for high-quality products and global shipping</li>
             <li><strong>Secure Payments:</strong> Stripe integration for safe and reliable transactions</li>
             <li><strong>Global Reach:</strong> Shopify integration for expanded catalog and international fulfillment</li>
             <li><strong>Advanced Design:</strong> Custom-built canvas editor with professional design capabilities</li>
@@ -73,7 +72,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">For Creators</h2>
           
           <p>
-            Whether you&apos;re just starting out or looking to expand your existing brand, Loka Media provides:
+            Whether you&apos;re just starting out or looking to expand your existing brand, Loka provides:
           </p>
 
           <ul>
@@ -103,7 +102,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">Join Our Community</h2>
           
           <p>
-            Ready to start your creative journey? Join thousands of creators who are already building their brands and growing their businesses with Loka Media.
+            Ready to start your creative journey? Join thousands of creators who are already building their brands and growing their businesses with Loka.
           </p>
 
           <div className="bg-blue-900/20 border border-blue-500/20 p-6 rounded-lg mt-8">

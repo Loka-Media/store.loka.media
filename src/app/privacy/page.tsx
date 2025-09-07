@@ -10,10 +10,10 @@ export default function PrivacyPolicyPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mt-16">
         <div className="prose prose-lg prose-invert max-w-none">
           <h1 className="text-4xl font-bold text-white mb-8">Privacy Policy</h1>
-          <p className="text-gray-400 mb-8">Last Updated: December 20, 2024</p>
+          <p className="text-gray-400 mb-8">Last Updated: July 7, 2025</p>
 
           <p>
-            This Privacy Policy describes how your personal information is collected, used, and shared when you visit or make a purchase from Loka Media Store (the "Site").
+            This Privacy Policy describes how your personal information is collected, used, and shared when you visit or make a purchase from Loka Store (the "Site").
           </p>
 
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">Personal Information We Collect</h2>
@@ -64,7 +64,7 @@ export default function PrivacyPolicyPage() {
 
           <h2 className="text-2xl font-bold text-white mt-8 mb-4">Creator Platform</h2>
           
-          <p>Loka Media Store operates as a marketplace platform where creators can design and sell custom products. When you create an account as a creator or make purchases from creators:</p>
+          <p>Loka Store operates as a marketplace platform where creators can design and sell custom products. When you create an account as a creator or make purchases from creators:</p>
 
           <ul>
             <li>Creator account information is stored securely</li>

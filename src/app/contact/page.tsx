@@ -128,7 +128,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="text-lg font-semibold text-white mb-3">General Inquiries</h3>
                 <p className="text-gray-400 mb-2">
-                  For general questions about Loka Media
+                  For general questions about Loka
                 </p>
                 <a 
                   href="mailto:hello@loka.media" 
@@ -198,23 +198,6 @@ export default function ContactPage() {
               </p>
             </div>
 
-            <div className="mt-8 pt-8 border-t border-gray-600">
-              <h3 className="text-lg font-semibold text-white mb-3">Follow Us</h3>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-gray-600">
-                  <span className="sr-only">Twitter</span>
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-gray-600">
-                  <span className="sr-only">Instagram</span>
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path fillRule="evenodd" d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987s11.987-5.367 11.987-11.987C24.014 5.367 18.647.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.706 13.742 3.706 12.446s.492-2.448 1.297-3.323C5.9 8.248 7.051 7.756 8.348 7.756s2.448.492 3.323 1.297c.897.897 1.389 2.048 1.389 3.345s-.492 2.448-1.297 3.323c-.897.897-2.048 1.389-3.345 1.389zm7.84-9.297c-.297 0-.54-.108-.729-.297-.189-.189-.297-.432-.297-.729s.108-.54.297-.729c.189-.189.432-.297.729-.297s.54.108.729.297c.189.189.297.432.297.729s-.108.54-.297.729c-.189.189-.432.297-.729.297z" clipRule="evenodd" />
-                  </svg>
-                </a>
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -188,7 +188,7 @@ export default function HelpPage() {
                 Getting Started Guide
               </h3>
               <p className="text-gray-400 text-sm mb-4">
-                Everything you need to know to start creating and selling on Loka Media.
+                Everything you need to know to start creating and selling on Loka.
               </p>
               <a href="/creator-guide" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
                 Read Guide →

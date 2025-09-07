@@ -7,60 +7,60 @@ export function FAQSection() {
 
   const faqs = [
     {
-      question: "How much does it cost to use Loka Media?",
+      question: "How much does it cost to use Loka?",
       answer:
-        "Loka Media is free to use. We take a small commission on sales to keep the platform running and continue improving our services.",
+        "Loka is free to use. We take a small commission on sales to keep the platform running and continue improving our services.",
     },
     {
       question:
-        "How much money do I make on sales from the Loka Media catalog?",
+        "How much money do I make on sales from the Loka catalog?",
       answer:
-        "You earn a commission on every sale from the Loka Media catalog. The exact percentage varies by product type and volume, but you'll always see your earnings clearly before making any decisions.",
+        "You earn a commission on every sale from the Loka catalog. The exact percentage varies by product type and volume, but you'll always see your earnings clearly before making any decisions.",
     },
     {
-      question: "Does Loka Media ship worldwide?",
+      question: "Does Loka ship worldwide?",
       answer:
-        "Yes! Loka Media ships to customers worldwide. We have fulfillment centers in multiple regions to ensure fast and cost-effective shipping to your customers globally.",
+        "Yes! Loka ships to customers worldwide. We have fulfillment centers in multiple regions to ensure fast and cost-effective shipping to your customers globally.",
     },
     {
-      question: "Does Loka Media handle payment processing?",
+      question: "Does Loka handle payment processing?",
       answer:
-        "Absolutely. Loka Media handles all payment processing securely, including credit cards, PayPal, and other popular payment methods. You don't need to worry about setting up payment systems.",
+        "Absolutely. Loka handles all payment processing securely, including credit cards, PayPal, and other popular payment methods. You don't need to worry about setting up payment systems.",
     },
     {
-      question: "Does Loka Media handle sales tax?",
+      question: "Does Loka handle sales tax?",
       answer:
-        "Yes, Loka Media automatically handles sales tax calculations and remittance where required. This takes the complexity of tax compliance off your shoulders.",
+        "Yes, Loka automatically handles sales tax calculations and remittance where required. This takes the complexity of tax compliance off your shoulders.",
     },
     {
-      question: "Can I connect a custom domain to Loka Media?",
+      question: "Can I connect a custom domain to Loka?",
       answer:
-        "Yes! You can connect your own custom domain to your Loka Media store to maintain your brand identity and provide a seamless experience for your customers.",
+        "Yes! You can connect your own custom domain to your Loka store to maintain your brand identity and provide a seamless experience for your customers.",
     },
     {
-      question: "Does Loka Media offer artwork & design support?",
+      question: "Does Loka offer artwork & design support?",
       answer:
-        "Yes, we offer design services and have a library of templates to help you create amazing products. Our design team can also provide custom artwork services for your store.",
+        "Yes, we offer design services and have a library of templates to help you create amazing products. Our design team can also provide custom artwork services for your shop.",
     },
     {
-      question: "Does Loka Media provide customer support for my orders?",
+      question: "Does Loka provide customer support for my orders?",
       answer:
-        "Yes! Loka Media provides full customer support for all orders placed through your store, including handling returns, exchanges, and customer inquiries.",
+        "Yes! Loka provides full customer support for all orders placed through your store, including handling returns, exchanges, and customer inquiries.",
     },
     {
-      question: "Can you show me examples of storefronts on Loka Media?",
+      question: "Can you show me examples of storefronts on Loka?",
       answer:
-        "Of course! We have many successful creators using Loka Media. You can browse our creator showcase to see examples of different store styles and approaches.",
+        "Of course! We have many successful creators using Loka. You can browse our creator showcase to see examples of different store styles and approaches.",
     },
     {
-      question: "What integrations does Loka Media have?",
+      question: "What integrations does Loka have?",
       answer:
-        "Loka Media integrates with popular platforms like Twitch, YouTube, Discord, and social media platforms. We also offer API access for custom integrations.",
+        "Loka integrates with popular platforms like Twitch, YouTube, Discord, and social media platforms. We also offer API access for custom integrations.",
     },
     {
-      question: "Are there any requirements to join Loka Media?",
+      question: "Are there any requirements to join Loka?",
       answer:
-        "No special requirements! Loka Media is open to all creators, whether you're just starting out or already have an established audience. Simply sign up and start building your store.",
+        "No special requirements! Loka is open to all creators, whether you're just starting out or already have an established audience. Simply sign up and start building your own custom shop.",
     },
   ];
 
@@ -83,7 +83,7 @@ export function FAQSection() {
             Got Questions? We've Got Answers.
           </h2>
           <p className="text-gray-300 text-lg">
-            Everything you need to know about getting started with Loka Media.
+            Everything you need to know about getting started with Loka.
           </p>
         </div>
 

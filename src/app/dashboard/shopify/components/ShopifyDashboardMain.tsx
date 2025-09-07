@@ -147,7 +147,7 @@ export default function ShopifyDashboardMain({
                   Products Go Live
                 </p>
                 <p className="text-sm text-gray-500">
-                  Your Shopify products will appear in the Loka Media marketplace
+                  Your Shopify products will appear in the Loka marketplace
                 </p>
               </div>
             </div>

@@ -66,7 +66,7 @@ export default function ConnectShopifyCard({
             </h3>
             
             <p className="mt-2 text-sm text-gray-500">
-              Connect your Shopify store to sync products to the Loka Media marketplace.
+              Connect your Shopify store to sync products to the Loka marketplace.
               One-time setup enables access for all your creators.
             </p>
           </div>

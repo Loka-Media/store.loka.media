@@ -92,40 +92,38 @@ function LoginPageContent() {
           {/* Hero Content - Updated Messaging */}
           <div className="max-w-lg">
             <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-tight mb-6">
-              Empowering{" "}
+              WELCOME BACK TO{" "}
               <span className="block text-orange-400">
-                Creators, Artists & Brands
+                LOKA
               </span>
             </h1>
 
             <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              Join thousands of influencers, artists, and businesses to showcase
-              your unique products and services, connecting directly with your
-              audience.
+              Sign in to access your account, explore amazing products, and connect with creators across all platforms.
             </p>
 
-            {/* Stats Section - Updated Icons/Text for broader audience */}
+            {/* Stats Section - Updated with new numbers */}
             <div className="grid grid-cols-3 gap-6 mb-8">
               <div className="text-center">
                 <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
                   <Users className="w-6 h-6 text-orange-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">10K+</div>
-                <div className="text-sm text-gray-400">Active Members</div>
+                <div className="text-2xl font-bold text-white">7+</div>
+                <div className="text-sm text-gray-400">Social Media Platforms</div>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
                   <ShoppingBag className="w-6 h-6 text-orange-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">50K+</div>
-                <div className="text-sm text-gray-400">Products & Services</div>
+                <div className="text-2xl font-bold text-white">40K+</div>
+                <div className="text-sm text-gray-400">Custom and Trending Products</div>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
                   <TrendingUp className="w-6 h-6 text-orange-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">₹2Cr+</div>
-                <div className="text-sm text-gray-400">Total Earnings</div>
+                <div className="text-2xl font-bold text-white">$1M+++</div>
+                <div className="text-sm text-gray-400">Start Making Millions</div>
               </div>
             </div>
 
@@ -133,15 +131,15 @@ function LoginPageContent() {
             <div className="space-y-4">
               <div className="flex items-center text-gray-300">
                 <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-                <span>Zero listing fees for all members</span>
+                <span>Browse unique custom products</span>
               </div>
               <div className="flex items-center text-gray-300">
                 <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-                <span>Direct audience and customer connections</span>
+                <span>Support your favorite creators</span>
               </div>
               <div className="flex items-center text-gray-300">
                 <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-                <span>Curated tools for growth and visibility</span>
+                <span>Access exclusive creator content</span>
               </div>
             </div>
           </div>
