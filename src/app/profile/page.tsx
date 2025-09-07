@@ -67,7 +67,7 @@ export default function ProfilePage() {
       
       console.log('📦 Fetched orders:', ordersResponse.orders);
       // Log image URLs for debugging
-      ordersResponse.orders.forEach((order, orderIndex) => {
+      ordersResponse.orders.forEach((order: Order, orderIndex:any) => {
         order.order_items?.forEach((item, itemIndex) => {
           console.log(`🖼️ Order ${orderIndex + 1}, Item ${itemIndex + 1} - Image URL:`, item.image_url);
         });
