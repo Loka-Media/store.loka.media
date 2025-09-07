@@ -3,10 +3,22 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, formatDate, checkoutAPI, addressAPI, Address } from '@/lib/api';
-import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus } from 'lucide-react';
+import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+
+interface OrderItem {
+  product_id: number;
+  variant_id: number;
+  product_name: string;
+  price: string;
+  quantity: number;
+  size?: string;
+  color?: string;
+  image_url?: string;
+  total_price: string;
+}
 
 interface Order {
   id: number;
@@ -17,6 +29,12 @@ interface Order {
   payment_method: string;
   created_at: string;
   item_count: number;
+  order_items: OrderItem[];
+  shipping_cost: number;
+  tax_amount: number;
+  admin_fee: number;
+  shipping_address: any;
+  metadata: any;
 }
 
 export default function ProfilePage() {
@@ -27,6 +45,8 @@ export default function ProfilePage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set());
+  const [loadingImages, setLoadingImages] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -44,6 +64,14 @@ export default function ProfilePage() {
         checkoutAPI.getUserOrders({ limit: 5 }),
         addressAPI.getAddresses()
       ]);
+      
+      console.log('📦 Fetched orders:', ordersResponse.orders);
+      // Log image URLs for debugging
+      ordersResponse.orders.forEach((order, orderIndex) => {
+        order.order_items?.forEach((item, itemIndex) => {
+          console.log(`🖼️ Order ${orderIndex + 1}, Item ${itemIndex + 1} - Image URL:`, item.image_url);
+        });
+      });
       
       setOrders(ordersResponse.orders);
       setAddresses(addressesResponse.addresses);
@@ -68,6 +96,16 @@ export default function ProfilePage() {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const toggleOrderExpansion = (orderId: number) => {
+    const newExpanded = new Set(expandedOrders);
+    if (newExpanded.has(orderId)) {
+      newExpanded.delete(orderId);
+    } else {
+      newExpanded.add(orderId);
+    }
+    setExpandedOrders(newExpanded);
   };
 
   if (!isAuthenticated || loading) {
@@ -199,32 +237,188 @@ export default function ProfilePage() {
                 </Link>
               </div>
             ) : (
-              <div className="divide-y divide-gray-200">
-                {orders.map((order) => (
-                  <div key={order.id} className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          Order #{order.order_number}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {formatDate(order.created_at)} • {order.item_count} item(s)
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Payment: {order.payment_method.toUpperCase()}
-                        </p>
+              <div className="space-y-3">
+                {orders.map((order) => {
+                  const isExpanded = expandedOrders.has(order.id);
+                  return (
+                    <div key={order.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                      {/* Compact Order Header */}
+                      <div 
+                        className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"
+                        onClick={() => toggleOrderExpansion(order.id)}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Package className="w-5 h-5 text-indigo-600" />
+                          <div>
+                            <p className="font-semibold text-gray-900">
+                              Order #{order.order_number}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {formatDate(order.created_at)} • {order.item_count} item(s)
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              Payment: {order.payment_method.toUpperCase()}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <p className="font-bold text-lg text-gray-900">
+                              {formatPrice(order.total_amount)}
+                            </p>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </span>
+                          </div>
+                          {isExpanded ? (
+                            <ChevronUp className="w-5 h-5 text-gray-400" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-gray-400" />
+                          )}
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
-                          {formatPrice(order.total_amount)}
-                        </p>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </span>
-                      </div>
+
+                      {/* Expandable Order Details */}
+                      {isExpanded && (
+                        <div className="border-t border-gray-200 p-4 bg-gray-50">
+                          {/* Order Items */}
+                          {order.order_items && order.order_items.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                                <Package className="w-4 h-4 mr-2 text-indigo-600" />
+                                Items Ordered
+                              </h4>
+                              <div className="space-y-3">
+                                {order.order_items.map((item, index) => (
+                                  <div key={index} className="bg-white rounded-lg p-3 border border-gray-200 flex items-center space-x-3 hover:bg-gray-50 transition-colors cursor-pointer group">
+                                    <Link 
+                                      href={`/products/${item.product_id}`} 
+                                      className="flex items-center space-x-3 flex-1"
+                                    >
+                                      <div className="flex-shrink-0 relative">
+                                        {item.image_url ? (
+                                          <>
+                                            <img
+                                              src={item.image_url}
+                                              alt={item.product_name}
+                                              className="w-12 h-12 object-cover rounded-md border border-gray-200 group-hover:border-indigo-300 transition-colors"
+                                              loading="lazy"
+                                              onLoad={() => {
+                                                console.log('✅ Image loaded successfully:', item.image_url);
+                                                const key = `${item.variant_id}-${item.product_id}`;
+                                                setLoadingImages(prev => {
+                                                  const newSet = new Set(prev);
+                                                  newSet.delete(key);
+                                                  return newSet;
+                                                });
+                                              }}
+                                              onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                console.error('❌ Failed to load image:', item.image_url);
+                                                target.onerror = null;
+                                                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNCAzNkMzMC42Mjc0IDM2IDM2IDMwLjYyNzQgMzYgMjRDMzYgMTcuMzcyNiAzMC42Mjc0IDEyIDI0IDEyQzE3LjM3MjYgMTIgMTIgMTcuMzcyNiAxMiAyNEMxMiAzMC42Mjc0IDE3LjM3MjYgMzYgMjQgMzZaIiBmaWxsPSIjOUIxMDZGIi8+CjxwYXRoIGQ9Ik0yNCAzMkMzMS4xNzk3IDMyIDM2IDI3LjE3OTcgMzYgMjBDMzYgMTIuODIwMyAzMS4xNzk3IDggMjQgOEMxNi44MjAzIDggMTIgMTIuODIwMyAxMiAyMEMxMiAyNy4xNzk3IDE2LjgyMDMgMzIgMjQgMzJaIiBmaWxsPSIjNjM2NkY3Ii8+CjxwYXRoIGQ9Ik0yNCAyOEMyOS41MjI4IDI4IDM0IDIzLjUyMjggMzQgMThDMzQgMTIuNDc3MiAyOS41MjI4IDggMjQgOEMxOC40NzcyIDggMTQgMTIuNDc3MiAxNCAxOEMxNCAyMy41MjI4IDE4LjQ3NzIgMjggMjQgMjhaIiBmaWxsPSIjRkZGRkZGIi8+PC9zdmc+';
+                                                const key = `${item.variant_id}-${item.product_id}`;
+                                                setLoadingImages(prev => {
+                                                  const newSet = new Set(prev);
+                                                  newSet.delete(key);
+                                                  return newSet;
+                                                });
+                                              }}
+                                              style={{ display: loadingImages.has(`${item.variant_id}-${item.product_id}`) ? 'none' : 'block' }}
+                                            />
+                                            {loadingImages.has(`${item.variant_id}-${item.product_id}`) && (
+                                              <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center animate-pulse">
+                                                <div className="w-6 h-6 bg-gray-300 rounded animate-pulse"></div>
+                                              </div>
+                                            )}
+                                          </>
+                                        ) : (
+                                          <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center group-hover:bg-gray-300 transition-colors">
+                                            <Package className="w-6 h-6 text-gray-400" />
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-gray-900 truncate text-sm group-hover:text-indigo-600 transition-colors">
+                                          {item.product_name}
+                                        </p>
+                                        <div className="flex items-center space-x-2 text-xs text-gray-500">
+                                          {item.size && <span>Size: {item.size}</span>}
+                                          {item.color && <span>Color: {item.color}</span>}
+                                        </div>
+                                        <p className="text-xs text-gray-500">
+                                          Qty: {item.quantity} × {formatPrice(parseFloat(item.price))}
+                                        </p>
+                                      </div>
+                                    </Link>
+                                    <div className="text-right">
+                                      <p className="font-semibold text-gray-900 text-sm">
+                                        {formatPrice(parseFloat(item.total_price) || (parseFloat(item.price) * item.quantity))}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Order Summary */}
+                          <div className="bg-white rounded-lg p-3 border border-gray-200 mb-4">
+                            <h5 className="text-sm font-semibold text-gray-900 mb-2">Order Summary</h5>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Subtotal:</span>
+                                <span className="text-gray-900">
+                                  {formatPrice(
+                                    order.order_items?.reduce((sum, item) => 
+                                      sum + (parseFloat(item.total_price) || (parseFloat(item.price) * item.quantity)), 0
+                                    ) || 0
+                                  )}
+                                </span>
+                              </div>
+                              {order.shipping_cost && order.shipping_cost > 0 && (
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Shipping:</span>
+                                  <span className="text-gray-900">{formatPrice(order.shipping_cost)}</span>
+                                </div>
+                              )}
+                              {(order.tax_amount > 0 || order.admin_fee > 0) && (
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Tax & Fees:</span>
+                                  <span className="text-gray-900">
+                                    {formatPrice((order.tax_amount || 0) + (order.admin_fee || 0))}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex justify-between font-semibold pt-1 border-t border-gray-200">
+                                <span className="text-gray-900">Total:</span>
+                                <span className="text-indigo-600">{formatPrice(order.total_amount)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Shipping Address */}
+                          {order.shipping_address && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-200">
+                              <h5 className="text-sm font-semibold text-gray-900 mb-2 flex items-center">
+                                <MapPin className="w-4 h-4 mr-1 text-green-600" />
+                                Shipping Address
+                              </h5>
+                              <div className="text-sm text-gray-600 space-y-0.5">
+                                <p className="font-medium text-gray-900">{order.shipping_address.name}</p>
+                                <p>{order.shipping_address.address1}</p>
+                                {order.shipping_address.address2 && <p>{order.shipping_address.address2}</p>}
+                                <p>{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.zip}</p>
+                                <p>{order.shipping_address.country}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

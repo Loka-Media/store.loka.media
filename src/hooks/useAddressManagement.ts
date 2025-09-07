@@ -11,9 +11,16 @@ export const useAddressManagement = () => {
   const loadUserAddresses = useCallback(async () => {
     try {
       const addresses = await addressAPI.getAddresses();
-      setSavedAddresses(addresses.addresses || []);
+      const addressList = addresses.addresses || [];
+      setSavedAddresses(addressList);
       
-      const defaultShipping = addresses.addresses?.find((addr: Address) => 
+      // If user has no addresses, default to saving new addresses
+      if (addressList.length === 0) {
+        setSaveNewAddress(true);
+        setShowNewAddressForm(true);
+      }
+      
+      const defaultShipping = addressList.find((addr: Address) => 
         addr.is_default && (addr.address_type === 'shipping' || addr.address_type === 'both')
       );
       
@@ -55,11 +62,35 @@ export const useAddressManagement = () => {
       country: 'US'
     });
     setShowNewAddressForm(true);
+    setSaveNewAddress(true); // Default to saving new addresses
     console.log('✅ Creating new address');
   }, []);
 
   const saveAddress = useCallback(async (customerInfo: CustomerInfo) => {
-    if (!saveNewAddress || !showNewAddressForm) return null;
+    // Save address if user wants to save it AND:
+    // 1. They're creating a new address, OR
+    // 2. They have no saved addresses (first time), OR  
+    // 3. They're not using an existing saved address
+    const shouldSaveAddress = saveNewAddress && (
+      showNewAddressForm || 
+      savedAddresses.length === 0 ||
+      selectedAddressId === null
+    );
+
+    if (!shouldSaveAddress) return null;
+    
+    // Check if this address already exists to avoid duplicates
+    const addressExists = savedAddresses.some(addr => 
+      addr.address1.toLowerCase() === customerInfo.address1.toLowerCase() &&
+      addr.city.toLowerCase() === customerInfo.city.toLowerCase() &&
+      addr.zip === customerInfo.zip &&
+      addr.country === customerInfo.country
+    );
+
+    if (addressExists) {
+      console.log('✅ Address already exists, skipping save');
+      return null;
+    }
     
     try {
       const newAddress = await addressAPI.createAddress({
@@ -74,13 +105,19 @@ export const useAddressManagement = () => {
         address_type: 'shipping',
         is_default: savedAddresses.length === 0
       });
-      console.log('✅ Saved new address:', newAddress.address?.id);
+      
+      // Update local state to include the new address
+      if (newAddress.address) {
+        setSavedAddresses(prev => [...prev, newAddress.address]);
+        console.log('✅ Saved new address:', newAddress.address.id);
+      }
+      
       return newAddress;
     } catch (error) {
       console.error('Failed to save address:', error);
       return null;
     }
-  }, [saveNewAddress, showNewAddressForm, savedAddresses.length]);
+  }, [saveNewAddress, showNewAddressForm, savedAddresses, selectedAddressId]);
 
   const resetAddressState = useCallback(() => {
     setSavedAddresses([]);

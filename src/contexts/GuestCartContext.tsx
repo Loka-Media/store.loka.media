@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
-import { cartAPI, CartItem, CartSummary, publicAPI } from '@/lib/api';
+import { cartAPI, CartItem, CartSummary } from '@/lib/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 
@@ -48,7 +48,13 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
   });
   const [loading, setLoading] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [isClient, setIsClient] = useState(false);
   const { isAuthenticated, user } = useAuth();
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Refs for optimization
   const lastRefreshTime = useRef<number>(0);
@@ -60,7 +66,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
 
   // Load cart from localStorage for guest users
   const loadGuestCart = useCallback(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && isClient && typeof window !== 'undefined') {
       try {
         const savedCart = localStorage.getItem('guestCart');
         
@@ -101,11 +107,11 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         setCartCount(0);
       }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isClient]);
 
   // Save cart to localStorage for guest users
   const saveGuestCart = useCallback((cartItems: GuestCartItem[], cartSummary: CartSummary) => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && isClient && typeof window !== 'undefined') {
       try {
         const cartData = {
           items: cartItems,
@@ -116,7 +122,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         console.error('Failed to save guest cart to localStorage:', error);
       }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isClient]);
 
   // Calculate cart summary
   const calculateSummary = useCallback((cartItems: GuestCartItem[]): CartSummary => {
@@ -138,7 +144,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       if (isAuthenticated) {
         const response = await cartAPI.getCartCount();
         setCartCount(response.count);
-      } else {
+      } else if (isClient && typeof window !== 'undefined') {
         // Count guest cart items from current state first, then fallback to localStorage
         if (items.length > 0) {
           const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -158,7 +164,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Failed to fetch cart count:', error);
     }
-  }, [isAuthenticated, items]);
+  }, [isAuthenticated, items, isClient]);
 
   // Debounced refresh function to prevent excessive API calls
   const debouncedRefreshCart = useCallback(async (forceRefresh: boolean = false) => {
@@ -214,6 +220,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
 
   // Load cart data on mount and when auth status changes (optimized)
   useEffect(() => {
+    if (!isClient) return; // Wait for client-side hydration
+    
     if (!isInitialized.current) {
       isInitialized.current = true;
       // Initial load
@@ -230,7 +238,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         loadGuestCart(); // This will update cart count automatically
       }
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, isClient, loadGuestCart, debouncedRefreshCart]);
 
   // Removed visibility change handler to reduce unnecessary API calls
 
@@ -258,9 +266,17 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       }
     } else {
       // Guest cart logic - directly handle guest cart without trying authenticated API
+      if (!isClient || typeof window === 'undefined') {
+        toast.error('Unable to add to cart. Please try again.');
+        return false;
+      }
+      
       try {
         // Try to get cached product data from localStorage
         let newItem: GuestCartItem;
+        
+        // First, let the current execution cycle complete to allow localStorage to be updated
+        await new Promise(resolve => setTimeout(resolve, 10));
         
         try {
           const productCache = localStorage.getItem(`product_variant_${variantId}`);
@@ -290,37 +306,16 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
               printful_variant_id: cachedData.printful_variant_id
             };
           } else {
-            // Ultimate fallback when no cached data
-            newItem = {
-              id: Date.now(),
-              product_id: 0,
-              variant_id: variantId,
-              product_name: `Product (Please login to see details)`,
-              price: '25.00',
-              quantity,
-              total_price: (25.00 * quantity).toFixed(2),
-              size: 'One Size',
-              color: 'Default',
-              color_code: '#808080',
-              source: 'unknown'
-            };
+            // Since there's no cached data, we cannot add the product to guest cart
+            // The ProductListItem should have cached the data, so this is an error state
+            console.error('No cached product data available for variant:', variantId);
+            toast.error('Product data not available. Please try again.');
+            return false;
           }
         } catch (error) {
           console.error('Failed to get cached product data:', error);
-          // Ultimate fallback
-          newItem = {
-            id: Date.now(),
-            product_id: 0,
-            variant_id: variantId,
-            product_name: `Product (Please login to see details)`,
-            price: '25.00',
-            quantity,
-            total_price: (25.00 * quantity).toFixed(2),
-            size: 'One Size',
-            color: 'Default',
-            color_code: '#808080',
-            source: 'unknown'
-          };
+          toast.error('Unable to add product to cart. Please try again.');
+          return false;
         }
         
         // Check if item already exists in guest cart
@@ -460,7 +455,9 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
           total: '0.00'
         });
         setCartCount(0);
-        localStorage.removeItem('guestCart');
+        if (isClient && typeof window !== 'undefined') {
+          localStorage.removeItem('guestCart');
+        }
         
         toast.success('Cart cleared');
         return true;

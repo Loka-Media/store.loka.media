@@ -263,7 +263,7 @@ function LoginPageContent() {
                 <div className="flex items-center justify-end">
                   <div className="text-sm">
                     <Link
-                      href="#"
+                      href="/auth/forgot-password"
                       className="font-semibold text-orange-400 hover:text-orange-300 transition-colors duration-300"
                     >
                       Forgot your password?

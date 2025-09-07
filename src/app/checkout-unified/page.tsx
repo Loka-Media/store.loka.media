@@ -168,46 +168,94 @@ export default function UnifiedCheckoutPage() {
         }
       }
 
-      const sessionData = await unifiedCheckoutAPI.createGuestCheckout({
-        email: customerInfo.email,
-        customerInfo: {
-          name: customerInfo.name,
-          email: customerInfo.email,
-          phone: customerInfo.phone,
-        },
-        shippingAddress: {
-          name: customerInfo.name,
-          address1: customerInfo.address1,
-          address2: customerInfo.address2,
-          city: customerInfo.city,
-          state: customerInfo.state,
-          zip: customerInfo.zip,
-          country: customerInfo.country,
-          phone: customerInfo.phone,
-        },
-        cartItems: items.map((item) => ({
-          product_id: String(item.product_id),
-          variant_id: String(item.variant_id),
-          product_name: item.product_name,
-          price: String(item.price),
-          quantity: item.quantity,
-          image_url: item.image_url || "",
-          size: item.size,
-          color: item.color,
-          source: item.source || "printful",
-        })),
-      });
+      let orderResult;
 
-      const orderResult = await unifiedCheckoutAPI.processCheckout({
-        sessionToken: sessionData.session.session_token,
-        paymentMethod: "stripe",
-        ...(wantsToSignup && {
-          loginCredentials: {
-            email: customerInfo.email,
-            password: signupInfo.password,
+      if (isLoggedInUser && !wantsToSignup) {
+        // Authenticated user checkout
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          toast.error("Please login to continue");
+          return;
+        }
+
+        orderResult = await unifiedCheckoutAPI.processAuthenticatedCheckout({
+          paymentMethod: "stripe",
+          shippingAddress: {
+            name: customerInfo.name,
+            address1: customerInfo.address1,
+            address2: customerInfo.address2,
+            city: customerInfo.city,
+            state: customerInfo.state,
+            zip: customerInfo.zip,
+            country: customerInfo.country,
+            phone: customerInfo.phone,
           },
-        }),
-      });
+          billingAddress: {
+            name: customerInfo.name,
+            address1: customerInfo.address1,
+            address2: customerInfo.address2,
+            city: customerInfo.city,
+            state: customerInfo.state,
+            zip: customerInfo.zip,
+            country: customerInfo.country,
+            phone: customerInfo.phone,
+          },
+          cartItems: items.map((item) => ({
+            product_id: String(item.product_id),
+            variant_id: String(item.variant_id),
+            product_name: item.product_name,
+            price: String(item.price),
+            quantity: item.quantity,
+            image_url: item.image_url || "",
+            size: item.size,
+            color: item.color,
+            source: item.source || "printful",
+          })),
+          customerNotes: ""
+        }, token);
+      } else {
+        // Guest checkout or user wants to signup
+        const sessionData = await unifiedCheckoutAPI.createGuestCheckout({
+          email: customerInfo.email,
+          customerInfo: {
+            name: customerInfo.name,
+            email: customerInfo.email,
+            phone: customerInfo.phone,
+          },
+          shippingAddress: {
+            name: customerInfo.name,
+            address1: customerInfo.address1,
+            address2: customerInfo.address2,
+            city: customerInfo.city,
+            state: customerInfo.state,
+            zip: customerInfo.zip,
+            country: customerInfo.country,
+            phone: customerInfo.phone,
+          },
+          cartItems: items.map((item) => ({
+            product_id: String(item.product_id),
+            variant_id: String(item.variant_id),
+            product_name: item.product_name,
+            price: String(item.price),
+            quantity: item.quantity,
+            image_url: item.image_url || "",
+            size: item.size,
+            color: item.color,
+            source: item.source || "printful",
+          })),
+        });
+
+        orderResult = await unifiedCheckoutAPI.processCheckout({
+          sessionToken: sessionData.session.session_token,
+          paymentMethod: "stripe",
+          ...(wantsToSignup && {
+            loginCredentials: {
+              email: customerInfo.email,
+              password: signupInfo.password,
+            },
+          }),
+        });
+      }
 
       const totalAmount = checkoutState.calculateTotal(summary.subtotal);
       const paymentIntentResult = await unifiedCheckoutAPI.createStripePaymentIntent(
@@ -327,6 +375,8 @@ export default function UnifiedCheckoutPage() {
               savedAddresses={addressManagement.savedAddresses}
               selectedAddressId={addressManagement.selectedAddressId}
               showNewAddressForm={addressManagement.showNewAddressForm}
+              setShowNewAddressForm={addressManagement.setShowNewAddressForm}
+              setSelectedAddressId={addressManagement.setSelectedAddressId}
               onNewAddress={handleNewAddress}
               onAddressSelect={handleAddressSelect}
               saveNewAddress={addressManagement.saveNewAddress}

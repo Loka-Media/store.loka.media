@@ -116,7 +116,12 @@ export function ProductListItem({ product }: ProductListItemProps) {
           localStorage.setItem(`product_variant_${selectedVariant.id}`, JSON.stringify(variantCacheData));
         } catch (error) {
           console.warn('Failed to cache variant data:', error);
+          toast.error('Failed to prepare product data. Please try again.');
+          return;
         }
+
+        // Small delay to ensure localStorage write completes
+        await new Promise(resolve => setTimeout(resolve, 10));
 
         await addToCart(selectedVariant.id, 1);
       } else {

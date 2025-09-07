@@ -405,7 +405,7 @@ export const checkoutAPI = {
 
   // Get user orders
   getUserOrders: async (params?: { limit?: number; offset?: number }) => {
-    const response = await api.get("/api/checkout/orders", { params });
+    const response = await api.get("/api/unified-checkout/orders", { params });
     return response.data;
   },
 

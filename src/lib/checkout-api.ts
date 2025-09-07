@@ -43,6 +43,19 @@ export const unifiedCheckoutAPI = {
     });
     if (!response.ok) throw new Error('Failed to confirm Stripe payment');
     return response.json();
+  },
+
+  processAuthenticatedCheckout: async (data: any, token: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/process-authenticated`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) throw new Error('Failed to process authenticated checkout');
+    return response.json();
   }
 };
 

@@ -7,6 +7,8 @@ interface ShippingAddressFormProps {
   savedAddresses: Address[];
   selectedAddressId: number | null;
   showNewAddressForm: boolean;
+  setShowNewAddressForm: (show: boolean) => void;
+  setSelectedAddressId: (id: number | null) => void;
   onNewAddress: () => void;
   onAddressSelect: (address: Address, updateCustomerInfo: (updates: Partial<CustomerInfo>) => void) => void;
   saveNewAddress: boolean;
@@ -24,6 +26,8 @@ export const ShippingAddressForm = ({
   savedAddresses,
   selectedAddressId,
   showNewAddressForm,
+  setShowNewAddressForm,
+  setSelectedAddressId,
   onNewAddress,
   onAddressSelect,
   saveNewAddress,
@@ -38,15 +42,47 @@ export const ShippingAddressForm = ({
   return (
     <div className="bg-gray-900 border border-gray-800 shadow-sm rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-white">Shipping Address</h2>
-        {isLoggedInUser && savedAddresses.length > 0 && (
+        <div>
+          <h2 className="text-lg font-medium text-white">Shipping Address</h2>
+          {isLoggedInUser && savedAddresses.length > 0 && !showNewAddressForm && (
+            <p className="text-sm text-gray-400 mt-1">Select an existing address or create a new one</p>
+          )}
+        </div>
+        {isLoggedInUser && savedAddresses.length > 0 && !showNewAddressForm && (
           <button
             type="button"
             onClick={onNewAddress}
-            className="inline-flex items-center text-sm text-orange-500 hover:text-orange-400"
+            className="inline-flex items-center px-3 py-2 text-sm font-medium text-orange-500 hover:text-orange-400 border border-orange-500/50 hover:border-orange-400/50 rounded-md transition-colors"
           >
             <Plus className="w-4 h-4 mr-1" />
             New Address
+          </button>
+        )}
+        {isLoggedInUser && savedAddresses.length > 0 && showNewAddressForm && (
+          <button
+            type="button"
+            onClick={() => {
+              setShowNewAddressForm(false);
+              // If there's a default address, select it and populate the form
+              const defaultAddress = savedAddresses.find(addr => 
+                addr.is_default && (addr.address_type === 'shipping' || addr.address_type === 'both')
+              ) || savedAddresses[0];
+              
+              if (defaultAddress) {
+                setSelectedAddressId(defaultAddress.id);
+                updateCustomerInfo({
+                  address1: defaultAddress.address1,
+                  address2: defaultAddress.address2 || '',
+                  city: defaultAddress.city,
+                  state: defaultAddress.state || '',
+                  zip: defaultAddress.zip,
+                  country: defaultAddress.country
+                });
+              }
+            }}
+            className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-300 hover:text-white border border-gray-600 hover:border-gray-500 rounded-md transition-colors"
+          >
+            ← Back to Saved Addresses
           </button>
         )}
       </div>
@@ -64,7 +100,7 @@ export const ShippingAddressForm = ({
       {/* Address Form (for new addresses or guests) */}
       {(!isLoggedInUser || showNewAddressForm || savedAddresses.length === 0) && (
         <div>
-          {isLoggedInUser && showNewAddressForm && (
+          {isLoggedInUser && (showNewAddressForm || savedAddresses.length === 0) && (
             <div className="mb-4">
               <div className="flex items-center">
                 <input
@@ -75,7 +111,10 @@ export const ShippingAddressForm = ({
                   className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-600 rounded bg-gray-800"
                 />
                 <label htmlFor="save-address" className="ml-2 block text-sm text-gray-300">
-                  Save this address for future orders
+                  {savedAddresses.length === 0 
+                    ? "Save this address for future orders (recommended)" 
+                    : "Save this address for future orders"
+                  }
                 </label>
               </div>
             </div>
