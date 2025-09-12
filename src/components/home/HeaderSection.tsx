@@ -63,7 +63,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
           </p>
 
           {/* Primary CTA */}
-          <div className="mb-6 sm:mb-8 md:mb-10 lg:mb-12 relative flex justify-center px-3 sm:px-0">
+          {/* <div className="mb-6 sm:mb-8 md:mb-10 lg:mb-12 relative flex justify-center px-3 sm:px-0">
             <Link
               href="/products"
               className="relative inline-flex items-center justify-center w-full sm:w-auto max-w-xs sm:max-w-sm md:max-w-md px-6 sm:px-8 md:px-12 lg:px-16 py-3 sm:py-4 md:py-5 lg:py-6 bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 hover:from-orange-600 hover:via-orange-700 hover:to-orange-600 text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl rounded-full transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/50 focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50 group overflow-hidden"
@@ -73,7 +73,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
               <span className="relative">Explore Marketplace</span>
               <ArrowRight className="ml-1.5 sm:ml-2 md:ml-3 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
-          </div>
+          </div> */}
 
           {/* Secondary Actions */}
           <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 sm:gap-4 md:gap-6 mb-2 px-3 sm:px-0">

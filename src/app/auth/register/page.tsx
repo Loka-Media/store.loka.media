@@ -71,6 +71,7 @@ function RegisterPageContent() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -206,63 +207,83 @@ function RegisterPageContent() {
           <div className="mt-8">
             <div className="bg-gray-900/50 backdrop-blur-md border border-gray-800/50 py-8 px-6 lg:px-8 shadow-xl rounded-xl">
               <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-                {/* Role Selection */}
+                {/* Role Selection - Cool Toggle Switch */}
                 <div>
                   <label className="block text-sm font-semibold text-white mb-2">
                     Account Type
                   </label>
                   <p className="text-xs sm:text-sm leading-5 text-gray-400 mt-1">
-                    Choose your account type
+                    Toggle to switch between User and Creator account
                   </p>
-                  <fieldset className="mt-3 sm:mt-4">
-                    <legend className="sr-only">Account type</legend>
-                    <div className="space-y-2 sm:space-y-3">
-                      {/* User Role Option */}
-                      <div className="flex items-center">
-                        <input
-                          {...register("role")}
-                          value="user"
-                          type="radio"
-                          className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
-                        />
-                        <label className="ml-3 block text-xs sm:text-sm font-medium text-gray-300">
-                          <span className="flex items-center">
-                            <User className="w-4 h-4 mr-2" />
-                            <span>
-                              <span className="text-white font-semibold">
-                                User
-                              </span>
-                              <span className="block sm:inline sm:ml-1 text-gray-400">
-                                - Browse and purchase products
-                              </span>
-                            </span>
-                          </span>
-                        </label>
+                  
+                  <div className="mt-4 flex items-center justify-start">
+                    <div className="w-1/2 flex items-center justify-between p-4 bg-gray-800/30 rounded-xl border border-gray-700/50">
+                      {/* User Side */}
+                      <div className={`flex items-center transition-all duration-300 ${selectedRole === 'user' ? 'text-white' : 'text-gray-500'}`}>
+                        <User className="w-4 h-4 mr-2" />
+                        <div>
+                          <div className="font-semibold text-xs">User</div>
+                          <div className="text-xs text-gray-400">Browse</div>
+                        </div>
                       </div>
-                      {/* Creator Role Option */}
-                      <div className="flex items-center">
-                        <input
-                          {...register("role")}
-                          value="creator"
-                          type="radio"
-                          className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
-                        />
-                        <label className="ml-3 block text-xs sm:text-sm font-medium text-gray-300">
-                          <span className="flex items-center">
-                            <UserCheck className="w-4 h-4 mr-2" />
-                            <span>
-                              <span className="text-white font-semibold">
-                                Creator
-                              </span>
-                              <span className="block sm:inline sm:ml-1 text-gray-400">
-                                - Sell your products
-                              </span>
-                            </span>
-                          </span>
-                        </label>
+
+                      {/* Toggle Switch */}
+                      <div className="relative mx-4">
+                        <div
+                          className={`relative w-16 h-8 rounded-full transition-all duration-300 ease-in-out cursor-pointer ${
+                            selectedRole === 'creator'
+                              ? 'bg-gradient-to-r from-orange-500 to-orange-600 shadow-lg shadow-orange-500/30'
+                              : 'bg-gray-600'
+                          }`}
+                          onClick={() => {
+                            const newRole = selectedRole === 'creator' ? 'user' : 'creator';
+                            setValue('role', newRole);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              const newRole = selectedRole === 'creator' ? 'user' : 'creator';
+                              setValue('role', newRole);
+                            }
+                          }}
+                          tabIndex={0}
+                          role="switch"
+                          aria-checked={selectedRole === 'creator'}
+                          aria-label="Toggle between User and Creator account type"
+                        >
+                          {/* Switch Ball */}
+                          <div
+                            className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-all duration-300 ease-in-out transform ${
+                              selectedRole === 'creator' ? 'translate-x-8' : 'translate-x-1'
+                            }`}
+                          >
+                            {/* Icon inside the ball */}
+                            <div className="flex items-center justify-center w-full h-full">
+                              {selectedRole === 'creator' ? (
+                                <UserCheck className="w-3 h-3 text-orange-500" />
+                              ) : (
+                                <User className="w-3 h-3 text-gray-400" />
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Glow effect when active */}
+                          {selectedRole === 'creator' && (
+                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 opacity-20 animate-pulse"></div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Creator Side */}
+                      <div className={`flex items-center transition-all duration-300 ${selectedRole === 'creator' ? 'text-white' : 'text-gray-500'}`}>
+                        <div className="text-right mr-2">
+                          <div className="font-semibold text-xs">Creator</div>
+                          <div className="text-xs text-gray-400">Sell</div>
+                        </div>
+                        <UserCheck className="w-4 h-4" />
                       </div>
                     </div>
-                  </fieldset>
+                  </div>
                 </div>
 
                 {/* Creator URL Field - Conditionally shown */}

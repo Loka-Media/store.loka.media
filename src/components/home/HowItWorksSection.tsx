@@ -133,7 +133,7 @@ export function HowItWorksSection() {
               Start Building Your Brand
             </h3>
             <p className="text-sm sm:text-base md:text-lg text-gray-400 mb-8 sm:mb-10 leading-relaxed font-light">
-              Join thousands of creators already earning with our platform
+              Join trendsetting creators already earning with our platform
             </p>
             
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">

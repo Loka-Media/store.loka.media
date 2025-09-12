@@ -292,18 +292,9 @@ function LoginPageContent() {
 
               {/* Demo Accounts Section */}
               <div className="mt-8">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-800" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-3 bg-gray-900/50 text-gray-400 font-semibold">
-                      Quick Login
-                    </span>
-                  </div>
-                </div>
+            
 
-                <div className="mt-6">
+                {/* <div className="mt-6">
                   <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-4">
                     <p className="text-sm font-semibold text-white mb-3 text-center">
                       Demo Accounts:
@@ -323,7 +314,7 @@ function LoginPageContent() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
