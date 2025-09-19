@@ -1,60 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function TestimonialSection() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      cardRef.current.style.setProperty("--x", `${x}px`);
+      cardRef.current.style.setProperty("--y", `${y}px`);
+    }
+  };
 
   const testimonials = [
     {
-      quote:
-        "Loka transformed my side hustle into a six-figure business. The quality is incredible and my customers love every product. I've never looked back!",
-      author: "Maya Patel",
-      title: "Content Creator & Entrepreneur",
-      platform: "@mayacreates",
-      revenue: "$180K",
-      timeframe: "8 months",
+      quote: "Loka is a gamechanger! LFG 🔥",
+      author: "Joty Kay",
       avatar:
-        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
+        "https://live.staticflickr.com/65535/52955514230_8e34ee16c7_z.jpg",
     },
     {
-      quote:
-        "The print quality exceeded my expectations. My art looks stunning on their products and the shipping is lightning fast. My fans are obsessed!",
-      author: "Jake Thompson",
-      title: "Digital Artist",
-      platform: "@jakeart",
-      revenue: "$95K",
-      timeframe: "4 months",
+      quote: "Monetization Made Easy 💰",
+      author: "Rupan Bal",
       avatar:
-        "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
+        "https://thepersonage.com/wp-content/uploads/2020/07/Rupan-Bal-Images.jpg",
     },
     {
-      quote:
-        "Finally, a platform that gets creators. No upfront costs, amazing margins, and they handle everything. I focus on content, they handle the business.",
-      author: "Zoe Williams",
-      title: "Lifestyle Influencer",
-      platform: "@zoeliving",
-      revenue: "$250K",
-      timeframe: "1 year",
+      quote: "The platform for ALL platforms. Love it! ❤️",
+      author: "Sejal Puri",
       avatar:
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-    },
-    {
-      quote:
-        "My merch sales went through the roof! The analytics dashboard helps me understand what my audience wants. This is the future of creator commerce.",
-      author: "Marcus Johnson",
-      title: "Gaming Content Creator",
-      platform: "@marcusgames",
-      revenue: "$320K",
-      timeframe: "10 months",
-      avatar:
-        "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
+        "https://i0.wp.com/tellyflight.com/wp-content/uploads/2023/07/345687233_702675861629777_76830047465931681_n.jpg",
     },
   ];
 
@@ -95,73 +76,50 @@ export function TestimonialSection() {
             </span>
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
-            Real stories from creators who've built successful businesses with our platform
+            Real stories from creators who've built successful businesses with
+            our platform
           </p>
         </div>
 
         {/* Modern testimonial card */}
         <div className="max-w-4xl mx-auto">
-          <div className="relative backdrop-blur-2xl bg-white/[0.06] border border-white/[0.12] rounded-[28px] p-6 sm:p-8 md:p-10 lg:p-12 shadow-2xl shadow-black/20 overflow-hidden group">
-            
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] via-transparent to-orange-500/[0.02] opacity-50"></div>
-            
+          <div
+            ref={cardRef}
+            onMouseMove={handleMouseMove}
+            className="testimonial-card relative backdrop-blur-2xl bg-white/[0.06] border border-white/[0.12] rounded-[28px] p-6 sm:p-8 md:p-10 lg:p-12 shadow-2xl shadow-black/20 overflow-hidden group"
+          >
+            {/* Avatar as background */}
+            <div
+              className="absolute inset-0 bg-cover bg-right opacity-30"
+              style={{
+                backgroundImage: `url(${testimonials[currentTestimonial].avatar})`,
+              }}
+            ></div>
+            {/* Gradient overlay to blend */}
+            <div className="absolute inset-0 bg-gradient-to-l from-gray-950 via-gray-950/80 to-transparent"></div>
+
             {/* Quote icon */}
             <div className="relative z-10 mb-6 sm:mb-8">
               <Quote className="w-8 h-8 sm:w-10 sm:h-10 text-orange-400/60" />
             </div>
-            
+
             {/* Testimonial content */}
             <div className="relative z-10">
               <blockquote className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium leading-relaxed mb-6 sm:mb-8 text-white">
                 "{testimonials[currentTestimonial].quote}"
               </blockquote>
 
-              {/* Rating stars */}
-              <div className="flex items-center justify-center sm:justify-start mb-6 sm:mb-8">
-                {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 fill-current" />
-                ))}
-              </div>
-
-              {/* Author info and stats */}
-              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 sm:gap-8">
-                <div className="flex items-center space-x-4 text-center sm:text-left">
-                  <div className="relative">
-                    <img
-                      src={testimonials[currentTestimonial].avatar}
-                      alt={testimonials[currentTestimonial].author}
-                      className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full object-cover ring-2 ring-white/20"
-                    />
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-2 border-gray-950"></div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-base sm:text-lg text-white">
-                      {testimonials[currentTestimonial].author}
-                    </div>
-                    <div className="text-xs sm:text-sm text-gray-400">
-                      {testimonials[currentTestimonial].title}
-                    </div>
-                    <div className="text-xs sm:text-sm text-orange-400 font-medium">
-                      {testimonials[currentTestimonial].platform}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Success metrics */}
-                <div className="flex gap-4 sm:gap-6">
-                  <div className="text-center backdrop-blur-md bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 sm:px-4 py-2 sm:py-3">
-                    <div className="text-lg sm:text-xl md:text-2xl font-bold text-orange-400">
-                      {testimonials[currentTestimonial].revenue}
-                    </div>
-                    <div className="text-xs sm:text-sm text-gray-400">Revenue</div>
-                  </div>
-                  <div className="text-center backdrop-blur-md bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 sm:px-4 py-2 sm:py-3">
-                    <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-                      {testimonials[currentTestimonial].timeframe}
-                    </div>
-                    <div className="text-xs sm:text-sm text-gray-400">Timeframe</div>
-                  </div>
+              {/* Author info */}
+              <div className="text-center">
+                {testimonials[currentTestimonial].avatar && (
+                  <img
+                    src={testimonials[currentTestimonial].avatar}
+                    alt={testimonials[currentTestimonial].author}
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover ring-2 ring-white/20 mx-auto mb-4"
+                  />
+                )}
+                <div className="font-semibold text-base sm:text-lg text-white">
+                  {testimonials[currentTestimonial].author}
                 </div>
               </div>
             </div>
@@ -178,8 +136,8 @@ export function TestimonialSection() {
                       setCurrentTestimonial(index);
                     }}
                     className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ${
-                      index === currentTestimonial 
-                        ? "bg-orange-400 scale-125" 
+                      index === currentTestimonial
+                        ? "bg-orange-400 scale-125"
                         : "bg-white/30 hover:bg-white/50"
                     }`}
                   />
@@ -207,6 +165,26 @@ export function TestimonialSection() {
       </div>
 
       <style jsx>{`
+        .testimonial-card::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(
+            circle at var(--x) var(--y),
+            rgba(255, 255, 255, 0.1),
+            transparent 20%
+          );
+          opacity: 0;
+          transition: opacity 0.3s ease-in-out;
+        }
+
+        .testimonial-card:hover::before {
+          opacity: 1;
+        }
+
         @keyframes blob {
           0% {
             transform: translate(0px, 0px) scale(1);
