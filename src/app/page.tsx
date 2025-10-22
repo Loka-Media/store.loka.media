@@ -9,6 +9,8 @@ import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { TestimonialSection } from "@/components/home/TestimonialSection";
 import { FAQSection } from "@/components/home/FAQSection";
 import { useAuth } from "@/contexts/AuthContext";
+import { CustomizableShopsSection } from "@/components/home/CustomizableShopsSection";
+import { ProductCategoriesSection } from "@/components/home/ProductCategoriesSection";
 
 export default function Home() {
   const { isAuthenticated, loading: authLoading, user } = useAuth();
@@ -28,7 +30,8 @@ export default function Home() {
       <div className="relative z-10">
         <HeroSection isAuthenticated={isAuthenticated} user={user} />
         <QualityProductsSection />
-        {/* <CustomizableShopsSection /> */}
+        <ProductCategoriesSection />
+        <CustomizableShopsSection />
         <MakeAndSellSection />
         <HowItWorksSection />
         <TestimonialSection />
