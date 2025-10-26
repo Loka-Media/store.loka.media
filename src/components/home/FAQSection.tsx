@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 export function FAQSection() {
+  // test commits
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
   const faqs = [
