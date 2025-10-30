@@ -50,8 +50,6 @@ function ProductsContent() {
     category: "",
     search: "",
     creator: "",
-    minPrice: "",
-    maxPrice: "",
     sortBy: "created_at",
     sortOrder: "DESC",
     source: "all" as "printful" | "shopify" | "all",
@@ -80,8 +78,6 @@ function ProductsContent() {
         
         const response = await productAPI.getProducts({
           ...params,
-          minPrice: params.minPrice ? Number(params.minPrice) : undefined,
-          maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
           limit: paginationParams.limit,
           offset: paginationParams.offset,
         });
@@ -121,8 +117,6 @@ function ProductsContent() {
       search,
       creator,
       source,
-      minPrice: "",
-      maxPrice: "",
       sortBy: "created_at",
       sortOrder: "DESC",
     };
@@ -202,14 +196,12 @@ function ProductsContent() {
       category: "",
       search: "",
       creator: "",
-      minPrice: "",
-      maxPrice: "",
       sortBy: "created_at",
       sortOrder: "DESC",
       source: "all" as const,
     };
     setFilters(clearedFilters);
-    
+
     // Update URL and fetch products
     window.history.replaceState({}, '', '/products');
     setPagination(prev => ({ ...prev, offset: 0 }));
@@ -217,7 +209,7 @@ function ProductsContent() {
   };
 
   return (
-    <div className=" bg-black text-white">
+    <div className="bg-black text-white">
       <ProductsHero
         filters={filters}
         setFilters={setFilters}
@@ -227,55 +219,56 @@ function ProductsContent() {
         categories={categories}
       />
 
-      <div className="max-w-7xl mx-auto px-4 -mt-96">
-        <ProductsFilterTopBar
-          filters={filters}
-          setFilters={setFilters}
-          handleFilterChange={handleFilterChange}
-          clearFilters={clearFilters}
-          fetchProducts={fetchProducts}
-          categories={categories}
-          creators={creators}
-        />
+      <div className="relative bg-black pt-8 sm:pt-12 lg:pt-0">
+        <div className="max-w-7xl mx-auto px-4 -mt-32 sm:-mt-48 lg:-mt-96">
+          <ProductsFilterTopBar
+            filters={filters}
+            setFilters={setFilters}
+            handleFilterChange={handleFilterChange}
+            clearFilters={clearFilters}
+            fetchProducts={fetchProducts}
+            categories={categories}
+            creators={creators}
+          />
+        </div>
 
-        <div className="-z-40">
-            <ProductsControls
-              loading={loading}
-              pagination={pagination}
-              filters={filters}
-              setFilters={setFilters}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-            />
+        <div className="max-w-7xl mx-auto px-4 relative z-10 pt-6 sm:pt-8">
+          <ProductsControls
+            loading={loading}
+            pagination={pagination}
+            filters={filters}
+            setFilters={setFilters}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
 
-            {loading ? (
-              <ProductsLoading message="Discovering amazing products..." />
-            ) : products.length === 0 ? (
-              <NoProductsFound clearFilters={clearFilters} />
-            ) : (
-              <>
-                {viewMode === "grid" ? (
-                  <ProductsGrid products={products} />
-                ) : (
-                  <ProductsList products={products} />
-                )}
+          {loading ? (
+            <ProductsLoading message="Discovering amazing products..." />
+          ) : products.length === 0 ? (
+            <NoProductsFound clearFilters={clearFilters} />
+          ) : (
+            <>
+              {viewMode === "grid" ? (
+                <ProductsGrid products={products} />
+              ) : (
+                <ProductsList products={products} />
+              )}
 
-                <ProductsPagination
-                  hasNext={pagination.hasNext}
-                  loading={loadingMore}
-                  onLoadMore={() => {
-                    // Load more products by updating offset
-                    setPagination(prev => ({
-                      ...prev,
-                      offset: prev.offset + prev.limit,
-                    }));
-                  }}
-                />
-              </>
-            )}
-          </div>
+              <ProductsPagination
+                hasNext={pagination.hasNext}
+                loading={loadingMore}
+                onLoadMore={() => {
+                  // Load more products by updating offset
+                  setPagination(prev => ({
+                    ...prev,
+                    offset: prev.offset + prev.limit,
+                  }));
+                }}
+              />
+            </>
+          )}
         </div>
       </div>
-  
+    </div>
   );
 }

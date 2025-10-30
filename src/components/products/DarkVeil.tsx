@@ -126,7 +126,9 @@ export default function DarkVeil({
 
     const resize = () => {
       const w = parent.clientWidth;
-      const h = Math.max(parent.clientHeight, window.innerHeight * 0.5); // Minimum 120vh
+      // Adaptive height based on viewport size
+      const minHeightMultiplier = window.innerWidth < 640 ? 0.8 : window.innerWidth < 768 ? 1 : 1.2;
+      const h = Math.max(parent.clientHeight, window.innerHeight * minHeightMultiplier);
       renderer.setSize(w * resolutionScale, h * resolutionScale);
       program.uniforms.uResolution.value.set(w, h);
     };
@@ -165,7 +167,7 @@ export default function DarkVeil({
     resolutionScale,
   ]);
   return (
-    <div className="relative w-full h-full min-h-[100vh]">
+    <div className="relative w-full h-full min-h-[70vh] sm:min-h-[90vh] md:min-h-[110vh]">
       <canvas
         ref={ref}
         className="absolute inset-0 w-full h-full block"

@@ -7,8 +7,6 @@ interface ProductsFilterTopBarProps {
     source: string;
     category: string;
     creator: string;
-    minPrice: string;
-    maxPrice: string;
   };
   setFilters: React.Dispatch<React.SetStateAction<any>>;
   handleFilterChange: (key: string, value: string) => void;
@@ -37,11 +35,11 @@ export function ProductsFilterTopBar({
 }: ProductsFilterTopBarProps) {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
-  const CustomDropdown = ({ 
-    label, 
-    value, 
-    options, 
-    onSelect, 
+  const CustomDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
     placeholder = "Select..."
   }: {
     label: string;
@@ -54,29 +52,37 @@ export function ProductsFilterTopBar({
     const selectedOption = options.find(opt => opt.value === value);
 
     return (
-      <div className="relative">
+      <div className="relative w-full sm:w-auto">
         <button
           onClick={() => setOpenDropdown(isOpen ? null : label)}
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white text-sm hover:bg-gray-700/50 hover:border-gray-600/50 transition-all duration-200 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500/50"
+          className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg sm:rounded-xl text-white text-xs sm:text-sm hover:bg-gray-700/50 hover:border-gray-600/50 transition-all duration-200 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500/50"
         >
-          <span className={selectedOption?.label ? "text-white" : "text-gray-400"}>
+          <span className={`truncate ${selectedOption?.label ? "text-white" : "text-gray-400"}`}>
             {selectedOption?.label || placeholder}
           </span>
-          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+          <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${
             isOpen ? "rotate-180" : ""
           }`} />
         </button>
-        
+
         {isOpen && (
           <>
-            <div 
+            <div
               className="fixed inset-0"
               style={{ zIndex: 999998 }}
               onClick={() => setOpenDropdown(null)}
             />
-            <div 
-              className="absolute top-full left-0 right-0 mt-1 bg-gray-800/95 border border-gray-700/50 rounded-xl shadow-2xl backdrop-blur-sm max-h-64 overflow-y-auto"
-              style={{ zIndex: 999999 }}
+            <div
+              className="fixed sm:absolute sm:top-full sm:left-0 sm:right-0 sm:mt-1 bg-gray-800/95 border border-gray-700/50 rounded-lg sm:rounded-xl shadow-2xl backdrop-blur-sm max-h-72 overflow-y-auto"
+              style={{
+                zIndex: 999999,
+                // On mobile: full screen, bottom-up positioning
+                // On desktop: relative to button
+                ...(!window.matchMedia('(min-width: 640px)').matches
+                  ? { bottom: '0', left: '0', right: '0', borderRadius: '1rem 1rem 0 0' }
+                  : {}
+                )
+              }}
             >
               {options.map((option) => (
                 <button
@@ -85,7 +91,7 @@ export function ProductsFilterTopBar({
                     onSelect(option.value);
                     setOpenDropdown(null);
                   }}
-                  className={`w-full px-4 py-2.5 text-left text-sm transition-colors duration-150 hover:bg-gray-700/50 first:rounded-t-xl last:rounded-b-xl ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-left text-xs sm:text-sm transition-colors duration-150 hover:bg-gray-700/50 first:rounded-t-lg sm:first:rounded-t-xl last:rounded-b-lg sm:last:rounded-b-xl ${
                     value === option.value
                       ? "bg-orange-500/20 text-orange-300"
                       : "text-gray-300 hover:text-white"
@@ -101,10 +107,8 @@ export function ProductsFilterTopBar({
     );
   };
 
-  const hasActiveFilters = filters.category !== "" || 
-    filters.creator !== "" || 
-    (filters.minPrice !== "" && filters.minPrice !== "0") || 
-    (filters.maxPrice !== "" && filters.maxPrice !== "0");
+  const hasActiveFilters = filters.category !== "" ||
+    filters.creator !== "";
 
   return (
     <div className="w-full bg-gray-900/50 border border-gray-800/50 rounded-2xl backdrop-blur-sm mb-6">
@@ -132,10 +136,10 @@ export function ProductsFilterTopBar({
       </div>
 
       {/* Filter Controls */}
-      <div className="p-3">
-        <div className="flex flex-wrap items-end gap-3">
+      <div className="p-3 sm:p-4">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-end gap-2 sm:gap-3">
           {/* Category */}
-          <div className="min-w-0 flex-1">
+          <div className="col-span-1 sm:flex-1 sm:min-w-0">
             <label className="block text-xs font-medium text-gray-400 mb-1">
               Category
             </label>
@@ -155,7 +159,7 @@ export function ProductsFilterTopBar({
           </div>
 
           {/* Creator */}
-          <div className="min-w-0 flex-1">
+          <div className="col-span-1 sm:flex-1 sm:min-w-0">
             <label className="block text-xs font-medium text-gray-400 mb-1">
               Creator
             </label>
@@ -172,32 +176,6 @@ export function ProductsFilterTopBar({
               onSelect={(value) => handleFilterChange("creator", value)}
               placeholder="All Creators"
             />
-          </div>
-
-          {/* Price Range */}
-          <div className="flex items-end gap-2">
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">
-                Price
-              </label>
-              <div className="flex items-center gap-1">
-                <input
-                  type="number"
-                  value={filters.minPrice}
-                  onChange={(e) => setFilters((prev: any) => ({ ...prev, minPrice: e.target.value }))}
-                  className="w-16 px-2 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-400 text-xs focus:ring-1 focus:ring-orange-500/30 focus:border-orange-500/50 transition-all duration-200"
-                  placeholder="Min"
-                />
-                <span className="text-gray-500 text-xs">-</span>
-                <input
-                  type="number"
-                  value={filters.maxPrice}
-                  onChange={(e) => setFilters((prev: any) => ({ ...prev, maxPrice: e.target.value }))}
-                  className="w-16 px-2 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-400 text-xs focus:ring-1 focus:ring-orange-500/30 focus:border-orange-500/50 transition-all duration-200"
-                  placeholder="Max"
-                />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -220,24 +198,6 @@ export function ProductsFilterTopBar({
                 {creators.find(c => c.name === filters.creator)?.name || filters.creator}
                 <button
                   onClick={() => handleFilterChange("creator", "")}
-                  className="text-orange-300 hover:text-orange-100 transition-colors"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-            {((filters.minPrice !== "" && filters.minPrice !== "0") ||
-              (filters.maxPrice !== "" && filters.maxPrice !== "0")) && (
-              <span className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs font-medium px-2 py-0.5 rounded-md">
-                ${filters.minPrice || "0"} - ${filters.maxPrice || "∞"}
-                <button
-                  onClick={() => {
-                    setFilters((prev: any) => ({
-                      ...prev,
-                      minPrice: "",
-                      maxPrice: "",
-                    }));
-                  }}
                   className="text-orange-300 hover:text-orange-100 transition-colors"
                 >
                   <X className="w-3 h-3" />

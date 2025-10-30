@@ -77,12 +77,13 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
     <>
     <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
       <div className="relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group cursor-pointer hover:border-orange-500/50">
-        <div className="aspect-square relative overflow-hidden rounded-t-xl">
+        <div className="w-full relative overflow-hidden rounded-t-xl" style={{ aspectRatio: '1/1' }}>
           <Image
             src={product.thumbnail_url || "/placeholder-product.png"}
             alt={product.name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
             <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>

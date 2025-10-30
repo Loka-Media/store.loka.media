@@ -151,7 +151,8 @@ export function ProductListItem({ product }: ProductListItemProps) {
       <div className="flex flex-col md:flex-row">
         <Link
           href={`/products/${createProductSlug(product.name, product.id)}`}
-          className="relative md:w-40 h-32 md:h-auto flex-shrink-0"
+          className="relative w-full md:w-48 flex-shrink-0"
+          style={{ aspectRatio: '4/3' }}
         >
           {/* Sale badge removed - no fake discounts */}
           <div className="w-full h-full relative overflow-hidden">
@@ -161,6 +162,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               unoptimized={true}
+              sizes="(max-width: 768px) 100vw, 200px"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
                 const fallbackImg =

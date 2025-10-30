@@ -332,12 +332,13 @@ function ProductGridCard({
   return (
     <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
       <div className="bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-xl overflow-hidden border-2 border-gray-800 hover:border-orange-500/50 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
-        <div className="aspect-square relative">
+        <div className="w-full relative" style={{ aspectRatio: '1/1' }}>
           <Image
             src={product.thumbnail_url || '/placeholder-product.png'}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           <div className="absolute top-3 right-3">
             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${
@@ -440,12 +441,13 @@ function ProductListRow({
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div className="flex-shrink-0 h-12 w-12">
-            <div className="h-12 w-12 relative rounded-xl overflow-hidden border border-gray-700 group-hover:border-orange-500/50 transition-colors">
+            <div className="h-12 w-12 relative rounded-xl overflow-hidden border border-gray-700 group-hover:border-orange-500/50 transition-colors" style={{ aspectRatio: '1/1' }}>
               <Image
                 src={product.thumbnail_url || '/placeholder-product.png'}
                 alt={product.name}
                 fill
                 className="object-cover"
+                sizes="48px"
               />
             </div>
           </div>
