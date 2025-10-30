@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Delius&family=Fascinate+Inline&family=Michroma&family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Delius&family=Fascinate+Inline&family=Michroma&family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap");
 @import "tailwindcss";
 
 /* Force dark mode - no light mode option */
@@ -29,34 +29,60 @@ body {
 }
 
 /* Global font classes */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: "Fascinate Inline", system-ui;
 }
 
 /* Body text uses Sansation */
-p, span, div, button, input, select, textarea, a, li, td, th {
+p,
+span,
+div,
+button,
+input,
+select,
+textarea,
+a,
+li,
+td,
+th {
   font-family: "Sansation", sans-serif;
 }
 
-/* Force all text to use Sansation - higher specificity */
-* {
-  font-family: "Sansation", sans-serif !important;
-}
-
-/* Headings use Fascinate Inline */
-h1, h2, h3, h4, h5, h6 {
+/* Headings use Fascinate Inline with Regular Weight (NOT bold) */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: "Fascinate Inline", system-ui !important;
+  font-weight: 400 !important;
 }
 
-/* Bold text maintains Sansation */
-.font-bold, .font-semibold, .font-black, .font-extrabold, 
-strong, b, [class*="font-bold"], [class*="font-semibold"], 
-[class*="font-black"], [class*="font-extrabold"] {
+/* Bold text and strong emphasis - Standard Bold styling */
+.font-bold,
+.font-semibold,
+.font-black,
+.font-extrabold,
+strong,
+b,
+[class*="font-bold"],
+[class*="font-semibold"],
+[class*="font-black"],
+[class*="font-extrabold"] {
   font-family: "Sansation", sans-serif !important;
+  font-weight: 700 !important;
 }
 
 /* Ensure button text uses Sansation */
-button, .btn, [role="button"] {
+button,
+.btn,
+[role="button"] {
   font-family: "Sansation", sans-serif !important;
 }
 
@@ -121,7 +147,8 @@ button, .btn, [role="button"] {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
