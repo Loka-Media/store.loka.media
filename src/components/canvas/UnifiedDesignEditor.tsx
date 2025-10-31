@@ -793,13 +793,6 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
             onShowPositionPanel={() => setShowPositionPanel(true)}
             selectedFile={selectedFile}
             setSelectedFile={setSelectedFile}
-            applyQuickPosition={(position: string) => {
-              const activePrintFile = getActivePrintFile(printFiles, selectedVariants, activePlacement);
-              applyQuickPosition(position, selectedDesignFile, activePrintFile, (updatedDesign) => {
-                setDesignFiles(designFiles.map(df => df.id === updatedDesign.id ? updatedDesign : df));
-                setSelectedDesignFile(updatedDesign);
-              });
-            }}
           />
         );
 

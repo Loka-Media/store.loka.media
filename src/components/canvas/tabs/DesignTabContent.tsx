@@ -36,7 +36,6 @@ interface DesignTabContentProps {
   onShowPositionPanel: () => void;
   selectedFile: UploadedFile | null;
   setSelectedFile: (file: UploadedFile | null) => void;
-  applyQuickPosition: (position: string) => void;
 }
 
 type WorkflowStep = 'placement' | 'image' | 'position';
@@ -54,7 +53,6 @@ const DesignTabContent: React.FC<DesignTabContentProps> = ({
   handleAddDesign,
   selectedFile,
   setSelectedFile,
-  applyQuickPosition,
 }) => {
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('placement');
 
@@ -263,66 +261,6 @@ const DesignTabContent: React.FC<DesignTabContentProps> = ({
                   >
                     Remove
                   </button>
-                </div>
-              </div>
-            )}
-
-            {/* Quick Position Controls */}
-            <div className="space-y-4">
-              <div className="text-sm font-bold text-gray-200">Quick Position</div>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { position: 'top-left', label: '↖' },
-                  { position: 'top-center', label: '↑' },
-                  { position: 'top-right', label: '↗' },
-                  { position: 'center-left', label: '←' },
-                  { position: 'center', label: '⊙' },
-                  { position: 'center-right', label: '→' },
-                  { position: 'bottom-left', label: '↙' },
-                  { position: 'bottom-center', label: '↓' },
-                  { position: 'bottom-right', label: '↘' },
-                ].map(({ position, label }) => (
-                  <button
-                    key={position}
-                    onClick={() => applyQuickPosition(position)}
-                    className="aspect-square flex items-center justify-center bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl text-white text-lg transition-colors"
-                    title={position.replace('-', ' ')}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Position Details */}
-            {selectedDesignFile && (
-              <div className="space-y-4">
-                <div className="text-sm font-bold text-gray-200">Position Details</div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1">X Position</label>
-                    <div className="text-sm text-white font-mono bg-gray-800 px-3 py-2 rounded-lg">
-                      {Math.round(selectedDesignFile.position.left)}px
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1">Y Position</label>
-                    <div className="text-sm text-white font-mono bg-gray-800 px-3 py-2 rounded-lg">
-                      {Math.round(selectedDesignFile.position.top)}px
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1">Width</label>
-                    <div className="text-sm text-white font-mono bg-gray-800 px-3 py-2 rounded-lg">
-                      {Math.round(selectedDesignFile.position.width)}px
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1">Height</label>
-                    <div className="text-sm text-white font-mono bg-gray-800 px-3 py-2 rounded-lg">
-                      {Math.round(selectedDesignFile.position.height)}px
-                    </div>
-                  </div>
                 </div>
               </div>
             )}
