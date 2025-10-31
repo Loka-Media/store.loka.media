@@ -38,7 +38,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
           </div>
 
           {/* Heading */}
-          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black mb-4 sm:mb-6 md:mb-8 tracking-tight leading-tight px-2 sm:px-0">
+          <h1 className="text-3xl xs:text-4xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black mb-4 sm:mb-6 md:mb-8 tracking-tight leading-tight px-2 sm:px-0">
             <span className="bg-gradient-to-r from-orange-300 via-orange-400 to-orange-500 bg-clip-text text-transparent">
               Turn Your
             </span>
