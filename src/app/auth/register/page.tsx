@@ -177,17 +177,6 @@ function RegisterPageContent() {
         <div className="mx-auto w-full max-w-sm lg:max-w-3xl">
           {" "}
           {/* Adjusted max-width here for more space */}
-          {/* Mobile Logo (visible only on smaller screens where the left side is hidden) */}
-          <div className="flex justify-center mb-8 lg:hidden">
-            <div className="flex items-center group">
-              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300">
-                <Store className="h-7 w-7 text-white" />
-              </div>
-              <span className="ml-3 text-3xl font-black text-white tracking-tight">
-                LOKA
-              </span>
-            </div>
-          </div>
           {/* Header */}
           <div className="text-center lg:text-left">
             <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
