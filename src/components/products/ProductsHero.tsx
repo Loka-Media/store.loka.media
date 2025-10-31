@@ -7,8 +7,8 @@ interface ProductsHeroProps {
     category: string;
     search: string;
     creator: string;
-    minPrice: string;
-    maxPrice: string;
+    minPrice: number | undefined;
+    maxPrice: number | undefined;
     sortBy: string;
     sortOrder: string;
     source: "all" | "printful" | "shopify";

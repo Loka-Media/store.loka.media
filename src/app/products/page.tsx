@@ -53,6 +53,8 @@ function ProductsContent() {
     sortBy: "created_at",
     sortOrder: "DESC",
     source: "all" as "printful" | "shopify" | "all",
+    minPrice: undefined as number | undefined,
+    maxPrice: undefined as number | undefined,
   });
   const [pagination, setPagination] = useState({
     total: 0,
@@ -119,6 +121,8 @@ function ProductsContent() {
       source,
       sortBy: "created_at",
       sortOrder: "DESC",
+      minPrice: undefined,
+      maxPrice: undefined,
     };
 
     setFilters(initialFilters);
@@ -199,6 +203,8 @@ function ProductsContent() {
       sortBy: "created_at",
       sortOrder: "DESC",
       source: "all" as const,
+      minPrice: undefined,
+      maxPrice: undefined,
     };
     setFilters(clearedFilters);
 
