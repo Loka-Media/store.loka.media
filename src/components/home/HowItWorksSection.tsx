@@ -50,10 +50,9 @@ export function HowItWorksSection() {
 
   return (
     <section className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gray-950 relative overflow-hidden">
-      {/* Refined background elements with iOS-style subtlety */}
-      <div className="absolute top-0 left-0 w-48 sm:w-64 md:w-80 lg:w-96 h-48 sm:h-64 md:h-80 lg:h-96 bg-gradient-to-br from-blue-500/8 to-indigo-500/6 rounded-full blur-3xl animate-blob opacity-60"></div>
-      <div className="absolute bottom-0 right-0 w-48 sm:w-64 md:w-80 lg:w-96 h-48 sm:h-64 md:h-80 lg:h-96 bg-gradient-to-br from-purple-500/8 to-pink-500/6 rounded-full blur-3xl animate-blob animation-delay-1000 opacity-60"></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 sm:w-48 md:w-64 h-32 sm:h-48 md:h-64 bg-gradient-to-br from-orange-500/6 to-red-500/4 rounded-full blur-3xl animate-blob animation-delay-2000 opacity-40"></div>
+      {/* Refined background elements */}
+      <div className="absolute top-0 left-0 w-48 sm:w-64 md:w-80 lg:w-96 h-48 sm:h-64 md:h-80 lg:h-96 bg-gradient-to-br from-blue-500/4 to-indigo-500/3 rounded-full blur-2xl opacity-30"></div>
+      <div className="absolute bottom-0 right-0 w-48 sm:w-64 md:w-80 lg:w-96 h-48 sm:h-64 md:h-80 lg:h-96 bg-gradient-to-br from-purple-500/4 to-pink-500/3 rounded-full blur-2xl opacity-30"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header with iOS-style typography */}

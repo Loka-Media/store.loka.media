@@ -8,39 +8,8 @@ export function MakeAndSellSection() {
 
   return (
     <section className="relative py-24 px-4 sm:px-6 lg:px-8 from-gray-900 text-white overflow-hidden">
-      {/* Dynamic Background Grids and Particles */}
-      <div className="absolute inset-0 z-0 opacity-5">
-        <div className="w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-transparent to-transparent"></div>
-        <div className="absolute inset-0 [mask-image:radial-gradient(white,transparent)]">
-          <svg
-            className="w-full h-full"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-          >
-            <pattern
-              id="grid-pattern"
-              x="0"
-              y="0"
-              width="10"
-              height="10"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 10 0 L 0 0 L 0 10"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.2"
-              ></path>
-            </pattern>
-            <rect
-              width="100%"
-              height="100%"
-              fill="url(#grid-pattern)"
-              className="text-gray-700 animate-grid"
-            ></rect>
-          </svg>
-        </div>
-      </div>
+      {/* Subtle Background */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-gray-900/50 to-transparent"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">

@@ -27,8 +27,8 @@ export  function QualityProductsSection() {
     <section
       className="relative text-white py-8 sm:py-12 md:py-16 lg:py-24 overflow-hidden bg-gray-950"
     >
-      <div className="absolute top-0 left-0 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-blue-500/10 rounded-full blur-3xl animate-blob opacity-40"></div>
-      <div className="absolute bottom-0 right-0 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-purple-500/10 rounded-full blur-3xl animate-blob animation-delay-1000 opacity-40"></div>
+      <div className="absolute top-0 left-0 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-blue-500/5 rounded-full blur-2xl opacity-30"></div>
+      <div className="absolute bottom-0 right-0 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-purple-500/5 rounded-full blur-2xl opacity-30"></div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-16 items-center">
@@ -66,9 +66,8 @@ export  function QualityProductsSection() {
               </div>
             </div>
 
-            {/* Floating accent elements */}
-            <div className="absolute -top-2 sm:-top-3 md:-top-4 -right-2 sm:-right-3 md:-right-4 w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 bg-gradient-to-br from-purple-500/20 to-orange-500/20 rounded-full blur-xl"></div>
-            <div className="absolute -bottom-2 sm:-bottom-3 md:-bottom-4 -left-2 sm:-left-3 md:-left-4 w-20 sm:w-24 md:w-32 h-20 sm:h-24 md:h-32 bg-gradient-to-br from-orange-500/15 to-purple-500/15 rounded-full blur-2xl"></div>
+            {/* Floating accent elements - Reduced */}
+            <div className="absolute -top-2 sm:-top-3 md:-top-4 -right-2 sm:-right-3 md:-right-4 w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 bg-gradient-to-br from-purple-500/10 to-orange-500/10 rounded-full blur-lg"></div>
           </div>
 
           {/* Right side - Enhanced Content */}

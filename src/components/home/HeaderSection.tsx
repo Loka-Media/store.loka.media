@@ -13,26 +13,25 @@ interface HeroSectionProps {
 export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
   return (
     <section className="relative pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4 md:px-6 lg:px-8 overflow-hidden flex items-center mt-4 sm:mt-6 md:mt-9">
-      {/* Ballpit Background */}
+      {/* Ballpit Background - Optimized */}
       <div className="absolute inset-0 w-full h-full">
-        <Threads amplitude={1} distance={0} enableMouseInteraction={true} />
+        <Threads amplitude={1} distance={0} enableMouseInteraction={false} />
       </div>
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-orange-900/40"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-orange-900/20"></div>
 
-      {/* Floating Shapes */}
+      {/* Floating Shapes - Reduced */}
       <div className="absolute inset-0 z-[1] pointer-events-none">
-        <div className="absolute top-1/4 left-1/6 sm:left-1/4 w-16 sm:w-20 md:w-32 h-16 sm:h-20 md:h-32 bg-gradient-to-br from-orange-500/20 to-orange-300/10 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute top-3/4 right-1/6 sm:right-1/4 w-20 sm:w-28 md:w-48 h-20 sm:h-28 md:h-48 bg-gradient-to-br from-orange-400/15 to-orange-600/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-1/4 left-1/4 sm:left-1/3 w-12 sm:w-16 md:w-24 h-12 sm:h-16 md:h-24 bg-gradient-to-br from-orange-300/25 to-orange-500/15 rounded-full blur-lg animate-pulse delay-500"></div>
+        <div className="absolute top-1/4 left-1/6 sm:left-1/4 w-16 sm:w-20 md:w-32 h-16 sm:h-20 md:h-32 bg-gradient-to-br from-orange-500/20 to-orange-300/10 rounded-full blur-lg opacity-70"></div>
+        <div className="absolute top-3/4 right-1/6 sm:right-1/4 w-20 sm:w-28 md:w-48 h-20 sm:h-28 md:h-48 bg-gradient-to-br from-orange-400/15 to-orange-600/10 rounded-full blur-lg opacity-60"></div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto w-full">
         <div className="text-center">
           {/* Badge */}
-          <div className="inline-flex items-center px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 mb-4 sm:mb-6 md:mb-8 rounded-full bg-gradient-to-r from-orange-500/20 to-orange-300/20 backdrop-blur-sm border border-orange-500/30 text-orange-200 text-xs sm:text-sm font-medium animate-bounce">
+          <div className="inline-flex items-center px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 mb-4 sm:mb-6 md:mb-8 rounded-full bg-gradient-to-r from-orange-500/15 to-orange-300/15 border border-orange-500/20 text-orange-200 text-xs sm:text-sm font-medium">
             <Zap className="w-4 h-4 mr-2 text-orange-400" />
             <span>Now with AI-Powered Analytics</span>
           </div>
@@ -77,7 +76,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
 
           {/* Secondary Actions */}
           <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 sm:gap-4 md:gap-6 mb-2 px-3 sm:px-0">
-            {!isAuthenticated ? (
+            {!isAuthenticated && (
               <>
                 <Link
                   href="/auth/register"
@@ -97,16 +96,6 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   </span>
                 </Link>
               </>
-            ) : (
-              <Link
-                href={
-                  user?.role === "creator" ? "/dashboard/creator" : "/dashboard"
-                }
-                className="group w-full sm:w-auto max-w-xs sm:max-w-sm md:max-w-md px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 border-2 border-orange-400/50 hover:border-orange-400 text-gray-200 hover:text-white font-semibold rounded-full transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-50 backdrop-blur-md bg-gradient-to-r from-black/30 to-orange-900/30 hover:from-orange-500/20 hover:to-orange-600/20 relative overflow-hidden text-xs sm:text-sm md:text-base text-center"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-400/10 to-orange-500/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                <span className="relative">Go to Dashboard</span>
-              </Link>
             )}
           </div>
         </div>
