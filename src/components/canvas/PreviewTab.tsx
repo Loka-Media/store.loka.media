@@ -87,11 +87,14 @@ const PreviewTab: React.FC<PreviewTabProps> = ({
       </div>
       
       {/* Preview Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 overflow-y-auto" style={{ maxHeight: "calc(100vh - 280px)" }}>
         {mockupUrls && mockupUrls.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {mockupUrls.map((mockup, index) => (
-              <div key={index} className="bg-gray-800 rounded-2xl overflow-hidden shadow-xl">
+              <div
+                key={index}
+                className="bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300"
+              >
                 <div className="aspect-square bg-gray-700 flex items-center justify-center">
                   <Image
                     src={mockup.url}

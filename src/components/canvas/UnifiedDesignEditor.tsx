@@ -923,7 +923,8 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         </div>
       </div>
 
-      {/* Secondary Sidebar - Tab Content */}
+      {/* Secondary Sidebar - Tab Content (Hidden during preview for full canvas view) */}
+      {activeTab !== "preview" && (
       <div className="w-80 border-r border-gray-800 bg-gray-900 flex flex-col">
         {/* Product Info Header */}
         <div className="p-4 border-b border-gray-800 flex-shrink-0">
@@ -973,6 +974,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
           </button>
         </div>
       </div>
+      )}
 
       {/* Child Panel - Expandable */}
       {childPanelOpen && (
