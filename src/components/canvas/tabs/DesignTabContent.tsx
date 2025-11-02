@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Layers, 
-  Image as ImageIcon, 
-  Move, 
-  AlignCenter,
-  AlignLeft,
-  AlignRight,
-  RotateCw,
-  Maximize,
+import {
+  Layers,
+  Image as ImageIcon,
+  Move,
   CheckCircle,
   Plus
 } from 'lucide-react';
@@ -34,8 +29,6 @@ interface DesignTabContentProps {
   uploadedFiles: UploadedFile[];
   handleAddDesign: (file: UploadedFile, placement: string) => Promise<void>;
   onShowPositionPanel: () => void;
-  selectedFile: UploadedFile | null;
-  setSelectedFile: (file: UploadedFile | null) => void;
 }
 
 type WorkflowStep = 'placement' | 'image' | 'position';
@@ -51,8 +44,7 @@ const DesignTabContent: React.FC<DesignTabContentProps> = ({
   setSelectedDesignFile,
   uploadedFiles,
   handleAddDesign,
-  selectedFile,
-  setSelectedFile,
+  onShowPositionPanel,
 }) => {
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('placement');
 
@@ -80,7 +72,6 @@ const DesignTabContent: React.FC<DesignTabContentProps> = ({
   };
 
   const handleImageSelect = async (file: UploadedFile) => {
-    setSelectedFile(file);
     if (activePlacement) {
       // AUTOMATIC: Adjust image to valid aspect ratio instead of rejecting
       await handleAddDesign(file, activePlacement);
@@ -182,11 +173,7 @@ const DesignTabContent: React.FC<DesignTabContentProps> = ({
                   <button
                     key={file.id}
                     onClick={() => handleImageSelect(file)}
-                    className={`group relative p-1 border rounded-2xl transition-all duration-300 ${
-                      selectedFile?.id === file.id
-                        ? 'border-orange-500 bg-orange-500/10'
-                        : 'border-gray-700 hover:border-gray-600'
-                    }`}
+                    className={`group relative p-1 border rounded-2xl transition-all duration-300 border-gray-700 hover:border-gray-600`}
                   >
                     <div className="aspect-square bg-gray-800 rounded-xl overflow-hidden">
                       <Image

@@ -184,16 +184,6 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                 const canvasHeight = canvasDims.height;
                 const printFile = activePrintFile;
 
-                // console.log("DesignCanvasTab props:", {
-                //   area_width: canvasWidth,
-                //   area_height: canvasHeight,
-                //   width: design.position.width,
-                //   height: design.position.height,
-                //   top: design.position.top,
-                //   left: design.position.left,
-                //   url: design.url,
-                // });
-
                 // Calculate scaling factor to fit print file in canvas
                 const scaleX = printFile ? canvasWidth / printFile.width : 0.5;
                 const scaleY = printFile

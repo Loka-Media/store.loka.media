@@ -78,9 +78,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
   const [childPanelContent, setChildPanelContent] = useState<string>("");
   const [selectedFileForPlacement, setSelectedFileForPlacement] = useState<UploadedFile | null>(null);
   const [showPlacementPanel, setShowPlacementPanel] = useState(false);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [showPositionPanel, setShowPositionPanel] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
   const [aspectRatioIssues, setAspectRatioIssues] = useState<AspectRatioIssue[]>([]);
 
   // Use custom hooks for state management
@@ -791,8 +789,6 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
             uploadedFiles={uploadedFiles}
             handleAddDesign={handleAddDesign}
             onShowPositionPanel={() => setShowPositionPanel(true)}
-            selectedFile={selectedFile}
-            setSelectedFile={setSelectedFile}
           />
         );
 
@@ -1131,30 +1127,6 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
         </div>
       )}
 
-      {/* Advanced Options Modal */}
-      {showAdvancedOptions && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-gray-900 rounded-2xl p-6 max-w-2xl max-h-[90vh] overflow-y-auto m-4 border border-gray-800">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Advanced Options</h3>
-              <button
-                onClick={() => setShowAdvancedOptions(false)}
-                className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="text-center text-gray-400 p-8">
-                <Settings className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <p className="text-lg text-white mb-2">Advanced Options</p>
-                <p className="text-sm">Configure mockup generation settings</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
