@@ -119,31 +119,12 @@ const PreviewTab: React.FC<PreviewTabProps> = ({
                 <PlayCircle className="w-10 h-10 text-gray-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">No Mockups Generated</h3>
-              <p className="text-gray-400 mb-6">
-                {designFiles.length === 0 
+              <p className="text-gray-400">
+                {designFiles.length === 0
                   ? "Add designs from the Upload tab, then return here to generate mockups."
-                  : "Click 'Generate Preview' to create product mockups with your designs."
+                  : "Use the 'Generate Preview' button in the header to create product mockups with your designs."
                 }
               </p>
-              {designFiles.length > 0 && (
-                <button
-                  onClick={handleGeneratePreview}
-                  disabled={isGeneratingPreview}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isGeneratingPreview ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <PlayCircle className="w-4 h-4" />
-                      Generate Preview
-                    </>
-                  )}
-                </button>
-              )}
             </div>
           </div>
         )}

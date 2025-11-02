@@ -820,18 +820,8 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
           />
         );
 
-      case "preview":
-        return (
-          <PreviewTab
-            designFiles={designFiles}
-            mockupUrls={mockupUrls}
-            mockupStatus={mockupStatus}
-            isGeneratingPreview={isGeneratingPreview}
-            selectedTechnique={selectedTechnique}
-            advancedOptions={advancedOptions}
-            onGeneratePreview={handleValidatedPreviewGeneration}
-          />
-        );
+      // REMOVED: PreviewTab is rendered in the main canvas area, not in the sidebar
+      // Preview tab content is rendered at the main canvas area below
 
       // Child panels
       default:
