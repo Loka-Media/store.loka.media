@@ -130,6 +130,10 @@ export const applyQuickPosition = (
       break;
   }
 
+  // CRITICAL FIX: Clamp position values to prevent negative coordinates and overflow
+  newPosition.left = Math.max(0, Math.min(newPosition.left, areaWidth - width));
+  newPosition.top = Math.max(0, Math.min(newPosition.top, areaHeight - height));
+
   const updatedDesign = {
     ...designFile,
     position: newPosition
@@ -143,16 +147,28 @@ export const getActivePrintFile = (
   selectedVariants: number[],
   activePlacement: string
 ): PrintFile | null => {
-  if (!printFiles || selectedVariants.length === 0) return null;
+  if (!printFiles || selectedVariants.length === 0 || !activePlacement) return null;
+
+  // CRITICAL FIX: Add null safety checks for arrays
+  if (!Array.isArray(printFiles.variant_printfiles) || !Array.isArray(printFiles.printfiles)) {
+    console.warn("Invalid printFiles structure - missing variant_printfiles or printfiles arrays");
+    return null;
+  }
 
   const variantPrintFile = printFiles.variant_printfiles.find((vp) =>
     selectedVariants.includes(vp.variant_id)
   );
 
-  if (!variantPrintFile?.placements[activePlacement]) return null;
+  if (!variantPrintFile || !variantPrintFile.placements || !variantPrintFile.placements[activePlacement]) {
+    return null;
+  }
 
   const printFileId = variantPrintFile.placements[activePlacement];
-  return printFiles.printfiles.find((pf) => pf.printfile_id === printFileId) || null;
+
+  // CRITICAL FIX: Ensure printFileId is valid before searching
+  if (!printFileId) return null;
+
+  return printFiles.printfiles.find((pf) => pf && pf.printfile_id === printFileId) || null;
 };
 
 export const isEmbroideryProduct = (product: Product, selectedTechnique: string): boolean => {
@@ -172,36 +188,58 @@ export const calculateAspectRatioAwareDimensions = async (
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
-    
+    let resolved = false;
+
+    // CRITICAL FIX: Add timeout to prevent hanging promises (images that never load)
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        console.warn(`⚠️ Image load timeout (5s) - using fallback dimensions for ${imageUrl}`);
+        const defaultWidth = printFile.width * maxScale;
+        const defaultHeight = printFile.height * maxScale;
+        resolve({
+          width: Math.round(defaultWidth),
+          height: Math.round(defaultHeight),
+          adapted: true,
+          originalRatio: printFile.width / printFile.height,
+          finalRatio: printFile.width / printFile.height
+        });
+      }
+    }, 5000);
+
     img.onload = () => {
+      if (resolved) return; // Prevent double resolution
+      resolved = true;
+      clearTimeout(timeout);
+
       const imageAspectRatio = img.naturalWidth / img.naturalHeight;
       const printAreaAspectRatio = printFile.width / printFile.height;
-      
+
       console.log(`🖼️  Image Analysis:`, {
         imageSize: `${img.naturalWidth}x${img.naturalHeight}`,
         imageAspectRatio: imageAspectRatio.toFixed(2),
         printArea: `${printFile.width}x${printFile.height}`,
         printAreaAspectRatio: printAreaAspectRatio.toFixed(2)
       });
-      
+
       let designWidth: number;
       let designHeight: number;
       let adapted = false;
-      
+
       const maxWidth = printFile.width * maxScale;
       const maxHeight = printFile.height * maxScale;
-      
+
       // SMART ADAPTATION: Choose best fitting strategy
       if (adaptToArea && Math.abs(imageAspectRatio - printAreaAspectRatio) > 0.15) {
         // Image aspect ratio is significantly different from print area
         // AUTO-ADAPT to print area for better visual harmony
-        
+
         console.log(`🎯 Auto-adapting aspect ratio: ${imageAspectRatio.toFixed(2)} → ${printAreaAspectRatio.toFixed(2)}`);
-        
+
         designWidth = maxWidth;
         designHeight = maxHeight;
         adapted = true;
-        
+
         console.log(`✨ Smart adaptation applied! Image will fill the print area beautifully.`);
       } else {
         // Maintain original image aspect ratio
@@ -213,7 +251,7 @@ export const calculateAspectRatioAwareDimensions = async (
           designHeight = designWidth / imageAspectRatio;
         }
       }
-      
+
       // Ensure minimum size constraints
       const minSize = Math.min(printFile.width, printFile.height) * 0.2;
       if (designWidth < minSize || designHeight < minSize) {
@@ -227,15 +265,15 @@ export const calculateAspectRatioAwareDimensions = async (
           designWidth = designHeight * ratio;
         }
       }
-      
+
       const finalDimensions = {
         width: Math.round(designWidth),
         height: Math.round(designHeight)
       };
-      
+
       const finalRatio = finalDimensions.width / finalDimensions.height;
       console.log(`✅ Final dimensions: ${finalDimensions.width}x${finalDimensions.height} (ratio: ${finalRatio.toFixed(2)})`);
-      
+
       resolve({
         ...finalDimensions,
         adapted,
@@ -243,8 +281,12 @@ export const calculateAspectRatioAwareDimensions = async (
         finalRatio
       });
     };
-    
+
     img.onerror = () => {
+      if (resolved) return; // Prevent double resolution
+      resolved = true;
+      clearTimeout(timeout);
+
       console.warn("Failed to load image, using print area dimensions");
       const defaultWidth = printFile.width * maxScale;
       const defaultHeight = printFile.height * maxScale;
@@ -256,7 +298,7 @@ export const calculateAspectRatioAwareDimensions = async (
         finalRatio: printFile.width / printFile.height
       });
     };
-    
+
     img.src = imageUrl;
   });
 };
@@ -452,16 +494,46 @@ export const autoFixDesignForPrintful = (
 
 /**
  * Validate all design files for an order before submission
+ * CRITICAL: Validates every design, prevents empty designs array from being published
  */
 export const validateOrderDesigns = (
   designFiles: DesignFile[],
   printFiles: PrintFilesData | null,
   selectedVariants: number[]
 ): { isValid: boolean; errors: string[]; warnings: string[]; validatedDesigns: DesignFile[] } => {
-  if (!printFiles || designFiles.length === 0) {
+  // CRITICAL FIX: Check all required inputs
+  if (!printFiles) {
     return {
       isValid: false,
-      errors: ["No design files or print data available"],
+      errors: ["Print files data not available"],
+      warnings: [],
+      validatedDesigns: []
+    };
+  }
+
+  if (!designFiles || designFiles.length === 0) {
+    return {
+      isValid: false,
+      errors: ["At least one design must be added to the product"],
+      warnings: [],
+      validatedDesigns: []
+    };
+  }
+
+  if (!selectedVariants || selectedVariants.length === 0) {
+    return {
+      isValid: false,
+      errors: ["No variants selected for the product"],
+      warnings: [],
+      validatedDesigns: []
+    };
+  }
+
+  // CRITICAL FIX: Validate array structure
+  if (!Array.isArray(printFiles.variant_printfiles) || !Array.isArray(printFiles.printfiles)) {
+    return {
+      isValid: false,
+      errors: ["Invalid print files structure"],
       warnings: [],
       validatedDesigns: []
     };
@@ -472,34 +544,62 @@ export const validateOrderDesigns = (
   const validatedDesigns: DesignFile[] = [];
 
   for (const design of designFiles) {
+    // CRITICAL FIX: Validate design object structure
+    if (!design || !design.placement || !design.filename) {
+      allErrors.push(`Invalid design object - missing required fields`);
+      continue;
+    }
+
     // Find the print file for this design's placement
     const variantPrintFile = printFiles.variant_printfiles.find(vp =>
       selectedVariants.includes(vp.variant_id)
     );
-    
-    if (!variantPrintFile?.placements[design.placement]) {
-      allErrors.push(`No print file found for placement: ${design.placement}`);
+
+    if (!variantPrintFile) {
+      allErrors.push(`No variant print file found for selected variants: ${selectedVariants.join(', ')}`);
+      continue;
+    }
+
+    if (!variantPrintFile.placements || !variantPrintFile.placements[design.placement]) {
+      allErrors.push(`No print file found for placement "${design.placement}" in design: ${design.filename}`);
       continue;
     }
 
     const printFileId = variantPrintFile.placements[design.placement];
-    const printFile = printFiles.printfiles.find(pf => pf.printfile_id === printFileId);
-    
+
+    // CRITICAL FIX: Validate printFileId exists
+    if (!printFileId) {
+      allErrors.push(`Invalid print file ID for placement "${design.placement}" in design: ${design.filename}`);
+      continue;
+    }
+
+    const printFile = printFiles.printfiles.find(pf => pf && pf.printfile_id === printFileId);
+
     if (!printFile) {
-      allErrors.push(`Print file not found for design: ${design.filename}`);
+      allErrors.push(`Print file #${printFileId} not found for design: ${design.filename}`);
       continue;
     }
 
     // Validate this design
     const validation = validateDesignForPrintful(design, printFile, true);
-    
+
     if (!validation.isValid) {
       allErrors.push(`${design.filename}: ${validation.errors.join(', ')}`);
     } else {
       validatedDesigns.push(design);
     }
-    
+
     allWarnings.push(...validation.warnings.map(w => `${design.filename}: ${w}`));
+  }
+
+  // CRITICAL FIX: Ensure at least one valid design exists
+  if (validatedDesigns.length === 0) {
+    return {
+      isValid: false,
+      errors: allErrors.length > 0 ? allErrors : ["No valid designs after validation"],
+      warnings: allWarnings,
+      validatedDesigns: []
+    };
   }
 
   return {

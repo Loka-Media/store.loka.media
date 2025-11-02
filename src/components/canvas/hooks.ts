@@ -110,6 +110,9 @@ export const usePrintFilesLoader = (
         setLoadingPrintFiles(true);
 
         let printFilesResponse;
+        let retryCount = 0;
+        const maxRetries = 3;
+        const attemptedTechniques = new Set<string>();
 
         console.log(`🎯 Attempting to load print files for product ${selectedProduct.id} without technique parameter (letting API use default)`);
 
@@ -119,13 +122,16 @@ export const usePrintFilesLoader = (
           console.log(`✅ Successfully loaded print files with default technique`);
         } catch (error: any) {
           console.warn("Default technique attempt failed:", error);
-          
+
+          // CRITICAL FIX: Prevent infinite retry loops with max retries and tracking
+          let loadSucceeded = false;
+
           // Check if error contains allowed techniques - handle multiple error structures
           const errorData = error?.response?.data || error?.data || {};
           const errorMessage = errorData.result || errorData.error?.message || error.message || '';
           console.log("Full error data:", errorData);
           console.log("Parsed error message:", errorMessage);
-          
+
           // Parse allowed techniques from error message
           const allowedTechniquesMatch = errorMessage.match(/Allowed values?:\\s*([A-Z,\\s]+)/i);
           if (allowedTechniquesMatch) {
@@ -133,23 +139,34 @@ export const usePrintFilesLoader = (
               .split(',')
               .map((t: string) => t.trim())
               .filter((t: string) => t);
-            
+
             console.log("Parsed allowed techniques:", allowedTechniques);
-            
-            if (allowedTechniques.length > 0) {
-              const fallbackTechnique = allowedTechniques[0];
-              console.log("Retrying with fallback technique:", fallbackTechnique);
-              
-              try {
-                setSelectedTechnique?.(fallbackTechnique);
-                printFilesResponse = await printfulAPI.getPrintFiles(selectedProduct.id, fallbackTechnique);
-                console.log(`✅ Successfully loaded print files with technique: ${fallbackTechnique}`);
-              } catch (fallbackError) {
-                console.error("Fallback technique also failed:", fallbackError);
-                throw fallbackError;
+
+            // Try each allowed technique only once
+            for (const technique of allowedTechniques) {
+              if (retryCount >= maxRetries || attemptedTechniques.has(technique)) {
+                break;
               }
-            } else {
-              throw error;
+
+              attemptedTechniques.add(technique);
+              retryCount++;
+
+              console.log(`Attempting technique #${retryCount}: ${technique}`);
+
+              try {
+                setSelectedTechnique?.(technique);
+                printFilesResponse = await printfulAPI.getPrintFiles(selectedProduct.id, technique);
+                console.log(`✅ Successfully loaded print files with technique: ${technique}`);
+                loadSucceeded = true;
+                break;
+              } catch (techniqueError) {
+                console.warn(`Technique ${technique} failed:`, techniqueError);
+                // Continue to next technique
+              }
+            }
+
+            if (!loadSucceeded) {
+              throw new Error(`Failed to load print files after ${maxRetries} retries`);
             }
           } else {
             throw error;
@@ -192,7 +209,8 @@ export const useAutoSelectVariants = (
     if (uniqueColors.length > 0 && selectedColors.length === 0) {
       setSelectedColors([uniqueColors[0].name]);
     }
-  }, [selectedProduct, uniqueSizes, uniqueColors, selectedSizes.length, selectedColors.length]);
+    // CRITICAL FIX: Include all dependencies that affect the effect
+  }, [selectedProduct?.id, uniqueSizes.length, uniqueColors.length, selectedSizes.length, selectedColors.length, setSelectedSizes, setSelectedColors]);
 
   // Show live preview when colors are selected
   useEffect(() => {

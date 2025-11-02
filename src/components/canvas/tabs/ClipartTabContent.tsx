@@ -105,7 +105,7 @@ const ClipartTabContent: React.FC<ClipartTabContentProps> = ({
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+          className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
         >
           {Object.entries(iconCategories).map(([key, category]) => (
             <option key={key} value={key}>{category.label}</option>
@@ -149,7 +149,7 @@ const ClipartTabContent: React.FC<ClipartTabContentProps> = ({
           <select
             value={backgroundColor}
             onChange={(e) => setBackgroundColor(e.target.value)}
-            className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+            className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
           >
             <option value="transparent">Transparent</option>
             <option value="#ffffff">White</option>

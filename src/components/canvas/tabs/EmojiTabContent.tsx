@@ -323,7 +323,7 @@ const EmojiTabContent: React.FC<EmojiTabContentProps> = ({
         <select
           value={selectedGroup}
           onChange={(e) => setSelectedGroup(e.target.value)}
-          className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+          className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
         >
           <option value="all">All Categories ({availableEmojis.length})</option>
           {availableGroups.map((groupKey) => {

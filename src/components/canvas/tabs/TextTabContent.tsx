@@ -76,10 +76,10 @@ const TextTabContent: React.FC<TextTabContentProps> = ({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Font Size</label>
-          <select 
+          <select
             value={fontSize}
             onChange={(e) => setFontSize(Number(e.target.value))}
-            className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+            className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
           >
             <option value={24}>24px</option>
             <option value={32}>32px</option>
@@ -91,10 +91,10 @@ const TextTabContent: React.FC<TextTabContentProps> = ({
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">Font Family</label>
-          <select 
+          <select
             value={fontFamily}
             onChange={(e) => setFontFamily(e.target.value)}
-            className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
+            className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm bg-white text-gray-900"
           >
             <option value="Arial, sans-serif">Arial</option>
             <option value="Times New Roman, serif">Times New Roman</option>
