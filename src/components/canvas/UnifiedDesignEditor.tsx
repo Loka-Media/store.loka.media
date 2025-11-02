@@ -5,8 +5,6 @@ import React, { useState } from "react";
 import {
   Home,
   Upload,
-  Type,
-  Smile,
   Zap,
   Settings,
   ChevronLeft,
@@ -14,16 +12,12 @@ import {
   Scissors,
   PlayCircle,
   X,
-  Heart,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
 // Import tab components
 import ProductTabContent from "./tabs/ProductTabContent";
 import UploadTabContent from "./tabs/UploadTabContent";
-import TextTabContent from "./tabs/TextTabContent";
-import ClipartTabContent from "./tabs/ClipartTabContent";
-import EmojiTabContent from "./tabs/EmojiTabContent";
 import DesignTabContent from "./tabs/DesignTabContent";
 import EmbroideryTabContent from "./tabs/EmbroideryTabContent";
 import AdvancedTabContent from "./tabs/AdvancedTabContent";
@@ -719,9 +713,8 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
     : [];
 
   // Tab content renderer
-  const renderTabContent = (designSubTab?: "placement" | "text" | "clipart" | "emoji") => {
-    // If we're in design tab and a sub-tab is specified, use that
-    const tabToRender = activeTab === "placement" && designSubTab ? designSubTab : activeTab;
+  const renderTabContent = () => {
+    const tabToRender = activeTab;
 
     switch (tabToRender) {
       case "product":
@@ -747,45 +740,14 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
             handleFileUpload={handleFileUpload}
             isUploading={isUploading}
             onRefreshFiles={onRefreshFiles}
-          />
-        );
-
-      case "text":
-        return (
-          <TextTabContent
             textContent={textContent}
             setTextContent={setTextContent}
             handleAddTextToDesign={handleAddTextToDesign}
             activePlacement={activePlacement}
-            onTextImageCreated={async (url, filename) => {
-              await handleTextImageCreated(url, filename);
-              // Auto-switch to canvas view after text is added
-              setActiveDesignSubTab("placement");
-            }}
+            onTextImageCreated={handleTextImageCreated}
+            onClipartImageCreated={handleClipartImageCreated}
+            onEmojiImageCreated={handleClipartImageCreated}
             userId={1}
-          />
-        );
-
-      case "clipart":
-        return (
-          <ClipartTabContent
-            onClipartImageCreated={async (url, filename) => {
-              await handleClipartImageCreated(url, filename);
-              // Auto-switch to canvas view after clipart is added
-              setActiveDesignSubTab("placement");
-            }}
-          />
-        );
-
-      case "emoji":
-        return (
-          <EmojiTabContent
-            onEmojiImageCreated={async (url, filename) => {
-              await handleClipartImageCreated(url, filename);
-              // Auto-switch to canvas view after emoji is added
-              setActiveDesignSubTab("placement");
-            }}
-            onSwitchToDesignTab={() => setActiveDesignSubTab("placement")}
           />
         );
 
@@ -885,17 +847,6 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
     ? [...baseTabs, embroideryTab, advancedTab, previewTab]
     : [...baseTabs, advancedTab, previewTab];
 
-  // Sub-tabs for Design tab
-  const designSubTabs = [
-    { id: "placement", label: "Canvas", icon: Zap },
-    { id: "text", label: "Text", icon: Type },
-    { id: "clipart", label: "Clipart", icon: Smile },
-    { id: "emoji", label: "Emoji", icon: Heart },
-  ];
-
-  // Track active design sub-tab
-  const [activeDesignSubTab, setActiveDesignSubTab] = useState<"placement" | "text" | "clipart" | "emoji">("placement");
-
   return (
     <div className="h-screen bg-black flex">
       {/* Main Sidebar - Tab Icons */}
@@ -948,7 +899,7 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
 
       {/* Secondary Sidebar - Tab Content (Hidden during preview for full canvas view) */}
       {activeTab !== "preview" && (
-      <div className="w-80 border-r border-gray-800 bg-gray-900 flex flex-col">
+      <div className="w-96 border-r border-gray-800 bg-gray-900 flex flex-col">
         {/* Product Info Header */}
         <div className="p-4 border-b border-gray-800 flex-shrink-0">
           <h1 className="text-lg font-semibold text-white truncate">
@@ -977,30 +928,9 @@ const UnifiedDesignEditor: React.FC<UnifiedDesignEditorProps> = ({
           </div>
         </div>
 
-        {/* Design Sub-tabs */}
-        {activeTab === "placement" && (
-          <div className="border-b border-gray-800 flex-shrink-0">
-            <div className="flex gap-2 px-4 py-3">
-              {designSubTabs.map((subTab) => (
-                <button
-                  key={subTab.id}
-                  onClick={() => setActiveDesignSubTab(subTab.id as "placement" | "text" | "clipart" | "emoji")}
-                  className={`flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1 ${
-                    activeDesignSubTab === subTab.id
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
-                >
-                  {subTab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Tab Content */}
         <div className="flex-1 p-4 overflow-y-auto">
-          {activeTab === "placement" ? renderTabContent(activeDesignSubTab) : renderTabContent()}
+          {renderTabContent()}
         </div>
 
         {/* Bottom Actions */}
