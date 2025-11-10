@@ -70,48 +70,45 @@ export function FAQSection() {
   };
 
   return (
-    <section className="relative py-16 text-white bg-gray-950">
-      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-blob opacity-40"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-blob animation-delay-1000 opacity-40"></div>
-
+    <section className="relative py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h2
             id="faq-heading"
-            className="text-4xl lg:text-5xl font-extrabold text-orange-500 mb-4 tracking-tight"
+            className="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight"
           >
             Got Questions? We've Got Answers.
           </h2>
-          <p className="text-gray-300 text-lg">
+          <p className="text-gray-600 text-lg">
             Everything you need to know about getting started with Loka.
           </p>
         </div>
 
         {/* FAQ Items */}
-        <div className="border border-white/20 rounded-xl overflow-hidden shadow-2xl">
+        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-lg">
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className={`border-b border-white/10 last:border-b-0 transition-all duration-500 ease-in-out ${
-                openFAQ === index ? "bg-white/5" : "hover:bg-white/5"
+              className={`border-b border-gray-200 last:border-b-0 transition-all duration-300 ease-in-out ${
+                openFAQ === index ? "bg-gray-50" : "hover:bg-gray-50"
               }`}
             >
               <h3>
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="w-full p-6 text-left flex items-center justify-between transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full p-6 text-left flex items-center justify-between transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent"
                   aria-expanded={openFAQ === index}
                   aria-controls={`faq-panel-${index}`}
                 >
-                  <span className="text-lg font-semibold text-white pr-4">
+                  <span className="text-lg font-semibold text-gray-900 pr-4">
                     {faq.question}
                   </span>
                   <span
                     className={`transform transition-transform duration-300 ease-in-out ${
                       openFAQ === index
-                        ? "rotate-45 text-orange-500"
-                        : "text-white"
+                        ? "rotate-45 text-accent"
+                        : "text-gray-600"
                     }`}
                   >
                     <svg
@@ -141,7 +138,7 @@ export function FAQSection() {
                 }`}
               >
                 <div className="overflow-hidden">
-                  <div className="px-6 pb-6 text-gray-300 text-base leading-relaxed">
+                  <div className="px-6 pb-6 text-gray-600 text-base leading-relaxed">
                     {faq.answer}
                   </div>
                 </div>

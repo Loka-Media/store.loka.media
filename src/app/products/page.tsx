@@ -16,13 +16,13 @@ import { ProductsLoading } from "@/components/products/ProductsLoading";
 
 export default function ProductsPage() {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <Suspense
         fallback={
-          <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="min-h-screen bg-white flex items-center justify-center">
             <div className="text-center">
-              <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-400">Loading marketplace...</p>
+              <div className="w-16 h-16 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading marketplace...</p>
             </div>
           </div>
         }
@@ -215,7 +215,7 @@ function ProductsContent() {
   };
 
   return (
-    <div className="bg-black text-white">
+    <div className="bg-white text-gray-900">
       <ProductsHero
         filters={filters}
         setFilters={setFilters}
@@ -225,7 +225,7 @@ function ProductsContent() {
         categories={categories}
       />
 
-      <div className="relative bg-black pt-8 sm:pt-12 lg:pt-0">
+      <div className="relative bg-white pt-8 sm:pt-12 lg:pt-0">
         <div className="max-w-7xl mx-auto px-4 -mt-32 sm:-mt-48 lg:-mt-96">
           <ProductsFilterTopBar
             filters={filters}

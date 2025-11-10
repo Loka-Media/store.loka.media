@@ -87,16 +87,16 @@ export default function HelpPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-white text-gray-900">
       <Navigation />
-      
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mt-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Help Center</h1>
-          <p className="text-xl text-gray-400 mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Help Center</h1>
+          <p className="text-xl text-gray-600 mb-8">
             Find answers to common questions or get in touch with our support team.
           </p>
-          
+
           {/* Search */}
           <div className="max-w-md mx-auto">
             <input
@@ -104,7 +104,7 @@ export default function HelpPage() {
               placeholder="Search for help..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
             />
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function HelpPage() {
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Categories Sidebar */}
           <div className="lg:col-span-1">
-            <h2 className="text-lg font-semibold text-white mb-4">Categories</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Categories</h2>
             <nav className="space-y-2">
               {faqData.map((category) => (
                 <button
@@ -120,8 +120,8 @@ export default function HelpPage() {
                   onClick={() => setActiveCategory(category.category)}
                   className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
                     activeCategory === category.category
-                      ? 'bg-blue-900 text-blue-300'
-                      : 'text-gray-400 hover:bg-gray-800'
+                      ? 'bg-pink-50 text-pink-600'
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   {category.category}
@@ -130,14 +130,14 @@ export default function HelpPage() {
             </nav>
 
             {/* Quick Contact */}
-            <div className="mt-8 p-4 bg-gray-800 border border-gray-700 rounded-lg">
-              <h3 className="font-semibold text-white mb-2">Still need help?</h3>
-              <p className="text-sm text-gray-400 mb-4">
+            <div className="mt-8 p-4 bg-white border border-gray-200 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-2">Still need help?</h3>
+              <p className="text-sm text-gray-600 mb-4">
                 Can't find what you're looking for? Our support team is here to help.
               </p>
               <a
                 href="/contact"
-                className="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium text-sm"
+                className="inline-flex items-center text-pink-500 hover:text-pink-600 font-medium text-sm"
               >
                 Contact Support
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,29 +149,29 @@ export default function HelpPage() {
 
           {/* FAQ Content */}
           <div className="lg:col-span-3">
-            <h2 className="text-2xl font-bold text-white mb-6">{activeCategory}</h2>
-            
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{activeCategory}</h2>
+
             <div className="space-y-4">
               {filteredFAQ.length > 0 ? (
                 filteredFAQ[0].questions
-                  .filter(q => 
+                  .filter(q =>
                     searchTerm === "" ||
                     q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     q.answer.toLowerCase().includes(searchTerm.toLowerCase())
                   )
                   .map((faq, index) => (
-                    <div key={index} className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-sm">
-                      <h3 className="text-lg font-semibold text-white mb-3">
+                    <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
                         {faq.question}
                       </h3>
-                      <p className="text-gray-300 leading-relaxed">
+                      <p className="text-gray-600 leading-relaxed">
                         {faq.answer}
                       </p>
                     </div>
                   ))
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-400">No questions found matching your search.</p>
+                  <p className="text-gray-600">No questions found matching your search.</p>
                 </div>
               )}
             </div>
@@ -179,42 +179,42 @@ export default function HelpPage() {
         </div>
 
         {/* Popular Help Articles */}
-        <div className="mt-16 pt-16 border-t border-gray-600">
-          <h2 className="text-2xl font-bold text-white mb-8 text-center">Popular Help Articles</h2>
-          
+        <div className="mt-16 pt-16 border-t border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Popular Help Articles</h2>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="text-lg font-semibold text-white mb-2">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Getting Started Guide
               </h3>
-              <p className="text-gray-400 text-sm mb-4">
+              <p className="text-gray-600 text-sm mb-4">
                 Everything you need to know to start creating and selling on Loka.
               </p>
-              <a href="/creator-guide" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
+              <a href="/creator-guide" className="text-pink-500 hover:text-pink-600 font-medium text-sm">
                 Read Guide →
               </a>
             </div>
 
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="text-lg font-semibold text-white mb-2">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Design Best Practices
               </h3>
-              <p className="text-gray-400 text-sm mb-4">
+              <p className="text-gray-600 text-sm mb-4">
                 Tips and tricks for creating high-quality designs that sell.
               </p>
-              <a href="/design-tips" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
+              <a href="/design-tips" className="text-pink-500 hover:text-pink-600 font-medium text-sm">
                 Learn More →
               </a>
             </div>
 
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="text-lg font-semibold text-white mb-2">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Quality Standards
               </h3>
-              <p className="text-gray-400 text-sm mb-4">
+              <p className="text-gray-600 text-sm mb-4">
                 Understand our quality requirements and how to meet them.
               </p>
-              <a href="/quality-standards" className="text-blue-400 hover:text-blue-300 font-medium text-sm">
+              <a href="/quality-standards" className="text-pink-500 hover:text-pink-600 font-medium text-sm">
                 View Standards →
               </a>
             </div>

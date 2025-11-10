@@ -16,17 +16,15 @@ export default function Home() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <BackgroundPattern />
-
-      <div className="relative z-10">
+    <div className="min-h-screen bg-white text-gray-900">
+      <div className="relative">
         <HeroSection isAuthenticated={isAuthenticated} user={user} />
         <QualityProductsSection />
         <CustomizableShopsSection />

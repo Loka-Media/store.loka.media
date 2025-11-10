@@ -98,74 +98,35 @@ function ResetPasswordContent() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 flex min-h-screen">
+    <div className="bg-white flex min-h-screen">
       {/* Left Side - Hero Section */}
-      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
-        {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 via-orange-500/10 to-transparent"></div>
-
-        {/* Lottie Animation */}
-        <div className="absolute inset-0">
-          <LottieAnimation
-            animationPath="/fly-man.json"
-            loop={true}
-            autoplay={true}
-            style={{ width: "100%", height: "100%" }}
-            className="opacity-30"
-          />
-        </div>
-
-        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-16 text-white">
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-gray-50">
+        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-16">
           {/* Hero Content */}
           <div className="max-w-lg">
-            <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-tight mb-6">
+            <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-tight mb-6 text-gray-900">
               CREATE NEW{" "}
-              <span className="block text-orange-400">
+              <span className="block text-pink-500">
                 PASSWORD
               </span>
             </h1>
 
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
               Enter the OTP we sent to your email and create a secure new password for your account.
             </p>
 
-            {/* Stats Section */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <Users className="w-6 h-6 text-orange-400" />
-                </div>
-                <div className="text-2xl font-bold text-white">7+</div>
-                <div className="text-sm text-gray-400">Social Media Platforms</div>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <ShoppingBag className="w-6 h-6 text-orange-400" />
-                </div>
-                <div className="text-2xl font-bold text-white">40K+</div>
-                <div className="text-sm text-gray-400">Custom and Trending Products</div>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <TrendingUp className="w-6 h-6 text-orange-400" />
-                </div>
-                <div className="text-2xl font-bold text-white">$1M+++</div>
-                <div className="text-sm text-gray-400">Start Making Millions</div>
-              </div>
-            </div>
-
             {/* Feature Highlights */}
             <div className="space-y-4">
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+              <div className="flex items-center text-gray-600">
+                <div className="w-2 h-2 bg-pink-500 rounded-full mr-3"></div>
                 <span>Secure password encryption</span>
               </div>
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+              <div className="flex items-center text-gray-600">
+                <div className="w-2 h-2 bg-pink-500 rounded-full mr-3"></div>
                 <span>All sessions will be logged out</span>
               </div>
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+              <div className="flex items-center text-gray-600">
+                <div className="w-2 h-2 bg-pink-500 rounded-full mr-3"></div>
                 <span>Enhanced account security</span>
               </div>
             </div>
@@ -181,7 +142,7 @@ function ResetPasswordContent() {
           <div className="mb-6">
             <Link
               href="/auth/forgot-password"
-              className="inline-flex items-center text-orange-400 hover:text-orange-300 transition-colors duration-300"
+              className="inline-flex items-center text-pink-500 hover:text-pink-600"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Email Entry
@@ -192,23 +153,23 @@ function ResetPasswordContent() {
             <>
               {/* Header */}
               <div className="text-center lg:text-left">
-                <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
+                <h2 className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
                   Reset Password
                 </h2>
-                <p className="mt-3 text-base text-gray-300">
+                <p className="mt-3 text-base text-gray-600">
                   Enter the OTP from your email and your new password.
                 </p>
               </div>
 
               {/* Form */}
               <div className="mt-8">
-                <div className="bg-gray-900/50 backdrop-blur-md border border-gray-800/50 py-8 px-6 lg:px-8 shadow-xl rounded-xl">
+                <div className="bg-white border border-gray-200 py-8 px-6 lg:px-8 rounded-xl">
                   <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                     {/* Email Field */}
                     <div>
                       <label
                         htmlFor="email"
-                        className="block text-sm font-semibold text-white mb-2"
+                        className="block text-sm font-semibold text-gray-900 mb-2"
                       >
                         Email address
                       </label>
@@ -216,12 +177,12 @@ function ResetPasswordContent() {
                         {...register("email")}
                         type="email"
                         autoComplete="email"
-                        className="block w-full px-3 py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        className="block w-full px-3 py-3 bg-white border border-gray-200 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                         placeholder="Enter your email address"
                         readOnly={!!emailParam}
                       />
                       {errors.email && (
-                        <p className="mt-2 text-sm text-red-400">
+                        <p className="mt-2 text-sm text-red-500">
                           {errors.email.message}
                         </p>
                       )}
@@ -231,7 +192,7 @@ function ResetPasswordContent() {
                     <div>
                       <label
                         htmlFor="otp"
-                        className="block text-sm font-semibold text-white mb-2"
+                        className="block text-sm font-semibold text-gray-900 mb-2"
                       >
                         6-Digit OTP
                       </label>
@@ -239,12 +200,12 @@ function ResetPasswordContent() {
                         {...register("otp")}
                         type="text"
                         maxLength={6}
-                        className="block w-full px-3 py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 text-center text-2xl tracking-widest font-mono"
+                        className="block w-full px-3 py-3 bg-white border border-gray-200 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-center text-2xl tracking-widest font-mono"
                         placeholder="123456"
                         autoComplete="one-time-code"
                       />
                       {errors.otp && (
-                        <p className="mt-2 text-sm text-red-400">
+                        <p className="mt-2 text-sm text-red-500">
                           {errors.otp.message}
                         </p>
                       )}
@@ -254,7 +215,7 @@ function ResetPasswordContent() {
                     <div>
                       <label
                         htmlFor="newPassword"
-                        className="block text-sm font-semibold text-white mb-2"
+                        className="block text-sm font-semibold text-gray-900 mb-2"
                       >
                         New Password
                       </label>
@@ -266,13 +227,13 @@ function ResetPasswordContent() {
                           {...register("newPassword")}
                           type={showPassword ? "text" : "password"}
                           autoComplete="new-password"
-                          className="block w-full pl-10 pr-10 py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                          className="block w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                           placeholder="Enter your new password"
                         />
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                           <button
                             type="button"
-                            className="text-gray-400 hover:text-gray-300 focus:outline-none transition-colors duration-300"
+                            className="text-gray-400 hover:text-gray-600 focus:outline-none"
                             onClick={() => setShowPassword(!showPassword)}
                           >
                             {showPassword ? (
@@ -284,7 +245,7 @@ function ResetPasswordContent() {
                         </div>
                       </div>
                       {errors.newPassword && (
-                        <p className="mt-2 text-sm text-red-400">
+                        <p className="mt-2 text-sm text-red-500">
                           {errors.newPassword.message}
                         </p>
                       )}
@@ -294,7 +255,7 @@ function ResetPasswordContent() {
                     <div>
                       <label
                         htmlFor="confirmPassword"
-                        className="block text-sm font-semibold text-white mb-2"
+                        className="block text-sm font-semibold text-gray-900 mb-2"
                       >
                         Confirm New Password
                       </label>
@@ -306,13 +267,13 @@ function ResetPasswordContent() {
                           {...register("confirmPassword")}
                           type={showConfirmPassword ? "text" : "password"}
                           autoComplete="new-password"
-                          className="block w-full pl-10 pr-10 py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                          className="block w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                           placeholder="Confirm your new password"
                         />
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                           <button
                             type="button"
-                            className="text-gray-400 hover:text-gray-300 focus:outline-none transition-colors duration-300"
+                            className="text-gray-400 hover:text-gray-600 focus:outline-none"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           >
                             {showConfirmPassword ? (
@@ -324,7 +285,7 @@ function ResetPasswordContent() {
                         </div>
                       </div>
                       {errors.confirmPassword && (
-                        <p className="mt-2 text-sm text-red-400">
+                        <p className="mt-2 text-sm text-red-500">
                           {errors.confirmPassword.message}
                         </p>
                       )}
@@ -335,7 +296,7 @@ function ResetPasswordContent() {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex justify-center py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                        className="w-full flex justify-center py-3 px-4 bg-pink-500 hover:bg-pink-600 text-white rounded-lg text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
                       >
                         {loading ? (
                           <div className="flex items-center">
@@ -355,26 +316,26 @@ function ResetPasswordContent() {
             <>
               {/* Success State */}
               <div className="text-center lg:text-left">
-                <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
+                <h2 className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
                   Password Reset!
                 </h2>
-                <p className="mt-3 text-base text-gray-300">
+                <p className="mt-3 text-base text-gray-600">
                   Your password has been successfully reset. You can now sign in with your new password.
                 </p>
               </div>
 
               <div className="mt-8">
-                <div className="bg-gray-900/50 backdrop-blur-md border border-gray-800/50 py-8 px-6 lg:px-8 shadow-xl rounded-xl text-center">
-                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Shield className="w-8 h-8 text-green-400" />
+                <div className="bg-white border border-gray-200 py-8 px-6 lg:px-8 rounded-xl text-center">
+                  <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield className="w-8 h-8 text-green-500" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Password Updated!</h3>
-                  <p className="text-gray-300 mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Password Updated!</h3>
+                  <p className="text-gray-600 mb-6">
                     Your password has been changed successfully. For security reasons, you've been logged out of all devices.
                   </p>
                   <button
                     onClick={handleGoToLogin}
-                    className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                    className="w-full py-3 px-4 bg-pink-500 hover:bg-pink-600 text-white rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
                   >
                     Go to Sign In
                   </button>

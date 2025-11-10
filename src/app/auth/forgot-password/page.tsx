@@ -72,74 +72,60 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 flex min-h-screen">
+    <div className="bg-gray-50 flex min-h-screen">
       {/* Left Side - Hero Section */}
-      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
-        {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 via-orange-500/10 to-transparent"></div>
-
-        {/* Lottie Animation */}
-        <div className="absolute inset-0">
-          <LottieAnimation
-            animationPath="/fly-man.json"
-            loop={true}
-            autoplay={true}
-            style={{ width: "100%", height: "100%" }}
-            className="opacity-30"
-          />
-        </div>
-
-        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-16 text-white">
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-white border-r border-gray-200">
+        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-16">
           {/* Hero Content */}
           <div className="max-w-lg">
-            <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-tight mb-6">
+            <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-tight mb-6 text-gray-900">
               RESET YOUR{" "}
-              <span className="block text-orange-400">
+              <span className="block text-accent">
                 PASSWORD
               </span>
             </h1>
 
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
               Don't worry! Enter your email address and we'll send you an OTP to reset your password.
             </p>
 
             {/* Stats Section */}
             <div className="grid grid-cols-3 gap-6 mb-8">
               <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <Users className="w-6 h-6 text-orange-400" />
+                <div className="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-2 mx-auto">
+                  <Users className="w-6 h-6 text-accent" />
                 </div>
-                <div className="text-2xl font-bold text-white">7+</div>
-                <div className="text-sm text-gray-400">Social Media Platforms</div>
+                <div className="text-2xl font-bold text-gray-900">7+</div>
+                <div className="text-sm text-gray-600">Social Media Platforms</div>
               </div>
               <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <ShoppingBag className="w-6 h-6 text-orange-400" />
+                <div className="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-2 mx-auto">
+                  <ShoppingBag className="w-6 h-6 text-accent" />
                 </div>
-                <div className="text-2xl font-bold text-white">40K+</div>
-                <div className="text-sm text-gray-400">Custom and Trending Products</div>
+                <div className="text-2xl font-bold text-gray-900">40K+</div>
+                <div className="text-sm text-gray-600">Custom and Trending Products</div>
               </div>
               <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <TrendingUp className="w-6 h-6 text-orange-400" />
+                <div className="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-2 mx-auto">
+                  <TrendingUp className="w-6 h-6 text-accent" />
                 </div>
-                <div className="text-2xl font-bold text-white">$1M+++</div>
-                <div className="text-sm text-gray-400">Start Making Millions</div>
+                <div className="text-2xl font-bold text-gray-900">$1M+++</div>
+                <div className="text-sm text-gray-600">Start Making Millions</div>
               </div>
             </div>
 
             {/* Feature Highlights */}
             <div className="space-y-4">
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+              <div className="flex items-center text-gray-700">
+                <div className="w-2 h-2 bg-accent rounded-full mr-3"></div>
                 <span>Secure password reset process</span>
               </div>
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+              <div className="flex items-center text-gray-700">
+                <div className="w-2 h-2 bg-accent rounded-full mr-3"></div>
                 <span>OTP expires in 10 minutes</span>
               </div>
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+              <div className="flex items-center text-gray-700">
+                <div className="w-2 h-2 bg-accent rounded-full mr-3"></div>
                 <span>Get back to creating quickly</span>
               </div>
             </div>
@@ -155,7 +141,7 @@ export default function ForgotPasswordPage() {
           <div className="mb-6">
             <Link
               href="/auth/login"
-              className="inline-flex items-center text-orange-400 hover:text-orange-300 transition-colors duration-300"
+              className="inline-flex items-center text-accent hover:text-accent/80 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Sign In
@@ -166,23 +152,23 @@ export default function ForgotPasswordPage() {
             <>
               {/* Header */}
               <div className="text-center lg:text-left">
-                <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
+                <h2 className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
                   Forgot Password?
                 </h2>
-                <p className="mt-3 text-base text-gray-300">
+                <p className="mt-3 text-base text-gray-600">
                   Enter your email address and we'll send you an OTP to reset your password.
                 </p>
               </div>
 
               {/* Form */}
               <div className="mt-8">
-                <div className="bg-gray-900/50 backdrop-blur-md border border-gray-800/50 py-8 px-6 lg:px-8 shadow-xl rounded-xl">
+                <div className="bg-white border border-gray-200 py-8 px-6 lg:px-8 shadow-sm rounded-xl">
                   <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                     {/* Email Field */}
                     <div>
                       <label
                         htmlFor="email"
-                        className="block text-sm font-semibold text-white mb-2"
+                        className="block text-sm font-semibold text-gray-900 mb-2"
                       >
                         Email address
                       </label>
@@ -194,12 +180,12 @@ export default function ForgotPasswordPage() {
                           {...register("email")}
                           type="email"
                           autoComplete="email"
-                          className="block w-full pl-10 pr-3 py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                          className="block w-full pl-10 pr-3 py-3 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                           placeholder="Enter your email address"
                         />
                       </div>
                       {errors.email && (
-                        <p className="mt-2 text-sm text-red-400">
+                        <p className="mt-2 text-sm text-red-600">
                           {errors.email.message}
                         </p>
                       )}
@@ -210,7 +196,7 @@ export default function ForgotPasswordPage() {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex justify-center py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                        className="w-full flex justify-center py-3 px-4 bg-accent hover:bg-accent/90 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                       >
                         {loading ? (
                           <div className="flex items-center">
@@ -230,27 +216,27 @@ export default function ForgotPasswordPage() {
             <>
               {/* Success State */}
               <div className="text-center lg:text-left">
-                <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
+                <h2 className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
                   Check Your Email
                 </h2>
-                <p className="mt-3 text-base text-gray-300">
+                <p className="mt-3 text-base text-gray-600">
                   We've sent a 6-digit OTP to{" "}
-                  <span className="text-orange-400 font-semibold">{email}</span>
+                  <span className="text-accent font-semibold">{email}</span>
                 </p>
               </div>
 
               <div className="mt-8">
-                <div className="bg-gray-900/50 backdrop-blur-md border border-gray-800/50 py-8 px-6 lg:px-8 shadow-xl rounded-xl text-center">
-                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Mail className="w-8 h-8 text-green-400" />
+                <div className="bg-white border border-gray-200 py-8 px-6 lg:px-8 shadow-sm rounded-xl text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mail className="w-8 h-8 text-green-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Email Sent!</h3>
-                  <p className="text-gray-300 mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Email Sent!</h3>
+                  <p className="text-gray-600 mb-6">
                     Please check your inbox for the 6-digit OTP. It will expire in 10 minutes.
                   </p>
                   <button
                     onClick={handleProceedToReset}
-                    className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                    className="w-full py-3 px-4 bg-accent hover:bg-accent/90 text-white rounded-lg text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                   >
                     Continue to Reset Password
                   </button>

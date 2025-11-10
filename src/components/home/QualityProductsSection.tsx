@@ -25,11 +25,8 @@ export  function QualityProductsSection() {
 
   return (
     <section
-      className="relative text-white py-8 sm:py-12 md:py-16 lg:py-24 overflow-hidden bg-gray-950"
+      className="relative bg-gray-50 py-8 sm:py-12 md:py-16 lg:py-24 overflow-hidden"
     >
-      <div className="absolute top-0 left-0 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-blue-500/5 rounded-full blur-2xl opacity-30"></div>
-      <div className="absolute bottom-0 right-0 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-purple-500/5 rounded-full blur-2xl opacity-30"></div>
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-16 items-center">
           {/* Left side - Scrolling Images */}
@@ -65,43 +62,36 @@ export  function QualityProductsSection() {
                 ))}
               </div>
             </div>
-
-            {/* Floating accent elements - Reduced */}
-            <div className="absolute -top-2 sm:-top-3 md:-top-4 -right-2 sm:-right-3 md:-right-4 w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 bg-gradient-to-br from-purple-500/10 to-orange-500/10 rounded-full blur-lg"></div>
           </div>
 
-          {/* Right side - Enhanced Content */}
+          {/* Right side - Content */}
           <div className="space-y-4 sm:space-y-6 md:space-y-8">
             <div className="relative">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-white mb-4 sm:mb-6 md:mb-8 leading-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 mb-4 sm:mb-6 md:mb-8 leading-tight">
                 Quality products
                 <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 via-gray-300 to-gray-400">
+                <span className="text-gray-600">
                   without the headache
                 </span>
               </h2>
-              <div className="absolute -left-3 sm:-left-4 md:-left-6 top-4 sm:top-6 md:top-8 w-0.5 sm:w-1 h-12 sm:h-16 md:h-20 bg-gradient-to-b from-purple-500 to-orange-500 rounded-full"></div>
             </div>
 
             <div className="space-y-1 sm:space-y-2">
               {/* Create beautiful products */}
-              <div className="group relative backdrop-blur-sm bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:bg-white/[0.04] hover:border-white/20">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
+              <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
                 <button
                   onClick={() => toggleSection("create")}
-                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left z-10"
+                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
                 >
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-orange-400 transition-all duration-300">
+                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-accent transition-all duration-300">
                     Create beautiful products
                   </h3>
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-orange-500 rounded-full blur opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
-                    <div className="relative transform transition-all duration-300 ease-out p-1.5 sm:p-2 rounded-full bg-white/5 group-hover:bg-white/10 group-hover:scale-110">
+                    <div className="relative transform transition-all duration-300 ease-out p-1.5 sm:p-2 rounded-full bg-gray-50 group-hover:bg-accent/10">
                       {expandedSection === "create" ? (
-                        <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-orange-400 transition-colors duration-200" />
+                        <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
                       ) : (
-                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-purple-400 transition-colors duration-200" />
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
                       )}
                     </div>
                   </div>
@@ -115,37 +105,31 @@ export  function QualityProductsSection() {
                   }`}
                 >
                   <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
-                    <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-5 md:mb-6 font-light">
+                    <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-5 md:mb-6">
                       From apparel to makeup to your own product lines, we've teamed up with top brands and manufacturers to bring your ideas to life. No minimums required.
                     </p>
-                    <button className="relative group/btn bg-gradient-to-r from-white to-gray-100 text-black px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-full font-semibold overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-white/20 text-sm sm:text-base">
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-orange-600 opacity-0 group-hover/btn:opacity-10 transition-opacity duration-300"></div>
-                      <span className="relative">
-                        Create your first product
-                      </span>
+                    <button className="bg-accent hover:bg-accent/90 text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-lg font-semibold transition-all duration-300 text-sm sm:text-base">
+                      Create your first product
                     </button>
                   </div>
                 </div>
               </div>
 
               {/* Launch your own shop */}
-              <div className="group relative backdrop-blur-sm bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:bg-white/[0.04] hover:border-white/20">
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
+              <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
                 <button
                   onClick={() => toggleSection("shop")}
-                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left z-10"
+                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
                 >
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-orange-400 group-hover:to-purple-400 transition-all duration-300">
+                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-accent transition-all duration-300">
                     Launch your own shop
                   </h3>
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-purple-500 rounded-full blur opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
-                    <div className="relative transform transition-all duration-300 ease-out p-1.5 sm:p-2 rounded-full bg-white/5 group-hover:bg-white/10 group-hover:scale-110">
+                    <div className="relative transform transition-all duration-300 ease-out p-1.5 sm:p-2 rounded-full bg-gray-50 group-hover:bg-accent/10">
                       {expandedSection === "shop" ? (
-                        <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-purple-400 transition-colors duration-200" />
+                        <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
                       ) : (
-                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-orange-400 transition-colors duration-200" />
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
                       )}
                     </div>
                   </div>
@@ -159,7 +143,7 @@ export  function QualityProductsSection() {
                   }`}
                 >
                   <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
-                    <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed font-light">
+                    <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
                       Set up your free custom shop and start selling your products with our easy-to-use platform across all social platforms. Full customization available. Ask us about your own fully branded website.
                     </p>
                   </div>
@@ -167,23 +151,20 @@ export  function QualityProductsSection() {
               </div>
 
               {/* We handle shipping & support */}
-              <div className="group relative backdrop-blur-sm bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden transition-all duration-500 hover:bg-white/[0.04] hover:border-white/20">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-orange-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
+              <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
                 <button
                   onClick={() => toggleSection("shipping")}
-                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left z-10"
+                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
                 >
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-orange-400 transition-all duration-300">
+                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-accent transition-all duration-300">
                     We handle shipping & support
                   </h3>
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-orange-500 rounded-full blur opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
-                    <div className="relative transform transition-all duration-300 ease-out p-1.5 sm:p-2 rounded-full bg-white/5 group-hover:bg-white/10 group-hover:scale-110">
+                    <div className="relative transform transition-all duration-300 ease-out p-1.5 sm:p-2 rounded-full bg-gray-50 group-hover:bg-accent/10">
                       {expandedSection === "shipping" ? (
-                        <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-orange-400 transition-colors duration-200" />
+                        <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
                       ) : (
-                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-purple-400 transition-colors duration-200" />
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
                       )}
                     </div>
                   </div>
@@ -197,7 +178,7 @@ export  function QualityProductsSection() {
                   }`}
                 >
                   <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
-                    <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed font-light">
+                    <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
                       Join trendsetting creators already earning across all socials with our platform.
                     </p>
                   </div>

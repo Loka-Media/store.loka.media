@@ -101,67 +101,53 @@ function RegisterPageContent() {
 
   return (
     // Main container now uses the same flex properties as the login page
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* --- Left Side - Hero Section (Copied directly from Login Page) --- */}
-      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
-        {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 via-orange-500/10 to-transparent"></div>
-
-        {/* Lottie Animation (ensure '/fly-man.json' exists in your public folder) */}
-        <div className="absolute inset-0">
-          <LottieAnimation
-            animationPath="/fly-man.json" // Using the same Lottie as the login page
-            loop={true}
-            autoplay={true}
-            style={{ width: "100%", height: "100%" }}
-            className="opacity-30" // Subtle background effect
-          />
-        </div>
-
-        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-16 text-white">
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-white border-r border-gray-200">
+        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-16">
 
           {/* Hero Content - Updated Messaging */}
           <div className="max-w-lg">
-            <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-tight mb-6">
+            <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-tight mb-6 text-gray-900">
               CREATE YOUR{" "}
-              <span className="block text-orange-400">
+              <span className="block text-accent">
                 ACCOUNT PAGE
               </span>
             </h1>
 
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
               Join trendsetting artists, brands and creators to showcase your unique products and services, connecting directly with your audience.
             </p>
 
             {/* Stats Section - Updated with new numbers */}
             <div className="grid grid-cols-3 gap-6 mb-8">
               <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <Users className="w-6 h-6 text-orange-400" />
+                <div className="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-2 mx-auto">
+                  <Users className="w-6 h-6 text-accent" />
                 </div>
-                <div className="text-2xl font-bold text-white">7+</div>
-                <div className="text-sm text-gray-400">Social Media Platforms</div>
+                <div className="text-2xl font-bold text-gray-900">7+</div>
+                <div className="text-sm text-gray-600">Social Media Platforms</div>
               </div>
               <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <ShoppingBag className="w-6 h-6 text-orange-400" />
+                <div className="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-2 mx-auto">
+                  <ShoppingBag className="w-6 h-6 text-accent" />
                 </div>
-                <div className="text-2xl font-bold text-white">40K+</div>
-                <div className="text-sm text-gray-400">Custom and Trending Products</div>
+                <div className="text-2xl font-bold text-gray-900">40K+</div>
+                <div className="text-sm text-gray-600">Custom and Trending Products</div>
               </div>
               <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <TrendingUp className="w-6 h-6 text-orange-400" />
+                <div className="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-lg mb-2 mx-auto">
+                  <TrendingUp className="w-6 h-6 text-accent" />
                 </div>
-                <div className="text-2xl font-bold text-white">$1M+++</div>
-                <div className="text-sm text-gray-400">Start Making Millions</div>
+                <div className="text-2xl font-bold text-gray-900">$1M+++</div>
+                <div className="text-sm text-gray-600">Start Making Millions</div>
               </div>
             </div>
 
             {/* Feature Highlights - Updated Messaging */}
             <div className="space-y-4">
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+              <div className="flex items-center text-gray-700">
+                <div className="w-2 h-2 bg-accent rounded-full mr-3"></div>
                 <span>Creators - Design and sell your custom products</span>
               </div>
             </div>
@@ -172,21 +158,17 @@ function RegisterPageContent() {
 
       {/* --- Right Side - Registration Form (Your existing form content) --- */}
       <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 lg:flex-none lg:w-[680px] xl:w-[820px]">
-        {" "}
-        {/* Adjusted width here */}
         <div className="mx-auto w-full max-w-sm lg:max-w-3xl">
-          {" "}
-          {/* Adjusted max-width here for more space */}
           {/* Header */}
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
+            <h2 className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
               Create your account
             </h2>
-            <p className="mt-3 text-base text-gray-300">
+            <p className="mt-3 text-base text-gray-600">
               Or{" "}
               <Link
                 href="/auth/login"
-                className="font-semibold text-orange-400 hover:text-orange-300 transition-colors duration-300"
+                className="font-semibold text-accent hover:text-accent/80 transition-colors"
               >
                 sign in to your existing account
               </Link>
@@ -194,25 +176,25 @@ function RegisterPageContent() {
           </div>
           {/* Form */}
           <div className="mt-8">
-            <div className="bg-gray-900/50 backdrop-blur-md border border-gray-800/50 py-8 px-6 lg:px-8 shadow-xl rounded-xl">
+            <div className="bg-white border border-gray-200 py-8 px-6 lg:px-8 shadow-sm rounded-xl">
               <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                 {/* Role Selection - Cool Toggle Switch */}
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Account Type
                   </label>
-                  <p className="text-xs sm:text-sm leading-5 text-gray-400 mt-1">
+                  <p className="text-xs sm:text-sm leading-5 text-gray-600 mt-1">
                     Toggle to switch between User and Creator account
                   </p>
-                  
+
                   <div className="mt-4 flex items-center justify-start">
-                    <div className="w-1/2 flex items-center justify-between p-4 bg-gray-800/30 rounded-xl border border-gray-700/50">
+                    <div className="w-1/2 flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
                       {/* User Side */}
-                      <div className={`flex items-center transition-all duration-300 ${selectedRole === 'user' ? 'text-white' : 'text-gray-500'}`}>
+                      <div className={`flex items-center transition-all duration-300 ${selectedRole === 'user' ? 'text-gray-900' : 'text-gray-400'}`}>
                         <User className="w-4 h-4 mr-2" />
                         <div>
                           <div className="font-semibold text-xs">User</div>
-                          <div className="text-xs text-gray-400">Browse</div>
+                          <div className="text-xs text-gray-500">Browse</div>
                         </div>
                       </div>
 
@@ -221,8 +203,8 @@ function RegisterPageContent() {
                         <div
                           className={`relative w-16 h-8 rounded-full transition-all duration-300 ease-in-out cursor-pointer ${
                             selectedRole === 'creator'
-                              ? 'bg-gradient-to-r from-orange-500 to-orange-600 shadow-lg shadow-orange-500/30'
-                              : 'bg-gray-600'
+                              ? 'bg-accent'
+                              : 'bg-gray-300'
                           }`}
                           onClick={() => {
                             const newRole = selectedRole === 'creator' ? 'user' : 'creator';
@@ -249,25 +231,20 @@ function RegisterPageContent() {
                             {/* Icon inside the ball */}
                             <div className="flex items-center justify-center w-full h-full">
                               {selectedRole === 'creator' ? (
-                                <UserCheck className="w-3 h-3 text-orange-500" />
+                                <UserCheck className="w-3 h-3 text-accent" />
                               ) : (
                                 <User className="w-3 h-3 text-gray-400" />
                               )}
                             </div>
                           </div>
-                          
-                          {/* Glow effect when active */}
-                          {selectedRole === 'creator' && (
-                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 opacity-20 animate-pulse"></div>
-                          )}
                         </div>
                       </div>
 
                       {/* Creator Side */}
-                      <div className={`flex items-center transition-all duration-300 ${selectedRole === 'creator' ? 'text-white' : 'text-gray-500'}`}>
+                      <div className={`flex items-center transition-all duration-300 ${selectedRole === 'creator' ? 'text-gray-900' : 'text-gray-400'}`}>
                         <div className="text-right mr-2">
                           <div className="font-semibold text-xs">Creator</div>
-                          <div className="text-xs text-gray-400">Sell</div>
+                          <div className="text-xs text-gray-500">Sell</div>
                         </div>
                         <UserCheck className="w-4 h-4" />
                       </div>
@@ -280,7 +257,7 @@ function RegisterPageContent() {
                   <div>
                     <label
                       htmlFor="creatorUrl"
-                      className="block text-xs sm:text-sm font-semibold text-white mb-2"
+                      className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2"
                     >
                       Creator Handle/Profile URL
                     </label>
@@ -291,12 +268,12 @@ function RegisterPageContent() {
                       <input
                         {...register("creatorUrl")}
                         type="url"
-                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                         placeholder="https://instagram.com/yourhandle or YouTube/TikTok URL"
                       />
                     </div>
                     {errors.creatorUrl && (
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-400">
+                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600">
                         {errors.creatorUrl.message}
                       </p>
                     )}
@@ -305,15 +282,15 @@ function RegisterPageContent() {
 
                 {/* Creator Approval Notice */}
                 {selectedRole === "creator" && (
-                  <div className="bg-blue-900/30 border border-blue-500/30 rounded-lg p-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-start">
-                      <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
+                      <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                       <div>
-                        <h4 className="text-sm font-semibold text-blue-400 mb-1">
+                        <h4 className="text-sm font-semibold text-blue-900 mb-1">
                           Creator Account Approval Required
                         </h4>
-                        <p className="text-xs text-blue-200 leading-relaxed">
-                          You will initially register as a user. Your creator request will be reviewed by our admin team. 
+                        <p className="text-xs text-blue-700 leading-relaxed">
+                          You will initially register as a user. Your creator request will be reviewed by our admin team.
                           Once approved, you&apos;ll gain access to creator features including product uploads and sales tracking.
                         </p>
                       </div>
@@ -327,7 +304,7 @@ function RegisterPageContent() {
                   <div className="lg:col-span-2">
                     <label
                       htmlFor="name"
-                      className="block text-xs sm:text-sm font-semibold text-white mb-2"
+                      className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2"
                     >
                       Full Name
                     </label>
@@ -338,12 +315,12 @@ function RegisterPageContent() {
                       <input
                         {...register("name")}
                         type="text"
-                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                         placeholder="Enter your full name"
                       />
                     </div>
                     {errors.name && (
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-400">
+                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600">
                         {errors.name.message}
                       </p>
                     )}
@@ -353,7 +330,7 @@ function RegisterPageContent() {
                   <div className="lg:col-span-1">
                     <label
                       htmlFor="username"
-                      className="block text-xs sm:text-sm font-semibold text-white mb-2"
+                      className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2"
                     >
                       Username
                     </label>
@@ -364,12 +341,12 @@ function RegisterPageContent() {
                       <input
                         {...register("username")}
                         type="text"
-                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                         placeholder="Choose a username"
                       />
                     </div>
                     {errors.username && (
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-400">
+                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600">
                         {errors.username.message}
                       </p>
                     )}
@@ -379,7 +356,7 @@ function RegisterPageContent() {
                   <div className="lg:col-span-1">
                     <label
                       htmlFor="phone"
-                      className="block text-xs sm:text-sm font-semibold text-white mb-2"
+                      className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2"
                     >
                       Phone Number
                     </label>
@@ -390,12 +367,12 @@ function RegisterPageContent() {
                       <input
                         {...register("phone")}
                         type="tel"
-                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                         placeholder="Enter your phone number"
                       />
                     </div>
                     {errors.phone && (
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-400">
+                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600">
                         {errors.phone.message}
                       </p>
                     )}
@@ -405,7 +382,7 @@ function RegisterPageContent() {
                   <div className="lg:col-span-2">
                     <label
                       htmlFor="email"
-                      className="block text-xs sm:text-sm font-semibold text-white mb-2"
+                      className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2"
                     >
                       Email address
                     </label>
@@ -416,12 +393,12 @@ function RegisterPageContent() {
                       <input
                         {...register("email")}
                         type="email"
-                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        className="block w-full pl-8 sm:pl-10 pr-3 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                         placeholder="Enter your email"
                       />
                     </div>
                     {errors.email && (
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-400">
+                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600">
                         {errors.email.message}
                       </p>
                     )}
@@ -431,7 +408,7 @@ function RegisterPageContent() {
                   <div className="lg:col-span-1">
                     <label
                       htmlFor="password"
-                      className="block text-xs sm:text-sm font-semibold text-white mb-2"
+                      className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2"
                     >
                       Password
                     </label>
@@ -442,13 +419,13 @@ function RegisterPageContent() {
                       <input
                         {...register("password")}
                         type={showPassword ? "text" : "password"}
-                        className="block w-full pl-8 sm:pl-10 pr-10 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        className="block w-full pl-8 sm:pl-10 pr-10 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                         placeholder="Create a password"
                       />
                       <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                         <button
                           type="button"
-                          className="text-gray-400 hover:text-gray-300 focus:outline-none transition-colors duration-300"
+                          className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? (
@@ -460,7 +437,7 @@ function RegisterPageContent() {
                       </div>
                     </div>
                     {errors.password && (
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-400">
+                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600">
                         {errors.password.message}
                       </p>
                     )}
@@ -470,7 +447,7 @@ function RegisterPageContent() {
                   <div className="lg:col-span-1">
                     <label
                       htmlFor="confirmPassword"
-                      className="block text-xs sm:text-sm font-semibold text-white mb-2"
+                      className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2"
                     >
                       Confirm Password
                     </label>
@@ -481,13 +458,13 @@ function RegisterPageContent() {
                       <input
                         {...register("confirmPassword")}
                         type={showConfirmPassword ? "text" : "password"}
-                        className="block w-full pl-8 sm:pl-10 pr-10 py-2.5 sm:py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
+                        className="block w-full pl-8 sm:pl-10 pr-10 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                         placeholder="Confirm your password"
                       />
                       <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                         <button
                           type="button"
-                          className="text-gray-400 hover:text-gray-300 focus:outline-none transition-colors duration-300"
+                          className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
                           onClick={() =>
                             setShowConfirmPassword(!showConfirmPassword)
                           }
@@ -501,7 +478,7 @@ function RegisterPageContent() {
                       </div>
                     </div>
                     {errors.confirmPassword && (
-                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-400">
+                      <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-red-600">
                         {errors.confirmPassword.message}
                       </p>
                     )}
@@ -513,7 +490,7 @@ function RegisterPageContent() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full flex justify-center py-2.5 sm:py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-sm sm:text-base font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                    className="w-full flex justify-center py-2.5 sm:py-3 px-4 bg-accent hover:bg-accent/90 text-white rounded-lg text-sm sm:text-base font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                   >
                     {loading ? (
                       <div className="flex items-center">
@@ -528,19 +505,19 @@ function RegisterPageContent() {
               </form>
 
               {/* Footer Links */}
-              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-800">
-                <p className="text-xs text-gray-400 text-center leading-relaxed">
+              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+                <p className="text-xs text-gray-600 text-center leading-relaxed">
                   By creating an account, you agree to our{" "}
                   <Link
                     href="/terms"
-                    className="text-orange-400 hover:text-orange-300 transition-colors duration-300"
+                    className="text-accent hover:text-accent/80 transition-colors"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
                     href="/privacy"
-                    className="text-orange-400 hover:text-orange-300 transition-colors duration-300"
+                    className="text-accent hover:text-accent/80 transition-colors"
                   >
                     Privacy Policy
                   </Link>
@@ -561,9 +538,9 @@ export default function RegisterPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
-          <p className="text-white ml-4 text-xl">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent"></div>
+          <p className="text-gray-900 ml-4 text-xl">
             Loading registration form...
           </p>
         </div>
