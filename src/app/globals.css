@@ -5,7 +5,8 @@
   --background: #ffffff;
   --foreground: #1a1a1a;
   --border: #e5e5e5;
-  --accent: #23a094;
+  --accent: #FF90E8;
+  --accent-hover: #FF6FDB;
 }
 
 @theme inline {

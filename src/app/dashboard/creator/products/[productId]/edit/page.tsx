@@ -178,10 +178,10 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-          <p className="mt-4 text-gray-400 text-lg">Loading product...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+          <p className="mt-4 text-gray-600 text-lg">Loading product...</p>
         </div>
       </div>
     );
@@ -189,12 +189,12 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Product not found</h1>
-          <Link 
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h1>
+          <Link
             href="/dashboard/creator/products"
-            className="text-orange-400 hover:text-orange-300"
+            className="text-accent hover:text-accent/80"
           >
             Return to products
           </Link>
@@ -204,22 +204,22 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gray-900/50 backdrop-blur-sm border-b border-orange-500/20">
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center space-x-6">
-              <Link 
+              <Link
                 href="/dashboard/creator/products"
-                className="inline-flex items-center text-gray-400 hover:text-orange-400 transition-colors"
+                className="inline-flex items-center text-gray-600 hover:text-accent transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 Back to Products
               </Link>
               <div>
-                <h1 className="text-3xl font-extrabold text-white tracking-tight">Edit Product</h1>
-                <p className="mt-1 text-base text-gray-400">
+                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Edit Product</h1>
+                <p className="mt-1 text-base text-gray-600">
                   Update your product details and mockup
                 </p>
               </div>
@@ -228,7 +228,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
               <Link
                 href={`/products/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
                 target="_blank"
-                className="inline-flex items-center px-4 py-2 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700 rounded-xl transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-white text-gray-600 hover:text-gray-900 border border-gray-200 rounded-xl transition-colors"
               >
                 <Eye className="w-4 h-4 mr-2" />
                 Preview
@@ -241,39 +241,39 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
-          <div className="bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-xl p-6 border border-gray-800">
-            <h2 className="text-xl font-bold text-white mb-6">Basic Information</h2>
-            
+          <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Basic Information</h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Product Name *
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
                   placeholder="Enter product name"
                   required
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Description
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
                   placeholder="Describe your product"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Base Price
                 </label>
                 <input
@@ -281,13 +281,13 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   step="0.01"
                   value={formData.basePrice}
                   onChange={(e) => handleInputChange('basePrice', e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
                   placeholder="0.00"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Markup Percentage
                 </label>
                 <input
@@ -295,19 +295,19 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   step="0.1"
                   value={formData.markupPercentage}
                   onChange={(e) => handleInputChange('markupPercentage', e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
                   placeholder="0"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Category
                 </label>
                 <select
                   value={formData.category}
                   onChange={(e) => handleInputChange('category', e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
                 >
                   <option value="">Select Category</option>
                   <option value="T-Shirts">T-Shirts</option>
@@ -320,7 +320,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Status
                 </label>
                 <div className="flex items-center space-x-4">
@@ -329,18 +329,18 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                       type="radio"
                       checked={formData.isActive}
                       onChange={() => handleInputChange('isActive', true)}
-                      className="form-radio text-orange-500 focus:ring-orange-500"
+                      className="form-radio text-accent focus:ring-accent"
                     />
-                    <span className="ml-2 text-white">Active</span>
+                    <span className="ml-2 text-gray-900">Active</span>
                   </label>
                   <label className="inline-flex items-center">
                     <input
                       type="radio"
                       checked={!formData.isActive}
                       onChange={() => handleInputChange('isActive', false)}
-                      className="form-radio text-orange-500 focus:ring-orange-500"
+                      className="form-radio text-accent focus:ring-accent"
                     />
-                    <span className="ml-2 text-white">Inactive</span>
+                    <span className="ml-2 text-gray-900">Inactive</span>
                   </label>
                 </div>
               </div>
@@ -348,8 +348,8 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
           </div>
 
           {/* Tags */}
-          <div className="bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-xl p-6 border border-gray-800">
-            <h2 className="text-xl font-bold text-white mb-6">Tags</h2>
+          <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Tags</h2>
             
             <div className="space-y-4">
               <div className="flex space-x-2">
@@ -358,13 +358,13 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                  className="flex-1 px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
                   placeholder="Add a tag"
                 />
                 <button
                   type="button"
                   onClick={handleAddTag}
-                  className="px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-colors"
+                  className="px-4 py-3 bg-accent text-white rounded-xl transition-colors"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -375,13 +375,13 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   {formData.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-3 py-1 bg-gray-800 text-white text-sm rounded-full"
+                      className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-900 text-sm rounded-full"
                     >
                       {tag}
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
-                        className="ml-2 text-gray-400 hover:text-red-400"
+                        className="ml-2 text-gray-600 hover:text-red-600"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -464,7 +464,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-red-700 shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="inline-flex items-center px-6 py-3 bg-accent text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <>

@@ -162,7 +162,7 @@ export default function CreatorCatalogPage() {
 
   return (
     <CreatorProtectedRoute>
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
         <Navigation />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -201,10 +201,10 @@ export default function CreatorCatalogPage() {
 function CategorySelection({ categories, onSelectCategory } : any) {
   return (
     <div>
-      <h2 className="text-3xl font-bold text-center text-white mb-4">
+      <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">
         Choose a Category
       </h2>
-      <p className="text-center text-gray-400 mb-12">
+      <p className="text-center text-gray-600 mb-12">
         Select a product category to start creating your designs.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -225,7 +225,7 @@ function CategorySelection({ categories, onSelectCategory } : any) {
 function CategoryCard({ category, onSelect }: any) {
   return (
     <div
-      className="bg-gray-900/50 backdrop-blur-sm border border-orange-500/20 rounded-lg overflow-hidden group hover:border-orange-500 transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+      className="bg-white border border-gray-200 rounded-lg overflow-hidden group hover:border-accent transition-colors cursor-pointer"
       onClick={() => onSelect(category)}
     >
       <div className="aspect-square relative overflow-hidden">
@@ -233,12 +233,11 @@ function CategoryCard({ category, onSelect }: any) {
           src={category.image_url || "/placeholder-product.png"}
           alt={category.title}
           fill
-          className="object-cover group-hover:scale-110 transition-transform duration-300 ease-in-out"
+          className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
       </div>
       <div className="p-4">
-        <h3 className="font-bold text-white text-xl text-center">
+        <h3 className="font-bold text-gray-900 text-xl text-center">
           {category.title}
         </h3>
       </div>

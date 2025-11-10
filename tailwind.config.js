@@ -11,7 +11,10 @@ module.exports = {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
         border: 'var(--border)',
-        accent: 'var(--accent)',
+        accent: {
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+        },
       },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],

@@ -58,7 +58,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     : [product.thumbnail_url || '/placeholder-product.svg'];
 
   return (
-    <div className="bg-black text-white min-h-screen">
+    <div className="bg-white text-gray-900 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <ProductPageNavigation />
 
@@ -93,8 +93,8 @@ export default function ProductPage({ params }: ProductPageProps) {
               onAddToCart={handleAddToCart}
               onWishlistToggle={handleWishlistToggle}
             />
-            
-            <div className="pt-8 border-t border-gray-800">
+
+            <div className="pt-8 border-t border-gray-200">
               <ProductMeta
                 creatorName={product.creator_name}
                 creatorUsername={product.creator_username}

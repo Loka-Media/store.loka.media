@@ -15,36 +15,27 @@ export function HowItWorksSection() {
       icon: (
         <UserPlus className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-gray-600 group-hover:text-accent transition-colors duration-300" />
       ),
-      title: "Create Your Account",
+      title: "Sign up for free",
       description:
-        "Sign up and complete our secure creator verification to get approved in under 24 hours.",
+        "Create your account in seconds. No credit card required.",
     },
     {
       step: "02",
       icon: (
-        <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-gray-600 group-hover:text-accent transition-colors duration-300" />
+        <Palette className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-gray-600 group-hover:text-accent transition-colors duration-300" />
       ),
-      title: "Secure Your Identity",
+      title: "Design your products",
       description:
-        "Our team reviews your application to ensure the highest standards for our marketplace.",
+        "Use our easy design tools or upload your own artwork. Pick from thousands of products.",
     },
     {
       step: "03",
       icon: (
-        <Palette className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-gray-600 group-hover:text-accent transition-colors duration-300" />
-      ),
-      title: "Design & Launch Products",
-      description:
-        "Access our full product catalog and intuitive design tools to create your first collection.",
-    },
-    {
-      step: "04",
-      icon: (
         <Rocket className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-gray-600 group-hover:text-accent transition-colors duration-300" />
       ),
-      title: "Sell & Get Paid",
+      title: "Start earning",
       description:
-        "Publish your products and get paid instantly for every sale you make on the platform.",
+        "Share your store link and get paid. We handle production, shipping, and customer service.",
     },
   ];
 
@@ -53,15 +44,11 @@ export function HowItWorksSection() {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight tracking-tight">
-            A Seamless Journey from{" "}
-            <span className="text-accent">
-              Idea to Launch
-            </span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+            Sell products in minutes
           </h2>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-xl sm:max-w-2xl lg:max-w-3xl mx-auto leading-relaxed">
-            Our streamlined process empowers you to build and grow your brand
-            with professional tools and seamless workflows.
+            Build your product business the simple way. No inventory, no shipping, no hassle.
           </p>
         </div>
 
@@ -69,7 +56,7 @@ export function HowItWorksSection() {
           {/* Connecting line */}
           <div className="hidden lg:block absolute top-[120px] left-0 right-0 h-px bg-gray-200"></div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 relative z-10">
             {steps.map((step, index) => (
               <div
                 key={index}

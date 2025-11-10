@@ -50,64 +50,64 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       <Navigation />
-      
+
       <div className="max-w-7xl mt-16 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-          <p className="mt-2 text-gray-400">
+          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="mt-2 text-gray-600">
             Manage your marketplace, sync products, and oversee all platform operations
           </p>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+          <div className="bg-white p-6 rounded-lg border border-gray-200">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
-                <Store className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Store className="w-6 h-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-400">Shopify Products</p>
-                <p className="text-2xl font-bold text-white">40K+</p>
+                <p className="text-sm font-medium text-gray-600">Shopify Products</p>
+                <p className="text-2xl font-bold text-gray-900">40K+</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+          <div className="bg-white p-6 rounded-lg border border-gray-200">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-400">Active Creators</p>
-                <p className="text-2xl font-bold text-white">125</p>
+                <p className="text-sm font-medium text-gray-600">Active Creators</p>
+                <p className="text-2xl font-bold text-gray-900">125</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+          <div className="bg-white p-6 rounded-lg border border-gray-200">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Package className="w-6 h-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-400">Published Products</p>
-                <p className="text-2xl font-bold text-white">2.8K</p>
+                <p className="text-sm font-medium text-gray-600">Published Products</p>
+                <p className="text-2xl font-bold text-gray-900">2.8K</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+          <div className="bg-white p-6 rounded-lg border border-gray-200">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center">
-                <ShoppingCart className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                <ShoppingCart className="w-6 h-6 text-accent" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-400">Total Orders</p>
-                <p className="text-2xl font-bold text-white">1.2K</p>
+                <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                <p className="text-2xl font-bold text-gray-900">1.2K</p>
               </div>
             </div>
           </div>
@@ -121,20 +121,20 @@ export default function AdminDashboard() {
               <Link
                 key={feature.href}
                 href={feature.href}
-                className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-gray-600 transition-all group"
+                className="bg-white p-6 rounded-lg border border-gray-200 hover:border-accent transition-colors group"
               >
                 <div className="flex items-center mb-4">
-                  <div className={`w-12 h-12 ${feature.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <div className={`w-12 h-12 ${feature.color} rounded-lg flex items-center justify-center`}>
                     <IconComponent className="w-6 h-6 text-white" />
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-white group-hover:text-orange-400">
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-accent">
                       {feature.title}
                     </h3>
-                    <p className="text-sm text-gray-400">{feature.stats}</p>
+                    <p className="text-sm text-gray-600">{feature.stats}</p>
                   </div>
                 </div>
-                <p className="text-gray-300 group-hover:text-gray-200">
+                <p className="text-gray-600">
                   {feature.description}
                 </p>
               </Link>
@@ -143,17 +143,17 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="mt-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
+        <div className="mt-8 bg-accent rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-semibold mb-2">Automated Product Sync</h3>
-              <p className="text-orange-100">
+              <p className="text-white/90">
                 Products are automatically synced from Shopify every 6 hours. No manual intervention required.
               </p>
             </div>
             <div className="text-white text-sm">
               <p className="font-semibold">Next sync in: {/* TODO: Add countdown timer */}</p>
-              <p className="text-orange-100">Automated sync active</p>
+              <p className="text-white/90">Automated sync active</p>
             </div>
           </div>
         </div>

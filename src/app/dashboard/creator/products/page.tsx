@@ -113,26 +113,26 @@ export default function CreatorProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gray-900/50 backdrop-blur-sm border-b border-orange-500/20">
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center space-x-6">
-              <Link 
+              <Link
                 href="/dashboard/creator"
-                className="inline-flex items-center text-gray-400 hover:text-orange-400 transition-colors"
+                className="inline-flex items-center text-gray-600 hover:text-accent transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 Back to Dashboard
               </Link>
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center">
                   <Package className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-extrabold text-white tracking-tight">My Products</h1>
-                  <p className="mt-1 text-base text-gray-400">
+                  <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Products</h1>
+                  <p className="mt-1 text-base text-gray-600">
                     Manage your product catalog
                   </p>
                 </div>
@@ -144,7 +144,7 @@ export default function CreatorProductsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters and Controls */}
-        <div className="bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-xl p-6 mb-8 border border-gray-800">
+        <div className="bg-white rounded-xl p-6 mb-8 border border-gray-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 flex-1">
               {/* Search */}
@@ -153,7 +153,7 @@ export default function CreatorProductsPage() {
                   type="text"
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors backdrop-blur-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
                   placeholder="Search products..."
                 />
                 <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
@@ -163,7 +163,7 @@ export default function CreatorProductsPage() {
               <select
                 value={filters.category}
                 onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                className="px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors backdrop-blur-sm"
+                className="px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
               >
                 <option value="">All Categories</option>
                 <option value="T-Shirts">T-Shirts</option>
@@ -172,7 +172,7 @@ export default function CreatorProductsPage() {
                 <option value="Posters">Posters</option>
               </select>
 
-            
+
 
               {/* Sort */}
               <select
@@ -181,7 +181,7 @@ export default function CreatorProductsPage() {
                   const [sortBy, sortOrder] = e.target.value.split('-');
                   setFilters(prev => ({ ...prev, sortBy, sortOrder }));
                 }}
-                className="px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors backdrop-blur-sm"
+                className="px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
               >
                 <option value="created_at-DESC">Newest First</option>
                 <option value="created_at-ASC">Oldest First</option>
@@ -194,23 +194,23 @@ export default function CreatorProductsPage() {
 
             <div className="flex items-center space-x-4">
               {/* View Mode */}
-              <div className="flex border border-gray-700 rounded-xl overflow-hidden">
+              <div className="flex border border-gray-200 rounded-xl overflow-hidden">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-3 transition-all duration-200 ${
-                    viewMode === 'grid' 
-                      ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg' 
-                      : 'bg-gray-800/50 text-gray-400 hover:text-white hover:bg-gray-700'
+                  className={`p-3 transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-accent text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
                   }`}
                 >
                   <Grid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-3 transition-all duration-200 ${
-                    viewMode === 'list' 
-                      ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg' 
-                      : 'bg-gray-800/50 text-gray-400 hover:text-white hover:bg-gray-700'
+                  className={`p-3 transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-accent text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -219,25 +219,25 @@ export default function CreatorProductsPage() {
             </div>
           </div>
 
-          <div className="mt-6 text-sm font-medium text-gray-300">
-            <span className="text-orange-400">{filteredProducts.length}</span> products found
+          <div className="mt-6 text-sm font-medium text-gray-600">
+            <span className="text-accent">{filteredProducts.length}</span> products found
           </div>
         </div>
 
         {/* Products Display */}
         {loading ? (
           <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-            <p className="mt-4 text-gray-400 text-lg">Loading your products...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+            <p className="mt-4 text-gray-600 text-lg">Loading your products...</p>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Package className="w-10 h-10 text-gray-600" />
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Package className="w-10 h-10 text-gray-400" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">No products found</h3>
-            <p className="text-gray-400 text-lg mb-8">
-              {filters.search || filters.category || filters.status 
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-600 text-lg mb-8">
+              {filters.search || filters.category || filters.status
                 ? 'Try adjusting your filters'
                 : 'Get started by creating your first product'
               }
@@ -246,7 +246,7 @@ export default function CreatorProductsPage() {
               <div className="mt-6">
                 <Link
                   href="/dashboard/creator/products/create"
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-red-700 shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+                  className="inline-flex items-center px-6 py-3 bg-accent text-white font-semibold rounded-xl transition-colors"
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   Create Your First Product
@@ -265,35 +265,35 @@ export default function CreatorProductsPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-xl overflow-hidden border border-gray-800">
+          <div className="bg-white rounded-xl overflow-hidden border border-gray-200">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-800">
-                <thead className="bg-gray-900/50 backdrop-blur-sm">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Product
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Category
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Price
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Variants
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Created
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-900/20 divide-y divide-gray-800">
+                <tbody className="bg-white divide-y divide-gray-200">
                   {filteredProducts.map((product) => (
                     <ProductListRow
                       key={product.id}
@@ -331,33 +331,30 @@ function ProductGridCard({
 
   return (
     <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-      <div className="bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-xl overflow-hidden border-2 border-gray-800 hover:border-orange-500/50 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group">
+      <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-accent transition-colors cursor-pointer group">
         <div className="w-full relative" style={{ aspectRatio: '1/1' }}>
           <Image
             src={product.thumbnail_url || '/placeholder-product.png'}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           <div className="absolute top-3 right-3">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${
-              product.is_active 
-                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
-                : 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-200'
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+              product.is_active
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-600'
             }`}>
               {product.is_active ? 'Active' : 'Inactive'}
             </span>
           </div>
-          
-          {/* Overlay for card interactions */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          
+
           {/* Action buttons overlay */}
-          <div className="absolute bottom-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute bottom-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <Link
               href={`/dashboard/creator/products/${product.id}/edit`}
-              className="p-2 bg-gray-900/80 text-gray-300 hover:text-blue-400 hover:bg-blue-900/50 rounded-lg transition-colors backdrop-blur-sm"
+              className="p-2 bg-white text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
               title="Edit product"
               onClick={handleEdit}
             >
@@ -365,40 +362,40 @@ function ProductGridCard({
             </Link>
             <button
               onClick={handleDelete}
-              className="p-2 bg-gray-900/80 text-gray-300 hover:text-red-400 hover:bg-red-900/50 rounded-lg transition-colors backdrop-blur-sm"
+              className="p-2 bg-white text-gray-600 hover:text-red-600 rounded-lg transition-colors"
               title="Delete product"
             >
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>
-        
+
         <div className="p-6">
-          <h3 className="font-bold text-white text-lg mb-2 truncate group-hover:text-orange-300 transition-colors">
+          <h3 className="font-bold text-gray-900 text-lg mb-2 truncate group-hover:text-accent transition-colors">
             {product.name}
           </h3>
-          
-          <p className="text-sm text-gray-300 mb-4">
-            <span className="text-orange-400 font-semibold">Category:</span> {product.category || 'Uncategorized'}
+
+          <p className="text-sm text-gray-600 mb-4">
+            <span className="text-accent font-semibold">Category:</span> {product.category || 'Uncategorized'}
           </p>
-          
+
           <div className="flex items-center justify-between mb-4">
             <div>
-              <span className="text-xl font-bold text-white">
+              <span className="text-xl font-bold text-gray-900">
                 {formatPrice(product.min_price)}
               </span>
               {product.max_price > product.min_price && (
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-gray-600">
                   -{formatPrice(product.max_price)}
                 </span>
               )}
             </div>
-            <span className="text-sm text-gray-400 bg-gray-800/50 px-3 py-1 rounded-lg">
+            <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-lg">
               {product.variant_count} variants
             </span>
           </div>
-          
-          <div className="text-xs text-gray-500 bg-gray-800/30 px-3 py-2 rounded-lg">
+
+          <div className="text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
             Click to view full product details
           </div>
         </div>
@@ -434,14 +431,14 @@ function ProductListRow({
   };
 
   return (
-    <tr 
-      className="hover:bg-gray-800/30 transition-colors cursor-pointer group"
+    <tr
+      className="hover:bg-gray-50 transition-colors cursor-pointer group"
       onClick={() => window.open(`/products/${createProductSlug(product.name, product.id)}`, '_blank')}
     >
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div className="flex-shrink-0 h-12 w-12">
-            <div className="h-12 w-12 relative rounded-xl overflow-hidden border border-gray-700 group-hover:border-orange-500/50 transition-colors" style={{ aspectRatio: '1/1' }}>
+            <div className="h-12 w-12 relative rounded-xl overflow-hidden border border-gray-200 group-hover:border-accent transition-colors" style={{ aspectRatio: '1/1' }}>
               <Image
                 src={product.thumbnail_url || '/placeholder-product.png'}
                 alt={product.name}
@@ -452,42 +449,42 @@ function ProductListRow({
             </div>
           </div>
           <div className="ml-4">
-            <div className="text-sm font-semibold text-white group-hover:text-orange-300 transition-colors">{product.name}</div>
-            <div className="text-sm text-gray-400 truncate max-w-xs">
+            <div className="text-sm font-semibold text-gray-900 group-hover:text-accent transition-colors">{product.name}</div>
+            <div className="text-sm text-gray-600 truncate max-w-xs">
               {product.description}
             </div>
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
         {product.category || 'Uncategorized'}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-semibold">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
         {formatPrice(product.min_price)}
         {product.max_price > product.min_price && (
-          <span className="text-gray-400"> - {formatPrice(product.max_price)}</span>
+          <span className="text-gray-600"> - {formatPrice(product.max_price)}</span>
         )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-          product.is_active 
-            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
-            : 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-200'
+          product.is_active
+            ? 'bg-green-100 text-green-700'
+            : 'bg-gray-100 text-gray-600'
         }`}>
           {product.is_active ? 'Active' : 'Inactive'}
         </span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
         {product.variant_count}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
         {formatDate(product.created_at)}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <div className="flex justify-end space-x-2">
           <Link
             href={`/dashboard/creator/products/${product.id}/edit`}
-            className="p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-800/50 rounded-lg transition-colors"
+            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
             title="Edit"
             onClick={handleEdit}
           >
@@ -495,7 +492,7 @@ function ProductListRow({
           </Link>
           <button
             onClick={handleDelete}
-            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
+            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Delete"
           >
             <Trash2 className="w-4 h-4" />

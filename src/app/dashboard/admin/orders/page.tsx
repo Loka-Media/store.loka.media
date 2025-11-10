@@ -392,26 +392,26 @@ export default function AdminOrdersPage() {
   if (loading && !stats) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">Order Management</h1>
-            <p className="text-gray-300 mt-1">
+            <h1 className="text-2xl font-bold text-gray-900">Order Management</h1>
+            <p className="text-gray-600 mt-1">
               Manage and process marketplace orders
             </p>
           </div>
           <button
             onClick={loadDashboardData}
             disabled={loading}
-            className="inline-flex items-center px-4 py-2 border border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 disabled:opacity-50"
+            className="inline-flex items-center px-4 py-2 border border-gray-200 text-sm font-medium rounded-md text-gray-900 bg-white hover:bg-gray-50 disabled:opacity-50"
           >
             <RefreshCw
               className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
@@ -423,17 +423,17 @@ export default function AdminOrdersPage() {
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gray-800 rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Package className="h-8 w-8 text-blue-600" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
+                    <dt className="text-sm font-medium text-gray-600 truncate">
                       Pending Orders
                     </dt>
-                    <dd className="text-lg font-medium text-white">
+                    <dd className="text-lg font-medium text-gray-900">
                       {stats.orders.paymentReceived}
                     </dd>
                   </dl>
@@ -441,17 +441,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <DollarSign className="h-8 w-8 text-green-600" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
+                    <dt className="text-sm font-medium text-gray-600 truncate">
                       Escrowed Funds
                     </dt>
-                    <dd className="text-lg font-medium text-white">
+                    <dd className="text-lg font-medium text-gray-900">
                       ${stats.payments.totalEscrowed}
                     </dd>
                   </dl>
@@ -459,17 +459,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Clock className="h-8 w-8 text-yellow-600" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
+                    <dt className="text-sm font-medium text-gray-600 truncate">
                       Verification Queue
                     </dt>
-                    <dd className="text-lg font-medium text-white">
+                    <dd className="text-lg font-medium text-gray-900">
                       {stats.verification.totalPending}
                     </dd>
                   </dl>
@@ -477,17 +477,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <AlertTriangle className="h-8 w-8 text-red-600" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
+                    <dt className="text-sm font-medium text-gray-600 truncate">
                       Urgent Items
                     </dt>
-                    <dd className="text-lg font-medium text-white">
+                    <dd className="text-lg font-medium text-gray-900">
                       {stats.verification.urgent}
                     </dd>
                   </dl>
@@ -498,16 +498,16 @@ export default function AdminOrdersPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
                 Status
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full p-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white"
+                className="w-full p-2 border border-gray-200 rounded-md focus:ring-accent focus:border-accent bg-white text-gray-900"
               >
                 <option value="">All Orders</option>
                 <option value="pending">Pending</option>
@@ -520,13 +520,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
                 Order Type
               </label>
               <select
                 value={orderTypeFilter}
                 onChange={(e) => setOrderTypeFilter(e.target.value)}
-                className="w-full p-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white"
+                className="w-full p-2 border border-gray-200 rounded-md focus:ring-accent focus:border-accent bg-white text-gray-900"
               >
                 <option value="">All Types</option>
                 <option value="printful">Printful</option>
@@ -536,13 +536,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
                 Priority
               </label>
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="w-full p-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white"
+                className="w-full p-2 border border-gray-200 rounded-md focus:ring-accent focus:border-accent bg-white text-gray-900"
               >
                 <option value="">All Priorities</option>
                 <option value="urgent">Urgent</option>
@@ -553,7 +553,7 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
                 Search
               </label>
               <div className="relative">
@@ -562,7 +562,7 @@ export default function AdminOrdersPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Order number, email..."
-                  className="w-full p-2 pl-8 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full p-2 pl-8 border border-gray-200 rounded-md focus:ring-accent focus:border-accent bg-white text-gray-900"
                 />
                 <Search className="w-4 h-4 text-gray-400 absolute left-2 top-3" />
               </div>
@@ -571,16 +571,16 @@ export default function AdminOrdersPage() {
         </div>
 
         {/* Orders Table */}
-        <div className="bg-gray-800 shadow-sm rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-700">
-            <h3 className="text-lg font-medium text-white">Orders</h3>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">Orders</h3>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-700">
-              <thead className="bg-gray-900">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Order
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">

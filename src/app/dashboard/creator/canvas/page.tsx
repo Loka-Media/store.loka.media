@@ -312,20 +312,20 @@ function CanvasContent() {
   if (!selectedProduct && !loading) {
     return (
       <CreatorProtectedRoute>
-        <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-center p-12 bg-black/60 backdrop-blur-sm rounded-3xl border border-gray-800 shadow-2xl">
-          <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="h-8 w-8 text-gray-400" />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-12 bg-white rounded-3xl border border-gray-200">
+          <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-8 w-8 text-gray-600" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
             No product selected
           </h3>
-          <p className="text-gray-400 mb-8 font-medium">
+          <p className="text-gray-600 mb-8 font-medium">
             Please select a product from the catalog first.
           </p>
           <Link
             href="/dashboard/creator/catalog"
-            className="inline-flex items-center px-8 py-4 text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-orange-500/25 font-bold transition-all duration-300 transform hover:scale-105"
+            className="inline-flex items-center px-8 py-4 text-white bg-accent rounded-2xl font-bold transition-colors"
           >
             Browse Catalog
           </Link>
@@ -756,7 +756,7 @@ function CanvasContent() {
 
   return (
     <CreatorProtectedRoute>
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gray-50">
       {/* <CanvasHeader
         selectedProduct={selectedProduct}
         step={step}
@@ -767,8 +767,8 @@ function CanvasContent() {
       <div className="">
         {loading ? (
           <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto" />
-            <p className="mt-6 text-gray-300 text-lg font-medium">Loading design canvas...</p>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-accent mx-auto" />
+            <p className="mt-6 text-gray-600 text-lg font-medium">Loading design canvas...</p>
           </div>
         ) : (
           <>

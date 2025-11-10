@@ -119,7 +119,7 @@ export default function StickyHeader() {
                           <ShoppingBag className="w-4 h-4 mr-2" />
                           Cart
                           {cartCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">
+                            <span className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                               {cartCount > 99 ? "99+" : cartCount}
                             </span>
                           )}
@@ -152,7 +152,7 @@ export default function StickyHeader() {
                       <ShoppingBag className="w-4 h-4 mr-2" />
                       Cart
                       {cartCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">
+                        <span className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                           {cartCount > 99 ? "99+" : cartCount}
                         </span>
                       )}
@@ -165,7 +165,7 @@ export default function StickyHeader() {
                     </Link>
                     <Link
                       href="/auth/register"
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30"
+                      className="bg-accent hover:bg-accent/90 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300"
                     >
                       Sign Up
                     </Link>
@@ -178,7 +178,7 @@ export default function StickyHeader() {
             <div className="md:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 transition-all duration-300"
+                className="inline-flex items-center justify-center p-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-accent transition-all duration-300"
               >
                 {isMenuOpen ? (
                   <X className="h-6 w-6" />
@@ -241,7 +241,7 @@ export default function StickyHeader() {
                         <ShoppingBag className="w-5 h-5 mr-3" />
                         Cart
                         {cartCount > 0 && (
-                          <span className="ml-auto bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+                          <span className="ml-auto bg-accent text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
                             {cartCount > 99 ? "99+" : cartCount}
                           </span>
                         )}
@@ -279,7 +279,7 @@ export default function StickyHeader() {
                     <ShoppingBag className="w-5 h-5 mr-3" />
                     Cart
                     {cartCount > 0 && (
-                      <span className="ml-auto bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+                      <span className="ml-auto bg-accent text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
                         {cartCount > 99 ? "99+" : cartCount}
                       </span>
                     )}
@@ -293,7 +293,7 @@ export default function StickyHeader() {
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white block px-4 py-3 rounded-lg text-base font-bold transition-all duration-300 mt-2"
+                    className="bg-accent hover:bg-accent/90 text-white block px-4 py-3 rounded-lg text-base font-bold transition-all duration-300 mt-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign Up

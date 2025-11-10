@@ -341,11 +341,11 @@ export default function UnifiedCheckoutPage() {
 
   // Main checkout form
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-white">Checkout</h1>
-          <Link href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700">
+          <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
+          <Link href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-200 text-sm font-medium rounded-md text-gray-900 bg-white hover:bg-gray-50">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Cart
           </Link>
