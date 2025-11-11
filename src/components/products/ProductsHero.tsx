@@ -41,7 +41,7 @@ export function ProductsHero({
   categories,
 }: ProductsHeroProps) {
   return (
-    <div className="relative bg-gradient-to-br from-pink-200 via-yellow-100 to-pink-100 border-b-2 border-black overflow-hidden">
+    <div className="relative bg-gradient-to-br from-pink-200 via-yellow-100 to-pink-100 overflow-hidden">
       {/* Decorative Elements */}
       <div className="absolute top-10 left-10 w-24 h-24 bg-yellow-300 rounded-full opacity-40 hidden lg:block"></div>
       <div className="absolute bottom-10 right-10 w-32 h-32 bg-pink-300 rounded-3xl opacity-30 rotate-12 hidden lg:block"></div>
