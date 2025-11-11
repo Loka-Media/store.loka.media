@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
@@ -10,10 +10,12 @@ import Navigation from "@/components/Navigation";
 import StickyHeader from "@/components/StickyHeader";
 import { Footer } from "@/components/home/Footer";
 
-const inter = Inter({
+// Manrope is very similar to ABC Favorit (Gumroad's font)
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-manrope",
   display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -48,14 +50,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${manrope.variable} antialiased`}>
         <AuthProvider>
           {/* <CartProvider> - Disabled to prevent duplicate API calls */}
             <GuestCartProvider>
               <WishlistProvider>
                 <Navigation />
                 <StickyHeader />
-                <div className="bg-white text-black pt-20">
+                <div className="bg-white text-black pt-16">
                   {children}
                   <Footer />
                 </div>

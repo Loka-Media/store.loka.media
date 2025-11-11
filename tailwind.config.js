@@ -20,12 +20,13 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
-        inter: ['var(--font-inter)', 'sans-serif'],
+        sans: ['var(--font-manrope)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        manrope: ['var(--font-manrope)', 'sans-serif'],
       },
       letterSpacing: {
         tighter: '-0.02em',
-        tight: '-0.011em',
+        tight: '-0.01em',
+        normal: '0em',
       },
     },
   },

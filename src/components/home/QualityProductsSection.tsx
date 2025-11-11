@@ -67,48 +67,48 @@ export  function QualityProductsSection() {
           {/* Right side - Content */}
           <div className="space-y-4 sm:space-y-6 md:space-y-8">
             <div className="relative">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-black mb-6 sm:mb-8 md:mb-10 leading-[0.95] tracking-tighter">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-black mb-6 sm:mb-8 md:mb-10 leading-[0.95] tracking-tight">
                 Quality products
                 <br />
-                <span className="text-foreground-muted">
+                <span className="text-foreground-muted font-normal">
                   without the headache
                 </span>
               </h2>
             </div>
 
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               {/* Create beautiful products */}
-              <div className="group relative bg-white border-2 border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-black hover:shadow-lg">
+              <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300">
                 <button
                   onClick={() => toggleSection("create")}
-                  className="relative w-full flex items-center justify-between p-5 sm:p-6 md:p-8 text-left"
+                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
                 >
-                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-black group-hover:text-accent transition-all duration-300 tracking-tight">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-black group-hover:text-accent transition-all duration-300">
                     Create beautiful products
                   </h3>
                   <div className="relative">
-                    <div className="relative transform transition-all duration-300 ease-out p-2 sm:p-3 rounded-full bg-gray-100 group-hover:bg-accent/20">
+                    <div className="relative transform transition-all duration-300 ease-out">
                       {expandedSection === "create" ? (
-                        <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
+                        <Minus className="w-5 h-5 text-black group-hover:text-accent transition-colors duration-200" />
                       ) : (
-                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
+                        <Plus className="w-5 h-5 text-black group-hover:text-accent transition-colors duration-200" />
                       )}
                     </div>
                   </div>
                 </button>
 
                 <div
-                  className={`relative overflow-hidden transition-all duration-700 ease-out ${
+                  className={`relative overflow-hidden transition-all duration-500 ease-out ${
                     expandedSection === "create"
                       ? "max-h-96 opacity-100"
                       : "max-h-0 opacity-0"
                   }`}
                 >
-                  <div className="px-5 sm:px-6 md:px-8 pb-5 sm:pb-6 md:pb-8">
-                    <p className="text-foreground-muted text-base sm:text-lg md:text-xl leading-relaxed mb-5 sm:mb-6 md:mb-7 font-medium">
+                  <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
+                    <p className="text-foreground-muted text-base sm:text-lg leading-relaxed mb-4 sm:mb-5">
                       From apparel to makeup to your own product lines, we've teamed up with top brands and manufacturers to bring your ideas to life. No minimums required.
                     </p>
-                    <button className="bg-accent hover:bg-accent-hover text-white px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-4 rounded-xl font-bold transition-all duration-300 text-base sm:text-lg hover:scale-105 shadow-lg hover:shadow-xl">
+                    <button className="bg-accent hover:bg-accent-hover text-white px-6 sm:px-7 py-3 rounded-lg font-bold transition-colors text-base">
                       Create your first product
                     </button>
                   </div>
@@ -116,34 +116,34 @@ export  function QualityProductsSection() {
               </div>
 
               {/* Launch your own shop */}
-              <div className="group relative bg-white border-2 border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-black hover:shadow-lg">
+              <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300">
                 <button
                   onClick={() => toggleSection("shop")}
-                  className="relative w-full flex items-center justify-between p-5 sm:p-6 md:p-8 text-left"
+                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
                 >
-                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-black group-hover:text-accent transition-all duration-300 tracking-tight">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-black group-hover:text-accent transition-all duration-300">
                     Launch your own shop
                   </h3>
                   <div className="relative">
-                    <div className="relative transform transition-all duration-300 ease-out p-2 sm:p-3 rounded-full bg-gray-100 group-hover:bg-accent/20">
+                    <div className="relative transform transition-all duration-300 ease-out">
                       {expandedSection === "shop" ? (
-                        <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
+                        <Minus className="w-5 h-5 text-black group-hover:text-accent transition-colors duration-200" />
                       ) : (
-                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
+                        <Plus className="w-5 h-5 text-black group-hover:text-accent transition-colors duration-200" />
                       )}
                     </div>
                   </div>
                 </button>
 
                 <div
-                  className={`relative overflow-hidden transition-all duration-700 ease-out ${
+                  className={`relative overflow-hidden transition-all duration-500 ease-out ${
                     expandedSection === "shop"
                       ? "max-h-96 opacity-100"
                       : "max-h-0 opacity-0"
                   }`}
                 >
-                  <div className="px-5 sm:px-6 md:px-8 pb-5 sm:pb-6 md:pb-8">
-                    <p className="text-foreground-muted text-base sm:text-lg md:text-xl leading-relaxed font-medium">
+                  <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
+                    <p className="text-foreground-muted text-base sm:text-lg leading-relaxed">
                       Set up your free custom shop and start selling your products with our easy-to-use platform across all social platforms. Full customization available. Ask us about your own fully branded website.
                     </p>
                   </div>
@@ -151,34 +151,34 @@ export  function QualityProductsSection() {
               </div>
 
               {/* We handle shipping & support */}
-              <div className="group relative bg-white border-2 border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-black hover:shadow-lg">
+              <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300">
                 <button
                   onClick={() => toggleSection("shipping")}
-                  className="relative w-full flex items-center justify-between p-5 sm:p-6 md:p-8 text-left"
+                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
                 >
-                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-black group-hover:text-accent transition-all duration-300 tracking-tight">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-black group-hover:text-accent transition-all duration-300">
                     We handle shipping & support
                   </h3>
                   <div className="relative">
-                    <div className="relative transform transition-all duration-300 ease-out p-2 sm:p-3 rounded-full bg-gray-100 group-hover:bg-accent/20">
+                    <div className="relative transform transition-all duration-300 ease-out">
                       {expandedSection === "shipping" ? (
-                        <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
+                        <Minus className="w-5 h-5 text-black group-hover:text-accent transition-colors duration-200" />
                       ) : (
-                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
+                        <Plus className="w-5 h-5 text-black group-hover:text-accent transition-colors duration-200" />
                       )}
                     </div>
                   </div>
                 </button>
 
                 <div
-                  className={`relative overflow-hidden transition-all duration-700 ease-out ${
+                  className={`relative overflow-hidden transition-all duration-500 ease-out ${
                     expandedSection === "shipping"
                       ? "max-h-96 opacity-100"
                       : "max-h-0 opacity-0"
                   }`}
                 >
-                  <div className="px-5 sm:px-6 md:px-8 pb-5 sm:pb-6 md:pb-8">
-                    <p className="text-foreground-muted text-base sm:text-lg md:text-xl leading-relaxed font-medium">
+                  <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
+                    <p className="text-foreground-muted text-base sm:text-lg leading-relaxed">
                       Join trendsetting creators already earning across all socials with our platform.
                     </p>
                   </div>

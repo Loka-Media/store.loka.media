@@ -24,13 +24,13 @@ export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo - Gumroad style: simple, bold */}
+        <div className="flex justify-between items-center h-16">
+          {/* Logo - Gumroad style: simple, clean */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-black text-black tracking-tight">
+              <span className="text-xl font-extrabold text-black tracking-tight">
                 Loka Media
               </span>
             </Link>
@@ -38,10 +38,10 @@ export default function Navigation() {
 
           {/* Desktop Navigation - Gumroad style: minimal, clean */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-center space-x-2">
+            <div className="ml-10 flex items-center space-x-1">
               <Link
                 href="/products"
-                className="text-black/70 hover:text-black px-5 py-2 text-base font-semibold transition-colors"
+                className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors"
               >
                 Marketplace
               </Link>
@@ -51,7 +51,7 @@ export default function Navigation() {
                   {user?.role === "creator" && (
                     <Link
                       href="/dashboard/creator"
-                      className="text-black/70 hover:text-black px-5 py-2 text-base font-semibold transition-colors"
+                      className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors"
                     >
                       Creator Hub
                     </Link>
@@ -60,7 +60,7 @@ export default function Navigation() {
                   {user?.role === "admin" && (
                     <Link
                       href="/dashboard/admin"
-                      className="text-black/70 hover:text-black px-5 py-2 text-base font-semibold transition-colors"
+                      className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors"
                     >
                       Admin Dashboard
                     </Link>
@@ -70,31 +70,31 @@ export default function Navigation() {
                     <>
                       <Link
                         href="/wishlist"
-                        className="text-black/70 hover:text-black px-5 py-2 text-base font-semibold transition-colors flex items-center relative"
+                        className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors flex items-center relative"
                       >
-                        <Heart className="w-5 h-5 mr-2" />
+                        <Heart className="w-4 h-4 mr-1.5" />
                         Wishlist
                         {wishlistCount > 0 && (
-                          <span className="ml-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                          <span className="ml-1.5 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                             {wishlistCount > 99 ? "99+" : wishlistCount}
                           </span>
                         )}
                       </Link>
                       <Link
                         href="/addresses"
-                        className="text-black/70 hover:text-black px-5 py-2 text-base font-semibold transition-colors flex items-center"
+                        className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors flex items-center"
                       >
-                        <MapPin className="w-5 h-5 mr-2" />
+                        <MapPin className="w-4 h-4 mr-1.5" />
                         Addresses
                       </Link>
                       <Link
                         href="/cart"
-                        className="text-black/70 hover:text-black px-5 py-2 text-base font-semibold transition-colors flex items-center relative"
+                        className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors flex items-center relative"
                       >
-                        <ShoppingBag className="w-5 h-5 mr-2" />
+                        <ShoppingBag className="w-4 h-4 mr-1.5" />
                         Cart
                         {cartCount > 0 && (
-                          <span className="ml-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                          <span className="ml-1.5 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                             {cartCount > 99 ? "99+" : cartCount}
                           </span>
                         )}
@@ -104,19 +104,19 @@ export default function Navigation() {
 
                   <Link
                     href="/profile"
-                    className="text-black/70 hover:text-black px-5 py-2 text-base font-semibold transition-colors flex items-center"
+                    className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors flex items-center"
                   >
-                    <User className="w-5 h-5 mr-2" />
+                    <User className="w-4 h-4 mr-1.5" />
                     Profile
                   </Link>
 
-                  <div className="flex items-center space-x-3 ml-4 pl-4 border-l border-gray-200">
-                    <span className="text-sm text-black/70 font-semibold hidden lg:block">
+                  <div className="flex items-center space-x-2 ml-3 pl-3 border-l border-gray-200">
+                    <span className="text-xs text-black/70 font-semibold hidden lg:block">
                       {user?.name || user?.email}
                     </span>
                     <button
                       onClick={logout}
-                      className="text-black/70 hover:text-black px-4 py-2 text-base font-semibold transition-colors"
+                      className="text-black/70 hover:text-black px-3 py-2 text-sm font-semibold transition-colors"
                     >
                       Logout
                     </button>
@@ -126,25 +126,25 @@ export default function Navigation() {
                 <>
                   <Link
                     href="/cart"
-                    className="text-black/70 hover:text-black px-5 py-2 text-base font-semibold transition-colors flex items-center relative"
+                    className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors flex items-center relative"
                   >
-                    <ShoppingBag className="w-5 h-5 mr-2" />
+                    <ShoppingBag className="w-4 h-4 mr-1.5" />
                     Cart
                     {cartCount > 0 && (
-                      <span className="ml-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      <span className="ml-1.5 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                         {cartCount > 99 ? "99+" : cartCount}
                       </span>
                     )}
                   </Link>
                   <Link
                     href="/auth/login"
-                    className="text-black/70 hover:text-black px-5 py-2 text-base font-semibold transition-colors"
+                    className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors"
                   >
                     Sign in
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded-xl text-base font-bold transition-all hover:scale-105 shadow-md hover:shadow-lg"
+                    className="bg-accent hover:bg-accent-hover text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors"
                   >
                     Start selling
                   </Link>
