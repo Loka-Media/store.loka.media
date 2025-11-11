@@ -6,8 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 
 import { ProductsHero } from "@/components/products/ProductsHero";
-import { ProductsFilterTopBar } from "@/components/products/ProductsFilterTopBar";
-import { ProductsControls } from "@/components/products/ProductsControls";
+import { CategoryNavigation } from "@/components/products/CategoryNavigation";
+import { FeaturedProducts } from "@/components/products/FeaturedProducts";
+import { ProductViewTabs, ViewType } from "@/components/products/ProductViewTabs";
+import { ProductsSidebar } from "@/components/products/ProductsSidebar";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { ProductsPagination } from "@/components/products/ProductsPagination";
 import { NoProductsFound } from "@/components/products/NoProductsFound";
@@ -42,7 +44,7 @@ function ProductsContent() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  
+  const [activeView, setActiveView] = useState<ViewType>("trending");
 
   const [filters, setFilters] = useState({
     category: "",
@@ -212,8 +214,21 @@ function ProductsContent() {
     fetchProducts(clearedFilters, { limit: pagination.limit, offset: 0 });
   };
 
+  const handleViewChange = (view: ViewType) => {
+    setActiveView(view);
+    // Update sort based on view
+    const sortConfig = {
+      trending: { sortBy: "created_at", sortOrder: "DESC" },
+      new: { sortBy: "created_at", sortOrder: "DESC" },
+      popular: { sortBy: "base_price", sortOrder: "DESC" },
+    };
+    const newSort = sortConfig[view];
+    setFilters((prev) => ({ ...prev, ...newSort }));
+  };
+
   return (
-    <div className="bg-white text-black">
+    <div className="bg-white text-black min-h-screen">
+      {/* Simplified Hero with Search */}
       <ProductsHero
         filters={filters}
         setFilters={setFilters}
@@ -223,48 +238,69 @@ function ProductsContent() {
         categories={categories}
       />
 
-      <div className="relative bg-white">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <ProductsFilterTopBar
-            filters={filters}
-            setFilters={setFilters}
-            handleFilterChange={handleFilterChange}
-            clearFilters={clearFilters}
-            fetchProducts={fetchProducts}
-            categories={categories}
-            creators={creators}
-          />
-        </div>
+      {/* Category Navigation */}
+      <CategoryNavigation
+        categories={categories}
+        activeCategory={filters.category}
+        onCategoryChange={(category) => handleFilterChange("category", category)}
+      />
 
-        <div className="max-w-7xl mx-auto px-4 pt-6 sm:pt-8">
-          <ProductsControls
-            loading={loading}
-            pagination={pagination}
-            filters={filters}
-            setFilters={setFilters}
-          />
+      {/* Featured Products Section */}
+      {!loading && products.length > 0 && filters.category === "" && (
+        <FeaturedProducts products={products} />
+      )}
 
-          {loading ? (
-            <ProductsLoading message="Discovering amazing products..." />
-          ) : products.length === 0 ? (
-            <NoProductsFound clearFilters={clearFilters} />
-          ) : (
-            <>
-              <ProductsGrid products={products} />
+      {/* Main Content with Sidebar Layout */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar Filters - Hidden on mobile, visible on desktop */}
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <ProductsSidebar
+              filters={{
+                creator: filters.creator,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+              }}
+              creators={creators}
+              handleFilterChange={(key, value) => {
+                const newFilters = { ...filters, [key]: value };
+                setFilters(newFilters);
+              }}
+              clearFilters={clearFilters}
+            />
+          </aside>
 
-              <ProductsPagination
-                hasNext={pagination.hasNext}
-                loading={loadingMore}
-                onLoadMore={() => {
-                  // Load more products by updating offset
-                  setPagination(prev => ({
-                    ...prev,
-                    offset: prev.offset + prev.limit,
-                  }));
-                }}
-              />
-            </>
-          )}
+          {/* Main Products Area */}
+          <div className="flex-1">
+            {/* View Tabs */}
+            <ProductViewTabs
+              activeView={activeView}
+              onViewChange={handleViewChange}
+              resultCount={pagination.total}
+            />
+
+            {/* Products Grid or Loading/Empty State */}
+            {loading ? (
+              <ProductsLoading message="Discovering amazing products..." />
+            ) : products.length === 0 ? (
+              <NoProductsFound clearFilters={clearFilters} />
+            ) : (
+              <>
+                <ProductsGrid products={products} />
+
+                <ProductsPagination
+                  hasNext={pagination.hasNext}
+                  loading={loadingMore}
+                  onLoadMore={() => {
+                    setPagination((prev) => ({
+                      ...prev,
+                      offset: prev.offset + prev.limit,
+                    }));
+                  }}
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
