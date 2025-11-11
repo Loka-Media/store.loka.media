@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
 import { authAPI } from '@/lib/auth';
-import { Mail, ArrowLeft } from 'lucide-react';
+import { Mail, ArrowLeft, Sparkles, CheckCircle, Clock, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const otpSchema = z.object({
@@ -58,7 +58,7 @@ function VerifyEmailPageContent() {
       toast.success('Email verified successfully!');
       router.push('/auth/login');
     } catch (error: unknown) {
-      const message = (error && typeof error === 'object' && 'response' in error && 
+      const message = (error && typeof error === 'object' && 'response' in error &&
         error.response && typeof error.response === 'object' && 'data' in error.response &&
         error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data &&
         typeof error.response.data.error === 'string') ? error.response.data.error : 'Verification failed';
@@ -77,7 +77,7 @@ function VerifyEmailPageContent() {
       toast.success('OTP sent successfully!');
       setResendCooldown(60); // 60 seconds cooldown
     } catch (error: unknown) {
-      const message = (error && typeof error === 'object' && 'response' in error && 
+      const message = (error && typeof error === 'object' && 'response' in error &&
         error.response && typeof error.response === 'object' && 'data' in error.response &&
         error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data &&
         typeof error.response.data.error === 'string') ? error.response.data.error : 'Failed to resend OTP';
@@ -97,80 +97,165 @@ function VerifyEmailPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">
-            <Mail className="w-8 h-8 text-indigo-600" />
+    <div className="bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 flex min-h-screen">
+      {/* Left Side - Hero Section */}
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-gradient-to-br from-yellow-200 via-pink-100 to-purple-100 border-r-4 border-black">
+        {/* Decorative Elements */}
+        <div className="absolute top-20 left-20 w-32 h-32 bg-pink-300 rounded-full opacity-40 border-4 border-black"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-yellow-300 rounded-3xl opacity-30 rotate-12 border-4 border-black"></div>
+        <div className="absolute top-1/2 left-10 w-24 h-24 bg-purple-300 rounded-2xl opacity-20 -rotate-12 border-4 border-black"></div>
+
+        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-16">
+          {/* Hero Content */}
+          <div className="max-w-lg">
+            <div className="inline-block bg-pink-300 border-4 border-black px-4 py-2 rounded-xl mb-6 hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-black" />
+                <span className="text-sm font-extrabold text-black">ALMOST THERE!</span>
+              </div>
+            </div>
+
+            <h1 className="text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 text-black">
+              Verify Your
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">
+                Email Address
+              </span>
+            </h1>
+
+            <p className="text-xl text-black font-bold mb-8 leading-relaxed">
+              We've sent a 6-digit verification code to your email. Enter it below to complete your registration!
+            </p>
+
+            {/* Feature Highlights */}
+            <div className="space-y-3">
+              {[
+                "Secure email verification",
+                "One-time verification code",
+                "Access your account instantly",
+              ].map((feature, index) => (
+                <div key={index} className="flex items-center text-black">
+                  <div className="w-3 h-3 bg-black rounded-full mr-3 border-2 border-black"></div>
+                  <span className="font-bold">{feature}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Info Card */}
+            <div className="mt-8 bg-yellow-200 border-4 border-black rounded-2xl p-4 hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-black rounded-xl">
+                  <Sparkles className="w-6 h-6 text-yellow-300" />
+                </div>
+                <div>
+                  <div className="font-extrabold text-black">Quick Verification</div>
+                  <div className="text-sm font-bold text-black">Just one more step to get started!</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Verify your email
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          We&apos;ve sent a 6-digit verification code to
-        </p>
-        <p className="text-center text-sm font-medium text-gray-900">{email}</p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
-                Verification Code
-              </label>
-              <div className="mt-1">
-                <input
-                  {...register('otp')}
-                  onChange={handleOTPChange}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-center text-2xl tracking-widest text-gray-900"
-                  placeholder="000000"
-                />
-              </div>
-              {errors.otp && (
-                <p className="mt-2 text-sm text-red-600">{errors.otp.message}</p>
-              )}
-            </div>
+      {/* Right Side - Verification Form */}
+      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 lg:flex-none lg:w-[600px] xl:w-[700px]">
+        <div className="mx-auto w-full max-w-sm lg:max-w-xl">
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading || !otpValue || otpValue.length !== 6}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Verifying...' : 'Verify Email'}
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-6">
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Didn&apos;t receive the code?{' '}
-                <button
-                  type="button"
-                  onClick={handleResendOTP}
-                  disabled={resendLoading || resendCooldown > 0}
-                  className="font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {resendLoading ? 'Sending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
-                </button>
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6">
+          {/* Back Link */}
+          <div className="mb-6">
             <Link
               href="/auth/login"
-              className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="inline-flex items-center font-extrabold text-purple-600 hover:text-purple-700 transition-colors underline"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Link>
+          </div>
+
+          {/* Header */}
+          <div className="text-center lg:text-left mb-8">
+            <div className="inline-block bg-pink-300 border-4 border-black px-4 py-2 rounded-xl mb-4">
+              <h2 className="text-3xl lg:text-4xl font-extrabold text-black tracking-tight">
+                Verify Email
+              </h2>
+            </div>
+            <p className="mt-3 text-base font-bold text-black">
+              We've sent a 6-digit code to
+            </p>
+            <p className="text-base font-extrabold text-purple-600">{email}</p>
+          </div>
+
+          {/* Form */}
+          <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+              {/* OTP Field */}
+              <div>
+                <label htmlFor="otp" className="block text-sm font-extrabold text-black mb-2">
+                  Verification Code
+                </label>
+                <div className="mt-1">
+                  <input
+                    {...register('otp')}
+                    onChange={handleOTPChange}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    className="block w-full px-3 py-3 bg-white border-2 border-black rounded-xl placeholder-gray-500 text-black font-bold focus:outline-none focus:ring-4 focus:ring-yellow-300 focus:border-black text-center text-2xl tracking-widest"
+                    placeholder="000000"
+                  />
+                </div>
+                {errors.otp && (
+                  <p className="mt-2 text-sm font-bold text-red-600 bg-red-100 border-2 border-red-600 rounded-lg px-3 py-1">
+                    {errors.otp.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Timer Info */}
+              <div className="bg-yellow-100 border-2 border-black rounded-xl p-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-black" />
+                  <span className="text-sm font-bold text-black">
+                    Code expires in 10 minutes
+                  </span>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading || !otpValue || otpValue.length !== 6}
+                  className="w-full flex justify-center py-3 px-4 bg-black hover:bg-gray-900 text-white rounded-xl text-base font-extrabold transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none border-4 border-black hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
+                >
+                  {loading ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Verifying...
+                    </div>
+                  ) : (
+                    'Verify Email'
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {/* Resend Section */}
+            <div className="mt-6 pt-6 border-t-2 border-black">
+              <div className="text-center">
+                <p className="text-sm font-bold text-black mb-3">
+                  Didn't receive the code?
+                </p>
+                <button
+                  type="button"
+                  onClick={handleResendOTP}
+                  disabled={resendLoading || resendCooldown > 0}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-pink-200 hover:bg-pink-300 border-2 border-black rounded-xl font-extrabold text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
+                >
+                  <RefreshCw className={`w-4 h-4 ${resendLoading ? 'animate-spin' : ''}`} />
+                  {resendLoading ? 'Sending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -180,7 +265,13 @@ function VerifyEmailPageContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-8 border-black border-t-transparent"></div>
+        </div>
+      }
+    >
       <VerifyEmailPageContent />
     </Suspense>
   );
