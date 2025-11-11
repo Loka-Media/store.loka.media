@@ -30,7 +30,7 @@ export default function Navigation() {
           {/* Logo - Neubrutalism style: bold, colorful */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-extrabold text-black tracking-tighter bg-white px-4 py-2 rounded-lg border-2 border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+              <span className="text-2xl font-extrabold text-black tracking-tighter bg-white px-4 py-2 rounded-lg border border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
                 Loka Media
               </span>
             </Link>
@@ -75,7 +75,7 @@ export default function Navigation() {
                         <Heart className="w-4 h-4 mr-1.5" />
                         Wishlist
                         {wishlistCount > 0 && (
-                          <span className="ml-1.5 bg-pink-400 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold border-2 border-black">
+                          <span className="ml-1.5 bg-pink-400 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold border border-black">
                             {wishlistCount > 99 ? "99+" : wishlistCount}
                           </span>
                         )}
@@ -94,7 +94,7 @@ export default function Navigation() {
                         <ShoppingBag className="w-4 h-4 mr-1.5" />
                         Cart
                         {cartCount > 0 && (
-                          <span className="ml-1.5 bg-yellow-300 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold border-2 border-black">
+                          <span className="ml-1.5 bg-yellow-300 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold border border-black">
                             {cartCount > 99 ? "99+" : cartCount}
                           </span>
                         )}
@@ -131,7 +131,7 @@ export default function Navigation() {
                     <ShoppingBag className="w-4 h-4 mr-1.5" />
                     Cart
                     {cartCount > 0 && (
-                      <span className="ml-1.5 bg-yellow-300 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold border-2 border-black">
+                      <span className="ml-1.5 bg-yellow-300 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold border border-black">
                         {cartCount > 99 ? "99+" : cartCount}
                       </span>
                     )}
@@ -144,7 +144,7 @@ export default function Navigation() {
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="bg-black hover:bg-gray-900 text-white px-6 py-2.5 rounded-lg text-sm font-extrabold transition-all border-2 border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
+                    className="bg-black hover:bg-gray-900 text-white px-6 py-2.5 rounded-lg text-sm font-extrabold transition-all border border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
                   >
                     Start selling
                   </Link>

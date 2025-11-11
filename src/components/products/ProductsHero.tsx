@@ -53,7 +53,7 @@ export function ProductsHero({
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-black drop-shadow-lg">
               Premium Marketplace
             </h1>
-            <div className="inline-block bg-white/90 backdrop-blur-sm px-6 py-3 rounded-2xl border-2 border-black">
+            <div className="inline-block bg-white/90 backdrop-blur-sm px-6 py-3 rounded-2xl border border-black">
               <p className="text-lg sm:text-xl md:text-2xl text-black font-bold max-w-3xl">
                 Discover curated designs from top creators worldwide
               </p>
@@ -62,15 +62,15 @@ export function ProductsHero({
 
           {/* Stats bar - Colorful cards */}
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <div className="flex items-center gap-2 bg-yellow-300 px-4 py-2 rounded-full border-2 border-black font-bold text-black">
+            <div className="flex items-center gap-2 bg-yellow-300 px-4 py-2 rounded-full border border-black font-bold text-black">
               <ShoppingBag className="w-4 h-4" />
               <span>{pagination.total.toLocaleString()} Products</span>
             </div>
-            <div className="flex items-center gap-2 bg-pink-300 px-4 py-2 rounded-full border-2 border-black font-bold text-black">
+            <div className="flex items-center gap-2 bg-pink-300 px-4 py-2 rounded-full border border-black font-bold text-black">
               <Users className="w-4 h-4" />
               <span>{creators.length} Creators</span>
             </div>
-            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-black font-bold text-black">
+            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-black font-bold text-black">
               <TrendingUp className="w-4 h-4" />
               <span>{categories.length} Categories</span>
             </div>
@@ -78,7 +78,7 @@ export function ProductsHero({
 
           {/* Search Bar - Neubrutalist style */}
           <div className="max-w-2xl mx-auto">
-            <div className="relative bg-white border-2 border-black rounded-2xl overflow-hidden hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+            <div className="relative bg-white border border-black rounded-2xl overflow-hidden hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
               <div className="flex items-center">
                 <div className="flex items-center flex-1 px-4 py-3">
                   <Search className="w-5 h-5 text-black mr-3 flex-shrink-0" />
