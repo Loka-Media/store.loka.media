@@ -24,13 +24,13 @@ export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-yellow-200 via-pink-100 to-yellow-200 border-b-4 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo - Gumroad style: simple, clean */}
+          {/* Logo - Neubrutalism style: bold, colorful */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-extrabold text-black tracking-tight">
+              <span className="text-2xl font-extrabold text-black tracking-tighter bg-white px-4 py-2 rounded-lg border-3 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all">
                 Loka Media
               </span>
             </Link>
@@ -75,7 +75,7 @@ export default function Navigation() {
                         <Heart className="w-4 h-4 mr-1.5" />
                         Wishlist
                         {wishlistCount > 0 && (
-                          <span className="ml-1.5 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                          <span className="ml-1.5 bg-pink-400 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold border-2 border-black">
                             {wishlistCount > 99 ? "99+" : wishlistCount}
                           </span>
                         )}
@@ -94,7 +94,7 @@ export default function Navigation() {
                         <ShoppingBag className="w-4 h-4 mr-1.5" />
                         Cart
                         {cartCount > 0 && (
-                          <span className="ml-1.5 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                          <span className="ml-1.5 bg-yellow-300 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold border-2 border-black">
                             {cartCount > 99 ? "99+" : cartCount}
                           </span>
                         )}
@@ -131,20 +131,20 @@ export default function Navigation() {
                     <ShoppingBag className="w-4 h-4 mr-1.5" />
                     Cart
                     {cartCount > 0 && (
-                      <span className="ml-1.5 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      <span className="ml-1.5 bg-yellow-300 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold border-2 border-black">
                         {cartCount > 99 ? "99+" : cartCount}
                       </span>
                     )}
                   </Link>
                   <Link
                     href="/auth/login"
-                    className="text-black/70 hover:text-black px-4 py-2 text-sm font-semibold transition-colors"
+                    className="text-black/70 hover:text-black px-4 py-2 text-sm font-extrabold transition-colors"
                   >
                     Sign in
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="bg-accent hover:bg-accent-hover text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors"
+                    className="bg-black hover:bg-gray-900 text-white px-6 py-2.5 rounded-lg text-sm font-extrabold transition-all border-3 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
                   >
                     Start selling
                   </Link>

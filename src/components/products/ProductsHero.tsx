@@ -41,47 +41,51 @@ export function ProductsHero({
   categories,
 }: ProductsHeroProps) {
   return (
-    <div className="bg-white border-b border-gray-200">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+    <div className="relative bg-gradient-to-br from-pink-200 via-yellow-100 to-pink-100 border-b-4 border-black overflow-hidden">
+      {/* Decorative Elements */}
+      <div className="absolute top-10 left-10 w-24 h-24 bg-yellow-300 rounded-full opacity-40 hidden lg:block"></div>
+      <div className="absolute bottom-10 right-10 w-32 h-32 bg-pink-300 rounded-3xl opacity-30 rotate-12 hidden lg:block"></div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 relative z-10">
         <div className="text-center space-y-6 sm:space-y-8">
-          {/* Heading - Gumroad style: clean and minimal */}
+          {/* Heading - Neubrutalism style: bold and colorful */}
           <div className="space-y-3 sm:space-y-4">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-black">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-black drop-shadow-lg">
               Premium Marketplace
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-foreground-muted font-normal max-w-3xl mx-auto">
-              Discover curated designs from top creators worldwide
-            </p>
+            <div className="inline-block bg-white/90 backdrop-blur-sm px-6 py-3 rounded-2xl border-4 border-black shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+              <p className="text-lg sm:text-xl md:text-2xl text-black font-bold max-w-3xl">
+                Discover curated designs from top creators worldwide
+              </p>
+            </div>
           </div>
 
-          {/* Stats bar - Clean and minimal */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-foreground-muted">
-            <div className="flex items-center gap-2">
+          {/* Stats bar - Colorful cards */}
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+            <div className="flex items-center gap-2 bg-yellow-300 px-4 py-2 rounded-full border-3 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] font-bold text-black">
               <ShoppingBag className="w-4 h-4" />
               <span>{pagination.total.toLocaleString()} Products</span>
             </div>
-            <div className="text-gray-300">•</div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-pink-300 px-4 py-2 rounded-full border-3 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] font-bold text-black">
               <Users className="w-4 h-4" />
               <span>{creators.length} Creators</span>
             </div>
-            <div className="text-gray-300">•</div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-3 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] font-bold text-black">
               <TrendingUp className="w-4 h-4" />
               <span>{categories.length} Categories</span>
             </div>
           </div>
 
-          {/* Search Bar - Clean Gumroad style */}
+          {/* Search Bar - Neubrutalist style */}
           <div className="max-w-2xl mx-auto">
-            <div className="relative bg-white border-2 border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors">
+            <div className="relative bg-white border-4 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
               <div className="flex items-center">
                 <div className="flex items-center flex-1 px-4 py-3">
-                  <Search className="w-5 h-5 text-foreground-muted mr-3 flex-shrink-0" />
+                  <Search className="w-5 h-5 text-black mr-3 flex-shrink-0" />
                   <input
                     type="text"
                     placeholder="Search products, creators..."
-                    className="flex-1 bg-transparent border-0 text-black placeholder-foreground-muted focus:outline-none focus:ring-0 text-base"
+                    className="flex-1 bg-transparent border-0 text-black placeholder-gray-500 focus:outline-none focus:ring-0 text-base font-semibold"
                     value={filters.search}
                     onChange={(e) =>
                       setFilters((prev: any) => ({
@@ -94,7 +98,7 @@ export function ProductsHero({
                 </div>
                 <button
                   onClick={() => fetchProducts()}
-                  className="bg-accent hover:bg-accent-hover text-white px-6 py-3 font-bold text-base transition-colors flex-shrink-0"
+                  className="bg-black hover:bg-gray-900 text-white px-8 py-4 font-extrabold text-base transition-all flex-shrink-0"
                 >
                   Search
                 </button>
@@ -104,7 +108,7 @@ export function ProductsHero({
 
           {/* Call to action */}
           <div className="text-center">
-            <p className="text-foreground-muted text-sm">
+            <p className="text-black font-bold text-sm">
               Explore designs • Support creators • Find your style
             </p>
           </div>

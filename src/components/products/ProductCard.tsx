@@ -36,7 +36,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-      <div className="group relative bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
+      <div className="group relative bg-white border-4 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-300 cursor-pointer">
         {/* Image Container */}
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100" style={{ aspectRatio: '1/1' }}>
           <Image
@@ -74,10 +74,10 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Wishlist Button */}
           <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
             <button
-              className={`p-2.5 rounded-full transition-all duration-300 focus:outline-none shadow-md hover:scale-110 ${
+              className={`p-2.5 rounded-full transition-all duration-300 focus:outline-none border-3 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] ${
                 isWishlisted
-                  ? "bg-accent text-white hover:bg-accent-hover"
-                  : "bg-white/95 backdrop-blur-sm text-black/60 hover:text-accent hover:bg-white"
+                  ? "bg-pink-400 text-black"
+                  : "bg-white text-black/60 hover:text-black"
               }`}
               title="Add to wishlist"
               onClick={async (e) => {
@@ -133,17 +133,17 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Category badge */}
           {product.category && (
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center bg-black text-white text-xs px-3 py-1.5 rounded-full font-bold tracking-tight">
+              <span className="inline-flex items-center bg-yellow-300 text-black text-xs px-3 py-1.5 rounded-full font-extrabold tracking-tight border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
                 {product.category}
               </span>
               {product.product_source && (
                 <span
-                  className={`inline-flex items-center text-xs px-3 py-1.5 rounded-full font-bold ${
+                  className={`inline-flex items-center text-xs px-3 py-1.5 rounded-full font-extrabold border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] ${
                     product.product_source === "printful"
-                      ? "bg-purple-500 text-white"
+                      ? "bg-purple-400 text-black"
                       : product.product_source === "shopify"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-500 text-white"
+                      ? "bg-green-400 text-black"
+                      : "bg-gray-400 text-black"
                   }`}
                 >
                   {product.product_source === "printful"

@@ -55,7 +55,7 @@ export function ProductsFilterTopBar({
       <div className="relative w-full sm:flex-1">
         <button
           onClick={() => setOpenDropdown(isOpen ? null : label)}
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-black text-sm font-semibold hover:border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+          className="w-full flex items-center justify-between px-4 py-3 bg-white border-3 border-black rounded-lg text-black text-sm font-extrabold hover:bg-yellow-50 transition-all duration-200 focus:outline-none shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
         >
           <span className={selectedOption?.label ? "text-black" : "text-foreground-muted"}>
             {selectedOption?.label || placeholder}
@@ -72,7 +72,7 @@ export function ProductsFilterTopBar({
               onClick={() => setOpenDropdown(null)}
             />
             <div
-              className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-72 overflow-y-auto z-50"
+              className="absolute top-full left-0 right-0 mt-2 bg-white border-3 border-black rounded-lg shadow-[4px_4px_0_0_rgba(0,0,0,1)] max-h-72 overflow-y-auto z-50"
             >
               {options.map((option) => (
                 <button
@@ -81,10 +81,10 @@ export function ProductsFilterTopBar({
                     onSelect(option.value);
                     setOpenDropdown(null);
                   }}
-                  className={`w-full px-4 py-2.5 text-left text-sm font-medium transition-colors duration-150 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
+                  className={`w-full px-4 py-2.5 text-left text-sm font-bold transition-colors duration-150 hover:bg-yellow-100 first:rounded-t-lg last:rounded-b-lg ${
                     value === option.value
-                      ? "bg-gray-100 text-black"
-                      : "text-foreground-muted hover:text-black"
+                      ? "bg-pink-100 text-black"
+                      : "text-black hover:text-black"
                   }`}
                 >
                   {option.label}
@@ -101,23 +101,23 @@ export function ProductsFilterTopBar({
     filters.creator !== "";
 
   return (
-    <div className="w-full bg-white border-2 border-gray-200 rounded-lg mb-8">
+    <div className="w-full bg-white border-4 border-black rounded-2xl mb-8 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b-4 border-black bg-gradient-to-r from-yellow-100 to-pink-100">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-black" />
-          <span className="text-black font-bold text-sm">Filters</span>
+          <Filter className="w-5 h-5 text-black" />
+          <span className="text-black font-extrabold text-base">Filters</span>
           {hasActiveFilters && (
-            <span className="bg-accent/10 text-accent text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-pink-400 text-black text-xs font-extrabold px-3 py-1 rounded-full border-2 border-black">
               {Object.values(filters).filter(v => v !== "" && v !== "all" && v !== "0").length}
             </span>
           )}
         </div>
-        
+
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="flex items-center gap-1.5 text-foreground-muted hover:text-black text-xs font-semibold transition-colors duration-200 px-3 py-1.5 rounded-lg hover:bg-gray-100"
+            className="flex items-center gap-1.5 text-black hover:text-white bg-white hover:bg-black text-xs font-extrabold transition-all duration-200 px-4 py-2 rounded-lg border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
           >
             <X className="w-3.5 h-3.5" />
             Clear all
@@ -173,22 +173,22 @@ export function ProductsFilterTopBar({
         {hasActiveFilters && (
           <div className="flex flex-wrap gap-2 pt-4 mt-4 border-t border-gray-200">
             {filters.category !== "" && (
-              <span className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 text-black text-xs font-semibold px-3 py-1.5 rounded-md">
+              <span className="flex items-center gap-1.5 bg-yellow-300 border-2 border-black text-black text-xs font-extrabold px-3 py-1.5 rounded-full shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
                 {filters.category}
                 <button
                   onClick={() => handleFilterChange("category", "")}
-                  className="text-foreground-muted hover:text-black transition-colors"
+                  className="text-black hover:text-white hover:bg-black rounded-full p-0.5 transition-all"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               </span>
             )}
             {filters.creator !== "" && (
-              <span className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 text-black text-xs font-semibold px-3 py-1.5 rounded-md">
+              <span className="flex items-center gap-1.5 bg-pink-300 border-2 border-black text-black text-xs font-extrabold px-3 py-1.5 rounded-full shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
                 {creators.find(c => c.name === filters.creator)?.name || filters.creator}
                 <button
                   onClick={() => handleFilterChange("creator", "")}
-                  className="text-foreground-muted hover:text-black transition-colors"
+                  className="text-black hover:text-white hover:bg-black rounded-full p-0.5 transition-all"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
