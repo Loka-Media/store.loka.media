@@ -46,32 +46,32 @@ export function ProductsHero({
       <div className="absolute top-10 left-10 w-24 h-24 bg-yellow-300 rounded-full opacity-40 hidden lg:block"></div>
       <div className="absolute bottom-10 right-10 w-32 h-32 bg-pink-300 rounded-3xl opacity-30 rotate-12 hidden lg:block"></div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 relative z-10">
-        <div className="text-center space-y-6 sm:space-y-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 relative z-10">
+        <div className="text-center space-y-4 sm:space-y-6 md:space-y-8">
           {/* Heading - Neubrutalism style: bold and colorful */}
-          <div className="space-y-3 sm:space-y-4">
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-normal mb-6 md:mb-8 text-black leading-[0.95] tracking-tight">
+          <div className="space-y-2 sm:space-y-3 md:space-y-4">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal mb-4 sm:mb-6 md:mb-8 text-black leading-[0.95] tracking-tight">
               Premium Marketplace
             </h1>
-            <div className="inline-block bg-white/90 backdrop-blur-sm px-6 py-3 rounded-2xl border border-black">
-              <p className="text-lg sm:text-xl md:text-2xl text-black font-bold max-w-3xl">
+            <div className="inline-block bg-white/90 backdrop-blur-sm px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-black">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-black font-bold max-w-3xl">
                 Discover curated designs from top creators worldwide
               </p>
             </div>
           </div>
 
           {/* Stats bar - Colorful cards */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <div className="flex items-center gap-2 bg-yellow-300 px-4 py-2 rounded-full border border-black font-bold text-black">
-              <ShoppingBag className="w-4 h-4" />
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-yellow-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-black font-bold text-black text-sm sm:text-base">
+              <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{pagination.total.toLocaleString()} Products</span>
             </div>
-            <div className="flex items-center gap-2 bg-pink-300 px-4 py-2 rounded-full border border-black font-bold text-black">
-              <Users className="w-4 h-4" />
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-pink-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-black font-bold text-black text-sm sm:text-base">
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{creators.length} Creators</span>
             </div>
-            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-black font-bold text-black">
-              <TrendingUp className="w-4 h-4" />
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-black font-bold text-black text-sm sm:text-base">
+              <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{categories.length} Categories</span>
             </div>
           </div>

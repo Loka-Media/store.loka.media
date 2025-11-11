@@ -19,23 +19,23 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-pink-50 via-yellow-50 to-purple-50 border-y border-black py-12">
+    <div className="bg-gradient-to-br from-pink-50 via-yellow-50 to-purple-50 border-y border-black py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-2.5 bg-black rounded-xl border border-black shadow-md">
-            <Sparkles className="w-5 h-5 text-yellow-300" />
+        <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+          <div className="p-2 sm:p-2.5 bg-black rounded-xl border border-black shadow-md">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300" />
           </div>
           <div>
-            <h2 className="text-3xl font-extrabold text-black">Featured Products</h2>
-            <p className="text-sm text-black font-bold mt-1">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-black">Featured Products</h2>
+            <p className="text-xs sm:text-sm text-black font-bold mt-0.5 sm:mt-1">
               Curated picks from our marketplace
             </p>
           </div>
         </div>
 
         {/* Featured Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {featuredProducts.map((product) => (
             <Link
               key={product.id}

@@ -10,6 +10,7 @@ import { CategoryNavigation } from "@/components/products/CategoryNavigation";
 import { FeaturedProducts } from "@/components/products/FeaturedProducts";
 import { ProductViewTabs, ViewType } from "@/components/products/ProductViewTabs";
 import { ProductsSidebar } from "@/components/products/ProductsSidebar";
+import { MobileFiltersDrawer } from "@/components/products/MobileFiltersDrawer";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { ProductsPagination } from "@/components/products/ProductsPagination";
 import { NoProductsFound } from "@/components/products/NoProductsFound";
@@ -45,6 +46,7 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeView, setActiveView] = useState<ViewType>("trending");
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   const [filters, setFilters] = useState({
     category: "",
@@ -251,8 +253,8 @@ function ProductsContent() {
       )}
 
       {/* Main Content with Sidebar Layout */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar Filters - Hidden on mobile, visible on desktop */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
             <ProductsSidebar
@@ -272,6 +274,24 @@ function ProductsContent() {
 
           {/* Main Products Area */}
           <div className="flex-1">
+            {/* Mobile Filter Button - Visible only on mobile */}
+            <div className="lg:hidden mb-4">
+              <button
+                onClick={() => setIsMobileFiltersOpen(true)}
+                className="w-full bg-gradient-to-r from-yellow-200 to-pink-200 border border-black rounded-xl px-4 py-3 font-extrabold text-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Show Filters
+                {(filters.creator || filters.minPrice || filters.maxPrice) && (
+                  <span className="bg-black text-white text-xs font-extrabold px-2 py-1 rounded-full">
+                    {(filters.creator ? 1 : 0) + (filters.minPrice ? 1 : 0) + (filters.maxPrice ? 1 : 0)}
+                  </span>
+                )}
+              </button>
+            </div>
+
             {/* View Tabs */}
             <ProductViewTabs
               activeView={activeView}
@@ -303,6 +323,23 @@ function ProductsContent() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Filters Drawer */}
+      <MobileFiltersDrawer
+        isOpen={isMobileFiltersOpen}
+        onClose={() => setIsMobileFiltersOpen(false)}
+        filters={{
+          creator: filters.creator,
+          minPrice: filters.minPrice,
+          maxPrice: filters.maxPrice,
+        }}
+        creators={creators}
+        handleFilterChange={(key, value) => {
+          const newFilters = { ...filters, [key]: value };
+          setFilters(newFilters);
+        }}
+        clearFilters={clearFilters}
+      />
     </div>
   );
 }

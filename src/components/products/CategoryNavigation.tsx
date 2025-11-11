@@ -24,7 +24,7 @@ export function CategoryNavigation({
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
           <div className="flex items-center gap-2 flex-shrink-0">
             <Tag className="w-4 h-4 text-black" />
-            <span className="text-sm font-extrabold text-black">Categories:</span>
+            <span className="text-sm font-extrabold text-black hidden sm:inline">Categories:</span>
           </div>
 
           {/* All Categories */}
