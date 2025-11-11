@@ -16,12 +16,12 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
       <div className="max-w-6xl mx-auto text-center">
         {/* Heading - Gumroad style: huge, bold, minimal letter-spacing */}
         <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold mb-6 md:mb-8 text-black leading-[0.95] tracking-tight">
-          Go from zero to $1
+          Turn Your Following Into Income
         </h1>
 
         {/* Subheading - Gumroad style: clean, readable */}
         <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-foreground-muted mb-10 md:mb-12 max-w-4xl mx-auto font-normal leading-tight tracking-normal">
-          Loka Media helps creators earn a living. Start selling products in minutes and keep 90% of your earnings.
+          Your creator journey deserves premium marketing support and maximum monetization earnings on and across all social platforms.
         </p>
 
         {/* CTA Buttons - Gumroad style: simple, clear */}
