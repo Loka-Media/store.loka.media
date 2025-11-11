@@ -9,7 +9,6 @@ import { ProductsHero } from "@/components/products/ProductsHero";
 import { ProductsFilterTopBar } from "@/components/products/ProductsFilterTopBar";
 import { ProductsControls } from "@/components/products/ProductsControls";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
-import { ProductsList } from "@/components/products/ProductsList";
 import { ProductsPagination } from "@/components/products/ProductsPagination";
 import { NoProductsFound } from "@/components/products/NoProductsFound";
 import { ProductsLoading } from "@/components/products/ProductsLoading";
@@ -43,7 +42,6 @@ function ProductsContent() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
 
   const [filters, setFilters] = useState({
@@ -244,8 +242,6 @@ function ProductsContent() {
             pagination={pagination}
             filters={filters}
             setFilters={setFilters}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
           />
 
           {loading ? (
@@ -254,11 +250,7 @@ function ProductsContent() {
             <NoProductsFound clearFilters={clearFilters} />
           ) : (
             <>
-              {viewMode === "grid" ? (
-                <ProductsGrid products={products} />
-              ) : (
-                <ProductsList products={products} />
-              )}
+              <ProductsGrid products={products} />
 
               <ProductsPagination
                 hasNext={pagination.hasNext}
