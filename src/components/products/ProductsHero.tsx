@@ -50,7 +50,7 @@ export function ProductsHero({
         <div className="text-center space-y-6 sm:space-y-8">
           {/* Heading - Neubrutalism style: bold and colorful */}
           <div className="space-y-3 sm:space-y-4">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-black drop-shadow-lg">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-normal mb-6 md:mb-8 text-black leading-[0.95] tracking-tight">
               Premium Marketplace
             </h1>
             <div className="inline-block bg-white/90 backdrop-blur-sm px-6 py-3 rounded-2xl border border-black">
