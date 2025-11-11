@@ -19,12 +19,12 @@ export function ProductsControls({
   setFilters,
 }: ProductsControlsProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-6 border-b-4 border-black">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-6 border-b-2 border-black">
       {/* Results Count */}
       <div className="text-black text-base font-extrabold">
         {loading ? (
           <div className="flex items-center bg-yellow-200 px-4 py-2 rounded-full border-2 border-black">
-            <div className="w-5 h-5 border-3 border-black border-t-transparent rounded-full animate-spin mr-2"></div>
+            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin mr-2"></div>
             Loading products...
           </div>
         ) : (
@@ -45,7 +45,7 @@ export function ProductsControls({
             const [sortBy, sortOrder] = e.target.value.split("-");
             setFilters((prev: any) => ({ ...prev, sortBy, sortOrder }));
           }}
-          className="w-full sm:w-auto px-4 py-3 bg-white border-3 border-black rounded-lg text-black text-sm font-extrabold transition-all duration-200 focus:outline-none hover:bg-yellow-50 appearance-none pr-10 hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
+          className="w-full sm:w-auto px-4 py-3 bg-white border-2 border-black rounded-lg text-black text-sm font-extrabold transition-all duration-200 focus:outline-none hover:bg-yellow-50 appearance-none pr-10 hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
         >
           <option value="created_at-DESC">Newest First</option>
           <option value="created_at-ASC">Oldest First</option>

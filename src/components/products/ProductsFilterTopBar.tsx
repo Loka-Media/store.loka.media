@@ -55,7 +55,7 @@ export function ProductsFilterTopBar({
       <div className="relative w-full sm:flex-1">
         <button
           onClick={() => setOpenDropdown(isOpen ? null : label)}
-          className="w-full flex items-center justify-between px-4 py-3 bg-white border-3 border-black rounded-lg text-black text-sm font-extrabold hover:bg-yellow-50 transition-all duration-200 focus:outline-none hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
+          className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-black rounded-lg text-black text-sm font-extrabold hover:bg-yellow-50 transition-all duration-200 focus:outline-none hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
         >
           <span className={selectedOption?.label ? "text-black" : "text-foreground-muted"}>
             {selectedOption?.label || placeholder}
@@ -72,7 +72,7 @@ export function ProductsFilterTopBar({
               onClick={() => setOpenDropdown(null)}
             />
             <div
-              className="absolute top-full left-0 right-0 mt-2 bg-white border-3 border-black rounded-lg max-h-72 overflow-y-auto z-50"
+              className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-black rounded-lg max-h-72 overflow-y-auto z-50"
             >
               {options.map((option) => (
                 <button
@@ -101,9 +101,9 @@ export function ProductsFilterTopBar({
     filters.creator !== "";
 
   return (
-    <div className="w-full bg-white border-4 border-black rounded-2xl mb-8 hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+    <div className="w-full bg-white border-2 border-black rounded-2xl mb-8 hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b-4 border-black bg-gradient-to-r from-yellow-100 to-pink-100">
+      <div className="flex items-center justify-between p-4 border-b-2 border-black bg-gradient-to-r from-yellow-100 to-pink-100">
         <div className="flex items-center gap-2">
           <Filter className="w-5 h-5 text-black" />
           <span className="text-black font-extrabold text-base">Filters</span>

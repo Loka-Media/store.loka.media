@@ -24,13 +24,13 @@ export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-yellow-200 via-pink-100 to-yellow-200 border-b-4 border-black">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-yellow-200 via-pink-100 to-yellow-200 border-b-2 border-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo - Neubrutalism style: bold, colorful */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-extrabold text-black tracking-tighter bg-white px-4 py-2 rounded-lg border-3 border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+              <span className="text-2xl font-extrabold text-black tracking-tighter bg-white px-4 py-2 rounded-lg border-2 border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
                 Loka Media
               </span>
             </Link>
@@ -144,7 +144,7 @@ export default function Navigation() {
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="bg-black hover:bg-gray-900 text-white px-6 py-2.5 rounded-lg text-sm font-extrabold transition-all border-3 border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
+                    className="bg-black hover:bg-gray-900 text-white px-6 py-2.5 rounded-lg text-sm font-extrabold transition-all border-2 border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
                   >
                     Start selling
                   </Link>

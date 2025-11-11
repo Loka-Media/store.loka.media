@@ -36,7 +36,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-      <div className="group relative bg-white border-4 border-black rounded-2xl overflow-hidden hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-300 cursor-pointer">
+      <div className="group relative bg-white border-2 border-black rounded-2xl overflow-hidden hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-300 cursor-pointer">
         {/* Image Container */}
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100" style={{ aspectRatio: '1/1' }}>
           <Image
@@ -74,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Wishlist Button */}
           <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
             <button
-              className={`p-2.5 rounded-full transition-all duration-300 focus:outline-none border-3 border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] ${
+              className={`p-2.5 rounded-full transition-all duration-300 focus:outline-none border-2 border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] ${
                 isWishlisted
                   ? "bg-pink-400 text-black"
                   : "bg-white text-black/60 hover:text-black"

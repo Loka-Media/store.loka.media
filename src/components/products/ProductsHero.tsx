@@ -41,7 +41,7 @@ export function ProductsHero({
   categories,
 }: ProductsHeroProps) {
   return (
-    <div className="relative bg-gradient-to-br from-pink-200 via-yellow-100 to-pink-100 border-b-4 border-black overflow-hidden">
+    <div className="relative bg-gradient-to-br from-pink-200 via-yellow-100 to-pink-100 border-b-2 border-black overflow-hidden">
       {/* Decorative Elements */}
       <div className="absolute top-10 left-10 w-24 h-24 bg-yellow-300 rounded-full opacity-40 hidden lg:block"></div>
       <div className="absolute bottom-10 right-10 w-32 h-32 bg-pink-300 rounded-3xl opacity-30 rotate-12 hidden lg:block"></div>
@@ -53,7 +53,7 @@ export function ProductsHero({
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-black drop-shadow-lg">
               Premium Marketplace
             </h1>
-            <div className="inline-block bg-white/90 backdrop-blur-sm px-6 py-3 rounded-2xl border-4 border-black">
+            <div className="inline-block bg-white/90 backdrop-blur-sm px-6 py-3 rounded-2xl border-2 border-black">
               <p className="text-lg sm:text-xl md:text-2xl text-black font-bold max-w-3xl">
                 Discover curated designs from top creators worldwide
               </p>
@@ -62,15 +62,15 @@ export function ProductsHero({
 
           {/* Stats bar - Colorful cards */}
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <div className="flex items-center gap-2 bg-yellow-300 px-4 py-2 rounded-full border-3 border-black font-bold text-black">
+            <div className="flex items-center gap-2 bg-yellow-300 px-4 py-2 rounded-full border-2 border-black font-bold text-black">
               <ShoppingBag className="w-4 h-4" />
               <span>{pagination.total.toLocaleString()} Products</span>
             </div>
-            <div className="flex items-center gap-2 bg-pink-300 px-4 py-2 rounded-full border-3 border-black font-bold text-black">
+            <div className="flex items-center gap-2 bg-pink-300 px-4 py-2 rounded-full border-2 border-black font-bold text-black">
               <Users className="w-4 h-4" />
               <span>{creators.length} Creators</span>
             </div>
-            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-3 border-black font-bold text-black">
+            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-black font-bold text-black">
               <TrendingUp className="w-4 h-4" />
               <span>{categories.length} Categories</span>
             </div>
@@ -78,7 +78,7 @@ export function ProductsHero({
 
           {/* Search Bar - Neubrutalist style */}
           <div className="max-w-2xl mx-auto">
-            <div className="relative bg-white border-4 border-black rounded-2xl overflow-hidden hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+            <div className="relative bg-white border-2 border-black rounded-2xl overflow-hidden hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
               <div className="flex items-center">
                 <div className="flex items-center flex-1 px-4 py-3">
                   <Search className="w-5 h-5 text-black mr-3 flex-shrink-0" />
