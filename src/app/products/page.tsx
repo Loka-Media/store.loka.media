@@ -215,7 +215,7 @@ function ProductsContent() {
   };
 
   return (
-    <div className="bg-white text-gray-900">
+    <div className="bg-white text-black">
       <ProductsHero
         filters={filters}
         setFilters={setFilters}
@@ -225,8 +225,8 @@ function ProductsContent() {
         categories={categories}
       />
 
-      <div className="relative bg-white pt-8 sm:pt-12 lg:pt-0">
-        <div className="max-w-7xl mx-auto px-4 -mt-32 sm:-mt-48 lg:-mt-96">
+      <div className="relative bg-white">
+        <div className="max-w-7xl mx-auto px-4 py-6">
           <ProductsFilterTopBar
             filters={filters}
             setFilters={setFilters}
@@ -238,7 +238,7 @@ function ProductsContent() {
           />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 relative z-10 pt-6 sm:pt-8">
+        <div className="max-w-7xl mx-auto px-4 pt-6 sm:pt-8">
           <ProductsControls
             loading={loading}
             pagination={pagination}
