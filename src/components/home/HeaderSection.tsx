@@ -27,7 +27,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
           </h1>
 
           {/* Subheading with background highlight */}
-          <div className="inline-block bg-white/80 backdrop-blur-sm px-6 py-4 rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-10 md:mb-12">
+          <div className="inline-block bg-white/80 backdrop-blur-sm px-6 py-4 rounded-2xl border-4 border-black mb-10 md:mb-12">
             <p className="text-xl sm:text-2xl md:text-3xl text-black max-w-3xl font-semibold leading-tight tracking-tight">
               Your creator journey deserves premium marketing support and maximum monetization earnings on and across all social platforms.
             </p>
@@ -38,13 +38,13 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
             <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-8">
               <Link
                 href="/auth/register"
-                className="bg-black hover:bg-gray-900 text-white px-12 py-5 rounded-xl text-xl font-extrabold transition-all border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] w-full sm:w-auto text-center"
+                className="bg-black hover:bg-gray-900 text-white px-12 py-5 rounded-xl text-xl font-extrabold transition-all border-4 border-black hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] w-full sm:w-auto text-center"
               >
                 Start selling
               </Link>
               <Link
                 href="/products"
-                className="bg-white hover:bg-gray-50 text-black px-12 py-5 rounded-xl text-xl font-extrabold transition-all border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] w-full sm:w-auto text-center"
+                className="bg-white hover:bg-gray-50 text-black px-12 py-5 rounded-xl text-xl font-extrabold transition-all border-4 border-black hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] w-full sm:w-auto text-center"
               >
                 Explore marketplace →
               </Link>
@@ -58,19 +58,19 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
             {/* Stat Card 1 - Yellow */}
-            <div className="relative bg-yellow-300 p-8 md:p-10 rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+            <div className="relative bg-yellow-300 p-8 md:p-10 rounded-3xl border-4 border-black hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
               <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-black mb-3 tracking-tight">$2M+</div>
               <div className="text-lg md:text-xl text-black font-bold">Paid to creators</div>
             </div>
 
             {/* Stat Card 2 - Pink */}
-            <div className="relative bg-pink-400 p-8 md:p-10 rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+            <div className="relative bg-pink-400 p-8 md:p-10 rounded-3xl border-4 border-black hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
               <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-black mb-3 tracking-tight">10K+</div>
               <div className="text-lg md:text-xl text-black font-bold">Active creators</div>
             </div>
 
             {/* Stat Card 3 - Black */}
-            <div className="relative bg-black p-8 md:p-10 rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(255,105,180,1)] hover:shadow-[12px_12px_0px_0px_rgba(255,105,180,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+            <div className="relative bg-black p-8 md:p-10 rounded-3xl border-4 border-black hover:shadow-[12px_12px_0px_0px_rgba(255,105,180,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
               <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-yellow-300 mb-3 tracking-tight">90%</div>
               <div className="text-lg md:text-xl text-white font-bold">You keep</div>
             </div>

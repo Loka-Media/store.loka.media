@@ -36,7 +36,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-      <div className="group relative bg-white border-4 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-300 cursor-pointer">
+      <div className="group relative bg-white border-4 border-black rounded-2xl overflow-hidden hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-300 cursor-pointer">
         {/* Image Container */}
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100" style={{ aspectRatio: '1/1' }}>
           <Image
@@ -74,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Wishlist Button */}
           <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
             <button
-              className={`p-2.5 rounded-full transition-all duration-300 focus:outline-none border-3 border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px] ${
+              className={`p-2.5 rounded-full transition-all duration-300 focus:outline-none border-3 border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] ${
                 isWishlisted
                   ? "bg-pink-400 text-black"
                   : "bg-white text-black/60 hover:text-black"
@@ -133,12 +133,12 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Category badge */}
           {product.category && (
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center bg-yellow-300 text-black text-xs px-3 py-1.5 rounded-full font-extrabold tracking-tight border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+              <span className="inline-flex items-center bg-yellow-300 text-black text-xs px-3 py-1.5 rounded-full font-extrabold tracking-tight border-2 border-black">
                 {product.category}
               </span>
               {product.product_source && (
                 <span
-                  className={`inline-flex items-center text-xs px-3 py-1.5 rounded-full font-extrabold border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] ${
+                  className={`inline-flex items-center text-xs px-3 py-1.5 rounded-full font-extrabold border-2 border-black ${
                     product.product_source === "printful"
                       ? "bg-purple-400 text-black"
                       : product.product_source === "shopify"
