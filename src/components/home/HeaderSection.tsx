@@ -22,7 +22,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
 
         <div className="max-w-6xl mx-auto text-center relative z-10">
           {/* Heading - Gumroad neubrutalism style: huge, bold, colorful */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold mb-6 md:mb-8 text-black leading-[0.95] tracking-tight drop-shadow-lg">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-normal mb-6 md:mb-8 text-black leading-[0.95] tracking-tight drop-shadow-lg">
             Turn Your Following Into Income
           </h1>
 
