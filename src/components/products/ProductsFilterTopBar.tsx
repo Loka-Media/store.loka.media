@@ -107,7 +107,7 @@ export function ProductsFilterTopBar({
   return (
     <div className="w-full bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 border border-black rounded-2xl mb-8 hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
       {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-black bg-gradient-to-r from-yellow-200 to-pink-200">
+      <div className="flex items-center justify-between p-5 border-b border-black bg-gradient-to-r from-yellow-200 to-pink-200 rounded-t-2xl">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-black rounded-xl border border-black shadow-md">
             <Filter className="w-5 h-5 text-white" />
