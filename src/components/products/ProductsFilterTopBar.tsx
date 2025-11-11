@@ -52,15 +52,15 @@ export function ProductsFilterTopBar({
     const selectedOption = options.find(opt => opt.value === value);
 
     return (
-      <div className="relative w-full sm:w-auto">
+      <div className="relative w-full sm:flex-1">
         <button
           onClick={() => setOpenDropdown(isOpen ? null : label)}
-          className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg sm:rounded-xl text-white text-xs sm:text-sm hover:bg-gray-700/50 hover:border-gray-600/50 transition-all duration-200 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500/50"
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-black text-sm font-semibold hover:border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
         >
-          <span className={`truncate ${selectedOption?.label ? "text-white" : "text-gray-400"}`}>
+          <span className={selectedOption?.label ? "text-black" : "text-foreground-muted"}>
             {selectedOption?.label || placeholder}
           </span>
-          <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${
+          <ChevronDown className={`w-4 h-4 text-foreground-muted transition-transform duration-200 flex-shrink-0 ml-2 ${
             isOpen ? "rotate-180" : ""
           }`} />
         </button>
@@ -68,21 +68,11 @@ export function ProductsFilterTopBar({
         {isOpen && (
           <>
             <div
-              className="fixed inset-0"
-              style={{ zIndex: 999998 }}
+              className="fixed inset-0 z-40"
               onClick={() => setOpenDropdown(null)}
             />
             <div
-              className="fixed sm:absolute sm:top-full sm:left-0 sm:right-0 sm:mt-1 bg-gray-800/95 border border-gray-700/50 rounded-lg sm:rounded-xl shadow-2xl backdrop-blur-sm max-h-72 overflow-y-auto"
-              style={{
-                zIndex: 999999,
-                // On mobile: full screen, bottom-up positioning
-                // On desktop: relative to button
-                ...(!window.matchMedia('(min-width: 640px)').matches
-                  ? { bottom: '0', left: '0', right: '0', borderRadius: '1rem 1rem 0 0' }
-                  : {}
-                )
-              }}
+              className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-72 overflow-y-auto z-50"
             >
               {options.map((option) => (
                 <button
@@ -91,10 +81,10 @@ export function ProductsFilterTopBar({
                     onSelect(option.value);
                     setOpenDropdown(null);
                   }}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-left text-xs sm:text-sm transition-colors duration-150 hover:bg-gray-700/50 first:rounded-t-lg sm:first:rounded-t-xl last:rounded-b-lg sm:last:rounded-b-xl ${
+                  className={`w-full px-4 py-2.5 text-left text-sm font-medium transition-colors duration-150 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
                     value === option.value
-                      ? "bg-orange-500/20 text-orange-300"
-                      : "text-gray-300 hover:text-white"
+                      ? "bg-gray-100 text-black"
+                      : "text-foreground-muted hover:text-black"
                   }`}
                 >
                   {option.label}
@@ -111,14 +101,14 @@ export function ProductsFilterTopBar({
     filters.creator !== "";
 
   return (
-    <div className="w-full bg-gray-900/50 border border-gray-800/50 rounded-2xl backdrop-blur-sm mb-6">
+    <div className="w-full bg-white border-2 border-gray-200 rounded-lg mb-8">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800/50">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-orange-400" />
-          <span className="text-white font-medium text-sm">Filters</span>
+          <Filter className="w-4 h-4 text-black" />
+          <span className="text-black font-bold text-sm">Filters</span>
           {hasActiveFilters && (
-            <span className="bg-orange-500/20 text-orange-300 text-xs font-medium px-2 py-0.5 rounded-full">
+            <span className="bg-accent/10 text-accent text-xs font-bold px-2 py-0.5 rounded-full">
               {Object.values(filters).filter(v => v !== "" && v !== "all" && v !== "0").length}
             </span>
           )}
@@ -127,20 +117,20 @@ export function ProductsFilterTopBar({
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="flex items-center gap-1 text-gray-400 hover:text-orange-400 text-xs font-medium transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-gray-800/50"
+            className="flex items-center gap-1.5 text-foreground-muted hover:text-black text-xs font-semibold transition-colors duration-200 px-3 py-1.5 rounded-lg hover:bg-gray-100"
           >
-            <X className="w-3 h-3" />
-            Clear
+            <X className="w-3.5 h-3.5" />
+            Clear all
           </button>
         )}
       </div>
 
       {/* Filter Controls */}
-      <div className="p-3 sm:p-4">
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-end gap-2 sm:gap-3">
+      <div className="p-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           {/* Category */}
-          <div className="col-span-1 sm:flex-1 sm:min-w-0">
-            <label className="block text-xs font-medium text-gray-400 mb-1">
+          <div className="flex-1">
+            <label className="block text-xs font-bold text-black mb-2">
               Category
             </label>
             <CustomDropdown
@@ -159,8 +149,8 @@ export function ProductsFilterTopBar({
           </div>
 
           {/* Creator */}
-          <div className="col-span-1 sm:flex-1 sm:min-w-0">
-            <label className="block text-xs font-medium text-gray-400 mb-1">
+          <div className="flex-1">
+            <label className="block text-xs font-bold text-black mb-2">
               Creator
             </label>
             <CustomDropdown
@@ -179,28 +169,28 @@ export function ProductsFilterTopBar({
           </div>
         </div>
 
-        {/* Active Filters */}
+        {/* Active Filters Tags */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap gap-1.5 pt-2 mt-2 border-t border-gray-800/50">
+          <div className="flex flex-wrap gap-2 pt-4 mt-4 border-t border-gray-200">
             {filters.category !== "" && (
-              <span className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs font-medium px-2 py-0.5 rounded-md">
+              <span className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 text-black text-xs font-semibold px-3 py-1.5 rounded-md">
                 {filters.category}
                 <button
                   onClick={() => handleFilterChange("category", "")}
-                  className="text-orange-300 hover:text-orange-100 transition-colors"
+                  className="text-foreground-muted hover:text-black transition-colors"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </span>
             )}
             {filters.creator !== "" && (
-              <span className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs font-medium px-2 py-0.5 rounded-md">
+              <span className="flex items-center gap-1.5 bg-gray-100 border border-gray-200 text-black text-xs font-semibold px-3 py-1.5 rounded-md">
                 {creators.find(c => c.name === filters.creator)?.name || filters.creator}
                 <button
                   onClick={() => handleFilterChange("creator", "")}
-                  className="text-orange-300 hover:text-orange-100 transition-colors"
+                  className="text-foreground-muted hover:text-black transition-colors"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </span>
             )}

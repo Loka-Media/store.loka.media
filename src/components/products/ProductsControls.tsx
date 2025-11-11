@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Grid, List, Filter } from "lucide-react";
+import { Grid, List } from "lucide-react";
 
 interface ProductsControlsProps {
   loading: boolean;
@@ -24,71 +24,72 @@ export function ProductsControls({
   setViewMode,
 }: ProductsControlsProps) {
   return (
-    <div className="flex flex-col gap-4 mb-8">
-      <div className="text-gray-400 text-sm sm:text-base">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-200">
+      {/* Results Count */}
+      <div className="text-foreground-muted text-base font-medium">
         {loading ? (
           <div className="flex items-center">
-            <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+            <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin mr-2"></div>
             Loading products...
           </div>
         ) : (
           <span>
-            <span className="text-orange-400 font-bold">
+            <span className="text-black font-bold">
               {pagination.total}
             </span>{" "}
-            products found
+            products
           </span>
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-        {/* Enhanced Sort */}
-        <div className="w-full sm:w-auto relative z-50">
+      <div className="flex items-center gap-3">
+        {/* Sort Dropdown */}
+        <div className="relative">
           <select
             value={`${filters.sortBy}-${filters.sortOrder}`}
             onChange={(e) => {
               const [sortBy, sortOrder] = e.target.value.split("-");
               setFilters((prev: any) => ({ ...prev, sortBy, sortOrder }));
             }}
-            className="w-full sm:w-auto p-2 sm:p-3 bg-gray-800/80 border border-gray-600/50 rounded-lg sm:rounded-xl text-white text-xs sm:text-sm backdrop-blur-sm transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none pr-8 sm:pr-10"
-            style={{ zIndex: 9999 }}
+            className="w-full sm:w-auto px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-black text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent hover:border-gray-300 appearance-none pr-10"
           >
-            <option value="created_at-DESC" className="bg-gray-800 text-white">Newest First</option>
-            <option value="created_at-ASC" className="bg-gray-800 text-white">Oldest First</option>
-            <option value="base_price-ASC" className="bg-gray-800 text-white">Price: Low to High</option>
-            <option value="base_price-DESC" className="bg-gray-800 text-white">Price: High to Low</option>
-            <option value="name-ASC" className="bg-gray-800 text-white">Name: A to Z</option>
-            <option value="name-DESC" className="bg-gray-800 text-white">Name: Z to A</option>
+            <option value="created_at-DESC">Newest First</option>
+            <option value="created_at-ASC">Oldest First</option>
+            <option value="base_price-ASC">Price: Low to High</option>
+            <option value="base_price-DESC">Price: High to Low</option>
+            <option value="name-ASC">Name: A to Z</option>
+            <option value="name-DESC">Name: Z to A</option>
           </select>
-          {/* Custom dropdown arrow */}
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
-            <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg className="w-4 h-4 text-foreground-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
         </div>
 
-        {/* Enhanced View Mode */}
-        <div className="flex bg-gray-800/80 border border-gray-600/50 rounded-lg sm:rounded-xl p-0.5 sm:p-1 backdrop-blur-sm">
+        {/* View Mode Toggle */}
+        <div className="flex bg-gray-100 border border-gray-200 rounded-lg p-1">
           <button
             onClick={() => setViewMode("grid")}
-            className={`p-2 sm:p-3 rounded-lg transition-all duration-200 ${
+            className={`p-2 rounded-md transition-all duration-200 ${
               viewMode === "grid"
-                ? "bg-orange-500 text-white shadow-lg"
-                : "text-gray-400 hover:text-white hover:bg-gray-700/50"
+                ? "bg-white text-black shadow-sm"
+                : "text-foreground-muted hover:text-black"
             }`}
+            title="Grid view"
           >
-            <Grid className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Grid className="w-5 h-5" />
           </button>
           <button
             onClick={() => setViewMode("list")}
-            className={`p-2 sm:p-3 rounded-lg transition-all duration-200 ${
+            className={`p-2 rounded-md transition-all duration-200 ${
               viewMode === "list"
-                ? "bg-orange-500 text-white shadow-lg"
-                : "text-gray-400 hover:text-white hover:bg-gray-700/50"
+                ? "bg-white text-black shadow-sm"
+                : "text-foreground-muted hover:text-black"
             }`}
+            title="List view"
           >
-            <List className="w-4 h-4 sm:w-5 sm:h-5" />
+            <List className="w-5 h-5" />
           </button>
         </div>
       </div>
