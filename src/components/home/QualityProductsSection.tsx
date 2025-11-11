@@ -67,31 +67,31 @@ export  function QualityProductsSection() {
           {/* Right side - Content */}
           <div className="space-y-4 sm:space-y-6 md:space-y-8">
             <div className="relative">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 mb-4 sm:mb-6 md:mb-8 leading-tight">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-black mb-6 sm:mb-8 md:mb-10 leading-[0.95] tracking-tighter">
                 Quality products
                 <br />
-                <span className="text-gray-600">
+                <span className="text-foreground-muted">
                   without the headache
                 </span>
               </h2>
             </div>
 
-            <div className="space-y-1 sm:space-y-2">
+            <div className="space-y-3 sm:space-y-4">
               {/* Create beautiful products */}
-              <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+              <div className="group relative bg-white border-2 border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-black hover:shadow-lg">
                 <button
                   onClick={() => toggleSection("create")}
-                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
+                  className="relative w-full flex items-center justify-between p-5 sm:p-6 md:p-8 text-left"
                 >
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-accent transition-all duration-300">
+                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-black group-hover:text-accent transition-all duration-300 tracking-tight">
                     Create beautiful products
                   </h3>
                   <div className="relative">
-                    <div className="relative transform transition-all duration-300 ease-out p-1.5 sm:p-2 rounded-full bg-gray-50 group-hover:bg-accent/10">
+                    <div className="relative transform transition-all duration-300 ease-out p-2 sm:p-3 rounded-full bg-gray-100 group-hover:bg-accent/20">
                       {expandedSection === "create" ? (
-                        <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
+                        <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
                       ) : (
-                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
                       )}
                     </div>
                   </div>
@@ -104,11 +104,11 @@ export  function QualityProductsSection() {
                       : "max-h-0 opacity-0"
                   }`}
                 >
-                  <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
-                    <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-5 md:mb-6">
+                  <div className="px-5 sm:px-6 md:px-8 pb-5 sm:pb-6 md:pb-8">
+                    <p className="text-foreground-muted text-base sm:text-lg md:text-xl leading-relaxed mb-5 sm:mb-6 md:mb-7 font-medium">
                       From apparel to makeup to your own product lines, we've teamed up with top brands and manufacturers to bring your ideas to life. No minimums required.
                     </p>
-                    <button className="bg-accent hover:bg-accent/90 text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-lg font-semibold transition-all duration-300 text-sm sm:text-base">
+                    <button className="bg-accent hover:bg-accent-hover text-white px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-4 rounded-xl font-bold transition-all duration-300 text-base sm:text-lg hover:scale-105 shadow-lg hover:shadow-xl">
                       Create your first product
                     </button>
                   </div>
@@ -116,20 +116,20 @@ export  function QualityProductsSection() {
               </div>
 
               {/* Launch your own shop */}
-              <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+              <div className="group relative bg-white border-2 border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-black hover:shadow-lg">
                 <button
                   onClick={() => toggleSection("shop")}
-                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
+                  className="relative w-full flex items-center justify-between p-5 sm:p-6 md:p-8 text-left"
                 >
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-accent transition-all duration-300">
+                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-black group-hover:text-accent transition-all duration-300 tracking-tight">
                     Launch your own shop
                   </h3>
                   <div className="relative">
-                    <div className="relative transform transition-all duration-300 ease-out p-1.5 sm:p-2 rounded-full bg-gray-50 group-hover:bg-accent/10">
+                    <div className="relative transform transition-all duration-300 ease-out p-2 sm:p-3 rounded-full bg-gray-100 group-hover:bg-accent/20">
                       {expandedSection === "shop" ? (
-                        <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
+                        <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
                       ) : (
-                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
                       )}
                     </div>
                   </div>
@@ -142,8 +142,8 @@ export  function QualityProductsSection() {
                       : "max-h-0 opacity-0"
                   }`}
                 >
-                  <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
-                    <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
+                  <div className="px-5 sm:px-6 md:px-8 pb-5 sm:pb-6 md:pb-8">
+                    <p className="text-foreground-muted text-base sm:text-lg md:text-xl leading-relaxed font-medium">
                       Set up your free custom shop and start selling your products with our easy-to-use platform across all social platforms. Full customization available. Ask us about your own fully branded website.
                     </p>
                   </div>
@@ -151,20 +151,20 @@ export  function QualityProductsSection() {
               </div>
 
               {/* We handle shipping & support */}
-              <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+              <div className="group relative bg-white border-2 border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-black hover:shadow-lg">
                 <button
                   onClick={() => toggleSection("shipping")}
-                  className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
+                  className="relative w-full flex items-center justify-between p-5 sm:p-6 md:p-8 text-left"
                 >
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 group-hover:text-accent transition-all duration-300">
+                  <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-black group-hover:text-accent transition-all duration-300 tracking-tight">
                     We handle shipping & support
                   </h3>
                   <div className="relative">
-                    <div className="relative transform transition-all duration-300 ease-out p-1.5 sm:p-2 rounded-full bg-gray-50 group-hover:bg-accent/10">
+                    <div className="relative transform transition-all duration-300 ease-out p-2 sm:p-3 rounded-full bg-gray-100 group-hover:bg-accent/20">
                       {expandedSection === "shipping" ? (
-                        <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
+                        <Minus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
                       ) : (
-                        <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-accent transition-colors duration-200" />
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-black group-hover:text-accent transition-colors duration-200 stroke-[3]" />
                       )}
                     </div>
                   </div>
@@ -177,8 +177,8 @@ export  function QualityProductsSection() {
                       : "max-h-0 opacity-0"
                   }`}
                 >
-                  <div className="px-4 sm:px-5 md:px-6 pb-4 sm:pb-5 md:pb-6">
-                    <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
+                  <div className="px-5 sm:px-6 md:px-8 pb-5 sm:pb-6 md:pb-8">
+                    <p className="text-foreground-muted text-base sm:text-lg md:text-xl leading-relaxed font-medium">
                       Join trendsetting creators already earning across all socials with our platform.
                     </p>
                   </div>

@@ -23,7 +23,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-white text-black">
       <div className="relative">
         <HeroSection isAuthenticated={isAuthenticated} user={user} />
         <QualityProductsSection />

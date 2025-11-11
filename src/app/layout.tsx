@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
@@ -8,6 +9,12 @@ import { Toaster } from "react-hot-toast";
 import Navigation from "@/components/Navigation";
 import StickyHeader from "@/components/StickyHeader";
 import { Footer } from "@/components/home/Footer";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Loka Media - Premium Design Marketplace | Custom Products",
@@ -41,14 +48,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className={`${inter.variable} antialiased`}>
         <AuthProvider>
           {/* <CartProvider> - Disabled to prevent duplicate API calls */}
             <GuestCartProvider>
               <WishlistProvider>
                 <Navigation />
                 <StickyHeader />
-                <div className="bg-white text-gray-900 pt-20">
+                <div className="bg-white text-black pt-20">
                   {children}
                   <Footer />
                 </div>

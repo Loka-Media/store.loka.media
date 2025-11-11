@@ -12,50 +12,50 @@ interface HeroSectionProps {
 
 export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
   return (
-    <section className="relative py-20 md:py-32 px-4 md:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto text-center">
-        {/* Heading */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-gray-900 leading-tight">
+    <section className="relative py-24 md:py-40 px-4 md:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto text-center">
+        {/* Heading - Gumroad style: very large, bold, tight spacing */}
+        <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black mb-8 text-black leading-[0.9] tracking-tighter">
           Go from zero to $1
         </h1>
 
-        {/* Subheading */}
-        <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto">
+        {/* Subheading - Gumroad style: larger, more prominent */}
+        <p className="text-2xl md:text-3xl lg:text-4xl text-foreground-muted mb-12 max-w-3xl mx-auto font-medium leading-snug tracking-tight">
           Loka Media helps creators earn a living. Start selling products in minutes and keep 90% of your earnings.
         </p>
 
-        {/* CTA Buttons */}
+        {/* CTA Buttons - Gumroad style: larger, bolder */}
         {!isAuthenticated && (
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-5 mb-8">
             <Link
               href="/auth/register"
-              className="bg-accent hover:bg-accent-hover text-white px-8 py-4 rounded-lg text-lg font-medium transition-colors"
+              className="bg-accent hover:bg-accent-hover text-white px-12 py-5 rounded-xl text-xl font-bold transition-all hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Start selling
             </Link>
             <Link
               href="/products"
-              className="text-gray-700 hover:text-gray-900 px-8 py-4 text-lg font-medium transition-colors underline decoration-gray-300 hover:decoration-gray-900"
+              className="text-black hover:text-foreground-muted px-12 py-5 text-xl font-semibold transition-colors underline decoration-2 decoration-black/20 hover:decoration-black/40 underline-offset-4"
             >
               Explore marketplace
             </Link>
           </div>
         )}
 
-        {/* Stats - Gumroad style social proof */}
-        <div className="mt-16 pt-16 border-t border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+        {/* Stats - Gumroad style: clean and minimal */}
+        <div className="mt-24 pt-20 border-t border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-4xl mx-auto">
             <div className="text-center">
-              <div className="text-4xl font-bold text-gray-900 mb-2">$2M+</div>
-              <div className="text-sm text-gray-600">Paid to creators</div>
+              <div className="text-5xl md:text-6xl font-black text-black mb-3 tracking-tight">$2M+</div>
+              <div className="text-base md:text-lg text-foreground-muted font-medium">Paid to creators</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-gray-900 mb-2">10K+</div>
-              <div className="text-sm text-gray-600">Active creators</div>
+              <div className="text-5xl md:text-6xl font-black text-black mb-3 tracking-tight">10K+</div>
+              <div className="text-base md:text-lg text-foreground-muted font-medium">Active creators</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-gray-900 mb-2">90%</div>
-              <div className="text-sm text-gray-600">You keep</div>
+              <div className="text-5xl md:text-6xl font-black text-black mb-3 tracking-tight">90%</div>
+              <div className="text-base md:text-lg text-foreground-muted font-medium">You keep</div>
             </div>
           </div>
         </div>

@@ -9,7 +9,10 @@ module.exports = {
     extend: {
       colors: {
         background: 'var(--background)',
-        foreground: 'var(--foreground)',
+        foreground: {
+          DEFAULT: 'var(--foreground)',
+          muted: 'var(--foreground-muted)',
+        },
         border: 'var(--border)',
         accent: {
           DEFAULT: 'var(--accent)',
@@ -17,8 +20,12 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
-        mono: ['var(--font-geist-mono)', 'monospace'],
+        sans: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        inter: ['var(--font-inter)', 'sans-serif'],
+      },
+      letterSpacing: {
+        tighter: '-0.02em',
+        tight: '-0.011em',
       },
     },
   },
