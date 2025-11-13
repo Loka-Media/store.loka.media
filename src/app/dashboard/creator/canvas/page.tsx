@@ -794,7 +794,7 @@ function CanvasContent() {
                     onClick={() => setUseSimplifiedWizard(!useSimplifiedWizard)}
                     className="px-6 py-3 bg-black text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-sm whitespace-nowrap"
                   >
-                    {useSimplifiedWizard ? "Switch to Classic" : "Switch to New"}
+                    {useSimplifiedWizard ? "Try Classic" : "Back to New"}
                   </button>
                 </div>
               </div>
