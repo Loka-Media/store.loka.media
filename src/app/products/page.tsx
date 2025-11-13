@@ -15,17 +15,15 @@ import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { ProductsPagination } from "@/components/products/ProductsPagination";
 import { NoProductsFound } from "@/components/products/NoProductsFound";
 import { ProductsLoading } from "@/components/products/ProductsLoading";
+import CreativeLoader from "@/components/CreativeLoader";
 
 export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-white">
       <Suspense
         fallback={
-          <div className="min-h-screen bg-white flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 border border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading marketplace...</p>
-            </div>
+          <div className="min-h-screen bg-white">
+            <CreativeLoader variant="product" message="Loading marketplace..." />
           </div>
         }
       >

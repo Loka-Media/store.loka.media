@@ -7,6 +7,7 @@ import { ArrowLeft, Save, User, Phone, Mail, AtSign } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import CreativeLoader from '@/components/CreativeLoader';
 
 export default function EditProfilePage() {
   const { user, isAuthenticated, refreshUser } = useAuth();
@@ -79,10 +80,8 @@ export default function EditProfilePage() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 flex items-center justify-center">
-        <div className="bg-gradient-to-r from-purple-400 to-pink-400 border-4 border-black rounded-full p-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-white"></div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
+        <CreativeLoader variant="default" message="Loading profile editor..." />
       </div>
     );
   }

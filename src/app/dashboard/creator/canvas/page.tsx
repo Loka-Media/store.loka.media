@@ -17,6 +17,7 @@ import UnifiedDesignEditor from "@/components/canvas/UnifiedDesignEditor";
 import EnhancedCanvasWizard from "@/components/canvas/EnhancedCanvasWizard";
 import ProductDetailsForm from "@/components/canvas/ProductDetailsForm";
 import EnhancedProductDetailsForm from "@/components/canvas/EnhancedProductDetailsForm";
+import CreativeLoader from "@/components/CreativeLoader";
 
 import {
   DesignFile,
@@ -770,10 +771,7 @@ function CanvasContent() {
 
       <div className="">
         {loading ? (
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-accent mx-auto" />
-            <p className="mt-6 text-gray-600 text-lg font-medium">Loading design canvas...</p>
-          </div>
+          <CreativeLoader variant="design" message="Loading design canvas..." />
         ) : (
           <>
             {/* Interface Toggle */}
