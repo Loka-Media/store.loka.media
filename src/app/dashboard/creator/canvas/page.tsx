@@ -14,6 +14,7 @@ import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 
 import UploadStep from "@/components/canvas/UploadStep";
 import UnifiedDesignEditor from "@/components/canvas/UnifiedDesignEditor";
+import EnhancedCanvasWizard from "@/components/canvas/EnhancedCanvasWizard";
 import ProductDetailsForm from "@/components/canvas/ProductDetailsForm";
 
 import {
@@ -35,6 +36,7 @@ function CanvasContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId");
+  const useNewInterface = searchParams.get("new") === "true";
 
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,7 @@ function CanvasContent() {
   const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
   const [mockupStatus, setMockupStatus] = useState<string>("");
   const [printFiles, setPrintFiles] = useState<any>(null);
+  const [useSimplifiedWizard, setUseSimplifiedWizard] = useState(useNewInterface);
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: "",
@@ -772,24 +775,68 @@ function CanvasContent() {
           </div>
         ) : (
           <>
+            {/* Interface Toggle */}
+            {step === "unified-editor" && (
+              <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-4 border-black p-4 mb-4 mx-4">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                  <div>
+                    <h3 className="font-extrabold text-black">
+                      {useSimplifiedWizard ? "🎨 New Simplified Interface" : "🔧 Classic Interface"}
+                    </h3>
+                    <p className="text-sm font-bold text-black">
+                      {useSimplifiedWizard
+                        ? "Enjoying the new step-by-step wizard? Let us know!"
+                        : "Try our new simplified wizard for a better experience!"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setUseSimplifiedWizard(!useSimplifiedWizard)}
+                    className="px-4 py-2 bg-black text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+                  >
+                    {useSimplifiedWizard ? "Use Classic" : "Try New"}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {step === "unified-editor" ? (
-              <UnifiedDesignEditor
-                selectedProduct={selectedProduct}
-                selectedVariants={selectedVariants}
-                setSelectedVariants={setSelectedVariants}
-                designFiles={designFiles}
-                setDesignFiles={setDesignFiles}
-                uploadedFiles={uploadedFiles}
-                printFiles={printFiles}
-                onGeneratePreview={generatePreview}
-                isGeneratingPreview={isGeneratingMockup}
-                mockupUrls={mockupUrls}
-                mockupStatus={mockupStatus}
-                onNext={handleNextStep}
-                onPrev={handlePrevStep}
-                onPrintFilesLoaded={handlePrintFilesLoaded}
-                onRefreshFiles={fetchUploadedFiles}
-              />
+              useSimplifiedWizard ? (
+                <EnhancedCanvasWizard
+                  selectedProduct={selectedProduct}
+                  selectedVariants={selectedVariants}
+                  setSelectedVariants={setSelectedVariants}
+                  designFiles={designFiles}
+                  setDesignFiles={setDesignFiles}
+                  uploadedFiles={uploadedFiles}
+                  printFiles={printFiles}
+                  onGeneratePreview={generatePreview}
+                  isGeneratingPreview={isGeneratingMockup}
+                  mockupUrls={mockupUrls}
+                  mockupStatus={mockupStatus}
+                  onNext={handleNextStep}
+                  onPrev={handlePrevStep}
+                  onPrintFilesLoaded={handlePrintFilesLoaded}
+                  onRefreshFiles={fetchUploadedFiles}
+                />
+              ) : (
+                <UnifiedDesignEditor
+                  selectedProduct={selectedProduct}
+                  selectedVariants={selectedVariants}
+                  setSelectedVariants={setSelectedVariants}
+                  designFiles={designFiles}
+                  setDesignFiles={setDesignFiles}
+                  uploadedFiles={uploadedFiles}
+                  printFiles={printFiles}
+                  onGeneratePreview={generatePreview}
+                  isGeneratingPreview={isGeneratingMockup}
+                  mockupUrls={mockupUrls}
+                  mockupStatus={mockupStatus}
+                  onNext={handleNextStep}
+                  onPrev={handlePrevStep}
+                  onPrintFilesLoaded={handlePrintFilesLoaded}
+                  onRefreshFiles={fetchUploadedFiles}
+                />
+              )
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
