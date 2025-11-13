@@ -113,26 +113,26 @@ export default function CreatorProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-gradient-to-r from-purple-200 to-pink-200 border-b-4 border-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center space-x-6">
               <Link
                 href="/dashboard/creator"
-                className="inline-flex items-center text-gray-600 hover:text-accent transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-white border-4 border-black rounded-xl font-extrabold text-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
-                Back to Dashboard
+                Dashboard
               </Link>
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 border-4 border-black rounded-xl flex items-center justify-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
                   <Package className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Products</h1>
-                  <p className="mt-1 text-base text-gray-600">
+                  <h1 className="text-3xl md:text-4xl font-extrabold text-black tracking-tight">My Products</h1>
+                  <p className="mt-1 text-base font-bold text-gray-800">
                     Manage your product catalog
                   </p>
                 </div>
@@ -144,7 +144,7 @@ export default function CreatorProductsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters and Controls */}
-        <div className="bg-white rounded-xl p-6 mb-8 border border-gray-200">
+        <div className="bg-white border-4 border-black rounded-2xl p-6 mb-8 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 flex-1">
               {/* Search */}
@@ -153,17 +153,17 @@ export default function CreatorProductsPage() {
                   type="text"
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+                  className="w-full pl-10 pr-4 py-3 bg-yellow-50 border-4 border-black rounded-xl text-black placeholder-gray-600 focus:ring-0 focus:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all font-bold"
                   placeholder="Search products..."
                 />
-                <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-3.5 h-5 w-5 text-black" />
               </div>
 
               {/* Category Filter */}
               <select
                 value={filters.category}
                 onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                className="px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+                className="px-4 py-3 bg-yellow-50 border-4 border-black rounded-xl text-black focus:ring-0 focus:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all font-bold"
               >
                 <option value="">All Categories</option>
                 <option value="T-Shirts">T-Shirts</option>
@@ -172,8 +172,6 @@ export default function CreatorProductsPage() {
                 <option value="Posters">Posters</option>
               </select>
 
-
-
               {/* Sort */}
               <select
                 value={`${filters.sortBy}-${filters.sortOrder}`}
@@ -181,7 +179,7 @@ export default function CreatorProductsPage() {
                   const [sortBy, sortOrder] = e.target.value.split('-');
                   setFilters(prev => ({ ...prev, sortBy, sortOrder }));
                 }}
-                className="px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+                className="px-4 py-3 bg-yellow-50 border-4 border-black rounded-xl text-black focus:ring-0 focus:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all font-bold"
               >
                 <option value="created_at-DESC">Newest First</option>
                 <option value="created_at-ASC">Oldest First</option>
@@ -194,23 +192,23 @@ export default function CreatorProductsPage() {
 
             <div className="flex items-center space-x-4">
               {/* View Mode */}
-              <div className="flex border border-gray-200 rounded-xl overflow-hidden">
+              <div className="flex border-4 border-black rounded-xl overflow-hidden">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-3 transition-colors ${
+                  className={`p-3 transition-all font-extrabold ${
                     viewMode === 'grid'
-                      ? 'bg-accent text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                      ? 'bg-purple-300 text-black'
+                      : 'bg-white text-black hover:bg-yellow-100'
                   }`}
                 >
                   <Grid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-3 transition-colors ${
+                  className={`p-3 transition-all font-extrabold ${
                     viewMode === 'list'
-                      ? 'bg-accent text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                      ? 'bg-purple-300 text-black'
+                      : 'bg-white text-black hover:bg-yellow-100'
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -219,24 +217,26 @@ export default function CreatorProductsPage() {
             </div>
           </div>
 
-          <div className="mt-6 text-sm font-medium text-gray-600">
-            <span className="text-accent">{filteredProducts.length}</span> products found
+          <div className="mt-6 text-sm font-extrabold text-black bg-gradient-to-r from-green-200 to-blue-200 border-2 border-black rounded-lg px-3 py-2 inline-block">
+            <span className="text-purple-600">{filteredProducts.length}</span> products found
           </div>
         </div>
 
         {/* Products Display */}
         {loading ? (
           <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
-            <p className="mt-4 text-gray-600 text-lg">Loading your products...</p>
+            <div className="bg-gradient-to-r from-purple-400 to-pink-400 border-4 border-black rounded-full p-4 inline-block mb-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-white"></div>
+            </div>
+            <p className="mt-4 text-black font-extrabold text-lg">Loading your products...</p>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Package className="w-10 h-10 text-gray-400" />
+          <div className="text-center py-16 bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+            <div className="bg-gradient-to-br from-yellow-300 to-orange-400 border-4 border-black rounded-2xl p-6 inline-block mb-6">
+              <Package className="w-16 h-16 text-black" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600 text-lg mb-8">
+            <h3 className="text-2xl font-extrabold text-black mb-2">No products found</h3>
+            <p className="text-gray-700 font-bold text-lg mb-8">
               {filters.search || filters.category || filters.status
                 ? 'Try adjusting your filters'
                 : 'Get started by creating your first product'
@@ -245,8 +245,8 @@ export default function CreatorProductsPage() {
             {!filters.search && !filters.category && !filters.status && (
               <div className="mt-6">
                 <Link
-                  href="/dashboard/creator/products/create"
-                  className="inline-flex items-center px-6 py-3 bg-accent text-white font-semibold rounded-xl transition-colors"
+                  href="/dashboard/creator/catalog"
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-lg"
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   Create Your First Product
@@ -311,10 +311,10 @@ export default function CreatorProductsPage() {
   );
 }
 
-function ProductGridCard({ 
-  product, 
-  onDelete 
-}: { 
+function ProductGridCard({
+  product,
+  onDelete
+}: {
   product: Product;
   onDelete: (id: number) => void;
 }) {
@@ -325,28 +325,27 @@ function ProductGridCard({
   };
 
   const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    // Don't preventDefault - let the Link navigate
+    e.stopPropagation();
   };
 
   return (
     <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-      <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-accent transition-colors cursor-pointer group">
+      <div className="bg-white rounded-2xl overflow-hidden border-4 border-black hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all cursor-pointer group shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
         <div className="w-full relative" style={{ aspectRatio: '1/1' }}>
           <Image
             src={product.thumbnail_url || '/placeholder-product.png'}
             alt={product.name}
             fill
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           <div className="absolute top-3 right-3">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold border-2 border-black ${
               product.is_active
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-600'
+                ? 'bg-green-300 text-black'
+                : 'bg-gray-300 text-black'
             }`}>
-              {product.is_active ? 'Active' : 'Inactive'}
+              {product.is_active ? '✓ Active' : 'Inactive'}
             </span>
           </div>
 
@@ -354,7 +353,7 @@ function ProductGridCard({
           <div className="absolute bottom-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <Link
               href={`/dashboard/creator/products/${product.id}/edit`}
-              className="p-2 bg-white text-gray-600 hover:text-blue-600 rounded-lg transition-colors"
+              className="p-2 bg-white border-2 border-black text-black hover:bg-blue-200 rounded-lg transition-colors"
               title="Edit product"
               onClick={handleEdit}
             >
@@ -362,7 +361,7 @@ function ProductGridCard({
             </Link>
             <button
               onClick={handleDelete}
-              className="p-2 bg-white text-gray-600 hover:text-red-600 rounded-lg transition-colors"
+              className="p-2 bg-white border-2 border-black text-black hover:bg-red-200 rounded-lg transition-colors"
               title="Delete product"
             >
               <Trash2 className="w-4 h-4" />
@@ -370,33 +369,33 @@ function ProductGridCard({
           </div>
         </div>
 
-        <div className="p-6">
-          <h3 className="font-bold text-gray-900 text-lg mb-2 truncate group-hover:text-accent transition-colors">
+        <div className="p-6 bg-gradient-to-br from-yellow-50 to-pink-50">
+          <h3 className="font-extrabold text-black text-lg mb-2 truncate group-hover:text-purple-600 transition-colors">
             {product.name}
           </h3>
 
-          <p className="text-sm text-gray-600 mb-4">
-            <span className="text-accent font-semibold">Category:</span> {product.category || 'Uncategorized'}
+          <p className="text-sm font-bold text-gray-700 mb-4">
+            <span className="text-purple-600">Category:</span> {product.category || 'Uncategorized'}
           </p>
 
           <div className="flex items-center justify-between mb-4">
             <div>
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-xl font-extrabold text-black">
                 {formatPrice(product.min_price)}
               </span>
               {product.max_price > product.min_price && (
-                <span className="text-sm text-gray-600">
+                <span className="text-sm font-bold text-gray-700">
                   -{formatPrice(product.max_price)}
                 </span>
               )}
             </div>
-            <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-lg">
+            <span className="text-xs font-extrabold bg-purple-200 border-2 border-black text-black px-3 py-1 rounded-full">
               {product.variant_count} variants
             </span>
           </div>
 
-          <div className="text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
-            Click to view full product details
+          <div className="text-xs font-bold text-gray-700 bg-white border-2 border-black px-3 py-2 rounded-lg text-center">
+            Click to view product
           </div>
         </div>
       </div>

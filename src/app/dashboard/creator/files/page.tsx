@@ -167,24 +167,29 @@ export default function FilesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-gradient-to-r from-blue-200 to-purple-200 border-b-4 border-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
-            <div className="flex items-center space-x-4">
-              <Link 
+            <div className="flex items-center space-x-6">
+              <Link
                 href="/dashboard/creator"
-                className="inline-flex items-center text-gray-500 hover:text-gray-700"
+                className="inline-flex items-center px-4 py-2 bg-white border-4 border-black rounded-xl font-extrabold text-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
-                Back to Dashboard
+                Dashboard
               </Link>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Design Files</h1>
-                <p className="mt-1 text-sm text-gray-600">
-                  Manage your uploaded design files
-                </p>
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 border-4 border-black rounded-xl flex items-center justify-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+                  <FileImage className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-extrabold text-black tracking-tight">Design Files</h1>
+                  <p className="mt-1 text-base font-bold text-gray-800">
+                    Manage your uploaded design files
+                  </p>
+                </div>
               </div>
             </div>
             
@@ -192,14 +197,14 @@ export default function FilesPage() {
               {selectedFiles.length > 0 && (
                 <button
                   onClick={handleBulkDelete}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-400 to-red-500 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete ({selectedFiles.length})
                 </button>
               )}
-              
-              <label className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
+
+              <label className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-400 to-purple-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all cursor-pointer">
                 {uploading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -227,7 +232,7 @@ export default function FilesPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters and Controls */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white border-4 border-black rounded-2xl p-6 mb-6 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 flex-1">
               {/* Search */}
@@ -236,17 +241,17 @@ export default function FilesPage() {
                   type="text"
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                  className="w-full pl-10 pr-4 py-3 bg-yellow-50 border-4 border-black rounded-xl text-black placeholder-gray-600 focus:ring-0 focus:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all font-bold"
                   placeholder="Search files..."
                 />
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-3.5 h-5 w-5 text-black" />
               </div>
 
               {/* Type Filter */}
               <select
                 value={filters.type}
                 onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                className="px-4 py-3 bg-yellow-50 border-4 border-black rounded-xl text-black focus:ring-0 focus:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all font-bold"
               >
                 <option value="">All Types</option>
                 <option value="image">Images</option>
@@ -258,7 +263,7 @@ export default function FilesPage() {
               <select
                 value={filters.status}
                 onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                className="px-4 py-3 bg-yellow-50 border-4 border-black rounded-xl text-black focus:ring-0 focus:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all font-bold"
               >
                 <option value="">All Status</option>
                 <option value="ok">Ready</option>
@@ -271,25 +276,25 @@ export default function FilesPage() {
               {/* Select All */}
               <button
                 onClick={handleSelectAll}
-                className="text-sm text-indigo-600 hover:text-indigo-500"
+                className="text-sm font-extrabold px-4 py-2 bg-blue-200 border-2 border-black text-black rounded-xl hover:bg-blue-300 transition-all"
               >
-                {selectedFiles.length === filteredFiles.length && filteredFiles.length > 0 
-                  ? 'Deselect All' 
+                {selectedFiles.length === filteredFiles.length && filteredFiles.length > 0
+                  ? 'Deselect All'
                   : 'Select All'
                 }
               </button>
 
               {/* View Mode */}
-              <div className="flex border border-gray-300 rounded-md">
+              <div className="flex border-4 border-black rounded-xl overflow-hidden">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 ${viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'text-gray-600'}`}
+                  className={`p-3 transition-all font-extrabold ${viewMode === 'grid' ? 'bg-purple-300 text-black' : 'bg-white text-black hover:bg-yellow-100'}`}
                 >
                   <Grid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'text-gray-600'}`}
+                  className={`p-3 transition-all font-extrabold ${viewMode === 'list' ? 'bg-purple-300 text-black' : 'bg-white text-black hover:bg-yellow-100'}`}
                 >
                   <List className="w-4 h-4" />
                 </button>
@@ -297,33 +302,37 @@ export default function FilesPage() {
             </div>
           </div>
 
-          <div className="mt-4 text-sm text-gray-600">
+          <div className="mt-6 text-sm font-extrabold text-black bg-gradient-to-r from-green-200 to-blue-200 border-2 border-black rounded-lg px-3 py-2 inline-block">
             {filteredFiles.length} files found
-            {selectedFiles.length > 0 && ` • ${selectedFiles.length} selected`}
+            {selectedFiles.length > 0 && <span className="text-purple-600"> • {selectedFiles.length} selected</span>}
           </div>
         </div>
 
         {/* Files Display */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading files...</p>
+          <div className="text-center py-16">
+            <div className="bg-gradient-to-r from-blue-400 to-purple-400 border-4 border-black rounded-full p-4 inline-block mb-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-white"></div>
+            </div>
+            <p className="mt-4 text-black font-extrabold text-lg">Loading files...</p>
           </div>
         ) : filteredFiles.length === 0 ? (
-          <div className="text-center py-12">
-            <Upload className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No files found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {filters.search || filters.type || filters.status 
+          <div className="text-center py-16 bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+            <div className="bg-gradient-to-br from-blue-300 to-purple-400 border-4 border-black rounded-2xl p-6 inline-block mb-6">
+              <Upload className="mx-auto h-16 w-16 text-black" />
+            </div>
+            <h3 className="text-2xl font-extrabold text-black mb-2">No files found</h3>
+            <p className="text-lg font-bold text-gray-700 mb-6">
+              {filters.search || filters.type || filters.status
                 ? 'Try adjusting your filters'
                 : 'Upload your first design file to get started'
               }
             </p>
             {!filters.search && !filters.type && !filters.status && (
               <div className="mt-6">
-                <label className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Files
+                <label className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-400 to-purple-400 text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-lg cursor-pointer">
+                  <Upload className="w-5 h-5 mr-2" />
+                  Upload Your First File
                   <input
                     type="file"
                     multiple
