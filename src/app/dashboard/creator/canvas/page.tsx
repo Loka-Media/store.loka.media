@@ -16,6 +16,7 @@ import UploadStep from "@/components/canvas/UploadStep";
 import UnifiedDesignEditor from "@/components/canvas/UnifiedDesignEditor";
 import EnhancedCanvasWizard from "@/components/canvas/EnhancedCanvasWizard";
 import ProductDetailsForm from "@/components/canvas/ProductDetailsForm";
+import EnhancedProductDetailsForm from "@/components/canvas/EnhancedProductDetailsForm";
 
 import {
   DesignFile,
@@ -893,7 +894,7 @@ function CanvasContent() {
                   )} */}
 
                   {step === "product-details" && (
-                    <ProductDetailsForm
+                    <EnhancedProductDetailsForm
                       initialData={{
                         name: productForm.name,
                         description: productForm.description,
@@ -907,12 +908,15 @@ function CanvasContent() {
                           description: data.description,
                           markupPercentage: data.markupPercentage.toString(),
                           category: data.category,
+                          tags: data.tags || []
                         });
                       }}
                       onNext={handleGoLiveToMarketplace}
                       isLoading={creating}
                       selectedProduct={selectedProduct}
                       selectedVariants={selectedVariants}
+                      mockupUrls={mockupUrls}
+                      designFiles={designFiles}
                     />
                   )}
                 </div>
