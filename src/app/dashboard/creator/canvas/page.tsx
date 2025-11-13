@@ -55,7 +55,7 @@ function CanvasContent() {
   const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
   const [mockupStatus, setMockupStatus] = useState<string>("");
   const [printFiles, setPrintFiles] = useState<any>(null);
-  const [useSimplifiedWizard, setUseSimplifiedWizard] = useState(useNewInterface);
+  const [useSimplifiedWizard, setUseSimplifiedWizard] = useState(useNewInterface !== undefined ? useNewInterface : true);
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: "",
@@ -778,23 +778,23 @@ function CanvasContent() {
           <>
             {/* Interface Toggle */}
             {step === "unified-editor" && (
-              <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-4 border-black p-4 mb-4 mx-4">
+              <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-4 border-black p-4 mb-4 mx-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                   <div>
-                    <h3 className="font-extrabold text-black">
-                      {useSimplifiedWizard ? "🎨 New Simplified Interface" : "🔧 Classic Interface"}
+                    <h3 className="font-extrabold text-black text-lg">
+                      {useSimplifiedWizard ? "🎨 New Simplified Interface (Recommended)" : "🔧 Classic Interface"}
                     </h3>
-                    <p className="text-sm font-bold text-black">
+                    <p className="text-sm font-bold text-black/80 mt-1">
                       {useSimplifiedWizard
-                        ? "Enjoying the new step-by-step wizard? Let us know!"
-                        : "Try our new simplified wizard for a better experience!"}
+                        ? "Streamlined step-by-step workflow for faster product creation. Switch to classic if you prefer the advanced editor."
+                        : "Advanced interface with full editor controls. Switch back to simplified for easier workflow."}
                     </p>
                   </div>
                   <button
                     onClick={() => setUseSimplifiedWizard(!useSimplifiedWizard)}
-                    className="px-4 py-2 bg-black text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+                    className="px-6 py-3 bg-black text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-sm whitespace-nowrap"
                   >
-                    {useSimplifiedWizard ? "Use Classic" : "Try New"}
+                    {useSimplifiedWizard ? "Switch to Classic" : "Switch to New"}
                   </button>
                 </div>
               </div>
