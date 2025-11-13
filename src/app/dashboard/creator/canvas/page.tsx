@@ -37,8 +37,8 @@ function CanvasContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId");
-  const useNewInterface = searchParams.get("new") === "true";
 
+  // Default to simplified (new) interface unless explicitly set to classic
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
@@ -55,7 +55,7 @@ function CanvasContent() {
   const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
   const [mockupStatus, setMockupStatus] = useState<string>("");
   const [printFiles, setPrintFiles] = useState<any>(null);
-  const [useSimplifiedWizard, setUseSimplifiedWizard] = useState(useNewInterface !== undefined ? useNewInterface : true);
+  const [useSimplifiedWizard, setUseSimplifiedWizard] = useState(searchParams.get("new") !== "false");
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: "",
