@@ -1,7 +1,19 @@
 "use client";
 
 import React from "react";
-import { Check, Plus } from "lucide-react";
+import {
+  Check,
+  Plus,
+  Shirt,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Heart,
+  MapPin,
+  Square,
+  Circle
+} from "lucide-react";
 
 interface PlacementOption {
   id: string;
@@ -23,21 +35,23 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
   onSelectPlacement,
   designsByPlacement,
 }) => {
-  // Common placement icons/illustrations
-  const placementIcons: Record<string, string> = {
-    front: "👕 Front",
-    back: "🔄 Back",
-    left: "👈 Left",
-    right: "👉 Right",
-    sleeve_left: "💪 Left Sleeve",
-    sleeve_right: "💪 Right Sleeve",
-    chest_left: "💎 Left Chest",
-    chest_right: "💎 Right Chest",
-    default: "📍 Design Area",
-  };
+  // Get proper icon component for each placement
+  const getPlacementIcon = (placement: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      front: <Shirt className="w-12 h-12" />,
+      back: <RotateCcw className="w-12 h-12" />,
+      left: <ChevronLeft className="w-12 h-12" />,
+      right: <ChevronRight className="w-12 h-12" />,
+      sleeve_left: <ChevronLeft className="w-12 h-12" />,
+      sleeve_right: <ChevronRight className="w-12 h-12" />,
+      chest_left: <Heart className="w-12 h-12" />,
+      chest_right: <Heart className="w-12 h-12" />,
+      label: <Square className="w-12 h-12" />,
+      pocket: <Circle className="w-12 h-12" />,
+      default: <MapPin className="w-12 h-12" />,
+    };
 
-  const getPlacementIcon = (placement: string): string => {
-    return placementIcons[placement] || placementIcons.default;
+    return iconMap[placement.toLowerCase()] || iconMap.default;
   };
 
   const placementOptions: PlacementOption[] = Object.entries(availablePlacements).map(
@@ -79,11 +93,13 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
               {/* Placement Icon/Illustration */}
               <div className="flex items-center justify-center mb-4">
                 <div
-                  className={`text-4xl ${
-                    isSelected ? "scale-110" : "group-hover:scale-105"
-                  } transition-transform`}
+                  className={`${
+                    isSelected
+                      ? "scale-110 text-black"
+                      : "text-gray-700 group-hover:text-black group-hover:scale-105"
+                  } transition-all`}
                 >
-                  {getPlacementIcon(placement.id).split(" ")[0]}
+                  {getPlacementIcon(placement.id)}
                 </div>
               </div>
 
@@ -121,10 +137,15 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
       </div>
 
       {/* Helper Text */}
-      <div className="bg-yellow-100 border-2 border-black rounded-xl p-4">
-        <p className="text-sm font-bold text-black">
-          💡 <strong>Tip:</strong> You can add multiple designs to the same placement area. They'll be combined into your final product!
-        </p>
+      <div className="bg-yellow-100 border-4 border-black rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <div className="bg-yellow-300 border-2 border-black rounded-lg p-2 flex-shrink-0">
+            <Sparkles className="w-5 h-5 text-black" />
+          </div>
+          <p className="text-sm font-bold text-black">
+            <strong>Tip:</strong> You can add multiple designs to the same placement area. They'll be combined into your final product!
+          </p>
+        </div>
       </div>
     </div>
   );
