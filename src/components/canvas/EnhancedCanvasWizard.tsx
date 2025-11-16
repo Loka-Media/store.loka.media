@@ -13,10 +13,12 @@ import {
   Palette,
   Ruler,
   HelpCircle,
+  Zap,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { UnifiedDesignEditorProps, UploadedFile } from "./types";
 import { printfulAPI } from "@/lib/api";
+import { aspectRatioValidation } from "@/utils/aspectRatioValidation";
 
 // Import components
 import { useDesignEditorState, usePrintFilesLoader, useAutoSelectVariants } from "./hooks";
@@ -238,6 +240,59 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       console.error("Failed to delete file:", error);
       toast.error("Failed to delete file. Please try again.");
       throw error;
+    }
+  };
+
+  const autoFixAspectRatios = async () => {
+    const criticalIssues = aspectRatioIssues.filter(issue =>
+      issue.message.includes('🚫 CRITICAL')
+    );
+
+    if (criticalIssues.length === 0) {
+      toast("All designs already have correct aspect ratios!", { icon: "✅" });
+      return;
+    }
+
+    const loadingToast = toast.loading(`Fixing ${criticalIssues.length} aspect ratio issue${criticalIssues.length > 1 ? 's' : ''}...`);
+
+    try {
+      let fixedCount = 0;
+
+      for (const issue of criticalIssues) {
+        const design = designFiles.find(d => d.id === issue.designId);
+        if (!design) continue;
+
+        // Get corrected dimensions from validation
+        const result = await aspectRatioValidation(
+          design.url,
+          design.position.width,
+          design.position.height,
+          0.5
+        );
+
+        if (!result.isValid && result.correctedDimensions) {
+          // Update the design with corrected dimensions
+          updateDesignPosition(design.id, {
+            width: result.correctedDimensions.width,
+            height: result.correctedDimensions.height,
+          });
+          fixedCount++;
+        }
+      }
+
+      toast.dismiss(loadingToast);
+
+      if (fixedCount > 0) {
+        toast.success(`✅ Fixed ${fixedCount} aspect ratio issue${fixedCount > 1 ? 's' : ''}! All designs are now Printful compatible.`, {
+          duration: 4000,
+        });
+      } else {
+        toast("No issues could be fixed automatically.", { icon: "⚠️" });
+      }
+    } catch (error) {
+      console.error("Failed to auto-fix aspect ratios:", error);
+      toast.dismiss(loadingToast);
+      toast.error("Failed to fix aspect ratios. Please try manually adjusting dimensions.");
     }
   };
 
@@ -467,6 +522,17 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             ⚠️ Please add a design in the previous step first
           </p>
         </div>
+      )}
+
+      {/* Auto-fix aspect ratio button - only show if there are critical issues */}
+      {aspectRatioIssues.filter(issue => issue.message.includes('🚫 CRITICAL')).length > 0 && (
+        <button
+          onClick={autoFixAspectRatios}
+          className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-4 px-6 rounded-xl font-extrabold border-4 border-black hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-lg flex items-center justify-center gap-2"
+        >
+          <Zap className="w-6 h-6" />
+          Auto-Fix Aspect Ratios ({aspectRatioIssues.filter(issue => issue.message.includes('🚫 CRITICAL')).length} issue{aspectRatioIssues.filter(issue => issue.message.includes('🚫 CRITICAL')).length !== 1 ? 's' : ''})
+        </button>
       )}
 
       <button
