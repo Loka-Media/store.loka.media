@@ -54,6 +54,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
   const [showHelp, setShowHelp] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [aspectRatioIssues, setAspectRatioIssues] = useState<any[]>([]);
+  const [showAllPreviews, setShowAllPreviews] = useState(false);
 
   // Use existing hooks
   const stateHook = useDesignEditorState(selectedProduct);
@@ -550,7 +551,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             Product Previews ({mockupUrls.length})
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {mockupUrls.slice(0, 4).map((mockup: any, index: number) => (
+            {(showAllPreviews ? mockupUrls : mockupUrls.slice(0, 4)).map((mockup: any, index: number) => (
               <div key={index} className="border-2 border-black rounded-xl overflow-hidden">
                 <img
                   src={mockup.url}
@@ -566,9 +567,14 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             ))}
           </div>
           {mockupUrls.length > 4 && (
-            <p className="text-sm font-bold text-gray-700 mt-4 text-center">
-              + {mockupUrls.length - 4} more preview{mockupUrls.length - 4 !== 1 ? 's' : ''}
-            </p>
+            <button
+              onClick={() => setShowAllPreviews(!showAllPreviews)}
+              className="text-sm font-bold text-black mt-4 mx-auto block px-6 py-2 bg-gradient-to-r from-yellow-200 to-pink-200 border-2 border-black rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+            >
+              {showAllPreviews
+                ? "Show Less"
+                : `+ ${mockupUrls.length - 4} more preview${mockupUrls.length - 4 !== 1 ? 's' : ''}`}
+            </button>
           )}
         </div>
       ) : (

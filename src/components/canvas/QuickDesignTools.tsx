@@ -32,6 +32,7 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   isUploading = false,
 }) => {
   const [showExistingFiles, setShowExistingFiles] = useState(false);
+  const [showAllFiles, setShowAllFiles] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -147,44 +148,51 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
           </div>
 
           {showExistingFiles && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {uploadedFiles.slice(0, 12).map((file) => (
-                <button
-                  key={file.id}
-                  onClick={() => onSelectExistingFile(file)}
-                  className="group relative bg-gray-100 border-2 border-gray-300 rounded-xl p-2 hover:border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
-                >
-                  <div className="aspect-square bg-white border-2 border-black rounded-lg mb-2 overflow-hidden flex items-center justify-center">
-                    {file.thumbnail_url ? (
-                      <img
-                        src={file.thumbnail_url}
-                        alt={file.filename}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <ImageIcon className="w-8 h-8 text-gray-400" />
-                    )}
-                  </div>
-                  <p className="text-xs font-bold text-black truncate">
-                    {file.filename}
-                  </p>
-
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/80 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="text-white text-center">
-                      <Sparkles className="w-6 h-6 mx-auto mb-1" />
-                      <p className="text-xs font-bold">Use This</p>
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {(showAllFiles ? uploadedFiles : uploadedFiles.slice(0, 12)).map((file) => (
+                  <button
+                    key={file.id}
+                    onClick={() => onSelectExistingFile(file)}
+                    className="group relative bg-gray-100 border-2 border-gray-300 rounded-xl p-2 hover:border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+                  >
+                    <div className="aspect-square bg-white border-2 border-black rounded-lg mb-2 overflow-hidden flex items-center justify-center">
+                      {file.thumbnail_url ? (
+                        <img
+                          src={file.thumbnail_url}
+                          alt={file.filename}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ImageIcon className="w-8 h-8 text-gray-400" />
+                      )}
                     </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+                    <p className="text-xs font-bold text-black truncate">
+                      {file.filename}
+                    </p>
 
-          {uploadedFiles.length > 12 && showExistingFiles && (
-            <p className="text-sm text-gray-600 font-bold mt-4 text-center">
-              + {uploadedFiles.length - 12} more files available
-            </p>
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/80 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <Sparkles className="w-6 h-6 mx-auto mb-1" />
+                        <p className="text-xs font-bold">Use This</p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {uploadedFiles.length > 12 && (
+                <button
+                  onClick={() => setShowAllFiles(!showAllFiles)}
+                  className="text-sm font-bold text-black mt-4 mx-auto block px-6 py-2 bg-gradient-to-r from-blue-200 to-purple-200 border-2 border-black rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  {showAllFiles
+                    ? "Show Less"
+                    : `+ ${uploadedFiles.length - 12} more files available`}
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
