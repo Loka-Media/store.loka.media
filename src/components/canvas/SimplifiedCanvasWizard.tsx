@@ -89,7 +89,7 @@ const SimplifiedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       title: "Position & Adjust",
       description: "Perfect your design placement",
       icon: Ruler,
-      completed: designFiles.length > 0 && mockupUrls && mockupUrls.length > 0,
+      completed: designFiles.length > 0 && !!mockupUrls && mockupUrls.length > 0,
     },
     {
       id: "preview",

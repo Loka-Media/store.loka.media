@@ -117,7 +117,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       title: "Position & Preview",
       description: "Perfect placement",
       icon: Ruler,
-      completed: designFiles.length > 0 && mockupUrls && mockupUrls.length > 0,
+      completed: designFiles.length > 0 && !!mockupUrls && mockupUrls.length > 0,
     },
     {
       id: "review",
@@ -407,9 +407,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 
       <QuickDesignTools
         onUploadImage={handleUploadImage}
-        onCreateText={() => toast.info("Text tool coming soon!")}
-        onBrowseClipart={() => toast.info("Clipart browser coming soon!")}
-        onAddEmoji={() => toast.info("Emoji picker coming soon!")}
+        onCreateText={() => toast("Text tool coming soon!")}
+        onBrowseClipart={() => toast("Clipart browser coming soon!")}
+        onAddEmoji={() => toast("Emoji picker coming soon!")}
         onSelectExistingFile={(file) => handleAddDesign(file)}
         uploadedFiles={uploadedFiles}
         isUploading={isUploading}

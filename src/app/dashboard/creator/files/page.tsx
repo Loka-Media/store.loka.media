@@ -182,7 +182,7 @@ export default function FilesPage() {
               </Link>
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 border-4 border-black rounded-xl flex items-center justify-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-                  <FileImage className="w-6 h-6 text-white" />
+                  <File className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h1 className="text-3xl md:text-4xl font-extrabold text-black tracking-tight">Design Files</h1>
