@@ -44,9 +44,9 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
             >
               {/* Product Image */}
               <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 border-b border-black overflow-hidden">
-                {product.image_url ? (
+                {product.thumbnail_url ? (
                   <Image
-                    src={product.image_url}
+                    src={product.thumbnail_url}
                     alt={product.name}
                     fill
                     unoptimized
@@ -72,9 +72,9 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                 </h3>
 
                 {/* Creator */}
-                {product.creator && (
+                {product.creator_name && (
                   <p className="text-sm text-gray-600 font-bold mb-3">
-                    by {product.creator.name}
+                    by {product.creator_name}
                   </p>
                 )}
 
