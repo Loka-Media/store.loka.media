@@ -10,6 +10,7 @@ import {
   FileImage,
   Sparkles,
   Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { UploadedFile } from "./types";
 
@@ -37,6 +38,8 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   const [showExistingFiles, setShowExistingFiles] = useState(false);
   const [showAllFiles, setShowAllFiles] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<number | string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<{ id: number | string; filename: string } | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -47,21 +50,32 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
     }
   };
 
-  const handleDeleteFile = async (e: React.MouseEvent, fileId: number | string) => {
+  const handleDeleteFile = (e: React.MouseEvent, file: UploadedFile) => {
     e.stopPropagation(); // Prevent triggering file selection
     if (!onDeleteFile) return;
 
-    const confirmed = window.confirm("Are you sure you want to delete this file? This action cannot be undone.");
-    if (!confirmed) return;
+    setFileToDelete({ id: file.id, filename: file.filename });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!fileToDelete || !onDeleteFile) return;
 
     try {
-      setDeletingFileId(fileId);
-      await onDeleteFile(fileId);
+      setDeletingFileId(fileToDelete.id);
+      await onDeleteFile(fileToDelete.id);
+      setShowDeleteModal(false);
+      setFileToDelete(null);
     } catch (error) {
       console.error("Failed to delete file:", error);
     } finally {
       setDeletingFileId(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setFileToDelete(null);
   };
 
   return (
@@ -205,7 +219,7 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
                     {/* Delete button */}
                     {onDeleteFile && (
                       <button
-                        onClick={(e) => handleDeleteFile(e, file.id)}
+                        onClick={(e) => handleDeleteFile(e, file)}
                         disabled={deletingFileId === file.id}
                         className="absolute -top-2 -right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Delete file"
@@ -250,6 +264,69 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && fileToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border-4 border-black rounded-2xl shadow-[12px_12px_0_0_rgba(0,0,0,1)] max-w-md w-full animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-400 to-orange-400 border-b-4 border-black p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white border-4 border-black rounded-xl">
+                  <AlertTriangle className="w-8 h-8 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-extrabold text-black">Delete File?</h3>
+                  <p className="text-sm font-bold text-black/80">This action cannot be undone</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              <p className="text-black font-bold mb-2">
+                Are you sure you want to delete this file?
+              </p>
+              <div className="bg-gray-100 border-2 border-black rounded-xl p-3 mb-6">
+                <p className="text-sm font-extrabold text-black truncate">
+                  📄 {fileToDelete.filename}
+                </p>
+              </div>
+              <p className="text-sm text-gray-700 font-bold">
+                This file will be permanently removed from your library and cannot be recovered.
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t-4 border-black p-6 flex gap-3">
+              <button
+                onClick={cancelDelete}
+                disabled={deletingFileId === fileToDelete.id}
+                className="flex-1 px-6 py-3 bg-white text-black border-4 border-black rounded-xl font-extrabold hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deletingFileId === fileToDelete.id}
+                className="flex-1 px-6 py-3 bg-red-500 text-white border-4 border-black rounded-xl font-extrabold hover:bg-red-600 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {deletingFileId === fileToDelete.id ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-5 h-5" />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
