@@ -212,10 +212,6 @@ function CanvasContent() {
               duration: 3000
             });
 
-            // Wait a bit for auth to be ready, then fetch files
-            setTimeout(() => {
-              fetchUploadedFiles();
-            }, 1000);
             return;
           }
         } catch (error: any) {
@@ -265,11 +261,6 @@ function CanvasContent() {
           tags: []
         });
       }
-
-      // Wait a bit for auth to be ready, then fetch files
-      setTimeout(() => {
-        fetchUploadedFiles();
-      }, 1000);
     } catch (error) {
       console.error("Canvas initialization failed:", error);
       toast.error("Failed to initialize canvas");
@@ -278,7 +269,7 @@ function CanvasContent() {
     }
   }, [productId]);
 
-  const fetchUploadedFiles = async () => {
+  const fetchUploadedFiles = useCallback(async () => {
     // Check if user is authenticated first
     if (!user || (user.role !== "creator" && user.role !== "admin")) {
       console.log("User not authenticated, skipping file fetch");
@@ -301,7 +292,7 @@ function CanvasContent() {
       // Set empty array on error
       setUploadedFiles([]);
     }
-  };
+  }, [user]);
 
 
   const handleNextStep = () => {
@@ -325,6 +316,18 @@ function CanvasContent() {
       initializeCanvas();
     }
   }, [user, initializeCanvas]);
+
+  // Separate effect to ensure uploaded files are fetched when user is ready
+  useEffect(() => {
+    if (user?.role === "creator" || user?.role === "admin") {
+      // Fetch files after a short delay to ensure auth is fully ready
+      const timer = setTimeout(() => {
+        fetchUploadedFiles();
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [user, fetchUploadedFiles]);
 
   if (!selectedProduct && !loading) {
     return (
