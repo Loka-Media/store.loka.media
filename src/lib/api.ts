@@ -769,7 +769,7 @@ export const printfulAPI = {
   },
 
   // Delete uploaded file
-  deleteFile: async (fileId: number | string) => {
+  deleteFile: async function(fileId: number | string) {
     try {
       const response = await api.delete(`/api/printful/files/${fileId}`);
       return response.data;
