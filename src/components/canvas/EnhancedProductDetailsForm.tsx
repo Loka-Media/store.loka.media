@@ -15,7 +15,8 @@ import {
   AlertCircle,
   Check,
   X,
-  Plus
+  Plus,
+  ChevronLeft
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -34,6 +35,7 @@ interface ProductDetailsFormProps {
     tags?: string[];
   }) => void;
   onNext: () => void;
+  onBack?: () => void;
   isLoading?: boolean;
   selectedProduct?: any;
   selectedVariants?: number[];
@@ -45,6 +47,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
   initialData,
   onSave,
   onNext,
+  onBack,
   isLoading = false,
   selectedProduct,
   selectedVariants = [],
@@ -144,6 +147,15 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white border-4 border-black rounded-3xl p-6 mb-6 shadow-[12px_12px_0_0_rgba(0,0,0,1)]">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="mb-4 flex items-center gap-2 px-4 py-2 bg-white text-black border-2 border-black rounded-xl font-extrabold hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              Back to Design
+            </button>
+          )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-gradient-to-br from-orange-400 to-pink-400 border-4 border-black rounded-xl">

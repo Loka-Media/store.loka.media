@@ -181,13 +181,25 @@ function CanvasContent() {
               JSON.stringify(productWithVariants)
             );
 
-            setProductForm({
-              name: `Custom ${product.title || product.model}`,
-              description: product.description || "",
-              markupPercentage: "30",
-              category: product.type_name || product.type,
-              tags: []
-            });
+            // Check if there's saved product form data for this product
+            const savedFormKey = `productForm_${productId}`;
+            const savedForm = localStorage.getItem(savedFormKey);
+
+            if (savedForm) {
+              // Use saved form data if it exists
+              const parsedForm = JSON.parse(savedForm);
+              setProductForm(parsedForm);
+              console.log(`📝 Loaded saved product form for product ${productId}`);
+            } else {
+              // Initialize with default Printful product data
+              setProductForm({
+                name: `Custom ${product.title || product.model}`,
+                description: product.description || "",
+                markupPercentage: "30",
+                category: product.type_name || product.type,
+                tags: []
+              });
+            }
 
             // Skip upload step and go directly to unified editor
             setStep("unified-editor");
@@ -712,6 +724,11 @@ function CanvasContent() {
 
       if (result.success) {
         localStorage.removeItem(`mockup_request_${selectedProduct.id}`);
+        // Clear saved product form since product is now published
+        if (productId) {
+          localStorage.removeItem(`productForm_${productId}`);
+          console.log(`🗑️ Cleared product form for product ${productId} after publishing`);
+        }
       }
 
       toast.dismiss("marketplace");
@@ -837,100 +854,58 @@ function CanvasContent() {
                 />
               )
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                  {step === "upload" && (
-                    <UploadStep
-                      uploadedFiles={uploadedFiles}
-                      uploading={uploading}
-                      setUploading={setUploading}
-                      setUploadedFiles={setUploadedFiles}
-                      onNextStep={handleNextStep}
-                      printfulAPI={printfulAPI}
-                    />
-                  )}
-{/* 
-                  {step === "design" && (
-                    <DesignStep
-                      uploadedFiles={uploadedFiles}
-                      designFiles={designFiles}
-                      onAddDesignFile={handleAddDesignFile}
-                      onRemoveDesignFile={handleRemoveDesignFile}
-                      onUpdateDesignPosition={updateDesignPosition}
-                      onSetPresetPosition={setPresetPosition}
-                      onPrevStep={() => {}}
-                      onNextStep={handleNextStep}
-                      printFiles={printFiles}
-                      onGeneratePreview={generatePreview}
-                      isGeneratingPreview={isGeneratingMockup}
-                    />
-                  )}
+              <>
+                {step === "upload" && (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2">
+                      <UploadStep
+                        uploadedFiles={uploadedFiles}
+                        uploading={uploading}
+                        setUploading={setUploading}
+                        setUploadedFiles={setUploadedFiles}
+                        onNextStep={handleNextStep}
+                        printfulAPI={printfulAPI}
+                      />
+                    </div>
+                  </div>
+                )}
 
-                  {step === "variants" && (
-                    <VariantsStep
-                      selectedProduct={selectedProduct}
-                      selectedVariants={selectedVariants}
-                      setSelectedVariants={setSelectedVariants}
-                      onPrevStep={() => {}}
-                      onNextStep={handleNextStep}
-                      onPrintFilesLoaded={handlePrintFilesLoaded}
-                    />
-                  )}
+                {step === "product-details" && (
+                  <EnhancedProductDetailsForm
+                    initialData={{
+                      name: productForm.name,
+                      description: productForm.description,
+                      markupPercentage: productForm.markupPercentage,
+                      category: productForm.category,
+                    }}
+                    onSave={(data) => {
+                      const updatedForm = {
+                        ...productForm,
+                        name: data.name,
+                        description: data.description,
+                        markupPercentage: data.markupPercentage.toString(),
+                        category: data.category,
+                        tags: data.tags || []
+                      };
+                      setProductForm(updatedForm);
 
-                  {step === "finalize" && (
-                    <FinalizeStep
-                      productForm={productForm}
-                      setProductForm={setProductForm}
-                      selectedProduct={selectedProduct}
-                      selectedVariants={selectedVariants}
-                      designFiles={designFiles}
-                      mockupUrl={mockupUrls}
-                      onGenerateMockup={generateMockup}
-                      isGeneratingMockup={isGeneratingMockup}
-                      onPrevStep={() => {}}
-                    />
-                  )} */}
-
-                  {step === "product-details" && (
-                    <EnhancedProductDetailsForm
-                      initialData={{
-                        name: productForm.name,
-                        description: productForm.description,
-                        markupPercentage: productForm.markupPercentage,
-                        category: productForm.category,
-                      }}
-                      onSave={(data) => {
-                        setProductForm({
-                          ...productForm,
-                          name: data.name,
-                          description: data.description,
-                          markupPercentage: data.markupPercentage.toString(),
-                          category: data.category,
-                          tags: data.tags || []
-                        });
-                      }}
-                      onNext={handleGoLiveToMarketplace}
-                      isLoading={creating}
-                      selectedProduct={selectedProduct}
-                      selectedVariants={selectedVariants}
-                      mockupUrls={mockupUrls}
-                      designFiles={designFiles}
-                    />
-                  )}
-                </div>
-
-                {/* <div className="lg:col-span-1">
-                  <ProductPreview
+                      // Persist to localStorage for this product
+                      if (productId) {
+                        const savedFormKey = `productForm_${productId}`;
+                        localStorage.setItem(savedFormKey, JSON.stringify(updatedForm));
+                        console.log(`💾 Saved product form for product ${productId}`);
+                      }
+                    }}
+                    onNext={handleGoLiveToMarketplace}
+                    onBack={handlePrevStep}
+                    isLoading={creating}
                     selectedProduct={selectedProduct}
-                    productForm={productForm}
-                    designFiles={designFiles}
                     selectedVariants={selectedVariants}
-                    loading={loading}
-                    mockupUrl={mockupUrls}
-                    isGeneratingMockup={isGeneratingMockup}
+                    mockupUrls={mockupUrls}
+                    designFiles={designFiles}
                   />
-                </div> */}
-              </div>
+                )}
+              </>
             )}
           </>
         )}
