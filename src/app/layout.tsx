@@ -20,8 +20,10 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "Loka Media - Premium Design Marketplace | Custom Products",
-  description: "Discover curated designs from top creators worldwide. Shop premium custom products, print-on-demand items, and exclusive designs from independent artists. Support creators and find your unique style on Loka Media.",
-  keywords: "design marketplace, print-on-demand, custom products, independent creators, premium designs",
+  description:
+    "Discover curated designs from top creators worldwide. Shop premium custom products, print-on-demand items, and exclusive designs from independent artists. Support creators and find your unique style on Loka Media.",
+  keywords:
+    "design marketplace, print-on-demand, custom products, independent creators, premium designs",
   authors: [{ name: "Loka Media" }],
   creator: "Loka Media",
   publisher: "Loka Media",
@@ -53,17 +55,17 @@ export default function RootLayout({
       <body className={`${manrope.variable} antialiased`}>
         <AuthProvider>
           {/* <CartProvider> - Disabled to prevent duplicate API calls */}
-            <GuestCartProvider>
-              <WishlistProvider>
-                <Navigation />
-                <StickyHeader />
-                <div className="bg-white text-black pt-16">
-                  {children}
-                  <Footer />
-                </div>
-                <Toaster position="top-right" />
-              </WishlistProvider>
-            </GuestCartProvider>
+          <GuestCartProvider>
+            <WishlistProvider>
+              <Navigation />
+              {/* <StickyHeader /> */}
+              <div className="bg-white text-black pt-16">
+                {children}
+                <Footer />
+              </div>
+              <Toaster position="top-right" />
+            </WishlistProvider>
+          </GuestCartProvider>
           {/* </CartProvider> */}
         </AuthProvider>
       </body>
