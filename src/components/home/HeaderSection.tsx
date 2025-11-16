@@ -12,91 +12,68 @@ interface HeroSectionProps {
 
 export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
   return (
-    <section className="relative pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4 md:px-6 lg:px-8 overflow-hidden flex items-center mt-4 sm:mt-6 md:mt-9">
-      {/* Ballpit Background - Optimized */}
-      <div className="absolute inset-0 w-full h-full">
-        <Threads amplitude={1} distance={0} enableMouseInteraction={false} />
-      </div>
+    <section className="relative overflow-hidden">
+      {/* Main Hero with Gradient Background */}
+      <div className="relative bg-gradient-to-br from-yellow-300 via-pink-200 to-yellow-100 py-20 md:py-32 lg:py-40 px-4 md:px-6 lg:px-8">
+        {/* Decorative Elements - Neubrutalism style */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-black rounded-3xl opacity-10 rotate-12 hidden lg:block"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-pink-500 rounded-full opacity-20 hidden lg:block"></div>
+        <div className="absolute top-1/2 right-10 w-24 h-24 bg-yellow-400 rounded-2xl opacity-30 rotate-45 hidden md:block"></div>
 
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-orange-900/20"></div>
-
-      {/* Floating Shapes - Reduced */}
-      <div className="absolute inset-0 z-[1] pointer-events-none">
-        <div className="absolute top-1/4 left-1/6 sm:left-1/4 w-16 sm:w-20 md:w-32 h-16 sm:h-20 md:h-32 bg-gradient-to-br from-orange-500/20 to-orange-300/10 rounded-full blur-lg opacity-70"></div>
-        <div className="absolute top-3/4 right-1/6 sm:right-1/4 w-20 sm:w-28 md:w-48 h-20 sm:h-28 md:h-48 bg-gradient-to-br from-orange-400/15 to-orange-600/10 rounded-full blur-lg opacity-60"></div>
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full">
-        <div className="text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 mb-4 sm:mb-6 md:mb-8 rounded-full bg-gradient-to-r from-orange-500/15 to-orange-300/15 border border-orange-500/20 text-orange-200 text-xs sm:text-sm font-medium">
-            <Zap className="w-4 h-4 mr-2 text-orange-400" />
-            <span>Now with AI-Powered Analytics</span>
-          </div>
-
-          {/* Heading */}
-          <h1 className="text-3xl xs:text-4xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-black mb-4 sm:mb-6 md:mb-8 tracking-tight leading-tight px-2 sm:px-0">
-            <span className="bg-gradient-to-r from-orange-300 via-orange-400 to-orange-500 bg-clip-text text-transparent">
-              Turn Your
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-white via-gray-100 to-orange-100 bg-clip-text text-transparent">
-              Following Into Income
-            </span>
+        <div className="max-w-6xl mx-auto text-center relative z-10">
+          {/* Heading - Gumroad neubrutalism style: huge, bold, colorful */}
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-normal mb-6 md:mb-8 text-black leading-[0.95] tracking-tight">
+            Turn Your Following Into Income
           </h1>
 
-          {/* Value Prop */}
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-gray-200 mb-6 sm:mb-8 md:mb-12 max-w-xl sm:max-w-2xl lg:max-w-4xl mx-auto leading-relaxed font-light px-3 sm:px-2">
-            Your creator journey deserves premium marketing support and maximum
-            <span className="text-orange-300 font-medium">
-              {" "}
-              monetization earnings on
-            </span>{" "}
-            and
-            <span className="text-orange-300 font-medium">
-              {" "}
-              across all social platforms.
-            </span>
-          </p>
+          {/* Subheading with background highlight */}
+          <div className="inline-block bg-white/80 backdrop-blur-sm px-6 py-4 rounded-2xl border border-black mb-10 md:mb-12">
+            <p className="text-xl sm:text-2xl md:text-3xl text-black max-w-3xl font-semibold leading-tight tracking-tight">
+              Your creator journey deserves premium marketing support and maximum monetization earnings on and across all social platforms.
+            </p>
+          </div>
 
-          {/* Primary CTA */}
-          {/* <div className="mb-6 sm:mb-8 md:mb-10 lg:mb-12 relative flex justify-center px-3 sm:px-0">
-            <Link
-              href="/products"
-              className="relative inline-flex items-center justify-center w-full sm:w-auto max-w-xs sm:max-w-sm md:max-w-md px-6 sm:px-8 md:px-12 lg:px-16 py-3 sm:py-4 md:py-5 lg:py-6 bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 hover:from-orange-600 hover:via-orange-700 hover:to-orange-600 text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl rounded-full transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/50 focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50 group overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <ShoppingBag className="mr-1.5 sm:mr-2 md:mr-3 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 group-hover:rotate-12 transition-transform duration-300" />
-              <span className="relative">Explore Marketplace</span>
-              <ArrowRight className="ml-1.5 sm:ml-2 md:ml-3 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
-          </div> */}
+          {/* CTA Buttons - Neubrutalism style with bold shadows */}
+          {!isAuthenticated && (
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-8">
+              <Link
+                href="/auth/register"
+                className="bg-black hover:bg-gray-900 text-white px-12 py-5 rounded-xl text-xl font-extrabold transition-all border border-black hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] w-full sm:w-auto text-center"
+              >
+                Start selling
+              </Link>
+              <Link
+                href="/products"
+                className="bg-white hover:bg-gray-50 text-black px-12 py-5 rounded-xl text-xl font-extrabold transition-all border border-black hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] w-full sm:w-auto text-center"
+              >
+                Explore marketplace →
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
 
-          {/* Secondary Actions */}
-          <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 sm:gap-4 md:gap-6 mb-2 px-3 sm:px-0">
-            {!isAuthenticated && (
-              <>
-                <Link
-                  href="/auth/register"
-                  className="group w-full sm:w-auto sm:flex-1 max-w-xs sm:max-w-sm md:max-w-md px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 border-2 border-orange-400/50 hover:border-orange-400 text-gray-200 hover:text-white font-semibold rounded-full transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-50 backdrop-blur-md bg-gradient-to-r from-black/30 to-orange-900/30 hover:from-orange-500/20 hover:to-orange-600/20 relative overflow-hidden text-xs sm:text-sm md:text-base text-center inline-flex items-center justify-center"
-                >
-                  <span className="relative">Get Started Free</span>
-                </Link>
-                <Link
-                  href="/auth/login"
-                  className="group w-full sm:w-auto sm:flex-1 max-w-xs sm:max-w-sm md:max-w-md px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 border-2 border-orange-400/50 hover:border-orange-400 text-gray-200 hover:text-white font-semibold rounded-full transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-50 backdrop-blur-md bg-gradient-to-r from-black/30 to-orange-900/30 hover:from-orange-500/20 hover:to-orange-600/20 relative overflow-hidden text-xs sm:text-sm md:text-base text-center inline-flex items-center justify-center"
-                >
-                  <span className="relative flex items-center">
-                    <span className="group-hover:mr-1 sm:group-hover:mr-2 transition-all duration-300">
-                      Sign In
-                    </span>
-                    <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-0.5 sm:ml-1 group-hover:translate-x-1 transition-transform duration-300" />
-                  </span>
-                </Link>
-              </>
-            )}
+      {/* Stats Section - Colorful Cards with Neubrutalism */}
+      <div className="bg-white py-16 md:py-24 px-4 md:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+            {/* Stat Card 1 - Yellow */}
+            <div className="relative bg-yellow-300 p-8 md:p-10 rounded-3xl border border-black hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+              <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-black mb-3 tracking-tight">$2M+</div>
+              <div className="text-lg md:text-xl text-black font-bold">Paid to creators</div>
+            </div>
+
+            {/* Stat Card 2 - Pink */}
+            <div className="relative bg-pink-400 p-8 md:p-10 rounded-3xl border border-black hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+              <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-black mb-3 tracking-tight">10K+</div>
+              <div className="text-lg md:text-xl text-black font-bold">Active creators</div>
+            </div>
+
+            {/* Stat Card 3 - Black */}
+            <div className="relative bg-black p-8 md:p-10 rounded-3xl border border-black hover:shadow-[12px_12px_0px_0px_rgba(255,105,180,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+              <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-yellow-300 mb-3 tracking-tight">90%</div>
+              <div className="text-lg md:text-xl text-white font-bold">You keep</div>
+            </div>
           </div>
         </div>
       </div>

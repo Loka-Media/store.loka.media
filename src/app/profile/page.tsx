@@ -7,6 +7,7 @@ import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus, ChevronDown,
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import CreativeLoader from '@/components/CreativeLoader';
 
 interface OrderItem {
   product_id: number;
@@ -110,42 +111,42 @@ export default function ProfilePage() {
 
   if (!isAuthenticated || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
+        <CreativeLoader variant="default" message="Loading your profile..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-          <p className="text-gray-600 mt-1">Manage your account and view your order history</p>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-black">My Profile</h1>
+          <p className="text-gray-800 font-bold mt-2 text-lg">Manage your account and view your order history</p>
         </div>
 
         {/* Profile Overview */}
-        <div className="bg-white shadow-sm rounded-lg p-6 mb-8">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-indigo-100 rounded-full p-3">
-                <User className="w-8 h-8 text-indigo-600" />
+        <div className="bg-white border-4 border-black rounded-2xl p-8 mb-8 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-6">
+            <div className="flex items-center space-x-6">
+              <div className="bg-gradient-to-br from-purple-400 to-pink-400 border-4 border-black rounded-2xl p-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+                <User className="w-10 h-10 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">{user?.name}</h2>
-                <p className="text-gray-600">@{user?.username}</p>
-                <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <Mail className="w-4 h-4 mr-1" />
+                <h2 className="text-2xl font-extrabold text-black">{user?.name}</h2>
+                <p className="text-gray-700 font-bold text-lg">@{user?.username}</p>
+                <div className="flex flex-wrap items-center gap-4 mt-3 text-sm font-bold">
+                  <div className="flex items-center bg-blue-100 border-2 border-black rounded-lg px-3 py-1">
+                    <Mail className="w-4 h-4 mr-2 text-black" />
                     {user?.email}
                   </div>
-                  <div className="flex items-center">
-                    <Phone className="w-4 h-4 mr-1" />
+                  <div className="flex items-center bg-green-100 border-2 border-black rounded-lg px-3 py-1">
+                    <Phone className="w-4 h-4 mr-2 text-black" />
                     {user?.phone}
                   </div>
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
+                  <div className="flex items-center bg-yellow-100 border-2 border-black rounded-lg px-3 py-1">
+                    <Calendar className="w-4 h-4 mr-2 text-black" />
                     Member since 2024
                   </div>
                 </div>
@@ -153,32 +154,32 @@ export default function ProfilePage() {
             </div>
             <Link
               href="/profile/edit"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-lg"
             >
-              <Edit2 className="w-4 h-4 mr-2" />
+              <Edit2 className="w-5 h-5 mr-2" />
               Edit Profile
             </Link>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="-mb-px flex space-x-8">
+        <div className="bg-white border-4 border-black rounded-2xl p-2 mb-8 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <nav className="flex space-x-2">
             {[
-              { key: 'overview', label: 'Overview', icon: User },
-              { key: 'orders', label: 'Order History', icon: Package },
-              { key: 'addresses', label: 'Addresses', icon: MapPin },
-            ].map(({ key, label, icon: Icon }) => (
+              { key: 'overview', label: 'Overview', icon: User, gradient: 'from-purple-300 to-pink-300' },
+              { key: 'orders', label: 'Order History', icon: Package, gradient: 'from-blue-300 to-purple-300' },
+              { key: 'addresses', label: 'Addresses', icon: MapPin, gradient: 'from-green-300 to-teal-300' },
+            ].map(({ key, label, icon: Icon, gradient }) => (
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
+                className={`flex-1 py-3 px-4 font-extrabold text-sm flex items-center justify-center rounded-xl border-2 border-black transition-all ${
                   activeTab === key
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? `bg-gradient-to-r ${gradient} text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] translate-x-[-2px] translate-y-[-2px]`
+                    : 'bg-white text-gray-700 hover:bg-yellow-100'
                 }`}
               >
-                <Icon className="w-4 h-4 mr-2" />
+                <Icon className="w-5 h-5 mr-2" />
                 {label}
               </button>
             ))}
@@ -188,32 +189,38 @@ export default function ProfilePage() {
         {/* Tab Content */}
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white shadow-sm rounded-lg p-6">
-              <div className="flex items-center">
-                <Package className="w-8 h-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-2xl font-semibold text-gray-900">{orders.length}</p>
-                  <p className="text-gray-600">Total Orders</p>
+            <div className="bg-gradient-to-br from-blue-200 to-blue-300 border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-4xl font-extrabold text-black">{orders.length}</p>
+                  <p className="text-black font-bold text-sm mt-1">Total Orders</p>
+                </div>
+                <div className="bg-blue-500 border-4 border-black rounded-xl p-3">
+                  <Package className="w-8 h-8 text-white" />
                 </div>
               </div>
             </div>
-            
-            <div className="bg-white shadow-sm rounded-lg p-6">
-              <div className="flex items-center">
-                <MapPin className="w-8 h-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-2xl font-semibold text-gray-900">{addresses.length}</p>
-                  <p className="text-gray-600">Saved Addresses</p>
+
+            <div className="bg-gradient-to-br from-green-200 to-green-300 border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-4xl font-extrabold text-black">{addresses.length}</p>
+                  <p className="text-black font-bold text-sm mt-1">Saved Addresses</p>
+                </div>
+                <div className="bg-green-500 border-4 border-black rounded-xl p-3">
+                  <MapPin className="w-8 h-8 text-white" />
                 </div>
               </div>
             </div>
-            
-            <div className="bg-white shadow-sm rounded-lg p-6">
-              <div className="flex items-center">
-                <User className="w-8 h-8 text-purple-600" />
-                <div className="ml-4">
-                  <p className="text-2xl font-semibold text-gray-900 capitalize">{user?.role || 'User'}</p>
-                  <p className="text-gray-600">Account Type</p>
+
+            <div className="bg-gradient-to-br from-purple-200 to-purple-300 border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-4xl font-extrabold text-black capitalize">{user?.role || 'User'}</p>
+                  <p className="text-black font-bold text-sm mt-1">Account Type</p>
+                </div>
+                <div className="bg-purple-500 border-4 border-black rounded-xl p-3">
+                  <User className="w-8 h-8 text-white" />
                 </div>
               </div>
             </div>
@@ -221,67 +228,73 @@ export default function ProfilePage() {
         )}
 
         {activeTab === 'orders' && (
-          <div className="bg-white shadow-sm rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Recent Orders</h3>
+          <div className="bg-white border-4 border-black rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)] overflow-hidden">
+            <div className="px-6 py-5 bg-gradient-to-r from-blue-200 to-purple-200 border-b-4 border-black">
+              <h3 className="text-2xl font-extrabold text-black">Recent Orders</h3>
             </div>
             {orders.length === 0 ? (
-              <div className="p-6 text-center">
-                <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No orders yet</p>
+              <div className="p-12 text-center">
+                <div className="bg-gradient-to-br from-blue-300 to-purple-400 border-4 border-black rounded-2xl p-8 inline-block mb-6">
+                  <Package className="w-16 h-16 text-black mx-auto" />
+                </div>
+                <p className="text-2xl font-extrabold text-black mb-3">No orders yet</p>
                 <Link
                   href="/products"
-                  className="text-indigo-600 hover:text-indigo-500 font-medium"
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-lg"
                 >
                   Start Shopping
                 </Link>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4 p-4">
                 {orders.map((order) => {
                   const isExpanded = expandedOrders.has(order.id);
                   return (
-                    <div key={order.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={order.id} className="bg-gradient-to-br from-yellow-50 to-pink-50 rounded-2xl border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all overflow-hidden">
                       {/* Compact Order Header */}
-                      <div 
-                        className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"
+                      <div
+                        className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/50 transition-colors"
                         onClick={() => toggleOrderExpansion(order.id)}
                       >
-                        <div className="flex items-center space-x-3">
-                          <Package className="w-5 h-5 text-indigo-600" />
+                        <div className="flex items-center space-x-4">
+                          <div className="bg-purple-400 border-2 border-black rounded-lg p-2">
+                            <Package className="w-6 h-6 text-white" />
+                          </div>
                           <div>
-                            <p className="font-semibold text-gray-900">
+                            <p className="font-extrabold text-black text-lg">
                               Order #{order.order_number}
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm font-bold text-gray-700">
                               {formatDate(order.created_at)} • {order.item_count} item(s)
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm font-bold text-gray-700">
                               Payment: {order.payment_method.toUpperCase()}
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-4">
                           <div className="text-right">
-                            <p className="font-bold text-lg text-gray-900">
+                            <p className="font-extrabold text-2xl text-black">
                               {formatPrice(order.total_amount)}
                             </p>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold border-2 border-black ${getStatusColor(order.status)}`}>
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </span>
                           </div>
-                          {isExpanded ? (
-                            <ChevronUp className="w-5 h-5 text-gray-400" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-gray-400" />
-                          )}
+                          <div className="bg-white border-2 border-black rounded-full p-2">
+                            {isExpanded ? (
+                              <ChevronUp className="w-5 h-5 text-black" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5 text-black" />
+                            )}
+                          </div>
                         </div>
                       </div>
 
                       {/* Expandable Order Details */}
                       {isExpanded && (
-                        <div className="border-t border-gray-200 p-4 bg-gray-50">
+                        <div className="border-t-4 border-black p-6 bg-white">
                           {/* Order Items */}
                           {order.order_items && order.order_items.length > 0 && (
                             <div className="mb-4">
@@ -425,50 +438,52 @@ export default function ProfilePage() {
         )}
 
         {activeTab === 'addresses' && (
-          <div className="bg-white shadow-sm rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900">Saved Addresses</h3>
+          <div className="bg-white border-4 border-black rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)] overflow-hidden">
+            <div className="px-6 py-5 bg-gradient-to-r from-green-200 to-teal-200 border-b-4 border-black flex items-center justify-between">
+              <h3 className="text-2xl font-extrabold text-black">Saved Addresses</h3>
               <Link
                 href="/addresses"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-400 to-pink-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Address
               </Link>
             </div>
             {addresses.length === 0 ? (
-              <div className="p-6 text-center">
-                <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No addresses saved</p>
+              <div className="p-12 text-center">
+                <div className="bg-gradient-to-br from-green-300 to-teal-400 border-4 border-black rounded-2xl p-8 inline-block mb-6">
+                  <MapPin className="w-16 h-16 text-black mx-auto" />
+                </div>
+                <p className="text-2xl font-extrabold text-black mb-3">No addresses saved</p>
                 <Link
                   href="/addresses"
-                  className="text-indigo-600 hover:text-indigo-500 font-medium"
+                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-lg"
                 >
                   Add Your First Address
                 </Link>
               </div>
             ) : (
-              <div className="divide-y divide-gray-200">
+              <div className="p-4 space-y-4">
                 {addresses.map((address) => (
-                  <div key={address.id} className="p-6">
+                  <div key={address.id} className="bg-gradient-to-br from-green-50 to-teal-50 border-4 border-black rounded-2xl p-6 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">{address.name}</p>
-                        <p className="text-gray-600">{address.address1}</p>
-                        {address.address2 && <p className="text-gray-600">{address.address2}</p>}
-                        <p className="text-gray-600">
+                        <p className="font-extrabold text-black text-lg mb-2">{address.name}</p>
+                        <p className="text-gray-700 font-bold">{address.address1}</p>
+                        {address.address2 && <p className="text-gray-700 font-bold">{address.address2}</p>}
+                        <p className="text-gray-700 font-bold">
                           {address.city}, {address.state} {address.zip}
                         </p>
-                        <p className="text-gray-600">{address.country}</p>
-                        {address.phone && <p className="text-gray-600">{address.phone}</p>}
+                        <p className="text-gray-700 font-bold">{address.country}</p>
+                        {address.phone && <p className="text-gray-700 font-bold mt-2">{address.phone}</p>}
                       </div>
                       <div className="text-right">
                         {address.is_default && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Default
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-green-300 text-black border-2 border-black mb-2">
+                            ✓ Default
                           </span>
                         )}
-                        <p className="text-xs text-gray-500 mt-1 capitalize">
+                        <p className="text-xs font-extrabold text-gray-700 capitalize bg-teal-100 border-2 border-black rounded-lg px-2 py-1">
                           {address.address_type} address
                         </p>
                       </div>

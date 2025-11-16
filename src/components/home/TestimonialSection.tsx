@@ -61,83 +61,59 @@ export function TestimonialSection() {
   };
 
   return (
-    <section className="relative py-12 sm:py-16 md:py-20 lg:py-32 bg-gradient-to-b from-gray-950 via-gray-950 to-black overflow-hidden">
-      {/* Enhanced background with gradient glow */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 left-1/4 w-72 sm:w-96 md:w-[500px] h-72 sm:h-96 md:h-[500px] bg-gradient-to-br from-orange-500/15 to-pink-500/10 rounded-full blur-3xl opacity-40 animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-72 sm:w-96 md:w-[500px] h-72 sm:h-96 md:h-[500px] bg-gradient-to-br from-blue-500/15 to-purple-500/10 rounded-full blur-3xl opacity-40 animate-pulse" style={{ animationDelay: "1s" }}></div>
-        <div className="absolute top-1/3 right-0 w-96 h-96 bg-gradient-to-l from-orange-500/8 to-transparent rounded-full blur-3xl opacity-30"></div>
-      </div>
-
+    <section className="relative py-12 sm:py-16 md:py-20 lg:py-32 bg-gradient-to-br from-pink-100 via-yellow-50 to-pink-100 overflow-hidden border-y border-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section header - Enhanced */}
+        {/* Section header */}
         <div className="text-center mb-12 sm:mb-16 md:mb-24">
           <div className="inline-block mb-6 sm:mb-8">
-            <span className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-400 px-4 py-2 rounded-full border border-orange-400/30 backdrop-blur-sm">
-              ⭐ Testimonials
+            <span className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-black px-4 py-2 rounded-full border border-black bg-yellow-200">
+              Testimonials
             </span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-4 sm:mb-6 leading-tight tracking-tight">
-            <span className="bg-gradient-to-r from-white via-orange-200 to-pink-200 bg-clip-text text-transparent">
-              Loved by Creators
-            </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-black mb-4 sm:mb-6 leading-tight tracking-tight">
+            Loved by Creators
             <br />
-            <span className="bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="font-normal">
               Worldwide
             </span>
           </h2>
-          <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed font-light mt-6 sm:mt-8">
+          <p className="text-sm sm:text-base md:text-lg text-black max-w-2xl mx-auto leading-relaxed mt-6 sm:mt-8 font-medium">
             Join thousands of creators who are earning and growing their audience with Loka
           </p>
         </div>
 
-        {/* Modern testimonial card */}
+        {/* Testimonial card */}
         <div className="max-w-5xl mx-auto px-0 sm:px-4">
           <div
-            ref={cardRef}
-            onMouseMove={handleMouseMove}
-            className="testimonial-card relative backdrop-blur-3xl bg-gradient-to-br from-white/[0.12] to-white/[0.04] border border-white/[0.2] rounded-3xl p-8 sm:p-10 md:p-14 lg:p-16 shadow-2xl shadow-orange-500/10 overflow-hidden group transition-all duration-500 hover:border-white/[0.3] hover:shadow-orange-500/20"
+            className="relative bg-white border border-black rounded-2xl p-8 sm:p-10 md:p-14 lg:p-16 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-[12px_12px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
           >
-            {/* Animated gradient border glow */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-orange-500/20 via-transparent to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
-            {/* Avatar as background - Enhanced */}
-            <div
-              className="absolute inset-0 bg-cover bg-right opacity-25 group-hover:opacity-35 transition-opacity duration-500"
-              style={{
-                backgroundImage: `url(${testimonials[currentTestimonial].avatar})`,
-              }}
-            ></div>
-            {/* Premium gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-950 via-gray-950/60 to-transparent"></div>
-
-            {/* Quote icon - Enhanced */}
+            {/* Quote icon */}
             <div className="relative z-10 mb-8 sm:mb-10">
-              <div className="inline-block p-3 sm:p-4 bg-gradient-to-br from-orange-500/20 to-pink-500/10 border border-orange-400/30 rounded-2xl">
-                <Quote className="w-6 h-6 sm:w-8 sm:h-8 text-orange-400" />
+              <div className="inline-block p-3 sm:p-4 bg-pink-200 border border-black rounded-xl">
+                <Quote className="w-6 h-6 sm:w-8 sm:h-8 text-black" />
               </div>
             </div>
 
             {/* Testimonial content */}
             <div className="relative z-10">
-              <blockquote className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-relaxed mb-8 sm:mb-10 text-white tracking-tight">
+              <blockquote className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold leading-relaxed mb-8 sm:mb-10 text-black tracking-tight">
                 "{testimonials[currentTestimonial].quote}"
               </blockquote>
 
-              {/* Author info - Enhanced */}
+              {/* Author info */}
               <div className="flex items-center gap-4 sm:gap-5">
                 {testimonials[currentTestimonial].avatar && (
                   <img
                     src={testimonials[currentTestimonial].avatar}
                     alt={testimonials[currentTestimonial].author}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-3 ring-gradient-to-r ring-orange-400/50 shadow-lg"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-black shadow-md border border-black"
                   />
                 )}
                 <div>
-                  <div className="font-bold text-lg sm:text-xl text-white">
+                  <div className="font-extrabold text-lg sm:text-xl text-black">
                     {testimonials[currentTestimonial].author}
                   </div>
-                  <div className="text-sm text-orange-400 font-semibold">
+                  <div className="text-sm text-black font-bold">
                     Creator on Loka
                   </div>
                 </div>
@@ -145,7 +121,7 @@ export function TestimonialSection() {
             </div>
 
             {/* Navigation */}
-            <div className="flex items-center justify-between mt-10 sm:mt-12 relative z-10 pt-6 sm:pt-8 border-t border-white/[0.1]">
+            <div className="flex items-center justify-between mt-10 sm:mt-12 relative z-10 pt-6 sm:pt-8 border-t border-black">
               {/* Testimonial indicators */}
               <div className="flex space-x-2 sm:space-x-3">
                 {testimonials.map((_, index) => (
@@ -155,10 +131,10 @@ export function TestimonialSection() {
                       setIsAutoPlaying(false);
                       setCurrentTestimonial(index);
                     }}
-                    className={`rounded-full transition-all duration-300 ${
+                    className={`rounded-full transition-all duration-300 border border-black ${
                       index === currentTestimonial
-                        ? "w-8 h-3 sm:w-10 sm:h-3 bg-gradient-to-r from-orange-400 to-pink-400"
-                        : "w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white/30 hover:bg-white/60"
+                        ? "w-8 h-3 sm:w-10 sm:h-3 bg-black"
+                        : "w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white hover:bg-gray-200"
                     }`}
                   />
                 ))}
@@ -168,69 +144,21 @@ export function TestimonialSection() {
               <div className="flex space-x-3 sm:space-x-4">
                 <button
                   onClick={prevTestimonial}
-                  className="w-11 h-11 sm:w-13 sm:h-13 backdrop-blur-md bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.15] hover:border-orange-400/50 rounded-full flex items-center justify-center transition-all duration-300 group/btn hover:shadow-lg hover:shadow-orange-500/20"
+                  className="w-11 h-11 sm:w-13 sm:h-13 bg-white hover:bg-gray-50 border border-black rounded-full flex items-center justify-center transition-all duration-300 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
                 >
-                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-300 group-hover/btn:text-orange-400 transition-colors duration-300" />
+                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
                 </button>
                 <button
                   onClick={nextTestimonial}
-                  className="w-11 h-11 sm:w-13 sm:h-13 backdrop-blur-md bg-gradient-to-r from-orange-500/20 to-pink-500/20 hover:from-orange-500/40 hover:to-pink-500/40 border border-orange-400/40 hover:border-orange-400/70 rounded-full flex items-center justify-center transition-all duration-300 group/btn hover:shadow-lg hover:shadow-orange-500/30"
+                  className="w-11 h-11 sm:w-13 sm:h-13 bg-black hover:bg-gray-900 border border-black rounded-full flex items-center justify-center transition-all duration-300 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
                 >
-                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-orange-300 group-hover/btn:text-orange-200 transition-colors duration-300" />
+                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .testimonial-card::before {
-          content: "";
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          background: radial-gradient(
-            circle at var(--x) var(--y),
-            rgba(251, 146, 60, 0.15),
-            transparent 30%
-          );
-          opacity: 0;
-          transition: opacity 0.4s ease-in-out;
-          pointer-events: none;
-          border-radius: 24px;
-        }
-
-        .testimonial-card:hover::before {
-          opacity: 1;
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes pulse-glow {
-          0%, 100% {
-            opacity: 0.4;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
-
-        .testimonial-card {
-          animation: fadeInUp 0.6s ease-out;
-        }
-      `}</style>
     </section>
   );
 }

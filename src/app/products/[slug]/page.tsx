@@ -6,10 +6,10 @@ import { useVariantSelection } from '@/hooks/useVariantSelection';
 import { useProductWishlist } from '@/hooks/useProductWishlist';
 import { useProductCart } from '@/hooks/useProductCart';
 
-import { ProductImageGallery } from '@/components/products/product-detail/ProductImageGallery';
-import { ProductInfo } from '@/components/products/product-detail/ProductInfo';
-import { ProductVariantSelector } from '@/components/products/product-detail/ProductVariantSelector';
-import { ProductActions } from '@/components/products/product-detail/ProductActions';
+import { EnhancedProductImageGallery } from '@/components/products/product-detail/EnhancedProductImageGallery';
+import { EnhancedProductInfo } from '@/components/products/product-detail/EnhancedProductInfo';
+import { EnhancedProductVariantSelector } from '@/components/products/product-detail/EnhancedProductVariantSelector';
+import { EnhancedProductActions } from '@/components/products/product-detail/EnhancedProductActions';
 import { ProductMeta } from '@/components/products/product-detail/ProductMeta';
 import { ProductPageLoader } from '@/components/products/product-detail/ProductPageLoader';
 import { ProductNotFound } from '@/components/products/product-detail/ProductNotFound';
@@ -23,9 +23,9 @@ interface ProductPageProps {
 
 export default function ProductPage({ params }: ProductPageProps) {
   const { slug } = use(params);
-  
+
   const { product, loading, isVariantAvailable } = useProductData(slug);
-  
+
   const {
     selectedVariant,
     setSelectedVariant,
@@ -35,12 +35,12 @@ export default function ProductPage({ params }: ProductPageProps) {
     getCurrentVariant,
     initializeSelectedVariant
   } = useVariantSelection(product, isVariantAvailable);
-  
+
   const { isWishlisted, handleWishlistToggle } = useProductWishlist(product);
   const { handleAddToCart } = useProductCart(product, selectedVariant);
 
   // Product fetching is now handled automatically by the hook
-  
+
   useEffect(() => {
     initializeSelectedVariant();
   }, [initializeSelectedVariant]);
@@ -58,21 +58,25 @@ export default function ProductPage({ params }: ProductPageProps) {
     : [product.thumbnail_url || '/placeholder-product.svg'];
 
   return (
-    <div className="bg-black text-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <ProductPageNavigation />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <ProductImageGallery productName={product.name} images={images} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 mt-8">
+          {/* Left Column - Images */}
+          <EnhancedProductImageGallery productName={product.name} images={images} />
 
-          <div className="space-y-8">
-            <ProductInfo
+          {/* Right Column - Product Info & Actions */}
+          <div className="space-y-6">
+            <EnhancedProductInfo
               productName={product.name}
               description={product.description}
               basePrice={product.base_price}
               selectedVariantPrice={selectedVariant?.price}
+              category={product.category}
             />
-            <ProductVariantSelector
+
+            <EnhancedProductVariantSelector
               variants={product.variants}
               selectedVariant={selectedVariant}
               onVariantChange={setSelectedVariant}
@@ -82,7 +86,8 @@ export default function ProductPage({ params }: ProductPageProps) {
               getCurrentVariant={getCurrentVariant}
               isVariantAvailable={(v) => isVariantAvailable(v, product.source)}
             />
-            <ProductActions
+
+            <EnhancedProductActions
               selectedVariant={selectedVariant}
               isVariantAvailable={
                 selectedVariant
@@ -93,8 +98,9 @@ export default function ProductPage({ params }: ProductPageProps) {
               onAddToCart={handleAddToCart}
               onWishlistToggle={handleWishlistToggle}
             />
-            
-            <div className="pt-8 border-t border-gray-800">
+
+            {/* Creator Info */}
+            <div className="bg-white border-4 border-black rounded-2xl p-6">
               <ProductMeta
                 creatorName={product.creator_name}
                 creatorUsername={product.creator_username}

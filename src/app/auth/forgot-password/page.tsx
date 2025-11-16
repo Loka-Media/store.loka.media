@@ -8,14 +8,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Mail,
-  Store,
   ArrowLeft,
   Users,
   ShoppingBag,
   TrendingUp,
+  Sparkles,
+  Shield,
+  Clock,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import LottieAnimation from "@/components/LottieAnimation";
 
 // Validation schema
 const forgotPasswordSchema = z.object({
@@ -72,76 +73,72 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 flex min-h-screen">
+    <div className="bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 flex min-h-screen">
       {/* Left Side - Hero Section */}
-      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
-        {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 via-orange-500/10 to-transparent"></div>
+      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden bg-gradient-to-br from-pink-200 via-yellow-100 to-pink-100 border-r-4 border-black">
+        {/* Decorative Elements */}
+        <div className="absolute top-20 left-20 w-32 h-32 bg-yellow-300 rounded-full opacity-40 border-4 border-black"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-pink-300 rounded-3xl opacity-30 rotate-12 border-4 border-black"></div>
+        <div className="absolute top-1/2 left-10 w-24 h-24 bg-purple-300 rounded-2xl opacity-20 -rotate-12 border-4 border-black"></div>
 
-        {/* Lottie Animation */}
-        <div className="absolute inset-0">
-          <LottieAnimation
-            animationPath="/fly-man.json"
-            loop={true}
-            autoplay={true}
-            style={{ width: "100%", height: "100%" }}
-            className="opacity-30"
-          />
-        </div>
-
-        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-16 text-white">
+        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-16">
           {/* Hero Content */}
           <div className="max-w-lg">
-            <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-tight mb-6">
-              RESET YOUR{" "}
-              <span className="block text-orange-400">
-                PASSWORD
+            <div className="inline-block bg-yellow-300 border-4 border-black px-4 py-2 rounded-xl mb-6 hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+              <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-black" />
+                <span className="text-sm font-extrabold text-black">SECURE RESET</span>
+              </div>
+            </div>
+
+            <h1 className="text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 text-black">
+              Reset Your
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">
+                Password
               </span>
             </h1>
 
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              Don't worry! Enter your email address and we'll send you an OTP to reset your password.
+            <p className="text-xl text-black font-bold mb-8 leading-relaxed">
+              Don't worry! Enter your email address and we'll send you an OTP to reset your password securely.
             </p>
 
             {/* Stats Section */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <Users className="w-6 h-6 text-orange-400" />
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="bg-yellow-200 border-4 border-black rounded-2xl p-4 text-center hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                <div className="flex items-center justify-center w-12 h-12 bg-black rounded-xl mb-2 mx-auto">
+                  <Users className="w-6 h-6 text-yellow-300" />
                 </div>
-                <div className="text-2xl font-bold text-white">7+</div>
-                <div className="text-sm text-gray-400">Social Media Platforms</div>
+                <div className="text-2xl font-extrabold text-black">7+</div>
+                <div className="text-xs font-bold text-black">Platforms</div>
               </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <ShoppingBag className="w-6 h-6 text-orange-400" />
+              <div className="bg-pink-200 border-4 border-black rounded-2xl p-4 text-center hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                <div className="flex items-center justify-center w-12 h-12 bg-black rounded-xl mb-2 mx-auto">
+                  <ShoppingBag className="w-6 h-6 text-pink-300" />
                 </div>
-                <div className="text-2xl font-bold text-white">40K+</div>
-                <div className="text-sm text-gray-400">Custom and Trending Products</div>
+                <div className="text-2xl font-extrabold text-black">40K+</div>
+                <div className="text-xs font-bold text-black">Products</div>
               </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-2 mx-auto">
-                  <TrendingUp className="w-6 h-6 text-orange-400" />
+              <div className="bg-purple-200 border-4 border-black rounded-2xl p-4 text-center hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                <div className="flex items-center justify-center w-12 h-12 bg-black rounded-xl mb-2 mx-auto">
+                  <TrendingUp className="w-6 h-6 text-purple-300" />
                 </div>
-                <div className="text-2xl font-bold text-white">$1M+++</div>
-                <div className="text-sm text-gray-400">Start Making Millions</div>
+                <div className="text-2xl font-extrabold text-black">$1M++</div>
+                <div className="text-xs font-bold text-black">Revenue</div>
               </div>
             </div>
 
             {/* Feature Highlights */}
-            <div className="space-y-4">
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-                <span>Secure password reset process</span>
-              </div>
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-                <span>OTP expires in 10 minutes</span>
-              </div>
-              <div className="flex items-center text-gray-300">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-                <span>Get back to creating quickly</span>
-              </div>
+            <div className="space-y-3">
+              {[
+                "Secure password reset process",
+                "OTP expires in 10 minutes",
+                "Get back to creating quickly",
+              ].map((feature, index) => (
+                <div key={index} className="flex items-center text-black">
+                  <div className="w-3 h-3 bg-black rounded-full mr-3 border-2 border-black"></div>
+                  <span className="font-bold">{feature}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -155,7 +152,7 @@ export default function ForgotPasswordPage() {
           <div className="mb-6">
             <Link
               href="/auth/login"
-              className="inline-flex items-center text-orange-400 hover:text-orange-300 transition-colors duration-300"
+              className="inline-flex items-center font-extrabold text-purple-600 hover:text-purple-700 transition-colors underline"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Sign In
@@ -165,96 +162,102 @@ export default function ForgotPasswordPage() {
           {!emailSent ? (
             <>
               {/* Header */}
-              <div className="text-center lg:text-left">
-                <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
-                  Forgot Password?
-                </h2>
-                <p className="mt-3 text-base text-gray-300">
+              <div className="text-center lg:text-left mb-8">
+                <div className="inline-block bg-pink-300 border-4 border-black px-4 py-2 rounded-xl mb-4">
+                  <h2 className="text-3xl lg:text-4xl font-extrabold text-black tracking-tight">
+                    Forgot Password?
+                  </h2>
+                </div>
+                <p className="mt-3 text-base font-bold text-black">
                   Enter your email address and we'll send you an OTP to reset your password.
                 </p>
               </div>
 
               {/* Form */}
-              <div className="mt-8">
-                <div className="bg-gray-900/50 backdrop-blur-md border border-gray-800/50 py-8 px-6 lg:px-8 shadow-xl rounded-xl">
-                  <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-                    {/* Email Field */}
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="block text-sm font-semibold text-white mb-2"
-                      >
-                        Email address
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Mail className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                          {...register("email")}
-                          type="email"
-                          autoComplete="email"
-                          className="block w-full pl-10 pr-3 py-3 bg-gray-800/50 border border-gray-700 rounded-lg placeholder-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300"
-                          placeholder="Enter your email address"
-                        />
+              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+                <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+                  {/* Email Field */}
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-extrabold text-black mb-2"
+                    >
+                      Email address
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail className="h-5 w-5 text-black" />
                       </div>
-                      {errors.email && (
-                        <p className="mt-2 text-sm text-red-400">
-                          {errors.email.message}
-                        </p>
-                      )}
+                      <input
+                        {...register("email")}
+                        type="email"
+                        autoComplete="email"
+                        className="block w-full pl-10 pr-3 py-3 bg-white border-2 border-black rounded-xl placeholder-gray-500 text-black font-bold focus:outline-none focus:ring-4 focus:ring-yellow-300 focus:border-black transition-all"
+                        placeholder="Enter your email address"
+                      />
                     </div>
+                    {errors.email && (
+                      <p className="mt-2 text-sm font-bold text-red-600 bg-red-100 border-2 border-red-600 rounded-lg px-3 py-1">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
 
-                    {/* Submit Button */}
-                    <div className="pt-2">
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full flex justify-center py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                      >
-                        {loading ? (
-                          <div className="flex items-center">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Sending OTP...
-                          </div>
-                        ) : (
-                          "Send Reset OTP"
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                  {/* Submit Button */}
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full flex justify-center py-3 px-4 bg-black hover:bg-gray-900 text-white rounded-xl text-base font-extrabold transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none border-4 border-black hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
+                    >
+                      {loading ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                          Sending OTP...
+                        </div>
+                      ) : (
+                        "Send Reset OTP"
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
             </>
           ) : (
             <>
               {/* Success State */}
-              <div className="text-center lg:text-left">
-                <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
-                  Check Your Email
-                </h2>
-                <p className="mt-3 text-base text-gray-300">
+              <div className="text-center lg:text-left mb-8">
+                <div className="inline-block bg-green-300 border-4 border-black px-4 py-2 rounded-xl mb-4">
+                  <h2 className="text-3xl lg:text-4xl font-extrabold text-black tracking-tight">
+                    Check Your Email
+                  </h2>
+                </div>
+                <p className="mt-3 text-base font-bold text-black">
                   We've sent a 6-digit OTP to{" "}
-                  <span className="text-orange-400 font-semibold">{email}</span>
+                  <span className="text-purple-600">{email}</span>
                 </p>
               </div>
 
-              <div className="mt-8">
-                <div className="bg-gray-900/50 backdrop-blur-md border border-gray-800/50 py-8 px-6 lg:px-8 shadow-xl rounded-xl text-center">
-                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Mail className="w-8 h-8 text-green-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Email Sent!</h3>
-                  <p className="text-gray-300 mb-6">
-                    Please check your inbox for the 6-digit OTP. It will expire in 10 minutes.
-                  </p>
-                  <button
-                    onClick={handleProceedToReset}
-                    className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                  >
-                    Continue to Reset Password
-                  </button>
+              <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0_0_rgba(0,0,0,1)] text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-green-200 border-4 border-black rounded-full mb-4">
+                  <Mail className="w-10 h-10 text-black" />
                 </div>
+                <h3 className="text-2xl font-extrabold text-black mb-3">Email Sent!</h3>
+                <div className="bg-yellow-100 border-2 border-black rounded-xl p-4 mb-6">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Clock className="w-5 h-5 text-black" />
+                    <span className="font-extrabold text-black">OTP Expires in 10 minutes</span>
+                  </div>
+                  <p className="text-sm font-bold text-black">
+                    Please check your inbox for the 6-digit OTP code.
+                  </p>
+                </div>
+                <button
+                  onClick={handleProceedToReset}
+                  className="w-full py-3 px-4 bg-black hover:bg-gray-900 text-white rounded-xl text-base font-extrabold transition-all focus:outline-none border-4 border-black hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
+                >
+                  Continue to Reset Password
+                </button>
               </div>
             </>
           )}

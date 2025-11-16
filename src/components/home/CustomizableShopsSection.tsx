@@ -90,7 +90,7 @@ export function CustomizableShopsSection() {
       easing: 'linear'
     });
 
-    // Bottom row animation (moving left to right continuously)  
+    // Bottom row animation (moving left to right continuously)
     const bottomRowAnimation = bottomRow.animate([
       { transform: 'translateX(-50%)' },
       { transform: 'translateX(0%)' }
@@ -112,16 +112,16 @@ export function CustomizableShopsSection() {
   };
 
   return (
-    <section className="relative py-20 bg-gray-50 overflow-hidden">
+    <section className="relative py-20 bg-gradient-to-br from-yellow-100 via-pink-50 to-yellow-50 overflow-hidden border-y border-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-2xl lg:text-4xl xl:text-5xl font-black text-gray-900 mb-6 leading-tight">
+          <h2 className="text-2xl lg:text-4xl xl:text-5xl font-extrabold text-black mb-6 leading-tight tracking-tight">
             Fully Customizable shop,
             <br />
-            <span className="text-gray-700">100% owned by you</span>
+            <span className="font-normal text-gray-700">100% owned by you</span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-black font-medium max-w-2xl mx-auto leading-relaxed">
             Or customize the product and publish to our shop. Easily customize your design, layout, and domain to create a brand that's as unique as you are.
           </p>
         </div>
@@ -131,7 +131,7 @@ export function CustomizableShopsSection() {
       <div className="space-y-8">
         {/* Top row - moving left */}
         <div className="overflow-hidden">
-          <div 
+          <div
             ref={topRowRef}
             className="flex space-x-6"
             style={{ width: '200%' }}
@@ -140,31 +140,31 @@ export function CustomizableShopsSection() {
             {[...topRowShops, ...topRowShops].map((shop, index) => (
               <div
                 key={`top-${index}`}
-                className="flex-shrink-0 w-80 h-60 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group cursor-pointer"
+                className="flex-shrink-0 w-80 h-60 rounded-2xl overflow-hidden shadow-lg hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all group cursor-pointer border border-black"
                 onClick={() => handleCardClick(shop.website)}
               >
                 <div className="w-full h-full relative bg-white flex flex-col">
                   {/* Mock browser header */}
-                  <div className="flex items-center p-3 border-b border-gray-300 bg-gray-100">
+                  <div className="flex items-center p-3 border-b border-black bg-yellow-100">
                     <div className="flex space-x-1.5">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-red-500 rounded-full border border-black"></div>
+                      <div className="w-3 h-3 bg-yellow-400 rounded-full border border-black"></div>
+                      <div className="w-3 h-3 bg-green-500 rounded-full border border-black"></div>
                     </div>
                   </div>
-                  
+
                   {/* Shop content */}
                   <div className="flex-1 relative overflow-hidden">
                     {/* Main image */}
-                    <img 
-                      src={shop.url} 
+                    <img
+                      src={shop.url}
                       alt={shop.title}
                       className="w-full h-full object-cover"
                     />
-                    
+
                     {/* Title overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <h3 className="text-white text-lg font-semibold">{shop.title}</h3>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 border-t border-black/20">
+                      <h3 className="text-white text-lg font-extrabold">{shop.title}</h3>
                     </div>
                   </div>
                 </div>
@@ -175,7 +175,7 @@ export function CustomizableShopsSection() {
 
         {/* Bottom row - moving right */}
         <div className="overflow-hidden">
-          <div 
+          <div
             ref={bottomRowRef}
             className="flex space-x-6"
             style={{ width: '200%' }}
@@ -184,31 +184,31 @@ export function CustomizableShopsSection() {
             {[...bottomRowShops, ...bottomRowShops].map((shop, index) => (
               <div
                 key={`bottom-${index}`}
-                className="flex-shrink-0 w-80 h-60 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 group cursor-pointer"
+                className="flex-shrink-0 w-80 h-60 rounded-2xl overflow-hidden shadow-lg hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all group cursor-pointer border border-black"
                 onClick={() => handleCardClick(shop.website)}
               >
                 <div className="w-full h-full relative bg-white flex flex-col">
                   {/* Mock browser header */}
-                  <div className="flex items-center p-3 border-b border-gray-300 bg-gray-100">
+                  <div className="flex items-center p-3 border-b border-black bg-pink-100">
                     <div className="flex space-x-1.5">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-red-500 rounded-full border border-black"></div>
+                      <div className="w-3 h-3 bg-yellow-400 rounded-full border border-black"></div>
+                      <div className="w-3 h-3 bg-green-500 rounded-full border border-black"></div>
                     </div>
                   </div>
-                  
+
                   {/* Shop content */}
                   <div className="flex-1 relative overflow-hidden">
                     {/* Main image */}
-                    <img 
-                      src={shop.url} 
+                    <img
+                      src={shop.url}
                       alt={shop.title}
                       className="w-full h-full object-cover"
                     />
-                    
+
                     {/* Title overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <h3 className="text-white text-lg font-semibold">{shop.title}</h3>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 border-t border-black/20">
+                      <h3 className="text-white text-lg font-extrabold">{shop.title}</h3>
                     </div>
                   </div>
                 </div>
@@ -218,7 +218,7 @@ export function CustomizableShopsSection() {
         </div>
       </div>
 
-   
+
     </section>
   );
 }

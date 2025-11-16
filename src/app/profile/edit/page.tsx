@@ -7,6 +7,7 @@ import { ArrowLeft, Save, User, Phone, Mail, AtSign } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import CreativeLoader from '@/components/CreativeLoader';
 
 export default function EditProfilePage() {
   const { user, isAuthenticated, refreshUser } = useAuth();
@@ -79,24 +80,24 @@ export default function EditProfilePage() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
+        <CreativeLoader variant="default" message="Loading profile editor..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
-            <p className="text-gray-600 mt-1">Update your personal information</p>
+            <h1 className="text-4xl font-extrabold text-black">Edit Profile</h1>
+            <p className="text-gray-800 font-bold mt-2 text-lg">Update your personal information</p>
           </div>
           <Link
             href="/profile"
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-4 py-2 bg-white border-4 border-black text-black font-extrabold rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Profile
@@ -104,33 +105,35 @@ export default function EditProfilePage() {
         </div>
 
         {/* Form */}
-        <div className="bg-white shadow-sm rounded-lg">
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <div className="bg-white border-4 border-black rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+          <form onSubmit={handleSubmit} className="p-8 space-y-6">
             {/* Current Info Display */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Current Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center text-gray-600">
-                  <Mail className="w-4 h-4 mr-2" />
-                  <span className="font-medium">Email:</span>
+            <div className="bg-gradient-to-br from-blue-100 to-purple-100 border-4 border-black rounded-2xl p-6 mb-6 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+              <h3 className="text-lg font-extrabold text-black mb-4">Current Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center bg-white border-2 border-black rounded-lg px-3 py-2 font-bold text-black">
+                  <Mail className="w-5 h-5 mr-2 text-blue-600" />
+                  <span className="font-extrabold">Email:</span>
                   <span className="ml-2">{user.email}</span>
                 </div>
-                <div className="flex items-center text-gray-600">
-                  <AtSign className="w-4 h-4 mr-2" />
-                  <span className="font-medium">Username:</span>
+                <div className="flex items-center bg-white border-2 border-black rounded-lg px-3 py-2 font-bold text-black">
+                  <AtSign className="w-5 h-5 mr-2 text-purple-600" />
+                  <span className="font-extrabold">Username:</span>
                   <span className="ml-2">@{user.username}</span>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Email and username cannot be changed. Contact support if you need assistance.
+              <p className="text-sm font-bold text-gray-700 mt-4 bg-yellow-100 border-2 border-black rounded-lg px-3 py-2">
+                ⚠️ Email and username cannot be changed. Contact support if you need assistance.
               </p>
             </div>
 
             {/* Editable Fields */}
             <div className="space-y-6">
               <div>
-                <label htmlFor="name" className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                  <User className="w-4 h-4 mr-2" />
+                <label htmlFor="name" className="flex items-center text-base font-extrabold text-black mb-3">
+                  <div className="bg-purple-300 border-2 border-black rounded-lg p-2 mr-2">
+                    <User className="w-4 h-4 text-black" />
+                  </div>
                   Full Name
                 </label>
                 <input
@@ -140,14 +143,16 @@ export default function EditProfilePage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-yellow-50 border-4 border-black rounded-xl font-bold text-black placeholder-gray-600 focus:ring-0 focus:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
                   placeholder="Enter your full name"
                 />
               </div>
 
               <div>
-                <label htmlFor="phone" className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                  <Phone className="w-4 h-4 mr-2" />
+                <label htmlFor="phone" className="flex items-center text-base font-extrabold text-black mb-3">
+                  <div className="bg-green-300 border-2 border-black rounded-lg p-2 mr-2">
+                    <Phone className="w-4 h-4 text-black" />
+                  </div>
                   Phone Number
                 </label>
                 <input
@@ -157,29 +162,29 @@ export default function EditProfilePage() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-yellow-50 border-4 border-black rounded-xl font-bold text-black placeholder-gray-600 focus:ring-0 focus:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
                   placeholder="Enter your phone number"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Include country code (e.g., +1234567890)
+                <p className="text-sm font-bold text-gray-700 mt-2 bg-blue-100 border-2 border-black rounded-lg px-3 py-2">
+                  📞 Include country code (e.g., +1234567890)
                 </p>
               </div>
             </div>
 
             {/* Form Actions */}
-            <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+            <div className="flex items-center justify-end space-x-4 pt-6 border-t-4 border-black">
               <Link
                 href="/profile"
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-6 py-3 font-extrabold text-black bg-white border-4 border-black rounded-xl hover:bg-gray-100 transition-all"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-lg"
               >
-                <Save className="w-4 h-4 mr-2" />
+                <Save className="w-5 h-5 mr-2" />
                 {loading ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
@@ -187,30 +192,32 @@ export default function EditProfilePage() {
         </div>
 
         {/* Additional Settings */}
-        <div className="mt-8 bg-white shadow-sm rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Account Settings</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-200">
+        <div className="mt-8 bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)] overflow-hidden">
+          <div className="px-6 py-5 bg-gradient-to-r from-yellow-200 to-orange-200 border-b-4 border-black">
+            <h3 className="text-2xl font-extrabold text-black">Account Settings</h3>
+          </div>
+          <div className="p-6 space-y-6">
+            <div className="flex items-center justify-between py-4 border-b-4 border-black">
               <div>
-                <p className="text-sm font-medium text-gray-900">Account Type</p>
-                <p className="text-sm text-gray-500">Your current account role</p>
+                <p className="text-base font-extrabold text-black">Account Type</p>
+                <p className="text-sm font-bold text-gray-700">Your current account role</p>
               </div>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 capitalize">
+              <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-extrabold bg-purple-300 text-black border-2 border-black capitalize">
                 {user.role}
               </span>
             </div>
-            
-            <div className="flex items-center justify-between py-3 border-b border-gray-200">
+
+            <div className="flex items-center justify-between py-4">
               <div>
-                <p className="text-sm font-medium text-gray-900">Email Verification</p>
-                <p className="text-sm text-gray-500">Your email verification status</p>
+                <p className="text-base font-extrabold text-black">Email Verification</p>
+                <p className="text-sm font-bold text-gray-700">Your email verification status</p>
               </div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                user.isVerified 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-yellow-100 text-yellow-800'
+              <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-extrabold border-2 border-black ${
+                user.isVerified
+                  ? 'bg-green-300 text-black'
+                  : 'bg-yellow-300 text-black'
               }`}>
-                {user.isVerified ? 'Verified' : 'Pending'}
+                {user.isVerified ? '✓ Verified' : '⏳ Pending'}
               </span>
             </div>
           </div>

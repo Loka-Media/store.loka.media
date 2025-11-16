@@ -5,7 +5,7 @@ interface ProductsLoadingProps {
 export function ProductsLoading({ message }: ProductsLoadingProps) {
   return (
     <div className="text-center py-20">
-      <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+      <div className="w-16 h-16 border border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
       <p className="text-xl text-gray-400">
         {message || "Discovering amazing products..."}
       </p>

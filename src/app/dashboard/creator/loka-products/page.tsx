@@ -122,11 +122,11 @@ export default function LokaProductsPage() {
 
   if (loading && products.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center h-64">
-            <Loader className="w-8 h-8 animate-spin text-orange-500" />
-            <span className="ml-2 text-gray-400">Loading Loka products...</span>
+            <Loader className="w-8 h-8 animate-spin text-accent" />
+            <span className="ml-2 text-gray-600">Loading Loka products...</span>
           </div>
         </div>
       </div>
@@ -134,17 +134,17 @@ export default function LokaProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-6">
-            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-14 h-14 bg-accent rounded-xl flex items-center justify-center">
               <Store className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold text-white tracking-tight">Loka Products</h1>
-              <p className="mt-2 text-base text-gray-400">
+              <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Loka Products</h1>
+              <p className="mt-2 text-base text-gray-600">
                 Browse and publish curated products to your marketplace
               </p>
             </div>
@@ -154,19 +154,19 @@ export default function LokaProductsPage() {
         {/* Messages */}
         {message && (
           <div className={`mb-6 p-4 rounded-xl border ${
-            message.type === 'success' 
-              ? 'bg-green-900/20 border-green-500/30 backdrop-blur-sm' 
-              : 'bg-red-900/20 border-red-500/30 backdrop-blur-sm'
+            message.type === 'success'
+              ? 'bg-green-50 border-green-200'
+              : 'bg-red-50 border-red-200'
           }`}>
             <div className="flex">
               {message.type === 'success' ? (
-                <Check className="h-5 w-5 text-green-400" />
+                <Check className="h-5 w-5 text-green-600" />
               ) : (
-                <div className="h-5 w-5 text-red-400">⚠</div>
+                <div className="h-5 w-5 text-red-600">⚠</div>
               )}
               <div className="ml-3">
                 <p className={`text-sm font-medium ${
-                  message.type === 'success' ? 'text-green-300' : 'text-red-300'
+                  message.type === 'success' ? 'text-green-900' : 'text-red-900'
                 }`}>
                   {message.text}
                 </p>
@@ -185,7 +185,7 @@ export default function LokaProductsPage() {
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors backdrop-blur-sm"
+                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
               />
             </div>
           </form>
@@ -194,7 +194,7 @@ export default function LokaProductsPage() {
             <button
               onClick={handlePublishSelected}
               disabled={publishing.length > 0}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed space-x-2 shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+              className="inline-flex items-center px-6 py-3 bg-accent text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed space-x-2 transition-colors"
             >
               {publishing.length > 0 ? (
                 <Loader className="w-4 h-4 animate-spin" />
@@ -211,14 +211,14 @@ export default function LokaProductsPage() {
           {products.map((product) => (
             <div
               key={product.shopify_product_id}
-              className={`bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-xl overflow-hidden border-2 transition-all duration-300 transform hover:-translate-y-1 ${
+              className={`bg-white rounded-xl overflow-hidden border transition-colors ${
                 selectedProducts.includes(product.shopify_product_id)
-                  ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-orange-500/20'
-                  : 'border-gray-800 hover:border-gray-700 hover:shadow-2xl'
+                  ? 'border-accent'
+                  : 'border-gray-200 hover:border-gray-300'
               }`}
             >
               {/* Product Image */}
-              <div className="relative h-48 bg-gray-800/50">
+              <div className="relative h-48 bg-gray-50">
                 {product.thumbnail_url || product.images?.[0] ? (
                   <img
                     src={product.thumbnail_url || product.images[0]}
@@ -227,23 +227,23 @@ export default function LokaProductsPage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Store className="w-12 h-12 text-gray-600" />
+                    <Store className="w-12 h-12 text-gray-400" />
                   </div>
                 )}
-                
+
                 {/* Selection Checkbox */}
                 <div className="absolute top-3 left-3">
                   <input
                     type="checkbox"
                     checked={selectedProducts.includes(product.shopify_product_id)}
                     onChange={() => handleProductSelect(product.shopify_product_id)}
-                    className="w-5 h-5 text-orange-500 bg-gray-900 border-2 border-gray-600 rounded focus:ring-orange-500 focus:ring-2"
+                    className="w-5 h-5 text-accent bg-white border-2 border-gray-300 rounded focus:ring-accent focus:ring-2"
                   />
                 </div>
 
                 {/* Published Badge */}
                 {product.is_published_by_creator && (
-                  <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                  <div className="absolute top-3 right-3 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
                     Published
                   </div>
                 )}
@@ -251,7 +251,7 @@ export default function LokaProductsPage() {
 
               {/* Product Info */}
               <div className="p-6">
-                <h3 className="font-bold text-white mb-3 line-clamp-2 text-lg">
+                <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 text-lg">
                   {product.title}
                 </h3>
 
@@ -260,12 +260,12 @@ export default function LokaProductsPage() {
                   <button
                     onClick={() => handlePublishSingle(product.shopify_product_id)}
                     disabled={product.is_published_by_creator || publishing.includes(product.shopify_product_id)}
-                    className={`flex-1 inline-flex items-center justify-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                    className={`flex-1 inline-flex items-center justify-center px-4 py-3 text-sm font-semibold rounded-xl transition-colors ${
                       product.is_published_by_creator
-                        ? 'bg-gray-800/50 text-gray-400 cursor-not-allowed border border-gray-700'
+                        ? 'bg-gray-100 text-gray-600 cursor-not-allowed border border-gray-200'
                         : publishing.includes(product.shopify_product_id)
-                        ? 'bg-orange-900/30 text-orange-300 cursor-not-allowed border border-orange-500/30'
-                        : 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-lg transform hover:-translate-y-0.5'
+                        ? 'bg-accent/50 text-white cursor-not-allowed border border-accent'
+                        : 'bg-accent text-white hover:bg-accent/90'
                     }`}
                   >
                     {publishing.includes(product.shopify_product_id) ? (
@@ -297,19 +297,19 @@ export default function LokaProductsPage() {
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-6 py-3 text-sm font-semibold text-gray-300 bg-gray-900/50 border border-gray-700 rounded-xl hover:bg-gray-800 hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm"
+              className="px-6 py-3 text-sm font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
-            
-            <span className="px-6 py-3 text-sm font-medium text-white bg-gray-800/50 rounded-xl border border-gray-700 backdrop-blur-sm">
+
+            <span className="px-6 py-3 text-sm font-medium text-gray-900 bg-white rounded-xl border border-gray-200">
               Page {currentPage} of {totalPages}
             </span>
-            
+
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-6 py-3 text-sm font-semibold text-gray-300 bg-gray-900/50 border border-gray-700 rounded-xl hover:bg-gray-800 hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm"
+              className="px-6 py-3 text-sm font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>
@@ -319,11 +319,11 @@ export default function LokaProductsPage() {
         {/* Empty State */}
         {products.length === 0 && !loading && (
           <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Store className="w-10 h-10 text-gray-600" />
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Store className="w-10 h-10 text-gray-400" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">No products found</h3>
-            <p className="text-gray-400 text-lg">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-600 text-lg">
               {searchTerm ? 'Try adjusting your search terms.' : 'No Loka products are available yet.'}
             </p>
           </div>

@@ -9,16 +9,24 @@ module.exports = {
     extend: {
       colors: {
         background: 'var(--background)',
-        foreground: 'var(--foreground)',
+        foreground: {
+          DEFAULT: 'var(--foreground)',
+          muted: 'var(--foreground-muted)',
+        },
+        border: 'var(--border)',
+        accent: {
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+        },
       },
       fontFamily: {
-        'fascinate': ['var(--font-fascinate-inline)', 'system-ui'],
-        'michroma': ['var(--font-michroma)', 'sans-serif'],
-        'delius': ['var(--font-delius)', 'cursive'],
-        'sansation': ['"Sansation"', 'sans-serif'],
-        'sans': ['"Sansation"', 'sans-serif'],
-        'mono': ['var(--font-geist-mono)', 'monospace'],
-        'heading': ['var(--font-fascinate-inline)', 'system-ui'],
+        sans: ['var(--font-manrope)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        manrope: ['var(--font-manrope)', 'sans-serif'],
+      },
+      letterSpacing: {
+        tighter: '-0.02em',
+        tight: '-0.01em',
+        normal: '0em',
       },
     },
   },

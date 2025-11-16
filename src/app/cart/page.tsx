@@ -110,26 +110,26 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">Shopping Cart</h1>
-            <p className="text-gray-400 mt-1">
+            <h1 className="text-2xl font-bold text-gray-900">Shopping Cart</h1>
+            <p className="text-gray-600 mt-1">
               {summary.itemCount} {summary.itemCount === 1 ? 'item' : 'items'} in your cart
             </p>
           </div>
           <Link
             href="/products"
-            className="inline-flex items-center px-4 py-2 border border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700"
+            className="inline-flex items-center px-4 py-2 border border-gray-200 shadow-sm text-sm font-medium rounded-md text-gray-900 bg-white hover:bg-gray-50"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Continue Shopping
@@ -139,12 +139,12 @@ export default function CartPage() {
         {items.length === 0 ? (
           <div className="text-center py-12">
             <ShoppingBag className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-white">Your cart is empty</h3>
-            <p className="mt-1 text-sm text-gray-400">Start adding some products to your cart!</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Your cart is empty</h3>
+            <p className="mt-1 text-sm text-gray-600">Start adding some products to your cart!</p>
             <div className="mt-6">
               <Link
                 href="/products"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-black bg-orange-500 hover:bg-orange-600"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-pink-500 hover:bg-pink-600"
               >
                 Start Shopping
               </Link>
@@ -154,13 +154,13 @@ export default function CartPage() {
           <div className="lg:grid lg:grid-cols-12 lg:gap-x-12">
             {/* Cart Items */}
             <div className="lg:col-span-7">
-              <div className="bg-gray-900 shadow-sm rounded-lg border border-gray-800">
+              <div className="bg-white shadow-sm rounded-lg border border-gray-200">
                 <div className="px-4 py-6 sm:px-6">
                   <div className="flow-root">
-                    <ul className="-my-6 divide-y divide-gray-800">
+                    <ul className="-my-6 divide-y divide-gray-200">
                       {items.map((item) => (
                         <li key={item.id} className="py-6 flex">
-                          <div className="flex-shrink-0 w-24 h-24 border border-gray-700 rounded-md overflow-hidden">
+                          <div className="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden">
                             <Image
                               src={item.image_url || item.thumbnail_url || '/placeholder-product.svg'}
                               alt={item.product_name}
@@ -176,19 +176,19 @@ export default function CartPage() {
 
                           <div className="ml-4 flex-1 flex flex-col">
                             <div>
-                              <div className="flex justify-between text-base font-medium text-white">
+                              <div className="flex justify-between text-base font-medium text-gray-900">
                                 <h3>{item.product_name}</h3>
                                 <p className="ml-4">{formatPrice(item.total_price)}</p>
                               </div>
-                              <p className="mt-1 text-sm text-gray-400">
+                              <p className="mt-1 text-sm text-gray-600">
                                 by {item.creator_name}
                               </p>
-                              <div className="mt-1 text-sm text-gray-400 flex items-center space-x-4">
+                              <div className="mt-1 text-sm text-gray-600 flex items-center space-x-4">
                                 <span>Size: {item.size}</span>
                                 <span className="flex items-center">
-                                  Color: 
-                                  <span 
-                                    className="ml-1 w-4 h-4 rounded-full border border-gray-600"
+                                  Color:
+                                  <span
+                                    className="ml-1 w-4 h-4 rounded-full border border-gray-200"
                                     style={{ backgroundColor: getColorCode(item.color, item.color_code) }}
                                   ></span>
                                   <span className="ml-1">{item.color || 'Default'}</span>
@@ -197,22 +197,22 @@ export default function CartPage() {
                             </div>
                             <div className="flex-1 flex items-end justify-between text-sm">
                               <div className="flex items-center space-x-2">
-                                <span className="text-gray-400">Qty:</span>
-                                <div className="flex items-center border border-gray-600 rounded-md bg-gray-800">
+                                <span className="text-gray-600">Qty:</span>
+                                <div className="flex items-center border border-gray-200 rounded-md bg-white">
                                   <button
                                     type="button"
-                                    className="p-1 text-gray-400 hover:text-white disabled:opacity-50"
+                                    className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-50"
                                     onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                                     disabled={item.quantity <= 1 || updatingItems.has(item.id)}
                                   >
                                     <Minus className="h-3 w-3" />
                                   </button>
-                                  <span className="px-2 py-1 text-white min-w-[2rem] text-center">
+                                  <span className="px-2 py-1 text-gray-900 min-w-[2rem] text-center">
                                     {updatingItems.has(item.id) ? '...' : item.quantity}
                                   </span>
                                   <button
                                     type="button"
-                                    className="p-1 text-gray-400 hover:text-white disabled:opacity-50"
+                                    className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-50"
                                     onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                                     disabled={item.quantity >= 10 || updatingItems.has(item.id)}
                                   >
@@ -224,7 +224,7 @@ export default function CartPage() {
                               <div className="flex">
                                 <button
                                   type="button"
-                                  className="font-medium text-red-400 hover:text-red-300 disabled:opacity-50"
+                                  className="font-medium text-red-500 hover:text-red-600 disabled:opacity-50"
                                   onClick={() => handleRemoveItem(item.id, item.product_name)}
                                   disabled={updatingItems.has(item.id)}
                                 >
@@ -238,13 +238,13 @@ export default function CartPage() {
                     </ul>
                   </div>
                 </div>
-                
+
                 {/* Clear Cart Button */}
                 {items.length > 0 && (
-                  <div className="border-t border-gray-800 px-4 py-6 sm:px-6">
+                  <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
                     <button
                       type="button"
-                      className="text-sm text-red-400 hover:text-red-300 font-medium"
+                      className="text-sm text-red-500 hover:text-red-600 font-medium"
                       onClick={() => {
                         if (confirm('Are you sure you want to clear your cart?')) {
                           clearCart();
@@ -260,37 +260,37 @@ export default function CartPage() {
 
             {/* Order Summary */}
             <div className="mt-8 lg:mt-0 lg:col-span-5">
-              <div className="bg-gray-900 shadow-sm rounded-lg border border-gray-800">
+              <div className="bg-white shadow-sm rounded-lg border border-gray-200">
                 <div className="px-4 py-6 sm:px-6">
-                  <h2 className="text-lg font-medium text-white">Order Summary</h2>
-                  
+                  <h2 className="text-lg font-medium text-gray-900">Order Summary</h2>
+
                   <div className="mt-6 space-y-4">
                     <div className="flex items-center justify-between">
-                      <dt className="text-sm text-gray-400">Subtotal</dt>
-                      <dd className="text-sm font-medium text-white">{formatPrice(summary.subtotal)}</dd>
+                      <dt className="text-sm text-gray-600">Subtotal</dt>
+                      <dd className="text-sm font-medium text-gray-900">{formatPrice(summary.subtotal)}</dd>
                     </div>
-                    <div className="border-t border-gray-800 pt-4 flex items-center justify-between">
-                      <dt className="text-base font-medium text-white">Order total</dt>
-                      <dd className="text-base font-medium text-orange-500">{formatPrice(summary.subtotal)}</dd>
+                    <div className="border-t border-gray-200 pt-4 flex items-center justify-between">
+                      <dt className="text-base font-medium text-gray-900">Order total</dt>
+                      <dd className="text-base font-medium text-pink-500">{formatPrice(summary.subtotal)}</dd>
                     </div>
                   </div>
 
                   <div className="mt-6">
                     <Link
                       href="/checkout-unified"
-                      className="w-full bg-orange-500 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-black hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 flex items-center justify-center"
+                      className="w-full bg-pink-500 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 flex items-center justify-center"
                     >
                       Proceed to Checkout
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </div>
 
-                  <div className="mt-6 flex justify-center text-sm text-center text-gray-400">
+                  <div className="mt-6 flex justify-center text-sm text-center text-gray-600">
                     <p>
                       or{' '}
                       <Link
                         href="/products"
-                        className="text-orange-500 font-medium hover:text-orange-400"
+                        className="text-pink-500 font-medium hover:text-pink-600"
                       >
                         Continue Shopping
                         <span aria-hidden="true"> &rarr;</span>

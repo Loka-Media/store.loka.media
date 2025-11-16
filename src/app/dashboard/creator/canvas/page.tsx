@@ -14,7 +14,10 @@ import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 
 import UploadStep from "@/components/canvas/UploadStep";
 import UnifiedDesignEditor from "@/components/canvas/UnifiedDesignEditor";
+import EnhancedCanvasWizard from "@/components/canvas/EnhancedCanvasWizard";
 import ProductDetailsForm from "@/components/canvas/ProductDetailsForm";
+import EnhancedProductDetailsForm from "@/components/canvas/EnhancedProductDetailsForm";
+import CreativeLoader from "@/components/CreativeLoader";
 
 import {
   DesignFile,
@@ -36,6 +39,7 @@ function CanvasContent() {
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId");
 
+  // Default to simplified (new) interface unless explicitly set to classic
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
@@ -52,6 +56,7 @@ function CanvasContent() {
   const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
   const [mockupStatus, setMockupStatus] = useState<string>("");
   const [printFiles, setPrintFiles] = useState<any>(null);
+  const [useSimplifiedWizard, setUseSimplifiedWizard] = useState(searchParams.get("new") !== "false");
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: "",
@@ -312,20 +317,20 @@ function CanvasContent() {
   if (!selectedProduct && !loading) {
     return (
       <CreatorProtectedRoute>
-        <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-center p-12 bg-black/60 backdrop-blur-sm rounded-3xl border border-gray-800 shadow-2xl">
-          <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="h-8 w-8 text-gray-400" />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-12 bg-white rounded-3xl border border-gray-200">
+          <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-8 w-8 text-gray-600" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
             No product selected
           </h3>
-          <p className="text-gray-400 mb-8 font-medium">
+          <p className="text-gray-600 mb-8 font-medium">
             Please select a product from the catalog first.
           </p>
           <Link
             href="/dashboard/creator/catalog"
-            className="inline-flex items-center px-8 py-4 text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-orange-500/25 font-bold transition-all duration-300 transform hover:scale-105"
+            className="inline-flex items-center px-8 py-4 text-white bg-accent rounded-2xl font-bold transition-colors"
           >
             Browse Catalog
           </Link>
@@ -756,7 +761,7 @@ function CanvasContent() {
 
   return (
     <CreatorProtectedRoute>
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gray-50">
       {/* <CanvasHeader
         selectedProduct={selectedProduct}
         step={step}
@@ -766,30 +771,71 @@ function CanvasContent() {
 
       <div className="">
         {loading ? (
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto" />
-            <p className="mt-6 text-gray-300 text-lg font-medium">Loading design canvas...</p>
-          </div>
+          <CreativeLoader variant="design" message="Loading design canvas..." />
         ) : (
           <>
+            {/* Interface Toggle */}
+            {step === "unified-editor" && (
+              <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-4 border-black p-4 mb-4 mx-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                  <div>
+                    <h3 className="font-extrabold text-black text-lg">
+                      {useSimplifiedWizard ? "🎨 New Simplified Interface (Recommended)" : "🔧 Classic Interface"}
+                    </h3>
+                    <p className="text-sm font-bold text-black/80 mt-1">
+                      {useSimplifiedWizard
+                        ? "Streamlined step-by-step workflow for faster product creation. Switch to classic if you prefer the advanced editor."
+                        : "Advanced interface with full editor controls. Switch back to simplified for easier workflow."}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setUseSimplifiedWizard(!useSimplifiedWizard)}
+                    className="px-6 py-3 bg-black text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-sm whitespace-nowrap"
+                  >
+                    {useSimplifiedWizard ? "Try Classic" : "Back to New"}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {step === "unified-editor" ? (
-              <UnifiedDesignEditor
-                selectedProduct={selectedProduct}
-                selectedVariants={selectedVariants}
-                setSelectedVariants={setSelectedVariants}
-                designFiles={designFiles}
-                setDesignFiles={setDesignFiles}
-                uploadedFiles={uploadedFiles}
-                printFiles={printFiles}
-                onGeneratePreview={generatePreview}
-                isGeneratingPreview={isGeneratingMockup}
-                mockupUrls={mockupUrls}
-                mockupStatus={mockupStatus}
-                onNext={handleNextStep}
-                onPrev={handlePrevStep}
-                onPrintFilesLoaded={handlePrintFilesLoaded}
-                onRefreshFiles={fetchUploadedFiles}
-              />
+              useSimplifiedWizard ? (
+                <EnhancedCanvasWizard
+                  selectedProduct={selectedProduct}
+                  selectedVariants={selectedVariants}
+                  setSelectedVariants={setSelectedVariants}
+                  designFiles={designFiles}
+                  setDesignFiles={setDesignFiles}
+                  uploadedFiles={uploadedFiles}
+                  printFiles={printFiles}
+                  onGeneratePreview={generatePreview}
+                  isGeneratingPreview={isGeneratingMockup}
+                  mockupUrls={mockupUrls}
+                  mockupStatus={mockupStatus}
+                  onNext={handleNextStep}
+                  onPrev={handlePrevStep}
+                  onPrintFilesLoaded={handlePrintFilesLoaded}
+                  onRefreshFiles={fetchUploadedFiles}
+                />
+              ) : (
+                <UnifiedDesignEditor
+                  selectedProduct={selectedProduct}
+                  selectedVariants={selectedVariants}
+                  setSelectedVariants={setSelectedVariants}
+                  designFiles={designFiles}
+                  setDesignFiles={setDesignFiles}
+                  uploadedFiles={uploadedFiles}
+                  printFiles={printFiles}
+                  onGeneratePreview={generatePreview}
+                  isGeneratingPreview={isGeneratingMockup}
+                  mockupUrls={mockupUrls}
+                  mockupStatus={mockupStatus}
+                  onNext={handleNextStep}
+                  onPrev={handlePrevStep}
+                  onPrintFilesLoaded={handlePrintFilesLoaded}
+                  onRefreshFiles={fetchUploadedFiles}
+                />
+              )
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
@@ -846,7 +892,7 @@ function CanvasContent() {
                   )} */}
 
                   {step === "product-details" && (
-                    <ProductDetailsForm
+                    <EnhancedProductDetailsForm
                       initialData={{
                         name: productForm.name,
                         description: productForm.description,
@@ -860,12 +906,15 @@ function CanvasContent() {
                           description: data.description,
                           markupPercentage: data.markupPercentage.toString(),
                           category: data.category,
+                          tags: data.tags || []
                         });
                       }}
                       onNext={handleGoLiveToMarketplace}
                       isLoading={creating}
                       selectedProduct={selectedProduct}
                       selectedVariants={selectedVariants}
+                      mockupUrls={mockupUrls}
+                      designFiles={designFiles}
                     />
                   )}
                 </div>

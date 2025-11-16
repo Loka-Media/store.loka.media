@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { Filter, ChevronDown, X } from "lucide-react";
+import { Filter, ChevronDown, X, Tag, User, Sparkles } from "lucide-react";
 
 interface ProductsFilterTopBarProps {
   filters: {
@@ -52,15 +52,15 @@ export function ProductsFilterTopBar({
     const selectedOption = options.find(opt => opt.value === value);
 
     return (
-      <div className="relative w-full sm:w-auto">
+      <div className="relative w-full">
         <button
           onClick={() => setOpenDropdown(isOpen ? null : label)}
-          className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg sm:rounded-xl text-white text-xs sm:text-sm hover:bg-gray-700/50 hover:border-gray-600/50 transition-all duration-200 focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500/50"
+          className="w-full flex items-center justify-between px-4 py-3 bg-white border border-black rounded-xl text-black text-sm font-bold hover:bg-gray-50 transition-all duration-200 focus:outline-none hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
         >
-          <span className={`truncate ${selectedOption?.label ? "text-white" : "text-gray-400"}`}>
+          <span className={selectedOption?.label ? "text-black" : "text-gray-500"}>
             {selectedOption?.label || placeholder}
           </span>
-          <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2 ${
+          <ChevronDown className={`w-4 h-4 text-black transition-transform duration-200 flex-shrink-0 ml-2 ${
             isOpen ? "rotate-180" : ""
           }`} />
         </button>
@@ -68,33 +68,27 @@ export function ProductsFilterTopBar({
         {isOpen && (
           <>
             <div
-              className="fixed inset-0"
-              style={{ zIndex: 999998 }}
+              className="fixed inset-0 z-40"
               onClick={() => setOpenDropdown(null)}
             />
             <div
-              className="fixed sm:absolute sm:top-full sm:left-0 sm:right-0 sm:mt-1 bg-gray-800/95 border border-gray-700/50 rounded-lg sm:rounded-xl shadow-2xl backdrop-blur-sm max-h-72 overflow-y-auto"
-              style={{
-                zIndex: 999999,
-                // On mobile: full screen, bottom-up positioning
-                // On desktop: relative to button
-                ...(!window.matchMedia('(min-width: 640px)').matches
-                  ? { bottom: '0', left: '0', right: '0', borderRadius: '1rem 1rem 0 0' }
-                  : {}
-                )
-              }}
+              className="absolute top-full left-0 right-0 mt-2 bg-white border border-black rounded-xl shadow-[6px_6px_0_0_rgba(0,0,0,1)] max-h-72 overflow-y-auto z-50"
             >
-              {options.map((option) => (
+              {options.map((option, index) => (
                 <button
                   key={option.value}
                   onClick={() => {
                     onSelect(option.value);
                     setOpenDropdown(null);
                   }}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-left text-xs sm:text-sm transition-colors duration-150 hover:bg-gray-700/50 first:rounded-t-lg sm:first:rounded-t-xl last:rounded-b-lg sm:last:rounded-b-xl ${
+                  className={`w-full px-4 py-2.5 text-left text-sm font-bold transition-colors duration-150 border-b border-black/5 last:border-0 ${
+                    index === 0 ? "rounded-t-xl" : ""
+                  } ${
+                    index === options.length - 1 ? "rounded-b-xl" : ""
+                  } ${
                     value === option.value
-                      ? "bg-orange-500/20 text-orange-300"
-                      : "text-gray-300 hover:text-white"
+                      ? "bg-gradient-to-r from-yellow-100 to-pink-100 text-black font-extrabold"
+                      : "text-black hover:bg-gray-100"
                   }`}
                 >
                   {option.label}
@@ -111,38 +105,48 @@ export function ProductsFilterTopBar({
     filters.creator !== "";
 
   return (
-    <div className="w-full bg-gray-900/50 border border-gray-800/50 rounded-2xl backdrop-blur-sm mb-6">
+    <div className="w-full bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 border border-black rounded-2xl mb-8 hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800/50">
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-orange-400" />
-          <span className="text-white font-medium text-sm">Filters</span>
+      <div className="flex items-center justify-between p-5 border-b border-black bg-gradient-to-r from-yellow-200 to-pink-200 rounded-t-2xl">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-black rounded-xl border border-black shadow-md">
+            <Filter className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-black font-extrabold text-lg">Filter Products</span>
+            <Sparkles className="w-4 h-4 text-black" />
+          </div>
           {hasActiveFilters && (
-            <span className="bg-orange-500/20 text-orange-300 text-xs font-medium px-2 py-0.5 rounded-full">
-              {Object.values(filters).filter(v => v !== "" && v !== "all" && v !== "0").length}
+            <span className="bg-black text-white text-xs font-extrabold px-3 py-1.5 rounded-full border border-black shadow-md">
+              {Object.values(filters).filter(v => v !== "" && v !== "all" && v !== "0").length} Active
             </span>
           )}
         </div>
-        
+
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="flex items-center gap-1 text-gray-400 hover:text-orange-400 text-xs font-medium transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-gray-800/50"
+            className="flex items-center gap-2 text-white bg-black hover:bg-gray-900 text-sm font-extrabold transition-all duration-200 px-4 py-2 rounded-xl border border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
           >
-            <X className="w-3 h-3" />
-            Clear
+            <X className="w-4 h-4" />
+            Clear All
           </button>
         )}
       </div>
 
       {/* Filter Controls */}
-      <div className="p-3 sm:p-4">
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-end gap-2 sm:gap-3">
-          {/* Category */}
-          <div className="col-span-1 sm:flex-1 sm:min-w-0">
-            <label className="block text-xs font-medium text-gray-400 mb-1">
-              Category
-            </label>
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Category Filter - Yellow */}
+          <div className="bg-yellow-200 border border-black rounded-xl p-4 hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-black rounded-lg">
+                <Tag className="w-4 h-4 text-yellow-300" />
+              </div>
+              <label className="text-sm font-extrabold text-black">
+                Category
+              </label>
+            </div>
             <CustomDropdown
               label="category"
               value={filters.category}
@@ -158,11 +162,16 @@ export function ProductsFilterTopBar({
             />
           </div>
 
-          {/* Creator */}
-          <div className="col-span-1 sm:flex-1 sm:min-w-0">
-            <label className="block text-xs font-medium text-gray-400 mb-1">
-              Creator
-            </label>
+          {/* Creator Filter - Pink */}
+          <div className="bg-pink-200 border border-black rounded-xl p-4 hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-black rounded-lg">
+                <User className="w-4 h-4 text-pink-300" />
+              </div>
+              <label className="text-sm font-extrabold text-black">
+                Creator
+              </label>
+            </div>
             <CustomDropdown
               label="creator"
               value={filters.creator}
@@ -179,31 +188,38 @@ export function ProductsFilterTopBar({
           </div>
         </div>
 
-        {/* Active Filters */}
+        {/* Active Filters Tags */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap gap-1.5 pt-2 mt-2 border-t border-gray-800/50">
-            {filters.category !== "" && (
-              <span className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs font-medium px-2 py-0.5 rounded-md">
-                {filters.category}
-                <button
-                  onClick={() => handleFilterChange("category", "")}
-                  className="text-orange-300 hover:text-orange-100 transition-colors"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-            {filters.creator !== "" && (
-              <span className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 text-orange-300 text-xs font-medium px-2 py-0.5 rounded-md">
-                {creators.find(c => c.name === filters.creator)?.name || filters.creator}
-                <button
-                  onClick={() => handleFilterChange("creator", "")}
-                  className="text-orange-300 hover:text-orange-100 transition-colors"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
+          <div className="pt-6 mt-6 border-t border-black">
+            <div className="mb-3">
+              <span className="text-sm font-extrabold text-black uppercase tracking-wide">Active Filters:</span>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {filters.category !== "" && (
+                <span className="flex items-center gap-2 bg-yellow-300 border border-black text-black text-sm font-extrabold px-4 py-2 rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                  <Tag className="w-3.5 h-3.5" />
+                  {filters.category}
+                  <button
+                    onClick={() => handleFilterChange("category", "")}
+                    className="text-black hover:bg-black/10 rounded-full p-1 transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </span>
+              )}
+              {filters.creator !== "" && (
+                <span className="flex items-center gap-2 bg-pink-300 border border-black text-black text-sm font-extrabold px-4 py-2 rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                  <User className="w-3.5 h-3.5" />
+                  {creators.find(c => c.name === filters.creator)?.name || filters.creator}
+                  <button
+                    onClick={() => handleFilterChange("creator", "")}
+                    className="text-black hover:bg-black/10 rounded-full p-1 transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>

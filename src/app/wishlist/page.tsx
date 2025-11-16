@@ -68,16 +68,16 @@ export default function WishlistPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <Heart className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-white">
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
             Please login to view your wishlist
           </h3>
           <div className="mt-6">
             <Link
               href="/auth/login"
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-black bg-orange-500 hover:bg-orange-400"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-accent hover:bg-accent/90"
             >
               Sign In
             </Link>
@@ -89,30 +89,30 @@ export default function WishlistPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center">
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
               <Heart className="w-7 h-7 mr-3 text-red-500" />
               My Wishlist
             </h1>
-            <p className="text-gray-400 mt-2 text-lg">
+            <p className="text-gray-600 mt-2 text-lg">
               {items.length} {items.length === 1 ? "item" : "items"} saved for
               later
             </p>
           </div>
           <Link
             href="/products"
-            className="inline-flex items-center px-6 py-3 border border-gray-600 shadow-sm text-sm font-semibold rounded-lg text-white bg-gray-800 hover:bg-gray-700"
+            className="inline-flex items-center px-6 py-3 border border-gray-200 text-sm font-semibold rounded-lg text-gray-900 bg-white hover:bg-gray-50"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Continue Shopping
@@ -121,17 +121,17 @@ export default function WishlistPage() {
 
         {items.length === 0 ? (
           <div className="text-center py-16">
-            <Heart className="mx-auto h-16 w-16 text-gray-600" />
-            <h3 className="mt-4 text-xl font-semibold text-white">
+            <Heart className="mx-auto h-16 w-16 text-gray-400" />
+            <h3 className="mt-4 text-xl font-semibold text-gray-900">
               Your wishlist is empty
             </h3>
-            <p className="mt-2 text-gray-400">
+            <p className="mt-2 text-gray-600">
               Save products you love to your wishlist!
             </p>
             <div className="mt-8">
               <Link
                 href="/products"
-                className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-black bg-orange-500 hover:bg-orange-400"
+                className="inline-flex items-center px-6 py-3 text-sm font-semibold rounded-lg text-white bg-accent hover:bg-accent/90"
               >
                 Start Shopping
               </Link>
@@ -143,7 +143,7 @@ export default function WishlistPage() {
             <div className="mb-6 flex justify-end">
               <button
                 type="button"
-                className="text-sm text-red-400 hover:text-red-300 font-semibold"
+                className="text-sm text-red-500 hover:text-red-600 font-semibold"
                 onClick={() => {
                   if (
                     confirm("Are you sure you want to clear your wishlist?")
@@ -161,7 +161,7 @@ export default function WishlistPage() {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-gray-900 rounded-xl shadow-xl border border-gray-700 overflow-hidden hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 transform hover:-translate-y-1"
+                  className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-200"
                 >
                   <Link href={`/products/${item.product_id}`}>
                     <div className="aspect-square relative group">
@@ -169,7 +169,7 @@ export default function WishlistPage() {
                         src={item.thumbnail_url || "/placeholder-product.svg"}
                         alt={item.product_name}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="object-cover"
                         unoptimized={true}
                         onError={(e) => {
                           e.currentTarget.src = "/placeholder-product.svg";
@@ -180,24 +180,24 @@ export default function WishlistPage() {
 
                   <div className="p-5">
                     <Link href={`/products/${item.product_id}`}>
-                      <h3 className="font-semibold text-white hover:text-orange-400 transition-colors text-lg leading-tight">
+                      <h3 className="font-semibold text-gray-900 hover:text-accent transition-colors text-lg leading-tight">
                         {item.product_name}
                       </h3>
                     </Link>
 
                     <div className="flex items-center mt-2">
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-600">
                         by {item.creator_name}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between mt-4">
                       <div className="flex items-center space-x-2">
-                        <span className="text-xl font-bold text-white">
+                        <span className="text-xl font-bold text-gray-900">
                           {formatPrice(item.min_price)}
                         </span>
                         {item.max_price > item.min_price && (
-                          <span className="text-sm text-gray-400">
+                          <span className="text-sm text-gray-600">
                             - {formatPrice(item.max_price)}
                           </span>
                         )}
@@ -205,10 +205,10 @@ export default function WishlistPage() {
                     </div>
 
                     <div className="mt-3 flex items-center justify-between">
-                      <span className="inline-block bg-orange-500/20 text-orange-400 text-xs px-2 py-1 rounded-full font-medium border border-orange-500/30">
+                      <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-medium">
                         {item.category || "Uncategorized"}
                       </span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-600">
                         {item.variant_count} options
                       </span>
                     </div>
@@ -216,7 +216,7 @@ export default function WishlistPage() {
                     {/* Action Buttons */}
                     <div className="mt-4 flex items-center space-x-2">
                       <button
-                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors"
+                        className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         onClick={() => removeFromWishlist(item.product_id)}
                         title="Remove from wishlist"
                       >
