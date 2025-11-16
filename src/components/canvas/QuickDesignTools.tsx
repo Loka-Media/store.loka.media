@@ -9,6 +9,7 @@ import {
   X,
   FileImage,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { UploadedFile } from "./types";
 
@@ -18,6 +19,7 @@ interface QuickDesignToolsProps {
   onBrowseClipart: () => void;
   onAddEmoji: () => void;
   onSelectExistingFile: (file: UploadedFile) => void;
+  onDeleteFile?: (fileId: number | string) => Promise<void>;
   uploadedFiles: UploadedFile[];
   isUploading?: boolean;
 }
@@ -28,11 +30,13 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   onBrowseClipart,
   onAddEmoji,
   onSelectExistingFile,
+  onDeleteFile,
   uploadedFiles,
   isUploading = false,
 }) => {
   const [showExistingFiles, setShowExistingFiles] = useState(false);
   const [showAllFiles, setShowAllFiles] = useState(false);
+  const [deletingFileId, setDeletingFileId] = useState<number | string | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -40,6 +44,23 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
       await onUploadImage(file);
       // Reset input
       e.target.value = "";
+    }
+  };
+
+  const handleDeleteFile = async (e: React.MouseEvent, fileId: number | string) => {
+    e.stopPropagation(); // Prevent triggering file selection
+    if (!onDeleteFile) return;
+
+    const confirmed = window.confirm("Are you sure you want to delete this file? This action cannot be undone.");
+    if (!confirmed) return;
+
+    try {
+      setDeletingFileId(fileId);
+      await onDeleteFile(fileId);
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+    } finally {
+      setDeletingFileId(null);
     }
   };
 
@@ -151,34 +172,52 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {(showAllFiles ? uploadedFiles : uploadedFiles.slice(0, 12)).map((file) => (
-                  <button
-                    key={file.id}
-                    onClick={() => onSelectExistingFile(file)}
-                    className="group relative bg-gray-100 border-2 border-gray-300 rounded-xl p-2 hover:border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
-                  >
-                    <div className="aspect-square bg-white border-2 border-black rounded-lg mb-2 overflow-hidden flex items-center justify-center">
-                      {file.thumbnail_url ? (
-                        <img
-                          src={file.thumbnail_url}
-                          alt={file.filename}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <ImageIcon className="w-8 h-8 text-gray-400" />
-                      )}
-                    </div>
-                    <p className="text-xs font-bold text-black truncate">
-                      {file.filename}
-                    </p>
-
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/80 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <Sparkles className="w-6 h-6 mx-auto mb-1" />
-                        <p className="text-xs font-bold">Use This</p>
+                  <div key={file.id} className="relative">
+                    <button
+                      onClick={() => onSelectExistingFile(file)}
+                      disabled={deletingFileId === file.id}
+                      className="group relative bg-gray-100 border-2 border-gray-300 rounded-xl p-2 hover:border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div className="aspect-square bg-white border-2 border-black rounded-lg mb-2 overflow-hidden flex items-center justify-center">
+                        {file.thumbnail_url ? (
+                          <img
+                            src={file.thumbnail_url}
+                            alt={file.filename}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <ImageIcon className="w-8 h-8 text-gray-400" />
+                        )}
                       </div>
-                    </div>
-                  </button>
+                      <p className="text-xs font-bold text-black truncate">
+                        {file.filename}
+                      </p>
+
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-black/80 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="text-white text-center">
+                          <Sparkles className="w-6 h-6 mx-auto mb-1" />
+                          <p className="text-xs font-bold">Use This</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Delete button */}
+                    {onDeleteFile && (
+                      <button
+                        onClick={(e) => handleDeleteFile(e, file.id)}
+                        disabled={deletingFileId === file.id}
+                        className="absolute -top-2 -right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Delete file"
+                      >
+                        {deletingFileId === file.id ? (
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
+                        ) : (
+                          <Trash2 className="w-3 h-3" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
 

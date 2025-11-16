@@ -225,6 +225,22 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
     }
   };
 
+  const handleDeleteFile = async (fileId: number | string) => {
+    try {
+      await printfulAPI.deleteFile(fileId);
+      toast.success("File deleted successfully");
+
+      // Refresh the files list
+      if (onRefreshFiles) {
+        await onRefreshFiles();
+      }
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+      toast.error("Failed to delete file. Please try again.");
+      throw error;
+    }
+  };
+
   const updateDesignPosition = (designId: number, updates: any) => {
     setDesignFiles(designFiles.map((df) =>
       df.id === designId
@@ -412,6 +428,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         onBrowseClipart={() => toast("Clipart browser coming soon!")}
         onAddEmoji={() => toast("Emoji picker coming soon!")}
         onSelectExistingFile={(file) => handleAddDesign(file)}
+        onDeleteFile={handleDeleteFile}
         uploadedFiles={uploadedFiles}
         isUploading={isUploading}
       />

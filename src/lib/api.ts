@@ -768,6 +768,17 @@ export const printfulAPI = {
     return response.data;
   },
 
+  // Delete uploaded file
+  deleteFile: async (fileId: number | string) => {
+    try {
+      const response = await api.delete(`/api/printful/files/${fileId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+      throw error;
+    }
+  },
+
   // Store mockups permanently to DigitalOcean
   storeMockupsPermanently: async (
     mockupUrls: any[],
