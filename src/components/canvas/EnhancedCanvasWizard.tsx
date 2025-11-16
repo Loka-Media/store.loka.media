@@ -474,6 +474,36 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           <p className="text-sm font-bold text-black">{mockupStatus}</p>
         </div>
       )}
+
+      {mockupUrls && mockupUrls.length > 0 && (
+        <div className="bg-gradient-to-br from-green-100 to-teal-100 border-4 border-black rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-green-400 border-2 border-black rounded-full p-2">
+              <Check className="w-6 h-6 text-black" />
+            </div>
+            <div>
+              <h3 className="text-xl font-extrabold text-black">Preview Generated!</h3>
+              <p className="text-sm font-bold text-gray-700">What would you like to do next?</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              onClick={() => setCurrentStep(2)}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-400 to-blue-400 text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+            >
+              <Palette className="w-5 h-5" />
+              Add More Designs
+            </button>
+            <button
+              onClick={() => setCurrentStep(4)}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-400 text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+            >
+              <Eye className="w-5 h-5" />
+              Review & Continue
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -486,6 +516,32 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         <p className="text-gray-700 font-bold">
           Check everything looks good before continuing
         </p>
+      </div>
+
+      {/* Design Summary */}
+      <div className="bg-gradient-to-br from-yellow-100 to-pink-100 border-4 border-black rounded-2xl p-6">
+        <h3 className="text-xl font-extrabold text-black mb-4">
+          Your Designs ({designFiles.length})
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {Object.entries(designsByPlacement).map(([placement, count]) => (
+            <div key={placement} className="bg-white border-2 border-black rounded-xl p-3 text-center">
+              <p className="font-extrabold text-black text-sm mb-1">
+                {printFiles?.available_placements?.[placement] || placement}
+              </p>
+              <p className="text-xs font-bold text-gray-700">
+                {count} design{count !== 1 ? 's' : ''}
+              </p>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => setCurrentStep(2)}
+          className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-400 to-blue-400 text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+        >
+          <Palette className="w-5 h-5" />
+          Add More Designs to Other Placements
+        </button>
       </div>
 
       {mockupUrls && mockupUrls.length > 0 ? (
@@ -509,12 +565,23 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
               </div>
             ))}
           </div>
+          {mockupUrls.length > 4 && (
+            <p className="text-sm font-bold text-gray-700 mt-4 text-center">
+              + {mockupUrls.length - 4} more preview{mockupUrls.length - 4 !== 1 ? 's' : ''}
+            </p>
+          )}
         </div>
       ) : (
         <div className="bg-yellow-100 border-4 border-yellow-600 rounded-2xl p-6 text-center">
           <p className="font-bold text-black">
             ⚠️ Please generate a preview in the previous step
           </p>
+          <button
+            onClick={() => setCurrentStep(3)}
+            className="mt-4 px-6 py-3 bg-orange-400 text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+          >
+            Go Back to Generate Preview
+          </button>
         </div>
       )}
 
