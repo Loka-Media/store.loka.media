@@ -13,14 +13,19 @@ import {
   Palette,
   Ruler,
   HelpCircle,
+  Zap,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { UnifiedDesignEditorProps, UploadedFile } from "./types";
 import { printfulAPI } from "@/lib/api";
+import { aspectRatioValidation } from "@/utils/aspectRatioValidation";
 
 // Import components
-import { useDesignEditorState, usePrintFilesLoader, useAutoSelectVariants } from "./hooks";
-import { getActivePrintFile, calculateAspectRatioAwareDimensions } from "./utils";
+import { useDesignEditorState, usePrintFilesLoader } from "./hooks";
+import {
+  getActivePrintFile,
+  calculateAspectRatioAwareDimensions,
+} from "./utils";
 import VisualPlacementSelector from "./VisualPlacementSelector";
 import QuickDesignTools from "./QuickDesignTools";
 import DesignCanvasTab from "./DesignCanvasTab";
@@ -54,6 +59,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
   const [showHelp, setShowHelp] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [aspectRatioIssues, setAspectRatioIssues] = useState<any[]>([]);
+  const [showAllPreviews, setShowAllPreviews] = useState(false);
 
   // Use existing hooks
   const stateHook = useDesignEditorState(selectedProduct);
@@ -74,10 +80,15 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 
   // Auto-select variants when colors/sizes change
   useEffect(() => {
-    if (selectedColors.length > 0 && selectedSizes.length > 0 && selectedProduct?.variants) {
+    if (
+      selectedColors.length > 0 &&
+      selectedSizes.length > 0 &&
+      selectedProduct?.variants
+    ) {
       const variantIds = selectedProduct.variants
-        .filter((v: any) =>
-          selectedColors.includes(v.color) && selectedSizes.includes(v.size)
+        .filter(
+          (v: any) =>
+            selectedColors.includes(v.color) && selectedSizes.includes(v.size)
         )
         .map((v: any) => v.id);
       setSelectedVariants(variantIds);
@@ -117,7 +128,8 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       title: "Position & Preview",
       description: "Perfect placement",
       icon: Ruler,
-      completed: designFiles.length > 0 && !!mockupUrls && mockupUrls.length > 0,
+      completed:
+        designFiles.length > 0 && !!mockupUrls && mockupUrls.length > 0,
     },
     {
       id: "review",
@@ -169,7 +181,11 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       return;
     }
 
-    const activePrintFile = getActivePrintFile(printFiles, selectedVariants, targetPlacement);
+    const activePrintFile = getActivePrintFile(
+      printFiles,
+      selectedVariants,
+      targetPlacement
+    );
     if (!activePrintFile) {
       toast.error("No print file available for this placement");
       return;
@@ -180,12 +196,14 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       setSelectedPlacements([...selectedPlacements, targetPlacement]);
     }
 
-    const existingDesignsOnPlacement = designFiles.filter(df => df.placement === targetPlacement);
+    const existingDesignsOnPlacement = designFiles.filter(
+      (df) => df.placement === targetPlacement
+    );
     const offsetMultiplier = existingDesignsOnPlacement.length;
     const baseOffset = 20;
 
     try {
-      const imageUrl = file.file_url || file.thumbnail_url || '';
+      const imageUrl = file.file_url || file.thumbnail_url || "";
       const dimensionResult = await calculateAspectRatioAwareDimensions(
         imageUrl,
         activePrintFile,
@@ -193,7 +211,8 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         true
       );
 
-      const { width: aspectAwareWidth, height: aspectAwareHeight } = dimensionResult;
+      const { width: aspectAwareWidth, height: aspectAwareHeight } =
+        dimensionResult;
 
       const baseTop = (activePrintFile.height - aspectAwareHeight) / 2;
       const baseLeft = (activePrintFile.width - aspectAwareWidth) / 2;
@@ -209,8 +228,8 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           area_height: activePrintFile.height,
           width: aspectAwareWidth,
           height: aspectAwareHeight,
-          top: Math.max(0, baseTop + (offsetMultiplier * baseOffset)),
-          left: Math.max(0, baseLeft + (offsetMultiplier * baseOffset)),
+          top: Math.max(0, baseTop + offsetMultiplier * baseOffset),
+          left: Math.max(0, baseLeft + offsetMultiplier * baseOffset),
           limit_to_print_area: true,
         },
       };
@@ -224,23 +243,111 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
     }
   };
 
-  const updateDesignPosition = (designId: number, updates: any) => {
-    setDesignFiles(designFiles.map((df) =>
-      df.id === designId
-        ? { ...df, position: { ...df.position, ...updates } }
-        : df
-    ));
+  const handleDeleteFile = async (fileId: number | string) => {
+    try {
+      await printfulAPI.deleteFile(fileId);
+      toast.success("File deleted successfully");
 
-    const updatedDesign = designFiles.find((df) => df.id === designId);
-    if (updatedDesign) {
-      setSelectedDesignFile({ ...updatedDesign, position: { ...updatedDesign.position, ...updates } });
+      // Refresh the files list
+      if (onRefreshFiles) {
+        await onRefreshFiles();
+      }
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+      toast.error("Failed to delete file. Please try again.");
+      throw error;
     }
   };
 
-  const designsByPlacement = designFiles.reduce<Record<string, number>>((acc, design) => {
-    acc[design.placement] = (acc[design.placement] || 0) + 1;
-    return acc;
-  }, {});
+  const autoFixAspectRatios = async () => {
+    const criticalIssues = aspectRatioIssues.filter((issue) =>
+      issue.message.includes("🚫 CRITICAL")
+    );
+
+    if (criticalIssues.length === 0) {
+      toast("All designs already have correct aspect ratios!", { icon: "✅" });
+      return;
+    }
+
+    const loadingToast = toast.loading(
+      `Fixing ${criticalIssues.length} aspect ratio issue${
+        criticalIssues.length > 1 ? "s" : ""
+      }...`
+    );
+
+    try {
+      let fixedCount = 0;
+
+      for (const issue of criticalIssues) {
+        const design = designFiles.find((d) => d.id === issue.designId);
+        if (!design) continue;
+
+        // Get corrected dimensions from validation
+        const result = await aspectRatioValidation(
+          design.url,
+          design.position.width,
+          design.position.height,
+          0.5
+        );
+
+        if (!result.isValid && result.correctedDimensions) {
+          // Update the design with corrected dimensions
+          updateDesignPosition(design.id, {
+            width: result.correctedDimensions.width,
+            height: result.correctedDimensions.height,
+          });
+          fixedCount++;
+        }
+      }
+
+      toast.dismiss(loadingToast);
+
+      if (fixedCount > 0) {
+        toast.success(
+          `✅ Fixed ${fixedCount} aspect ratio issue${
+            fixedCount > 1 ? "s" : ""
+          }! All designs are now Printful compatible.`,
+          {
+            duration: 4000,
+          }
+        );
+      } else {
+        toast("No issues could be fixed automatically.", { icon: "⚠️" });
+      }
+    } catch (error) {
+      console.error("Failed to auto-fix aspect ratios:", error);
+      toast.dismiss(loadingToast);
+      toast.error(
+        "Failed to fix aspect ratios. Please try manually adjusting dimensions."
+      );
+    }
+  };
+
+  const updateDesignPosition = (designId: number, updates: any) => {
+    setDesignFiles(
+      designFiles.map((df) =>
+        df.id === designId
+          ? { ...df, position: { ...df.position, ...updates } }
+          : df
+      )
+    );
+
+    const updatedDesign = designFiles.find((df) => df.id === designId);
+    if (updatedDesign) {
+      setSelectedDesignFile({
+        ...updatedDesign,
+        position: { ...updatedDesign.position, ...updates },
+      });
+    }
+  };
+
+  const designsByPlacement = designFiles.reduce<Record<string, number>>(
+    (acc, design) => {
+      acc[design.placement] = (acc[design.placement] || 0) + 1;
+      return acc;
+    },
+    {}
+  );
 
   const canGoNext = () => {
     switch (currentStep) {
@@ -306,7 +413,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
                 key={color.name}
                 onClick={() => {
                   if (isSelected) {
-                    setSelectedColors(selectedColors.filter((c) => c !== color.name));
+                    setSelectedColors(
+                      selectedColors.filter((c) => c !== color.name)
+                    );
                   } else {
                     setSelectedColors([...selectedColors, color.name]);
                   }
@@ -375,8 +484,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         <div className="bg-green-100 border-4 border-green-600 rounded-2xl p-6">
           <h3 className="font-extrabold text-black mb-2">Your Selection</h3>
           <p className="text-black font-bold">
-            {selectedColors.length} color{selectedColors.length !== 1 ? "s" : ""} ×{" "}
-            {selectedSizes.length} size{selectedSizes.length !== 1 ? "s" : ""} ={" "}
+            {selectedColors.length} color
+            {selectedColors.length !== 1 ? "s" : ""} × {selectedSizes.length}{" "}
+            size{selectedSizes.length !== 1 ? "s" : ""} ={" "}
             <span className="text-2xl font-extrabold">
               {selectedColors.length * selectedSizes.length}
             </span>{" "}
@@ -390,7 +500,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
   const renderDesignStep = () => (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-extrabold text-black mb-2">Add Your Design</h2>
+        <h2 className="text-3xl font-extrabold text-black mb-2">
+          Add Your Design
+        </h2>
         <p className="text-gray-700 font-bold">
           Choose a placement and add your design
         </p>
@@ -411,6 +523,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         onBrowseClipart={() => toast("Clipart browser coming soon!")}
         onAddEmoji={() => toast("Emoji picker coming soon!")}
         onSelectExistingFile={(file) => handleAddDesign(file)}
+        onDeleteFile={handleDeleteFile}
         uploadedFiles={uploadedFiles}
         isUploading={isUploading}
       />
@@ -438,7 +551,11 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           setActivePlacement={setActivePlacement}
           selectedDesignFile={selectedDesignFile}
           setSelectedDesignFile={setSelectedDesignFile}
-          activePrintFile={getActivePrintFile(printFiles, selectedVariants, activePlacement)}
+          activePrintFile={getActivePrintFile(
+            printFiles,
+            selectedVariants,
+            activePlacement
+          )}
           updateDesignPosition={updateDesignPosition}
           onAspectRatioIssues={setAspectRatioIssues}
           aspectRatioIssues={aspectRatioIssues}
@@ -482,8 +599,12 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
               <Check className="w-6 h-6 text-black" />
             </div>
             <div>
-              <h3 className="text-xl font-extrabold text-black">Preview Generated!</h3>
-              <p className="text-sm font-bold text-gray-700">What would you like to do next?</p>
+              <h3 className="text-xl font-extrabold text-black">
+                Preview Generated!
+              </h3>
+              <p className="text-sm font-bold text-gray-700">
+                What would you like to do next?
+              </p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -525,12 +646,15 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {Object.entries(designsByPlacement).map(([placement, count]) => (
-            <div key={placement} className="bg-white border-2 border-black rounded-xl p-3 text-center">
+            <div
+              key={placement}
+              className="bg-white border-2 border-black rounded-xl p-3 text-center"
+            >
               <p className="font-extrabold text-black text-sm mb-1">
                 {printFiles?.available_placements?.[placement] || placement}
               </p>
               <p className="text-xs font-bold text-gray-700">
-                {count} design{count !== 1 ? 's' : ''}
+                {count} design{count !== 1 ? "s" : ""}
               </p>
             </div>
           ))}
@@ -550,25 +674,39 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             Product Previews ({mockupUrls.length})
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {mockupUrls.slice(0, 4).map((mockup: any, index: number) => (
-              <div key={index} className="border-2 border-black rounded-xl overflow-hidden">
-                <img
-                  src={mockup.url}
-                  alt={`Preview ${index + 1}`}
-                  className="w-full h-auto"
-                />
-                {mockup.title && (
-                  <div className="bg-gray-100 border-t-2 border-black p-2">
-                    <p className="text-xs font-bold text-black">{mockup.title}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+            {(showAllPreviews ? mockupUrls : mockupUrls.slice(0, 4)).map(
+              (mockup: any, index: number) => (
+                <div
+                  key={index}
+                  className="border-2 border-black rounded-xl overflow-hidden"
+                >
+                  <img
+                    src={mockup.url}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-auto"
+                  />
+                  {mockup.title && (
+                    <div className="bg-gray-100 border-t-2 border-black p-2">
+                      <p className="text-xs font-bold text-black">
+                        {mockup.title}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )
+            )}
           </div>
           {mockupUrls.length > 4 && (
-            <p className="text-sm font-bold text-gray-700 mt-4 text-center">
-              + {mockupUrls.length - 4} more preview{mockupUrls.length - 4 !== 1 ? 's' : ''}
-            </p>
+            <button
+              onClick={() => setShowAllPreviews(!showAllPreviews)}
+              className="text-sm font-bold text-black mt-4 mx-auto block px-6 py-2 bg-gradient-to-r from-yellow-200 to-pink-200 border-2 border-black rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+            >
+              {showAllPreviews
+                ? "Show Less"
+                : `+ ${mockupUrls.length - 4} more preview${
+                    mockupUrls.length - 4 !== 1 ? "s" : ""
+                  }`}
+            </button>
           )}
         </div>
       ) : (
@@ -589,8 +727,14 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         <h3 className="font-extrabold text-black mb-3">Summary</h3>
         <ul className="space-y-2 text-black font-bold">
           <li>✅ {selectedVariants.length} variants selected</li>
-          <li>✅ {designFiles.length} design{designFiles.length !== 1 ? "s" : ""} added</li>
-          <li>✅ {mockupUrls?.length || 0} preview{mockupUrls?.length !== 1 ? "s" : ""} generated</li>
+          <li>
+            ✅ {designFiles.length} design{designFiles.length !== 1 ? "s" : ""}{" "}
+            added
+          </li>
+          <li>
+            ✅ {mockupUrls?.length || 0} preview
+            {mockupUrls?.length !== 1 ? "s" : ""} generated
+          </li>
         </ul>
       </div>
     </div>
@@ -605,7 +749,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             <h1 className="text-2xl font-extrabold text-black">
               {selectedProduct?.title || selectedProduct?.name}
             </h1>
-            <p className="text-gray-600 font-bold">Create your custom product</p>
+            <p className="text-gray-600 font-bold">
+              Create your custom product
+            </p>
           </div>
 
           {/* Progress Bar */}

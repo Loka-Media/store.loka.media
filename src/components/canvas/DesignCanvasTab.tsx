@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { DesignFile, PrintFile, AspectRatioIssue } from "./types";
 import { getCanvasDimensions } from "./utils";
 import { aspectRatioValidation } from "@/utils/aspectRatioValidation";
+import AspectRatioFixButton from "./AspectRatioFixButton";
 
 interface DesignCanvasTabProps {
   designFiles: DesignFile[];
@@ -145,18 +146,19 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   return (
     <div className="flex-1 bg-gray-900 flex items-center justify-center p-6">
       <div className="w-full max-w-4xl">
-        {/* Design Canvas Area */}
-        <div
-          className="bg-white rounded-xl border-2 border-gray-300 relative shadow-2xl overflow-hidden"
-          style={{
-            width: `${canvasDims.width}px`,
-            height: `${canvasDims.height}px`,
-            margin: "0 auto",
-            background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
-            boxShadow:
-              "0 20px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6)",
-          }}
-        >
+        {/* Design Canvas Area - Centered with Button on Right */}
+        <div className="flex justify-center items-start gap-4">
+          {/* Canvas Container */}
+          <div
+            className="bg-white rounded-xl border-2 border-gray-300 relative shadow-2xl overflow-hidden flex-shrink-0"
+            style={{
+              width: `${canvasDims.width}px`,
+              height: `${canvasDims.height}px`,
+              background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
+              boxShadow:
+                "0 20px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6)",
+            }}
+          >
           {designFiles.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center text-gray-500">
@@ -258,6 +260,67 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                   </Rnd>
                 );
               })}
+          </div>
+          </div>
+
+          {/* Auto-Fix Aspect Ratio Button */}
+          <div className="flex items-start pt-2">
+            <AspectRatioFixButton
+              designFiles={designFiles}
+              activePlacement={activePlacement}
+              activePrintFile={activePrintFile}
+              updateDesignPosition={updateDesignPosition}
+              onFixComplete={() => {
+                // Re-validate after fixing
+                const designsForPlacement = designFiles.filter(
+                  (design) => design.placement === activePlacement && design.url
+                );
+                if (designsForPlacement.length > 0) {
+                  setTimeout(() => {
+                    // Force re-validation
+                    const validationPromises = designsForPlacement.map((design) =>
+                      aspectRatioValidation(
+                        design.url,
+                        design.position.width,
+                        design.position.height,
+                        0.5
+                      )
+                    );
+                    Promise.all(validationPromises).then((results) => {
+                      const allResults = results
+                        .map((result, index) => {
+                          if (result.percentDifference > 0.1) {
+                            if (!result.isValid) {
+                              return {
+                                designId: designsForPlacement[index].id,
+                                message: `🚫 CRITICAL: Aspect ratio off by ${result.percentDifference.toFixed(
+                                  2
+                                )}%. Must fix to: ${result.correctedDimensions?.width.toFixed(
+                                  0
+                                )}x${result.correctedDimensions?.height.toFixed(0)}px for Printful compliance`,
+                              };
+                            } else {
+                              return {
+                                designId: designsForPlacement[index].id,
+                                message: `✅ GOOD: Aspect ratio variance ${result.percentDifference.toFixed(
+                                  2
+                                )}% (within tolerance). Printful compatible!`,
+                              };
+                            }
+                          }
+                          return null;
+                        })
+                        .filter((r) => r !== null);
+                      const criticalIssues = allResults.filter(
+                        (issue) => issue.message.includes("🚫 CRITICAL")
+                      );
+                      onAspectRatioIssues(criticalIssues);
+                      setAllValidationResults(allResults);
+                    });
+                  }, 100);
+                }
+              }}
+            />
           </div>
         </div>
 
