@@ -649,7 +649,7 @@ function CanvasContent() {
 
 
   // Handle going live to marketplace with product details
-  const handleGoLiveToMarketplace = async () => {
+  const handleGoLiveToMarketplace = async (updatedProductForm?: typeof productForm) => {
     if (!mockupUrls || mockupUrls.length === 0) {
       toast.error("No mockups available. Please generate mockups first.");
       return;
@@ -662,6 +662,15 @@ function CanvasContent() {
 
     try {
       setCreating(true);
+
+      // Use the passed form data if available, otherwise fall back to state
+      const formDataToUse = updatedProductForm || productForm;
+
+      console.log('📝 Product form data being used for publishing:', {
+        name: formDataToUse.name,
+        description: formDataToUse.description,
+        source: updatedProductForm ? 'from form submission (fresh)' : 'from state (may be stale)'
+      });
 
       // FINAL VALIDATION: Ensure all selected variants are still available before publishing
       console.log("🔍 Performing final variant availability check before publishing...");
@@ -703,10 +712,10 @@ function CanvasContent() {
 
       const productData = {
         id: selectedProduct?.id,
-        name: productForm.name.trim(),
-        description: productForm.description.trim(),
-        category: productForm.category,
-        markupPercentage: parseFloat(productForm.markupPercentage),
+        name: formDataToUse.name.trim(),
+        description: formDataToUse.description.trim(),
+        category: formDataToUse.category,
+        markupPercentage: parseFloat(formDataToUse.markupPercentage),
         variants: selectedVariants,
         base_product: selectedProduct
       };
@@ -899,7 +908,15 @@ function CanvasContent() {
                         console.log(`💾 Saved product form for product ${productId}`);
                       }
                     }}
-                    onNext={handleGoLiveToMarketplace}
+                    onNext={(formData) => {
+                      // Use the form data passed from the form component
+                      // This ensures we use the user's latest edits
+                      if (formData) {
+                        handleGoLiveToMarketplace(formData);
+                      } else {
+                        handleGoLiveToMarketplace();
+                      }
+                    }}
                     onBack={handlePrevStep}
                     isLoading={creating}
                     selectedProduct={selectedProduct}
