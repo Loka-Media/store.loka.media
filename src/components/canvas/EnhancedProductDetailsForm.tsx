@@ -34,7 +34,13 @@ interface ProductDetailsFormProps {
     category: string;
     tags?: string[];
   }) => void;
-  onNext: () => void;
+  onNext: (data?: {
+    name: string;
+    description: string;
+    markupPercentage: string;
+    category: string;
+    tags?: string[];
+  }) => void;
   onBack?: () => void;
   isLoading?: boolean;
   selectedProduct?: any;
@@ -113,8 +119,19 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
       tags: formData.tags
     };
 
+    // Pass the product data to onSave for state management
     onSave(productData);
-    onNext();
+
+    // Also pass the data to onNext to avoid state timing issues
+    const formDataForNext = {
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      markupPercentage: formData.markupPercentage,
+      category: formData.category,
+      tags: formData.tags
+    };
+    onNext(formDataForNext);
+
     toast.success('Product details saved! Ready to go live! 🎉');
   };
 
