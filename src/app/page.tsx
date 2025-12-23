@@ -1,7 +1,5 @@
 "use client";
 
-import { BackgroundPattern } from "@/components/home/BackgroundPattern";
-import { Footer } from "@/components/home/Footer";
 import { HeroSection } from "@/components/home/HeaderSection";
 import { QualityProductsSection } from "@/components/home/QualityProductsSection";
 import { MakeAndSellSection } from "@/components/home/MakeAndSellSection";
