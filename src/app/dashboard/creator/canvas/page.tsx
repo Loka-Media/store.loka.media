@@ -912,7 +912,7 @@ function CanvasContent() {
                       // Use the form data passed from the form component
                       // This ensures we use the user's latest edits
                       if (formData) {
-                        handleGoLiveToMarketplace(formData);
+                        handleGoLiveToMarketplace(formData as ProductForm);
                       } else {
                         handleGoLiveToMarketplace();
                       }
