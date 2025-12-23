@@ -15,7 +15,7 @@ export function SearchBar({
 }: SearchBarProps) {
   return (
     <div className="mt-8 flex justify-center">
-      <div className="bg-gray-800 rounded-full p-2 flex items-center space-x-2 shadow-lg w-full max-w-2xl border border-gray-700">
+      <div className="bg-white/10 rounded-full p-2 flex items-center space-x-2 shadow-lg w-full max-w-2xl border border-white/20">
         <Search className="w-5 h-5 text-gray-500 ml-3 flex-shrink-0" />
         <input
           type="text"

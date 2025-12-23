@@ -22,20 +22,20 @@ export function FeaturedCreators({
   const CreatorPlaceholder = ({ index }: { index: number }) => (
     <div
       key={index}
-      className="text-center p-4 bg-gray-800/50 rounded-lg border border-gray-700/50 animate-pulse"
+      className="text-center p-4 bg-white/5 rounded-lg border border-white/10 animate-pulse"
     >
-      <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gray-700"></div>
-      <div className="h-4 bg-gray-700 rounded w-3/4 mx-auto mb-2"></div>
-      <div className="h-3 bg-gray-700 rounded w-1/2 mx-auto"></div>
+      <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-white/10"></div>
+      <div className="h-4 bg-white/10 rounded w-3/4 mx-auto mb-2"></div>
+      <div className="h-3 bg-white/10 rounded w-1/2 mx-auto"></div>
       <div className="flex items-center justify-center mt-1">
-        <Star className="w-3 h-3 text-gray-600" />
-        <span className="text-xs text-gray-600 ml-1">-.-</span>
+        <Star className="w-3 h-3 text-white/20" />
+        <span className="text-xs text-white/20 ml-1">-.-</span>
       </div>
     </div>
   );
 
   return (
-    <div className="bg-gray-900 rounded-xl shadow-lg p-6 mb-12 border border-gray-800">
+    <div className="bg-black rounded-xl shadow-lg p-6 mb-12 border border-white/10">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-white">Featured Creators</h2>
@@ -56,7 +56,7 @@ export function FeaturedCreators({
           ? creators.slice(0, 5).map((creator) => (
               <div
                 key={creator.id}
-                className="text-center p-4 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer border border-gray-700/50"
+                className="text-center p-4 bg-white/5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer border border-white/10"
                 onClick={() => onCreatorSelect(creator.name)}
               >
                 <div className="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center border-2 border-orange-400">

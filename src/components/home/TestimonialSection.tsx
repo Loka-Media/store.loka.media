@@ -1,160 +1,256 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { GradientCardLayout } from "@/components/ui/GradientCardLayout";
 
 export function TestimonialSection() {
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      cardRef.current.style.setProperty("--x", `${x}px`);
-      cardRef.current.style.setProperty("--y", `${y}px`);
-    }
-  };
 
   const testimonials = [
     {
       quote: "Loka is a gamechanger! LFG 🔥",
       author: "Joty Kay",
-      avatar:
-        "https://live.staticflickr.com/65535/52955514230_8e34ee16c7_z.jpg",
+      role: "Creator Partner",
+      avatar: "https://live.staticflickr.com/65535/52955514230_8e34ee16c7_z.jpg",
     },
     {
-      quote: "Monetization Made Easy 💰",
+      quote: "6.5x ROI on merchandise influencer campaign.",
       author: "Rupan Bal",
-      avatar:
-        "https://thepersonage.com/wp-content/uploads/2020/07/Rupan-Bal-Images.jpg",
+      role: "Co-Founder",
+      avatar: "https://thepersonage.com/wp-content/uploads/2020/07/Rupan-Bal-Images.jpg",
     },
     {
       quote: "The platform for ALL platforms. Love it! ❤️",
       author: "Sejal Puri",
-      avatar:
-        "https://i0.wp.com/tellyflight.com/wp-content/uploads/2023/07/345687233_702675861629777_76830047465931681_n.jpg",
+      role: "Creator Partner",
+      avatar: "https://i0.wp.com/tellyflight.com/wp-content/uploads/2023/07/345687233_702675861629777_76830047465931681_n.jpg",
+    },
+    {
+      quote: "Amazing growth in just 3 months!",
+      author: "Alex Turner",
+      role: "Content Creator",
+      avatar: "https://live.staticflickr.com/65535/52955514230_8e34ee16c7_z.jpg",
+    },
+    {
+      quote: "Best platform for creators out there",
+      author: "Maria Singh",
+      role: "Influencer",
+      avatar: "https://thepersonage.com/wp-content/uploads/2020/07/Rupan-Bal-Images.jpg",
     },
   ];
 
   useEffect(() => {
     if (isAutoPlaying) {
       const interval = setInterval(() => {
-        setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-      }, 6000);
+        setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+      }, 5000);
       return () => clearInterval(interval);
     }
   }, [isAutoPlaying, testimonials.length]);
 
   const nextTestimonial = () => {
     setIsAutoPlaying(false);
-    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const prevTestimonial = () => {
     setIsAutoPlaying(false);
-    setCurrentTestimonial(
-      (prev) => (prev - 1 + testimonials.length) % testimonials.length
-    );
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  const getCardIndex = (offset: number) => {
+    return (currentIndex + offset + testimonials.length) % testimonials.length;
   };
 
   return (
-    <section className="relative py-12 sm:py-16 md:py-20 lg:py-32 bg-gradient-to-br from-pink-100 via-yellow-50 to-pink-100 overflow-hidden border-y border-black">
+    <section className="relative py-16 sm:py-20 md:py-32 bg-black overflow-hidden border-y border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section header */}
-        <div className="text-center mb-12 sm:mb-16 md:mb-24">
-          <div className="inline-block mb-6 sm:mb-8">
-            <span className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-black px-4 py-2 rounded-full border border-black bg-yellow-200">
-              Testimonials
-            </span>
+        {/* Section header with navigation buttons */}
+        <div className="flex items-start justify-between mb-16 sm:mb-20 gap-6">
+          {/* SVG Title */}
+          <div className="w-full max-w-3xl flex-1">
+            <svg width="1049" height="45" viewBox="0 0 1049 45" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
+              <path d="M9.59994 43.5195H-5.84126e-05V0.63953H23.6799C34.2399 0.63953 40.2559 5.31153 40.2559 13.5035C40.2559 20.4795 36.2239 24.6395 28.1599 25.4075V25.9195C31.9999 26.9435 33.4719 28.9915 35.0719 31.9995L41.2799 43.5195H30.1439L24.2559 32.3835C22.5279 29.0555 20.9279 27.9675 15.9359 27.9675H9.59994V43.5195ZM9.59994 9.27953V20.7355H23.6159C28.1599 20.7355 30.2079 19.4555 30.2079 14.9755C30.2079 10.7515 28.1599 9.27953 23.6159 9.27953H9.59994ZM62.6164 44.1595C51.9284 44.1595 44.6324 38.9115 44.6324 27.5195C44.6324 17.2795 51.8644 10.8155 62.4244 10.8155C72.9204 10.8155 79.8964 16.3195 79.8964 26.3675C79.8964 27.5195 79.7684 28.3515 79.6404 29.4395H53.5284C53.7844 34.3675 56.0884 36.4795 62.2964 36.4795C67.9924 36.4795 69.9764 35.0075 69.9764 32.2555V31.6155H79.5764V32.3195C79.5764 39.2955 72.7924 44.1595 62.6164 44.1595ZM62.2324 18.3035C56.5364 18.3035 54.1044 20.2235 53.6564 24.3835H70.6804C70.4244 20.1595 67.8644 18.3035 62.2324 18.3035ZM95.1034 44.1595C88.1914 44.1595 84.0314 40.9595 84.0314 35.5835C84.0314 30.8475 87.5514 27.9035 94.3994 27.1995L108.159 25.7915V24.5755C108.159 20.4155 106.303 19.2635 101.183 19.2635C96.3194 19.2635 94.3354 20.5435 94.3354 24.1915V24.4475H84.6714V24.2555C84.6714 16.3195 91.3274 10.8155 101.887 10.8155C112.575 10.8155 117.631 16.3195 117.631 24.7035V43.5195H108.671V36.1595H108.159C106.687 41.1515 102.207 44.1595 95.1034 44.1595ZM93.6954 34.9435C93.6954 36.6715 95.0394 37.3755 97.8554 37.3755C104.383 37.3755 107.903 35.8395 108.159 31.2955L97.0234 32.5755C94.7194 32.7675 93.6954 33.4075 93.6954 34.9435ZM133.377 43.5195H123.777V0.63953H133.377V43.5195ZM160.437 43.5195H150.837V0.63953H174.517C185.077 0.63953 191.093 5.31153 191.093 13.5035C191.093 20.4795 187.061 24.6395 178.997 25.4075V25.9195C182.837 26.9435 184.309 28.9915 185.909 31.9995L192.117 43.5195H180.981L175.093 32.3835C173.365 29.0555 171.765 27.9675 166.773 27.9675H160.437V43.5195ZM160.437 9.27953V20.7355H174.453C178.997 20.7355 181.045 19.4555 181.045 14.9755C181.045 10.7515 178.997 9.27953 174.453 9.27953H160.437ZM213.454 44.1595C202.766 44.1595 195.47 38.9115 195.47 27.5195C195.47 17.2795 202.702 10.8155 213.262 10.8155C223.758 10.8155 230.734 16.3195 230.734 26.3675C230.734 27.5195 230.606 28.3515 230.478 29.4395H204.366C204.622 34.3675 206.926 36.4795 213.134 36.4795C218.83 36.4795 220.814 35.0075 220.814 32.2555V31.6155H230.414V32.3195C230.414 39.2955 223.63 44.1595 213.454 44.1595ZM213.07 18.3035C207.374 18.3035 204.942 20.2235 204.494 24.3835H221.518C221.262 20.1595 218.702 18.3035 213.07 18.3035ZM252.277 44.1595C241.461 44.1595 235.509 39.9355 235.509 32.5115V32.3195H245.109V32.8955C245.109 35.7755 246.901 36.5435 252.341 36.5435C257.461 36.5435 258.677 35.7115 258.677 33.7915C258.677 31.9995 257.717 31.4875 253.941 30.9755L244.917 29.8875C238.517 29.1835 234.933 26.3035 234.933 20.9275C234.933 15.2955 239.733 10.8155 250.741 10.8155C261.237 10.8155 267.189 14.7835 267.189 22.5915V22.7835H257.589V22.3995C257.589 19.7755 256.309 18.4315 250.421 18.4315C245.621 18.4315 244.405 19.2635 244.405 21.3115C244.405 22.9755 245.301 23.6795 249.525 24.1915L256.373 25.0235C264.949 25.9835 268.149 28.8635 268.149 34.1755C268.149 40.1915 262.197 44.1595 252.277 44.1595ZM286.55 44.1595C277.526 44.1595 273.238 38.5915 273.238 31.4235V11.4555H282.838V28.2235C282.838 33.4075 285.014 35.5835 291.094 35.5835C297.366 35.5835 299.606 33.1515 299.606 27.7115V11.4555H309.206V43.5195H300.246V33.7275H299.734C298.902 39.1035 294.998 44.1595 286.55 44.1595ZM324.995 43.5195H315.395V0.63953H324.995V43.5195ZM353.892 43.5195H345.956C338.468 43.5195 333.924 39.9995 333.924 31.9355V19.3915H328.868V11.4555H333.924V5.24753H343.524V11.4555H353.892V19.3915H343.524V30.8475C343.524 34.0475 344.74 34.8795 348.132 34.8795H353.892V43.5195ZM374.959 44.1595C364.143 44.1595 358.191 39.9355 358.191 32.5115V32.3195H367.791V32.8955C367.791 35.7755 369.583 36.5435 375.023 36.5435C380.143 36.5435 381.359 35.7115 381.359 33.7915C381.359 31.9995 380.399 31.4875 376.623 30.9755L367.599 29.8875C361.199 29.1835 357.615 26.3035 357.615 20.9275C357.615 15.2955 362.415 10.8155 373.423 10.8155C383.919 10.8155 389.871 14.7835 389.871 22.5915V22.7835H380.271V22.3995C380.271 19.7755 378.991 18.4315 373.103 18.4315C368.303 18.4315 367.087 19.2635 367.087 21.3115C367.087 22.9755 367.983 23.6795 372.207 24.1915L379.055 25.0235C387.631 25.9835 390.831 28.8635 390.831 34.1755C390.831 40.1915 384.879 44.1595 374.959 44.1595ZM416.74 43.5195H407.14V0.63953H443.428V9.27953H416.74V18.9435H442.468V27.5195H416.74V43.5195ZM458.395 43.5195H448.795V11.4555H457.691V19.9675H458.267C459.163 14.7835 462.555 10.8155 469.019 10.8155C476.187 10.8155 479.131 15.7435 479.131 22.0155V27.3275H469.531V23.9995C469.531 20.4795 468.123 18.9435 464.219 18.9435C459.931 18.9435 458.395 20.9275 458.395 24.9595V43.5195ZM500.975 44.1595C490.031 44.1595 482.671 37.6315 482.671 27.5195C482.671 17.2795 490.031 10.8155 500.975 10.8155C511.919 10.8155 519.279 17.2795 519.279 27.5195C519.279 37.6315 511.919 44.1595 500.975 44.1595ZM500.975 35.6475C507.439 35.6475 509.743 33.1515 509.743 27.5195C509.743 21.8875 507.439 19.2635 500.975 19.2635C494.447 19.2635 492.207 21.8875 492.207 27.5195C492.207 33.1515 494.447 35.6475 500.975 35.6475ZM534.08 43.5195H524.48V11.4555H533.376V21.1835H533.888C534.656 15.8075 537.856 10.8155 545.92 10.8155C553.344 10.8155 557.12 15.3595 557.824 21.3115H558.4C559.168 15.8715 562.432 10.8155 570.688 10.8155C578.944 10.8155 582.976 16.2555 582.976 23.5515V43.5195H573.376V26.7515C573.376 21.4395 571.52 19.4555 566.016 19.4555C560.192 19.4555 558.528 21.7595 558.528 27.3275V43.5195H548.928V26.7515C548.928 21.4395 547.072 19.4555 541.568 19.4555C535.744 19.4555 534.08 21.7595 534.08 27.3275V43.5195ZM609.89 43.5195H600.29V0.63953H623.97C634.53 0.63953 640.546 5.31153 640.546 13.5035C640.546 20.4795 636.514 24.6395 628.45 25.4075V25.9195C632.29 26.9435 633.762 28.9915 635.362 31.9995L641.57 43.5195H630.434L624.546 32.3835C622.818 29.0555 621.218 27.9675 616.226 27.9675H609.89V43.5195ZM609.89 9.27953V20.7355H623.906C628.45 20.7355 630.498 19.4555 630.498 14.9755C630.498 10.7515 628.45 9.27953 623.906 9.27953H609.89ZM662.906 44.1595C652.218 44.1595 644.922 38.9115 644.922 27.5195C644.922 17.2795 652.154 10.8155 662.714 10.8155C673.21 10.8155 680.186 16.3195 680.186 26.3675C680.186 27.5195 680.058 28.3515 679.93 29.4395H653.818C654.074 34.3675 656.378 36.4795 662.586 36.4795C668.282 36.4795 670.266 35.0075 670.266 32.2555V31.6155H679.866V32.3195C679.866 39.2955 673.082 44.1595 662.906 44.1595ZM662.522 18.3035C656.826 18.3035 654.394 20.2235 653.946 24.3835H670.97C670.714 20.1595 668.154 18.3035 662.522 18.3035ZM695.393 44.1595C688.481 44.1595 684.321 40.9595 684.321 35.5835C684.321 30.8475 687.841 27.9035 694.689 27.1995L708.449 25.7915V24.5755C708.449 20.4155 706.593 19.2635 701.473 19.2635C696.609 19.2635 694.625 20.5435 694.625 24.1915V24.4475H684.961V24.2555C684.961 16.3195 691.617 10.8155 702.177 10.8155C712.865 10.8155 717.921 16.3195 717.921 24.7035V43.5195H708.961V36.1595H708.449C706.977 41.1515 702.497 44.1595 695.393 44.1595ZM693.985 34.9435C693.985 36.6715 695.329 37.3755 698.145 37.3755C704.673 37.3755 708.193 35.8395 708.449 31.2955L697.313 32.5755C695.009 32.7675 693.985 33.4075 693.985 34.9435ZM733.667 43.5195H724.067V0.63953H733.667V43.5195ZM773.079 44.1595C758.935 44.1595 750.167 35.4555 750.167 22.0795C750.167 8.70353 758.935 -0.000469208 773.079 -0.000469208C786.391 -0.000469208 794.967 6.65553 794.967 17.5355V18.4955H784.279V17.5355C784.279 11.9035 781.079 9.21553 773.271 9.21553C763.863 9.21553 760.343 12.5435 760.343 22.0795C760.343 31.6155 763.863 34.9435 773.271 34.9435C781.079 34.9435 784.279 32.2555 784.279 26.6235V25.6635H794.967V26.6235C794.967 37.5035 786.455 44.1595 773.079 44.1595ZM810.007 43.5195H800.407V11.4555H809.303V19.9675H809.879C810.775 14.7835 814.167 10.8155 820.631 10.8155C827.799 10.8155 830.743 15.7435 830.743 22.0155V27.3275H821.143V23.9995C821.143 20.4795 819.735 18.9435 815.831 18.9435C811.543 18.9435 810.007 20.9275 810.007 24.9595V43.5195ZM852.524 44.1595C841.836 44.1595 834.54 38.9115 834.54 27.5195C834.54 17.2795 841.772 10.8155 852.332 10.8155C862.828 10.8155 869.804 16.3195 869.804 26.3675C869.804 27.5195 869.676 28.3515 869.548 29.4395H843.436C843.692 34.3675 845.996 36.4795 852.204 36.4795C857.9 36.4795 859.884 35.0075 859.884 32.2555V31.6155H869.484V32.3195C869.484 39.2955 862.7 44.1595 852.524 44.1595ZM852.14 18.3035C846.444 18.3035 844.012 20.2235 843.564 24.3835H860.588C860.332 20.1595 857.772 18.3035 852.14 18.3035ZM885.011 44.1595C878.099 44.1595 873.939 40.9595 873.939 35.5835C873.939 30.8475 877.459 27.9035 884.307 27.1995L898.067 25.7915V24.5755C898.067 20.4155 896.211 19.2635 891.091 19.2635C886.227 19.2635 884.243 20.5435 884.243 24.1915V24.4475H874.579V24.2555C874.579 16.3195 881.235 10.8155 891.795 10.8155C902.483 10.8155 907.539 16.3195 907.539 24.7035V43.5195H898.579V36.1595H898.067C896.595 41.1515 892.115 44.1595 885.011 44.1595ZM883.603 34.9435C883.603 36.6715 884.947 37.3755 887.763 37.3755C894.291 37.3755 897.811 35.8395 898.067 31.2955L886.931 32.5755C884.627 32.7675 883.603 33.4075 883.603 34.9435ZM936.277 43.5195H928.341C920.853 43.5195 916.309 39.9995 916.309 31.9355V19.3915H911.253V11.4555H916.309V5.24753H925.909V11.4555H936.277V19.3915H925.909V30.8475C925.909 34.0475 927.125 34.8795 930.517 34.8795H936.277V43.5195ZM958.24 44.1595C947.296 44.1595 939.936 37.6315 939.936 27.5195C939.936 17.2795 947.296 10.8155 958.24 10.8155C969.184 10.8155 976.544 17.2795 976.544 27.5195C976.544 37.6315 969.184 44.1595 958.24 44.1595ZM958.24 35.6475C964.704 35.6475 967.008 33.1515 967.008 27.5195C967.008 21.8875 964.704 19.2635 958.24 19.2635C951.712 19.2635 949.472 21.8875 949.472 27.5195C949.472 33.1515 951.712 35.6475 958.24 35.6475ZM991.345 43.5195H981.745V11.4555H990.641V19.9675H991.217C992.113 14.7835 995.505 10.8155 1001.97 10.8155C1009.14 10.8155 1012.08 15.7435 1012.08 22.0155V27.3275H1002.48V23.9995C1002.48 20.4795 1001.07 18.9435 997.169 18.9435C992.881 18.9435 991.345 20.9275 991.345 24.9595V43.5195ZM1033.03 44.1595C1022.21 44.1595 1016.26 39.9355 1016.26 32.5115V32.3195H1025.86V32.8955C1025.86 35.7755 1027.65 36.5435 1033.09 36.5435C1038.21 36.5435 1039.43 35.7115 1039.43 33.7915C1039.43 31.9995 1038.47 31.4875 1034.69 30.9755L1025.67 29.8875C1019.27 29.1835 1015.69 26.3035 1015.69 20.9275C1015.69 15.2955 1020.49 10.8155 1031.49 10.8155C1041.99 10.8155 1047.94 14.7835 1047.94 22.5915V22.7835H1038.34V22.3995C1038.34 19.7755 1037.06 18.4315 1031.17 18.4315C1026.37 18.4315 1025.16 19.2635 1025.16 21.3115C1025.16 22.9755 1026.05 23.6795 1030.28 24.1915L1037.13 25.0235C1045.7 25.9835 1048.9 28.8635 1048.9 34.1755C1048.9 40.1915 1042.95 44.1595 1033.03 44.1595Z" fill="url(#paint0_linear_1248_240)"/>
+              <defs>
+                <linearGradient id="paint0_linear_1248_240" x1="523.94" y1="-16.4805" x2="523.94" y2="62.5195" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="white"/>
+                  <stop offset="1" stopColor="#B94D13"/>
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-black mb-4 sm:mb-6 leading-tight tracking-tight">
-            Loved by Creators
-            <br />
-            <span className="font-normal">
-              Worldwide
-            </span>
-          </h2>
-          <p className="text-sm sm:text-base md:text-lg text-black max-w-2xl mx-auto leading-relaxed mt-6 sm:mt-8 font-medium">
-            Join thousands of creators who are earning and growing their audience with Loka
-          </p>
+
+          {/* Navigation arrows - Top right (desktop only) */}
+          <div className="hidden md:flex gap-3 sm:gap-4 flex-shrink-0">
+            <button
+              onClick={prevTestimonial}
+              className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center transition-all duration-300 hover:opacity-80"
+            >
+              <svg width="62" height="62" viewBox="0 0 62 62" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <mask id="mask0_1248_269" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="0" y="0" width="62" height="62">
+                  <rect x="62" y="2.71011e-06" width="61.9999" height="62" transform="rotate(90 62 2.71011e-06)" fill="#D9D9D9"/>
+                </mask>
+                <g mask="url(#mask0_1248_269)">
+                  <path d="M25.3961 30.245C25.1709 30.4581 25.0583 30.7067 25.0583 30.9909C25.0583 31.2751 25.1709 31.5298 25.3961 31.7549L30.805 37.1644C31.127 37.486 31.505 37.5635 31.939 37.3969C32.373 37.2299 32.59 36.9125 32.59 36.445L32.59 25.5317C32.59 25.077 32.373 24.7668 31.939 24.601C31.505 24.4357 31.127 24.5139 30.805 24.8355L25.3961 30.245ZM7.74999 31.0083C7.74999 27.7934 8.36009 24.7707 9.58028 21.9402C10.8005 19.1102 12.4564 16.6483 14.548 14.5545C16.6397 12.4607 19.0994 10.8033 21.9273 9.58223C24.7548 8.36074 27.7762 7.75 30.9916 7.75C34.2066 7.75 37.2293 8.3601 40.0597 9.58029C42.8898 10.8005 45.3517 12.4564 47.4455 14.548C49.5393 16.6397 51.1967 19.0994 52.4178 21.9273C53.6393 24.7548 54.25 27.7762 54.25 30.9916C54.25 34.2065 53.6399 37.2292 52.4197 40.0597C51.1995 42.8897 49.5436 45.3516 47.452 47.4454C45.3603 49.5392 42.9006 51.1966 40.0727 52.4177C37.2452 53.6392 34.2238 54.2499 31.0084 54.2499C27.7934 54.2499 24.7707 53.6398 21.9402 52.4196C19.1102 51.1994 16.6483 49.5435 14.5545 47.4519C12.4607 45.3602 10.8033 42.9005 9.58222 40.0726C8.36074 37.2451 7.74999 34.2237 7.74999 31.0083ZM10.3333 31C10.3333 36.7694 12.3354 41.6562 16.3396 45.6603C20.3437 49.6645 25.2306 51.6666 31 51.6666C36.7694 51.6666 41.6562 49.6645 45.6604 45.6603C49.6646 41.6562 51.6667 36.7694 51.6667 31C51.6667 25.2305 49.6646 20.3437 45.6604 16.3396C41.6562 12.3354 36.7694 10.3333 31 10.3333C25.2306 10.3333 20.3437 12.3354 16.3396 16.3396C12.3354 20.3437 10.3333 25.2305 10.3333 31Z" fill="#FF6D1F"/>
+                </g>
+              </svg>
+            </button>
+            <button
+              onClick={nextTestimonial}
+              className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center transition-all duration-300 hover:opacity-80"
+            >
+              <svg width="62" height="62" viewBox="0 0 62 62" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <mask id="mask0_1248_272" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="0" y="0" width="62" height="62">
+                  <rect y="62" width="61.9999" height="62" transform="rotate(-90 0 62)" fill="#D9D9D9"/>
+                </mask>
+                <g mask="url(#mask0_1248_272)">
+                  <path d="M36.6039 31.755C36.8291 31.5419 36.9417 31.2933 36.9417 31.0091C36.9417 30.7249 36.8291 30.4702 36.6039 30.2451L31.195 24.8356C30.873 24.514 30.495 24.4365 30.061 24.6031C29.627 24.7701 29.41 25.0875 29.41 25.555L29.41 36.4683C29.41 36.923 29.627 37.2332 30.061 37.3989C30.495 37.5643 30.873 37.4861 31.195 37.1645L36.6039 31.755ZM54.25 30.9917C54.25 34.2066 53.6399 37.2293 52.4197 40.0598C51.1995 42.8898 49.5436 45.3517 47.452 47.4455C45.3603 49.5393 42.9006 51.1967 40.0727 52.4178C37.2452 53.6393 34.2238 54.25 31.0084 54.25C27.7934 54.25 24.7707 53.6399 21.9402 52.4197C19.1102 51.1995 16.6483 49.5436 14.5545 47.452C12.4607 45.3603 10.8033 42.9006 9.58223 40.0727C8.36074 37.2452 7.75 34.2238 7.75 31.0084C7.75 27.7935 8.3601 24.7708 9.58029 21.9403C10.8005 19.1103 12.4564 16.6484 14.548 14.5546C16.6397 12.4608 19.0994 10.8034 21.9273 9.58232C24.7548 8.36083 27.7762 7.75009 30.9916 7.75009C34.2066 7.75009 37.2293 8.36019 40.0597 9.58038C42.8898 10.8006 45.3517 12.4565 47.4455 14.5481C49.5393 16.6398 51.1967 19.0995 52.4178 21.9274C53.6393 24.7548 54.25 27.7763 54.25 30.9917Z" fill="#FF6D1F"/>
+                </g>
+              </svg>
+            </button>
+          </div>
         </div>
 
-        {/* Testimonial card */}
-        <div className="max-w-5xl mx-auto px-0 sm:px-4">
-          <div
-            className="relative bg-white border border-black rounded-2xl p-8 sm:p-10 md:p-14 lg:p-16 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-[12px_12px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
-          >
-            {/* Quote icon */}
-            <div className="relative z-10 mb-8 sm:mb-10">
-              <div className="inline-block p-3 sm:p-4 bg-pink-200 border border-black rounded-xl">
-                <Quote className="w-6 h-6 sm:w-8 sm:h-8 text-black" />
-              </div>
-            </div>
-
-            {/* Testimonial content */}
-            <div className="relative z-10">
-              <blockquote className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold leading-relaxed mb-8 sm:mb-10 text-black tracking-tight">
-                "{testimonials[currentTestimonial].quote}"
-              </blockquote>
-
-              {/* Author info */}
-              <div className="flex items-center gap-4 sm:gap-5">
-                {testimonials[currentTestimonial].avatar && (
-                  <img
-                    src={testimonials[currentTestimonial].avatar}
-                    alt={testimonials[currentTestimonial].author}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-black shadow-md border border-black"
-                  />
-                )}
-                <div>
-                  <div className="font-extrabold text-lg sm:text-xl text-black">
-                    {testimonials[currentTestimonial].author}
+        {/* Testimonials carousel - 3 visible cards */}
+        <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-center">
+            {/* Left card - Small */}
+            <div className="hidden md:block md:col-span-3">
+              <GradientCardLayout className="transition-all duration-300 hover:opacity-80 scale-85 origin-right">
+                <div className="flex flex-col h-full">
+                  {/* Avatar and Quote in row */}
+                  <div className="flex gap-4 mb-4">
+                    <img
+                      src={testimonials[getCardIndex(-1)].avatar}
+                      alt={testimonials[getCardIndex(-1)].author}
+                      className="w-12 h-12 rounded-full object-cover ring-2 ring-white/20 flex-shrink-0"
+                    />
+                    <p className="text-xs sm:text-sm text-white/90 leading-relaxed flex-grow">
+                      "{testimonials[getCardIndex(-1)].quote}"
+                    </p>
                   </div>
-                  <div className="text-sm text-black font-bold">
-                    Creator on Loka
+
+                  {/* Name and role below */}
+                  <div className="flex flex-col ml-16">
+                    <div className="text-xs font-bold text-white">
+                      {testimonials[getCardIndex(-1)].author}
+                    </div>
+                    <p className="text-xs text-white/70 font-medium">
+                      {testimonials[getCardIndex(-1)].role}
+                    </p>
                   </div>
                 </div>
-              </div>
+              </GradientCardLayout>
             </div>
 
-            {/* Navigation */}
-            <div className="flex items-center justify-between mt-10 sm:mt-12 relative z-10 pt-6 sm:pt-8 border-t border-black">
-              {/* Testimonial indicators */}
-              <div className="flex space-x-2 sm:space-x-3">
-                {testimonials.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setIsAutoPlaying(false);
-                      setCurrentTestimonial(index);
-                    }}
-                    className={`rounded-full transition-all duration-300 border border-black ${
-                      index === currentTestimonial
-                        ? "w-8 h-3 sm:w-10 sm:h-3 bg-black"
-                        : "w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white hover:bg-gray-200"
-                    }`}
-                  />
-                ))}
-              </div>
+            {/* Center card (main) - Large */}
+            <div className="md:col-span-6">
+              <GradientCardLayout className="scale-100 transition-transform duration-300">
+                <div className="flex flex-col h-full">
+                  {/* Avatar and Quote in row */}
+                  <div className="flex gap-6 mb-8">
+                    <img
+                      src={testimonials[currentIndex].avatar}
+                      alt={testimonials[currentIndex].author}
+                      className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover ring-2 ring-white/30 flex-shrink-0"
+                    />
+                    <p className="text-lg sm:text-xl text-white leading-relaxed flex-grow font-medium">
+                      "{testimonials[currentIndex].quote}"
+                    </p>
+                  </div>
 
-              {/* Navigation arrows */}
-              <div className="flex space-x-3 sm:space-x-4">
+                  {/* Name and role below avatar */}
+                  <div className="flex flex-col ml-0">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-white">
+                      {testimonials[currentIndex].author}
+                    </h3>
+                    <p className="text-sm text-white/70 font-medium">
+                      {testimonials[currentIndex].role}
+                    </p>
+                  </div>
+                </div>
+              </GradientCardLayout>
+            </div>
+
+            {/* Right card - Small */}
+            <div className="hidden md:block md:col-span-3">
+              <GradientCardLayout className="transition-all duration-300 hover:opacity-80 scale-85 origin-left">
+                <div className="flex flex-col h-full">
+                  {/* Avatar and Quote in row */}
+                  <div className="flex gap-4 mb-4">
+                    <img
+                      src={testimonials[getCardIndex(1)].avatar}
+                      alt={testimonials[getCardIndex(1)].author}
+                      className="w-12 h-12 rounded-full object-cover ring-2 ring-white/20 flex-shrink-0"
+                    />
+                    <p className="text-xs sm:text-sm text-white/90 leading-relaxed flex-grow">
+                      "{testimonials[getCardIndex(1)].quote}"
+                    </p>
+                  </div>
+
+                  {/* Name and role below */}
+                  <div className="flex flex-col ml-16">
+                    <div className="text-xs font-bold text-white">
+                      {testimonials[getCardIndex(1)].author}
+                    </div>
+                    <p className="text-xs text-white/70 font-medium">
+                      {testimonials[getCardIndex(1)].role}
+                    </p>
+                  </div>
+                </div>
+              </GradientCardLayout>
+            </div>
+          </div>
+
+          {/* Mobile navigation and dots indicator */}
+          <div className="flex flex-col items-center gap-6 mt-8 md:hidden">
+            {/* Navigation arrows - Bottom (mobile only) */}
+            <div className="flex gap-3 sm:gap-4">
+              <button
+                onClick={prevTestimonial}
+                className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center transition-all duration-300 hover:opacity-80"
+              >
+                <svg width="62" height="62" viewBox="0 0 62 62" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                  <mask id="mask0_1248_269" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="0" y="0" width="62" height="62">
+                    <rect x="62" y="2.71011e-06" width="61.9999" height="62" transform="rotate(90 62 2.71011e-06)" fill="#D9D9D9"/>
+                  </mask>
+                  <g mask="url(#mask0_1248_269)">
+                    <path d="M25.3961 30.245C25.1709 30.4581 25.0583 30.7067 25.0583 30.9909C25.0583 31.2751 25.1709 31.5298 25.3961 31.7549L30.805 37.1644C31.127 37.486 31.505 37.5635 31.939 37.3969C32.373 37.2299 32.59 36.9125 32.59 36.445L32.59 25.5317C32.59 25.077 32.373 24.7668 31.939 24.601C31.505 24.4357 31.127 24.5139 30.805 24.8355L25.3961 30.245ZM7.74999 31.0083C7.74999 27.7934 8.36009 24.7707 9.58028 21.9402C10.8005 19.1102 12.4564 16.6483 14.548 14.5545C16.6397 12.4607 19.0994 10.8033 21.9273 9.58223C24.7548 8.36074 27.7762 7.75 30.9916 7.75C34.2066 7.75 37.2293 8.3601 40.0597 9.58029C42.8898 10.8005 45.3517 12.4564 47.4455 14.548C49.5393 16.6397 51.1967 19.0994 52.4178 21.9273C53.6393 24.7548 54.25 27.7762 54.25 30.9916C54.25 34.2065 53.6399 37.2292 52.4197 40.0597C51.1995 42.8897 49.5436 45.3516 47.452 47.4454C45.3603 49.5392 42.9006 51.1966 40.0727 52.4177C37.2452 53.6392 34.2238 54.2499 31.0084 54.2499C27.7934 54.2499 24.7707 53.6398 21.9402 52.4196C19.1102 51.1994 16.6483 49.5435 14.5545 47.4519C12.4607 45.3602 10.8033 42.9005 9.58222 40.0726C8.36074 37.2451 7.74999 34.2237 7.74999 31.0083ZM10.3333 31C10.3333 36.7694 12.3354 41.6562 16.3396 45.6603C20.3437 49.6645 25.2306 51.6666 31 51.6666C36.7694 51.6666 41.6562 49.6645 45.6604 45.6603C49.6646 41.6562 51.6667 36.7694 51.6667 31C51.6667 25.2305 49.6646 20.3437 45.6604 16.3396C41.6562 12.3354 36.7694 10.3333 31 10.3333C25.2306 10.3333 20.3437 12.3354 16.3396 16.3396C12.3354 20.3437 10.3333 25.2305 10.3333 31Z" fill="#FF6D1F"/>
+                  </g>
+                </svg>
+              </button>
+              <button
+                onClick={nextTestimonial}
+                className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center transition-all duration-300 hover:opacity-80"
+              >
+                <svg width="62" height="62" viewBox="0 0 62 62" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                  <mask id="mask0_1248_272" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="0" y="0" width="62" height="62">
+                    <rect y="62" width="61.9999" height="62" transform="rotate(-90 0 62)" fill="#D9D9D9"/>
+                  </mask>
+                  <g mask="url(#mask0_1248_272)">
+                    <path d="M36.6039 31.755C36.8291 31.5419 36.9417 31.2933 36.9417 31.0091C36.9417 30.7249 36.8291 30.4702 36.6039 30.2451L31.195 24.8356C30.873 24.514 30.495 24.4365 30.061 24.6031C29.627 24.7701 29.41 25.0875 29.41 25.555L29.41 36.4683C29.41 36.923 29.627 37.2332 30.061 37.3989C30.495 37.5643 30.873 37.4861 31.195 37.1645L36.6039 31.755ZM54.25 30.9917C54.25 34.2066 53.6399 37.2293 52.4197 40.0598C51.1995 42.8898 49.5436 45.3517 47.452 47.4455C45.3603 49.5393 42.9006 51.1967 40.0727 52.4178C37.2452 53.6393 34.2238 54.25 31.0084 54.25C27.7934 54.25 24.7707 53.6399 21.9402 52.4197C19.1102 51.1995 16.6483 49.5436 14.5545 47.452C12.4607 45.3603 10.8033 42.9006 9.58223 40.0727C8.36074 37.2452 7.75 34.2238 7.75 31.0084C7.75 27.7935 8.3601 24.7708 9.58029 21.9403C10.8005 19.1103 12.4564 16.6484 14.548 14.5546C16.6397 12.4608 19.0994 10.8034 21.9273 9.58232C24.7548 8.36083 27.7762 7.75009 30.9916 7.75009C34.2066 7.75009 37.2293 8.36019 40.0597 9.58038C42.8898 10.8006 45.3517 12.4565 47.4455 14.5481C49.5393 16.6398 51.1967 19.0995 52.4178 21.9274C53.6393 24.7548 54.25 27.7763 54.25 30.9917Z" fill="#FF6D1F"/>
+                  </g>
+                </svg>
+              </button>
+            </div>
+
+            {/* Dots indicator */}
+            <div className="flex justify-center gap-2">
+              {testimonials.map((_, index) => (
                 <button
-                  onClick={prevTestimonial}
-                  className="w-11 h-11 sm:w-13 sm:h-13 bg-white hover:bg-gray-50 border border-black rounded-full flex items-center justify-center transition-all duration-300 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
-                >
-                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-black" />
-                </button>
-                <button
-                  onClick={nextTestimonial}
-                  className="w-11 h-11 sm:w-13 sm:h-13 bg-black hover:bg-gray-900 border border-black rounded-full flex items-center justify-center transition-all duration-300 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
-                >
-                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                </button>
-              </div>
+                  key={index}
+                  onClick={() => {
+                    setIsAutoPlaying(false);
+                    setCurrentIndex(index);
+                  }}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex
+                      ? "w-8 bg-orange-600"
+                      : "w-2 bg-white/30 hover:bg-white/50"
+                  }`}
+                />
+              ))}
             </div>
           </div>
         </div>

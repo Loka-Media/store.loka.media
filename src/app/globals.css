@@ -1,32 +1,96 @@
 @import "tailwindcss";
 
-/* Gumroad-style design system - Using Manrope (similar to ABC Favorit) */
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
-  --foreground-muted: #6b7280;
-  --border: #e5e7eb;
-  --accent: #FF90E8;
-  --accent-hover: #FF6FDB;
-  --font-manrope: var(--font-manrope);
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --primary-orange: #FF6D1F;
+  --orange-hover: #FF7A1A;
+  --secondary-bg: #111111;
+  --card-bg: #1a1a1a;
+  --gray-text: #888888;
+
+  /* Font */
+  --font-clash: 'Clash Display', var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-foreground-muted: var(--foreground-muted);
-  --color-border: var(--border);
-  --color-accent: var(--accent);
+  --color-primary: var(--primary-orange);
+  --color-orange-hover: var(--orange-hover);
+  --color-secondary-bg: var(--secondary-bg);
+  --color-card-bg: var(--card-bg);
+  --color-gray-text: var(--gray-text);
+
+  /* Font Family */
+  --font-family-sans: var(--font-inter);
+  --font-family-clash: var(--font-clash);
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+.font-clash {
+  font-family: 'Clash Display', var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Clash Display', var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography System - Based on Clash Display */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Clash Display', var(--font-inter), sans-serif;
+  font-weight: 600;
+  line-height: 110%;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+h3 {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+h4 {
+  font-size: clamp(1.25rem, 2.5vw, 1.875rem);
+}
+
+h5 {
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+}
+
+h6 {
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+}
+
+/* Base text sizes */
+.text-brand {
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.2;
   letter-spacing: -0.01em;
-  font-weight: 400;
+}
+
+/* Gradient Text - For titles and headings */
+.gradient-text-primary {
+  background: linear-gradient(180deg, #FFFFFF 0%, #B94D13 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: transparent !important;
 }
 
 /* Custom animations for UploadStep */

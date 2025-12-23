@@ -1,9 +1,8 @@
 // components/home/HeroSection.tsx
 "use client";
 
-import Link from "next/link";
-import { ArrowRight, ShoppingBag, Zap } from "lucide-react";
-import Threads from "./Threads";
+import { Button } from "@/components/ui/button";
+import { GradientCardLayout } from "@/components/ui/GradientCardLayout";
 
 interface HeroSectionProps {
   isAuthenticated: boolean;
@@ -12,68 +11,159 @@ interface HeroSectionProps {
 
 export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
   return (
-    <section className="relative overflow-hidden">
-      {/* Main Hero with Gradient Background */}
-      <div className="relative bg-gradient-to-br from-yellow-300 via-pink-200 to-yellow-100 py-20 md:py-32 lg:py-40 px-4 md:px-6 lg:px-8">
-        {/* Decorative Elements - Neubrutalism style */}
-        <div className="absolute top-10 left-10 w-32 h-32 bg-black rounded-3xl opacity-10 rotate-12 hidden lg:block"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-pink-500 rounded-full opacity-20 hidden lg:block"></div>
-        <div className="absolute top-1/2 right-10 w-24 h-24 bg-yellow-400 rounded-2xl opacity-30 rotate-45 hidden md:block"></div>
-
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          {/* Heading - Gumroad neubrutalism style: huge, bold, colorful */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-normal mb-6 md:mb-8 text-black leading-[0.95] tracking-tight">
-            Turn Your Following Into Income
+    <section className="relative overflow-hidden bg-black text-white">
+      {/* Main Hero Section - Matching Figma Design Exactly */}
+      <div
+        className="relative w-full flex items-center justify-center px-4 py-16 md:py-24 lg:py-32"
+        style={{
+          background: "linear-gradient(180deg, #000000 0%, #0a0a0a 100%)",
+        }}
+      >
+        <div className="w-full max-w-6xl mx-auto text-center">
+          {/* Main Heading - Gradient from Brown/Orange to White */}
+          <h1
+            className="font-bold mb-6 md:mb-8 leading-tight tracking-tight"
+            style={{
+              fontSize: "clamp(2rem, 6vw, 5.5rem)",
+              lineHeight: "1.1",
+              background:
+                "linear-gradient(273.09deg, #9E4719 0.41%, #FFFFFF 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              fontFamily: "Clash Display, system-ui, sans-serif",
+            }}
+          >
+            Turn Your Following
+            <br />
+            Into Income
           </h1>
 
-          {/* Subheading with background highlight */}
-          <div className="inline-block bg-white/80 backdrop-blur-sm px-6 py-4 rounded-2xl border border-black mb-10 md:mb-12">
-            <p className="text-xl sm:text-2xl md:text-3xl text-black max-w-3xl font-semibold leading-tight tracking-tight">
-              Your creator journey deserves premium marketing support and maximum monetization earnings on and across all social platforms.
-            </p>
-          </div>
+          {/* Subheading - Gradient from White to Black */}
+          <p
+            className="mb-10 md:mb-14 leading-relaxed max-w-3xl mx-auto"
+            style={{
+              fontSize: "clamp(1rem, 2.5vw, 1.625rem)",
+              background:
+                "linear-gradient(91.77deg, #FFFFFF 0%, #000000 136.03%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              fontFamily: "Satoshi, system-ui, sans-serif",
+              fontWeight: 400,
+            }}
+          >
+            Your creator journey deserves premium marketing support and maximum
+            monetization earnings on and across all social platforms.
+          </p>
 
-          {/* CTA Buttons - Neubrutalism style with bold shadows */}
+          {/* CTA Buttons */}
           {!isAuthenticated && (
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-8">
-              <Link
-                href="/auth/register"
-                className="bg-black hover:bg-gray-900 text-white px-12 py-5 rounded-xl text-xl font-extrabold transition-all border border-black hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] w-full sm:w-auto text-center"
-              >
-                Start selling
-              </Link>
-              <Link
-                href="/products"
-                className="bg-white hover:bg-gray-50 text-black px-12 py-5 rounded-xl text-xl font-extrabold transition-all border border-black hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] w-full sm:w-auto text-center"
-              >
-                Explore marketplace →
-              </Link>
+            <div className="flex flex-row justify-center items-center gap-6 md:gap-8">
+              <Button variant="primary" href="/auth/register">
+                Start Selling
+              </Button>
+
+              <Button variant="secondary" href="/products">
+                Explore Marketplace
+              </Button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Stats Section - Colorful Cards with Neubrutalism */}
-      <div className="bg-white py-16 md:py-24 px-4 md:px-6 lg:px-8">
+      {/* Stats Section - Black Background with Accent Cards */}
+      <div
+        className="py-8 md:py-12 px-4 md:px-6 lg:px-8 border-t"
+        style={{
+          background: "#000000",
+          borderColor: "rgba(255, 255, 255, 0.1)",
+          backgroundImage:
+            "linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%)",
+        }}
+      >
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
-            {/* Stat Card 1 - Yellow */}
-            <div className="relative bg-yellow-300 p-8 md:p-10 rounded-3xl border border-black hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-              <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-black mb-3 tracking-tight">$2M+</div>
-              <div className="text-lg md:text-xl text-black font-bold">Paid to creators</div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {/* Stat Card 1 */}
+            <GradientCardLayout>
+              <div className="flex flex-col h-full justify-between items-center text-center">
+                <div
+                  className="font-medium"
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "rgba(255, 255, 255, 0.8)",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Paid to creators
+                </div>
+                <div
+                  className="font-extrabold tracking-wider"
+                  style={{
+                    fontSize: "clamp(3rem, 8vw, 5rem)",
+                    color: "#FF6D1F",
+                    lineHeight: "1",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  $2M+
+                </div>
+              </div>
+            </GradientCardLayout>
 
-            {/* Stat Card 2 - Pink */}
-            <div className="relative bg-pink-400 p-8 md:p-10 rounded-3xl border border-black hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-              <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-black mb-3 tracking-tight">10K+</div>
-              <div className="text-lg md:text-xl text-black font-bold">Active creators</div>
-            </div>
+            {/* Stat Card 2 */}
+            <GradientCardLayout>
+              <div className="flex flex-col h-full justify-between items-center text-center">
+                <div
+                  className="font-medium"
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "rgba(255, 255, 255, 0.8)",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Active creators
+                </div>
+                <div
+                  className="font-extrabold tracking-wider"
+                  style={{
+                    fontSize: "clamp(3rem, 8vw, 5rem)",
+                    color: "#FF6D1F",
+                    lineHeight: "1",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  10K+
+                </div>
+              </div>
+            </GradientCardLayout>
 
-            {/* Stat Card 3 - Black */}
-            <div className="relative bg-black p-8 md:p-10 rounded-3xl border border-black hover:shadow-[12px_12px_0px_0px_rgba(255,105,180,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-              <div className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-yellow-300 mb-3 tracking-tight">90%</div>
-              <div className="text-lg md:text-xl text-white font-bold">You keep</div>
-            </div>
+            {/* Stat Card 3 */}
+            <GradientCardLayout>
+              <div className="flex flex-col h-full justify-between items-center text-center">
+                <div
+                  className="font-medium"
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "rgba(255, 255, 255, 0.8)",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  You keep
+                </div>
+                <div
+                  className="font-extrabold tracking-wider"
+                  style={{
+                    fontSize: "clamp(3rem, 8vw, 5rem)",
+                    color: "#FF6D1F",
+                    lineHeight: "1",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  90%
+                </div>
+              </div>
+            </GradientCardLayout>
           </div>
         </div>
       </div>

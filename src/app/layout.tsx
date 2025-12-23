@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
@@ -8,14 +8,13 @@ import { WishlistProvider } from "@/contexts/WishlistContext";
 import { Toaster } from "react-hot-toast";
 import Navigation from "@/components/Navigation";
 import StickyHeader from "@/components/StickyHeader";
-import { Footer } from "@/components/home/Footer";
+import Footer from "@/components/home/Footer";
 
-// Manrope is very similar to ABC Favorit (Gumroad's font)
-const manrope = Manrope({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-manrope",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -51,15 +50,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${manrope.variable} antialiased`}>
+    <html lang="en" className={inter.variable}>
+      <head>
+        <link rel="preconnect" href="https://api.fontshare.com" />
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased font-clash">
         <AuthProvider>
           {/* <CartProvider> - Disabled to prevent duplicate API calls */}
           <GuestCartProvider>
             <WishlistProvider>
               <Navigation />
               {/* <StickyHeader /> */}
-              <div className="bg-white text-black pt-16">
+              <div className="pt-16">
                 {children}
                 <Footer />
               </div>
