@@ -62,16 +62,16 @@ export function CategoryNavigation({
   };
 
   return (
-    <div className="bg-gradient-to-r from-yellow-100 via-pink-100 to-purple-100 border-y border-black py-4">
+    <div className="bg-gradient-to-r from-gray-950 via-black to-gray-950 border-y border-white/10 py-4">
       <div className="max-w-7xl mx-auto px-4">
         {/* Scrollable category tabs with navigation */}
         <div className="relative">
           {/* Left scroll button with gradient fade */}
           {showLeftButton && (
-            <div className="absolute left-0 top-0 bottom-2 z-10 flex items-center bg-gradient-to-r from-yellow-100 via-pink-100 to-transparent pointer-events-none pr-4">
+            <div className="absolute left-0 top-0 bottom-2 z-10 flex items-center bg-gradient-to-r from-black via-black to-transparent pointer-events-none pr-4">
               <button
                 onClick={() => scroll("left")}
-                className="pointer-events-auto bg-black text-white p-2 rounded-xl border border-black hover:bg-gray-900 transition-all hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
+                className="pointer-events-auto bg-orange-500 text-white p-2 rounded-lg border border-orange-400 hover:bg-orange-600 transition-all hover:shadow-[0_8px_20px_rgba(255,99,71,0.3)]"
                 aria-label="Scroll left"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -81,10 +81,10 @@ export function CategoryNavigation({
 
           {/* Right scroll button with gradient fade */}
           {showRightButton && (
-            <div className="absolute right-0 top-0 bottom-2 z-10 flex items-center bg-gradient-to-l from-purple-100 via-pink-100 to-transparent pointer-events-none pl-4">
+            <div className="absolute right-0 top-0 bottom-2 z-10 flex items-center bg-gradient-to-l from-black via-black to-transparent pointer-events-none pl-4">
               <button
                 onClick={() => scroll("right")}
-                className="pointer-events-auto bg-black text-white p-2 rounded-xl border border-black hover:bg-gray-900 transition-all hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
+                className="pointer-events-auto bg-orange-500 text-white p-2 rounded-lg border border-orange-400 hover:bg-orange-600 transition-all hover:shadow-[0_8px_20px_rgba(255,99,71,0.3)]"
                 aria-label="Scroll right"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -97,18 +97,13 @@ export function CategoryNavigation({
             className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide px-12"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-          <div className="flex items-center gap-2 flex-shrink-0 pl-0">
-            <Tag className="w-4 h-4 text-black" />
-            <span className="text-sm font-extrabold text-black hidden sm:inline">Categories:</span>
-          </div>
-
           {/* All Categories */}
           <button
             onClick={() => onCategoryChange("")}
-            className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-extrabold border border-black transition-all hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] ${
+            className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-extrabold border transition-all ${
               activeCategory === ""
-                ? "bg-black text-white"
-                : "bg-white text-black hover:bg-yellow-50"
+                ? "bg-orange-500 text-white border-orange-400 hover:shadow-[0_8px_20px_rgba(255,99,71,0.3)]"
+                : "bg-gray-800 text-white border-white/10 hover:border-orange-400/50 hover:bg-gray-700"
             }`}
           >
             All
@@ -119,10 +114,10 @@ export function CategoryNavigation({
             <button
               key={cat.category}
               onClick={() => onCategoryChange(cat.category)}
-              className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-extrabold border border-black transition-all hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] ${
+              className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-extrabold border transition-all ${
                 activeCategory === cat.category
-                  ? "bg-black text-white"
-                  : "bg-white text-black hover:bg-yellow-50"
+                  ? "bg-orange-500 text-white border-orange-400 hover:shadow-[0_8px_20px_rgba(255,99,71,0.3)]"
+                  : "bg-gray-800 text-white border-white/10 hover:border-orange-400/50 hover:bg-gray-700"
               }`}
             >
               {cat.category}

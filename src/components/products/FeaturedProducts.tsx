@@ -5,6 +5,7 @@ import { ExtendedProduct } from "@/lib/api";
 import { Star, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import GradientTitle from "@/components/ui/GradientTitle";
 
 interface FeaturedProductsProps {
   products: ExtendedProduct[];
@@ -19,19 +20,11 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-pink-50 via-yellow-50 to-purple-50 border-y border-black py-8 sm:py-12">
+    <div className="bg-gradient-to-br from-gray-950 via-black to-gray-950 border-y border-white/10 py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
-          <div className="p-2 sm:p-2.5 bg-black rounded-xl border border-black shadow-md">
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300" />
-          </div>
-          <div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-black">Featured Products</h2>
-            <p className="text-xs sm:text-sm text-black font-bold mt-0.5 sm:mt-1">
-              Curated picks from our marketplace
-            </p>
-          </div>
+        <div className="mb-8 sm:mb-10">
+          <GradientTitle text="Featured Products" size="lg" />
         </div>
 
         {/* Featured Products Grid */}
@@ -40,10 +33,16 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
             <Link
               key={product.id}
               href={`/products/${product.id}`}
-              className="group bg-white border border-black rounded-2xl overflow-hidden hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+              className="group relative bg-black rounded-3xl overflow-hidden hover:shadow-[0_20px_60px_rgba(255,99,71,0.3)] transition-all duration-300 cursor-pointer"
+              style={{
+                border: '1px solid transparent',
+                backgroundImage: 'linear-gradient(#000, #000), linear-gradient(180deg, transparent, rgba(255,255,255,0.3) 70%, #ffffff)',
+                backgroundOrigin: 'border-box',
+                backgroundClip: 'padding-box, border-box',
+              }}
             >
               {/* Product Image */}
-              <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 border-b border-black overflow-hidden">
+              <div className="relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
                 {product.thumbnail_url ? (
                   <Image
                     src={product.thumbnail_url}
@@ -51,45 +50,47 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                     fill
                     unoptimized
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Sparkles className="w-16 h-16 text-gray-400" />
+                    <Sparkles className="w-16 h-16 text-gray-700" />
                   </div>
                 )}
 
-                {/* Featured Badge */}
-                <div className="absolute top-3 right-3 bg-yellow-300 border border-black px-3 py-1 rounded-full">
-                  <span className="text-xs font-extrabold text-black">FEATURED</span>
+                {/* Featured Badge - Bottom Left */}
+                <div className="absolute bottom-3 left-3 z-10">
+                  <div className="bg-gradient-to-r from-orange-500 to-orange-600 border border-orange-400/30 px-2.5 py-1 rounded-lg">
+                    <span className="text-xs font-extrabold text-white">FEATURED</span>
+                  </div>
+                </div>
+
+                {/* Rating Badge - Bottom Right */}
+                <div className="absolute bottom-3 right-3 z-10">
+                  <div className="bg-black px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
+                    <span className="text-xs font-extrabold text-white">4.8</span>
+                    <span className="text-sm">⭐</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Product Details */}
-              <div className="p-4">
-                <h3 className="text-base font-extrabold text-black mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors">
+              {/* Content Section - Below Image */}
+              <div className="bg-black px-3 py-2.5 flex flex-col h-full">
+                {/* Creator Name */}
+                <p className="text-xs text-gray-400 font-semibold mb-1">
+                  by {product.creator_name}
+                </p>
+
+                {/* Product Title */}
+                <div className="font-extrabold text-sm text-white mb-auto line-clamp-2 group-hover:text-orange-400 transition-colors tracking-tight">
                   {product.name}
-                </h3>
+                </div>
 
-                {/* Creator */}
-                {product.creator_name && (
-                  <p className="text-sm text-gray-600 font-bold mb-3">
-                    by {product.creator_name}
-                  </p>
-                )}
-
-                {/* Price and Rating */}
-                <div className="flex items-center justify-between">
-                  <div className="bg-pink-200 border border-black px-3 py-1.5 rounded-lg">
-                    <span className="text-sm font-extrabold text-black">
-                      ${product.base_price}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-bold text-black">4.8</span>
-                  </div>
+                {/* Price */}
+                <div className="flex items-center justify-between pt-1.5">
+                  <span className="text-sm font-extrabold text-cyan-400 tracking-tight">
+                    ${product.base_price}
+                  </span>
                 </div>
               </div>
             </Link>

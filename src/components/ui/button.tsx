@@ -9,6 +9,8 @@ interface ButtonProps {
   href?: string;
   onClick?: () => void;
   disabled?: boolean;
+  type?: "button" | "submit" | "reset";
+  className?: string;
 }
 
 export function Button({
@@ -17,6 +19,8 @@ export function Button({
   href,
   onClick,
   disabled = false,
+  type = "button",
+  className = "",
 }: ButtonProps) {
   const baseClasses = "font-medium transition-all duration-300 hover:shadow-lg active:scale-95 px-4 py-2 sm:px-14 sm:py-4 text-sm sm:text-base lg:text-lg rounded-full";
 
@@ -43,9 +47,10 @@ export function Button({
 
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
-      className={baseClasses}
+      className={`${baseClasses} ${className}`}
       style={style}
     >
       {children}
