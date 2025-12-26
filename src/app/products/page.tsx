@@ -4,12 +4,12 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
+import { TrendingUp, Zap, Heart } from "lucide-react";
 
 import { ProductsHero } from "@/components/products/ProductsHero";
 import { FeaturedProducts } from "@/components/products/FeaturedProducts";
 import type { ViewType } from "@/components/products/ProductViewTabs";
 import { ProductsSidebar } from "@/components/products/ProductsSidebar";
-import { MobileFiltersDrawer } from "@/components/products/MobileFiltersDrawer";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { ProductsPagination } from "@/components/products/ProductsPagination";
 import { NoProductsFound } from "@/components/products/NoProductsFound";
@@ -43,7 +43,6 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeView, setActiveView] = useState<ViewType>("trending");
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   const [filters, setFilters] = useState({
     category: "",
@@ -234,111 +233,107 @@ function ProductsContent() {
       />
 
       {/* Filter Controls Section - Above Featured Products */}
-      <div className="bg-black border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-6">
-          {/* Row 1: Search bar (full width on mobile) */}
-          <div className="mb-3 sm:mb-4">
-            <input
-              type="text"
-              placeholder="Search Files"
-              value={filters.search}
-              onChange={(e) => handleFilterChange("search", e.target.value)}
-              className="w-full px-4 py-2.5 sm:py-3 rounded-lg border border-white/20 bg-gray-800 text-white text-sm placeholder-white/40 hover:border-orange-400/50 focus:outline-none focus:border-orange-400 transition-all"
-            />
-          </div>
-
-          {/* Row 2: Dropdowns (stacked on mobile, row on larger screens) */}
-          <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 mb-3 sm:mb-4">
-            {/* All Types Dropdown */}
-            <select
-              value={filters.category}
-              onChange={(e) => handleFilterChange("category", e.target.value)}
-              className="flex-1 xs:flex-none px-3 sm:px-4 py-2.5 sm:py-3 h-10 sm:h-11 rounded-lg border border-white/30 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-orange-400 hover:shadow-[0_8px_20px_rgba(255,99,71,0.2)] focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all cursor-pointer font-medium appearance-none w-full xs:w-auto"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 8px center',
-                paddingRight: '28px',
-              }}
-            >
-              <option value="">All Types</option>
-              {categories.map((cat) => (
-                <option key={cat.category} value={cat.category}>
-                  {cat.category} ({cat.product_count})
-                </option>
-              ))}
-            </select>
-
-            {/* All Creators Dropdown */}
-            <select
-              value={filters.creator}
-              onChange={(e) => handleFilterChange("creator", e.target.value)}
-              className="flex-1 xs:flex-none px-3 sm:px-4 py-2.5 sm:py-3 h-10 sm:h-11 rounded-lg border border-white/30 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-orange-400 hover:shadow-[0_8px_20px_rgba(255,99,71,0.2)] focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all cursor-pointer font-medium appearance-none w-full xs:w-auto"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 8px center',
-                paddingRight: '28px',
-              }}
-            >
-              <option value="">All Creators</option>
-              {creators.map((creator) => (
-                <option key={creator.id} value={creator.name}>
-                  {creator.name} ({creator.product_count})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Row 3: View tabs and Price Range button (stacked on mobile) */}
-          <div className="flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2 sm:gap-3">
-            {/* Left side - View Tabs (scrollable on mobile) */}
-            <div className="flex gap-2 items-center overflow-x-auto scrollbar-hide pb-1 xs:pb-0">
-              <button
-                onClick={() => handleViewChange("trending")}
-                className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs border transition-all flex items-center gap-1 flex-shrink-0 ${
-                  activeView === "trending"
-                    ? "bg-orange-500 text-white border-orange-400"
-                    : "bg-gray-800 text-white border-white/20 hover:border-orange-400/50"
-                }`}
-              >
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-                <span className="hidden xs:inline">Trending</span>
-              </button>
-              <button
-                onClick={() => handleViewChange("new")}
-                className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs border transition-all flex items-center gap-1 flex-shrink-0 ${
-                  activeView === "new"
-                    ? "bg-orange-500 text-white border-orange-400"
-                    : "bg-gray-800 text-white border-white/20 hover:border-orange-400/50"
-                }`}
-              >
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="hidden xs:inline">New</span>
-              </button>
-              <button
-                onClick={() => handleViewChange("popular")}
-                className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs border transition-all flex items-center gap-1 flex-shrink-0 ${
-                  activeView === "popular"
-                    ? "bg-orange-500 text-white border-orange-400"
-                    : "bg-gray-800 text-white border-white/20 hover:border-orange-400/50"
-                }`}
-              >
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="hidden xs:inline">Popular</span>
-              </button>
+      <div className="bg-black border-b border-white/10 relative z-40">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:py-8 overflow-visible">
+          {/* Row 1: Search bar (50%), Categories and Creators (50% split) */}
+          <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
+            {/* Search Input - 50% on desktop */}
+            <div className="relative w-full lg:w-1/2">
+              <svg className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search Files"
+                value={filters.search}
+                onChange={(e) => handleFilterChange("search", e.target.value)}
+                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/20 bg-gradient-to-br from-gray-800 to-gray-900 text-white text-xs sm:text-sm placeholder-white/40 hover:border-orange-400/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 transition-all"
+              />
             </div>
 
-            {/* Right side - Price Range Button */}
-            <button className="px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-white/20 bg-gray-800 text-white text-xs sm:text-sm hover:border-orange-400/50 transition-all flex-shrink-0 whitespace-nowrap">
-              $ Price Range
+            {/* Dropdowns Container - 50% on desktop */}
+            <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 w-full lg:w-1/2">
+              {/* All Types Dropdown */}
+              <select
+                value={filters.category}
+                onChange={(e) => handleFilterChange("category", e.target.value)}
+                className="flex-1 px-4 sm:px-5 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/30 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-orange-400 hover:shadow-[0_8px_24px_rgba(255,99,71,0.15)] focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all cursor-pointer font-medium appearance-none"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center',
+                  paddingRight: '32px',
+                }}
+              >
+                <option value="">All Types</option>
+                {categories.map((cat) => (
+                  <option key={cat.category} value={cat.category}>
+                    {cat.category} ({cat.product_count})
+                  </option>
+                ))}
+              </select>
+
+              {/* All Creators Dropdown */}
+              <select
+                value={filters.creator}
+                onChange={(e) => handleFilterChange("creator", e.target.value)}
+                className="flex-1 px-4 sm:px-5 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/30 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-orange-400 hover:shadow-[0_8px_24px_rgba(255,99,71,0.15)] focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all cursor-pointer font-medium appearance-none"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center',
+                  paddingRight: '32px',
+                }}
+              >
+                <option value="">All Creators</option>
+                {creators.map((creator) => (
+                  <option key={creator.id} value={creator.name}>
+                    {creator.name} ({creator.product_count})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Row 2: View tabs and Price Range button */}
+          <div className="flex gap-2 sm:gap-3 items-center overflow-x-auto overflow-y-visible scrollbar-hide pb-2 xs:pb-0 -mx-4 xs:mx-0 px-4 xs:px-0">
+            <button
+              onClick={() => handleViewChange("trending")}
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${
+                activeView === "trending"
+                  ? "bg-gray-800 text-white border-purple-500 shadow-[0_8px_20px_rgba(147,51,234,0.3)]"
+                  : "bg-gray-800 text-white border-white/20 hover:border-purple-400/50 hover:bg-gray-700"
+              }`}
+              title="View trending products"
+            >
+              <TrendingUp className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "trending" ? "text-purple-500" : "text-white/60"}`} />
+              <span className="font-normal">Trending</span>
             </button>
+            <button
+              onClick={() => handleViewChange("new")}
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${
+                activeView === "new"
+                  ? "bg-gray-800 text-white border-blue-500 shadow-[0_8px_20px_rgba(59,130,246,0.3)]"
+                  : "bg-gray-800 text-white border-white/20 hover:border-blue-400/50 hover:bg-gray-700"
+              }`}
+              title="View new arrivals"
+            >
+              <Zap className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "new" ? "text-blue-500" : "text-white/60"}`} />
+              <span className="font-normal">New</span>
+            </button>
+            <button
+              onClick={() => handleViewChange("popular")}
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${
+                activeView === "popular"
+                  ? "bg-gray-800 text-white border-red-500 shadow-[0_8px_20px_rgba(220,38,38,0.3)]"
+                  : "bg-gray-800 text-white border-white/20 hover:border-red-400/50 hover:bg-gray-700"
+              }`}
+              title="View popular products"
+            >
+              <Heart className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "popular" ? "text-red-500" : "text-white/60"}`} />
+              <span className="font-normal">Popular</span>
+            </button>
+
           </div>
         </div>
       </div>
@@ -351,24 +346,6 @@ function ProductsContent() {
 
       {/* Main Content - Full Width without Sidebar */}
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
-        {/* Mobile Filter Button - Visible only on mobile */}
-        <div className="lg:hidden mb-4">
-          <button
-            onClick={() => setIsMobileFiltersOpen(true)}
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 border border-orange-400 rounded-lg px-4 py-3 font-extrabold text-white hover:shadow-[0_12px_30px_rgba(255,99,71,0.3)] transition-all flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            Show Filters
-            {(filters.creator || filters.minPrice || filters.maxPrice) && (
-              <span className="bg-white text-orange-600 text-xs font-extrabold px-2 py-1 rounded-full">
-                {(filters.creator ? 1 : 0) + (filters.minPrice ? 1 : 0) + (filters.maxPrice ? 1 : 0)}
-              </span>
-            )}
-          </button>
-        </div>
-
         {/* Products Grid or Loading/Empty State */}
         {loading ? (
           <ProductsLoading message="Discovering amazing products..." />
@@ -392,22 +369,6 @@ function ProductsContent() {
         )}
       </div>
 
-      {/* Mobile Filters Drawer */}
-      <MobileFiltersDrawer
-        isOpen={isMobileFiltersOpen}
-        onClose={() => setIsMobileFiltersOpen(false)}
-        filters={{
-          creator: filters.creator,
-          minPrice: filters.minPrice,
-          maxPrice: filters.maxPrice,
-        }}
-        creators={creators}
-        handleFilterChange={(key, value) => {
-          const newFilters = { ...filters, [key]: value };
-          setFilters(newFilters);
-        }}
-        clearFilters={clearFilters}
-      />
 
       {/* Custom Scrollbar Styling for Select Elements */}
       <style jsx global>{`
