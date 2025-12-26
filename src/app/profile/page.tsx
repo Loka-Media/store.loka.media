@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, formatDate, checkoutAPI, addressAPI, Address } from '@/lib/api';
-import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus, ChevronDown, ChevronUp, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import CreativeLoader from '@/components/CreativeLoader';
+import GradientTitle from '@/components/ui/GradientTitle';
 
 interface OrderItem {
   product_id: number;
@@ -111,76 +112,100 @@ export default function ProfilePage() {
 
   if (!isAuthenticated || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
+      <div className="min-h-screen bg-black">
         <CreativeLoader variant="default" message="Loading your profile..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-black">My Profile</h1>
-          <p className="text-gray-800 font-bold mt-2 text-lg">Manage your account and view your order history</p>
+    <div className="min-h-screen bg-black">
+      {/* Header */}
+      <div className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="pb-6 sm:pb-8 pt-6 sm:pt-8">
+            <GradientTitle text="My Profile" size="lg" />
+            <p className="mt-2 text-xs sm:text-sm text-gray-400 font-medium">
+              Manage your account and view your order history
+            </p>
+          </div>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Overview */}
-        <div className="bg-white border-4 border-black rounded-2xl p-8 mb-8 shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-          <div className="flex flex-col md:flex-row items-start justify-between gap-6">
-            <div className="flex items-center space-x-6">
-              <div className="bg-gradient-to-br from-purple-400 to-pink-400 border-4 border-black rounded-2xl p-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-                <User className="w-10 h-10 text-white" />
+        <div className="gradient-border-white-top p-6 sm:p-8 mb-8">
+          {/* Top Row - Member Since & Edit Button */}
+          <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/10">
+            <div />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center bg-white/5 border border-white/20 rounded-lg px-3 py-1.5">
+                <Calendar className="w-4 h-4 mr-2 text-white/70" />
+                <span className="text-white/80 text-xs sm:text-sm font-medium">Member Since 2024</span>
               </div>
-              <div>
-                <h2 className="text-2xl font-extrabold text-black">{user?.name}</h2>
-                <p className="text-gray-700 font-bold text-lg">@{user?.username}</p>
-                <div className="flex flex-wrap items-center gap-4 mt-3 text-sm font-bold">
-                  <div className="flex items-center bg-blue-100 border-2 border-black rounded-lg px-3 py-1">
-                    <Mail className="w-4 h-4 mr-2 text-black" />
-                    {user?.email}
+              <Link
+                href="/profile/edit"
+                className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2 whitespace-nowrap"
+              >
+                <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Edit Profile</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Main Content - Avatar, Name, and Contact Badges */}
+          <div className="flex flex-col sm:flex-row items-start gap-6">
+            {/* Left Section - Avatar + Name/Username */}
+            <div>
+              <div className="flex items-start gap-4 sm:gap-6 mb-6">
+                {/* Avatar */}
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-white/20 bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                    <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                   </div>
-                  <div className="flex items-center bg-green-100 border-2 border-black rounded-lg px-3 py-1">
-                    <Phone className="w-4 h-4 mr-2 text-black" />
-                    {user?.phone}
-                  </div>
-                  <div className="flex items-center bg-yellow-100 border-2 border-black rounded-lg px-3 py-1">
-                    <Calendar className="w-4 h-4 mr-2 text-black" />
-                    Member since 2024
-                  </div>
+                </div>
+
+                {/* User Details */}
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white">{user?.name}</h2>
+                  <p className="text-xs sm:text-sm text-orange-400 font-medium mt-1">@{user?.username}</p>
+                </div>
+              </div>
+
+              {/* Contact Info Badges - Horizontal Row */}
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center bg-white/5 border border-white/20 rounded-lg px-4 py-2">
+                  <Phone className="w-4 h-4 mr-2 text-white/70" />
+                  <span className="text-white/80 text-xs sm:text-sm font-medium">{user?.phone || 'Not provided'}</span>
+                </div>
+                <div className="flex items-center bg-white/5 border border-white/20 rounded-lg px-4 py-2">
+                  <Mail className="w-4 h-4 mr-2 text-white/70" />
+                  <span className="text-white/80 text-xs sm:text-sm font-medium">{user?.email}</span>
                 </div>
               </div>
             </div>
-            <Link
-              href="/profile/edit"
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-lg"
-            >
-              <Edit2 className="w-5 h-5 mr-2" />
-              Edit Profile
-            </Link>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="bg-white border-4 border-black rounded-2xl p-2 mb-8 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
-          <nav className="flex space-x-2">
+        <div className="gradient-border-white-top p-2 sm:p-3 mb-8">
+          <nav className="flex gap-2">
             {[
-              { key: 'overview', label: 'Overview', icon: User, gradient: 'from-purple-300 to-pink-300' },
-              { key: 'orders', label: 'Order History', icon: Package, gradient: 'from-blue-300 to-purple-300' },
-              { key: 'addresses', label: 'Addresses', icon: MapPin, gradient: 'from-green-300 to-teal-300' },
-            ].map(({ key, label, icon: Icon, gradient }) => (
+              { key: 'overview', label: 'Overview', icon: User },
+              { key: 'orders', label: 'Order History', icon: Package },
+              { key: 'addresses', label: 'Addresses', icon: MapPin },
+            ].map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`flex-1 py-3 px-4 font-extrabold text-sm flex items-center justify-center rounded-xl border-2 border-black transition-all ${
+                className={`flex-1 py-3 sm:py-3.5 px-4 sm:px-6 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 rounded-lg transition-all ${
                   activeTab === key
-                    ? `bg-gradient-to-r ${gradient} text-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] translate-x-[-2px] translate-y-[-2px]`
-                    : 'bg-white text-gray-700 hover:bg-yellow-100'
+                    ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg'
+                    : 'border border-white/20 text-gray-400 hover:border-white/40 hover:text-gray-300 bg-white/5'
                 }`}
               >
-                <Icon className="w-5 h-5 mr-2" />
-                {label}
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>{label}</span>
               </button>
             ))}
           </nav>
@@ -188,39 +213,39 @@ export default function ProfilePage() {
 
         {/* Tab Content */}
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-blue-200 to-blue-300 border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all cursor-pointer">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="gradient-border-white-top p-6 sm:p-8 hover:bg-white/5 transition-all">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-extrabold text-black">{orders.length}</p>
-                  <p className="text-black font-bold text-sm mt-1">Total Orders</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-white">{orders.length}</p>
+                  <p className="text-white/60 font-medium text-xs sm:text-sm mt-2">Total Orders</p>
                 </div>
-                <div className="bg-blue-500 border-4 border-black rounded-xl p-3">
-                  <Package className="w-8 h-8 text-white" />
+                <div className="bg-blue-500/20 border border-blue-400/50 rounded-lg p-3">
+                  <Package className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-200 to-green-300 border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all cursor-pointer">
+            <div className="gradient-border-white-top p-6 sm:p-8 hover:bg-white/5 transition-all">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-extrabold text-black">{addresses.length}</p>
-                  <p className="text-black font-bold text-sm mt-1">Saved Addresses</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-white">{addresses.length}</p>
+                  <p className="text-white/60 font-medium text-xs sm:text-sm mt-2">Saved Addresses</p>
                 </div>
-                <div className="bg-green-500 border-4 border-black rounded-xl p-3">
-                  <MapPin className="w-8 h-8 text-white" />
+                <div className="bg-green-500/20 border border-green-400/50 rounded-lg p-3">
+                  <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-200 to-purple-300 border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all cursor-pointer">
+            <div className="gradient-border-white-top p-6 sm:p-8 hover:bg-white/5 transition-all">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-4xl font-extrabold text-black capitalize">{user?.role || 'User'}</p>
-                  <p className="text-black font-bold text-sm mt-1">Account Type</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-white capitalize">{user?.role || 'User'}</p>
+                  <p className="text-white/60 font-medium text-xs sm:text-sm mt-2">Account Type</p>
                 </div>
-                <div className="bg-purple-500 border-4 border-black rounded-xl p-3">
-                  <User className="w-8 h-8 text-white" />
+                <div className="bg-purple-500/20 border border-purple-400/50 rounded-lg p-3">
+                  <User className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
                 </div>
               </div>
             </div>
@@ -228,65 +253,73 @@ export default function ProfilePage() {
         )}
 
         {activeTab === 'orders' && (
-          <div className="bg-white border-4 border-black rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)] overflow-hidden">
-            <div className="px-6 py-5 bg-gradient-to-r from-blue-200 to-purple-200 border-b-4 border-black">
-              <h3 className="text-2xl font-extrabold text-black">Recent Orders</h3>
+          <div className="gradient-border-white-top overflow-hidden">
+            <div className="px-6 sm:px-8 py-6 border-b border-white/10">
+              <h3 className="text-xl sm:text-2xl font-bold text-white">Recent Orders</h3>
             </div>
             {orders.length === 0 ? (
-              <div className="p-12 text-center">
-                <div className="bg-gradient-to-br from-blue-300 to-purple-400 border-4 border-black rounded-2xl p-8 inline-block mb-6">
-                  <Package className="w-16 h-16 text-black mx-auto" />
+              <div className="p-8 sm:p-12 text-center">
+                <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-8 inline-block mb-6">
+                  <Package className="w-12 h-12 sm:w-16 sm:h-16 text-blue-400 mx-auto" />
                 </div>
-                <p className="text-2xl font-extrabold text-black mb-3">No orders yet</p>
+                <p className="text-xl sm:text-2xl font-bold text-white mb-4">No orders yet</p>
                 <Link
                   href="/products"
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-lg"
+                  className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
                 >
                   Start Shopping
                 </Link>
               </div>
             ) : (
-              <div className="space-y-4 p-4">
+              <div className="space-y-4 p-4 sm:p-6">
                 {orders.map((order) => {
                   const isExpanded = expandedOrders.has(order.id);
                   return (
-                    <div key={order.id} className="bg-gradient-to-br from-yellow-50 to-pink-50 rounded-2xl border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] transition-all overflow-hidden">
+                    <div key={order.id} className="gradient-border-white-top rounded-lg overflow-hidden">
                       {/* Compact Order Header */}
                       <div
-                        className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/50 transition-colors"
+                        className="flex items-center justify-between p-4 sm:p-6 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/10"
                         onClick={() => toggleOrderExpansion(order.id)}
                       >
-                        <div className="flex items-center space-x-4">
-                          <div className="bg-purple-400 border-2 border-black rounded-lg p-2">
-                            <Package className="w-6 h-6 text-white" />
+                        <div className="flex items-center gap-4">
+                          <div className="bg-purple-500/20 border border-purple-400/50 rounded-lg p-2">
+                            <Package className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                           </div>
                           <div>
-                            <p className="font-extrabold text-black text-lg">
+                            <p className="font-bold text-white text-sm sm:text-base">
                               Order #{order.order_number}
                             </p>
-                            <p className="text-sm font-bold text-gray-700">
+                            <p className="text-xs sm:text-sm text-white/60 mt-1">
                               {formatDate(order.created_at)} • {order.item_count} item(s)
                             </p>
-                            <p className="text-sm font-bold text-gray-700">
-                              Payment: {order.payment_method.toUpperCase()}
+                            <p className="text-xs sm:text-sm text-white/60">
+                              {order.payment_method.toUpperCase()}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center gap-3 sm:gap-4">
                           <div className="text-right">
-                            <p className="font-extrabold text-2xl text-black">
+                            <p className="font-bold text-lg sm:text-xl text-white">
                               {formatPrice(order.total_amount)}
                             </p>
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold border-2 border-black ${getStatusColor(order.status)}`}>
+                            <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold border mt-1 ${
+                              order.status.toLowerCase() === 'pending'
+                                ? 'bg-yellow-500/10 border-yellow-400/50 text-yellow-400'
+                                : order.status.toLowerCase() === 'processing'
+                                ? 'bg-blue-500/10 border-blue-400/50 text-blue-400'
+                                : order.status.toLowerCase() === 'completed'
+                                ? 'bg-green-500/10 border-green-400/50 text-green-400'
+                                : 'bg-red-500/10 border-red-400/50 text-red-400'
+                            }`}>
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </span>
                           </div>
-                          <div className="bg-white border-2 border-black rounded-full p-2">
+                          <div className="bg-white/10 border border-white/20 rounded-full p-2">
                             {isExpanded ? (
-                              <ChevronUp className="w-5 h-5 text-black" />
+                              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             ) : (
-                              <ChevronDown className="w-5 h-5 text-black" />
+                              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             )}
                           </div>
                         </div>
@@ -294,20 +327,20 @@ export default function ProfilePage() {
 
                       {/* Expandable Order Details */}
                       {isExpanded && (
-                        <div className="border-t-4 border-black p-6 bg-white">
+                        <div className="border-t border-white/10 p-4 sm:p-6 space-y-4">
                           {/* Order Items */}
                           {order.order_items && order.order_items.length > 0 && (
-                            <div className="mb-4">
-                              <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-                                <Package className="w-4 h-4 mr-2 text-indigo-600" />
+                            <div>
+                              <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                <Package className="w-4 h-4 mr-2 text-purple-400" />
                                 Items Ordered
                               </h4>
                               <div className="space-y-3">
                                 {order.order_items.map((item, index) => (
-                                  <div key={index} className="bg-white rounded-lg p-3 border border-gray-200 flex items-center space-x-3 hover:bg-gray-50 transition-colors cursor-pointer group">
-                                    <Link 
-                                      href={`/products/${item.product_id}`} 
-                                      className="flex items-center space-x-3 flex-1"
+                                  <div key={index} className="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center gap-3 hover:bg-white/10 transition-colors cursor-pointer group">
+                                    <Link
+                                      href={`/products/${item.product_id}`}
+                                      className="flex items-center gap-3 flex-1"
                                     >
                                       <div className="flex-shrink-0 relative">
                                         {item.image_url ? (
@@ -315,7 +348,7 @@ export default function ProfilePage() {
                                             <img
                                               src={item.image_url}
                                               alt={item.product_name}
-                                              className="w-12 h-12 object-cover rounded-md border border-gray-200 group-hover:border-indigo-300 transition-colors"
+                                              className="w-12 h-12 object-cover rounded-md border border-white/20 group-hover:border-purple-400/50 transition-colors"
                                               loading="lazy"
                                               onLoad={() => {
                                                 console.log('✅ Image loaded successfully:', item.image_url);
@@ -341,32 +374,32 @@ export default function ProfilePage() {
                                               style={{ display: loadingImages.has(`${item.variant_id}-${item.product_id}`) ? 'none' : 'block' }}
                                             />
                                             {loadingImages.has(`${item.variant_id}-${item.product_id}`) && (
-                                              <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center animate-pulse">
-                                                <div className="w-6 h-6 bg-gray-300 rounded animate-pulse"></div>
+                                              <div className="w-12 h-12 bg-white/10 rounded-md flex items-center justify-center animate-pulse">
+                                                <div className="w-6 h-6 bg-white/20 rounded animate-pulse"></div>
                                               </div>
                                             )}
                                           </>
                                         ) : (
-                                          <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center group-hover:bg-gray-300 transition-colors">
-                                            <Package className="w-6 h-6 text-gray-400" />
+                                          <div className="w-12 h-12 bg-white/10 rounded-md flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                                            <Package className="w-6 h-6 text-white/40" />
                                           </div>
                                         )}
                                       </div>
                                       <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-gray-900 truncate text-sm group-hover:text-indigo-600 transition-colors">
+                                        <p className="font-medium text-white/90 truncate text-sm group-hover:text-white transition-colors">
                                           {item.product_name}
                                         </p>
-                                        <div className="flex items-center space-x-2 text-xs text-gray-500">
+                                        <div className="flex items-center gap-2 text-xs text-white/50 mt-1">
                                           {item.size && <span>Size: {item.size}</span>}
                                           {item.color && <span>Color: {item.color}</span>}
                                         </div>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-white/50">
                                           Qty: {item.quantity} × {formatPrice(parseFloat(item.price))}
                                         </p>
                                       </div>
                                     </Link>
                                     <div className="text-right">
-                                      <p className="font-semibold text-gray-900 text-sm">
+                                      <p className="font-semibold text-white/90 text-sm">
                                         {formatPrice(parseFloat(item.total_price) || (parseFloat(item.price) * item.quantity))}
                                       </p>
                                     </div>
@@ -377,14 +410,14 @@ export default function ProfilePage() {
                           )}
 
                           {/* Order Summary */}
-                          <div className="bg-white rounded-lg p-3 border border-gray-200 mb-4">
-                            <h5 className="text-sm font-semibold text-gray-900 mb-2">Order Summary</h5>
-                            <div className="space-y-1 text-sm">
+                          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <h5 className="text-sm font-semibold text-white mb-3">Order Summary</h5>
+                            <div className="space-y-2 text-sm text-white/70">
                               <div className="flex justify-between">
-                                <span className="text-gray-600">Subtotal:</span>
-                                <span className="text-gray-900">
+                                <span>Subtotal:</span>
+                                <span className="text-white/90">
                                   {formatPrice(
-                                    order.order_items?.reduce((sum, item) => 
+                                    order.order_items?.reduce((sum, item) =>
                                       sum + (parseFloat(item.total_price) || (parseFloat(item.price) * item.quantity)), 0
                                     ) || 0
                                   )}
@@ -392,34 +425,34 @@ export default function ProfilePage() {
                               </div>
                               {order.shipping_cost && order.shipping_cost > 0 && (
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600">Shipping:</span>
-                                  <span className="text-gray-900">{formatPrice(order.shipping_cost)}</span>
+                                  <span>Shipping:</span>
+                                  <span className="text-white/90">{formatPrice(order.shipping_cost)}</span>
                                 </div>
                               )}
                               {(order.tax_amount > 0 || order.admin_fee > 0) && (
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600">Tax & Fees:</span>
-                                  <span className="text-gray-900">
+                                  <span>Tax & Fees:</span>
+                                  <span className="text-white/90">
                                     {formatPrice((order.tax_amount || 0) + (order.admin_fee || 0))}
                                   </span>
                                 </div>
                               )}
-                              <div className="flex justify-between font-semibold pt-1 border-t border-gray-200">
-                                <span className="text-gray-900">Total:</span>
-                                <span className="text-indigo-600">{formatPrice(order.total_amount)}</span>
+                              <div className="flex justify-between font-semibold pt-2 border-t border-white/10 text-white">
+                                <span>Total:</span>
+                                <span className="text-orange-400">{formatPrice(order.total_amount)}</span>
                               </div>
                             </div>
                           </div>
 
                           {/* Shipping Address */}
                           {order.shipping_address && (
-                            <div className="bg-white rounded-lg p-3 border border-gray-200">
-                              <h5 className="text-sm font-semibold text-gray-900 mb-2 flex items-center">
-                                <MapPin className="w-4 h-4 mr-1 text-green-600" />
+                            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                              <h5 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                <MapPin className="w-4 h-4 mr-2 text-green-400" />
                                 Shipping Address
                               </h5>
-                              <div className="text-sm text-gray-600 space-y-0.5">
-                                <p className="font-medium text-gray-900">{order.shipping_address.name}</p>
+                              <div className="text-sm text-white/70 space-y-1">
+                                <p className="font-medium text-white/90">{order.shipping_address.name}</p>
                                 <p>{order.shipping_address.address1}</p>
                                 {order.shipping_address.address2 && <p>{order.shipping_address.address2}</p>}
                                 <p>{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.zip}</p>
@@ -438,52 +471,53 @@ export default function ProfilePage() {
         )}
 
         {activeTab === 'addresses' && (
-          <div className="bg-white border-4 border-black rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)] overflow-hidden">
-            <div className="px-6 py-5 bg-gradient-to-r from-green-200 to-teal-200 border-b-4 border-black flex items-center justify-between">
-              <h3 className="text-2xl font-extrabold text-black">Saved Addresses</h3>
+          <div className="gradient-border-white-top overflow-hidden">
+            <div className="px-6 sm:px-8 py-6 border-b border-white/10 flex items-center justify-between">
+              <h3 className="text-xl sm:text-2xl font-bold text-white">Saved Addresses</h3>
               <Link
                 href="/addresses"
-                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-400 to-pink-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+                className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Address
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Add Address</span>
+                <span className="sm:hidden">Add</span>
               </Link>
             </div>
             {addresses.length === 0 ? (
-              <div className="p-12 text-center">
-                <div className="bg-gradient-to-br from-green-300 to-teal-400 border-4 border-black rounded-2xl p-8 inline-block mb-6">
-                  <MapPin className="w-16 h-16 text-black mx-auto" />
+              <div className="p-8 sm:p-12 text-center">
+                <div className="bg-green-500/10 border border-green-400/30 rounded-lg p-8 inline-block mb-6">
+                  <MapPin className="w-12 h-12 sm:w-16 sm:h-16 text-green-400 mx-auto" />
                 </div>
-                <p className="text-2xl font-extrabold text-black mb-3">No addresses saved</p>
+                <p className="text-xl sm:text-2xl font-bold text-white mb-4">No addresses saved</p>
                 <Link
                   href="/addresses"
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-400 border-4 border-black text-white font-extrabold rounded-xl hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-lg"
+                  className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
                 >
                   Add Your First Address
                 </Link>
               </div>
             ) : (
-              <div className="p-4 space-y-4">
+              <div className="p-4 sm:p-6 space-y-4">
                 {addresses.map((address) => (
-                  <div key={address.id} className="bg-gradient-to-br from-green-50 to-teal-50 border-4 border-black rounded-2xl p-6 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-                    <div className="flex items-start justify-between">
+                  <div key={address.id} className="gradient-border-white-top rounded-lg p-4 sm:p-6 hover:bg-white/5 transition-all">
+                    <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="font-extrabold text-black text-lg mb-2">{address.name}</p>
-                        <p className="text-gray-700 font-bold">{address.address1}</p>
-                        {address.address2 && <p className="text-gray-700 font-bold">{address.address2}</p>}
-                        <p className="text-gray-700 font-bold">
+                        <p className="font-bold text-white text-base sm:text-lg mb-2">{address.name}</p>
+                        <p className="text-white/70 font-medium text-xs sm:text-sm">{address.address1}</p>
+                        {address.address2 && <p className="text-white/70 font-medium text-xs sm:text-sm">{address.address2}</p>}
+                        <p className="text-white/70 font-medium text-xs sm:text-sm">
                           {address.city}, {address.state} {address.zip}
                         </p>
-                        <p className="text-gray-700 font-bold">{address.country}</p>
-                        {address.phone && <p className="text-gray-700 font-bold mt-2">{address.phone}</p>}
+                        <p className="text-white/70 font-medium text-xs sm:text-sm">{address.country}</p>
+                        {address.phone && <p className="text-white/70 font-medium text-xs sm:text-sm mt-2">{address.phone}</p>}
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex flex-col gap-2">
                         {address.is_default && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold bg-green-300 text-black border-2 border-black mb-2">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-400 border border-green-400/50">
                             ✓ Default
                           </span>
                         )}
-                        <p className="text-xs font-extrabold text-gray-700 capitalize bg-teal-100 border-2 border-black rounded-lg px-2 py-1">
+                        <p className="text-xs font-semibold text-white/70 capitalize bg-white/10 border border-white/20 rounded-lg px-2 py-1">
                           {address.address_type} address
                         </p>
                       </div>

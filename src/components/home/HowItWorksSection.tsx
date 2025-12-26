@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GradientText } from "@/components/ui/GradientText";
-import { GradientCardLayout } from "@/components/ui/GradientCardLayout";
 
 export function HowItWorksSection() {
   const iconHoverStyles = `
@@ -80,7 +79,7 @@ export function HowItWorksSection() {
                 className="relative group transition-all duration-300 ease-out"
               >
                 {/* Card with Gradient Border */}
-                <GradientCardLayout>
+                <div className="gradient-border-white-top p-6 md:p-8">
                   <div className="w-full h-full flex flex-col">
                     {/* Top Row: Icon (left) and Step Number (right) */}
                     <div className="flex items-start justify-between w-full mb-4">
@@ -110,7 +109,7 @@ export function HowItWorksSection() {
                       </GradientText>
                     </div>
                   </div>
-                </GradientCardLayout>
+                </div>
               </div>
             ))}
           </div>

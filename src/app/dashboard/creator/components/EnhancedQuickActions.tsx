@@ -1,74 +1,65 @@
 'use client';
 
-import { ShoppingBag, Store, Palette, FileImage, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { TotalProductsIcon, CustomCatalogIcon, LokaProductsIcon, DesignCanvasIcon, DesignFilesIcon, ArrowIcon } from './QuickActionIcons';
 
 export function EnhancedQuickActions() {
   const actions = [
     {
       href: '/dashboard/creator/catalog',
-      icon: ShoppingBag,
+      icon: CustomCatalogIcon,
       title: 'Custom Catalog',
       description: 'Customizable products',
-      gradient: 'from-yellow-200 to-orange-300',
-      iconBg: 'bg-orange-500',
+      iconColor: 'text-orange-400',
     },
     {
       href: '/dashboard/creator/loka-products',
-      icon: Store,
+      icon: LokaProductsIcon,
       title: 'Loka Products',
       description: 'Browse & publish products',
-      gradient: 'from-pink-200 to-purple-300',
-      iconBg: 'bg-purple-500',
+      iconColor: 'text-purple-400',
     },
     {
       href: '/dashboard/creator/canvas',
-      icon: Palette,
+      icon: DesignCanvasIcon,
       title: 'Design Canvas',
       description: 'Create stunning designs',
-      gradient: 'from-green-200 to-teal-300',
-      iconBg: 'bg-teal-500',
+      iconColor: 'text-green-400',
     },
     {
       href: '/dashboard/creator/files',
-      icon: FileImage,
+      icon: DesignFilesIcon,
       title: 'Design Files',
       description: 'Manage your assets',
-      gradient: 'from-blue-200 to-indigo-300',
-      iconBg: 'bg-indigo-500',
+      iconColor: 'text-blue-400',
     },
   ];
 
   return (
-    <div className="mb-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-extrabold text-black">Quick Actions</h2>
-        <p className="text-gray-700 font-bold mt-1">Jump to your most-used tools</p>
+    <div className="mb-12">
+      <div className="mb-8">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Quick Actions</h2>
+        <p className="text-sm sm:text-base text-gray-400 font-medium mt-2">Jump to your most-used tools</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {actions.map((action, index) => (
           <Link href={action.href} key={index}>
-            <div className={`relative group overflow-hidden rounded-2xl border-4 border-black bg-gradient-to-br ${action.gradient} shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-300 cursor-pointer`}>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`${action.iconBg} border-4 border-black rounded-xl p-3 group-hover:scale-110 transition-transform duration-300`}>
-                    <action.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="bg-white border-2 border-black rounded-full p-2 group-hover:bg-black group-hover:translate-x-[4px] group-hover:translate-y-[-4px] transition-all duration-300">
-                    <ArrowRight className="w-4 h-4 text-black group-hover:text-white" />
-                  </div>
+            <div className="gradient-border-white-top p-6 sm:p-8 group hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300 flex flex-col h-full cursor-pointer">
+              <div className="flex items-start justify-between mb-6">
+                <div className={`${action.iconColor} opacity-70 group-hover:opacity-100 transition-opacity duration-300 w-8 h-8 sm:w-10 sm:h-10`}>
+                  <action.icon />
                 </div>
-                <h3 className="text-xl font-extrabold text-black mb-2">
-                  {action.title}
-                </h3>
-                <p className="text-sm font-bold text-black/70">
-                  {action.description}
-                </p>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-x-0 group-hover:translate-x-1">
+                  <ArrowIcon />
+                </div>
               </div>
-
-              {/* Hover accent */}
-              <div className="h-2 bg-black/20 group-hover:bg-black/30 transition-colors duration-300"></div>
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-white/80 transition-colors">
+                {action.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-400 font-medium">
+                {action.description}
+              </p>
             </div>
           </Link>
         ))}

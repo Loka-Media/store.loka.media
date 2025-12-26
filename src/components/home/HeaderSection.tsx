@@ -2,7 +2,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { GradientCardLayout } from "@/components/ui/GradientCardLayout";
 
 interface HeroSectionProps {
   isAuthenticated: boolean;
@@ -85,7 +84,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {/* Stat Card 1 */}
-            <GradientCardLayout>
+            <div className="gradient-border-white-top p-6 md:p-8">
               <div className="flex flex-col h-full justify-between items-center text-center">
                 <div
                   className="font-medium"
@@ -109,10 +108,10 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   $2M+
                 </div>
               </div>
-            </GradientCardLayout>
+            </div>
 
             {/* Stat Card 2 */}
-            <GradientCardLayout>
+            <div className="gradient-border-white-top p-6 md:p-8">
               <div className="flex flex-col h-full justify-between items-center text-center">
                 <div
                   className="font-medium"
@@ -136,10 +135,10 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   10K+
                 </div>
               </div>
-            </GradientCardLayout>
+            </div>
 
             {/* Stat Card 3 */}
-            <GradientCardLayout>
+            <div className="gradient-border-white-top p-6 md:p-8">
               <div className="flex flex-col h-full justify-between items-center text-center">
                 <div
                   className="font-medium"
@@ -163,7 +162,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   90%
                 </div>
               </div>
-            </GradientCardLayout>
+            </div>
           </div>
         </div>
       </div>

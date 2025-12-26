@@ -136,3 +136,59 @@ h6 {
 .animate-pulse-gentle {
   animation: pulse 2s ease-in-out infinite;
 }
+
+/* Gradient Border - White to Transparent (Top to Bottom) */
+.gradient-border-white-top {
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background-image: linear-gradient(black, black), linear-gradient(180deg, #FFFFFF 0%, transparent 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Gradient Border - Transparent to White (Top to Bottom) */
+.gradient-border-white-bottom {
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background-image: linear-gradient(black, black), linear-gradient(180deg, transparent 0%, #FFFFFF 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Gradient Border - White to Transparent (Left to Right) */
+.gradient-border-white-left {
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background-image: linear-gradient(black, black), linear-gradient(90deg, #FFFFFF 0%, transparent 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Gradient Border - Transparent to White (Left to Right) */
+.gradient-border-white-right {
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background-image: linear-gradient(black, black), linear-gradient(90deg, transparent 0%, #FFFFFF 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Product Card Title - Override h3 defaults */
+h3.text-sm {
+  font-size: 0.875rem !important;
+  line-height: 1.25rem;
+  letter-spacing: normal;
+}
+
+/* Quick Actions Card Title - Override h3 defaults */
+h3.text-lg {
+  font-size: 1.25rem !important;
+  line-height: 1.75rem;
+  letter-spacing: normal;
+}
+
+h3.sm\:text-xl {
+  font-size: 1.5rem !important;
+  line-height: 2rem;
+  letter-spacing: normal;
+}

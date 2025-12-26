@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Share2, ZoomIn, X, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, X, Maximize2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface EnhancedProductImageGalleryProps {
@@ -41,10 +41,10 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {/* Main Image */}
         <div className="relative group">
-          <div className="aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 border-4 border-black relative shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[12px_12px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]">
+          <div className="aspect-square overflow-hidden rounded-xl bg-white/5 border border-white/10 relative transition-all hover:border-white/20">
             <Image
               src={images[selectedImageIndex]}
               alt={productName}
@@ -65,41 +65,41 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white border-4 border-black rounded-full flex items-center justify-center text-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 bg-white/10 border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all opacity-0 group-hover:opacity-100"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white border-4 border-black rounded-full flex items-center justify-center text-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[-2px] transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 bg-white/10 border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all opacity-0 group-hover:opacity-100"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </>
             )}
 
             {/* Action Buttons */}
-            <div className="absolute top-4 right-4 flex gap-2">
+            <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex gap-2">
               <button
                 onClick={() => setShowFullscreen(true)}
-                className="w-12 h-12 bg-white/90 backdrop-blur-sm border-2 border-black rounded-xl flex items-center justify-center text-black hover:bg-yellow-300 transition-all hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                className="w-10 h-10 sm:w-11 sm:h-11 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/20 transition-all"
                 title="Fullscreen"
               >
-                <Maximize2 className="w-5 h-5" />
+                <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={handleShare}
-                className="w-12 h-12 bg-white/90 backdrop-blur-sm border-2 border-black rounded-xl flex items-center justify-center text-black hover:bg-pink-300 transition-all hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                className="w-10 h-10 sm:w-11 sm:h-11 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/20 transition-all"
                 title="Share"
               >
-                <Share2 className="w-5 h-5" />
+                <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
             {/* Image Counter */}
             {images.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm border-2 border-white px-4 py-2 rounded-full">
-                <span className="text-white font-extrabold text-sm">
+              <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-lg">
+                <span className="text-white font-medium text-xs sm:text-sm">
                   {selectedImageIndex + 1} / {images.length}
                 </span>
               </div>
@@ -109,15 +109,15 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
 
         {/* Thumbnail Grid */}
         {images.length > 1 && (
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-5 gap-2 sm:gap-3">
             {images.map((image, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedImageIndex(index)}
-                className={`aspect-square rounded-xl overflow-hidden border-4 transition-all ${
+                className={`aspect-square rounded-lg overflow-hidden border transition-all ${
                   selectedImageIndex === index
-                    ? 'border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] scale-105'
-                    : 'border-gray-300 hover:border-black hover:scale-105'
+                    ? 'border-white/40 ring-2 ring-white/20'
+                    : 'border-white/10 hover:border-white/20'
                 }`}
               >
                 <Image
@@ -135,6 +135,7 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
             ))}
           </div>
         )}
+
       </div>
 
       {/* Fullscreen Modal */}
@@ -142,7 +143,7 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
         <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
           <button
             onClick={() => setShowFullscreen(false)}
-            className="absolute top-4 right-4 w-12 h-12 bg-white border-4 border-black rounded-full flex items-center justify-center text-black hover:bg-red-400 transition-all"
+            className="absolute top-4 right-4 w-11 h-11 bg-white/10 border border-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/20 transition-all"
           >
             <X className="w-6 h-6" />
           </button>
@@ -153,7 +154,7 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
               alt={productName}
               width={1200}
               height={1200}
-              className="w-full h-full object-contain rounded-2xl border-4 border-white"
+              className="w-full h-full object-contain rounded-lg border border-white/10"
               unoptimized
             />
 
@@ -162,15 +163,15 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-16 h-16 bg-white border-4 border-black rounded-full flex items-center justify-center text-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all"
                 >
-                  <ChevronLeft className="w-8 h-8" />
+                  <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-16 h-16 bg-white border-4 border-black rounded-full flex items-center justify-center text-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all"
                 >
-                  <ChevronRight className="w-8 h-8" />
+                  <ChevronRight className="w-6 h-6" />
                 </button>
               </>
             )}

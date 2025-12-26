@@ -15,15 +15,15 @@ export default function CreatorDashboard() {
 
   return (
     <CreatorProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50">
+      <div className="min-h-screen bg-black text-white">
         <Navigation />
 
-        <div className="max-w-7xl mx-auto pb-12">
+        <div className="max-w-7xl mx-auto pb-12 px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
           <EnhancedDashboardHeader
             connection={connection}
             onConnectPrintful={handleConnectPrintful}
           />
-          <div className="mt-8 px-4 sm:px-6 lg:px-8">
+          <div className="mt-12">
             {connection && !connection.connected ? (
               <PrintfulConnectionPrompt onConnect={handleConnectPrintful} />
             ) : (

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GradientCardLayout } from "@/components/ui/GradientCardLayout";
 
 export function TestimonialSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -117,7 +116,7 @@ export function TestimonialSection() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-center">
             {/* Left card - Small */}
             <div className="hidden md:block md:col-span-3">
-              <GradientCardLayout className="transition-all duration-300 hover:opacity-80 scale-85 origin-right">
+              <div className="gradient-border-white-top p-6 md:p-8 transition-all duration-300 hover:opacity-80 scale-85 origin-right">
                 <div className="flex flex-col h-full">
                   {/* Avatar and Quote in row */}
                   <div className="flex gap-4 mb-4">
@@ -141,12 +140,12 @@ export function TestimonialSection() {
                     </p>
                   </div>
                 </div>
-              </GradientCardLayout>
+              </div>
             </div>
 
             {/* Center card (main) - Large */}
             <div className="md:col-span-6">
-              <GradientCardLayout className="scale-100 transition-transform duration-300">
+              <div className="gradient-border-white-top p-6 md:p-8 scale-100 transition-transform duration-300">
                 <div className="flex flex-col h-full">
                   {/* Avatar and Quote in row */}
                   <div className="flex gap-6 mb-8">
@@ -170,12 +169,12 @@ export function TestimonialSection() {
                     </p>
                   </div>
                 </div>
-              </GradientCardLayout>
+              </div>
             </div>
 
             {/* Right card - Small */}
             <div className="hidden md:block md:col-span-3">
-              <GradientCardLayout className="transition-all duration-300 hover:opacity-80 scale-85 origin-left">
+              <div className="gradient-border-white-top p-6 md:p-8 transition-all duration-300 hover:opacity-80 scale-85 origin-left">
                 <div className="flex flex-col h-full">
                   {/* Avatar and Quote in row */}
                   <div className="flex gap-4 mb-4">
@@ -199,7 +198,7 @@ export function TestimonialSection() {
                     </p>
                   </div>
                 </div>
-              </GradientCardLayout>
+              </div>
             </div>
           </div>
 

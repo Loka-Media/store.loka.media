@@ -1,8 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Store, Search, Plus, Check, Loader } from 'lucide-react';
+import { Store, Search, Plus, Check, Loader2, ArrowLeft } from 'lucide-react';
 import { shopifyAPI } from '@/lib/api';
+import Link from 'next/link';
+import GradientTitle from '@/components/ui/GradientTitle';
+import { Button } from '@/components/ui/button';
 
 interface ShopifyProduct {
   id: number;
@@ -122,11 +125,13 @@ export default function LokaProductsPage() {
 
   if (loading && products.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center h-64">
-            <Loader className="w-8 h-8 animate-spin text-accent" />
-            <span className="ml-2 text-gray-600">Loading Loka products...</span>
+            <div className="text-purple-400 animate-spin mr-4">
+              <Loader2 className="w-8 h-8" />
+            </div>
+            <span className="text-gray-300 font-medium">Loading Loka products...</span>
           </div>
         </div>
       </div>
@@ -134,102 +139,110 @@ export default function LokaProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="w-14 h-14 bg-accent rounded-xl flex items-center justify-center">
-              <Store className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Loka Products</h1>
-              <p className="mt-2 text-base text-gray-600">
-                Browse and publish curated products to your marketplace
-              </p>
-            </div>
+    <div className="min-h-screen bg-black">
+      {/* Header */}
+      <div className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-6 sm:py-8">
+            <Link
+              href="/dashboard/creator"
+              className="inline-flex items-center px-4 py-2 text-white/70 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              <span className="text-sm sm:text-base font-medium">Back</span>
+            </Link>
+          </div>
+          <div className="pb-6 sm:pb-8">
+            <GradientTitle text="Loka Products" size="lg" />
+            <p className="mt-2 text-xs sm:text-sm text-gray-400 font-medium">
+              Browse and publish curated products to your marketplace
+            </p>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Messages */}
         {message && (
-          <div className={`mb-6 p-4 rounded-xl border ${
+          <div className={`mb-6 p-4 rounded-lg border ${
             message.type === 'success'
-              ? 'bg-green-50 border-green-200'
-              : 'bg-red-50 border-red-200'
+              ? 'bg-green-500/10 border-green-500/50'
+              : 'bg-red-500/10 border-red-500/50'
           }`}>
-            <div className="flex">
+            <div className="flex items-start gap-3">
               {message.type === 'success' ? (
-                <Check className="h-5 w-5 text-green-600" />
+                <Check className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
               ) : (
-                <div className="h-5 w-5 text-red-600">⚠</div>
+                <div className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5">⚠</div>
               )}
-              <div className="ml-3">
-                <p className={`text-sm font-medium ${
-                  message.type === 'success' ? 'text-green-900' : 'text-red-900'
-                }`}>
-                  {message.text}
-                </p>
-              </div>
+              <p className={`text-sm font-medium ${
+                message.type === 'success' ? 'text-green-300' : 'text-red-300'
+              }`}>
+                {message.text}
+              </p>
             </div>
           </div>
         )}
 
         {/* Search and Actions */}
-        <div className="mb-8 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <form onSubmit={handleSearch} className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
-              />
-            </div>
-          </form>
+        <div className="gradient-border-white-top p-6 sm:p-8 mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <form onSubmit={handleSearch} className="flex-1 max-w-md">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
+                />
+              </div>
+            </form>
 
-          {selectedProducts.length > 0 && (
-            <button
-              onClick={handlePublishSelected}
-              disabled={publishing.length > 0}
-              className="inline-flex items-center px-6 py-3 bg-accent text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed space-x-2 transition-colors"
-            >
-              {publishing.length > 0 ? (
-                <Loader className="w-4 h-4 animate-spin" />
-              ) : (
-                <Plus className="w-4 h-4" />
-              )}
-              <span>Publish Selected ({selectedProducts.length})</span>
-            </button>
-          )}
+            {selectedProducts.length > 0 && (
+              <button
+                onClick={handlePublishSelected}
+                disabled={publishing.length > 0}
+                className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm sm:text-base gap-2"
+              >
+                {publishing.length > 0 ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4" />
+                )}
+                <span>Publish ({selectedProducts.length})</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {products.map((product) => (
             <div
               key={product.shopify_product_id}
-              className={`bg-white rounded-xl overflow-hidden border transition-colors ${
+              className={`group gradient-border-white-top overflow-hidden transition-all ${
                 selectedProducts.includes(product.shopify_product_id)
-                  ? 'border-accent'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'ring-2 ring-purple-400'
+                  : ''
               }`}
             >
               {/* Product Image */}
-              <div className="relative h-48 bg-gray-50">
+              <div className="relative bg-black/40 overflow-hidden" style={{ aspectRatio: '1/1' }}>
                 {product.thumbnail_url || product.images?.[0] ? (
                   <img
                     src={product.thumbnail_url || product.images[0]}
                     alt={product.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Store className="w-12 h-12 text-gray-400" />
+                    <Store className="w-12 h-12 text-gray-600" />
                   </div>
                 )}
+
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 {/* Selection Checkbox */}
                 <div className="absolute top-3 left-3">
@@ -237,55 +250,56 @@ export default function LokaProductsPage() {
                     type="checkbox"
                     checked={selectedProducts.includes(product.shopify_product_id)}
                     onChange={() => handleProductSelect(product.shopify_product_id)}
-                    className="w-5 h-5 text-accent bg-white border-2 border-gray-300 rounded focus:ring-accent focus:ring-2"
+                    className="w-5 h-5 accent-purple-400 bg-white/20 border-2 border-white/40 rounded cursor-pointer"
                   />
                 </div>
 
                 {/* Published Badge */}
                 {product.is_published_by_creator && (
-                  <div className="absolute top-3 right-3 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-                    Published
+                  <div className="absolute top-3 right-3 bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-semibold border border-green-500/50">
+                    ✓ Published
                   </div>
                 )}
               </div>
 
               {/* Product Info */}
-              <div className="p-6">
-                <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 text-lg">
+              <div className="p-4 sm:p-6">
+                <h3 className="font-bold text-white mb-4 line-clamp-2 text-sm sm:text-base group-hover:text-white/80 transition-colors">
                   {product.title}
                 </h3>
 
                 {/* Actions */}
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handlePublishSingle(product.shopify_product_id)}
-                    disabled={product.is_published_by_creator || publishing.includes(product.shopify_product_id)}
-                    className={`flex-1 inline-flex items-center justify-center px-4 py-3 text-sm font-semibold rounded-xl transition-colors ${
-                      product.is_published_by_creator
-                        ? 'bg-gray-100 text-gray-600 cursor-not-allowed border border-gray-200'
-                        : publishing.includes(product.shopify_product_id)
-                        ? 'bg-accent/50 text-white cursor-not-allowed border border-accent'
-                        : 'bg-accent text-white hover:bg-accent/90'
-                    }`}
-                  >
+                <Button
+                  variant="secondary"
+                  onClick={() => handlePublishSingle(product.shopify_product_id)}
+                  disabled={product.is_published_by_creator || publishing.includes(product.shopify_product_id)}
+                  className={`w-full !px-4 !py-2.5 sm:!py-3 !text-xs sm:!text-sm !rounded-lg ${
+                    product.is_published_by_creator
+                      ? '!bg-gray-500/20 !text-gray-400 cursor-not-allowed border border-gray-500/50'
+                      : publishing.includes(product.shopify_product_id)
+                      ? '!bg-purple-500/20 !text-purple-400 cursor-not-allowed border border-purple-500/50'
+                      : ''
+                  }`}
+                >
+                  <div className="inline-flex items-center gap-2">
                     {publishing.includes(product.shopify_product_id) ? (
                       <>
-                        <Loader className="w-4 h-4 animate-spin mr-2" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         Publishing...
                       </>
                     ) : product.is_published_by_creator ? (
                       <>
-                        <Check className="w-4 h-4 mr-2" />
+                        <Check className="w-4 h-4" />
                         Published
                       </>
                     ) : (
                       <>
-                        <Plus className="w-4 h-4 mr-2" />
+                        <Plus className="w-4 h-4" />
                         Publish
                       </>
                     )}
-                  </button>
-                </div>
+                  </div>
+                </Button>
               </div>
             </div>
           ))}
@@ -293,23 +307,23 @@ export default function LokaProductsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-12 flex items-center justify-center space-x-3">
+          <div className="mt-12 flex items-center justify-center gap-3">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-6 py-3 text-sm font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-white bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               Previous
             </button>
 
-            <span className="px-6 py-3 text-sm font-medium text-gray-900 bg-white rounded-xl border border-gray-200">
-              Page {currentPage} of {totalPages}
+            <span className="px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-gray-300 bg-white/10 rounded-lg border border-white/20">
+              <span className="text-white font-bold">{currentPage}</span> of {totalPages}
             </span>
 
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-6 py-3 text-sm font-semibold text-gray-900 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-white bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               Next
             </button>
@@ -318,12 +332,12 @@ export default function LokaProductsPage() {
 
         {/* Empty State */}
         {products.length === 0 && !loading && (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Store className="w-10 h-10 text-gray-400" />
+          <div className="gradient-border-white-top p-8 sm:p-12 flex flex-col items-center justify-center text-center">
+            <div className="text-orange-400 mb-6">
+              <Store className="mx-auto w-16 h-16 sm:w-20 sm:h-20" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600 text-lg">
+            <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">No products found</h3>
+            <p className="text-sm sm:text-base text-gray-400">
               {searchTerm ? 'Try adjusting your search terms.' : 'No Loka products are available yet.'}
             </p>
           </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Package, Eye, ShoppingBag, TrendingUp } from 'lucide-react';
+import { TotalProductsIcon, ActiveProductsIcon, TotalSalesIcon, RevenueIcon } from './QuickActionIcons';
 
 interface StatsProps {
   stats: {
@@ -16,58 +16,53 @@ export function EnhancedStatsCards({ stats }: StatsProps) {
     {
       name: 'Total Products',
       value: stats.totalProducts,
-      icon: Package,
-      gradient: 'from-blue-300 to-blue-400',
-      iconBg: 'bg-blue-400',
+      icon: TotalProductsIcon,
+      iconColor: 'text-blue-400',
+      borderColor: 'from-blue-500/20 to-blue-400/10',
     },
     {
       name: 'Active Products',
       value: stats.activeProducts,
-      icon: Eye,
-      gradient: 'from-green-300 to-green-400',
-      iconBg: 'bg-green-400',
+      icon: ActiveProductsIcon,
+      iconColor: 'text-green-400',
+      borderColor: 'from-green-500/20 to-green-400/10',
     },
     {
       name: 'Total Sales',
       value: stats.totalSales,
-      icon: ShoppingBag,
-      gradient: 'from-purple-300 to-purple-400',
-      iconBg: 'bg-purple-400',
+      icon: TotalSalesIcon,
+      iconColor: 'text-purple-400',
+      borderColor: 'from-purple-500/20 to-purple-400/10',
     },
     {
       name: 'Revenue',
       value: `$${stats.revenue.toFixed(2)}`,
-      icon: TrendingUp,
-      gradient: 'from-orange-300 to-pink-400',
-      iconBg: 'bg-orange-400',
+      icon: RevenueIcon,
+      iconColor: 'text-orange-400',
+      borderColor: 'from-orange-500/20 to-orange-400/10',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-12">
       {statItems.map((item, index) => (
         <div
           key={index}
-          className={`bg-gradient-to-br ${item.gradient} border-4 border-black rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)] overflow-hidden hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-300 group cursor-pointer`}
+          className="gradient-border-white-top p-6 sm:p-8 group hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300"
         >
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <dt className="text-sm font-extrabold text-black/70 uppercase tracking-wider mb-2">
-                  {item.name}
-                </dt>
-                <dd className="text-4xl font-extrabold text-black">
-                  {item.value}
-                </dd>
-              </div>
-              <div className={`${item.iconBg} border-4 border-black rounded-xl p-4 group-hover:scale-110 transition-transform duration-300`}>
-                <item.icon className="h-8 w-8 text-white" />
-              </div>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <dt className="text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 sm:mb-3">
+                {item.name}
+              </dt>
+              <dd className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                {item.value}
+              </dd>
+            </div>
+            <div className={`${item.iconColor} opacity-60 group-hover:opacity-100 transition-opacity duration-300 h-8 w-8 sm:h-10 sm:w-10`}>
+              <item.icon />
             </div>
           </div>
-
-          {/* Bottom accent bar */}
-          <div className="h-2 bg-black/20"></div>
         </div>
       ))}
     </div>
