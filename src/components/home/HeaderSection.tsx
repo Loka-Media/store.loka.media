@@ -2,6 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { GradientText } from "@/components/ui/GradientText";
 
 interface HeroSectionProps {
   isAuthenticated: boolean;
@@ -39,22 +40,17 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
           </h1>
 
           {/* Subheading - Gradient from White to Black */}
-          <p
-            className="mb-10 md:mb-14 leading-relaxed max-w-3xl mx-auto"
+          <GradientText
+            className="block mb-10 md:mb-14 leading-relaxed max-w-3xl mx-auto"
+            gradient="linear-gradient(91.77deg, #FFFFFF 0%, #000000 136.03%)"
             style={{
               fontSize: "clamp(1rem, 2.5vw, 1.625rem)",
-              background:
-                "linear-gradient(91.77deg, #FFFFFF 0%, #000000 136.03%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              fontFamily: "Satoshi, system-ui, sans-serif",
               fontWeight: 400,
             }}
           >
             Your creator journey deserves premium marketing support and maximum
             monetization earnings on and across all social platforms.
-          </p>
+          </GradientText>
 
           {/* CTA Buttons */}
           {!isAuthenticated && (

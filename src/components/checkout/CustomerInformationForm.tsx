@@ -35,11 +35,11 @@ export const CustomerInformationForm = ({
   setSignupInfo
 }: CustomerInformationFormProps) => {
   return (
-    <div className="bg-gray-900 border border-gray-800 shadow-sm rounded-lg p-6 mb-6">
-      <h2 className="text-lg font-medium text-white mb-4 flex items-center">
+    <div className="gradient-border-white-top rounded-xl overflow-hidden p-6 sm:p-8 mb-6">
+      <div className="text-lg sm:text-xl font-bold text-white flex items-center mb-6">
         <MapPin className="w-5 h-5 mr-2" />
         Customer Information
-      </h2>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input 

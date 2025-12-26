@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import GradientTitle from '@/components/ui/GradientTitle';
 import StripePaymentForm from '@/components/StripePaymentForm';
 
 import { useCheckoutState } from '@/hooks/useCheckoutState';
@@ -341,17 +342,17 @@ export default function UnifiedCheckoutPage() {
 
   // Main checkout form
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
-          <Link href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-200 text-sm font-medium rounded-md text-gray-900 bg-white hover:bg-gray-50">
+          <GradientTitle text="Checkout" size="sm" />
+          <Link href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-900 hover:bg-gray-800 hover:border-gray-600 transition-all duration-300">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Cart
           </Link>
         </div>
 
-        <div className="lg:grid lg:grid-cols-12 lg:gap-x-12">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-x-8">
           <div className="lg:col-span-7">
             <CustomerInformationForm
               customerInfo={checkoutState.customerInfo}

@@ -40,12 +40,12 @@ export const ShippingAddressForm = ({
   handleZipCodeChange
 }: ShippingAddressFormProps) => {
   return (
-    <div className="bg-gray-900 border border-gray-800 shadow-sm rounded-lg p-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="gradient-border-white-top rounded-xl overflow-hidden p-6 sm:p-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-medium text-white">Shipping Address</h2>
+          <span className="text-lg sm:text-xl font-bold text-white block">Shipping Address</span>
           {isLoggedInUser && savedAddresses.length > 0 && !showNewAddressForm && (
-            <p className="text-sm text-gray-400 mt-1">Select an existing address or create a new one</p>
+            <p className="text-sm text-gray-400 font-medium mt-2">Select an existing address or create a new one</p>
           )}
         </div>
         {isLoggedInUser && savedAddresses.length > 0 && !showNewAddressForm && (
