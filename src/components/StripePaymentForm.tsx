@@ -3,8 +3,10 @@
 import React from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import GradientTitle from '@/components/ui/GradientTitle';
 
 // API base URL
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
@@ -83,48 +85,86 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Complete Payment</h1>
-          <p className="text-gray-600 mt-2">Order #{orderData.orderNumber}</p>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-12">
+          <GradientTitle text="Complete Payment" size="sm" />
+          <Link href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-900 hover:bg-gray-800 hover:border-gray-600 transition-all duration-300">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Cart
+          </Link>
         </div>
 
-        <div className="bg-white shadow-sm rounded-lg p-6 max-w-md mx-auto">
-          <div className="text-center mb-6">
-            <CreditCard className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
-            <h2 className="text-lg font-medium text-gray-900">Secure Payment</h2>
-            <p className="text-2xl font-bold text-indigo-600 mt-2">${totalAmount.toFixed(2)}</p>
+        {/* Payment Card */}
+        <div className="gradient-border-white-top rounded-xl overflow-hidden bg-gray-900 p-8 max-w-md mx-auto">
+          {/* Order Info */}
+          <div className="text-center mb-8">
+            <div className="bg-orange-500/20 border border-orange-500/30 rounded-full p-4 inline-block mb-4">
+              <CreditCard className="w-8 h-8 text-orange-400" />
+            </div>
+            <h2 className="text-xl font-bold text-white">Secure Payment</h2>
+            <p className="text-gray-400 text-sm font-medium mt-2">Order #{orderData.orderNumber}</p>
+            <p className="text-4xl font-bold text-orange-400 mt-4">${totalAmount.toFixed(2)}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <p className="text-sm text-gray-600 text-center">
-              Powered by Stripe - Accept payments worldwide
-            </p>
-            
-            <PaymentElement 
-              options={{
-                layout: 'tabs',
-                paymentMethodOrder: ['card', 'link']
-              }}
-            />
-            
+          {/* Payment Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Stripe Payment Element */}
+            <div className="stripe-payment-element">
+              <PaymentElement
+                options={{
+                  layout: 'tabs',
+                  paymentMethodOrder: ['card', 'link']
+                }}
+              />
+            </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading || !stripe || !elements}
-              className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Processing...' : `Pay $${totalAmount.toFixed(2)}`}
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></span>
+                  Processing...
+                </span>
+              ) : (
+                `Pay $${totalAmount.toFixed(2)}`
+              )}
             </button>
-            
+
+            {/* Test Card Info */}
             <div className="text-center">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-400 font-medium">
                 Test card: 4242 4242 4242 4242 | Any future date | Any CVC
               </p>
             </div>
+
+            {/* Powered by Stripe */}
+            <p className="text-xs text-gray-500 text-center">
+              Powered by <span className="text-gray-400">Stripe</span> - Accept payments worldwide
+            </p>
           </form>
         </div>
+
+        {/* Security Note */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-400 font-medium">
+            Your payment information is secure and encrypted
+          </p>
+        </div>
       </div>
+
+      {/* Stripe Elements Styling */}
+      <style>{`
+        .stripe-payment-element ::-webkit-autofill {
+          -webkit-box-shadow: 0 0 0 1000px #1f2937 inset !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
+      `}</style>
     </div>
   );
 }
@@ -134,9 +174,39 @@ export default function StripePaymentForm({ clientSecret, ...props }: StripePaym
   const options = {
     clientSecret,
     appearance: {
-      theme: 'stripe' as const,
+      theme: 'night' as const,
       variables: {
-        colorPrimary: '#4f46e5',
+        colorPrimary: '#f97316',
+        colorBackground: '#111827',
+        colorText: '#ffffff',
+        colorDanger: '#ef4444',
+        borderRadius: '8px',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontSizeBase: '16px',
+      },
+      rules: {
+        '.Input': {
+          backgroundColor: '#1f2937',
+          borderColor: '#374151',
+          color: '#ffffff',
+        },
+        '.Input:focus': {
+          borderColor: '#f97316',
+          boxShadow: '0 0 0 2px rgba(249, 115, 22, 0.1)',
+        },
+        '.Label': {
+          color: '#e5e7eb',
+        },
+        '.Tab': {
+          backgroundColor: '#1f2937',
+          color: '#9ca3af',
+          borderColor: '#374151',
+        },
+        '.Tab--selected': {
+          backgroundColor: '#1f2937',
+          color: '#ffffff',
+          borderColor: '#f97316',
+        },
       },
     },
   };
