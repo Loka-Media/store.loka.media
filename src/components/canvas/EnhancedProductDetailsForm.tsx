@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import {
   Save,
-  Package,
   DollarSign,
   FileText,
   Tag,
@@ -16,9 +15,13 @@ import {
   Check,
   X,
   Plus,
-  ChevronLeft
+  ChevronLeft,
+  Lightbulb,
+  CheckCircle2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import GradientTitle from '@/components/ui/GradientTitle';
+import { Button } from '@/components/ui/button';
 
 interface ProductDetailsFormProps {
   initialData: {
@@ -175,20 +178,19 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
             </button>
           )}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-            <div className="flex items-start sm:items-center gap-2 sm:gap-4">
-              <div className="p-2 sm:p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex-shrink-0">
-                <Package className="w-6 sm:w-8 h-6 sm:h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-3xl font-extrabold text-white">Product Details</h1>
-                <p className="text-xs sm:text-sm text-gray-400 font-bold">
-                  Final step before publishing to marketplace!
-                </p>
-              </div>
+            <div className="flex-1">
+              <GradientTitle
+                text="Product Details"
+                size="sm"
+                className="text-2xl sm:text-4xl"
+              />
+              <p className="text-xs sm:text-sm text-gray-400 mt-2">
+                Final step before publishing to marketplace!
+              </p>
             </div>
             <div className="hidden md:flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 px-4 py-2 rounded-lg whitespace-nowrap">
               <Check className="w-5 h-5 text-orange-400" />
-              <span className="font-bold text-orange-300">Almost Done!</span>
+              <span className="text-orange-300">Almost Done!</span>
             </div>
           </div>
         </div>
@@ -215,7 +217,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                 {mockupUrls.length === 0 && (
                   <div className="col-span-2 md:col-span-4 bg-gray-800 border border-gray-700 rounded-lg p-4 sm:p-8 text-center">
                     <ImageIcon className="w-8 sm:w-12 h-8 sm:h-12 text-gray-500 mx-auto mb-2" />
-                    <p className="text-xs sm:text-sm font-bold text-gray-400">
+                    <p className="text-xs sm:text-sm text-gray-400">
                       No mockups generated yet
                     </p>
                   </div>
@@ -235,7 +237,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg font-bold text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all ${
                     errors.name ? 'border-orange-500/50 bg-orange-500/10' : ''
                   }`}
                   placeholder="E.g., Awesome Custom T-Shirt Design"
@@ -247,7 +249,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                     <p className="font-bold text-orange-300">{errors.name}</p>
                   </div>
                 )}
-                <p className="text-xs sm:text-sm text-gray-400 font-bold mt-2">
+                <p className="text-xs sm:text-sm text-gray-400 mt-2">
                   {formData.name.length}/100 characters
                 </p>
               </div>
@@ -262,7 +264,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   rows={4}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg font-bold text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all resize-none ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all resize-none ${
                     errors.description ? 'border-orange-500/50 bg-orange-500/10' : ''
                   }`}
                   placeholder="Describe your product... What makes it special? Who is it for? What materials are used?"
@@ -274,7 +276,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                     <p className="font-bold text-orange-300">{errors.description}</p>
                   </div>
                 )}
-                <p className="text-xs sm:text-sm text-gray-400 font-bold mt-2">
+                <p className="text-xs sm:text-sm text-gray-400 mt-2">
                   {formData.description.length}/500 characters
                 </p>
               </div>
@@ -289,7 +291,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowPricingCalculator(!showPricingCalculator)}
-                    className="text-sm font-bold text-orange-400 underline hover:text-orange-300"
+                    className="text-sm text-orange-400 underline hover:text-orange-300"
                   >
                     {showPricingCalculator ? 'Hide' : 'Show'} Calculator
                   </button>
@@ -297,7 +299,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-300 mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Markup Percentage
                     </label>
                     <div className="relative">
@@ -305,14 +307,14 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                         type="number"
                         value={formData.markupPercentage}
                         onChange={(e) => handleInputChange('markupPercentage', e.target.value)}
-                        className={`w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg font-bold text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all pr-12 ${
+                        className={`w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all pr-12 ${
                           errors.markupPercentage ? 'border-orange-500/50 bg-orange-500/10' : ''
                         }`}
                         min="0"
                         max="500"
                         step="5"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
                         %
                       </span>
                     </div>
@@ -331,7 +333,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                         key={value}
                         type="button"
                         onClick={() => handleInputChange('markupPercentage', value.toString())}
-                        className={`px-4 py-2 border border-gray-700 rounded-lg font-bold text-sm transition-all ${
+                        className={`px-4 py-2 border border-gray-700 rounded-lg text-sm transition-all ${
                           formData.markupPercentage === value.toString()
                             ? 'bg-orange-500 text-white border-orange-500 shadow-[0_10px_30px_rgba(255,133,27,0.2)]'
                             : 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:border-gray-600'
@@ -346,20 +348,20 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="font-bold text-gray-300">Base Cost:</span>
-                        <span className="font-bold text-white">${basePrice.toFixed(2)}</span>
+                        <span className="text-gray-300">Base Cost:</span>
+                        <span className="text-white">${basePrice.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-bold text-gray-300">Your Markup:</span>
-                        <span className="font-bold text-orange-400">+{markup}%</span>
+                        <span className="text-gray-300">Your Markup:</span>
+                        <span className="text-green-400 font-medium">+{markup}%</span>
                       </div>
                       <div className="border-t border-orange-500/30 pt-2 flex justify-between">
-                        <span className="font-bold text-white text-lg">Selling Price:</span>
-                        <span className="font-bold text-orange-400 text-lg">${sellingPrice.toFixed(2)}</span>
+                        <span className="text-white text-lg">Selling Price:</span>
+                        <span className="text-orange-400 text-lg">${sellingPrice.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-bold text-gray-300">Your Profit:</span>
-                        <span className="font-bold text-orange-300">${profit.toFixed(2)} ({profitMargin}%)</span>
+                        <span className="text-gray-300">Your Profit:</span>
+                        <span className="text-green-400 font-medium">${profit.toFixed(2)} ({profitMargin}%)</span>
                       </div>
                     </div>
                   </div>
@@ -372,18 +374,24 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   <Tag className="w-5 h-5" />
                   Category *
                 </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => handleInputChange('category', e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg font-bold text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
-                >
-                  <option value="apparel">👕 Apparel</option>
-                  <option value="accessories">👜 Accessories</option>
-                  <option value="home-living">🏠 Home & Living</option>
-                  <option value="stationery">📝 Stationery</option>
-                  <option value="bags">🎒 Bags</option>
-                  <option value="other">✨ Other</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={formData.category}
+                    onChange={(e) => handleInputChange('category', e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none"
+                  >
+                    <option value="">Select a category</option>
+                    <option value="apparel">Apparel</option>
+                    <option value="accessories">Accessories</option>
+                    <option value="home-living">Home & Living</option>
+                    <option value="stationery">Stationery</option>
+                    <option value="bags">Bags</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <ChevronLeft className="w-5 h-5 rotate-90" />
+                  </div>
+                </div>
               </div>
 
               {/* Tags */}
@@ -392,7 +400,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   <Tag className="w-5 h-5" />
                   Tags (Optional)
                 </label>
-                <p className="text-sm font-bold text-gray-400 mb-3">
+                <p className="text-sm text-gray-400 mb-3">
                   Add tags to help customers find your product
                 </p>
 
@@ -403,7 +411,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                    className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg font-bold text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
+                    className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
                     placeholder="Type a tag and press Enter"
                     maxLength={20}
                   />
@@ -411,7 +419,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                     type="button"
                     onClick={handleAddTag}
                     disabled={!tagInput.trim() || formData.tags.length >= 10}
-                    className="px-3 sm:px-4 py-2 bg-orange-500 text-white border border-orange-600 rounded-lg font-bold hover:bg-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                    className="px-3 sm:px-4 py-2 bg-orange-500 text-white border border-orange-600 rounded-lg hover:bg-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                   >
                     <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
                   </button>
@@ -425,7 +433,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                         key={tag}
                         className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 rounded-full px-3 py-1"
                       >
-                        <span className="font-bold text-orange-300 text-sm">{tag}</span>
+                        <span className="text-orange-300 text-sm">{tag}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveTag(tag)}
@@ -440,7 +448,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
 
                 {/* Suggested Tags */}
                 <div>
-                  <p className="text-xs font-bold text-gray-500 mb-2">SUGGESTED:</p>
+                  <p className="text-xs text-gray-500 mb-2">SUGGESTED:</p>
                   <div className="flex flex-wrap gap-2">
                     {suggestedTags
                       .filter(tag => !formData.tags.includes(tag))
@@ -454,7 +462,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                               setFormData(prev => ({ ...prev, tags: [...prev.tags, tag] }));
                             }
                           }}
-                          className="px-3 py-1 bg-gray-800 border border-gray-700 rounded-full text-xs font-bold text-gray-300 hover:border-orange-500 hover:text-orange-400 transition-all"
+                          className="px-3 py-1 bg-gray-800 border border-gray-700 rounded-full text-xs text-gray-300 hover:border-orange-500 hover:text-orange-400 transition-all"
                         >
                           + {tag}
                         </button>
@@ -464,25 +472,28 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
               </div>
 
               {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg font-bold text-sm sm:text-lg hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 sm:h-6 w-5 sm:w-6 border-b-2 border-white" />
-                    <span className="hidden sm:inline">Saving...</span>
-                    <span className="sm:hidden">Save...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-5 sm:w-6 h-5 sm:h-6" />
-                    <span className="hidden sm:inline">Save & Publish to Marketplace</span>
-                    <span className="sm:hidden">Publish</span>
-                  </>
-                )}
-              </button>
+              <div className="w-full">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  variant="primary"
+                  className="w-full gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 sm:h-6 w-5 sm:w-6 border-b-2 border-black" />
+                      <span className="hidden sm:inline">Saving...</span>
+                      <span className="sm:hidden">Save...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-5 sm:w-6 h-5 sm:h-6" />
+                      <span className="hidden sm:inline">Save & Publish to Marketplace</span>
+                      <span className="sm:hidden">Publish</span>
+                    </>
+                  )}
+                </Button>
+              </div>
             </form>
           </div>
 
@@ -496,22 +507,22 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between pb-3 border-b border-gray-700">
-                  <span className="font-bold text-gray-400">Variants:</span>
-                  <span className="font-bold text-white">{selectedVariants.length}</span>
+                  <span className="text-gray-400">Variants:</span>
+                  <span className="text-white">{selectedVariants.length}</span>
                 </div>
                 <div className="flex items-center justify-between pb-3 border-b border-gray-700">
-                  <span className="font-bold text-gray-400">Designs:</span>
-                  <span className="font-bold text-white">{designFiles.length}</span>
+                  <span className="text-gray-400">Designs:</span>
+                  <span className="text-white">{designFiles.length}</span>
                 </div>
                 <div className="flex items-center justify-between pb-3 border-b border-gray-700">
-                  <span className="font-bold text-gray-400">Mockups:</span>
-                  <span className="font-bold text-white">{mockupUrls.length}</span>
+                  <span className="text-gray-400">Mockups:</span>
+                  <span className="text-white">{mockupUrls.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-gray-400">Status:</span>
+                  <span className="text-gray-400">Status:</span>
                   <span className="inline-flex items-center gap-1 bg-orange-500/20 border border-orange-500/30 px-3 py-1 rounded-full">
                     <Sparkles className="w-4 h-4 text-orange-400" />
-                    <span className="font-bold text-orange-300 text-sm">Ready!</span>
+                    <span className="text-orange-300 text-sm">Ready!</span>
                   </span>
                 </div>
               </div>
@@ -519,40 +530,40 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
 
             {/* Tips Card */}
             <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
-              <h4 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+              <h4 className="text-lg text-white mb-3 flex items-center gap-2">
                 <Info className="w-5 h-5" />
                 Pro Tips
               </h4>
-              <ul className="space-y-2 text-sm font-bold text-gray-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-400">💡</span>
+              <ul className="space-y-3 text-sm text-gray-300">
+                <li className="flex items-start gap-3">
+                  <Lightbulb className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
                   <span>Use keywords customers would search for</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-400">💰</span>
+                <li className="flex items-start gap-3">
+                  <DollarSign className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
                   <span>30-50% markup is ideal for most products</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-400">📝</span>
+                <li className="flex items-start gap-3">
+                  <FileText className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
                   <span>Detailed descriptions increase sales</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-400">🏷️</span>
+                <li className="flex items-start gap-3">
+                  <Tag className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
                   <span>Tags improve discoverability</span>
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-orange-400">✅</span>
-                  <span>Check spelling before publishing</span>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <span>Check spelling before publishing and also for category dropdown options</span>
                 </li>
               </ul>
             </div>
 
             {/* Pricing Guide */}
             <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
-              <h4 className="text-lg font-bold text-white mb-3">
+              <h4 className="text-lg text-white mb-3">
                 Pricing Guide
               </h4>
-              <div className="space-y-2 text-sm font-bold text-gray-300">
+              <div className="space-y-2 text-sm text-gray-300">
                 <div className="flex justify-between">
                   <span>Conservative:</span>
                   <span className="text-orange-400">20-30%</span>
