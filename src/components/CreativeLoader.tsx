@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Sparkles, Shirt, Palette, Zap, Package } from "lucide-react";
+import { Sparkles, Package, Palette, Zap } from "lucide-react";
 
 interface CreativeLoaderProps {
   variant?: "default" | "product" | "design" | "shipping" | "small";
@@ -18,36 +18,41 @@ const CreativeLoader: React.FC<CreativeLoaderProps> = ({
       case "product":
         return {
           icon: Package,
-          bgGradient: "from-blue-200 to-purple-200",
-          iconBg: "from-blue-400 to-purple-400",
+          iconColor: "text-orange-400",
+          bgColor: "bg-orange-500/20",
+          borderColor: "border-orange-500/30",
           defaultMessage: "Loading products...",
         };
       case "design":
         return {
           icon: Palette,
-          bgGradient: "from-yellow-200 to-pink-200",
-          iconBg: "from-yellow-400 to-pink-400",
+          iconColor: "text-orange-400",
+          bgColor: "bg-orange-500/20",
+          borderColor: "border-orange-500/30",
           defaultMessage: "Loading design canvas...",
         };
       case "shipping":
         return {
           icon: Package,
-          bgGradient: "from-green-200 to-teal-200",
-          iconBg: "from-green-400 to-teal-400",
+          iconColor: "text-orange-400",
+          bgColor: "bg-orange-500/20",
+          borderColor: "border-orange-500/30",
           defaultMessage: "Processing order...",
         };
       case "small":
         return {
           icon: Sparkles,
-          bgGradient: "from-purple-200 to-pink-200",
-          iconBg: "from-purple-400 to-pink-400",
+          iconColor: "text-orange-400",
+          bgColor: "bg-orange-500/20",
+          borderColor: "border-orange-500/30",
           defaultMessage: "Loading...",
         };
       default:
         return {
           icon: Sparkles,
-          bgGradient: "from-yellow-200 to-pink-200",
-          iconBg: "from-yellow-400 to-pink-400",
+          iconColor: "text-orange-400",
+          bgColor: "bg-orange-500/20",
+          borderColor: "border-orange-500/30",
           defaultMessage: "Loading...",
         };
     }
@@ -60,68 +65,86 @@ const CreativeLoader: React.FC<CreativeLoaderProps> = ({
     return (
       <div className="flex items-center justify-center">
         <div
-          className={`bg-gradient-to-r ${loader.iconBg} border-4 border-black rounded-xl p-3 shadow-[4px_4px_0_0_rgba(0,0,0,1)] animate-bounce`}
+          className={`${loader.bgColor} ${loader.borderColor} border rounded-lg p-3 animate-spin`}
         >
-          <Icon className="w-6 h-6 text-white animate-pulse" />
+          <Icon className={`w-5 h-5 ${loader.iconColor}`} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-20">
+    <div className="flex flex-col items-center justify-center py-20 bg-black min-h-screen">
       {/* Animated Icon Container */}
       <div className="relative mb-8">
-        {/* Outer rotating square */}
+        {/* Spinning gradient border background */}
         <div
-          className={`absolute inset-0 bg-gradient-to-br ${loader.bgGradient} border-4 border-black rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)] animate-spin`}
-          style={{ width: "120px", height: "120px" }}
+          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100"
+          style={{
+            width: "140px",
+            height: "140px",
+            background: "conic-gradient(from 0deg, #f97316, #0ea5e9, #f97316)",
+            animation: "spin 3s linear infinite",
+            borderRadius: "1rem",
+          }}
         />
 
-        {/* Inner icon container */}
+        {/* Inner icon container with dark theme */}
         <div
-          className={`relative bg-gradient-to-r ${loader.iconBg} border-4 border-black rounded-2xl p-8 shadow-[6px_6px_0_0_rgba(0,0,0,1)]`}
-          style={{ width: "120px", height: "120px" }}
+          className={`relative ${loader.bgColor} ${loader.borderColor} border rounded-2xl p-8 flex items-center justify-center`}
+          style={{ width: "140px", height: "140px" }}
         >
-          <Icon className="w-16 h-16 text-white animate-pulse" />
+          <Icon className={`w-16 h-16 ${loader.iconColor} animate-pulse`} />
         </div>
 
-        {/* Floating sparkles */}
-        <div className="absolute -top-2 -right-2 animate-bounce">
-          <div className="bg-yellow-300 border-2 border-black rounded-full p-1">
-            <Sparkles className="w-4 h-4 text-black" />
+        {/* Floating accent dots */}
+        <div className="absolute -top-3 -right-3 animate-bounce">
+          <div className={`${loader.bgColor} ${loader.borderColor} border rounded-full p-2`}>
+            <Sparkles className={`w-4 h-4 ${loader.iconColor}`} />
           </div>
         </div>
         <div
-          className="absolute -bottom-2 -left-2 animate-bounce"
+          className="absolute -bottom-3 -left-3 animate-bounce"
           style={{ animationDelay: "0.2s" }}
         >
-          <div className="bg-pink-300 border-2 border-black rounded-full p-1">
-            <Zap className="w-4 h-4 text-black" />
+          <div className={`${loader.bgColor} ${loader.borderColor} border rounded-full p-2`}>
+            <Zap className={`w-4 h-4 ${loader.iconColor}`} />
           </div>
         </div>
       </div>
 
       {/* Loading Message */}
-      <div className="bg-white border-4 border-black rounded-2xl px-8 py-4 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
-        <p className="text-xl font-extrabold text-black">
+      <div className="gradient-border-white-bottom rounded-lg bg-black px-8 py-4 text-center">
+        <p className="text-lg font-bold text-white">
           {message || loader.defaultMessage}
         </p>
-        <div className="flex items-center justify-center gap-1 mt-3">
+        <div className="flex items-center justify-center gap-2 mt-4">
           <div
-            className="w-3 h-3 bg-yellow-400 border-2 border-black rounded-full animate-bounce"
+            className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
             style={{ animationDelay: "0s" }}
           />
           <div
-            className="w-3 h-3 bg-pink-400 border-2 border-black rounded-full animate-bounce"
+            className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
             style={{ animationDelay: "0.1s" }}
           />
           <div
-            className="w-3 h-3 bg-purple-400 border-2 border-black rounded-full animate-bounce"
+            className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
             style={{ animationDelay: "0.2s" }}
           />
         </div>
       </div>
+
+      {/* Spin animation */}
+      <style>{`
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 };

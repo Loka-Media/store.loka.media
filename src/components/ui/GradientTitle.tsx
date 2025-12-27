@@ -30,7 +30,7 @@ export default function GradientTitle({
   };
 
   return (
-    <h1
+    <div
       className={`font-extrabold tracking-tight leading-[1.1] ${sizeMap[size]} ${className}`}
       style={{
         backgroundImage: 'linear-gradient(273.09deg, #9E4719 0.41%, #FFFFFF 100%)',
@@ -41,6 +41,6 @@ export default function GradientTitle({
       }}
     >
       {text}
-    </h1>
+    </div>
   );
 }

@@ -56,7 +56,7 @@ function CanvasContent() {
   const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
   const [mockupStatus, setMockupStatus] = useState<string>("");
   const [printFiles, setPrintFiles] = useState<any>(null);
-  const [useSimplifiedWizard, setUseSimplifiedWizard] = useState(searchParams.get("new") !== "false");
+  const useSimplifiedWizard = searchParams.get("new") !== "false";
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: "",
@@ -332,20 +332,20 @@ function CanvasContent() {
   if (!selectedProduct && !loading) {
     return (
       <CreatorProtectedRoute>
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center p-12 bg-white rounded-3xl border border-gray-200">
-          <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="h-8 w-8 text-gray-600" />
+        <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-center p-12 gradient-border-white-top rounded-3xl bg-gray-900">
+          <div className="w-16 h-16 bg-orange-500/20 border border-orange-500/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-8 w-8 text-orange-400" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
+          <h3 className="text-xl font-bold text-white mb-2">
             No product selected
           </h3>
-          <p className="text-gray-600 mb-8 font-medium">
+          <p className="text-gray-400 mb-8 font-medium">
             Please select a product from the catalog first.
           </p>
           <Link
             href="/dashboard/creator/catalog"
-            className="inline-flex items-center px-8 py-4 text-white bg-accent rounded-2xl font-bold transition-colors"
+            className="inline-flex items-center px-8 py-4 text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-2xl font-bold transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
           >
             Browse Catalog
           </Link>
@@ -790,7 +790,7 @@ function CanvasContent() {
 
   return (
     <CreatorProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-black">
       {/* <CanvasHeader
         selectedProduct={selectedProduct}
         step={step}
@@ -803,30 +803,6 @@ function CanvasContent() {
           <CreativeLoader variant="design" message="Loading design canvas..." />
         ) : (
           <>
-            {/* Interface Toggle */}
-            {step === "unified-editor" && (
-              <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-4 border-black p-4 mb-4 mx-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                  <div>
-                    <h3 className="font-extrabold text-black text-lg">
-                      {useSimplifiedWizard ? "🎨 New Simplified Interface (Recommended)" : "🔧 Classic Interface"}
-                    </h3>
-                    <p className="text-sm font-bold text-black/80 mt-1">
-                      {useSimplifiedWizard
-                        ? "Streamlined step-by-step workflow for faster product creation. Switch to classic if you prefer the advanced editor."
-                        : "Advanced interface with full editor controls. Switch back to simplified for easier workflow."}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setUseSimplifiedWizard(!useSimplifiedWizard)}
-                    className="px-6 py-3 bg-black text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all text-sm whitespace-nowrap"
-                  >
-                    {useSimplifiedWizard ? "Try Classic" : "Back to New"}
-                  </button>
-                </div>
-              </div>
-            )}
-
             {step === "unified-editor" ? (
               useSimplifiedWizard ? (
                 <EnhancedCanvasWizard

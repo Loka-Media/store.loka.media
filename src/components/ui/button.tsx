@@ -22,7 +22,7 @@ export function Button({
   type = "button",
   className = "",
 }: ButtonProps) {
-  const baseClasses = "font-medium transition-all duration-300 hover:shadow-lg active:scale-95 px-4 py-2 sm:px-14 sm:py-4 text-sm sm:text-base lg:text-lg rounded-full";
+  const baseClasses = "font-medium transition-all duration-300 hover:shadow-lg active:scale-95 px-4 py-2 sm:px-14 sm:py-4 text-sm sm:text-base lg:text-lg rounded-full flex items-center justify-center cursor-pointer";
 
   const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
     primary: {

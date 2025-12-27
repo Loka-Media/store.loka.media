@@ -20,7 +20,7 @@ export function EnhancedDashboardHeader({ connection, onConnectPrintful }: Dashb
       <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-8">
         <div className="flex-1">
           <div className="mb-6">
-            <GradientTitle text="Creator Dashboard" size="lg" />
+            <GradientTitle text="Creator Dashboard" size="sm" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl" />
             <p className="mt-3 text-sm sm:text-base text-gray-400 font-medium">
               Manage your products, integrations, and sales performance
             </p>

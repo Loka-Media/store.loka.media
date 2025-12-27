@@ -11,6 +11,7 @@ import {
   Sparkles,
   Trash2,
   AlertTriangle,
+  Check,
 } from "lucide-react";
 import { UploadedFile } from "./types";
 
@@ -23,6 +24,7 @@ interface QuickDesignToolsProps {
   onDeleteFile?: (fileId: number | string) => Promise<void>;
   uploadedFiles: UploadedFile[];
   isUploading?: boolean;
+  selectedFileId?: number | string;
 }
 
 const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
@@ -34,6 +36,7 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   onDeleteFile,
   uploadedFiles,
   isUploading = false,
+  selectedFileId,
 }) => {
   const [showExistingFiles, setShowExistingFiles] = useState(false);
   const [showAllFiles, setShowAllFiles] = useState(false);
@@ -81,7 +84,7 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   return (
     <div className="space-y-6">
       {/* Main Tools Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         {/* Upload New Image */}
         <label className="relative cursor-pointer group">
           <input
@@ -91,19 +94,19 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
             onChange={handleFileChange}
             disabled={isUploading}
           />
-          <div className="bg-white border-4 border-black rounded-2xl p-6 hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all h-full">
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="p-4 bg-yellow-300 border-2 border-black rounded-xl group-hover:scale-110 transition-transform">
-                <UploadIcon className="w-8 h-8 text-black" />
+          <div className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all h-full bg-gray-800">
+            <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
+              <div className="p-2 sm:p-4 bg-orange-500/20 border border-orange-500/30 rounded-lg group-hover:scale-110 transition-transform">
+                <UploadIcon className="w-5 h-5 sm:w-8 sm:h-8 text-orange-400" />
               </div>
               <div>
-                <h4 className="font-extrabold text-black text-lg mb-1">Upload Image</h4>
-                <p className="text-sm text-gray-600 font-bold">
+                <div className="font-bold text-white text-xs sm:text-lg mb-1">Upload Image</div>
+                <p className="text-xs sm:text-sm text-gray-400">
                   PNG, JPG, or SVG
                 </p>
               </div>
               {isUploading && (
-                <div className="text-xs font-bold text-orange-600">
+                <div className="text-xs text-orange-400">
                   Uploading...
                 </div>
               )}
@@ -114,15 +117,15 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
         {/* Create Text */}
         <button
           onClick={onCreateText}
-          className="bg-white border-4 border-black rounded-2xl p-6 hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all group"
+          className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all group bg-gray-800"
         >
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="p-4 bg-pink-300 border-2 border-black rounded-xl group-hover:scale-110 transition-transform">
-              <Type className="w-8 h-8 text-black" />
+          <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
+            <div className="p-2 sm:p-4 bg-orange-500/20 border border-orange-500/30 rounded-lg group-hover:scale-110 transition-transform">
+              <Type className="w-5 h-5 sm:w-8 sm:h-8 text-orange-400" />
             </div>
             <div>
-              <h4 className="font-extrabold text-black text-lg mb-1">Add Text</h4>
-              <p className="text-sm text-gray-600 font-bold">
+              <div className="font-bold text-white text-xs sm:text-lg mb-1">Add Text</div>
+              <p className="text-xs sm:text-sm text-gray-400">
                 Custom fonts & styles
               </p>
             </div>
@@ -132,15 +135,15 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
         {/* Browse Clipart */}
         <button
           onClick={onBrowseClipart}
-          className="bg-white border-4 border-black rounded-2xl p-6 hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all group"
+          className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all group bg-gray-800"
         >
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="p-4 bg-purple-300 border-2 border-black rounded-xl group-hover:scale-110 transition-transform">
-              <ImageIcon className="w-8 h-8 text-black" />
+          <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
+            <div className="p-2 sm:p-4 bg-orange-500/20 border border-orange-500/30 rounded-lg group-hover:scale-110 transition-transform">
+              <ImageIcon className="w-5 h-5 sm:w-8 sm:h-8 text-orange-400" />
             </div>
             <div>
-              <h4 className="font-extrabold text-black text-lg mb-1">Clipart Library</h4>
-              <p className="text-sm text-gray-600 font-bold">
+              <div className="font-bold text-white text-xs sm:text-lg mb-1">Clipart Library</div>
+              <p className="text-xs sm:text-sm text-gray-400">
                 1000s of graphics
               </p>
             </div>
@@ -150,15 +153,15 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
         {/* Add Emoji */}
         <button
           onClick={onAddEmoji}
-          className="bg-white border-4 border-black rounded-2xl p-6 hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] transition-all group"
+          className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all group bg-gray-800"
         >
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="p-4 bg-green-300 border-2 border-black rounded-xl group-hover:scale-110 transition-transform">
-              <Smile className="w-8 h-8 text-black" />
+          <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
+            <div className="p-2 sm:p-4 bg-orange-500/20 border border-orange-500/30 rounded-lg group-hover:scale-110 transition-transform">
+              <Smile className="w-5 h-5 sm:w-8 sm:h-8 text-orange-400" />
             </div>
             <div>
-              <h4 className="font-extrabold text-black text-lg mb-1">Add Emoji</h4>
-              <p className="text-sm text-gray-600 font-bold">
+              <div className="font-bold text-white text-xs sm:text-lg mb-1">Add Emoji</div>
+              <p className="text-xs sm:text-sm text-gray-400">
                 Fun & expressive
               </p>
             </div>
@@ -168,15 +171,15 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
 
       {/* Previously Uploaded Files */}
       {uploadedFiles.length > 0 && (
-        <div className="bg-white border-4 border-black rounded-2xl p-6">
+        <div className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 bg-gray-800">
           <div className="flex items-center justify-between mb-4">
-            <h4 className="font-extrabold text-black text-lg flex items-center gap-2">
-              <FileImage className="w-5 h-5" />
+            <div className="font-bold text-white text-xs sm:text-lg flex items-center gap-2">
+              <FileImage className="w-4 h-4 sm:w-5 sm:h-5" />
               Your Uploaded Files ({uploadedFiles.length})
-            </h4>
+            </div>
             <button
               onClick={() => setShowExistingFiles(!showExistingFiles)}
-              className="text-sm font-extrabold text-black underline hover:text-orange-600"
+              className="text-xs sm:text-sm text-orange-400 underline hover:text-orange-300"
             >
               {showExistingFiles ? "Hide" : "Show"}
             </button>
@@ -184,15 +187,20 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
 
           {showExistingFiles && (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {(showAllFiles ? uploadedFiles : uploadedFiles.slice(0, 12)).map((file) => (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-6">
+                {(showAllFiles ? uploadedFiles : uploadedFiles.slice(0, 12)).map((file) => {
+                  const isSelected = selectedFileId === file.id;
+                  return (
                   <div key={file.id} className="relative">
                     <button
                       onClick={() => onSelectExistingFile(file)}
-                      disabled={deletingFileId === file.id}
-                      className="group relative bg-gray-100 border-2 border-gray-300 rounded-xl p-2 hover:border-black hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={`group relative rounded-lg p-1 sm:p-2 transition-all w-full ${
+                        isSelected
+                          ? "bg-black border-2 border-white shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
+                          : "bg-black border-2 border-gray-600 hover:border-white hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
+                      }`}
                     >
-                      <div className="aspect-square bg-white border-2 border-black rounded-lg mb-2 overflow-hidden flex items-center justify-center">
+                      <div className="aspect-square bg-gray-600 border border-gray-500 rounded-lg mb-1 sm:mb-2 overflow-hidden flex items-center justify-center">
                         {file.thumbnail_url ? (
                           <img
                             src={file.thumbnail_url}
@@ -200,45 +208,37 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <ImageIcon className="w-8 h-8 text-gray-400" />
+                          <ImageIcon className="w-4 h-4 sm:w-8 sm:h-8 text-gray-400" />
                         )}
                       </div>
-                      <p className="text-xs font-bold text-black truncate">
+                      <p className="text-xs text-gray-200 truncate line-clamp-1">
                         {file.filename}
                       </p>
 
                       {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-black/80 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/80 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <div className="text-white text-center">
-                          <Sparkles className="w-6 h-6 mx-auto mb-1" />
-                          <p className="text-xs font-bold">Use This</p>
+                          <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1" />
+                          <p className="text-xs">Use This</p>
                         </div>
                       </div>
-                    </button>
 
-                    {/* Delete button */}
-                    {onDeleteFile && (
-                      <button
-                        onClick={(e) => handleDeleteFile(e, file)}
-                        disabled={deletingFileId === file.id}
-                        className="absolute -top-2 -right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 border-2 border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Delete file"
-                      >
-                        {deletingFileId === file.id ? (
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
-                        ) : (
-                          <Trash2 className="w-3 h-3" />
-                        )}
-                      </button>
-                    )}
+                      {/* Selected Indicator */}
+                      {isSelected && (
+                        <div className="absolute -top-2 -right-2 bg-white border border-white rounded-full p-1 sm:p-2 shadow-[0_4px_12px_rgba(255,255,255,0.3)]">
+                          <Check className="w-3 h-3 sm:w-4 sm:h-4 text-black" />
+                        </div>
+                      )}
+                    </button>
                   </div>
-                ))}
+                );
+                })}
               </div>
 
               {uploadedFiles.length > 12 && (
                 <button
                   onClick={() => setShowAllFiles(!showAllFiles)}
-                  className="text-sm font-bold text-black mt-4 mx-auto block px-6 py-2 bg-gradient-to-r from-blue-200 to-purple-200 border-2 border-black rounded-xl hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+                  className="text-xs sm:text-sm text-orange-400 mt-4 mx-auto block px-3 sm:px-6 py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg hover:bg-orange-500/30 transition-all"
                 >
                   {showAllFiles
                     ? "Show Less"
@@ -251,12 +251,12 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
       )}
 
       {/* Quick Tips */}
-      <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-2 border-black rounded-xl p-4">
+      <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
         <div className="flex items-start gap-3">
-          <Sparkles className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+          <Sparkles className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
           <div>
-            <h5 className="font-extrabold text-black mb-1">Design Tips</h5>
-            <ul className="text-sm text-black font-bold space-y-1">
+            <div className="font-bold text-white mb-1">Design Tips</div>
+            <ul className="text-sm text-gray-300 space-y-1">
               <li>• Use high-resolution images (at least 300 DPI)</li>
               <li>• PNG files with transparent backgrounds work best</li>
               <li>• Keep text readable - not too small!</li>
@@ -268,48 +268,48 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
       {/* Delete Confirmation Modal */}
       {showDeleteModal && fileToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white border-4 border-black rounded-2xl shadow-[12px_12px_0_0_rgba(0,0,0,1)] max-w-md w-full animate-in zoom-in-95 duration-200">
+          <div className="gradient-border-white-bottom rounded-lg bg-gray-900 max-w-md w-full animate-in zoom-in-95 duration-200 shadow-[0_10px_30px_rgba(255,133,27,0.2)]">
             {/* Header */}
-            <div className="bg-gradient-to-r from-red-400 to-orange-400 border-b-4 border-black p-6">
+            <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-lg p-6 border-b border-orange-700">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-white border-4 border-black rounded-xl">
-                  <AlertTriangle className="w-8 h-8 text-red-600" />
+                <div className="p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg">
+                  <AlertTriangle className="w-8 h-8 text-orange-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-extrabold text-black">Delete File?</h3>
-                  <p className="text-sm font-bold text-black/80">This action cannot be undone</p>
+                  <div className="text-2xl font-extrabold text-white">Delete File?</div>
+                  <p className="text-sm text-orange-200">This action cannot be undone</p>
                 </div>
               </div>
             </div>
 
             {/* Body */}
-            <div className="p-6">
-              <p className="text-black font-bold mb-2">
+            <div className="p-6 border-b border-gray-700">
+              <p className="text-white mb-2">
                 Are you sure you want to delete this file?
               </p>
-              <div className="bg-gray-100 border-2 border-black rounded-xl p-3 mb-6">
-                <p className="text-sm font-extrabold text-black truncate">
+              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 mb-6">
+                <p className="text-sm text-gray-200 truncate">
                   📄 {fileToDelete.filename}
                 </p>
               </div>
-              <p className="text-sm text-gray-700 font-bold">
+              <p className="text-sm text-gray-400">
                 This file will be permanently removed from your library and cannot be recovered.
               </p>
             </div>
 
             {/* Footer */}
-            <div className="border-t-4 border-black p-6 flex gap-3">
+            <div className="p-6 flex gap-3 rounded-b-lg">
               <button
                 onClick={cancelDelete}
                 disabled={deletingFileId === fileToDelete.id}
-                className="flex-1 px-6 py-3 bg-white text-black border-4 border-black rounded-xl font-extrabold hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 bg-gray-800 text-gray-200 border border-gray-700 rounded-lg hover:bg-gray-700 hover:border-gray-600 hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
                 disabled={deletingFileId === fileToDelete.id}
-                className="flex-1 px-6 py-3 bg-red-500 text-white border-4 border-black rounded-xl font-extrabold hover:bg-red-600 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {deletingFileId === fileToDelete.id ? (
                   <>

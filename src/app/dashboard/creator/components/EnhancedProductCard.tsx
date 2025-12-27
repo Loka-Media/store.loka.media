@@ -74,7 +74,7 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
   return (
     <>
       <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-        <div className="gradient-border-white-top overflow-hidden group cursor-pointer flex flex-col h-full hover:shadow-[0_20px_60px_rgba(255,99,71,0.3)] transition-all duration-300">
+        <div className="gradient-border-white-bottom overflow-hidden group cursor-pointer flex flex-col h-full hover:shadow-[0_20px_60px_rgba(255,99,71,0.3)] transition-all duration-300">
           {/* Image Container */}
           <div className="w-full relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
             <Image

@@ -40,27 +40,27 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   uploading,
 }) => {
   return (
-    <div className="mb-8">
+    <div className="mb-6 sm:mb-8">
       <label className="block">
-        <div className="border-2 border-dashed border-gray-800 rounded-2xl p-12 text-center hover:border-orange-500 transition-all duration-300 cursor-pointer bg-black/60 hover:bg-black/80 backdrop-blur-sm transform hover:scale-[1.01] hover:shadow-2xl hover:shadow-orange-500/10">
+        <div className="border-2 border-dashed border-gray-800 rounded-xl sm:rounded-2xl p-6 sm:p-12 text-center hover:border-orange-500 transition-all duration-300 cursor-pointer bg-black/60 hover:bg-black/80 backdrop-blur-sm transform hover:scale-[1.01] hover:shadow-2xl hover:shadow-orange-500/10">
           {uploading ? (
             <div className="animate-bounce">
-              <Loader2 className="mx-auto h-14 w-14 text-orange-500 animate-spin" />
+              <Loader2 className="mx-auto h-10 sm:h-14 w-10 sm:w-14 text-orange-500 animate-spin" />
             </div>
           ) : (
             <div className="animate-pulse hover:animate-none transition-all duration-300">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Upload className="w-8 h-8 text-white" />
+              <div className="mx-auto w-12 sm:w-16 h-12 sm:h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Upload className="w-6 sm:w-8 h-6 sm:h-8 text-white" />
               </div>
             </div>
           )}
-          <div className="mt-8">
-            <p className="text-2xl font-bold text-white">
+          <div className="mt-4 sm:mt-8">
+            <p className="text-lg sm:text-2xl font-bold text-white">
               {uploading
                 ? "Uploading your design..."
                 : "Drop your design files here or click to browse"}
             </p>
-            <p className="text-sm text-gray-400 mt-4 font-medium">
+            <p className="text-xs sm:text-sm text-gray-400 mt-2 sm:mt-4 font-medium">
               PNG, JPG, PDF up to 10MB each • Recommended: 300 DPI, RGB color mode
             </p>
           </div>
@@ -86,18 +86,18 @@ const UploadedFilesList: React.FC<UploadedFilesListProps> = ({
 
   return (
     <div className="animate-fadeIn">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-3 sm:mb-4">
         <CheckCircle className="w-5 h-5 text-orange-500" />
-        <h4 className="text-lg font-bold text-black">Uploaded Files</h4>
+        <h4 className="text-base sm:text-lg font-bold text-white">Uploaded Files</h4>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
         {uploadedFiles.map((file, index) => (
-          <div 
-            key={file.id} 
+          <div
+            key={file.id}
             className="group relative animate-slideInUp transform hover:scale-105 transition-all duration-300"
             style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className="aspect-square bg-black/80 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-800 hover:border-orange-500/30">
+            <div className="aspect-square bg-black/80 rounded-lg sm:rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-800 hover:border-orange-500/30">
               {file.thumbnail_url ? (
                 <Image
                   src={file.thumbnail_url}
@@ -107,30 +107,30 @@ const UploadedFilesList: React.FC<UploadedFilesListProps> = ({
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
-                    <Palette className="w-6 h-6 text-white" />
+                  <div className="w-8 sm:w-12 h-8 sm:h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                    <Palette className="w-4 sm:w-6 h-4 sm:h-6 text-white" />
                   </div>
                 </div>
               )}
             </div>
-            <p className="mt-4 text-sm font-semibold text-white truncate">
+            <p className="mt-2 sm:mt-4 text-xs sm:text-sm font-semibold text-white truncate">
               {file.filename}
             </p>
-            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-0 group-hover:scale-100">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-sm">✓</span>
+            <div className="absolute top-2 sm:top-3 right-2 sm:right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-0 group-hover:scale-100">
+              <div className="w-6 sm:w-8 h-6 sm:h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-xs sm:text-sm">✓</span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-8 flex justify-end">
+      <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-end">
         <button
           onClick={onContinue}
-          className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-2xl hover:from-orange-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-orange-500/25"
+          className="group inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-lg sm:rounded-2xl hover:from-orange-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-orange-500/25"
         >
-          <span className="mr-3">Continue to Design</span>
+          <span className="mr-2 sm:mr-3">Continue to Design</span>
           <div className="transform group-hover:translate-x-1 transition-transform duration-300">→</div>
         </button>
       </div>

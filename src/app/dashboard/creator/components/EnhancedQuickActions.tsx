@@ -42,24 +42,24 @@ export function EnhancedQuickActions() {
         <p className="text-sm sm:text-base text-gray-400 font-medium mt-2">Jump to your most-used tools</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4 md:gap-4 lg:gap-6">
         {actions.map((action, index) => (
           <Link href={action.href} key={index}>
-            <div className="gradient-border-white-top p-6 sm:p-8 group hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300 flex flex-col h-full cursor-pointer">
-              <div className="flex items-start justify-between mb-6">
-                <div className={`${action.iconColor} opacity-70 group-hover:opacity-100 transition-opacity duration-300 w-8 h-8 sm:w-10 sm:h-10`}>
+            <div className="gradient-border-white-top p-4 sm:p-6 md:p-8 group hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300 flex flex-col h-full cursor-pointer relative">
+              <div className="flex items-start justify-between mb-4 sm:mb-6 md:mb-8">
+                <div className={`${action.iconColor} opacity-70 group-hover:opacity-100 transition-opacity duration-300 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16`}>
                   <action.icon />
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-x-0 group-hover:translate-x-1">
-                  <ArrowIcon />
-                </div>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-white/80 transition-colors">
+              <h3 className="text-sm sm:text-base md:text-lg font-bold text-white mb-2 group-hover:text-white/80 transition-colors line-clamp-2">
                 {action.title}
               </h3>
-              <p className="text-xs sm:text-sm text-gray-400 font-medium">
+              <p className="text-xs sm:text-sm text-gray-400 font-medium line-clamp-2">
                 {action.description}
               </p>
+              <div className="absolute top-4 sm:top-6 md:top-8 right-4 sm:right-6 md:right-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8">
+                <ArrowIcon />
+              </div>
             </div>
           </Link>
         ))}

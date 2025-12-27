@@ -160,50 +160,51 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
   const suggestedTags = ['custom', 'unique', 'gift', 'personalized', 'trendy', 'design', 'art', 'style'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 py-8 px-4">
+    <div className="min-h-screen bg-black py-4 sm:py-8 px-3 sm:px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white border-4 border-black rounded-3xl p-6 mb-6 shadow-[12px_12px_0_0_rgba(0,0,0,1)]">
+        <div className="gradient-border-white-bottom rounded-lg bg-gray-900 p-4 sm:p-6 mb-4 sm:mb-6">
           {onBack && (
             <button
               onClick={onBack}
-              className="mb-4 flex items-center gap-2 px-4 py-2 bg-white text-black border-2 border-black rounded-xl font-extrabold hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+              className="mb-3 sm:mb-4 flex items-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-800 text-gray-200 border border-gray-700 rounded-lg font-bold hover:bg-gray-700 hover:border-gray-600 transition-all"
             >
-              <ChevronLeft className="w-5 h-5" />
-              Back to Design
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Back to Design</span>
+              <span className="sm:hidden">Back</span>
             </button>
           )}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-orange-400 to-pink-400 border-4 border-black rounded-xl">
-                <Package className="w-8 h-8 text-black" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-start sm:items-center gap-2 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex-shrink-0">
+                <Package className="w-6 sm:w-8 h-6 sm:h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-extrabold text-black">Product Details</h1>
-                <p className="text-gray-700 font-bold">
+                <h1 className="text-xl sm:text-3xl font-extrabold text-white">Product Details</h1>
+                <p className="text-xs sm:text-sm text-gray-400 font-bold">
                   Final step before publishing to marketplace!
                 </p>
               </div>
             </div>
-            <div className="hidden md:flex items-center gap-2 bg-green-200 border-2 border-black px-4 py-2 rounded-xl">
-              <Check className="w-5 h-5 text-black" />
-              <span className="font-extrabold text-black">Almost Done!</span>
+            <div className="hidden md:flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 px-4 py-2 rounded-lg whitespace-nowrap">
+              <Check className="w-5 h-5 text-orange-400" />
+              <span className="font-bold text-orange-300">Almost Done!</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Left Column - Form */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Product Preview Card */}
-            <div className="bg-white border-4 border-black rounded-2xl p-6">
-              <h3 className="text-xl font-extrabold text-black mb-4 flex items-center gap-2">
-                <Eye className="w-6 h-6" />
+            <div className="gradient-border-white-bottom rounded-lg bg-gray-900 p-4 sm:p-6">
+              <h3 className="text-base sm:text-xl font-extrabold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                <Eye className="w-5 sm:w-6 h-5 sm:h-6" />
                 Product Preview
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 {mockupUrls.slice(0, 4).map((mockup: any, index: number) => (
-                  <div key={index} className="border-2 border-black rounded-xl overflow-hidden hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all">
+                  <div key={index} className="border border-gray-700 rounded-lg overflow-hidden hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all">
                     <img
                       src={mockup.url}
                       alt={`Preview ${index + 1}`}
@@ -212,9 +213,9 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   </div>
                 ))}
                 {mockupUrls.length === 0 && (
-                  <div className="col-span-2 md:col-span-4 bg-gray-100 border-2 border-black rounded-xl p-8 text-center">
-                    <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm font-bold text-gray-600">
+                  <div className="col-span-2 md:col-span-4 bg-gray-800 border border-gray-700 rounded-lg p-4 sm:p-8 text-center">
+                    <ImageIcon className="w-8 sm:w-12 h-8 sm:h-12 text-gray-500 mx-auto mb-2" />
+                    <p className="text-xs sm:text-sm font-bold text-gray-400">
                       No mockups generated yet
                     </p>
                   </div>
@@ -223,72 +224,72 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
             </div>
 
             {/* Main Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {/* Product Name */}
-              <div className="bg-white border-4 border-black rounded-2xl p-6">
-                <label className="block text-lg font-extrabold text-black mb-3 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
+              <div className="gradient-border-white-bottom rounded-lg bg-gray-900 p-4 sm:p-6">
+                <label className="block text-base sm:text-lg font-extrabold text-white mb-2 sm:mb-3 flex items-center gap-2">
+                  <FileText className="w-4 sm:w-5 h-4 sm:h-5" />
                   Product Name *
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-4 py-3 bg-white border-2 border-black rounded-xl font-bold text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-yellow-300 transition-all ${
-                    errors.name ? 'border-red-600 bg-red-50' : ''
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg font-bold text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all ${
+                    errors.name ? 'border-orange-500/50 bg-orange-500/10' : ''
                   }`}
                   placeholder="E.g., Awesome Custom T-Shirt Design"
                   maxLength={100}
                 />
                 {errors.name && (
-                  <div className="mt-2 flex items-center gap-2 bg-red-100 border-2 border-red-600 rounded-lg px-3 py-2">
-                    <AlertCircle className="w-4 h-4 text-red-600" />
-                    <p className="text-sm font-bold text-red-600">{errors.name}</p>
+                  <div className="mt-2 flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm">
+                    <AlertCircle className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                    <p className="font-bold text-orange-300">{errors.name}</p>
                   </div>
                 )}
-                <p className="text-sm text-gray-600 font-bold mt-2">
+                <p className="text-xs sm:text-sm text-gray-400 font-bold mt-2">
                   {formData.name.length}/100 characters
                 </p>
               </div>
 
               {/* Description */}
-              <div className="bg-white border-4 border-black rounded-2xl p-6">
-                <label className="block text-lg font-extrabold text-black mb-3 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
+              <div className="gradient-border-white-bottom rounded-lg bg-gray-900 p-4 sm:p-6">
+                <label className="block text-base sm:text-lg font-extrabold text-white mb-2 sm:mb-3 flex items-center gap-2">
+                  <FileText className="w-4 sm:w-5 h-4 sm:h-5" />
                   Product Description *
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  rows={6}
-                  className={`w-full px-4 py-3 bg-white border-2 border-black rounded-xl font-bold text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-yellow-300 transition-all resize-none ${
-                    errors.description ? 'border-red-600 bg-red-50' : ''
+                  rows={4}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg font-bold text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all resize-none ${
+                    errors.description ? 'border-orange-500/50 bg-orange-500/10' : ''
                   }`}
                   placeholder="Describe your product... What makes it special? Who is it for? What materials are used?"
                   maxLength={500}
                 />
                 {errors.description && (
-                  <div className="mt-2 flex items-center gap-2 bg-red-100 border-2 border-red-600 rounded-lg px-3 py-2">
-                    <AlertCircle className="w-4 h-4 text-red-600" />
-                    <p className="text-sm font-bold text-red-600">{errors.description}</p>
+                  <div className="mt-2 flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg px-2 sm:px-3 py-2 text-xs sm:text-sm">
+                    <AlertCircle className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                    <p className="font-bold text-orange-300">{errors.description}</p>
                   </div>
                 )}
-                <p className="text-sm text-gray-600 font-bold mt-2">
+                <p className="text-xs sm:text-sm text-gray-400 font-bold mt-2">
                   {formData.description.length}/500 characters
                 </p>
               </div>
 
               {/* Pricing Section */}
-              <div className="bg-white border-4 border-black rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <label className="text-lg font-extrabold text-black flex items-center gap-2">
-                    <DollarSign className="w-5 h-5" />
+              <div className="gradient-border-white-bottom rounded-lg bg-gray-900 p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
+                  <label className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
+                    <DollarSign className="w-4 sm:w-5 h-4 sm:h-5" />
                     Pricing & Profit *
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowPricingCalculator(!showPricingCalculator)}
-                    className="text-sm font-extrabold text-purple-600 underline hover:text-purple-700"
+                    className="text-sm font-bold text-orange-400 underline hover:text-orange-300"
                   >
                     {showPricingCalculator ? 'Hide' : 'Show'} Calculator
                   </button>
@@ -296,7 +297,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-black mb-2">
+                    <label className="block text-sm font-bold text-gray-300 mb-2">
                       Markup Percentage
                     </label>
                     <div className="relative">
@@ -304,21 +305,21 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                         type="number"
                         value={formData.markupPercentage}
                         onChange={(e) => handleInputChange('markupPercentage', e.target.value)}
-                        className={`w-full px-4 py-3 bg-white border-2 border-black rounded-xl font-bold text-black focus:outline-none focus:ring-4 focus:ring-yellow-300 transition-all pr-12 ${
-                          errors.markupPercentage ? 'border-red-600 bg-red-50' : ''
+                        className={`w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg font-bold text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all pr-12 ${
+                          errors.markupPercentage ? 'border-orange-500/50 bg-orange-500/10' : ''
                         }`}
                         min="0"
                         max="500"
                         step="5"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 font-extrabold text-lg">
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">
                         %
                       </span>
                     </div>
                     {errors.markupPercentage && (
-                      <div className="mt-2 flex items-center gap-2 bg-red-100 border-2 border-red-600 rounded-lg px-3 py-2">
-                        <AlertCircle className="w-4 h-4 text-red-600" />
-                        <p className="text-sm font-bold text-red-600">{errors.markupPercentage}</p>
+                      <div className="mt-2 flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg px-3 py-2">
+                        <AlertCircle className="w-4 h-4 text-orange-400" />
+                        <p className="text-sm font-bold text-orange-300">{errors.markupPercentage}</p>
                       </div>
                     )}
                   </div>
@@ -330,10 +331,10 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                         key={value}
                         type="button"
                         onClick={() => handleInputChange('markupPercentage', value.toString())}
-                        className={`px-4 py-2 border-2 border-black rounded-xl font-extrabold text-sm transition-all ${
+                        className={`px-4 py-2 border border-gray-700 rounded-lg font-bold text-sm transition-all ${
                           formData.markupPercentage === value.toString()
-                            ? 'bg-black text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]'
-                            : 'bg-white text-black hover:bg-gray-100'
+                            ? 'bg-orange-500 text-white border-orange-500 shadow-[0_10px_30px_rgba(255,133,27,0.2)]'
+                            : 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:border-gray-600'
                         }`}
                       >
                         {value}%
@@ -342,23 +343,23 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   </div>
 
                   {/* Pricing Summary */}
-                  <div className="bg-gradient-to-r from-green-100 to-green-200 border-2 border-black rounded-xl p-4">
+                  <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="font-bold text-black">Base Cost:</span>
-                        <span className="font-extrabold text-black">${basePrice.toFixed(2)}</span>
+                        <span className="font-bold text-gray-300">Base Cost:</span>
+                        <span className="font-bold text-white">${basePrice.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-bold text-black">Your Markup:</span>
-                        <span className="font-extrabold text-green-600">+{markup}%</span>
+                        <span className="font-bold text-gray-300">Your Markup:</span>
+                        <span className="font-bold text-orange-400">+{markup}%</span>
                       </div>
-                      <div className="border-t-2 border-black pt-2 flex justify-between">
-                        <span className="font-extrabold text-black text-lg">Selling Price:</span>
-                        <span className="font-extrabold text-black text-lg">${sellingPrice.toFixed(2)}</span>
+                      <div className="border-t border-orange-500/30 pt-2 flex justify-between">
+                        <span className="font-bold text-white text-lg">Selling Price:</span>
+                        <span className="font-bold text-orange-400 text-lg">${sellingPrice.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="font-bold text-green-700">Your Profit:</span>
-                        <span className="font-extrabold text-green-700">${profit.toFixed(2)} ({profitMargin}%)</span>
+                        <span className="font-bold text-gray-300">Your Profit:</span>
+                        <span className="font-bold text-orange-300">${profit.toFixed(2)} ({profitMargin}%)</span>
                       </div>
                     </div>
                   </div>
@@ -366,15 +367,15 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
               </div>
 
               {/* Category */}
-              <div className="bg-white border-4 border-black rounded-2xl p-6">
-                <label className="block text-lg font-extrabold text-black mb-3 flex items-center gap-2">
+              <div className="gradient-border-white-bottom rounded-lg bg-gray-900 p-6">
+                <label className="block text-lg font-extrabold text-white mb-3 flex items-center gap-2">
                   <Tag className="w-5 h-5" />
                   Category *
                 </label>
                 <select
                   value={formData.category}
                   onChange={(e) => handleInputChange('category', e.target.value)}
-                  className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl font-bold text-black focus:outline-none focus:ring-4 focus:ring-yellow-300 transition-all"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg font-bold text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
                 >
                   <option value="apparel">👕 Apparel</option>
                   <option value="accessories">👜 Accessories</option>
@@ -386,12 +387,12 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
               </div>
 
               {/* Tags */}
-              <div className="bg-white border-4 border-black rounded-2xl p-6">
-                <label className="block text-lg font-extrabold text-black mb-3 flex items-center gap-2">
+              <div className="gradient-border-white-bottom rounded-lg bg-gray-900 p-6">
+                <label className="block text-lg font-extrabold text-white mb-3 flex items-center gap-2">
                   <Tag className="w-5 h-5" />
                   Tags (Optional)
                 </label>
-                <p className="text-sm font-bold text-gray-600 mb-3">
+                <p className="text-sm font-bold text-gray-400 mb-3">
                   Add tags to help customers find your product
                 </p>
 
@@ -402,7 +403,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                    className="flex-1 px-4 py-2 bg-white border-2 border-black rounded-xl font-bold text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-yellow-300"
+                    className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg font-bold text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
                     placeholder="Type a tag and press Enter"
                     maxLength={20}
                   />
@@ -410,9 +411,9 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                     type="button"
                     onClick={handleAddTag}
                     disabled={!tagInput.trim() || formData.tags.length >= 10}
-                    className="px-4 py-2 bg-black text-white border-4 border-black rounded-xl font-extrabold hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 sm:px-4 py-2 bg-orange-500 text-white border border-orange-600 rounded-lg font-bold hover:bg-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
                   </button>
                 </div>
 
@@ -422,15 +423,15 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                     {formData.tags.map((tag) => (
                       <div
                         key={tag}
-                        className="inline-flex items-center gap-2 bg-purple-200 border-2 border-black rounded-full px-3 py-1"
+                        className="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 rounded-full px-3 py-1"
                       >
-                        <span className="font-extrabold text-black text-sm">{tag}</span>
+                        <span className="font-bold text-orange-300 text-sm">{tag}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveTag(tag)}
-                          className="hover:bg-purple-300 rounded-full p-1 transition-colors"
+                          className="hover:bg-orange-500/30 rounded-full p-1 transition-colors"
                         >
-                          <X className="w-3 h-3 text-black" />
+                          <X className="w-3 h-3 text-orange-400" />
                         </button>
                       </div>
                     ))}
@@ -453,7 +454,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                               setFormData(prev => ({ ...prev, tags: [...prev.tags, tag] }));
                             }
                           }}
-                          className="px-3 py-1 bg-gray-100 border-2 border-gray-300 rounded-full text-xs font-extrabold text-gray-700 hover:border-black hover:bg-white transition-all"
+                          className="px-3 py-1 bg-gray-800 border border-gray-700 rounded-full text-xs font-bold text-gray-300 hover:border-orange-500 hover:text-orange-400 transition-all"
                         >
                           + {tag}
                         </button>
@@ -466,17 +467,19 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-green-400 to-green-500 text-white py-4 px-6 rounded-xl font-extrabold text-lg border-4 border-black hover:shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg font-bold text-sm sm:text-lg hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
-                    Saving...
+                    <div className="animate-spin rounded-full h-5 sm:h-6 w-5 sm:w-6 border-b-2 border-white" />
+                    <span className="hidden sm:inline">Saving...</span>
+                    <span className="sm:hidden">Save...</span>
                   </>
                 ) : (
                   <>
-                    <Save className="w-6 h-6" />
-                    Save & Publish to Marketplace
+                    <Save className="w-5 sm:w-6 h-5 sm:h-6" />
+                    <span className="hidden sm:inline">Save & Publish to Marketplace</span>
+                    <span className="sm:hidden">Publish</span>
                   </>
                 )}
               </button>
@@ -484,87 +487,87 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
           </div>
 
           {/* Right Column - Summary & Tips */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Product Summary */}
-            <div className="bg-white border-4 border-black rounded-2xl p-6">
-              <h3 className="text-xl font-extrabold text-black mb-4 flex items-center gap-2">
-                <TrendingUp className="w-6 h-6" />
+            <div className="gradient-border-white-bottom rounded-lg bg-gray-900 p-4 sm:p-6">
+              <h3 className="text-base sm:text-xl font-extrabold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 sm:w-6 h-5 sm:h-6" />
                 Summary
               </h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-between pb-3 border-b-2 border-gray-200">
-                  <span className="font-bold text-gray-700">Variants:</span>
-                  <span className="font-extrabold text-black">{selectedVariants.length}</span>
+                <div className="flex items-center justify-between pb-3 border-b border-gray-700">
+                  <span className="font-bold text-gray-400">Variants:</span>
+                  <span className="font-bold text-white">{selectedVariants.length}</span>
                 </div>
-                <div className="flex items-center justify-between pb-3 border-b-2 border-gray-200">
-                  <span className="font-bold text-gray-700">Designs:</span>
-                  <span className="font-extrabold text-black">{designFiles.length}</span>
+                <div className="flex items-center justify-between pb-3 border-b border-gray-700">
+                  <span className="font-bold text-gray-400">Designs:</span>
+                  <span className="font-bold text-white">{designFiles.length}</span>
                 </div>
-                <div className="flex items-center justify-between pb-3 border-b-2 border-gray-200">
-                  <span className="font-bold text-gray-700">Mockups:</span>
-                  <span className="font-extrabold text-black">{mockupUrls.length}</span>
+                <div className="flex items-center justify-between pb-3 border-b border-gray-700">
+                  <span className="font-bold text-gray-400">Mockups:</span>
+                  <span className="font-bold text-white">{mockupUrls.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-gray-700">Status:</span>
-                  <span className="inline-flex items-center gap-1 bg-yellow-300 border-2 border-black px-3 py-1 rounded-full">
-                    <Sparkles className="w-4 h-4 text-black" />
-                    <span className="font-extrabold text-black text-sm">Ready!</span>
+                  <span className="font-bold text-gray-400">Status:</span>
+                  <span className="inline-flex items-center gap-1 bg-orange-500/20 border border-orange-500/30 px-3 py-1 rounded-full">
+                    <Sparkles className="w-4 h-4 text-orange-400" />
+                    <span className="font-bold text-orange-300 text-sm">Ready!</span>
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Tips Card */}
-            <div className="bg-gradient-to-br from-yellow-200 to-pink-200 border-4 border-black rounded-2xl p-6">
-              <h4 className="text-lg font-extrabold text-black mb-3 flex items-center gap-2">
+            <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
+              <h4 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
                 <Info className="w-5 h-5" />
                 Pro Tips
               </h4>
-              <ul className="space-y-2 text-sm font-bold text-black">
+              <ul className="space-y-2 text-sm font-bold text-gray-300">
                 <li className="flex items-start gap-2">
-                  <span className="text-black">💡</span>
+                  <span className="text-orange-400">💡</span>
                   <span>Use keywords customers would search for</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black">💰</span>
+                  <span className="text-orange-400">💰</span>
                   <span>30-50% markup is ideal for most products</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black">📝</span>
+                  <span className="text-orange-400">📝</span>
                   <span>Detailed descriptions increase sales</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black">🏷️</span>
+                  <span className="text-orange-400">🏷️</span>
                   <span>Tags improve discoverability</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-black">✅</span>
+                  <span className="text-orange-400">✅</span>
                   <span>Check spelling before publishing</span>
                 </li>
               </ul>
             </div>
 
             {/* Pricing Guide */}
-            <div className="bg-green-100 border-4 border-green-600 rounded-2xl p-6">
-              <h4 className="text-lg font-extrabold text-black mb-3">
+            <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
+              <h4 className="text-lg font-bold text-white mb-3">
                 Pricing Guide
               </h4>
-              <div className="space-y-2 text-sm font-bold text-black">
+              <div className="space-y-2 text-sm font-bold text-gray-300">
                 <div className="flex justify-between">
                   <span>Conservative:</span>
-                  <span className="font-extrabold">20-30%</span>
+                  <span className="text-orange-400">20-30%</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Standard:</span>
-                  <span className="font-extrabold">30-50%</span>
+                  <span className="text-orange-400">30-50%</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Premium:</span>
-                  <span className="font-extrabold">50-100%</span>
+                  <span className="text-orange-400">50-100%</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Luxury:</span>
-                  <span className="font-extrabold">100%+</span>
+                  <span className="text-orange-400">100%+</span>
                 </div>
               </div>
             </div>

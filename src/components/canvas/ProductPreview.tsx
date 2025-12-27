@@ -114,19 +114,19 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
   ]);
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 sticky top-8">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">
+    <div className="gradient-border-white-bottom rounded-lg shadow p-6 sticky top-8 bg-gray-900">
+      <h3 className="text-lg font-bold text-white mb-4">
         Product Preview
       </h3>
 
-      <div className="aspect-square relative bg-gray-100 rounded-lg overflow-hidden mb-4">
+      <div className="aspect-square relative bg-gray-800 rounded-lg overflow-hidden mb-4 border border-gray-700">
         {isGeneratingMockup ? (
           <div className="flex flex-col items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-            <p className="text-sm text-gray-600 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
+            <p className="text-sm text-gray-300 text-center">
               Generating mockup preview...
             </p>
-            <p className="text-xs text-gray-500 text-center mt-1">
+            <p className="text-xs text-gray-400 text-center mt-1">
               This may take a few seconds
             </p>
           </div>
@@ -139,7 +139,7 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
               className="object-contain"
               priority
             />
-            <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-medium">
+            <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium">
               Live Preview
             </div>
           </div>
@@ -154,7 +154,7 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
             priority
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
+          <div className="flex items-center justify-center h-full text-gray-500">
             <span>No image available</span>
           </div>
         )}
@@ -162,10 +162,10 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
 
       <div className="space-y-3">
         <div>
-          <h4 className="font-semibold text-gray-900">
+          <h4 className="font-semibold text-white">
             {productForm.name || selectedProduct.title || selectedProduct.model}
           </h4>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-400">
             {selectedProduct.brand} -{" "}
             {selectedProduct.type_name || selectedProduct.type}
           </p>
@@ -173,13 +173,13 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
 
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Design Files:</span>
-            <span className="font-medium">{designFiles.length}</span>
+            <span className="text-gray-400">Design Files:</span>
+            <span className="font-medium text-white">{designFiles.length}</span>
           </div>
 
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Available Variants:</span>
-            <span className="font-medium">
+            <span className="text-gray-400">Available Variants:</span>
+            <span className="font-medium text-white">
               {selectedProduct.variants?.length || 0} /{" "}
               {selectedProduct.variant_count || "Unknown"}
             </span>
@@ -187,8 +187,8 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
 
           {selectedVariants.length > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Selected Variants:</span>
-              <span className="font-medium text-indigo-600">
+              <span className="text-gray-400">Selected Variants:</span>
+              <span className="font-medium text-orange-400">
                 {selectedVariants.length}
               </span>
             </div>
@@ -198,12 +198,12 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
         {/* Status Indicators */}
         <div className="space-y-1">
           {loading && (
-            <p className="text-xs text-blue-600">🔄 Loading variants...</p>
+            <p className="text-xs text-orange-400">🔄 Loading variants...</p>
           )}
           {!loading &&
             (!selectedProduct.variants ||
               selectedProduct.variants.length === 0) && (
-              <p className="text-xs text-orange-600">
+              <p className="text-xs text-orange-400">
                 ⚠️ No variants loaded - product creation may fail
               </p>
             )}
@@ -211,12 +211,12 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
             selectedProduct.variants &&
             selectedProduct.variants.length > 0 && (
               <div>
-                <p className="text-xs text-green-600">
+                <p className="text-xs text-orange-400">
                   ✅ {selectedProduct.variants.length} variants loaded
                   successfully
                 </p>
                 {selectedVariants.length > 0 && (
-                  <p className="text-xs text-indigo-600">
+                  <p className="text-xs text-orange-400">
                     🎯 {selectedVariants.length} variants selected for product
                   </p>
                 )}
@@ -226,15 +226,15 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
 
         {/* Price Display */}
         {priceRange && (
-          <div className="pt-3 border-t border-gray-200">
-            <p className="text-lg font-bold text-gray-900">
+          <div className="pt-3 border-t border-gray-700">
+            <p className="text-lg font-bold text-orange-400">
               {priceRange.minPrice === priceRange.maxPrice
                 ? `$${priceRange.minPrice.toFixed(2)}`
                 : `$${priceRange.minPrice.toFixed(
                     2
                   )} - $${priceRange.maxPrice.toFixed(2)}`}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               Printful cost + {productForm.markupPercentage}% markup
             </p>
           </div>
@@ -242,8 +242,8 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
 
         {/* Design Placements */}
         {designFiles.length > 0 && (
-          <div className="pt-3 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-2">
+          <div className="pt-3 border-t border-gray-700">
+            <p className="text-sm font-medium text-gray-300 mb-2">
               Design Placements:
             </p>
             <div className="space-y-1">
@@ -252,10 +252,10 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
                   key={`${file.id}-${file.placement}`}
                   className="flex items-center justify-between text-xs"
                 >
-                  <span className="text-gray-600 capitalize">
+                  <span className="text-gray-400 capitalize">
                     {file.placement}:
                   </span>
-                  <span className="text-gray-800 truncate ml-2 max-w-24">
+                  <span className="text-gray-300 truncate ml-2 max-w-24">
                     {file.filename}
                   </span>
                 </div>
@@ -266,23 +266,23 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
 
         {/* Category and Tags */}
         {(productForm.category || productForm.tags.length > 0) && (
-          <div className="pt-3 border-t border-gray-200">
+          <div className="pt-3 border-t border-gray-700">
             {productForm.category && (
               <div className="mb-2">
-                <span className="text-xs text-gray-600">Category: </span>
-                <span className="text-xs font-medium text-gray-800 capitalize">
+                <span className="text-xs text-gray-400">Category: </span>
+                <span className="text-xs font-medium text-gray-300 capitalize">
                   {productForm.category}
                 </span>
               </div>
             )}
             {productForm.tags.length > 0 && (
               <div>
-                <span className="text-xs text-gray-600">Tags: </span>
+                <span className="text-xs text-gray-400">Tags: </span>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {productForm.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                      className="inline-block px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded border border-gray-700"
                     >
                       {tag}
                     </span>

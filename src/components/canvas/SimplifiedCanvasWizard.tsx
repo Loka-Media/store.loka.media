@@ -427,7 +427,7 @@ const SimplifiedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             <h3 className="text-xl font-extrabold text-black mb-4">
               Your Product Preview
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-2 sm:gap-6">
               {mockupUrls.slice(0, 4).map((mockup, index) => (
                 <div key={index} className="border-2 border-black rounded-xl overflow-hidden">
                   <img

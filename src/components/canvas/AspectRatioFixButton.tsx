@@ -93,20 +93,20 @@ const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
     <button
       onClick={handleAutoFixAspectRatio}
       disabled={isFixing || !activePlacement}
-      className="group relative flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl disabled:cursor-not-allowed"
+      className="group relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl disabled:cursor-not-allowed"
       title="Auto-fix aspect ratio"
     >
-      <Zap className={`w-5 h-5 ${isFixing ? 'animate-spin' : ''}`} />
+      <Zap className={`w-4 h-4 sm:w-5 sm:h-5 ${isFixing ? 'animate-spin' : ''}`} />
 
       {/* Tooltip */}
-      <div className="absolute right-12 top-1/2 -translate-y-1/2 hidden group-hover:block pointer-events-none z-50">
-        <div className="bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg border border-gray-700">
-          <div className="font-semibold">Auto-fix Aspect Ratio</div>
-          <div className="text-gray-300 mt-1">
+      <div className="absolute right-10 sm:right-12 top-1/2 -translate-y-1/2 hidden group-hover:block pointer-events-none z-50">
+        <div className="bg-gray-900 text-white text-xs rounded-lg px-2 sm:px-3 py-1 sm:py-2 whitespace-nowrap shadow-lg border border-gray-700">
+          <div className="font-semibold text-xs">Auto-fix</div>
+          <div className="text-gray-300 mt-0.5 hidden sm:block text-xs">
             Automatically adjusts design dimensions to match Printful&apos;s
             compliance requirements
           </div>
-          <div className="text-blue-300 text-xs mt-1 font-mono">
+          <div className="text-blue-300 text-xs mt-0.5 font-mono">
             {isFixing ? 'Fixing...' : 'Click to fix'}
           </div>
         </div>

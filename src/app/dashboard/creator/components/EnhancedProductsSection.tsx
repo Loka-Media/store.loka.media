@@ -25,7 +25,7 @@ export function EnhancedProductsSection({ products, loading, onDelete }: Product
   return (
     <div className="border-t border-white/10 pt-12">
       <div className="mb-8 flex items-center justify-between">
-        <GradientTitle text="Your Products" size="md" />
+        <GradientTitle text="Products" size="sm" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl" />
         {products.length > 0 && (
           <Link
             href="/dashboard/creator/products"
@@ -45,7 +45,7 @@ export function EnhancedProductsSection({ products, loading, onDelete }: Product
           <p className="text-base sm:text-lg font-bold text-gray-300">Loading your products...</p>
         </div>
       ) : products.length === 0 ? (
-        <div className="gradient-border-white-top p-8 sm:p-12 flex flex-col items-center justify-center text-center">
+        <div className="gradient-border-white-bottom p-8 sm:p-12 flex flex-col items-center justify-center text-center">
           <div className="text-orange-400 mb-6">
             <Package className="mx-auto h-16 w-16 sm:h-20 sm:w-20" />
           </div>
@@ -65,7 +65,7 @@ export function EnhancedProductsSection({ products, loading, onDelete }: Product
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {products.slice(0, 8).map((product) => (
               <EnhancedProductCard key={product.id} product={product} onDelete={onDelete} />
             ))}

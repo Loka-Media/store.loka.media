@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Rnd } from "react-rnd";
-import { Zap, X } from "lucide-react";
+import { Zap, X, AlertCircle, CheckCircle, Info } from "lucide-react";
 import toast from "react-hot-toast";
 import { DesignFile, PrintFile, AspectRatioIssue } from "./types";
 import { getCanvasDimensions } from "./utils";
@@ -37,6 +37,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   aspectRatioIssues,
 }) => {
   const [allValidationResults, setAllValidationResults] = React.useState<AspectRatioIssue[]>([]);
+  const [expandedIssueId, setExpandedIssueId] = useState<number | null>(null);
   const canvasDims = getCanvasDimensions(activePrintFile);
 
   useEffect(() => {
@@ -144,31 +145,31 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   };
 
   return (
-    <div className="flex-1 bg-gray-900 flex items-center justify-center p-6">
+    <div className="flex-1 bg-black flex items-center justify-center p-2 sm:p-6">
       <div className="w-full max-w-4xl">
         {/* Design Canvas Area - Centered with Button on Right */}
-        <div className="flex justify-center items-start gap-4">
+        <div className="flex flex-col sm:flex-row justify-center items-start gap-2 sm:gap-4 overflow-x-auto">
           {/* Canvas Container */}
           <div
-            className="bg-white rounded-xl border-2 border-gray-300 relative shadow-2xl overflow-hidden flex-shrink-0"
+            className="gradient-border-white-bottom rounded-lg relative shadow-[0_10px_30px_rgba(255,133,27,0.2)] overflow-hidden flex-shrink-0 w-full sm:w-auto"
             style={{
-              width: `${canvasDims.width}px`,
-              height: `${canvasDims.height}px`,
-              background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)",
+              width: `min(${canvasDims.width}px, 100%)`,
+              height: `${Math.max(300, canvasDims.height * (window?.innerWidth < 640 ? 0.6 : 1))}px`,
+              background: "linear-gradient(135deg, #1f2937 0%, #111827 100%)",
               boxShadow:
-                "0 20px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6)",
+                "0 20px 40px rgba(255,133,27,0.1), inset 0 1px 0 rgba(255,133,27,0.05)",
             }}
           >
           {designFiles.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                  <Zap className="w-8 h-8 text-gray-400" />
+              <div className="text-center text-gray-400">
+                <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner border border-gray-700">
+                  <Zap className="w-8 h-8 text-orange-400" />
                 </div>
-                <p className="text-lg font-medium mb-2 text-gray-700">
+                <p className="text-lg font-medium mb-2 text-white">
                   Product Canvas
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-400">
                   Select a file to add your design
                 </p>
               </div>
@@ -325,59 +326,117 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
         </div>
 
         {/* Canvas Controls */}
-        <div className="mt-4 flex items-center justify-center space-x-4 text-sm text-gray-400">
-          <div>
+        <div className="mt-2 sm:mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 flex-wrap">
+          <div className="whitespace-nowrap">
             Canvas Size: {canvasDims.width} x {canvasDims.height}
           </div>
-          <div>•</div>
-          <div>Active Placement: {activePlacement || "None"}</div>
-          <div>•</div>
-          <div>Designs: {designFiles.length}</div>
+          <div className="hidden sm:block">•</div>
+          <div className="whitespace-nowrap">
+            Active Placement: {activePlacement || "None"}
+          </div>
+          <div className="hidden sm:block">•</div>
+          <div className="whitespace-nowrap">
+            Designs: {designFiles.length}
+          </div>
         </div>
 
         {/* Aspect Ratio Validation Results */}
         {allValidationResults.length > 0 && (
-          <div className="mt-4 space-y-3">
+          <div className="mt-2 sm:mt-4 space-y-2 sm:space-y-3">
             {/* Critical Issues */}
             {aspectRatioIssues.length > 0 && (
-              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                <div className="flex items-center justify-center mb-2">
-                  <div className="text-sm font-bold text-red-400">
-                    ⚠️ PRINTFUL COMPLIANCE REQUIRED ({aspectRatioIssues.length} critical issues)
+              <div className="p-2 sm:p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 flex-shrink-0" />
+                  <div className="text-xs sm:text-sm font-bold text-orange-400">
+                    {aspectRatioIssues.length} Issue{aspectRatioIssues.length !== 1 ? 's' : ''}
                   </div>
                 </div>
-                <div className="space-y-2 mb-4">
-                  {aspectRatioIssues.map((issue) => (
-                    <div key={issue.designId} className="text-red-300 text-xs text-center">
-                      {issue.message}
-                    </div>
-                  ))}
-                </div>
-                <div className="text-center">
-                  <div className="text-xs text-red-200 mb-2">
-                    ❌ Mockup generation and order creation will be blocked until these issues are resolved.
-                  </div>
-                  <div className="text-xs text-red-100">
-                    💡 Tip: Resize your designs to match the exact dimensions shown above.
-                  </div>
+                <div className="space-y-1 sm:space-y-1.5">
+                  {aspectRatioIssues.map((issue) => {
+                    // Extract percentage from message
+                    const percentMatch = issue.message.match(/off by ([\d.]+)%/);
+                    const percent = percentMatch ? percentMatch[1] : '0';
+                    const isExpanded = expandedIssueId === issue.designId;
+
+                    return (
+                      <div key={issue.designId}>
+                        <button
+                          onClick={() => setExpandedIssueId(isExpanded ? null : issue.designId)}
+                          className="w-full group relative flex items-center gap-2 px-2 py-1 hover:bg-orange-500/20 rounded transition-colors text-left"
+                        >
+                          <div className="text-orange-400">•</div>
+                          <div className="text-xs text-orange-300 truncate flex-1">Design</div>
+                          <div className="text-xs font-mono text-orange-500 bg-orange-500/20 px-2 py-0.5 rounded whitespace-nowrap">
+                            {percent}%
+                          </div>
+                          {/* Desktop Tooltip */}
+                          <div className="absolute left-0 right-0 top-full mt-1 hidden sm:group-hover:block pointer-events-none z-50">
+                            <div className="bg-gray-900 text-orange-200 text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg border border-orange-500/30 text-center">
+                              {issue.message}
+                            </div>
+                          </div>
+                        </button>
+
+                        {/* Mobile Expandable Tooltip */}
+                        {isExpanded && (
+                          <div className="sm:hidden mt-1 bg-gray-900 border border-orange-500/30 rounded px-2 py-1 text-orange-200 text-xs">
+                            {issue.message}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
-            
+
             {/* Good Results */}
             {allValidationResults.filter(r => r.message.includes('✅ GOOD')).length > 0 && (
-              <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl">
-                <div className="text-sm font-bold text-green-400 mb-2 text-center">
-                  ✅ Aspect Ratio Status
+              <div className="p-2 sm:p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                  <div className="text-xs sm:text-sm font-bold text-emerald-400">
+                    Ready ({allValidationResults.filter(r => r.message.includes('✅ GOOD')).length})
+                  </div>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0.5 sm:space-y-1">
                   {allValidationResults
                     .filter(r => r.message.includes('✅ GOOD'))
-                    .map((result) => (
-                      <div key={result.designId} className="text-green-300 text-xs text-center">
-                        {result.message}
-                      </div>
-                    ))}
+                    .map((result) => {
+                      // Extract percentage from message
+                      const percentMatch = result.message.match(/variance ([\d.]+)%/);
+                      const percent = percentMatch ? percentMatch[1] : '0';
+                      const isExpanded = expandedIssueId === result.designId;
+
+                      return (
+                        <div key={result.designId}>
+                          <button
+                            onClick={() => setExpandedIssueId(isExpanded ? null : result.designId)}
+                            className="w-full group relative flex items-center gap-2 px-2 py-1 hover:bg-emerald-500/20 rounded transition-colors text-left"
+                          >
+                            <div className="text-emerald-400">✓</div>
+                            <div className="text-xs text-emerald-300 truncate flex-1">Design</div>
+                            <div className="text-xs font-mono text-emerald-500 bg-emerald-500/20 px-2 py-0.5 rounded whitespace-nowrap">
+                              {percent}%
+                            </div>
+                            {/* Desktop Tooltip */}
+                            <div className="absolute left-0 right-0 top-full mt-1 hidden sm:group-hover:block pointer-events-none z-50">
+                              <div className="bg-gray-900 text-emerald-200 text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg border border-emerald-500/30 text-center">
+                                {result.message}
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* Mobile Expandable Tooltip */}
+                          {isExpanded && (
+                            <div className="sm:hidden mt-1 bg-gray-900 border border-emerald-500/30 rounded px-2 py-1 text-emerald-200 text-xs">
+                              {result.message}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
             )}
