@@ -417,16 +417,16 @@ const SimplifiedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           <h2 className="text-3xl font-extrabold text-black mb-2">
             Preview & Publish
           </h2>
-          <p className="text-gray-700 font-bold">
+          <p className="text-gray-700">
             Review your product and publish to marketplace
           </p>
         </div>
 
         {mockupUrls && mockupUrls.length > 0 ? (
           <div className="bg-white border-4 border-black rounded-2xl p-6">
-            <h3 className="text-xl font-extrabold text-black mb-4">
+            <p className="text-xl text-black mb-4">
               Your Product Preview
-            </h3>
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-2 gap-2 sm:gap-6">
               {mockupUrls.slice(0, 4).map((mockup, index) => (
                 <div key={index} className="border-2 border-black rounded-xl overflow-hidden">
@@ -441,7 +441,7 @@ const SimplifiedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           </div>
         ) : (
           <div className="bg-yellow-100 border-4 border-yellow-600 rounded-2xl p-6 text-center">
-            <p className="font-bold text-black">
+            <p className="text-black">
               ⚠️ Please generate a preview in the previous step first
             </p>
           </div>
@@ -483,7 +483,7 @@ const SimplifiedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             <h1 className="text-2xl font-extrabold text-black">
               {selectedProduct?.title || selectedProduct?.name}
             </h1>
-            <p className="text-gray-600 font-bold">Create your custom product</p>
+            <p className="text-gray-600">Create your custom product</p>
           </div>
 
           {/* Progress Bar */}

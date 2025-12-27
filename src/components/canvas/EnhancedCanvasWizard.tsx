@@ -647,7 +647,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 
       {/* Design Summary */}
       <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 sm:p-6">
-        <div className="text-base sm:text-lg md:text-xl font-bold text-white mb-2 sm:mb-4">
+        <div className="text-base sm:text-lg md:text-xl text-white mb-2 sm:mb-4">
           Your Designs ({designFiles.length})
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
@@ -656,10 +656,10 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
               key={placement}
               className="bg-gray-800 border border-gray-700 rounded-lg p-2 sm:p-3 text-center"
             >
-              <p className="font-bold text-white text-xs sm:text-sm mb-1">
+              <p className="text-white text-xs sm:text-sm mb-1">
                 {printFiles?.available_placements?.[placement] || placement}
               </p>
-              <p className="text-xs font-bold text-gray-400">
+              <p className="text-xs text-gray-400">
                 {count} design{count !== 1 ? "s" : ""}
               </p>
             </div>
@@ -667,7 +667,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         </div>
         <button
           onClick={() => setCurrentStep(2)}
-          className="mt-2 sm:mt-4 w-full flex items-center justify-center gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-gray-800 border border-gray-700 text-gray-300 rounded-lg font-bold hover:bg-gray-700 hover:border-gray-600 transition-all"
+          className="mt-2 sm:mt-4 w-full flex items-center justify-center gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-gray-800 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-700 hover:border-gray-600 transition-all"
         >
           <Palette className="w-4 h-4 sm:w-5 sm:h-5" />
           Add More Designs to Other Placements
@@ -676,7 +676,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 
       {mockupUrls && mockupUrls.length > 0 ? (
         <div className="gradient-border-white-bottom rounded-lg p-2 sm:p-6 bg-gray-800">
-          <div className="text-sm sm:text-lg md:text-xl font-bold text-white mb-2 sm:mb-4">
+          <div className="text-sm sm:text-lg md:text-xl text-white mb-2 sm:mb-4">
             Product Previews ({mockupUrls.length})
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 gap-2 sm:gap-6">
@@ -693,7 +693,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
                   />
                   {mockup.title && (
                     <div className="bg-gray-700 border-t border-gray-600 p-1 sm:p-2">
-                      <p className="text-xs font-bold text-gray-200 line-clamp-1">
+                      <p className="text-xs text-gray-200 line-clamp-1">
                         {mockup.title}
                       </p>
                     </div>
@@ -705,7 +705,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           {mockupUrls.length > 4 && (
             <button
               onClick={() => setShowAllPreviews(!showAllPreviews)}
-              className="text-xs sm:text-sm font-bold text-orange-400 mt-2 sm:mt-4 mx-auto block px-2 sm:px-6 py-1 sm:py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg hover:bg-orange-500/30 transition-all"
+              className="text-xs sm:text-sm text-orange-400 mt-2 sm:mt-4 mx-auto block px-2 sm:px-6 py-1 sm:py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg hover:bg-orange-500/30 transition-all"
             >
               {showAllPreviews
                 ? "Show Less"
@@ -717,7 +717,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         </div>
       ) : (
         <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 sm:p-6 text-center">
-          <p className="font-bold text-xs sm:text-sm text-gray-300">
+          <p className="text-xs sm:text-sm text-gray-300">
             ⚠️ Please generate a preview in the previous step
           </p>
           <button
@@ -730,8 +730,8 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       )}
 
       <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 sm:p-6">
-        <div className="font-bold text-white mb-2 sm:mb-3 text-sm sm:text-base">Summary</div>
-        <ul className="space-y-1 sm:space-y-2 text-gray-300 font-bold text-xs sm:text-sm">
+        <div className="text-white mb-2 sm:mb-3 text-sm sm:text-base">Summary</div>
+        <ul className="space-y-1 sm:space-y-2 text-gray-300 text-xs sm:text-sm">
           <li>✅ {selectedVariants.length} variants selected</li>
           <li>
             ✅ {designFiles.length} design{designFiles.length !== 1 ? "s" : ""}{" "}
