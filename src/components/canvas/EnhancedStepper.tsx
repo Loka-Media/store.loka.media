@@ -93,9 +93,6 @@ const EnhancedStepper: React.FC<EnhancedStepperProps> = ({
                   <p className="text-xs sm:text-sm md:text-sm text-white font-medium line-clamp-2 break-words leading-tight">
                     {step.title}
                   </p>
-                  <p className="hidden md:block text-xs text-gray-400 line-clamp-1 break-words leading-tight">
-                    {step.description}
-                  </p>
                 </div>
               </div>
             );
