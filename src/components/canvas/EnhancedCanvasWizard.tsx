@@ -539,7 +539,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
   );
 
   const renderPositioningStep = () => (
-    <div className="space-y-6">
+    <div className="gradient-border-white-top rounded-lg bg-gray-900 p-4 sm:p-6 space-y-6">
       <div>
         <div className="text-lg sm:text-2xl md:text-3xl font-extrabold text-white mb-2">
           Position Your Design

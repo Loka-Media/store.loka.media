@@ -364,7 +364,7 @@ const SimplifiedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
   // Step 3: Position & Adjust
   const renderPositioning = () => {
     return (
-      <div className="space-y-8">
+      <div className="border-4 border-black rounded-2xl bg-white p-6 space-y-8">
         <div>
           <h2 className="text-3xl font-extrabold text-black mb-2">
             Position Your Design
