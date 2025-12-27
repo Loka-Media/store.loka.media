@@ -200,8 +200,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Product Preview Card */}
             <div className="gradient-border-white-bottom rounded-lg bg-gray-900 p-4 sm:p-6">
-              <h3 className="text-base sm:text-xl font-extrabold text-white mb-3 sm:mb-4 flex items-center gap-2">
-                <Eye className="w-5 sm:w-6 h-5 sm:h-6" />
+              <h3 className="text-base sm:text-xl font-extrabold text-white mb-3 sm:mb-4">
                 Product Preview
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
@@ -520,9 +519,9 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400">Status:</span>
-                  <span className="inline-flex items-center gap-1 bg-orange-500/20 border border-orange-500/30 px-3 py-1 rounded-full">
-                    <Sparkles className="w-4 h-4 text-orange-400" />
-                    <span className="text-orange-300 text-sm">Ready!</span>
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full" style={{ backgroundColor: '#FFEC1F' }}>
+                    <Sparkles className="w-4 h-4 text-black" />
+                    <span className="text-black text-sm font-medium">Ready!</span>
                   </span>
                 </div>
               </div>
