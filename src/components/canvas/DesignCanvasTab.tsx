@@ -6,6 +6,12 @@ import { DesignFile, PrintFile, AspectRatioIssue } from "./types";
 import { getCanvasDimensions } from "./utils";
 import { aspectRatioValidation } from "@/utils/aspectRatioValidation";
 import AspectRatioFixButton from "./AspectRatioFixButton";
+import {
+  FrontSVG,
+  BackSVG,
+  LeftSleeveSVG,
+  RightSleeveSVG,
+} from "./PlacementSVGs";
 
 interface DesignCanvasTabProps {
   designFiles: DesignFile[];
@@ -38,20 +44,71 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
 }) => {
   const [allValidationResults, setAllValidationResults] = React.useState<AspectRatioIssue[]>([]);
   const [expandedIssueId, setExpandedIssueId] = useState<number | null>(null);
+  const [windowWidth, setWindowWidth] = useState<number>(
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
   const canvasDims = getCanvasDimensions(activePrintFile);
 
+  // Listen for window resize to update orientation
   useEffect(() => {
-    const designsForPlacement = designFiles.filter((design) => design.placement === activePlacement && design.url);
-    console.log("🎯 Starting aspect ratio validation for active placement:", activePlacement);
-    console.log("🎯 Found designs for validation:", designsForPlacement.length, designsForPlacement.map(d => d.filename));
-    
-    if (designsForPlacement.length === 0) {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Calculate dynamic scale for mobile - ensure canvas fits within viewport
+  const calculateMobileScale = () => {
+    if (windowWidth >= 640) {
+      return 1;
+    }
+    // Available width with padding (16px left + 16px right)
+    const availableWidth = windowWidth - 32;
+    // Calculate scale to fit canvas width within available space
+    const scale = Math.min(availableWidth / canvasDims.width, 1);
+    return Math.max(scale, 0.4); // Minimum scale of 0.4
+  };
+
+  // Check if canvas is too wide for portrait mode (should rotate to landscape)
+  const shouldShowRotatePrompt = () => {
+    if (windowWidth >= 640 || typeof window === "undefined") return false;
+    // Show prompt if canvas width is significantly wider than viewport
+    return canvasDims.width > windowWidth * 0.7; // More than 70% of viewport width
+  };
+
+  // Get icon for placement
+  const getPlacementIcon = (placement: string) => {
+    const svgMap: Record<string, React.ReactNode> = {
+      front: <FrontSVG className="w-4 h-4" />,
+      back: <BackSVG className="w-4 h-4" />,
+      left: <LeftSleeveSVG className="w-4 h-4" />,
+      right: <RightSleeveSVG className="w-4 h-4" />,
+      sleeve_left: <LeftSleeveSVG className="w-4 h-4" />,
+      sleeve_right: <RightSleeveSVG className="w-4 h-4" />,
+      chest_left: <FrontSVG className="w-4 h-4" />,
+      chest_right: <FrontSVG className="w-4 h-4" />,
+      label: <FrontSVG className="w-4 h-4" />,
+      pocket: <FrontSVG className="w-4 h-4" />,
+      default: <FrontSVG className="w-4 h-4" />,
+    };
+
+    return svgMap[placement.toLowerCase()] || svgMap.default;
+  };
+
+  useEffect(() => {
+    // Validate ALL designs across ALL placements (not just active placement)
+    const allDesignsWithUrl = designFiles.filter((design) => design.url);
+    console.log("🎯 Starting aspect ratio validation for all placements");
+    console.log("🎯 Found designs for validation:", allDesignsWithUrl.length, allDesignsWithUrl.map(d => d.filename));
+
+    if (allDesignsWithUrl.length === 0) {
       console.log("🎯 No designs found for validation, clearing issues");
       onAspectRatioIssues([]);
       return;
     }
-    
-    const validationPromises = designsForPlacement.map((design) =>
+
+    const validationPromises = allDesignsWithUrl.map((design) =>
       aspectRatioValidation(
         design.url,
         design.position.width,
@@ -60,13 +117,14 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
       )
         .then(({ isValid, percentDifference, correctedDimensions }) => {
           console.log(`🎯 Validation result for ${design.filename}:`, { isValid, percentDifference });
-          
+
           // Show validation results even for valid designs if there's any difference
           if (percentDifference > 0.1) { // Show if difference is more than 0.1%
             if (!isValid && correctedDimensions) {
               return {
                 designId: design.id,
-                message: `🚫 CRITICAL: Aspect ratio off by ${percentDifference.toFixed(
+                placement: design.placement,
+                message: `🚫 CRITICAL: ${design.placement} - Aspect ratio off by ${percentDifference.toFixed(
                   2
                 )}%. Must fix to: ${correctedDimensions.width.toFixed(
                   0
@@ -75,7 +133,8 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
             } else if (isValid) {
               return {
                 designId: design.id,
-                message: `✅ GOOD: Aspect ratio variance ${percentDifference.toFixed(
+                placement: design.placement,
+                message: `✅ GOOD: ${design.placement} - Aspect ratio variance ${percentDifference.toFixed(
                   2
                 )}% (within tolerance). Printful compatible!`,
               };
@@ -92,7 +151,8 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
           );
           return {
             designId: design.id,
-            message: `Error validating aspect ratio for ${design.filename}.`,
+            placement: design.placement,
+            message: `Error validating aspect ratio for ${design.filename} on ${design.placement}.`,
           };
         })
     );
@@ -101,20 +161,20 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
       const allResults = results.filter((r) => r !== null) as AspectRatioIssue[];
       const criticalIssues = allResults.filter(issue => issue.message.includes('🚫 CRITICAL'));
       const goodResults = allResults.filter(issue => issue.message.includes('✅ GOOD'));
-      
-      console.log("🎯 Final validation results:", { 
-        total: allResults.length, 
-        critical: criticalIssues.length, 
-        good: goodResults.length 
+
+      console.log("🎯 Final validation results:", {
+        total: allResults.length,
+        critical: criticalIssues.length,
+        good: goodResults.length
       });
-      
+
       // Only pass critical issues to block workflow, but show all results in display
       onAspectRatioIssues(criticalIssues);
-      
+
       // Store all results for display purposes
       setAllValidationResults(allResults);
     });
-  }, [designFiles, activePlacement, onAspectRatioIssues]);
+  }, [designFiles, onAspectRatioIssues]);
 
   const handleRemoveDesign = (design: DesignFile, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -147,19 +207,63 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   return (
     <div className="flex-1 bg-black flex items-center justify-center p-2 sm:p-6">
       <div className="w-full max-w-4xl">
+        {/* Placement Tabs - Switch between selected placements */}
+        {selectedPlacements.length > 0 && (
+          <div className="mb-6 flex gap-2 overflow-x-auto pb-3">
+            {selectedPlacements.map((placement) => (
+              <button
+                key={placement}
+                onClick={() => setActivePlacement(placement)}
+                className={`px-4 py-2 rounded-full whitespace-nowrap font-medium transition-all text-sm sm:text-base flex items-center gap-2 bg-gray-800 text-gray-300 ${
+                  activePlacement === placement
+                    ? "border-2 border-white text-white"
+                    : "border-2 border-gray-700 hover:border-gray-600"
+                }`}
+              >
+                <span className="w-4 h-4 flex items-center justify-center">
+                  {getPlacementIcon(placement)}
+                </span>
+                {placement}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Design Canvas Area - Centered with Button on Right */}
-        <div className="flex flex-col sm:flex-row justify-center items-start gap-2 sm:gap-4 overflow-x-auto">
-          {/* Canvas Container */}
-          <div
-            className="gradient-border-white-bottom rounded-lg relative shadow-[0_10px_30px_rgba(255,133,27,0.2)] overflow-hidden flex-shrink-0 w-full sm:w-auto"
-            style={{
-              width: `min(${canvasDims.width}px, 100%)`,
-              height: `${Math.max(300, canvasDims.height * (window?.innerWidth < 640 ? 0.6 : 1))}px`,
-              background: "linear-gradient(135deg, #1f2937 0%, #111827 100%)",
-              boxShadow:
-                "0 20px 40px rgba(255,133,27,0.1), inset 0 1px 0 rgba(255,133,27,0.05)",
-            }}
-          >
+        {shouldShowRotatePrompt() ? (
+          <div className="flex flex-col w-full h-96 justify-center items-center gap-6 p-6">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-orange-500/20 border border-orange-500/30 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <svg className="w-10 h-10 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Rotate Your Phone</h3>
+              <p className="text-gray-300 mb-2">This design is wider and looks better in landscape mode</p>
+              <p className="text-sm text-gray-400">Canvas Size: {canvasDims.width} × {canvasDims.height}px</p>
+            </div>
+            <div className="text-center">
+              <svg className="w-16 h-16 mx-auto animate-bounce text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+              </svg>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row justify-center items-center sm:items-start gap-2 sm:gap-4 w-full">
+            {/* Canvas Container */}
+            <div
+              className="gradient-border-white-bottom rounded-lg relative shadow-[0_10px_30px_rgba(255,133,27,0.2)] overflow-hidden flex-shrink-0"
+              style={{
+                width: `${canvasDims.width}px`,
+                height: `${canvasDims.height}px`,
+                background: "linear-gradient(135deg, #1f2937 0%, #111827 100%)",
+                boxShadow:
+                  "0 20px 40px rgba(255,133,27,0.1), inset 0 1px 0 rgba(255,133,27,0.05)",
+                transform: `scale(${calculateMobileScale()})`,
+                transformOrigin: "center center",
+                transition: "transform 0.3s ease-in-out",
+              }}
+            >
           {designFiles.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center text-gray-400">
@@ -226,10 +330,10 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     bounds="parent"
                     minWidth={30}
                     minHeight={30}
-                    className={`border rounded ${
+                    className={`border rounded relative ${
                       selectedDesignFile?.id === design.id
-                        ? "border-orange-500 border-2"
-                        : "border-orange-500/50"
+                        ? "border-white border-2"
+                        : "border-white/30"
                     } ${design.id === -1 ? "bg-blue-100/20" : "bg-white/10"}`}
                     onClick={() => setSelectedDesignFile(design)}
                   >
@@ -247,13 +351,10 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                         draggable={false}
                       />
                     )}
-                    <div className="absolute -top-6 left-0 text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
-                      {design.placement} {design.id === -1 && "(Preview)"}
-                    </div>
-                    {/* Remove button */}
+                    {/* Remove button - Top Right Corner */}
                     <button
                       onClick={(e) => handleRemoveDesign(design, e)}
-                      className="absolute -top-6 -right-2 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-xs transition-colors shadow-lg"
+                      className="absolute top-2 right-2 w-6 h-6 bg-transparent border border-white text-white rounded-full flex items-center justify-center hover:bg-white/20 transition-all p-0"
                       title="Remove from placement"
                     >
                       <X className="w-3 h-3" />
@@ -324,6 +425,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
             />
           </div>
         </div>
+        )}
 
         {/* Canvas Controls */}
         <div className="mt-2 sm:mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 flex-wrap">
@@ -358,6 +460,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     const percentMatch = issue.message.match(/off by ([\d.]+)%/);
                     const percent = percentMatch ? percentMatch[1] : '0';
                     const isExpanded = expandedIssueId === issue.designId;
+                    // Extract placement name from message (e.g., "🚫 CRITICAL: front - Aspect ratio...")
+                    const placementMatch = issue.message.match(/CRITICAL: ([^-]+) -/);
+                    const placement = placementMatch ? placementMatch[1].trim() : 'Design';
 
                     return (
                       <div key={issue.designId}>
@@ -366,7 +471,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                           className="w-full group relative flex items-center gap-2 px-2 py-1 hover:bg-orange-500/20 rounded transition-colors text-left"
                         >
                           <div className="text-orange-400">•</div>
-                          <div className="text-xs text-orange-300 truncate flex-1">Design</div>
+                          <div className="text-xs text-orange-300 truncate flex-1">{placement}</div>
                           <div className="text-xs font-mono text-orange-500 bg-orange-500/20 px-2 py-0.5 rounded whitespace-nowrap">
                             {percent}%
                           </div>
@@ -408,6 +513,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       const percentMatch = result.message.match(/variance ([\d.]+)%/);
                       const percent = percentMatch ? percentMatch[1] : '0';
                       const isExpanded = expandedIssueId === result.designId;
+                      // Extract placement name from message (e.g., "✅ GOOD: front - Aspect ratio...")
+                      const placementMatch = result.message.match(/GOOD: ([^-]+) -/);
+                      const placement = placementMatch ? placementMatch[1].trim() : 'Design';
 
                       return (
                         <div key={result.designId}>
@@ -416,7 +524,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                             className="w-full group relative flex items-center gap-2 px-2 py-1 hover:bg-emerald-500/20 rounded transition-colors text-left"
                           >
                             <div className="text-emerald-400">✓</div>
-                            <div className="text-xs text-emerald-300 truncate flex-1">Design</div>
+                            <div className="text-xs text-emerald-300 truncate flex-1">{placement}</div>
                             <div className="text-xs font-mono text-emerald-500 bg-emerald-500/20 px-2 py-0.5 rounded whitespace-nowrap">
                               {percent}%
                             </div>

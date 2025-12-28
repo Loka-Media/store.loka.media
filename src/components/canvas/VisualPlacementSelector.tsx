@@ -131,7 +131,7 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
             <Sparkles className="w-5 h-5 text-orange-400" />
           </div>
           <p className="text-sm text-gray-300">
-            <strong className="text-white">Tip:</strong> You can add multiple designs to the same placement area. They'll be combined into your final product!
+            <strong className="text-white">Tip:</strong> Select a placement to add your design. Each placement area can have one design that you can adjust in the next step.
           </p>
         </div>
       </div>

@@ -3,12 +3,19 @@ import { printfulAPI } from '@/lib/api';
 import { Product, DesignFile, PrintFilesData, AdvancedMockupOptions, EmbroideryOptions } from './types';
 import { getUniqueSizes, getUniqueColors } from './utils';
 
-export const useDesignEditorState = (selectedProduct: Product) => {
+export const useDesignEditorState = (selectedProduct: Product, designFiles?: DesignFile[]) => {
+  // Initialize placements from designFiles if available
+  const initialPlacements = designFiles && designFiles.length > 0
+    ? [...new Set(designFiles.map(d => d.placement))]
+    : [];
+  const initialActivePlacement = initialPlacements.length > 0 ? initialPlacements[0] : "";
+  const initialSelectedDesign = designFiles && designFiles.length > 0 ? designFiles[0] : null;
+
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
-  const [activePlacement, setActivePlacement] = useState<string>("");
-  const [selectedPlacements, setSelectedPlacements] = useState<string[]>([]);
-  const [selectedDesignFile, setSelectedDesignFile] = useState<DesignFile | null>(null);
+  const [activePlacement, setActivePlacement] = useState<string>(initialActivePlacement);
+  const [selectedPlacements, setSelectedPlacements] = useState<string[]>(initialPlacements);
+  const [selectedDesignFile, setSelectedDesignFile] = useState<DesignFile | null>(initialSelectedDesign);
   const [loadingPrintFiles, setLoadingPrintFiles] = useState(false);
   const [printFilesLoaded, setPrintFilesLoaded] = useState(false);
   const [selectedTechnique, setSelectedTechnique] = useState<string>("DTG printing");

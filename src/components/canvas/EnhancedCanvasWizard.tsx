@@ -16,6 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 import { UnifiedDesignEditorProps, UploadedFile } from "./types";
 import { printfulAPI } from "@/lib/api";
 import { aspectRatioValidation } from "@/utils/aspectRatioValidation";
@@ -70,7 +71,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
   const [loadingTechniques, setLoadingTechniques] = useState(false);
 
   // Use existing hooks
-  const stateHook = useDesignEditorState(selectedProduct);
+  const stateHook = useDesignEditorState(selectedProduct, designFiles);
   const {
     selectedSizes,
     setSelectedSizes,
@@ -227,11 +228,10 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
     // Track the selected file
     setSelectedFileId(file.id);
 
-    const existingDesignsOnPlacement = designFiles.filter(
-      (df) => df.placement === targetPlacement
+    // Remove any existing designs on this placement (only one design per placement allowed)
+    const designsWithoutCurrentPlacement = designFiles.filter(
+      (df) => df.placement !== targetPlacement
     );
-    const offsetMultiplier = existingDesignsOnPlacement.length;
-    const baseOffset = 20;
 
     try {
       const imageUrl = file.file_url || file.thumbnail_url || "";
@@ -249,7 +249,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       const baseLeft = (activePrintFile.width - aspectAwareWidth) / 2;
 
       const newDesign: any = {
-        id: Date.now() + offsetMultiplier,
+        id: Date.now(),
         filename: file.filename,
         url: imageUrl,
         type: "design",
@@ -259,13 +259,13 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           area_height: activePrintFile.height,
           width: aspectAwareWidth,
           height: aspectAwareHeight,
-          top: Math.max(0, baseTop + offsetMultiplier * baseOffset),
-          left: Math.max(0, baseLeft + offsetMultiplier * baseOffset),
+          top: Math.max(0, baseTop),
+          left: Math.max(0, baseLeft),
           limit_to_print_area: true,
         },
       };
 
-      setDesignFiles([...designFiles, newDesign]);
+      setDesignFiles([...designsWithoutCurrentPlacement, newDesign]);
       setSelectedDesignFile(newDesign);
       toast.success(`Design added to ${targetPlacement}!`);
     } catch (error) {
@@ -557,7 +557,17 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         <VisualPlacementSelector
           availablePlacements={printFiles.available_placements}
           selectedPlacement={activePlacement}
-          onSelectPlacement={setActivePlacement}
+          onSelectPlacement={(placement) => {
+            setActivePlacement(placement);
+            // Show the design for this placement if it exists
+            const designForPlacement = designFiles.find(
+              (df) => df.placement === placement
+            );
+            if (designForPlacement) {
+              setSelectedDesignFile(designForPlacement);
+              setSelectedFileId(designForPlacement.id);
+            }
+          }}
           designsByPlacement={designsByPlacement}
         />
       )}
@@ -607,10 +617,11 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         </div>
       )}
 
-      <button
+      <Button
         onClick={() => onGeneratePreview()}
         disabled={isGeneratingPreview || aspectRatioIssues.length > 0}
-        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 sm:py-4 px-3 sm:px-6 rounded-lg font-bold hover:from-orange-600 hover:to-orange-700 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] disabled:opacity-50 text-xs sm:text-lg flex items-center justify-center gap-2"
+        variant="primary"
+        className="w-full text-xs sm:text-lg flex items-center justify-center gap-2"
       >
         {isGeneratingPreview ? (
           <>
@@ -623,11 +634,11 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             Generate Preview
           </>
         )}
-      </button>
+      </Button>
 
       {mockupStatus && (
         <div className="bg-gray-800 border border-gray-700 rounded-lg p-2 sm:p-4">
-          <p className="text-xs sm:text-sm font-bold text-gray-300">{mockupStatus}</p>
+          <p className="text-xs sm:text-sm text-gray-300">{mockupStatus}</p>
         </div>
       )}
 
@@ -638,10 +649,10 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
               <Check className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
             </div>
             <div>
-              <div className="text-base sm:text-lg md:text-xl font-bold text-white">
+              <div className="text-base sm:text-lg md:text-xl font-semibold text-white">
                 Preview Generated!
               </div>
-              <p className="text-xs sm:text-sm font-bold text-gray-400">
+              <p className="text-xs sm:text-sm text-gray-400">
                 What would you like to do next?
               </p>
             </div>
@@ -649,14 +660,14 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
             <button
               onClick={() => setCurrentStep(2)}
-              className="flex items-center justify-center gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-gray-800 border border-gray-700 text-gray-300 rounded-lg font-bold hover:bg-gray-700 hover:border-gray-600 transition-all"
+              className="flex items-center justify-center gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-gray-800 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-700 hover:border-gray-600 transition-all"
             >
               <Palette className="w-4 h-4 sm:w-5 sm:h-5" />
               Add More Designs
             </button>
             <button
               onClick={() => setCurrentStep(4)}
-              className="flex items-center justify-center gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-orange-500/20 border border-orange-500/50 text-orange-400 rounded-lg font-bold hover:bg-orange-500/30 transition-all"
+              className="flex items-center justify-center gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm bg-orange-500/20 border border-orange-500/50 text-orange-400 rounded-lg hover:bg-orange-500/30 transition-all"
             >
               <ScanEye className="w-4 h-4 sm:w-5 sm:h-5" />
               Review & Continue
@@ -818,37 +829,40 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         </div>
 
         {/* Navigation Buttons */}
-        <div className="mt-4 sm:mt-8 flex flex-row items-center justify-center gap-2 sm:gap-4">
-          <button
+        <div className="mt-4 sm:mt-8 flex flex-row items-center justify-between gap-2 sm:gap-4">
+          <Button
             onClick={() => currentStep > 1 && setCurrentStep(currentStep - 1)}
             disabled={currentStep === 1}
-            className="flex items-center justify-center gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base bg-gray-800 border border-gray-700 text-gray-300 rounded-lg font-bold hover:bg-gray-700 hover:border-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            variant="tertiary"
+            className="flex gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base rounded-lg whitespace-nowrap"
           >
             <ChevronLeft className="w-3 h-3 sm:w-5 sm:h-5" />
             <span className="hidden sm:inline">Previous</span>
             <span className="sm:hidden">Back</span>
-          </button>
+          </Button>
 
           {currentStep < steps.length ? (
-            <button
+            <Button
               onClick={() => canGoNext() && setCurrentStep(currentStep + 1)}
               disabled={!canGoNext()}
-              className="flex items-center justify-center gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold hover:from-orange-600 hover:to-orange-700 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              variant="primary"
+              className="flex gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base rounded-lg whitespace-nowrap"
             >
               <span className="hidden sm:inline">Next Step</span>
               <span className="sm:hidden">Next</span>
               <ChevronRight className="w-3 h-3 sm:w-5 sm:h-5" />
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               onClick={onNext}
               disabled={!canGoNext()}
-              className="flex items-center justify-center gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold hover:from-orange-600 hover:to-orange-700 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              variant="primary"
+              className="flex gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base rounded-lg whitespace-nowrap"
             >
               <span className="hidden sm:inline">Continue to Product Details</span>
               <span className="sm:hidden">Continue</span>
               <Check className="w-3 h-3 sm:w-5 sm:h-5" />
-            </button>
+            </Button>
           )}
         </div>
       </div>
