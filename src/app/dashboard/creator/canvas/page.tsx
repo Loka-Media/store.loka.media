@@ -12,10 +12,7 @@ import { printfulAPI } from "@/lib/api";
 import { mockupAPI } from "@/lib/MockupAPI";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 
-import UploadStep from "@/components/canvas/UploadStep";
-import UnifiedDesignEditor from "@/components/canvas/UnifiedDesignEditor";
 import EnhancedCanvasWizard from "@/components/canvas/EnhancedCanvasWizard";
-import ProductDetailsForm from "@/components/canvas/ProductDetailsForm";
 import EnhancedProductDetailsForm from "@/components/canvas/EnhancedProductDetailsForm";
 import CreativeLoader from "@/components/CreativeLoader";
 
@@ -56,7 +53,6 @@ function CanvasContent() {
   const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
   const [mockupStatus, setMockupStatus] = useState<string>("");
   const [printFiles, setPrintFiles] = useState<any>(null);
-  const useSimplifiedWizard = searchParams.get("new") !== "false";
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: "",
@@ -769,7 +765,6 @@ function CanvasContent() {
           // Reset form and redirect to products page
           setMockupUrls([]);
           setDesignFiles([]);
-          setStep("upload");
           window.location.href = "/dashboard/creator/products";
         }, 3000);
       } else {
@@ -804,60 +799,25 @@ function CanvasContent() {
         ) : (
           <>
             {step === "unified-editor" ? (
-              useSimplifiedWizard ? (
-                <EnhancedCanvasWizard
-                  selectedProduct={selectedProduct}
-                  selectedVariants={selectedVariants}
-                  setSelectedVariants={setSelectedVariants}
-                  designFiles={designFiles}
-                  setDesignFiles={setDesignFiles}
-                  uploadedFiles={uploadedFiles}
-                  printFiles={printFiles}
-                  onGeneratePreview={generatePreview}
-                  isGeneratingPreview={isGeneratingMockup}
-                  mockupUrls={mockupUrls}
-                  mockupStatus={mockupStatus}
-                  onNext={handleNextStep}
-                  onPrev={handlePrevStep}
-                  onPrintFilesLoaded={handlePrintFilesLoaded}
-                  onRefreshFiles={fetchUploadedFiles}
-                />
-              ) : (
-                <UnifiedDesignEditor
-                  selectedProduct={selectedProduct}
-                  selectedVariants={selectedVariants}
-                  setSelectedVariants={setSelectedVariants}
-                  designFiles={designFiles}
-                  setDesignFiles={setDesignFiles}
-                  uploadedFiles={uploadedFiles}
-                  printFiles={printFiles}
-                  onGeneratePreview={generatePreview}
-                  isGeneratingPreview={isGeneratingMockup}
-                  mockupUrls={mockupUrls}
-                  mockupStatus={mockupStatus}
-                  onNext={handleNextStep}
-                  onPrev={handlePrevStep}
-                  onPrintFilesLoaded={handlePrintFilesLoaded}
-                  onRefreshFiles={fetchUploadedFiles}
-                />
-              )
+              <EnhancedCanvasWizard
+                selectedProduct={selectedProduct}
+                selectedVariants={selectedVariants}
+                setSelectedVariants={setSelectedVariants}
+                designFiles={designFiles}
+                setDesignFiles={setDesignFiles}
+                uploadedFiles={uploadedFiles}
+                printFiles={printFiles}
+                onGeneratePreview={generatePreview}
+                isGeneratingPreview={isGeneratingMockup}
+                mockupUrls={mockupUrls}
+                mockupStatus={mockupStatus}
+                onNext={handleNextStep}
+                onPrev={handlePrevStep}
+                onPrintFilesLoaded={handlePrintFilesLoaded}
+                onRefreshFiles={fetchUploadedFiles}
+              />
             ) : (
               <>
-                {step === "upload" && (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2">
-                      <UploadStep
-                        uploadedFiles={uploadedFiles}
-                        uploading={uploading}
-                        setUploading={setUploading}
-                        setUploadedFiles={setUploadedFiles}
-                        onNextStep={handleNextStep}
-                        printfulAPI={printfulAPI}
-                      />
-                    </div>
-                  </div>
-                )}
-
                 {step === "product-details" && (
                   <EnhancedProductDetailsForm
                     initialData={{

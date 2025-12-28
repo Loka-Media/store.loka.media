@@ -30,6 +30,8 @@ import VisualPlacementSelector from "./VisualPlacementSelector";
 import QuickDesignTools from "./QuickDesignTools";
 import DesignCanvasTab from "./DesignCanvasTab";
 import EnhancedStepper from "./EnhancedStepper";
+import PrintingTechniqueSelector from "./PrintingTechniqueSelector";
+import { RegionalAvailabilityPreview } from "./RegionalAvailabilityPreview";
 
 interface WizardStep {
   id: string;
@@ -58,12 +60,14 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showHelp, setShowHelp] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [aspectRatioIssues, setAspectRatioIssues] = useState<any[]>([]);
   const [showAllPreviews, setShowAllPreviews] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState<
     number | string | undefined
   >();
+  const [selectedTechnique, setSelectedTechnique] = useState<string>("");
+  const [availableTechniques, setAvailableTechniques] = useState<string[]>([]);
+  const [loadingTechniques, setLoadingTechniques] = useState(false);
 
   // Use existing hooks
   const stateHook = useDesignEditorState(selectedProduct);
@@ -111,6 +115,52 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
     () => {}
   );
 
+  // Load available techniques for the product
+  useEffect(() => {
+    const loadAvailableTechniques = async () => {
+      if (!selectedProduct?.id) {
+        setAvailableTechniques([]);
+        return;
+      }
+
+      try {
+        setLoadingTechniques(true);
+        const data = await printfulAPI.getPrintFiles(selectedProduct.id);
+
+        if (data?.result?.available_techniques && Array.isArray(data.result.available_techniques)) {
+          const techniques = data.result.available_techniques;
+          setAvailableTechniques(techniques);
+
+          // Set default technique if current selection is not available
+          if (techniques.length > 0 && (!selectedTechnique || !techniques.includes(selectedTechnique))) {
+            setSelectedTechnique(techniques[0]);
+          }
+        } else {
+          // Fallback to common techniques
+          const fallbackTechniques = ['DTG', 'DTFILM'];
+          setAvailableTechniques(fallbackTechniques);
+
+          if (!selectedTechnique || !fallbackTechniques.includes(selectedTechnique)) {
+            setSelectedTechnique(fallbackTechniques[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load available techniques:', error);
+        // Fallback
+        const fallbackTechniques = ['DTG'];
+        setAvailableTechniques(fallbackTechniques);
+
+        if (!selectedTechnique || !fallbackTechniques.includes(selectedTechnique)) {
+          setSelectedTechnique(fallbackTechniques[0]);
+        }
+      } finally {
+        setLoadingTechniques(false);
+      }
+    };
+
+    loadAvailableTechniques();
+  }, [selectedProduct?.id, selectedTechnique]);
+
   // Define wizard steps
   const steps: WizardStep[] = [
     {
@@ -147,32 +197,6 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
   const progress = (currentStep / steps.length) * 100;
 
   // Design tool handlers
-  const handleUploadImage = async (file: File) => {
-    try {
-      setIsUploading(true);
-      const result = await printfulAPI.uploadFileDirectly(file);
-
-      if (result.result) {
-        toast.success("File uploaded successfully!");
-        onRefreshFiles?.();
-
-        // Auto-add to first placement if available
-        if (printFiles?.available_placements) {
-          const placements = Object.keys(printFiles.available_placements);
-          if (placements.length > 0) {
-            const firstPlacement = placements[0];
-            await handleAddDesign(result.result, firstPlacement);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Upload failed:", error);
-      toast.error("Upload failed. Please try again.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const handleAddDesign = async (file: UploadedFile, placement?: string) => {
     let targetPlacement = placement || activePlacement;
     if (!targetPlacement && printFiles?.available_placements) {
@@ -503,6 +527,20 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           </p>
         </div>
       )}
+
+      <PrintingTechniqueSelector
+        selectedTechnique={selectedTechnique}
+        onTechniqueChange={setSelectedTechnique}
+        availableTechniques={availableTechniques}
+        loading={loadingTechniques}
+      />
+
+      {selectedProduct && selectedProduct.variants && (
+        <RegionalAvailabilityPreview
+          selectedProduct={selectedProduct as any}
+          selectedVariants={selectedVariants}
+        />
+      )}
     </div>
   );
 
@@ -525,14 +563,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       )}
 
       <QuickDesignTools
-        onUploadImage={handleUploadImage}
-        onCreateText={() => toast("Text tool coming soon!")}
-        onBrowseClipart={() => toast("Clipart browser coming soon!")}
-        onAddEmoji={() => toast("Emoji picker coming soon!")}
         onSelectExistingFile={(file) => handleAddDesign(file)}
         onDeleteFile={handleDeleteFile}
         uploadedFiles={uploadedFiles}
-        isUploading={isUploading}
         selectedFileId={selectedFileId}
       />
     </div>

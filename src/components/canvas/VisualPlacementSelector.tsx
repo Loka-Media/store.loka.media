@@ -99,20 +99,19 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
 
               {/* Placement Name */}
               <div className="text-center">
-                <div className="text-white text-xs sm:text-xs md:text-sm lg:text-base mb-0.5 sm:mb-1 md:mb-1.5 lg:mb-2">
+                <div className="text-white text-xs sm:text-xs md:text-sm lg:text-base">
                   {placement.label}
                 </div>
-
-                {/* Design Count Badge */}
-                {designCount > 0 && (
-                  <div className="inline-flex items-center gap-0.5 sm:gap-1 bg-white/20 border border-white/30 rounded-full px-1.5 sm:px-2 md:px-2.5 lg:px-3 py-0.5 sm:py-1 text-xs sm:text-sm">
-                    <Check className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 text-white" />
-                    <span className="text-xs sm:text-sm md:text-base text-white">
-                      {designCount}
-                    </span>
-                  </div>
-                )}
               </div>
+
+              {/* Design Count Badge - Bottom Right */}
+              {designCount > 0 && (
+                <div className="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 md:bottom-2.5 md:right-2.5 lg:bottom-3 lg:right-3 bg-transparent border border-white rounded-full min-w-6 h-6 sm:min-w-7 sm:h-7 md:min-w-8 md:h-8 flex items-center justify-center">
+                  <span className="text-xs sm:text-sm text-white font-bold">
+                    {designCount}
+                  </span>
+                </div>
+              )}
 
               {/* Selected Indicator */}
               {isSelected && (

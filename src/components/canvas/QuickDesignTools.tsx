@@ -2,56 +2,33 @@
 
 import React, { useState } from "react";
 import {
-  Upload as UploadIcon,
-  Type,
-  Image as ImageIcon,
-  Smile,
   X,
   FileImage,
-  Sparkles,
   Trash2,
   AlertTriangle,
   Check,
+  Sparkles,
+  ImageIcon,
 } from "lucide-react";
 import { UploadedFile } from "./types";
 
 interface QuickDesignToolsProps {
-  onUploadImage: (file: File) => Promise<void>;
-  onCreateText: () => void;
-  onBrowseClipart: () => void;
-  onAddEmoji: () => void;
   onSelectExistingFile: (file: UploadedFile) => void;
   onDeleteFile?: (fileId: number | string) => Promise<void>;
   uploadedFiles: UploadedFile[];
-  isUploading?: boolean;
   selectedFileId?: number | string;
 }
 
 const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
-  onUploadImage,
-  onCreateText,
-  onBrowseClipart,
-  onAddEmoji,
   onSelectExistingFile,
   onDeleteFile,
   uploadedFiles,
-  isUploading = false,
   selectedFileId,
 }) => {
-  const [showExistingFiles, setShowExistingFiles] = useState(false);
   const [showAllFiles, setShowAllFiles] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<number | string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<{ id: number | string; filename: string } | null>(null);
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      await onUploadImage(file);
-      // Reset input
-      e.target.value = "";
-    }
-  };
 
   const handleDeleteFile = (e: React.MouseEvent, file: UploadedFile) => {
     e.stopPropagation(); // Prevent triggering file selection
@@ -83,111 +60,17 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Main Tools Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-        {/* Upload New Image */}
-        <label className="relative cursor-pointer group">
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/jpg,image/svg+xml"
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            onChange={handleFileChange}
-            disabled={isUploading}
-          />
-          <div className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all h-full bg-gray-800">
-            <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
-              <div className="p-2 sm:p-4 bg-orange-500/20 border border-orange-500/30 rounded-lg group-hover:scale-110 transition-transform">
-                <UploadIcon className="w-5 h-5 sm:w-8 sm:h-8 text-orange-400" />
-              </div>
-              <div>
-                <div className="font-bold text-white text-xs sm:text-lg mb-1">Upload Image</div>
-                <p className="text-xs sm:text-sm text-gray-400">
-                  PNG, JPG, or SVG
-                </p>
-              </div>
-              {isUploading && (
-                <div className="text-xs text-orange-400">
-                  Uploading...
-                </div>
-              )}
-            </div>
-          </div>
-        </label>
-
-        {/* Create Text */}
-        <button
-          onClick={onCreateText}
-          className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all group bg-gray-800"
-        >
-          <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
-            <div className="p-2 sm:p-4 bg-orange-500/20 border border-orange-500/30 rounded-lg group-hover:scale-110 transition-transform">
-              <Type className="w-5 h-5 sm:w-8 sm:h-8 text-orange-400" />
-            </div>
-            <div>
-              <div className="font-bold text-white text-xs sm:text-lg mb-1">Add Text</div>
-              <p className="text-xs sm:text-sm text-gray-400">
-                Custom fonts & styles
-              </p>
-            </div>
-          </div>
-        </button>
-
-        {/* Browse Clipart */}
-        <button
-          onClick={onBrowseClipart}
-          className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all group bg-gray-800"
-        >
-          <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
-            <div className="p-2 sm:p-4 bg-orange-500/20 border border-orange-500/30 rounded-lg group-hover:scale-110 transition-transform">
-              <ImageIcon className="w-5 h-5 sm:w-8 sm:h-8 text-orange-400" />
-            </div>
-            <div>
-              <div className="font-bold text-white text-xs sm:text-lg mb-1">Clipart Library</div>
-              <p className="text-xs sm:text-sm text-gray-400">
-                1000s of graphics
-              </p>
-            </div>
-          </div>
-        </button>
-
-        {/* Add Emoji */}
-        <button
-          onClick={onAddEmoji}
-          className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 hover:shadow-[0_10px_30px_rgba(255,133,27,0.2)] transition-all group bg-gray-800"
-        >
-          <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
-            <div className="p-2 sm:p-4 bg-orange-500/20 border border-orange-500/30 rounded-lg group-hover:scale-110 transition-transform">
-              <Smile className="w-5 h-5 sm:w-8 sm:h-8 text-orange-400" />
-            </div>
-            <div>
-              <div className="font-bold text-white text-xs sm:text-lg mb-1">Add Emoji</div>
-              <p className="text-xs sm:text-sm text-gray-400">
-                Fun & expressive
-              </p>
-            </div>
-          </div>
-        </button>
-      </div>
-
-      {/* Previously Uploaded Files */}
+      {/* Uploaded Files */}
       {uploadedFiles.length > 0 && (
         <div className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 bg-gray-800">
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4">
             <div className="font-bold text-white text-xs sm:text-lg flex items-center gap-2">
               <FileImage className="w-4 h-4 sm:w-5 sm:h-5" />
               Your Uploaded Files ({uploadedFiles.length})
             </div>
-            <button
-              onClick={() => setShowExistingFiles(!showExistingFiles)}
-              className="text-xs sm:text-sm text-orange-400 underline hover:text-orange-300"
-            >
-              {showExistingFiles ? "Hide" : "Show"}
-            </button>
           </div>
 
-          {showExistingFiles && (
-            <>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-6">
                 {(showAllFiles ? uploadedFiles : uploadedFiles.slice(0, 12)).map((file) => {
                   const isSelected = selectedFileId === file.id;
                   return (
@@ -233,20 +116,18 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
                   </div>
                 );
                 })}
-              </div>
+            </div>
 
-              {uploadedFiles.length > 12 && (
-                <button
-                  onClick={() => setShowAllFiles(!showAllFiles)}
-                  className="text-xs sm:text-sm text-orange-400 mt-4 mx-auto block px-3 sm:px-6 py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg hover:bg-orange-500/30 transition-all"
-                >
-                  {showAllFiles
-                    ? "Show Less"
-                    : `+ ${uploadedFiles.length - 12} more files available`}
-                </button>
-              )}
-            </>
-          )}
+            {uploadedFiles.length > 12 && (
+              <button
+                onClick={() => setShowAllFiles(!showAllFiles)}
+                className="text-xs sm:text-sm text-orange-400 mt-4 mx-auto block px-3 sm:px-6 py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg hover:bg-orange-500/30 transition-all"
+              >
+                {showAllFiles
+                  ? "Show Less"
+                  : `+ ${uploadedFiles.length - 12} more files available`}
+              </button>
+            )}
         </div>
       )}
 
