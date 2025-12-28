@@ -129,14 +129,14 @@ export function HowItWorksSection() {
             </p>
 
             <div className="flex flex-row gap-4 sm:gap-6 md:gap-8 justify-center items-center flex-wrap">
-              <Button variant="primary">
+              <Button variant="primary" href="/auth/register">
                 <span className="flex items-center justify-center">
                   Get Started Free
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </span>
               </Button>
 
-              <Button variant="secondary">
+              <Button variant="secondary" href="/products">
                 <span>View Products</span>
               </Button>
             </div>

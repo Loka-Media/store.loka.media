@@ -123,7 +123,7 @@ export  function QualityProductsSection() {
                     <p className="text-white/90 text-base sm:text-lg leading-relaxed mb-4 sm:mb-5 font-medium">
                       From apparel to makeup to your own product lines, we've teamed up with top brands and manufacturers to bring your ideas to life. No minimums required.
                     </p>
-                    <Button variant="primary">
+                    <Button variant="primary" href="/dashboard/creator/canvas">
                       Create your first product
                     </Button>
                   </div>
