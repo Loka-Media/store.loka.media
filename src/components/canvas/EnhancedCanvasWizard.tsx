@@ -128,30 +128,42 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         setLoadingTechniques(true);
         const data = await printfulAPI.getPrintFiles(selectedProduct.id);
 
-        if (data?.result?.available_techniques && Array.isArray(data.result.available_techniques)) {
+        if (
+          data?.result?.available_techniques &&
+          Array.isArray(data.result.available_techniques)
+        ) {
           const techniques = data.result.available_techniques;
           setAvailableTechniques(techniques);
 
           // Set default technique if current selection is not available
-          if (techniques.length > 0 && (!selectedTechnique || !techniques.includes(selectedTechnique))) {
+          if (
+            techniques.length > 0 &&
+            (!selectedTechnique || !techniques.includes(selectedTechnique))
+          ) {
             setSelectedTechnique(techniques[0]);
           }
         } else {
           // Fallback to common techniques
-          const fallbackTechniques = ['DTG', 'DTFILM'];
+          const fallbackTechniques = ["DTG", "DTFILM"];
           setAvailableTechniques(fallbackTechniques);
 
-          if (!selectedTechnique || !fallbackTechniques.includes(selectedTechnique)) {
+          if (
+            !selectedTechnique ||
+            !fallbackTechniques.includes(selectedTechnique)
+          ) {
             setSelectedTechnique(fallbackTechniques[0]);
           }
         }
       } catch (error) {
-        console.error('Failed to load available techniques:', error);
+        console.error("Failed to load available techniques:", error);
         // Fallback
-        const fallbackTechniques = ['DTG'];
+        const fallbackTechniques = ["DTG"];
         setAvailableTechniques(fallbackTechniques);
 
-        if (!selectedTechnique || !fallbackTechniques.includes(selectedTechnique)) {
+        if (
+          !selectedTechnique ||
+          !fallbackTechniques.includes(selectedTechnique)
+        ) {
           setSelectedTechnique(fallbackTechniques[0]);
         }
       } finally {
@@ -420,7 +432,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           <div className="flex items-start gap-2 sm:gap-3">
             <Info className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400 flex-shrink-0 mt-1" />
             <div>
-              <div className="font-bold text-white mb-2 text-sm sm:text-base">Quick Tips</div>
+              <div className="font-bold text-white mb-2 text-sm sm:text-base">
+                Quick Tips
+              </div>
               <ul className="space-y-1 text-xs sm:text-sm text-gray-400">
                 <li>• Select popular colors for better sales</li>
                 <li>• Include all sizes for maximum reach</li>
@@ -515,7 +529,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 
       {(selectedColors.length > 0 || selectedSizes.length > 0) && (
         <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 sm:p-6">
-          <div className="font-extrabold text-white mb-2 text-sm sm:text-base">Your Selection</div>
+          <div className="font-extrabold text-white mb-2 text-sm sm:text-base">
+            Your Selection
+          </div>
           <p className="text-xs sm:text-sm text-gray-300">
             {selectedColors.length} color
             {selectedColors.length !== 1 ? "s" : ""} × {selectedSizes.length}{" "}
@@ -774,7 +790,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       )}
 
       <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 sm:p-6">
-        <div className="text-white mb-2 sm:mb-3 text-sm sm:text-base">Summary</div>
+        <div className="text-white mb-2 sm:mb-3 text-sm sm:text-base">
+          Summary
+        </div>
         <ul className="space-y-1 sm:space-y-2 text-gray-300 text-xs sm:text-sm">
           <li>✅ {selectedVariants.length} variants selected</li>
           <li>
@@ -799,7 +817,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             <div className="text-lg sm:text-2xl font-extrabold text-white">
               {selectedProduct?.title || selectedProduct?.name}
             </div>
-            <p className="text-xs sm:text-sm text-gray-400">Create your custom product</p>
+            <p className="text-xs sm:text-sm text-gray-400">
+              Create your custom product
+            </p>
           </div>
 
           {/* Enhanced Stepper */}
@@ -821,7 +841,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
-        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-8">
+        <div className="rounded-xl sm:rounded-2xl">
           {currentStep === 1 && renderVariantSelection()}
           {currentStep === 2 && renderDesignStep()}
           {currentStep === 3 && renderPositioningStep()}
@@ -859,7 +879,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
               variant="primary"
               className="flex gap-2 px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base rounded-lg whitespace-nowrap"
             >
-              <span className="hidden sm:inline">Continue to Product Details</span>
+              <span className="hidden sm:inline">
+                Continue to Product Details
+              </span>
               <span className="sm:hidden">Continue</span>
               <Check className="w-3 h-3 sm:w-5 sm:h-5" />
             </Button>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Rnd } from "react-rnd";
-import { Zap, X, AlertCircle, CheckCircle, Info } from "lucide-react";
+import { Zap, X, AlertCircle, CheckCircle, Info, Smartphone } from "lucide-react";
 import toast from "react-hot-toast";
 import { DesignFile, PrintFile, AspectRatioIssue } from "./types";
 import { getCanvasDimensions } from "./utils";
@@ -205,7 +205,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   };
 
   return (
-    <div className="flex-1 bg-black flex items-center justify-center p-2 sm:p-6">
+    <div className="flex-1 bg-black flex items-center justify-center">
       <div className="w-full max-w-4xl">
         {/* Placement Tabs - Switch between selected placements */}
         {selectedPlacements.length > 0 && (
@@ -231,21 +231,26 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
 
         {/* Design Canvas Area - Centered with Button on Right */}
         {shouldShowRotatePrompt() ? (
-          <div className="flex flex-col w-full h-96 justify-center items-center gap-6 p-6">
+          <div className="flex flex-col w-full h-96 justify-center items-center gap-8 p-6">
             <div className="text-center">
-              <div className="w-20 h-20 bg-orange-500/20 border border-orange-500/30 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                <svg className="w-10 h-10 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+              <div className="inline-block mb-6">
+                <style>{`
+                  @keyframes rotatePhone {
+                    0% { transform: rotate(0deg); }
+                    50% { transform: rotate(90deg); }
+                    100% { transform: rotate(0deg); }
+                  }
+                  .animate-rotate-phone {
+                    animation: rotatePhone 3s ease-in-out infinite;
+                  }
+                `}</style>
+                <div className="w-24 h-24 bg-orange-500/20 border border-orange-500/30 rounded-full flex items-center justify-center shadow-inner">
+                  <Smartphone className="w-12 h-12 text-orange-400 animate-rotate-phone" strokeWidth={1.5} />
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Rotate Your Phone</h3>
+              <h3 className="text-2xl font-bold text-white mb-3">Rotate Your Phone</h3>
               <p className="text-gray-300 mb-2">This design is wider and looks better in landscape mode</p>
               <p className="text-sm text-gray-400">Canvas Size: {canvasDims.width} × {canvasDims.height}px</p>
-            </div>
-            <div className="text-center">
-              <svg className="w-16 h-16 mx-auto animate-bounce text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-              </svg>
             </div>
           </div>
         ) : (
