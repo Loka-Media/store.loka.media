@@ -1,18 +1,13 @@
 "use client";
 
 import React from "react";
+import { Check, Sparkles } from "lucide-react";
 import {
-  Check,
-  Shirt,
-  RotateCcw,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
-  Heart,
-  MapPin,
-  Square,
-  Circle
-} from "lucide-react";
+  FrontSVG,
+  BackSVG,
+  LeftSleeveSVG,
+  RightSleeveSVG,
+} from "./PlacementSVGs";
 
 interface PlacementOption {
   id: string;
@@ -34,23 +29,23 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
   onSelectPlacement,
   designsByPlacement,
 }) => {
-  // Get proper icon component for each placement
+  // Get proper SVG component for each placement
   const getPlacementIcon = (placement: string) => {
-    const iconMap: Record<string, React.ReactNode> = {
-      front: <Shirt className="w-full h-full" />,
-      back: <RotateCcw className="w-full h-full" />,
-      left: <ChevronLeft className="w-full h-full" />,
-      right: <ChevronRight className="w-full h-full" />,
-      sleeve_left: <ChevronLeft className="w-full h-full" />,
-      sleeve_right: <ChevronRight className="w-full h-full" />,
-      chest_left: <Heart className="w-full h-full" />,
-      chest_right: <Heart className="w-full h-full" />,
-      label: <Square className="w-full h-full" />,
-      pocket: <Circle className="w-full h-full" />,
-      default: <MapPin className="w-full h-full" />,
+    const svgMap: Record<string, React.ReactNode> = {
+      front: <FrontSVG className="w-full h-full" />,
+      back: <BackSVG className="w-full h-full" />,
+      left: <LeftSleeveSVG className="w-full h-full" />,
+      right: <RightSleeveSVG className="w-full h-full" />,
+      sleeve_left: <LeftSleeveSVG className="w-full h-full" />,
+      sleeve_right: <RightSleeveSVG className="w-full h-full" />,
+      chest_left: <FrontSVG className="w-full h-full" />,
+      chest_right: <FrontSVG className="w-full h-full" />,
+      label: <FrontSVG className="w-full h-full" />,
+      pocket: <FrontSVG className="w-full h-full" />,
+      default: <FrontSVG className="w-full h-full" />,
     };
 
-    return iconMap[placement.toLowerCase()] || iconMap.default;
+    return svgMap[placement.toLowerCase()] || svgMap.default;
   };
 
   const placementOptions: PlacementOption[] = Object.entries(availablePlacements).map(
@@ -74,7 +69,7 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
       </div>
 
       {/* Visual Grid of Placements */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-3 w-full sm:max-w-2xl lg:max-w-6xl">
         {placementOptions.map((placement) => {
           const isSelected = selectedPlacement === placement.id;
           const designCount = designsByPlacement[placement.id] || 0;
@@ -83,20 +78,20 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
             <button
               key={placement.id}
               onClick={() => onSelectPlacement(placement.id)}
-              className={`relative group transition-all bg-black rounded-lg p-3 sm:p-6 text-left ${
+              className={`relative group transition-all bg-black rounded-2xl p-2 sm:p-3 md:p-4 lg:p-5 text-left h-28 sm:h-32 md:h-36 lg:h-32 w-full ${
                 isSelected
                   ? "border-2 border-white shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
                   : "border-2 border-gray-700 hover:border-white hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
               }`}
             >
               {/* Placement Icon/Illustration */}
-              <div className="flex items-center justify-center mb-2 sm:mb-4">
+              <div className="flex items-center justify-center mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 flex-1">
                 <div
                   className={`${
                     isSelected
                       ? "scale-110 text-white"
                       : "text-gray-500 group-hover:text-white group-hover:scale-105"
-                  } transition-all w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center`}
+                  } transition-all w-8 h-8 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-14 lg:h-14 flex items-center justify-center`}
                 >
                   {getPlacementIcon(placement.id)}
                 </div>
@@ -104,16 +99,16 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
 
               {/* Placement Name */}
               <div className="text-center">
-                <div className="font-extrabold text-white text-xs sm:text-sm mb-1">
+                <div className="text-white text-xs sm:text-xs md:text-sm lg:text-base mb-0.5 sm:mb-1 md:mb-1.5 lg:mb-2">
                   {placement.label}
                 </div>
 
                 {/* Design Count Badge */}
                 {designCount > 0 && (
-                  <div className="inline-flex items-center gap-1 bg-white/20 border border-white/30 rounded-full px-2 sm:px-3 py-1 text-xs sm:text-sm">
-                    <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
-                    <span className="text-xs font-extrabold text-white">
-                      {designCount} design{designCount !== 1 ? "s" : ""}
+                  <div className="inline-flex items-center gap-0.5 sm:gap-1 bg-white/20 border border-white/30 rounded-full px-1.5 sm:px-2 md:px-2.5 lg:px-3 py-0.5 sm:py-1 text-xs sm:text-sm">
+                    <Check className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 lg:w-3.5 lg:h-3.5 text-white" />
+                    <span className="text-xs sm:text-sm md:text-base text-white">
+                      {designCount}
                     </span>
                   </div>
                 )}
@@ -121,8 +116,8 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
 
               {/* Selected Indicator */}
               {isSelected && (
-                <div className="absolute -top-2 -right-2 bg-white border border-white rounded-full p-1 sm:p-2 shadow-[0_4px_12px_rgba(255,255,255,0.3)]">
-                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-black" />
+                <div className="absolute -top-1.5 -right-1.5 bg-white border border-white rounded-full p-0.5 sm:p-1 shadow-[0_4px_12px_rgba(255,255,255,0.3)]">
+                  <Check className="w-2 h-2 sm:w-3 sm:h-3 text-black" />
                 </div>
               )}
             </button>

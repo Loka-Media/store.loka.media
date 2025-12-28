@@ -74,9 +74,9 @@ export function ProductCard({ product }: ProductCardProps) {
           />
 
           {/* Wishlist Button - Bottom Left */}
-          <div className="absolute bottom-3 left-3 z-10" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 z-10" onClick={(e) => e.stopPropagation()}>
             <button
-              className={`p-2.5 rounded-lg transition-all duration-300 focus:outline-none hover:shadow-[0_8px_20px_rgba(255,99,71,0.5)] ${
+              className={`p-1.5 sm:p-2.5 rounded-lg transition-all duration-300 focus:outline-none hover:shadow-[0_8px_20px_rgba(255,99,71,0.5)] ${
                 isWishlisted
                   ? "bg-pink-500 text-white"
                   : "bg-black text-white"
@@ -102,7 +102,7 @@ export function ProductCard({ product }: ProductCardProps) {
               }}
             >
               <Heart
-                className={`w-5 h-5 ${
+                className={`w-4 h-4 sm:w-5 sm:h-5 ${
                   isWishlisted ? "fill-current" : ""
                 }`}
               />
@@ -110,29 +110,29 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* Rating Badge - Bottom Right */}
-          <div className="absolute bottom-3 right-3 z-10">
-            <div className="bg-black px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
+          <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 z-10">
+            <div className="bg-black px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg flex items-center gap-0.5 sm:gap-1.5">
               <span className="text-xs font-extrabold text-white">4.8</span>
-              <span className="text-sm">⭐</span>
+              <span className="text-xs sm:text-sm">⭐</span>
             </div>
           </div>
         </div>
 
         {/* Content Section - Below Image */}
-        <div className="bg-black px-3 py-2.5 flex flex-col h-full">
+        <div className="bg-black px-2 sm:px-3 py-1.5 sm:py-2.5 flex flex-col h-full">
           {/* Creator Name */}
-          <p className="text-xs text-gray-400 font-semibold mb-1">
+          <p className="text-xs text-gray-400 font-semibold mb-0.5 sm:mb-1">
             by {product.creator_name}
           </p>
 
           {/* Product Title */}
-          <div className="font-extrabold text-sm text-white mb-auto line-clamp-2 group-hover:text-orange-400 transition-colors tracking-tight">
+          <div className="font-extrabold text-xs sm:text-sm text-white mb-auto line-clamp-2 group-hover:text-orange-400 transition-colors tracking-tight">
             {product.name}
           </div>
 
           {/* Price */}
-          <div className="flex items-center justify-between pt-1.5">
-            <span className="text-sm font-extrabold text-cyan-400 tracking-tight">
+          <div className="flex items-center justify-between pt-0.5 sm:pt-1.5">
+            <span className="text-xs sm:text-sm font-extrabold text-cyan-400 tracking-tight">
               {formatPrice(product.min_price)}
               {product.max_price > product.min_price && (
                 <span className="text-xs text-gray-400 font-normal ml-1">- {formatPrice(product.max_price)}</span>

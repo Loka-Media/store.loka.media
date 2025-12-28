@@ -14,12 +14,12 @@ export function ProductsPagination({
   if (!hasNext) return null;
 
   return (
-    <div className="mt-16 text-center">
+    <div className="mt-16 text-center px-4 sm:px-0">
       <Button
         onClick={onLoadMore}
         disabled={loading}
         variant="primary"
-        className={loading ? "cursor-not-allowed opacity-60" : ""}
+        className={`w-full ${loading ? "cursor-not-allowed opacity-60" : ""}`}
       >
         {loading ? (
           <div className="flex items-center justify-center gap-2">

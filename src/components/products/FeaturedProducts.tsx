@@ -23,12 +23,12 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
     <div className="bg-gradient-to-br from-gray-950 via-black to-gray-950 border-y border-white/10 py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <div className="mb-8 sm:mb-10">
-          <GradientTitle text="Featured Products" size="lg" />
+        <div className="mb-6 sm:mb-10">
+          <GradientTitle text="Featured Products" size="sm" className="sm:!text-2xl md:!text-3xl lg:!text-4xl" />
         </div>
 
         {/* Featured Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {featuredProducts.map((product) => (
             <Link
               key={product.id}
@@ -58,10 +58,10 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                   </div>
                 )}
 
-                {/* Featured Badge - Bottom Left */}
-                <div className="absolute bottom-3 left-3 z-10">
-                  <div className="bg-gradient-to-r from-orange-500 to-orange-600 border border-orange-400/30 px-2.5 py-1 rounded-lg">
-                    <span className="text-xs font-extrabold text-white">FEATURED</span>
+                {/* Featured Badge - Top Right */}
+                <div className="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 z-10">
+                  <div className="bg-yellow-400 border border-yellow-500 px-1.5 sm:px-2 py-0.5 rounded text-[8px] sm:text-[10px] md:text-[11px] lg:text-xs font-extrabold text-black leading-none">
+                    FEATURED
                   </div>
                 </div>
 

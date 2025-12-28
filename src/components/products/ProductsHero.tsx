@@ -31,8 +31,8 @@ export function ProductsHero({
           <div className="space-y-2 sm:space-y-3 md:space-y-4">
             <GradientTitle
               text="Premium Marketplace"
-              size="xl"
-              className="mb-4 sm:mb-6 md:mb-8"
+              size="lg"
+              className="sm:!text-3xl md:!text-4xl lg:!text-5xl"
             />
 
             <GradientText className="sm:text-lg md:text-xl lg:text-xl max-w-3xl block mx-auto text-center">

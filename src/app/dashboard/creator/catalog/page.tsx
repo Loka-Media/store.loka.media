@@ -396,10 +396,10 @@ function PrintfulProductCard({
         {/* Button - Bottom Left */}
         <button
           onClick={() => onCreateProduct(product)}
-          className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 p-2 sm:p-2.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 border border-orange-400 text-white hover:from-orange-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-110 opacity-0 group-hover:opacity-100"
+          className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 p-1.5 sm:p-2.5 rounded-full bg-black border border-orange-400 text-white hover:bg-orange-500 transition-all duration-300 transform hover:scale-110 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
           title="Create Product"
         >
-          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+          <Plus className="w-3 h-3 sm:w-5 sm:h-5" />
         </button>
       </div>
 
