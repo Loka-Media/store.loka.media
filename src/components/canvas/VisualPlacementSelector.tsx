@@ -77,7 +77,14 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
           return (
             <button
               key={placement.id}
-              onClick={() => onSelectPlacement(placement.id)}
+              onClick={() => {
+                // If already selected, deselect. Otherwise select
+                if (isSelected) {
+                  onSelectPlacement(""); // Deselect
+                } else {
+                  onSelectPlacement(placement.id); // Select
+                }
+              }}
               className={`relative group transition-all bg-black rounded-2xl p-2 sm:p-3 md:p-4 lg:p-5 text-left h-28 sm:h-32 md:h-36 lg:h-32 w-full ${
                 isSelected
                   ? "border-2 border-white shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
@@ -131,7 +138,7 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
             <Sparkles className="w-5 h-5 text-orange-400" />
           </div>
           <p className="text-sm text-gray-300">
-            <strong className="text-white">Tip:</strong> Select a placement to add your design. Each placement area can have one design that you can adjust in the next step.
+            <strong className="text-white">Tip:</strong> Select a placement to add your design. Click again to deselect. Each placement area can have one design that you can adjust in the next step.
           </p>
         </div>
       </div>

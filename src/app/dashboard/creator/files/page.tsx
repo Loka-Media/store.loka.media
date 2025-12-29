@@ -43,9 +43,7 @@ export default function FilesPage() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<number[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [viewerImage, setViewerImage] = useState<UploadedFile | null>(null);
   const [filters, setFilters] = useState({
     search: '',
     type: '',
@@ -101,34 +99,36 @@ export default function FilesPage() {
     if (!fileList || fileList.length === 0) return;
 
     setUploading(true);
-    
+
     try {
       const uploadPromises = Array.from(fileList).map(async (file) => {
-        // You may need to upload the file to your own server or a storage service first to get a URL
-        // For demo purposes, we'll use a placeholder URL
-        const demoImageUrl = URL.createObjectURL(file);
-
         try {
-          const response = await printfulAPI.uploadFile({
-            filename: file.name,
-            url: demoImageUrl,
-            type: file.type.startsWith('image/') ? 'image' : file.type === 'application/pdf' ? 'pdf' : undefined
-          });
+          // Use uploadFileDirectly which handles multipart/form-data upload
+          const response = await printfulAPI.uploadFileDirectly(file);
           if (response.result) {
             toast.success(`Uploaded ${file.name}`);
             return response.result;
+          } else {
+            toast.error(`Failed to upload ${file.name}`);
+            return null;
           }
         } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
           toast.error(`Failed to upload ${file.name}`);
-          throw error;
+          return null;
         }
       });
 
       const uploadedFiles = await Promise.all(uploadPromises);
-      setFiles(prev => [...uploadedFiles.filter(Boolean), ...prev]);
-      
+      const successfulUploads = uploadedFiles.filter(Boolean);
+
+      if (successfulUploads.length > 0) {
+        setFiles(prev => [...successfulUploads, ...prev]);
+      }
+
     } catch (error) {
       console.error('Upload error:', error);
+      toast.error('Failed to upload files');
     } finally {
       setUploading(false);
       // Reset input
@@ -140,44 +140,16 @@ export default function FilesPage() {
     if (!confirm('Are you sure you want to delete this file?')) return;
 
     try {
-      // Note: Printful API doesn't have a delete endpoint, so we'll just remove from UI
+      // Call the delete API endpoint
+      await printfulAPI.deleteFile(fileId);
       setFiles(prev => prev.filter(f => f.id !== fileId));
-      toast.success('File removed from list');
+      toast.success('File deleted successfully');
     } catch (error) {
       console.error('Failed to delete file:', error);
       toast.error('Failed to delete file');
     }
   };
 
-  const handleBulkDelete = async () => {
-    if (selectedFiles.length === 0) return;
-    if (!confirm(`Delete ${selectedFiles.length} selected files?`)) return;
-
-    try {
-      setFiles(prev => prev.filter(f => !selectedFiles.includes(f.id)));
-      setSelectedFiles([]);
-      toast.success(`Removed ${selectedFiles.length} files`);
-    } catch (error) {
-      console.error('Failed to delete files:', error);
-      toast.error('Failed to delete files');
-    }
-  };
-
-  const handleSelectFile = (fileId: number) => {
-    setSelectedFiles(prev => 
-      prev.includes(fileId) 
-        ? prev.filter(id => id !== fileId)
-        : [...prev, fileId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    setSelectedFiles(
-      selectedFiles.length === filteredFiles.length 
-        ? [] 
-        : filteredFiles.map(f => f.id)
-    );
-  };
 
 
   const filteredFiles = files.filter(file => {
@@ -198,42 +170,38 @@ export default function FilesPage() {
       {/* Header */}
       <div className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6 sm:py-8">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 sm:py-8 gap-4 sm:gap-0">
+            <div className="flex-1">
               <Link
                 href="/dashboard/creator"
-                className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 text-white/70 hover:text-white border border-white/20 rounded-lg font-bold hover:bg-white/5 transition-all text-xs sm:text-sm gap-2 mb-4"
+                className="inline-flex items-center px-3 sm:px-6 py-1.5 sm:py-3 text-white/70 hover:text-white border border-white/20 rounded-lg font-bold hover:bg-white/5 transition-all text-xs sm:text-sm gap-2 mb-3 sm:mb-4"
               >
-                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ArrowLeft className="w-3 h-3 sm:w-5 sm:h-5" />
                 <span>Dashboard</span>
               </Link>
-              <GradientTitle text="Design Files" size="lg" />
-              <p className="mt-2 text-xs sm:text-sm text-gray-400 font-medium">
-                Manage your uploaded design files
-              </p>
+              <div className="flex flex-col">
+                <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">
+                  Design Files
+                </h1>
+                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-400 font-medium">
+                  Manage your uploaded design files
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              {selectedFiles.length > 0 && (
-                <button
-                  onClick={handleBulkDelete}
-                  className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
-                >
-                  <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span>Delete ({selectedFiles.length})</span>
-                </button>
-              )}
-
-              <label className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all cursor-pointer text-xs sm:text-sm gap-2">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+              <label className="inline-flex items-center px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all cursor-pointer text-xs sm:text-sm gap-1 sm:gap-2 whitespace-nowrap">
                 {uploading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Uploading...</span>
+                    <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
+                    <span className="hidden sm:inline">Uploading...</span>
+                    <span className="sm:hidden">Upload</span>
                   </>
                 ) : (
                   <>
-                    <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span>Upload Files</span>
+                    <Upload className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Upload Files</span>
+                    <span className="sm:hidden">Upload</span>
                   </>
                 )}
                 <input
@@ -293,17 +261,6 @@ export default function FilesPage() {
             </div>
 
             <div className="flex items-center space-x-3 sm:space-x-4">
-              {/* Select All */}
-              <button
-                onClick={handleSelectAll}
-                className="text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 border border-white/20 text-white/80 hover:text-white rounded-lg hover:bg-white/15 transition-all"
-              >
-                {selectedFiles.length === filteredFiles.length && filteredFiles.length > 0
-                  ? 'Deselect All'
-                  : 'Select All'
-                }
-              </button>
-
               {/* View Mode */}
               <div className="flex border border-white/20 rounded-lg overflow-hidden">
                 <button
@@ -324,7 +281,6 @@ export default function FilesPage() {
 
           <div className="mt-6 text-xs sm:text-sm font-bold text-white/80 bg-white/5 border border-white/20 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 inline-block">
             {filteredFiles.length} files found
-            {selectedFiles.length > 0 && <span className="text-orange-400"> • {selectedFiles.length} selected</span>}
           </div>
         </div>
 
@@ -370,8 +326,6 @@ export default function FilesPage() {
               <FileGridItem
                 key={file.id}
                 file={file}
-                isSelected={selectedFiles.includes(file.id)}
-                onSelect={() => handleSelectFile(file.id)}
                 onDelete={() => handleDeleteFile(file.id)}
               />
             ))}
@@ -382,14 +336,6 @@ export default function FilesPage() {
               <thead>
                 <tr className="border-b border-white/10">
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
-                    <input
-                      type="checkbox"
-                      checked={selectedFiles.length === filteredFiles.length && filteredFiles.length > 0}
-                      onChange={handleSelectAll}
-                      className="rounded"
-                    />
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
                     File
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
@@ -397,9 +343,6 @@ export default function FilesPage() {
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
                     Size
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
-                    Status
                   </th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
                     Uploaded
@@ -414,8 +357,6 @@ export default function FilesPage() {
                   <FileListItem
                     key={file.id}
                     file={file}
-                    isSelected={selectedFiles.includes(file.id)}
-                    onSelect={() => handleSelectFile(file.id)}
                     onDelete={() => handleDeleteFile(file.id)}
                   />
                 ))}
@@ -430,13 +371,9 @@ export default function FilesPage() {
 
 function FileGridItem({
   file,
-  isSelected,
-  onSelect,
   onDelete
 }: {
   file: UploadedFile;
-  isSelected: boolean;
-  onSelect: () => void;
   onDelete: () => void;
 }) {
   const getFileIcon = (file: UploadedFile) => {
@@ -457,38 +394,10 @@ function FileGridItem({
   };
 
   return (
-    <div className={`gradient-border-white-top p-4 transition-all ${
-      isSelected ? 'bg-white/10' : 'bg-white/5'
-    }`}>
-      <div className="flex items-center justify-between mb-4">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={onSelect}
-          className="rounded"
-        />
-        <div className="flex space-x-2">
-          <a
-            href={file.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1.5 text-white/50 hover:text-white/80 transition-colors"
-            title="View file"
-          >
-            <Eye className="w-4 h-4" />
-          </a>
-          <button
-            onClick={onDelete}
-            className="p-1.5 text-white/50 hover:text-red-400 transition-colors"
-            title="Delete file"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+    <div className="gradient-border-white-top p-4 transition-all bg-white/5 hover:bg-white/10">
 
       {file.mime_type?.startsWith('image/') && file.url ? (
-        <div className="relative aspect-square w-full bg-white/10 rounded-lg overflow-hidden mb-4 border border-white/10">
+        <div className="relative aspect-square w-full bg-white/10 rounded-lg overflow-hidden mb-4 border border-white/10 group">
           <Image
             src={file.thumbnail_url || file.url}
             alt={file.filename}
@@ -497,15 +406,53 @@ function FileGridItem({
             className="object-cover"
             priority={false}
           />
+          {/* Overlay with buttons - always visible on mobile, hover on desktop */}
+          <div className="absolute inset-0 bg-black/50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+            <a
+              href={file.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              title="View file"
+            >
+              <Eye className="w-5 h-5 text-white" />
+            </a>
+            <button
+              onClick={onDelete}
+              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors"
+              title="Delete file"
+            >
+              <Trash2 className="w-5 h-5 text-red-400" />
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="aspect-square flex flex-col items-center justify-center bg-white/10 rounded-lg mb-4 border border-white/10">
+        <div className="relative aspect-square flex flex-col items-center justify-center bg-white/10 rounded-lg mb-4 border border-white/10 group">
           <div className="mb-3">
             {getFileIcon(file)}
           </div>
           <p className="text-xs text-white/70 text-center px-2">
             {file.type || 'File'}
           </p>
+          {/* Overlay with buttons for non-image files - always visible on mobile, hover on desktop */}
+          <div className="absolute inset-0 bg-black/50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 rounded-lg">
+            <a
+              href={file.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+              title="View file"
+            >
+              <Eye className="w-5 h-5 text-white" />
+            </a>
+            <button
+              onClick={onDelete}
+              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors"
+              title="Delete file"
+            >
+              <Trash2 className="w-5 h-5 text-red-400" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -515,26 +462,15 @@ function FileGridItem({
       <p className="text-xs text-white/60 mt-1">
         {formatFileSize(file.size)}
       </p>
-      <span className={`inline-block mt-3 px-2 py-1 text-xs font-bold rounded-full ${
-        file.status === 'ok' ? 'bg-green-500/20 text-green-400 border border-green-500/50' :
-        file.status === 'processing' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' :
-        'bg-red-500/20 text-red-400 border border-red-500/50'
-      }`}>
-        {file.status}
-      </span>
     </div>
   );
 }
 
 function FileListItem({
   file,
-  isSelected,
-  onSelect,
   onDelete
 }: {
   file: UploadedFile;
-  isSelected: boolean;
-  onSelect: () => void;
   onDelete: () => void;
 }) {
   const getFileIcon = (file: UploadedFile) => {
@@ -565,15 +501,7 @@ function FileListItem({
   };
 
   return (
-    <tr className={isSelected ? 'bg-white/5' : ''}>
-      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={onSelect}
-          className="rounded"
-        />
-      </td>
+    <tr>
       <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div className="flex-shrink-0 h-10 w-10">
@@ -605,15 +533,6 @@ function FileListItem({
       </td>
       <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-white/70">
         {formatFileSize(file.size)}
-      </td>
-      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-        <span className={`inline-flex px-2 py-1 text-xs font-bold rounded-full ${
-          file.status === 'ok' ? 'bg-green-500/20 text-green-400 border border-green-500/50' :
-          file.status === 'processing' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' :
-          'bg-red-500/20 text-red-400 border border-red-500/50'
-        }`}>
-          {file.status}
-        </span>
       </td>
       <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-white/70">
         {formatDate(file.created)}
