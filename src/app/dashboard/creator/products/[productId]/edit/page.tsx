@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { Button } from '@/components/ui/button';
+import CreativeLoader from '@/components/CreativeLoader';
 
 interface Product {
   id: number;
@@ -158,14 +159,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
-          <p className="mt-4 text-white/60 text-lg">Loading product...</p>
-        </div>
-      </div>
-    );
+    return <CreativeLoader variant="product" message="Loading product..." />;
   }
 
   if (!product) {

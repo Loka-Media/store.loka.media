@@ -13,6 +13,7 @@ import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 import GradientTitle from "@/components/ui/GradientTitle";
 import { GradientText } from "@/components/ui/GradientText";
 import { Button } from "@/components/ui/button";
+import CreativeLoader from "@/components/CreativeLoader";
 
 interface Category {
   id: number;
@@ -330,14 +331,7 @@ function ProductView({
 
         {/* Product Grid */}
         {loading ? (
-          <div className="text-center py-8 sm:py-12">
-            <div className="bg-orange-500/20 border border-orange-500/30 rounded-full p-3 sm:p-4 inline-block mb-3 sm:mb-4">
-              <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-orange-500/30 border-t-orange-500"></div>
-            </div>
-            <p className="mt-3 sm:mt-4 text-gray-300 font-bold text-sm sm:text-base">
-              Loading products...
-            </p>
-          </div>
+          <CreativeLoader variant="product" message="Loading products..." />
         ) : products.length === 0 ? (
           <div className="text-center py-8 sm:py-12 gradient-border-white-top rounded-lg bg-gray-900">
             <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-3 sm:p-4 inline-block mb-3 sm:mb-4">

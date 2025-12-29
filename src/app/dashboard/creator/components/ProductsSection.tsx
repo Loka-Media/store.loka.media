@@ -3,6 +3,7 @@
 import { Package, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "./ProductCard";
+import CreativeLoader from "@/components/CreativeLoader";
 
 interface CreatorProduct {
   id: number;
@@ -41,10 +42,7 @@ export function ProductsSection({ products, loading, onDelete }: ProductsSection
 
       <div className="p-6">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <Loader2 className="h-16 w-16 text-orange-500 animate-spin" />
-            <p className="mt-4 text-lg font-medium text-gray-400">Loading your products...</p>
-          </div>
+          <CreativeLoader variant="product" message="Loading your products..." />
         ) : products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Package className="mx-auto h-20 w-20 text-orange-500 opacity-70" />

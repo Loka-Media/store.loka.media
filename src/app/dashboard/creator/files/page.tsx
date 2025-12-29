@@ -20,6 +20,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import GradientTitle from '@/components/ui/GradientTitle';
+import CreativeLoader from '@/components/CreativeLoader';
 
 interface UploadedFile {
   id: number;
@@ -286,12 +287,7 @@ export default function FilesPage() {
 
         {/* Files Display */}
         {loading ? (
-          <div className="text-center py-16">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-full p-4 inline-block mb-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-white"></div>
-            </div>
-            <p className="mt-4 text-white font-bold text-lg">Loading files...</p>
-          </div>
+          <CreativeLoader variant="product" message="Loading files..." />
         ) : filteredFiles.length === 0 ? (
           <div className="text-center py-16 gradient-border-white-top p-6 sm:p-8">
             <div className="bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg p-6 inline-block mb-6">

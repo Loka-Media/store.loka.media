@@ -4,6 +4,7 @@ import { Package, Plus, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import GradientTitle from "@/components/ui/GradientTitle";
 import EnhancedProductCard from "./EnhancedProductCard";
+import CreativeLoader from "@/components/CreativeLoader";
 
 interface CreatorProduct {
   id: number;
@@ -38,12 +39,7 @@ export function EnhancedProductsSection({ products, loading, onDelete }: Product
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <div className="text-purple-400 mb-6 animate-spin">
-            <Loader2 className="h-12 w-12 sm:h-16 sm:w-16" />
-          </div>
-          <p className="text-base sm:text-lg font-bold text-gray-300">Loading your products...</p>
-        </div>
+        <CreativeLoader variant="product" message="Loading your products..." />
       ) : products.length === 0 ? (
         <div className="gradient-border-white-bottom p-8 sm:p-12 flex flex-col items-center justify-center text-center">
           <div className="text-orange-400 mb-6">

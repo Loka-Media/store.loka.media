@@ -6,6 +6,7 @@ import { shopifyAPI } from '@/lib/api';
 import Link from 'next/link';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { Button } from '@/components/ui/button';
+import CreativeLoader from '@/components/CreativeLoader';
 
 interface ShopifyProduct {
   id: number;
@@ -124,18 +125,7 @@ export default function LokaProductsPage() {
   };
 
   if (loading && products.length === 0) {
-    return (
-      <div className="min-h-screen bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-purple-400 animate-spin mr-4">
-              <Loader2 className="w-8 h-8" />
-            </div>
-            <span className="text-gray-300 font-medium">Loading Loka products...</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <CreativeLoader variant="product" message="Loading Loka products..." />;
   }
 
   return (

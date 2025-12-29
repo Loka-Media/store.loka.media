@@ -20,6 +20,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import GradientTitle from "@/components/ui/GradientTitle";
 import { Button } from "@/components/ui/button";
+import CreativeLoader from "@/components/CreativeLoader";
 
 interface Product {
   id: number;
@@ -275,14 +276,7 @@ export default function CreatorProductsPage() {
 
         {/* Products Display */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="text-purple-400 mb-6 animate-spin">
-              <Loader2 className="h-12 w-12 sm:h-16 sm:w-16" />
-            </div>
-            <p className="text-base sm:text-lg font-bold text-gray-300">
-              Loading your products...
-            </p>
-          </div>
+          <CreativeLoader variant="product" message="Loading your products..." />
         ) : filteredProducts.length === 0 ? (
           <div className="gradient-border-white-bottom p-8 sm:p-12 flex flex-col items-center justify-center text-center">
             <div className="text-orange-400 mb-6">
