@@ -63,13 +63,27 @@ export default function CreatorProductsPage() {
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await productAPI.getCreatorProducts({
-        ...filters,
+      const apiParams: any = {
         limit: pagination.limit,
         offset: pagination.offset,
-      });
+      };
 
-      setProducts(response.products || []);
+      // Only include filters if they have values
+      if (filters.search) apiParams.search = filters.search;
+      if (filters.category) apiParams.category = filters.category;
+      if (filters.status) apiParams.status = filters.status;
+      if (filters.sortBy) apiParams.sortBy = filters.sortBy;
+      if (filters.sortOrder) apiParams.sortOrder = filters.sortOrder;
+
+      const response = await productAPI.getCreatorProducts(apiParams);
+
+      // Transform products to ensure is_active is properly set from status field
+      const transformedProducts = (response.products || []).map((product: any) => ({
+        ...product,
+        is_active: product.is_active !== undefined ? product.is_active : product.status === 'active',
+      }));
+
+      setProducts(transformedProducts);
       setPagination(
         response.pagination || {
           total: 0,
@@ -377,18 +391,18 @@ function ProductGridCard({
 
             <div className="absolute top-3 right-3">
               <span
-                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${
                   product.is_active
                     ? "bg-green-500/20 text-green-400 border border-green-500/50"
                     : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
                 }`}
               >
-                {product.is_active ? "● Active" : "● Inactive"}
+                {product.is_active ? "●" : "○"}
               </span>
             </div>
 
             {/* Action buttons overlay */}
-            <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute bottom-3 right-3 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
               <Link
                 href={`/dashboard/creator/products/${product.id}/edit`}
                 className="p-2 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"

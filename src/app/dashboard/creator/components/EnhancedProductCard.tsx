@@ -82,45 +82,49 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
             />
 
             {/* Status badge */}
-            <div className="absolute top-3 left-3 z-10">
-              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${
+            <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10">
+              <span className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-bold ${
                 localStatus
                   ? 'bg-green-500/20 border border-green-500 text-green-400'
                   : 'bg-gray-500/20 border border-gray-500 text-gray-400'
               }`}>
-                {localStatus ? '✓ Active' : 'Inactive'}
+                <span className="sm:hidden">{localStatus ? '✓' : '○'}</span>
+                <span className="hidden sm:inline">{localStatus ? '✓ Active' : 'Inactive'}</span>
               </span>
             </div>
 
             {/* Action buttons overlay */}
-            <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+            <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex gap-1 sm:space-x-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-10">
               <Link
                 href={`/products/${createProductSlug(product.name, product.id)}`}
                 target="_blank"
-                className="p-2.5 bg-black/60 hover:bg-orange-500 border border-white/20 text-white rounded-lg transition-all duration-300"
+                className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-orange-500 border border-white/20 text-white rounded-lg transition-all duration-300"
                 title="View Product"
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-3 sm:w-4 h-3 sm:h-4" />
               </Link>
               <Link
                 href={`/dashboard/creator/products/${product.id}/edit`}
-                className="p-2.5 bg-black/60 hover:bg-blue-500 border border-white/20 text-white rounded-lg transition-all duration-300"
+                className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-blue-500 border border-white/20 text-white rounded-lg transition-all duration-300"
                 title="Edit Product"
               >
-                <Edit className="w-4 h-4" />
+                <Edit className="w-3 sm:w-4 h-3 sm:h-4" />
               </Link>
               <button
                 onClick={handleDelete}
-                className="p-2.5 bg-black/60 hover:bg-red-500 border border-white/20 text-white rounded-lg transition-all duration-300"
+                className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-red-500 border border-white/20 text-white rounded-lg transition-all duration-300"
                 title="Delete Product"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3 sm:w-4 h-3 sm:h-4" />
               </button>
             </div>
 
             {/* Status toggle at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}>
+              <div className="flex items-center space-x-2">
                 <Switch
                   checked={localStatus}
                   onCheckedChange={handleStatusChange}
@@ -128,7 +132,11 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
                 />
                 <label
                   htmlFor={`status-switch-${product.id}`}
-                  className="text-sm font-bold text-white"
+                  className="text-sm font-bold text-white cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                 >
                   {localStatus ? "Active" : "Inactive"}
                 </label>

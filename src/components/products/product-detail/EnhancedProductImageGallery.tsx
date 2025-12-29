@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Share2, X, Maximize2 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -107,32 +107,62 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
           </div>
         </div>
 
-        {/* Thumbnail Grid */}
+        {/* Thumbnail Carousel */}
         {images.length > 1 && (
-          <div className="grid grid-cols-5 gap-2 sm:gap-3">
-            {images.map((image, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedImageIndex(index)}
-                className={`aspect-square rounded-lg overflow-hidden border transition-all ${
-                  selectedImageIndex === index
-                    ? 'border-white/40 ring-2 ring-white/20'
-                    : 'border-white/10 hover:border-white/20'
-                }`}
-              >
-                <Image
-                  src={image}
-                  alt={`${productName} view ${index + 1}`}
-                  width={100}
-                  height={100}
-                  className="w-full h-full object-cover"
-                  unoptimized
-                  onError={(e) => {
-                    e.currentTarget.src = '/placeholder-product.svg';
-                  }}
-                />
-              </button>
-            ))}
+          <div className="relative group">
+            <div className="overflow-x-auto scrollbar-hide" data-carousel-container>
+              <div className="flex gap-2 sm:gap-3 pb-2">
+                {images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border transition-all ${
+                      selectedImageIndex === index
+                        ? 'border-white/40 ring-2 ring-white/20'
+                        : 'border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <Image
+                      src={image}
+                      alt={`${productName} view ${index + 1}`}
+                      width={100}
+                      height={100}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder-product.svg';
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Left Arrow */}
+            <button
+              onClick={() => {
+                const container = document.querySelector('[data-carousel-container]');
+                if (container) {
+                  container.scrollBy({ left: -100, behavior: 'smooth' });
+                }
+              }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            {/* Right Arrow */}
+            <button
+              onClick={() => {
+                const container = document.querySelector('[data-carousel-container]');
+                if (container) {
+                  container.scrollBy({ left: 100, behavior: 'smooth' });
+                }
+              }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         )}
 

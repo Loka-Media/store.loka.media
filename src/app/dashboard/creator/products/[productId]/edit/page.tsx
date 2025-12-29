@@ -413,6 +413,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                         {formData.images.map((image, index) => (
                           <button
                             key={index}
+                            type="button"
                             onClick={() => setSelectedImageIndex(index)}
                             className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border transition-all ${
                               selectedImageIndex === index
@@ -438,6 +439,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
 
                     {/* Left Arrow */}
                     <button
+                      type="button"
                       onClick={() => {
                         const container = document.querySelector('[data-carousel-container]');
                         if (container) {
@@ -451,6 +453,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
 
                     {/* Right Arrow */}
                     <button
+                      type="button"
                       onClick={() => {
                         const container = document.querySelector('[data-carousel-container]');
                         if (container) {
@@ -508,7 +511,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
           )}
 
           {/* Save Button */}
-          <div className="flex justify-end pt-2 sm:pt-4">
+          <div className="flex justify-center pt-2 sm:pt-4">
             <Button
               type="submit"
               disabled={saving}
