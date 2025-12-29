@@ -46,10 +46,6 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
     setShowStatusConfirmDialog(true);
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   const confirmStatusChange = async () => {
     if (newStatus !== null) {
       try {
@@ -103,7 +99,6 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
                 target="_blank"
                 className="p-2.5 bg-black/60 hover:bg-orange-500 border border-white/20 text-white rounded-lg transition-all duration-300"
                 title="View Product"
-                onClick={handleEdit}
               >
                 <ExternalLink className="w-4 h-4" />
               </Link>
@@ -111,7 +106,6 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
                 href={`/dashboard/creator/products/${product.id}/edit`}
                 className="p-2.5 bg-black/60 hover:bg-blue-500 border border-white/20 text-white rounded-lg transition-all duration-300"
                 title="Edit Product"
-                onClick={handleEdit}
               >
                 <Edit className="w-4 h-4" />
               </Link>
