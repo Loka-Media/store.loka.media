@@ -25,24 +25,24 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-black text-white">
       <Navigation />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mt-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h1>
-          <p className="text-xl text-gray-600">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-12 sm:py-16 mt-16">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">Get in Touch</h1>
+          <p className="text-base sm:text-lg text-gray-400">
             We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Contact Form */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a message</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Send us a message</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
                   Name *
                 </label>
                 <input
@@ -52,13 +52,13 @@ export default function ContactPage() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="Your full name"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
                   Email *
                 </label>
                 <input
@@ -68,13 +68,13 @@ export default function ContactPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="your.email@example.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-900 mb-2">
+                <label htmlFor="subject" className="block text-sm font-medium text-white mb-2">
                   Subject *
                 </label>
                 <select
@@ -83,7 +83,7 @@ export default function ContactPage() {
                   value={formData.subject}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 >
                   <option value="">Select a topic</option>
                   <option value="general">General Inquiry</option>
@@ -96,7 +96,7 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-900 mb-2">
+                <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
                   Message *
                 </label>
                 <textarea
@@ -106,14 +106,14 @@ export default function ContactPage() {
                   onChange={handleChange}
                   required
                   rows={6}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 resize-vertical"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-vertical"
                   placeholder="Tell us how we can help you..."
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-pink-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-pink-600 transition-colors focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
+                className="w-full bg-orange-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-orange-600 transition-colors focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black"
               >
                 Send Message
               </button>
@@ -122,78 +122,78 @@ export default function ContactPage() {
 
           {/* Contact Information */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Contact Information</h2>
 
             <div className="space-y-8">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">General Inquiries</h3>
-                <p className="text-gray-600 mb-2">
+                <h3 className="text-lg font-semibold text-white mb-3">General Inquiries</h3>
+                <p className="text-gray-400 mb-2">
                   For general questions about Loka
                 </p>
                 <a
                   href="mailto:hello@loka.media"
-                  className="text-pink-500 hover:text-pink-600 font-medium"
+                  className="text-orange-400 hover:text-orange-300 font-medium"
                 >
                   hello@loka.media
                 </a>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Creator Support</h3>
-                <p className="text-gray-600 mb-2">
+                <h3 className="text-lg font-semibold text-white mb-3">Creator Support</h3>
+                <p className="text-gray-400 mb-2">
                   For creators needing help with their account or products
                 </p>
                 <a
                   href="mailto:creators@loka.media"
-                  className="text-pink-500 hover:text-pink-600 font-medium"
+                  className="text-orange-400 hover:text-orange-300 font-medium"
                 >
                   creators@loka.media
                 </a>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Customer Support</h3>
-                <p className="text-gray-600 mb-2">
+                <h3 className="text-lg font-semibold text-white mb-3">Customer Support</h3>
+                <p className="text-gray-400 mb-2">
                   For order issues, returns, and customer service
                 </p>
                 <a
                   href="mailto:support@loka.media"
-                  className="text-pink-500 hover:text-pink-600 font-medium"
+                  className="text-orange-400 hover:text-orange-300 font-medium"
                 >
                   support@loka.media
                 </a>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Technical Support</h3>
-                <p className="text-gray-600 mb-2">
+                <h3 className="text-lg font-semibold text-white mb-3">Technical Support</h3>
+                <p className="text-gray-400 mb-2">
                   For website issues and technical problems
                 </p>
                 <a
                   href="mailto:tech@loka.media"
-                  className="text-pink-500 hover:text-pink-600 font-medium"
+                  className="text-orange-400 hover:text-orange-300 font-medium"
                 >
                   tech@loka.media
                 </a>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Press & Media</h3>
-                <p className="text-gray-600 mb-2">
+                <h3 className="text-lg font-semibold text-white mb-3">Press & Media</h3>
+                <p className="text-gray-400 mb-2">
                   For media inquiries and press requests
                 </p>
                 <a
                   href="mailto:press@loka.media"
-                  className="text-pink-500 hover:text-pink-600 font-medium"
+                  className="text-orange-400 hover:text-orange-300 font-medium"
                 >
                   press@loka.media
                 </a>
               </div>
             </div>
 
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Response Time</h3>
-              <p className="text-gray-600">
+            <div className="mt-8 pt-8 border-t border-gray-700">
+              <h3 className="text-lg font-semibold text-white mb-3">Response Time</h3>
+              <p className="text-gray-400">
                 We typically respond to all inquiries within 24 hours during business days (Monday-Friday, 9 AM - 6 PM EST).
               </p>
             </div>

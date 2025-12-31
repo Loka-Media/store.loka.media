@@ -10,6 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import GradientTitle from "@/components/ui/GradientTitle";
 
 export default function WishlistPage() {
   const { items, loading, removeFromWishlist, clearWishlist } = useWishlist();
@@ -68,16 +69,16 @@ export default function WishlistPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <Heart className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <Heart className="mx-auto h-12 w-12 text-white/40" />
+          <h3 className="mt-2 text-sm font-medium text-white">
             Please login to view your wishlist
           </h3>
           <div className="mt-6">
             <Link
               href="/auth/login"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-accent hover:bg-accent/90"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors"
             >
               Sign In
             </Link>
@@ -89,30 +90,27 @@ export default function WishlistPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Heart className="w-7 h-7 mr-3 text-red-500" />
-              My Wishlist
-            </h1>
-            <p className="text-gray-600 mt-2 text-lg">
+            <GradientTitle text="My Wishlist" size="sm" />
+            <p className="text-gray-400 mt-2 text-lg">
               {items.length} {items.length === 1 ? "item" : "items"} saved for
               later
             </p>
           </div>
           <Link
             href="/products"
-            className="inline-flex items-center px-6 py-3 border border-gray-200 text-sm font-semibold rounded-lg text-gray-900 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-6 py-3 border border-gray-700 text-sm font-semibold rounded-lg text-white bg-black hover:bg-gray-900 hover:border-gray-600 transition-all"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Continue Shopping
@@ -121,17 +119,17 @@ export default function WishlistPage() {
 
         {items.length === 0 ? (
           <div className="text-center py-16">
-            <Heart className="mx-auto h-16 w-16 text-gray-400" />
-            <h3 className="mt-4 text-xl font-semibold text-gray-900">
+            <Heart className="mx-auto h-16 w-16 text-white/30" />
+            <h3 className="mt-4 text-xl font-semibold text-white">
               Your wishlist is empty
             </h3>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-gray-400">
               Save products you love to your wishlist!
             </p>
             <div className="mt-8">
               <Link
                 href="/products"
-                className="inline-flex items-center px-6 py-3 text-sm font-semibold rounded-lg text-white bg-accent hover:bg-accent/90"
+                className="inline-flex items-center px-6 py-3 text-sm font-semibold rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors"
               >
                 Start Shopping
               </Link>
@@ -143,7 +141,7 @@ export default function WishlistPage() {
             <div className="mb-6 flex justify-end">
               <button
                 type="button"
-                className="text-sm text-red-500 hover:text-red-600 font-semibold"
+                className="text-sm text-red-400 hover:text-red-300 font-semibold transition-colors"
                 onClick={() => {
                   if (
                     confirm("Are you sure you want to clear your wishlist?")
@@ -161,15 +159,15 @@ export default function WishlistPage() {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-200"
+                  className="group bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-700/50 hover:border-orange-500/30 backdrop-blur-sm flex flex-col"
                 >
                   <Link href={`/products/${item.product_id}`}>
-                    <div className="aspect-square relative group">
+                    <div className="aspect-square relative overflow-hidden">
                       <Image
                         src={item.thumbnail_url || "/placeholder-product.svg"}
                         alt={item.product_name}
                         fill
-                        className="object-cover"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                         unoptimized={true}
                         onError={(e) => {
                           e.currentTarget.src = "/placeholder-product.svg";
@@ -178,49 +176,53 @@ export default function WishlistPage() {
                     </div>
                   </Link>
 
-                  <div className="p-5">
+                  <div className="p-5 flex flex-col flex-1">
                     <Link href={`/products/${item.product_id}`}>
-                      <h3 className="font-semibold text-gray-900 hover:text-accent transition-colors text-lg leading-tight">
+                      <h3 className="font-semibold text-white hover:text-orange-400 transition-colors text-lg leading-tight line-clamp-2">
                         {item.product_name}
                       </h3>
                     </Link>
 
-                    <div className="flex items-center mt-2">
-                      <span className="text-sm text-gray-600">
+                    <div className="flex items-center mt-2 mb-3">
+                      <div className="w-4 h-4 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                        <span className="text-xs text-white font-bold">👤</span>
+                      </div>
+                      <span className="text-sm text-gray-300 font-medium truncate">
                         by {item.creator_name}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
-                        <span className="text-xl font-bold text-gray-900">
+                        <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                           {formatPrice(item.min_price)}
                         </span>
                         {item.max_price > item.min_price && (
-                          <span className="text-sm text-gray-600">
+                          <span className="text-sm text-gray-400">
                             - {formatPrice(item.max_price)}
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-medium">
+                    <div className="mt-auto flex items-center justify-between mb-3">
+                      <span className="inline-block bg-orange-800/60 text-orange-200 text-xs px-2 py-1 rounded-md font-medium">
                         {item.category || "Uncategorized"}
                       </span>
-                      <span className="text-xs text-gray-600">
+                      <span className="text-xs text-gray-400">
                         {item.variant_count} options
                       </span>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="mt-4 flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 pt-3 border-t border-gray-700/50">
                       <button
-                        className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="flex-1 p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium flex items-center justify-center space-x-1"
                         onClick={() => removeFromWishlist(item.product_id)}
                         title="Remove from wishlist"
                       >
                         <Trash2 className="w-4 h-4" />
+                        <span>Remove</span>
                       </button>
                     </div>
                   </div>
