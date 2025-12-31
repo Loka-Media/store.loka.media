@@ -108,7 +108,7 @@ export default function AboutPage() {
           <div className="bg-pink-50 border border-pink-200 p-6 rounded-lg mt-8">
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
-                href="/auth/register"
+                href="/auth/signup/creator"
                 className="inline-flex items-center justify-center px-6 py-3 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition-colors"
               >
                 Start Creating

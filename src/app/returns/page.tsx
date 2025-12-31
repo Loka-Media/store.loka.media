@@ -112,7 +112,7 @@ export default function ReturnsAndFAQPage() {
 
           <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">How do I become a creator on Loka?</h3>
           <p>
-            Visit our <a href="/auth/register" className="text-pink-500 hover:text-pink-600">creator signup page</a> and submit an application. Our team reviews all applications and will contact you with next steps if approved.
+            Visit our <a href="/auth/signup/creator" className="text-pink-500 hover:text-pink-600">creator signup page</a> and submit an application. Our team reviews all applications and will contact you with next steps if approved.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Contact Us</h2>
