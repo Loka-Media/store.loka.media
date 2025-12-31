@@ -87,11 +87,11 @@ function CreatorSignupContent() {
         <div className="relative z-10 flex flex-col justify-center px-4 sm:px-6 lg:px-8 xl:px-16 py-6 sm:py-8 lg:py-0 mt-16 lg:mt-16">
           <div className="max-w-lg">
             <div className="mb-3 sm:mb-4 lg:mb-6">
-              <GradientTitle text="Start Creating & Earning" size="lg" />
+              <GradientTitle text="Create Your Account Today" size="lg" />
             </div>
 
             <GradientText className="text-xs sm:text-sm lg:text-lg mb-6 sm:mb-8 lg:mb-12">
-              Design and sell custom products to a global audience of buyers looking for unique, handcrafted items.
+              Join trendsetting artists, brands and creators to showcase your unique products and services.
             </GradientText>
 
             {/* Stats Section */}
@@ -105,23 +105,23 @@ function CreatorSignupContent() {
                       <path fillRule="evenodd" clipRule="evenodd" d="M4.42797 46.6172C5.34348 46.5568 6.2341 46.6739 7.09984 46.9688C16.7038 50.5217 26.3132 54.0608 35.928 57.586C45.86 53.9393 55.7976 50.3065 65.7405 46.6876C68.3415 46.442 69.8415 47.6139 70.2405 50.2032C70.1392 51.8616 69.3423 53.0335 67.8498 53.7188C57.631 57.4689 47.4124 61.2188 37.1936 64.9688C35.9291 65.2863 34.7103 65.1457 33.5373 64.5469C23.5061 60.8439 13.4748 57.1406 3.44359 53.4376C1.59437 52.0208 1.19594 50.2629 2.24828 48.1641C2.82867 47.4191 3.55524 46.9034 4.42797 46.6172Z" fill="url(#paint2_linear_1167_938)"/>
                       <defs>
                         <linearGradient id="paint0_linear_1167_938" x1="35.9958" y1="6.67151" x2="35.9958" y2="36.4299" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="#FB1FFF"/>
+                          <stop offset="1" stopColor="#500851"/>
                         </linearGradient>
                         <linearGradient id="paint1_linear_1167_938" x1="35.9581" y1="32.2581" x2="35.9581" y2="50.8106" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="#FB1FFF"/>
+                          <stop offset="1" stopColor="#500851"/>
                         </linearGradient>
                         <linearGradient id="paint2_linear_1167_938" x1="35.9581" y1="46.6018" x2="35.9581" y2="65.1339" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="#FB1FFF"/>
+                          <stop offset="1" stopColor="#500851"/>
                         </linearGradient>
                       </defs>
                     </svg>
                   </div>
                 </StartShape>
                 <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">7+</div>
-                <div className="text-xs text-white">Print Platforms</div>
+                <div className="text-xs text-white">Platforms</div>
               </div>
               <div className="text-center flex flex-col items-center">
                 <StartShape className="max-w-[80px] sm:max-w-[100px]">
@@ -153,7 +153,7 @@ function CreatorSignupContent() {
                   </div>
                 </StartShape>
                 <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">40K+</div>
-                <div className="text-xs text-white">Products Sold</div>
+                <div className="text-xs text-white">Products</div>
               </div>
               <div className="text-center flex flex-col items-center">
                 <StartShape className="max-w-[80px] sm:max-w-[100px]">
@@ -165,12 +165,12 @@ function CreatorSignupContent() {
                       </g>
                       <defs>
                         <linearGradient id="paint0_linear_1167_946" x1="35.9053" y1="-0.0703125" x2="35.9053" y2="13.4297" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="#5EC900"/>
+                          <stop offset="1" stopColor="#224801"/>
                         </linearGradient>
                         <linearGradient id="paint1_linear_1167_946" x1="35.9309" y1="17.9297" x2="35.9309" y2="71.9297" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="#5EC900"/>
+                          <stop offset="1" stopColor="#224801"/>
                         </linearGradient>
                         <clipPath id="clip0_1167_946">
                           <rect width="72" height="72" fill="white"/>
@@ -180,7 +180,7 @@ function CreatorSignupContent() {
                   </div>
                 </StartShape>
                 <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">$1M++</div>
-                <div className="text-xs text-white">Revenue Generated</div>
+                <div className="text-xs text-white">Revenue</div>
               </div>
             </div>
 
@@ -450,15 +450,6 @@ function CreatorSignupContent() {
               {/* Footer Links */}
               <div className="mt-4 sm:mt-6 lg:mt-8 pt-3 sm:pt-4 lg:pt-6 border-t border-white/10">
                 <p className="text-xs text-white/80 text-center leading-relaxed">
-                  Are you a customer?{" "}
-                  <Link
-                    href="/auth/signup/customer"
-                    className="text-green-500 hover:text-green-600 transition-colors font-bold"
-                  >
-                    Sign up here
-                  </Link>
-                </p>
-                <p className="text-xs text-white/80 text-center leading-relaxed mt-3">
                   Already have an account?{" "}
                   <Link
                     href="/auth/login"

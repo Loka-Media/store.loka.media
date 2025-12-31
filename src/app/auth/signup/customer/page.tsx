@@ -416,15 +416,6 @@ function CustomerSignupContent() {
               {/* Footer Links */}
               <div className="mt-4 sm:mt-6 lg:mt-8 pt-3 sm:pt-4 lg:pt-6 border-t border-white/10">
                 <p className="text-xs text-white/80 text-center leading-relaxed">
-                  Are you a creator?{" "}
-                  <Link
-                    href="/auth/signup/creator"
-                    className="text-green-500 hover:text-green-600 transition-colors font-bold"
-                  >
-                    Sign up here
-                  </Link>
-                </p>
-                <p className="text-xs text-white/80 text-center leading-relaxed mt-3">
                   Already have an account?{" "}
                   <Link
                     href="/auth/login"

@@ -1,17 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGuestCart } from '@/contexts/GuestCartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice } from '@/lib/api';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button as MuiButton } from '@mui/material';
+import { Button } from '@/components/ui/button';
 import GradientTitle from '@/components/ui/GradientTitle';
 
 export default function CartPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   
   // Use GuestCart for both authenticated and guest users (handles both cases)
   const { items, summary, loading, updateCartItem, removeFromCart, clearCart, refreshCart } = useGuestCart();
@@ -26,6 +30,13 @@ export default function CartPage() {
     itemId: null,
     productName: ''
   });
+
+  // Check authentication and redirect if not logged in
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      setShowLoginPrompt(true);
+    }
+  }, [isAuthenticated, authLoading]);
 
   // Only refresh cart on initial mount (contexts handle the rest)
   useEffect(() => {
@@ -109,10 +120,41 @@ export default function CartPage() {
     setDeleteConfirm({ show: false, itemId: null, productName: '' });
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  // Show login prompt if user is not authenticated
+  if (showLoginPrompt) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl inline-flex items-center justify-center mb-6">
+            <ShoppingBag className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">Sign In to Continue</h2>
+          <p className="text-gray-400 font-medium mb-8">Please log in to access your cart and complete your purchase.</p>
+          <div className="flex flex-col gap-3">
+            <Button
+              onClick={() => router.push('/auth/login')}
+              variant="primary"
+              className="w-full"
+            >
+              Sign In
+            </Button>
+            <Button
+              onClick={() => router.push('/products')}
+              variant="secondary"
+              className="w-full"
+            >
+              Continue Shopping
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -333,19 +375,19 @@ export default function CartPage() {
           </p>
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={cancelDelete} 
+          <MuiButton
+            onClick={cancelDelete}
             style={{ color: '#9ca3af' }}
           >
             Cancel
-          </Button>
-          <Button 
-            onClick={confirmDelete} 
+          </MuiButton>
+          <MuiButton
+            onClick={confirmDelete}
             style={{ color: '#ef4444' }}
             autoFocus
           >
             Remove
-          </Button>
+          </MuiButton>
         </DialogActions>
       </Dialog>
     </div>

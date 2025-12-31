@@ -1,13 +1,24 @@
 import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { ProductVariant } from '@/lib/api';
 import { useGuestCart } from '@/contexts/GuestCartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { ProductDetails } from './useProductData';
 import toast from 'react-hot-toast';
 
 export const useProductCart = (product: ProductDetails | null, selectedVariant: ProductVariant | null) => {
   const { addToCart } = useGuestCart();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const handleAddToCart = useCallback(async (quantity: number) => {
+    // Check if user is authenticated, redirect to login if not
+    if (!isAuthenticated) {
+      toast.error('Please login to add items to cart');
+      router.push('/auth/login');
+      return;
+    }
+
     if (!selectedVariant || !product) {
       toast.error('Please select a variant');
       return;

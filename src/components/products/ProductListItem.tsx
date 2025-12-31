@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface ProductListItemProps {
   product: ExtendedProduct;
@@ -37,6 +38,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
   const { addToCart } = useGuestCart();
   const { addToWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const imageUrl =
     product.thumbnail_url ||
@@ -80,6 +82,13 @@ export function ProductListItem({ product }: ProductListItemProps) {
   };
 
   const handleAddToCart = async () => {
+    // Check if user is authenticated, redirect to login if not
+    if (!isAuthenticated) {
+      toast.error("Please login to add items to cart");
+      router.push("/auth/login");
+      return;
+    }
+
     try {
       const productData = await productAPI.getProduct(product.id);
       if (productData.variants && productData.variants.length > 0) {
