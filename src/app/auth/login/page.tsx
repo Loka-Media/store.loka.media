@@ -323,7 +323,7 @@ function LoginPageContent() {
                   <p className="text-xs text-white/80 text-center leading-relaxed">
                     Don't have an account?{" "}
                     <Link
-                      href="/auth/register"
+                      href="/auth/signup/creator"
                       className="text-orange-500 hover:text-orange-600 transition-colors font-bold"
                     >
                       Sign up here

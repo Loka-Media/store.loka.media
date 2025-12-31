@@ -191,7 +191,7 @@ export default function Navigation() {
                       Log in
                     </Link>
                     <Link
-                      href="/auth/register"
+                      href="/auth/signup/creator"
                       className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
                       style={{ background: "#FF6D1F", fontWeight: 500 }}
                     >
@@ -217,7 +217,7 @@ export default function Navigation() {
               </button>
               {!isAuthenticated && (
                 <Link
-                  href="/auth/register"
+                  href="/auth/signup/creator"
                   className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
                   style={{ background: "#FF6D1F", fontWeight: 500 }}
                 >
@@ -384,7 +384,7 @@ export default function Navigation() {
                   Log in
                 </Link>
                 <Link
-                  href="/auth/register"
+                  href="/auth/signup/creator"
                   className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
                   style={{ background: "#FF6D1F", fontWeight: 500 }}
                 >
