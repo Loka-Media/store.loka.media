@@ -1,11 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "./auth";
-
-// API base URL
-const API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://catalog.loka.media"
-    : "http://localhost:3003";
+import { getApiUrl } from "./getApiUrl";
 
 // Product interfaces
 export interface Product {
@@ -538,9 +533,10 @@ export const printfulAPI = {
       try {
         console.log("Trying fallback with fetch...");
         const token = localStorage.getItem("accessToken");
+        const apiUrl = getApiUrl();
 
         const fetchResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/printful/files`,
+          `${apiUrl}/api/printful/files`,
           {
             method: "POST",
             headers: {

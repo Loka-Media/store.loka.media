@@ -94,11 +94,11 @@ export default function CreatorRequestsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900">
+      <div className="min-h-screen bg-black text-white">
         <Navigation />
         <div className="max-w-7xl mt-16 mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
           </div>
         </div>
       </div>
@@ -106,56 +106,56 @@ export default function CreatorRequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-black text-white">
       <Navigation />
 
-      <div className="max-w-7xl mt-16 mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mt-16 mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Creator Requests</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-white">Creator Requests</h1>
+          <p className="mt-2 text-gray-400">
             Review and manage creator account requests from users
           </p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-lg border border-gray-700/50">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-600" />
+              <div className="w-12 h-12 bg-yellow-900/30 rounded-lg flex items-center justify-center">
+                <Clock className="w-6 h-6 text-yellow-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending Requests</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Pending Requests</p>
+                <p className="text-2xl font-bold text-white">
                   {requests.filter(r => r.status === 'pending').length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-lg border border-gray-700/50">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-900/30 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Approved</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Approved</p>
+                <p className="text-2xl font-bold text-white">
                   {requests.filter(r => r.status === 'approved').length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 rounded-lg border border-gray-700/50">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <XCircle className="w-6 h-6 text-red-600" />
+              <div className="w-12 h-12 bg-red-900/30 rounded-lg flex items-center justify-center">
+                <XCircle className="w-6 h-6 text-red-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Rejected</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Rejected</p>
+                <p className="text-2xl font-bold text-white">
                   {requests.filter(r => r.status === 'rejected').length}
                 </p>
               </div>
@@ -164,58 +164,58 @@ export default function CreatorRequestsPage() {
         </div>
 
         {/* Requests List */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="gradient-border-white-top rounded-xl overflow-hidden bg-gray-900">
           {requests.length === 0 ? (
             <div className="p-8 text-center">
-              <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No creator requests found</p>
+              <User className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-400">No creator requests found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-800/50 border-b border-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Creator URL
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-800">
                   {requests.map((request) => (
-                    <tr key={request.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={request.id} className="hover:bg-gray-800/50 transition-colors">
                       <td className="px-6 py-4">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-white">
                             {request.name}
                           </div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-400">
                             @{request.username}
                           </div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-400">
                             {request.email}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <LinkIcon className="w-4 h-4 text-gray-400 mr-2" />
+                          <LinkIcon className="w-4 h-4 text-gray-500 mr-2" />
                           <a
                             href={request.creator_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-accent hover:text-accent/80 flex items-center"
+                            className="text-sm text-orange-400 hover:text-orange-300 flex items-center transition-colors"
                           >
                             {request.creator_url && request.creator_url.length > 30
                               ? `${request.creator_url.substring(0, 30)}...`
@@ -229,7 +229,7 @@ export default function CreatorRequestsPage() {
                           {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-6 py-4 text-sm text-gray-400">
                         {formatDate(request.created_at)}
                       </td>
                       <td className="px-6 py-4">
@@ -238,10 +238,10 @@ export default function CreatorRequestsPage() {
                             <button
                               onClick={() => handleApprove(request.id)}
                               disabled={processing === request.id}
-                              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors"
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-black bg-green-500 hover:bg-green-600 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {processing === request.id ? (
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-black mr-1"></div>
                               ) : (
                                 <CheckCircle className="w-3 h-3 mr-1" />
                               )}
@@ -250,10 +250,10 @@ export default function CreatorRequestsPage() {
                             <button
                               onClick={() => handleReject(request.id)}
                               disabled={processing === request.id}
-                              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 transition-colors"
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-black bg-red-500 hover:bg-red-600 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {processing === request.id ? (
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-black mr-1"></div>
                               ) : (
                                 <XCircle className="w-3 h-3 mr-1" />
                               )}
@@ -262,7 +262,7 @@ export default function CreatorRequestsPage() {
                           </div>
                         )}
                         {request.status !== 'pending' && (
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-gray-400">
                             {request.status === 'approved' ? 'Approved' : 'Rejected'} on {formatDate(request.updated_at)}
                           </span>
                         )}

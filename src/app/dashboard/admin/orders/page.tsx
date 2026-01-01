@@ -369,49 +369,49 @@ export default function AdminOrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-gray-100 text-gray-800';
-      case 'payment_received': return 'bg-blue-100 text-blue-800';
-      case 'verified': return 'bg-green-100 text-green-800';
-      case 'processing': return 'bg-yellow-100 text-yellow-800';
-      case 'fulfilled': return 'bg-purple-100 text-purple-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-gray-700 text-gray-300';
+      case 'payment_received': return 'bg-blue-900/30 text-blue-300';
+      case 'verified': return 'bg-green-900/30 text-green-300';
+      case 'processing': return 'bg-yellow-900/30 text-yellow-300';
+      case 'fulfilled': return 'bg-purple-900/30 text-purple-300';
+      case 'cancelled': return 'bg-red-900/30 text-red-300';
+      default: return 'bg-gray-700 text-gray-300';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'urgent': return 'bg-red-900/30 text-red-300';
+      case 'high': return 'bg-orange-900/30 text-orange-300';
+      case 'medium': return 'bg-yellow-900/30 text-yellow-300';
+      case 'low': return 'bg-green-900/30 text-green-300';
+      default: return 'bg-gray-700 text-gray-300';
     }
   };
 
   if (loading && !stats) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Order Management</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-2xl font-bold text-white">Order Management</h1>
+            <p className="text-gray-400 mt-1">
               Manage and process marketplace orders
             </p>
           </div>
           <button
             onClick={loadDashboardData}
             disabled={loading}
-            className="inline-flex items-center px-4 py-2 border border-gray-200 text-sm font-medium rounded-md text-gray-900 bg-white hover:bg-gray-50 disabled:opacity-50"
+            className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 disabled:opacity-50"
           >
             <RefreshCw
               className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
@@ -423,17 +423,17 @@ export default function AdminOrdersPage() {
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700/50 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <Package className="h-8 w-8 text-blue-600" />
+                  <Package className="h-8 w-8 text-blue-400" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-600 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Pending Orders
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-white">
                       {stats.orders.paymentReceived}
                     </dd>
                   </dl>
@@ -441,17 +441,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700/50 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <DollarSign className="h-8 w-8 text-green-600" />
+                  <DollarSign className="h-8 w-8 text-green-400" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-600 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Escrowed Funds
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-white">
                       ${stats.payments.totalEscrowed}
                     </dd>
                   </dl>
@@ -459,17 +459,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700/50 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <Clock className="h-8 w-8 text-yellow-600" />
+                  <Clock className="h-8 w-8 text-yellow-400" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-600 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Verification Queue
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-white">
                       {stats.verification.totalPending}
                     </dd>
                   </dl>
@@ -477,17 +477,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700/50 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                  <AlertTriangle className="h-8 w-8 text-red-400" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-600 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Urgent Items
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-white">
                       {stats.verification.urgent}
                     </dd>
                   </dl>
@@ -498,16 +498,16 @@ export default function AdminOrdersPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="bg-gray-900 rounded-lg border border-gray-700 p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Status
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full p-2 border border-gray-200 rounded-md focus:ring-accent focus:border-accent bg-white text-gray-900"
+                className="w-full p-2 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white"
               >
                 <option value="">All Orders</option>
                 <option value="pending">Pending</option>
@@ -520,13 +520,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Order Type
               </label>
               <select
                 value={orderTypeFilter}
                 onChange={(e) => setOrderTypeFilter(e.target.value)}
-                className="w-full p-2 border border-gray-200 rounded-md focus:ring-accent focus:border-accent bg-white text-gray-900"
+                className="w-full p-2 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white"
               >
                 <option value="">All Types</option>
                 <option value="printful">Printful</option>
@@ -536,13 +536,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Priority
               </label>
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="w-full p-2 border border-gray-200 rounded-md focus:ring-accent focus:border-accent bg-white text-gray-900"
+                className="w-full p-2 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white"
               >
                 <option value="">All Priorities</option>
                 <option value="urgent">Urgent</option>
@@ -553,7 +553,7 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Search
               </label>
               <div className="relative">
@@ -562,46 +562,46 @@ export default function AdminOrdersPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Order number, email..."
-                  className="w-full p-2 pl-8 border border-gray-200 rounded-md focus:ring-accent focus:border-accent bg-white text-gray-900"
+                  className="w-full p-2 pl-8 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
                 />
-                <Search className="w-4 h-4 text-gray-400 absolute left-2 top-3" />
+                <Search className="w-4 h-4 text-gray-500 absolute left-2 top-3" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Orders Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Orders</h3>
+        <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-700">
+            <h3 className="text-lg font-medium text-white">Orders</h3>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-800">
+              <thead className="bg-gray-800/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Order
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Type
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Priority
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Created
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -623,7 +623,7 @@ export default function AdminOrdersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-700 text-gray-300">
                         {order.order_type}
                       </span>
                     </td>
@@ -657,7 +657,7 @@ export default function AdminOrdersPage() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleOrderClick(order)}
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="text-blue-400 hover:text-blue-300"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -674,7 +674,7 @@ export default function AdminOrdersPage() {
                               });
                               setShowVerificationModal(true);
                             }}
-                            className="text-green-600 hover:text-green-900"
+                            className="text-green-400 hover:text-green-300"
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
@@ -693,7 +693,7 @@ export default function AdminOrdersPage() {
                               });
                               setShowPaymentModal(true);
                             }}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-orange-400 hover:text-orange-300"
                           >
                             <Send className="w-4 h-4" />
                           </button>
@@ -708,7 +708,7 @@ export default function AdminOrdersPage() {
 
           {orders.length === 0 && (
             <div className="text-center py-12">
-              <Package className="mx-auto h-12 w-12 text-gray-400" />
+              <Package className="mx-auto h-12 w-12 text-gray-500" />
               <h3 className="mt-2 text-sm font-medium text-white">
                 No orders found
               </h3>
@@ -890,7 +890,7 @@ export default function AdminOrdersPage() {
         {/* Payment Verification Modal */}
         {showVerificationModal && selectedOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border border-gray-600 w-full max-w-md shadow-lg rounded-md bg-gray-800">
+            <div className="relative top-20 mx-auto p-5 border border-gray-700 w-full max-w-md shadow-lg rounded-md bg-gray-900">
               <div className="mt-3">
                 <div className="flex items-start justify-between mb-4">
                   <h3 className="text-lg font-medium text-white">
@@ -919,7 +919,7 @@ export default function AdminOrdersPage() {
                           bankAmountVerified: e.target.value,
                         })
                       }
-                      className="w-full p-3 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-700 text-white"
+                      className="w-full p-3 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
                       placeholder="Enter verified amount"
                     />
                   </div>
@@ -937,7 +937,7 @@ export default function AdminOrdersPage() {
                         })
                       }
                       rows={3}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full p-3 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
                       placeholder="Enter verification notes..."
                     />
                   </div>
@@ -953,9 +953,9 @@ export default function AdminOrdersPage() {
                             approveOrder: e.target.checked,
                           })
                         }
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-700 rounded bg-gray-800"
                       />
-                      <span className="ml-2 text-sm text-gray-900">
+                      <span className="ml-2 text-sm text-gray-300">
                         Approve order for processing
                       </span>
                     </label>
@@ -965,7 +965,7 @@ export default function AdminOrdersPage() {
                 <div className="flex items-center justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setShowVerificationModal(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700"
                   >
                     Cancel
                   </button>
@@ -976,7 +976,7 @@ export default function AdminOrdersPage() {
                       !verificationForm.bankAmountVerified ||
                       !verificationForm.verificationNotes
                     }
-                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                    className="px-4 py-2 text-sm font-medium text-white bg-orange-600 border border-transparent rounded-md hover:bg-orange-700 disabled:opacity-50"
                   >
                     {loading ? "Verifying..." : "Verify Payment"}
                   </button>
@@ -988,16 +988,16 @@ export default function AdminOrdersPage() {
 
         {/* Payment Release Modal */}
         {showPaymentModal && selectedOrder && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border border-gray-700 w-full max-w-md shadow-lg rounded-md bg-gray-900">
               <div className="mt-3">
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-medium text-white">
                     Release Payment
                   </h3>
                   <button
                     onClick={() => setShowPaymentModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-200"
                   >
                     ×
                   </button>
@@ -1017,7 +1017,7 @@ export default function AdminOrdersPage() {
                           vendorEmail: e.target.value,
                         })
                       }
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full p-3 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
                       placeholder="vendor@example.com"
                     />
                   </div>
@@ -1035,13 +1035,13 @@ export default function AdminOrdersPage() {
                         })
                       }
                       rows={3}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full p-3 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
                       placeholder="Payment notes..."
                     />
                   </div>
 
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <p className="text-sm text-yellow-800">
+                  <div className="bg-orange-900/30 border border-orange-700/50 rounded-lg p-4">
+                    <p className="text-sm text-orange-300">
                       <strong>Amount to release:</strong> $
                       {selectedOrder.vendor_payment_amount || "Calculating..."}
                       <br />
@@ -1054,7 +1054,7 @@ export default function AdminOrdersPage() {
                 <div className="flex items-center justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setShowPaymentModal(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700"
                   >
                     Cancel
                   </button>

@@ -1,13 +1,9 @@
 import axios from 'axios';
+import { getApiUrl } from './getApiUrl';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 
-  (process.env.NODE_ENV === 'production' 
-    ? 'https://catalog.loka.media' 
-    : 'http://localhost:3003');
-
-// Create axios instance
+// Create axios instance - API URL is determined dynamically
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },

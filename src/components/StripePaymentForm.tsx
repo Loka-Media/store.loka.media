@@ -7,11 +7,7 @@ import { CreditCard, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import GradientTitle from '@/components/ui/GradientTitle';
-
-// API base URL
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://catalog.loka.media' 
-  : 'http://localhost:3003';
+import { getApiUrl } from '@/lib/getApiUrl';
 
 const stripePromise = loadStripe('pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8');
 
@@ -34,6 +30,7 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
   const elements = useElements();
 
   const confirmStripePayment = async (paymentIntentId: string, orderNumber: string) => {
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/stripe/confirm-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

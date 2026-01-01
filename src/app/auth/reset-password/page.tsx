@@ -17,6 +17,7 @@ import {
   Key,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { getApiUrl } from "@/lib/getApiUrl";
 
 // Validation schema
 const resetPasswordSchema = z.object({
@@ -62,7 +63,7 @@ function ResetPasswordContent() {
   const onSubmit = async (data: ResetPasswordForm) => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
+      const apiUrl = getApiUrl();
       const response = await fetch(`${apiUrl}/api/auth/reset-password`, {
         method: "POST",
         headers: {

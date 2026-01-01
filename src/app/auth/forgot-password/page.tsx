@@ -17,6 +17,7 @@ import {
   Clock,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { getApiUrl } from "@/lib/getApiUrl";
 
 // Validation schema
 const forgotPasswordSchema = z.object({
@@ -42,7 +43,7 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (data: ForgotPasswordForm) => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
+      const apiUrl = getApiUrl();
       const response = await fetch(`${apiUrl}/api/auth/forgot-password`, {
         method: "POST",
         headers: {

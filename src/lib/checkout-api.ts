@@ -1,11 +1,9 @@
 import { CheckoutData, ProcessCheckoutData } from './checkout-types';
-
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://catalog.loka.media' 
-  : 'http://localhost:3003';
+import { getApiUrl } from './getApiUrl';
 
 export const unifiedCheckoutAPI = {
   createGuestCheckout: async (data: CheckoutData) => {
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/guest/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -16,6 +14,7 @@ export const unifiedCheckoutAPI = {
   },
 
   processCheckout: async (data: ProcessCheckoutData) => {
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -26,6 +25,7 @@ export const unifiedCheckoutAPI = {
   },
 
   createStripePaymentIntent: async (amount: number, orderNumber: string, customerEmail?: string) => {
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/stripe/create-payment-intent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,6 +36,7 @@ export const unifiedCheckoutAPI = {
   },
 
   confirmStripePayment: async (paymentIntentId: string, orderNumber: string) => {
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/stripe/confirm-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -46,6 +47,7 @@ export const unifiedCheckoutAPI = {
   },
 
   processAuthenticatedCheckout: async (data: any, token: string) => {
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/process-authenticated`, {
       method: 'POST',
       headers: { 
@@ -61,6 +63,7 @@ export const unifiedCheckoutAPI = {
 
 export const authAPI = {
   login: async (email: string, password: string) => {
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -74,6 +77,7 @@ export const authAPI = {
   },
 
   getUserCart: async (token: string) => {
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/cart`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -83,6 +87,7 @@ export const authAPI = {
   },
 
   addToUserCart: async (token: string, variantId: string, quantity: number) => {
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
       method: 'POST',
       headers: {
