@@ -2,6 +2,42 @@ import { useState, useCallback } from 'react';
 import { Address, CustomerInfo } from '@/lib/checkout-types';
 import { addressAPI } from '@/lib/api';
 
+// Normalize state names to state codes
+const normalizeStateName = (state: string | null | undefined): string => {
+  if (!state) return '';
+
+  const nameToCodeMap: Record<string, string> = {
+    'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR',
+    'california': 'CA', 'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE',
+    'florida': 'FL', 'georgia': 'GA', 'hawaii': 'HI', 'idaho': 'ID',
+    'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA', 'kansas': 'KS',
+    'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+    'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS',
+    'missouri': 'MO', 'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV',
+    'new hampshire': 'NH', 'new jersey': 'NJ', 'new mexico': 'NM', 'new york': 'NY',
+    'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH', 'oklahoma': 'OK',
+    'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+    'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT',
+    'vermont': 'VT', 'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV',
+    'wisconsin': 'WI', 'wyoming': 'WY',
+    // Canadian provinces
+    'alberta': 'AB', 'british columbia': 'BC', 'manitoba': 'MB', 'new brunswick': 'NB',
+    'newfoundland and labrador': 'NL', 'nova scotia': 'NS', 'ontario': 'ON',
+    'prince edward island': 'PE', 'quebec': 'QC', 'saskatchewan': 'SK',
+    'northwest territories': 'NT', 'nunavut': 'NU', 'yukon': 'YT'
+  };
+
+  const lowerState = state.toLowerCase().trim();
+
+  // If already a code (2 letters, uppercase), return as-is
+  if (state.length === 2 && state === state.toUpperCase()) {
+    return state;
+  }
+
+  // Try to find in map
+  return nameToCodeMap[lowerState] || state;
+};
+
 export const useAddressManagement = () => {
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
@@ -13,23 +49,28 @@ export const useAddressManagement = () => {
       const addresses = await addressAPI.getAddresses();
       const addressList = addresses.addresses || [];
       setSavedAddresses(addressList);
-      
+
       // If user has no addresses, default to saving new addresses
       if (addressList.length === 0) {
         setSaveNewAddress(true);
         setShowNewAddressForm(true);
       }
-      
-      const defaultShipping = addressList.find((addr: Address) => 
+
+      const defaultShipping = addressList.find((addr: Address) =>
         addr.is_default && (addr.address_type === 'shipping' || addr.address_type === 'both')
       );
-      
+
       if (defaultShipping) {
         setSelectedAddressId(defaultShipping.id);
+        // Normalize state name if it's stored as full name
+        const normalizedAddress = {
+          ...defaultShipping,
+          state: normalizeStateName(defaultShipping.state)
+        };
         console.log('✅ Loaded default shipping address');
-        return defaultShipping;
+        return normalizedAddress;
       }
-      
+
       return null;
     } catch (error) {
       console.error('Failed to load addresses:', error);
@@ -43,7 +84,7 @@ export const useAddressManagement = () => {
       address1: address.address1,
       address2: address.address2 || '',
       city: address.city,
-      state: address.state || '',
+      state: normalizeStateName(address.state),
       zip: address.zip,
       country: address.country
     });

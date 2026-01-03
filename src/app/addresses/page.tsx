@@ -8,11 +8,51 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
 import GradientTitle from '@/components/ui/GradientTitle';
+import { useLocationLookup } from '@/hooks/useLocationLookup';
+import { PrintfulCountry, PrintfulState } from '@/lib/checkout-types';
+import { validateZipCode } from '@/lib/location-utils';
+
+// Normalize state names to state codes
+const normalizeStateName = (state: string | null | undefined): string => {
+  if (!state) return '';
+
+  const nameToCodeMap: Record<string, string> = {
+    'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR',
+    'california': 'CA', 'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE',
+    'florida': 'FL', 'georgia': 'GA', 'hawaii': 'HI', 'idaho': 'ID',
+    'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA', 'kansas': 'KS',
+    'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+    'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS',
+    'missouri': 'MO', 'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV',
+    'new hampshire': 'NH', 'new jersey': 'NJ', 'new mexico': 'NM', 'new york': 'NY',
+    'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH', 'oklahoma': 'OK',
+    'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+    'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT',
+    'vermont': 'VT', 'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV',
+    'wisconsin': 'WI', 'wyoming': 'WY',
+    // Canadian provinces
+    'alberta': 'AB', 'british columbia': 'BC', 'manitoba': 'MB', 'new brunswick': 'NB',
+    'newfoundland and labrador': 'NL', 'nova scotia': 'NS', 'ontario': 'ON',
+    'prince edward island': 'PE', 'quebec': 'QC', 'saskatchewan': 'SK',
+    'northwest territories': 'NT', 'nunavut': 'NU', 'yukon': 'YT'
+  };
+
+  const lowerState = state.toLowerCase().trim();
+
+  // If already a code (2 letters, uppercase), return as-is
+  if (state.length === 2 && state === state.toUpperCase()) {
+    return state;
+  }
+
+  // Try to find in map
+  return nameToCodeMap[lowerState] || state;
+};
 
 export default function AddressesPage() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
-  
+  const locationLookup = useLocationLookup();
+
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -29,7 +69,7 @@ export default function AddressesPage() {
     city: '',
     state: '',
     zip: '',
-    country: 'US',
+    country: '',
     phone: '',
     is_default: false,
     address_type: 'shipping'
@@ -74,7 +114,7 @@ export default function AddressesPage() {
       city: '',
       state: '',
       zip: '',
-      country: 'US',
+      country: '',
       phone: '',
       is_default: false,
       address_type: 'shipping'
@@ -90,18 +130,44 @@ export default function AddressesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Validate all required fields
+    if (
+      !addressForm.name ||
+      !addressForm.address1 ||
+      !addressForm.city ||
+      !addressForm.zip ||
+      !addressForm.country ||
+      !addressForm.state
+    ) {
+      toast.error("Please fill in all required fields including country and state/province");
+      return;
+    }
+
+    // Validate address format for country
+    const zipValidation = validateZipCode(addressForm.zip, addressForm.country);
+    if (!zipValidation.valid) {
+      toast.error(zipValidation.message || "Invalid postal code format");
+      return;
+    }
+
     try {
       setLoading(true);
-      
+
+      // Normalize state before saving
+      const normalizedAddressForm = {
+        ...addressForm,
+        state: normalizeStateName(addressForm.state)
+      };
+
       if (editingAddress) {
-        await addressAPI.updateAddress(editingAddress.id!, addressForm);
+        await addressAPI.updateAddress(editingAddress.id!, normalizedAddressForm);
         toast.success('Address updated successfully');
       } else {
-        await addressAPI.createAddress(addressForm);
+        await addressAPI.createAddress(normalizedAddressForm);
         toast.success('Address added successfully');
       }
-      
+
       resetForm();
       await fetchAddresses();
     } catch (error: unknown) {
@@ -345,40 +411,126 @@ export default function AddressesPage() {
                     className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                   />
 
-                  <input
-                    type="text"
-                    placeholder="City"
-                    value={addressForm.city}
-                    onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="City *"
+                      value={addressForm.city}
+                      onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                      className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                      required
+                    />
+                    {locationLookup.isLoadingLocation && (
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
+                      </div>
+                    )}
+                  </div>
 
-                  <input
-                    type="text"
-                    placeholder="State"
-                    value={addressForm.state}
-                    onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                  />
+                  {locationLookup.availableStates.length > 0 && (
+                    <div>
+                      <select
+                        value={addressForm.state}
+                        onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
+                        className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                        disabled={!addressForm.country || locationLookup.availableStates.length === 0}
+                        required
+                      >
+                        <option value="">{addressForm.country ? 'Select State/Province *' : 'Select Country First'}</option>
+                        {locationLookup.availableStates.map(state => (
+                          <option key={state.code} value={state.code}>
+                            {state.name} ({state.code})
+                          </option>
+                        ))}
+                      </select>
+                      {!addressForm.country && (
+                        <p className="text-xs text-orange-400 mt-1">✱ Select country first</p>
+                      )}
+                    </div>
+                  )}
 
-                  <input
-                    type="text"
-                    placeholder="ZIP Code"
-                    value={addressForm.zip}
-                    onChange={(e) => setAddressForm({ ...addressForm, zip: e.target.value })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder={
+                        addressForm.country === 'CA' ? 'Postal Code (e.g. M5V 3A8) *' :
+                        addressForm.country === 'IN' ? 'PIN Code (e.g. 110001) *' :
+                        addressForm.country === 'CN' ? 'Postal Code (e.g. 100000) *' :
+                        addressForm.country === 'BR' ? 'Postal Code (e.g. 01310-100) *' :
+                        addressForm.country === 'JP' ? 'Postal Code (e.g. 100-0001) *' :
+                        'ZIP/Postal Code *'
+                      }
+                      value={addressForm.zip}
+                      onChange={(e) => locationLookup.handleZipCodeChange(
+                        e.target.value,
+                        addressForm.country,
+                        (updates) => setAddressForm(prev => ({ ...prev, ...updates }))
+                      )}
+                      maxLength={
+                        addressForm.country === 'CA' ? 7 :
+                        addressForm.country === 'IN' ? 6 :
+                        addressForm.country === 'CN' ? 6 :
+                        addressForm.country === 'SG' ? 6 :
+                        addressForm.country === 'BR' ? 9 :
+                        addressForm.country === 'NL' ? 7 :
+                        addressForm.country === 'PL' ? 6 :
+                        addressForm.country === 'CZ' ? 6 :
+                        addressForm.country === 'JP' ? 8 :
+                        50
+                      }
+                      className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                      required
+                    />
+                    {locationLookup.isLoadingLocation && (
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
+                      </div>
+                    )}
+                    {addressForm.zip && addressForm.country && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {addressForm.country === 'CA' ? '6-7 characters (e.g. M5V 3A8)' :
+                         addressForm.country === 'IN' ? '6 digits (e.g. 110001)' :
+                         addressForm.country === 'CN' ? '6 digits (e.g. 100000)' :
+                         addressForm.country === 'BR' ? '5+3 digits (e.g. 01310-100)' :
+                         addressForm.country === 'JP' ? '3+4 digits (e.g. 100-0001)' :
+                         addressForm.country === 'US' ? '5 digits (e.g. 90210)' :
+                         'See format guide above'}
+                      </div>
+                    )}
+                  </div>
 
-                  <select
-                    value={addressForm.country}
-                    onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                  >
-                    <option value="US">United States</option>
-                    <option value="CA">Canada</option>
-                  </select>
+                  <div>
+                    <select
+                      value={addressForm.country}
+                      onChange={(e) => {
+                        setAddressForm({ ...addressForm, country: e.target.value, state: '' });
+                        locationLookup.updateAvailableStates(
+                          e.target.value,
+                          '',
+                          (updates) => setAddressForm(prev => ({ ...prev, ...updates }))
+                        );
+                      }}
+                      className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                      required
+                    >
+                      <option value="">Select Country *</option>
+                      {locationLookup.printfulCountries.length > 0 ? (
+                        locationLookup.printfulCountries.map(country => (
+                          <option key={country.code} value={country.code}>
+                            {country.name}
+                          </option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="US">United States</option>
+                          <option value="CA">Canada</option>
+                        </>
+                      )}
+                    </select>
+                    {!addressForm.country && (
+                      <p className="text-xs text-orange-400 mt-1">✱ Required to validate address</p>
+                    )}
+                  </div>
 
                   <select
                     value={addressForm.address_type}

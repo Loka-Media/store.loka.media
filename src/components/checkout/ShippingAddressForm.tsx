@@ -137,12 +137,12 @@ export const ShippingAddressForm = ({
             />
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="City *" 
-                  value={customerInfo.city} 
-                  onChange={(e) => updateCustomerInfo({ city: e.target.value })} 
-                  className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500" 
+                <input
+                  type="text"
+                  placeholder="City *"
+                  value={customerInfo.city}
+                  onChange={(e) => updateCustomerInfo({ city: e.target.value })}
+                  className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500"
                 />
                 {isLoadingLocation && (
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -151,29 +151,34 @@ export const ShippingAddressForm = ({
                 )}
               </div>
               {availableStates.length > 0 && (
-              <select 
-                value={customerInfo.state} 
-                onChange={(e) => updateCustomerInfo({ state: e.target.value })} 
-                className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500"
-                disabled={!customerInfo.country || availableStates.length === 0}
-              >
-                <option value="">{customerInfo.country ? 'Select State' : 'Select Country First'}</option>
-                {availableStates.map(state => (
-                  <option key={state.code} value={state.code}>
-                    {state.name} ({state.code})
-                  </option>
-                ))}
-              </select>
+              <div>
+                <select
+                  value={customerInfo.state}
+                  onChange={(e) => updateCustomerInfo({ state: e.target.value })}
+                  className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500"
+                  disabled={!customerInfo.country || availableStates.length === 0}
+                >
+                  <option value="">{customerInfo.country ? 'Select State/Province' : 'Select Country First'}</option>
+                  {availableStates.map(state => (
+                    <option key={state.code} value={state.code}>
+                      {state.name} ({state.code})
+                    </option>
+                  ))}
+                </select>
+                {!customerInfo.country && (
+                  <p className="text-xs text-orange-400 mt-1">✱ Select country first</p>
+                )}
+              </div>
               )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="ZIP/Postal Code *" 
-                  value={customerInfo.zip} 
-                  onChange={(e) => handleZipCodeChange(e.target.value)} 
-                  className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500" 
+                <input
+                  type="text"
+                  placeholder={customerInfo.country === 'CA' ? 'Postal Code (e.g. M5V 3A8) *' : 'ZIP Code (e.g. 90210) *'}
+                  value={customerInfo.zip}
+                  onChange={(e) => handleZipCodeChange(e.target.value)}
+                  className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500"
                   maxLength={customerInfo.country === 'CA' ? 7 : 5}
                 />
                 {isLoadingLocation && (
@@ -181,25 +186,38 @@ export const ShippingAddressForm = ({
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
                   </div>
                 )}
-              </div>
-              <select 
-                value={customerInfo.country} 
-                onChange={(e) => updateCustomerInfo({ country: e.target.value })} 
-                className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500"
-              >
-                {printfulCountries.length > 0 ? (
-                  printfulCountries.map(country => (
-                    <option key={country.code} value={country.code}>
-                      {country.name}
-                    </option>
-                  ))
-                ) : (
-                  <>
-                    <option value="US">United States</option>
-                    <option value="CA">Canada</option>
-                  </>
+                {customerInfo.zip && customerInfo.country && (
+                  <div className="text-xs text-gray-400 mt-1">
+                    {customerInfo.country === 'CA' ? '6-7 characters (e.g. M5V 3A8)' : '5 digits (e.g. 90210)'}
+                  </div>
                 )}
-              </select>
+              </div>
+              <div>
+                <select
+                  value={customerInfo.country}
+                  onChange={(e) => {
+                    updateCustomerInfo({ country: e.target.value, state: '' });
+                  }}
+                  className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500"
+                >
+                  <option value="">Select Country *</option>
+                  {printfulCountries.length > 0 ? (
+                    printfulCountries.map(country => (
+                      <option key={country.code} value={country.code}>
+                        {country.name}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="US">United States</option>
+                      <option value="CA">Canada</option>
+                    </>
+                  )}
+                </select>
+                {!customerInfo.country && (
+                  <p className="text-xs text-orange-400 mt-1">✱ Required to validate address</p>
+                )}
+              </div>
             </div>
           </div>
         </div>

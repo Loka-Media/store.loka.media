@@ -25,6 +25,7 @@ import { ShippingAddressForm } from '@/components/checkout/ShippingAddressForm';
 import { OrderSummary } from '@/components/checkout/OrderSummary';
 
 import { unifiedCheckoutAPI } from '@/lib/checkout-api';
+import { validateZipCode } from '@/lib/location-utils';
 
 
 export default function UnifiedCheckoutPage() {
@@ -138,14 +139,24 @@ export default function UnifiedCheckoutPage() {
     try {
       setLoading(true);
 
+      // Validate all required fields
       if (
         !customerInfo.name ||
         !customerInfo.email ||
         !customerInfo.address1 ||
         !customerInfo.city ||
-        !customerInfo.zip
+        !customerInfo.zip ||
+        !customerInfo.country ||
+        !customerInfo.state
       ) {
-        toast.error("Please fill in all required fields");
+        toast.error("Please fill in all required fields including country and state/province");
+        return;
+      }
+
+      // Validate address format for country
+      const zipValidation = validateZipCode(customerInfo.zip, customerInfo.country);
+      if (!zipValidation.valid) {
+        toast.error(zipValidation.message || "Invalid postal code format");
         return;
       }
 
