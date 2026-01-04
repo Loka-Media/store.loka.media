@@ -77,41 +77,41 @@ export const OrderStatusPipeline = ({
     const baseClasses = 'rounded-full p-3 transition-all duration-300';
 
     if (!isActive) {
-      return `${baseClasses} bg-gray-700/30 text-gray-500`;
+      return `${baseClasses} bg-slate-100 text-slate-400`;
     }
 
     switch (color) {
       case 'blue':
-        return `${baseClasses} bg-blue-900/30 text-blue-400`;
+        return `${baseClasses} bg-blue-100 text-blue-600`;
       case 'yellow':
-        return `${baseClasses} bg-yellow-900/30 text-yellow-400`;
+        return `${baseClasses} bg-yellow-100 text-yellow-600`;
       case 'orange':
-        return `${baseClasses} bg-orange-900/30 text-orange-400`;
+        return `${baseClasses} bg-orange-100 text-orange-600`;
       case 'purple':
-        return `${baseClasses} bg-purple-900/30 text-purple-400`;
+        return `${baseClasses} bg-purple-100 text-purple-600`;
       case 'green':
-        return `${baseClasses} bg-green-900/30 text-green-400`;
+        return `${baseClasses} bg-green-100 text-green-600`;
       default:
-        return `${baseClasses} bg-gray-700/30 text-gray-400`;
+        return `${baseClasses} bg-slate-100 text-slate-400`;
     }
   };
 
   const getTextColor = (color: string, isActive: boolean) => {
-    if (!isActive) return 'text-gray-500';
+    if (!isActive) return 'text-slate-500';
 
     switch (color) {
       case 'blue':
-        return 'text-blue-300';
+        return 'text-blue-700';
       case 'yellow':
-        return 'text-yellow-300';
+        return 'text-yellow-700';
       case 'orange':
-        return 'text-orange-300';
+        return 'text-orange-700';
       case 'purple':
-        return 'text-purple-300';
+        return 'text-purple-700';
       case 'green':
-        return 'text-green-300';
+        return 'text-green-700';
       default:
-        return 'text-gray-300';
+        return 'text-slate-700';
     }
   };
 
@@ -133,14 +133,14 @@ export const OrderStatusPipeline = ({
                     className={`${getColorClasses(
                       stage.color,
                       isActive
-                    )} ${isCurrent(index) ? 'ring-2 ring-offset-2 ring-offset-black' + (stage.color === 'blue' ? ' ring-blue-400' : stage.color === 'yellow' ? ' ring-yellow-400' : stage.color === 'orange' ? ' ring-orange-400' : ' ring-gray-400') : ''}`}
+                    )} ${isCurrent(index) ? 'ring-2 ring-offset-2 ring-offset-white' + (stage.color === 'blue' ? ' ring-blue-500' : stage.color === 'yellow' ? ' ring-yellow-500' : stage.color === 'orange' ? ' ring-orange-500' : ' ring-slate-400') : ''}`}
                   >
                     <Icon className="w-5 h-5" />
                   </div>
-                  <div className={`mt-2 text-xs font-medium whitespace-nowrap ${getTextColor(stage.color, isActive)}`}>
+                  <div className={`mt-2 text-xs font-semibold whitespace-nowrap ${getTextColor(stage.color, isActive)}`}>
                     {stage.label}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1 whitespace-nowrap">
+                  <div className="text-xs text-slate-400 mt-1 whitespace-nowrap">
                     {stage.description}
                   </div>
                 </div>
@@ -151,8 +151,8 @@ export const OrderStatusPipeline = ({
                     <ArrowRight
                       className={`w-4 h-4 ${
                         index < currentStageIndex
-                          ? 'text-green-400'
-                          : 'text-gray-600'
+                          ? 'text-green-600'
+                          : 'text-slate-300'
                       }`}
                     />
                   </div>
@@ -165,40 +165,40 @@ export const OrderStatusPipeline = ({
 
       {/* Status Summary */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
-        <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-3">
-          <div className="text-xs text-gray-400 font-medium">Order Status</div>
-          <div className={`text-sm font-semibold mt-1 ${
-            orderStatus === 'pending' ? 'text-gray-300' :
-            orderStatus === 'payment_received' ? 'text-blue-300' :
-            orderStatus === 'verified' ? 'text-yellow-300' :
-            orderStatus === 'processing' ? 'text-orange-300' :
-            orderStatus === 'fulfilled' ? 'text-purple-300' :
-            'text-green-300'
+        <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/60 rounded-lg p-3">
+          <div className="text-xs text-slate-600 font-semibold">Order Status</div>
+          <div className={`text-sm font-bold mt-1 ${
+            orderStatus === 'pending' ? 'text-slate-700' :
+            orderStatus === 'payment_received' ? 'text-blue-700' :
+            orderStatus === 'verified' ? 'text-yellow-700' :
+            orderStatus === 'processing' ? 'text-orange-700' :
+            orderStatus === 'fulfilled' ? 'text-purple-700' :
+            'text-green-700'
           }`}>
             {orderStatus.replace(/_/g, ' ').toUpperCase()}
           </div>
         </div>
 
-        <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-3">
-          <div className="text-xs text-gray-400 font-medium">Payment Status</div>
-          <div className={`text-sm font-semibold mt-1 ${
-            paymentStatus === 'pending' ? 'text-gray-300' :
-            paymentStatus === 'completed' ? 'text-green-300' :
-            paymentStatus === 'released' ? 'text-blue-300' :
-            'text-yellow-300'
+        <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/60 rounded-lg p-3">
+          <div className="text-xs text-slate-600 font-semibold">Payment Status</div>
+          <div className={`text-sm font-bold mt-1 ${
+            paymentStatus === 'pending' ? 'text-slate-700' :
+            paymentStatus === 'completed' ? 'text-green-700' :
+            paymentStatus === 'released' ? 'text-blue-700' :
+            'text-yellow-700'
           }`}>
             {paymentStatus.replace(/_/g, ' ').toUpperCase()}
           </div>
         </div>
 
         {printfulStatus && (
-          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-3">
-            <div className="text-xs text-gray-400 font-medium">Printful Status</div>
-            <div className={`text-sm font-semibold mt-1 ${
-              printfulStatus === 'processing' ? 'text-orange-300' :
-              printfulStatus === 'shipped' ? 'text-purple-300' :
-              printfulStatus === 'delivered' ? 'text-green-300' :
-              'text-gray-300'
+          <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/60 rounded-lg p-3">
+            <div className="text-xs text-slate-600 font-semibold">Printful Status</div>
+            <div className={`text-sm font-bold mt-1 ${
+              printfulStatus === 'processing' ? 'text-orange-700' :
+              printfulStatus === 'shipped' ? 'text-purple-700' :
+              printfulStatus === 'delivered' ? 'text-green-700' :
+              'text-slate-700'
             }`}>
               {printfulStatus.toUpperCase()}
             </div>

@@ -406,20 +406,20 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-12">
           <div>
-            <h1 className="text-2xl font-bold text-white">Order Management</h1>
-            <p className="text-gray-400 mt-1">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Order Management</h1>
+            <p className="text-slate-500 mt-2 text-lg">
               Manage and process marketplace orders
             </p>
           </div>
           <button
             onClick={loadDashboardData}
             disabled={loading}
-            className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 disabled:opacity-50"
+            className="inline-flex items-center px-6 py-3 border border-slate-200 text-sm font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-50 hover:shadow-lg transition-all duration-200 disabled:opacity-50 shadow-sm"
           >
             <RefreshCw
               className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
@@ -430,18 +430,18 @@ export default function AdminOrdersPage() {
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700/50 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-7 shadow-sm hover:shadow-md hover:border-slate-300/60 transition-all duration-200">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Package className="h-8 w-8 text-blue-400" />
+                <div className="flex-shrink-0 bg-blue-100/80 p-3 rounded-xl">
+                  <Package className="h-6 w-6 text-blue-600" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
+                    <dt className="text-sm font-medium text-slate-600 truncate">
                       Pending Orders
                     </dt>
-                    <dd className="text-lg font-medium text-white">
+                    <dd className="text-2xl font-bold text-slate-900 mt-1">
                       {stats.orders.paymentReceived}
                     </dd>
                   </dl>
@@ -449,17 +449,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700/50 p-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-7 shadow-sm hover:shadow-md hover:border-slate-300/60 transition-all duration-200">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <DollarSign className="h-8 w-8 text-green-400" />
+                <div className="flex-shrink-0 bg-green-100/80 p-3 rounded-xl">
+                  <DollarSign className="h-6 w-6 text-green-600" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
+                    <dt className="text-sm font-medium text-slate-600 truncate">
                       Escrowed Funds
                     </dt>
-                    <dd className="text-lg font-medium text-white">
+                    <dd className="text-2xl font-bold text-slate-900 mt-1">
                       ${stats.payments.totalEscrowed}
                     </dd>
                   </dl>
@@ -467,17 +467,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700/50 p-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-7 shadow-sm hover:shadow-md hover:border-slate-300/60 transition-all duration-200">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Clock className="h-8 w-8 text-yellow-400" />
+                <div className="flex-shrink-0 bg-amber-100/80 p-3 rounded-xl">
+                  <Clock className="h-6 w-6 text-amber-600" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
+                    <dt className="text-sm font-medium text-slate-600 truncate">
                       Verification Queue
                     </dt>
-                    <dd className="text-lg font-medium text-white">
+                    <dd className="text-2xl font-bold text-slate-900 mt-1">
                       {stats.verification.totalPending}
                     </dd>
                   </dl>
@@ -485,17 +485,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700/50 p-6">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-7 shadow-sm hover:shadow-md hover:border-slate-300/60 transition-all duration-200">
               <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <AlertTriangle className="h-8 w-8 text-red-400" />
+                <div className="flex-shrink-0 bg-red-100/80 p-3 rounded-xl">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
+                    <dt className="text-sm font-medium text-slate-600 truncate">
                       Urgent Items
                     </dt>
-                    <dd className="text-lg font-medium text-white">
+                    <dd className="text-2xl font-bold text-slate-900 mt-1">
                       {stats.verification.urgent}
                     </dd>
                   </dl>
@@ -506,16 +506,16 @@ export default function AdminOrdersPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-gray-900 rounded-lg border border-gray-700 p-6 mb-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-8 mb-8 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
                 Status
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full p-2 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white"
+                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
               >
                 <option value="">All Orders</option>
                 <option value="pending">Pending</option>
@@ -528,13 +528,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
                 Order Type
               </label>
               <select
                 value={orderTypeFilter}
                 onChange={(e) => setOrderTypeFilter(e.target.value)}
-                className="w-full p-2 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white"
+                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
               >
                 <option value="">All Types</option>
                 <option value="printful">Printful</option>
@@ -544,13 +544,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
                 Priority
               </label>
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="w-full p-2 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white"
+                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
               >
                 <option value="">All Priorities</option>
                 <option value="urgent">Urgent</option>
@@ -561,7 +561,7 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-3">
                 Search
               </label>
               <div className="relative">
@@ -570,9 +570,9 @@ export default function AdminOrdersPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Order number, email..."
-                  className="w-full p-2 pl-8 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
+                  className="w-full p-3 pl-10 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
                 />
-                <Search className="w-4 h-4 text-gray-500 absolute left-2 top-3" />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
               </div>
             </div>
           </div>
@@ -580,9 +580,9 @@ export default function AdminOrdersPage() {
 
         {/* Orders Grid */}
         <div>
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-white mb-2">Active Orders</h2>
-            <p className="text-gray-400 text-sm">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-2">Active Orders</h2>
+            <p className="text-slate-600 text-sm">
               {orders.length} order{orders.length !== 1 ? 's' : ''} found
             </p>
           </div>
@@ -619,18 +619,20 @@ export default function AdminOrdersPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-20 bg-gray-900 rounded-lg border border-gray-700">
-              <Package className="mx-auto h-16 w-16 text-gray-600 mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">No orders found</h3>
-              <p className="text-gray-400 mb-6">
+            <div className="text-center py-20 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full mb-4">
+                <Package className="w-8 h-8 text-slate-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">No orders found</h3>
+              <p className="text-slate-600 mb-8 max-w-sm mx-auto">
                 No orders match the current filters. Try adjusting your search criteria.
               </p>
               <button
                 onClick={loadDashboardData}
-                className="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-md transition-colors"
+                className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
+                Refresh Orders
               </button>
             </div>
           )}
@@ -638,24 +640,24 @@ export default function AdminOrdersPage() {
 
         {/* Order Details Modal */}
         {showOrderModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border border-gray-600 w-full max-w-4xl shadow-lg rounded-md bg-gray-800">
+          <div className="fixed inset-0 bg-black bg-opacity-40 overflow-y-auto h-full w-full z-50 backdrop-blur-sm">
+            <div className="relative top-20 mx-auto p-6 border border-slate-200/60 w-full max-w-4xl shadow-2xl rounded-2xl bg-white">
               <div className="mt-3">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-medium text-white">
+                <div className="flex items-start justify-between mb-6 pb-4 border-b border-slate-200">
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                     Order Details - {selectedOrder.order_number}
                   </h3>
                   <button
                     onClick={() => setShowOrderModal(false)}
-                    className="text-gray-400 hover:text-gray-200"
+                    className="text-slate-400 hover:text-slate-600 text-2xl transition-colors"
                   >
                     ×
                   </button>
                 </div>
 
                 {/* Status Pipeline */}
-                <div className="mb-6">
-                  <h4 className="font-medium text-white mb-4">Order Status Pipeline</h4>
+                <div className="mb-8">
+                  <h4 className="font-semibold text-slate-900 mb-4">Order Status Pipeline</h4>
                   <OrderStatusPipeline
                     orderStatus={selectedOrder.order_status}
                     paymentStatus={selectedOrder.payment_status}
@@ -666,57 +668,59 @@ export default function AdminOrdersPage() {
                   {/* Order Info */}
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-white mb-2">
+                      <h4 className="font-semibold text-slate-900 mb-3">
                         Order Information
                       </h4>
-                      <div className="bg-gray-700 p-4 rounded-lg space-y-2">
-                        <p className="text-gray-300">
-                          <span className="font-medium text-white">Type:</span>{" "}
-                          {selectedOrder.order_type}
+                      <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200/60 space-y-3">
+                        <p className="text-slate-700">
+                          <span className="font-semibold text-slate-900">Type:</span>{" "}
+                          <span className="ml-2 inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium capitalize">{selectedOrder.order_type}</span>
                         </p>
-                        <p className="text-gray-300">
-                          <span className="font-medium text-white">
+                        <p className="text-slate-700">
+                          <span className="font-semibold text-slate-900">
                             Status:
                           </span>{" "}
-                          {selectedOrder.order_status}
+                          <span className="ml-2 inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium capitalize">{selectedOrder.order_status}</span>
                         </p>
-                        <p className="text-gray-300">
-                          <span className="font-medium text-white">
+                        <p className="text-slate-700">
+                          <span className="font-semibold text-slate-900">
                             Payment Status:
                           </span>{" "}
-                          {selectedOrder.payment_status}
+                          <span className="ml-2 inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium capitalize">{selectedOrder.payment_status}</span>
                         </p>
-                        <p className="text-gray-300">
-                          <span className="font-medium text-white">
+                        <p className="text-slate-700">
+                          <span className="font-semibold text-slate-900">
                             Amount:
                           </span>{" "}
-                          $
-                          {parseFloat(
-                            selectedOrder.customer_payment_amount
-                          ).toFixed(2)}
+                          <span className="ml-2 font-semibold text-slate-900">
+                            $
+                            {parseFloat(
+                              selectedOrder.customer_payment_amount
+                            ).toFixed(2)}
+                          </span>
                         </p>
-                        <p className="text-gray-300">
-                          <span className="font-medium text-white">
+                        <p className="text-slate-700">
+                          <span className="font-semibold text-slate-900">
                             Created:
                           </span>{" "}
-                          {new Date(selectedOrder.created_at).toLocaleString()}
+                          <span className="ml-2 text-slate-600">{new Date(selectedOrder.created_at).toLocaleString()}</span>
                         </p>
                       </div>
                     </div>
 
                     {/* Customer Info */}
                     <div>
-                      <h4 className="font-medium text-white mb-2">
+                      <h4 className="font-semibold text-slate-900 mb-3">
                         Customer Information
                       </h4>
-                      <div className="bg-gray-700 p-4 rounded-lg space-y-2">
-                        <p className="text-gray-300">
-                          <span className="font-medium text-white">Name:</span>{" "}
-                          {selectedOrder.customer_name || "Guest"}
+                      <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200/60 space-y-3">
+                        <p className="text-slate-700">
+                          <span className="font-semibold text-slate-900">Name:</span>{" "}
+                          <span className="ml-2 text-slate-600">{selectedOrder.customer_name || "Guest"}</span>
                         </p>
-                        <p className="text-gray-300">
-                          <span className="font-medium text-white">Email:</span>{" "}
-                          {selectedOrder.customer_email || "N/A"}
+                        <p className="text-slate-700">
+                          <span className="font-semibold text-slate-900">Email:</span>{" "}
+                          <span className="ml-2 text-slate-600">{selectedOrder.customer_email || "N/A"}</span>
                         </p>
                       </div>
                     </div>
@@ -725,32 +729,32 @@ export default function AdminOrdersPage() {
                   {/* Shipping Address */}
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-white mb-2">
+                      <h4 className="font-semibold text-slate-900 mb-3">
                         Shipping Address
                       </h4>
                       {selectedOrder.shipping_address && (
-                        <div className="bg-gray-700 p-4 rounded-lg">
-                          <p className="text-gray-300">
+                        <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200/60 text-slate-700 space-y-1">
+                          <p className="font-semibold text-slate-900">
                             {selectedOrder.shipping_address.name}
                           </p>
-                          <p className="text-gray-300">
+                          <p className="text-sm">
                             {selectedOrder.shipping_address.address1}
                           </p>
                           {selectedOrder.shipping_address.address2 && (
-                            <p className="text-gray-300">
+                            <p className="text-sm">
                               {selectedOrder.shipping_address.address2}
                             </p>
                           )}
-                          <p className="text-gray-300">
+                          <p className="text-sm">
                             {selectedOrder.shipping_address.city},{" "}
                             {selectedOrder.shipping_address.state}{" "}
                             {selectedOrder.shipping_address.zip}
                           </p>
-                          <p className="text-gray-300">
+                          <p className="text-sm">
                             {selectedOrder.shipping_address.country}
                           </p>
                           {selectedOrder.shipping_address.phone && (
-                            <p>{selectedOrder.shipping_address.phone}</p>
+                            <p className="text-sm font-medium mt-2">{selectedOrder.shipping_address.phone}</p>
                           )}
                         </div>
                       )}
@@ -758,10 +762,10 @@ export default function AdminOrdersPage() {
 
                     {/* Order Items */}
                     <div>
-                      <h4 className="font-medium text-white mb-2">
+                      <h4 className="font-semibold text-slate-900 mb-3">
                         Order Items
                       </h4>
-                      <div className="bg-gray-700 p-4 rounded-lg max-h-48 overflow-y-auto">
+                      <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200/60 max-h-48 overflow-y-auto">
                         {selectedOrder.order_items &&
                           selectedOrder.order_items.map(
                             (item: unknown, index: number) => {
@@ -775,16 +779,16 @@ export default function AdminOrdersPage() {
                               return (
                                 <div
                                   key={index}
-                                  className="border-b border-gray-600 last:border-b-0 pb-2 mb-2 last:mb-0"
+                                  className="border-b border-slate-200 last:border-b-0 pb-3 mb-3 last:mb-0"
                                 >
-                                  <p className="font-medium text-white">
+                                  <p className="font-semibold text-slate-900">
                                     {orderItem.product_name}
                                   </p>
-                                  <p className="text-sm text-gray-300">
+                                  <p className="text-sm text-slate-600">
                                     {orderItem.size} • {orderItem.color} • Qty:{" "}
                                     {orderItem.quantity}
                                   </p>
-                                  <p className="text-sm text-gray-300">
+                                  <p className="text-sm font-medium text-slate-700">
                                     $
                                     {orderItem.price
                                       ? parseFloat(orderItem.price).toFixed(2)
@@ -800,10 +804,10 @@ export default function AdminOrdersPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end space-x-3 mt-6">
+                <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-slate-200">
                   <button
                     onClick={() => setShowOrderModal(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600"
+                    className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                   >
                     Close
                   </button>
@@ -815,24 +819,24 @@ export default function AdminOrdersPage() {
 
         {/* Payment Verification Modal */}
         {showVerificationModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border border-gray-700 w-full max-w-md shadow-lg rounded-md bg-gray-900">
-              <div className="mt-3">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-medium text-white">
+          <div className="fixed inset-0 bg-black bg-opacity-40 overflow-y-auto h-full w-full z-50 backdrop-blur-sm">
+            <div className="relative top-32 mx-auto p-6 border border-slate-200/60 w-full max-w-md shadow-2xl rounded-2xl bg-white">
+              <div className="mt-0">
+                <div className="flex items-start justify-between mb-6 pb-4 border-b border-slate-200">
+                  <h3 className="text-lg font-bold text-slate-900">
                     Verify Payment
                   </h3>
                   <button
                     onClick={() => setShowVerificationModal(false)}
-                    className="text-gray-400 hover:text-gray-200"
+                    className="text-slate-400 hover:text-slate-600 text-2xl transition-colors"
                   >
                     ×
                   </button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                       Bank Amount Verified ($)
                     </label>
                     <input
@@ -845,13 +849,13 @@ export default function AdminOrdersPage() {
                           bankAmountVerified: e.target.value,
                         })
                       }
-                      className="w-full p-3 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
+                      className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
                       placeholder="Enter verified amount"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                       Verification Notes
                     </label>
                     <textarea
@@ -863,13 +867,13 @@ export default function AdminOrdersPage() {
                         })
                       }
                       rows={3}
-                      className="w-full p-3 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
+                      className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
                       placeholder="Enter verification notes..."
                     />
                   </div>
 
-                  <div>
-                    <label className="flex items-center">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <label className="flex items-center cursor-pointer">
                       <input
                         type="checkbox"
                         checked={verificationForm.approveOrder}
@@ -879,19 +883,19 @@ export default function AdminOrdersPage() {
                             approveOrder: e.target.checked,
                           })
                         }
-                        className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-700 rounded bg-gray-800"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
                       />
-                      <span className="ml-2 text-sm text-gray-300">
+                      <span className="ml-3 text-sm font-medium text-slate-700">
                         Approve order for processing
                       </span>
                     </label>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end space-x-3 mt-6">
+                <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-slate-200">
                   <button
                     onClick={() => setShowVerificationModal(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700"
+                    className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                   >
                     Cancel
                   </button>
@@ -902,7 +906,7 @@ export default function AdminOrdersPage() {
                       !verificationForm.bankAmountVerified ||
                       !verificationForm.verificationNotes
                     }
-                    className="px-4 py-2 text-sm font-medium text-white bg-orange-600 border border-transparent rounded-md hover:bg-orange-700 disabled:opacity-50"
+                    className="px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 border border-transparent rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "Verifying..." : "Verify Payment"}
                   </button>
@@ -914,24 +918,24 @@ export default function AdminOrdersPage() {
 
         {/* Payment Release Modal */}
         {showPaymentModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border border-gray-700 w-full max-w-md shadow-lg rounded-md bg-gray-900">
-              <div className="mt-3">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-medium text-white">
+          <div className="fixed inset-0 bg-black bg-opacity-40 overflow-y-auto h-full w-full z-50 backdrop-blur-sm">
+            <div className="relative top-32 mx-auto p-6 border border-slate-200/60 w-full max-w-md shadow-2xl rounded-2xl bg-white">
+              <div className="mt-0">
+                <div className="flex items-start justify-between mb-6 pb-4 border-b border-slate-200">
+                  <h3 className="text-lg font-bold text-slate-900">
                     Release Payment
                   </h3>
                   <button
                     onClick={() => setShowPaymentModal(false)}
-                    className="text-gray-400 hover:text-gray-200"
+                    className="text-slate-400 hover:text-slate-600 text-2xl transition-colors"
                   >
                     ×
                   </button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                       Vendor Email
                     </label>
                     <input
@@ -943,13 +947,13 @@ export default function AdminOrdersPage() {
                           vendorEmail: e.target.value,
                         })
                       }
-                      className="w-full p-3 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
+                      className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
                       placeholder="vendor@example.com"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                       Notes
                     </label>
                     <textarea
@@ -961,33 +965,32 @@ export default function AdminOrdersPage() {
                         })
                       }
                       rows={3}
-                      className="w-full p-3 border border-gray-700 rounded-md focus:ring-accent focus:border-accent bg-gray-800 text-white placeholder-gray-500"
+                      className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
                       placeholder="Payment notes..."
                     />
                   </div>
 
-                  <div className="bg-orange-900/30 border border-orange-700/50 rounded-lg p-4">
-                    <p className="text-sm text-orange-300">
-                      <strong>Amount to release:</strong> $
-                      {selectedOrder.vendor_payment_amount || "Calculating..."}
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                    <p className="text-sm text-slate-700">
+                      <span className="font-semibold block mb-1">Amount Summary</span>
+                      <span className="text-emerald-700 font-semibold">Amount to release:</span> <span className="text-emerald-900 font-bold">${selectedOrder.vendor_payment_amount || "Calculating..."}</span>
                       <br />
-                      <strong>Admin fee:</strong> $
-                      {selectedOrder.admin_fee || "Calculating..."}
+                      <span className="text-orange-600 font-semibold">Admin fee:</span> <span className="text-orange-900 font-bold">${selectedOrder.admin_fee || "Calculating..."}</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end space-x-3 mt-6">
+                <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-slate-200">
                   <button
                     onClick={() => setShowPaymentModal(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-md hover:bg-gray-700"
+                    className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleReleasePayment}
                     disabled={loading || !paymentForm.vendorEmail}
-                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 disabled:opacity-50"
+                    className="px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 border border-transparent rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "Releasing..." : "Release Payment"}
                   </button>

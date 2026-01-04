@@ -9,7 +9,7 @@ import Link from 'next/link';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { getApiUrl } from '@/lib/getApiUrl';
 
-const stripePromise = loadStripe('pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8');
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 interface OrderData {
   orderNumber: string;

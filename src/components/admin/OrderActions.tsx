@@ -46,16 +46,14 @@ export const OrderActions = ({
     paymentStatus === 'released';
 
   return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-semibold text-white mb-3">Fulfillment Actions</h4>
-
+    <div className="space-y-2">
       <div className="grid grid-cols-1 gap-2">
         {/* Verify Payment */}
         {canVerifyPayment && (
           <button
             onClick={onVerifyPayment}
             disabled={loading}
-            className="w-full flex items-center justify-center px-4 py-2 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-600/50 text-yellow-300 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center px-4 py-2 bg-amber-100 hover:bg-amber-200 border border-amber-200 text-amber-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <AlertCircle className="w-4 h-4 mr-2" />
             Verify Payment
@@ -67,7 +65,7 @@ export const OrderActions = ({
           <button
             onClick={onReleasePayment}
             disabled={loading}
-            className="w-full flex items-center justify-center px-4 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-600/50 text-green-300 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center px-4 py-2 bg-emerald-100 hover:bg-emerald-200 border border-emerald-200 text-emerald-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4 mr-2" />
             Release Payment & Submit to Printful
@@ -79,7 +77,7 @@ export const OrderActions = ({
           <button
             onClick={onMarkProcessing}
             disabled={loading}
-            className="w-full flex items-center justify-center px-4 py-2 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/50 text-orange-300 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center px-4 py-2 bg-orange-100 hover:bg-orange-200 border border-orange-200 text-orange-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Printer className="w-4 h-4 mr-2" />
             Mark as Processing
@@ -91,7 +89,7 @@ export const OrderActions = ({
           <button
             onClick={onMarkShipped}
             disabled={loading}
-            className="w-full flex items-center justify-center px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-600/50 text-purple-300 text-sm font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center px-4 py-2 bg-purple-100 hover:bg-purple-200 border border-purple-200 text-purple-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <CheckCircle className="w-4 h-4 mr-2" />
             Mark as Shipped
@@ -100,8 +98,8 @@ export const OrderActions = ({
 
         {/* No actions available */}
         {!canVerifyPayment && !canReleasePayment && !canMarkProcessing && !canMarkShipped && (
-          <div className="bg-gray-800/50 border border-gray-700 rounded-md p-3 text-center">
-            <p className="text-xs text-gray-400">No pending actions for this order</p>
+          <div className="bg-slate-50 border border-slate-200/60 rounded-lg p-3 text-center">
+            <p className="text-xs text-slate-500">No pending actions for this order</p>
           </div>
         )}
       </div>

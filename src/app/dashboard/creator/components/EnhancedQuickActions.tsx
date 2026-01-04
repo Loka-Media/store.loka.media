@@ -5,8 +5,9 @@ import {
   TotalProductsIcon,
   CustomCatalogIcon,
   LokaProductsIcon,
-  DesignCanvasIcon,
   DesignFilesIcon,
+  EarningsIcon,
+  SettingsIcon,
   ArrowIcon,
 } from "./QuickActionIcons";
 
@@ -27,18 +28,25 @@ export function EnhancedQuickActions() {
       iconColor: "text-purple-400",
     },
     {
-      href: "/dashboard/creator/canvas",
-      icon: DesignCanvasIcon,
-      title: "Design Canvas",
-      description: "Create stunning designs",
-      iconColor: "text-green-400",
-    },
-    {
       href: "/dashboard/creator/files",
       icon: DesignFilesIcon,
       title: "Design Files",
       description: "Manage your assets",
       iconColor: "text-blue-400",
+    },
+    {
+      href: "/dashboard/creator/earnings",
+      icon: EarningsIcon,
+      title: "Earnings",
+      description: "Track commissions & payouts",
+      iconColor: "text-yellow-400",
+    },
+    {
+      href: "/dashboard/creator/settings/stripe",
+      icon: SettingsIcon,
+      title: "Settings",
+      description: "Manage Stripe account",
+      iconColor: "text-pink-400",
     },
   ];
 
@@ -53,7 +61,7 @@ export function EnhancedQuickActions() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4 md:gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 md:gap-4 lg:gap-6">
         {actions.map((action, index) => (
           <Link href={action.href} key={index}>
             <div className="gradient-border-white-top p-4 sm:p-6 md:p-8 group hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300 flex flex-col h-full cursor-pointer relative">
