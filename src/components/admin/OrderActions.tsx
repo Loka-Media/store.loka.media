@@ -20,25 +20,24 @@ export const OrderActions = ({
   loading = false
 }: OrderActionsProps) => {
   // Action availability based on current order and payment status
-  // Orders flow: pending → payment_received → verified → processing → fulfilled → delivered
+  // Payment flow: paid → escrowed (auto-verified) → released (submitted to Printful)
+  // Order status: pending → payment_received → processing → shipped → delivered
 
-  // Verify Payment: Show when payment is received but not yet verified
+  // Verify Payment: Show when payment is received but not yet escrowed/verified
   const canVerifyPayment =
     (orderStatus === 'pending' || orderStatus === 'payment_received') &&
-    paymentStatus !== 'verified' &&
-    paymentStatus !== 'released';
+    paymentStatus === 'paid';
 
-  // Release Payment: Show when order is verified or payment is confirmed, ready to go to Printful
+  // Release Payment: Show when payment is escrowed (verified) but not yet released to Printful
+  // Can be in 'payment_received' or 'processing' status as long as payment is escrowed
   const canReleasePayment =
-    (orderStatus === 'verified' || orderStatus === 'payment_received') &&
-    paymentStatus !== 'released' &&
-    paymentStatus !== 'completed';
+    (orderStatus === 'processing' || orderStatus === 'payment_received') &&
+    paymentStatus === 'escrowed';
 
-  // Mark as Processing: Show only after payment is released
+  // Mark as Processing: Show only after payment is released and order is processing
   const canMarkProcessing =
     paymentStatus === 'released' &&
-    orderStatus !== 'processing' &&
-    orderStatus !== 'fulfilled';
+    orderStatus === 'processing';
 
   // Mark as Shipped: Show when order is actively processing
   const canMarkShipped =
