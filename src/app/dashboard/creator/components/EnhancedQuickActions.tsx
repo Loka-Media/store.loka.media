@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   TotalProductsIcon,
   CustomCatalogIcon,
-  LokaProductsIcon,
   DesignFilesIcon,
   EarningsIcon,
   SettingsIcon,
@@ -12,6 +11,8 @@ import {
 } from "./QuickActionIcons";
 
 export function EnhancedQuickActions() {
+  // Note: Loka Products card is intentionally hidden from the quick actions
+  // The LokaProductsIcon import has been removed - do not re-add this card
   const actions = [
     {
       href: "/dashboard/creator/catalog",
@@ -19,13 +20,6 @@ export function EnhancedQuickActions() {
       title: "Custom Catalog",
       description: "Customizable products",
       iconColor: "text-orange-400",
-    },
-    {
-      href: "/dashboard/creator/loka-products",
-      icon: LokaProductsIcon,
-      title: "Loka Products",
-      description: "Browse & publish products",
-      iconColor: "text-purple-400",
     },
     {
       href: "/dashboard/creator/files",
@@ -61,7 +55,7 @@ export function EnhancedQuickActions() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 md:gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-4 lg:gap-6">
         {actions.map((action, index) => (
           <Link href={action.href} key={index}>
             <div className="gradient-border-white-top p-4 sm:p-6 md:p-8 group hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300 flex flex-col h-full cursor-pointer relative">
