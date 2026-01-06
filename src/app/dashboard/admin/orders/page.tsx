@@ -91,7 +91,16 @@ interface Order {
   priority?: string;
   verification_notes?: string;
   due_date?: string;
-  order_items?: unknown[];
+  order_items?: Array<{
+    id?: number;
+    product_name?: string;
+    quantity?: number;
+    price?: string;
+    color?: string;
+    size?: string;
+    product_image?: string;
+    image_url?: string;
+  }>;
   shipping_address?: {
     name?: string;
     address1?: string;
