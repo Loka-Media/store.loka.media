@@ -22,6 +22,7 @@ interface GuestCartItem {
   source?: string;
   shopify_variant_id?: string;
   printful_variant_id?: string;
+  printful_catalog_variant_id?: string;
 }
 
 interface GuestCartContextType {
@@ -256,7 +257,6 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       // Use authenticated cart API
       try {
         await cartAPI.addToCart(variantId, quantity);
-        toast.success('Added to cart!');
         await refreshCart();
         return true;
       } catch (error: unknown) {
@@ -338,10 +338,9 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         setSummary(newSummary);
         setCartCount(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
         saveGuestCart(updatedItems, newSummary);
-        
+
         // Cart count is already updated above, no need for API call
-        
-        toast.success('Added to cart!');
+
         return true;
       } catch (error) {
         console.error('Failed to add to guest cart:', error);
@@ -356,7 +355,6 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       // Use authenticated cart API
       try {
         await cartAPI.updateCartItem(cartItemId, quantity);
-        toast.success('Cart updated!');
         await refreshCart();
         return true;
       } catch (error: unknown) {
@@ -388,8 +386,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         setSummary(newSummary);
         setCartCount(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
         saveGuestCart(updatedItems, newSummary);
-        
-        toast.success('Cart updated!');
+
         return true;
       } catch (error) {
         toast.error('Failed to update cart');
@@ -403,7 +400,6 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       // Use authenticated cart API
       try {
         await cartAPI.removeFromCart(cartItemId);
-        toast.success('Item removed from cart');
         await refreshCart();
         return true;
       } catch (error: unknown) {
@@ -421,8 +417,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         setSummary(newSummary);
         setCartCount(updatedItems.reduce((sum, item) => sum + item.quantity, 0));
         saveGuestCart(updatedItems, newSummary);
-        
-        toast.success('Item removed from cart');
+
         return true;
       } catch (error) {
         toast.error('Failed to remove item');
@@ -436,7 +431,6 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       // Use authenticated cart API
       try {
         await cartAPI.clearCart();
-        toast.success('Cart cleared');
         await refreshCart();
         return true;
       } catch (error: unknown) {
@@ -458,8 +452,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         if (isClient && typeof window !== 'undefined') {
           localStorage.removeItem('guestCart');
         }
-        
-        toast.success('Cart cleared');
+
         return true;
       } catch (error) {
         toast.error('Failed to clear cart');

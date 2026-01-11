@@ -75,12 +75,24 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [showPricingCalculator, setShowPricingCalculator] = useState(false);
 
-  // Calculate estimated pricing
-  const basePrice = selectedProduct?.price || 20;
+  // Calculate estimated pricing from actual variant data
+  const selectedVariantIds = selectedVariants || [];
+  const variants = selectedProduct?.variants?.filter((v: any) =>
+    selectedVariantIds.includes(v.id)
+  ) || [];
+
+  // Get price range from selected variants
+  const variantPrices = variants.map((v: any) => parseFloat(v.price || 0)).filter((p: number) => p > 0);
+  const minPrice = variantPrices.length > 0 ? Math.min(...variantPrices) : 20;
+  const maxPrice = variantPrices.length > 0 ? Math.max(...variantPrices) : 20;
+  const hasPriceRange = minPrice !== maxPrice;
+
   const markup = parseFloat(formData.markupPercentage) || 0;
-  const sellingPrice = basePrice * (1 + markup / 100);
-  const profit = sellingPrice - basePrice;
-  const profitMargin = ((profit / sellingPrice) * 100).toFixed(1);
+  const minSellingPrice = minPrice * (1 + markup / 100);
+  const maxSellingPrice = maxPrice * (1 + markup / 100);
+  const avgProfit = ((minSellingPrice + maxSellingPrice) / 2) - ((minPrice + maxPrice) / 2);
+  const avgSellingPrice = (minSellingPrice + maxSellingPrice) / 2;
+  const profitMargin = ((avgProfit / avgSellingPrice) * 100).toFixed(1);
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -347,21 +359,41 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Base Cost:</span>
-                        <span className="text-white">${basePrice.toFixed(2)}</span>
+                        <span className="text-gray-300">Base Cost Range:</span>
+                        <span className="text-white">
+                          {hasPriceRange
+                            ? `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`
+                            : `$${minPrice.toFixed(2)}`
+                          }
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-300">Your Markup:</span>
                         <span className="text-green-400 font-medium">+{markup}%</span>
                       </div>
                       <div className="border-t border-orange-500/30 pt-2 flex justify-between">
-                        <span className="text-white text-lg">Selling Price:</span>
-                        <span className="text-orange-400 text-lg">${sellingPrice.toFixed(2)}</span>
+                        <span className="text-white text-lg">Selling Price Range:</span>
+                        <span className="text-orange-400 text-lg">
+                          {hasPriceRange
+                            ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}`
+                            : `$${minSellingPrice.toFixed(2)}`
+                          }
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Your Profit:</span>
-                        <span className="text-green-400 font-medium">${profit.toFixed(2)} ({profitMargin}%)</span>
+                        <span className="text-gray-300">Avg. Profit per Item:</span>
+                        <span className="text-green-400 font-medium">${avgProfit.toFixed(2)} ({profitMargin}%)</span>
                       </div>
+                      {hasPriceRange && (
+                        <div className="mt-3 pt-3 border-t border-orange-500/20">
+                          <p className="text-xs text-gray-400 flex items-start gap-2">
+                            <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                            <span>
+                              Different sizes have different base costs. Your {markup}% markup is applied to each variant individually. Larger sizes (2XL-6XL) cost more and will be priced higher accordingly.
+                            </span>
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

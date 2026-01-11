@@ -24,6 +24,7 @@ import {
 import toast from 'react-hot-toast';
 import { OrderCard } from '@/components/admin/OrderCard';
 import { OrderStatusPipeline } from '@/components/admin/OrderStatusPipeline';
+import CommissionBreakdownModal from '@/components/admin/CommissionBreakdownModal';
 
 // Admin API functions using the configured axios instance
 const adminAPI = {
@@ -167,7 +168,8 @@ export default function AdminOrdersPage() {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  
+  const [showCommissionModal, setShowCommissionModal] = useState(false);
+
   // Filters
   const [statusFilter, setStatusFilter] = useState('');
   const [orderTypeFilter, setOrderTypeFilter] = useState('');
@@ -991,6 +993,15 @@ export default function AdminOrdersPage() {
 
                 <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-slate-200">
                   <button
+                    onClick={() => {
+                      setShowPaymentModal(false);
+                      setShowCommissionModal(true);
+                    }}
+                    className="px-4 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                  >
+                    View Commission
+                  </button>
+                  <button
                     onClick={() => setShowPaymentModal(false)}
                     className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
                   >
@@ -1007,6 +1018,16 @@ export default function AdminOrdersPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Commission Breakdown Modal */}
+        {selectedOrder && (
+          <CommissionBreakdownModal
+            orderId={selectedOrder.id}
+            orderNumber={selectedOrder.order_number}
+            isOpen={showCommissionModal}
+            onClose={() => setShowCommissionModal(false)}
+          />
         )}
       </div>
     </div>

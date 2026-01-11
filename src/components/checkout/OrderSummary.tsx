@@ -26,6 +26,7 @@ interface OrderSummaryProps {
   shippingRates: ShippingRate[];
   selectedShippingRate: any;
   setSelectedShippingRate: any;
+  taxAmount?: number;
 }
 
 export const OrderSummary = ({
@@ -38,9 +39,11 @@ export const OrderSummary = ({
   shippingRates,
   selectedShippingRate,
   setSelectedShippingRate,
+  taxAmount = 0,
 }: OrderSummaryProps) => {
   const subtotalAmount = parseFloat(summary.subtotal.replace("$", ""));
-  const tax = subtotalAmount * 0.08;
+  // Use actual tax if available, otherwise estimate at 8%
+  const tax = taxAmount > 0 ? taxAmount : subtotalAmount * 0.08;
 
   return (
     <div className="gradient-border-white-top rounded-xl overflow-hidden p-6 sm:p-8">
@@ -100,11 +103,14 @@ export const OrderSummary = ({
           </div>
         )}
         <div className="flex justify-between text-sm">
-          <p className="text-gray-400 font-medium">Tax (8%)</p>
+          <p className="text-gray-400 font-medium">
+            Estimated Tax
+            <span className="text-xs block text-gray-500">Final tax calculated at checkout</span>
+          </p>
           <p className="text-white font-bold">${tax.toFixed(2)}</p>
         </div>
         <div className="border-t border-gray-800 pt-3 mt-3 flex justify-between font-bold">
-          <p className="text-white">Total</p>
+          <p className="text-white">Estimated Total</p>
           <p className="text-orange-400 text-lg">${calculateTotal().toFixed(2)}</p>
         </div>
       </div>

@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { DollarSign, TrendingUp, Clock, CheckCircle, AlertCircle, LinkIcon } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, LinkIcon } from 'lucide-react';
 import CreatorProtectedRoute from '@/components/CreatorProtectedRoute';
+import { api } from '@/lib/auth';
 
 interface CommissionSummary {
   creatorId: number;
@@ -53,6 +54,26 @@ interface StripeStatus {
   message?: string;
 }
 
+interface PrintfulStatusOrder {
+  id: number;
+  order_number: string;
+  order_status: string;
+  printful_order_id: string | null;
+  total_commission: string;
+  commission_statuses: string[];
+  printful_status: {
+    id: string;
+    status: string;
+    shipping: string;
+  } | null;
+  estimated_earnings: {
+    status: string;
+    commission: number;
+    description: string;
+    confidence: string;
+  };
+}
+
 function EarningsPageContent() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -60,6 +81,7 @@ function EarningsPageContent() {
   const [history, setHistory] = useState<CommissionHistory[]>([]);
   const [payouts, setPayouts] = useState<PayoutHistory[]>([]);
   const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
+  const [printfulOrders, setPrintfulOrders] = useState<PrintfulStatusOrder[]>([]);
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
@@ -69,54 +91,35 @@ function EarningsPageContent() {
   const fetchEarningsData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-
-      if (!token) {
-        router.push('/auth/login');
-        return;
-      }
 
       // Fetch commission summary
-      const summaryRes = await fetch('/api/creator/commissions/summary', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (summaryRes.ok) {
-        const data = await summaryRes.json();
-        setSummary(data.data);
+      const summaryRes = await api.get('/api/creator/commissions/summary');
+      if (summaryRes.data) {
+        setSummary(summaryRes.data.data);
       }
 
       // Fetch commission history
-      const historyRes = await fetch(
-        '/api/creator/commissions/history?limit=10&offset=0',
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (historyRes.ok) {
-        const data = await historyRes.json();
-        setHistory(data.data);
+      const historyRes = await api.get('/api/creator/commissions/history?limit=10&offset=0');
+      if (historyRes.data) {
+        setHistory(historyRes.data.data);
       }
 
       // Fetch payout history
-      const payoutRes = await fetch('/api/creator/commissions/payouts', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (payoutRes.ok) {
-        const data = await payoutRes.json();
-        setPayouts(data.data);
+      const payoutRes = await api.get('/api/creator/commissions/payouts');
+      if (payoutRes.data) {
+        setPayouts(payoutRes.data.data);
       }
 
       // Fetch Stripe status
-      const stripeRes = await fetch('/api/creator/stripe/status', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const stripeRes = await api.get('/api/creator/stripe/status');
+      if (stripeRes.data) {
+        setStripeStatus(stripeRes.data.data);
+      }
 
-      if (stripeRes.ok) {
-        const data = await stripeRes.json();
-        setStripeStatus(data.data);
+      // Fetch orders with Printful status for estimated earnings
+      const printfulOrdersRes = await api.get('/api/creator/orders/printful-status?limit=10');
+      if (printfulOrdersRes.data) {
+        setPrintfulOrders(printfulOrdersRes.data.data);
       }
     } catch (error) {
       console.error('Error fetching earnings data:', error);
@@ -128,14 +131,9 @@ function EarningsPageContent() {
 
   const handleConnectStripe = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const res = await fetch('/api/creator/stripe/auth-url', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        window.location.href = data.authUrl;
+      const res = await api.get('/api/creator/stripe/auth-url');
+      if (res.data) {
+        window.location.href = res.data.authUrl;
       } else {
         toast.error('Failed to get Stripe authorization URL');
       }
@@ -147,13 +145,8 @@ function EarningsPageContent() {
 
   const handleDisconnectStripe = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const res = await fetch('/api/creator/stripe/disconnect', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (res.ok) {
+      const res = await api.post('/api/creator/stripe/disconnect');
+      if (res.data) {
         toast.success('Stripe account disconnected');
         setStripeStatus(null);
         fetchEarningsData();
@@ -175,7 +168,12 @@ function EarningsPageContent() {
     );
   }
 
-  const pendingCommission = summary?.commissions?.processing?.totalAmount || '0.00';
+  // Combine pending and processing as "upcoming" since processing includes Printful draft orders
+  const upcomingPending = parseFloat(summary?.commissions?.pending?.totalAmount || '0');
+  const upcomingProcessing = parseFloat(summary?.commissions?.processing?.totalAmount || '0');
+  const upcomingCommission = (upcomingPending + upcomingProcessing).toFixed(2);
+  const upcomingCount = (summary?.commissions?.pending?.count || 0) + (summary?.commissions?.processing?.count || 0);
+
   const paidCommission = summary?.commissions?.paid?.totalAmount || '0.00';
 
   return (
@@ -208,22 +206,34 @@ function EarningsPageContent() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Pending Commission */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Upcoming Payment (includes draft orders in Printful) */}
           <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-orange-500">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-600">Pending Commission</h3>
+              <h3 className="text-sm font-medium text-gray-600">Upcoming Payment</h3>
               <Clock className="w-5 h-5 text-orange-500" />
             </div>
             <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-              ${pendingCommission}
+              ${upcomingCommission}
             </p>
             <p className="text-xs text-gray-500">
-              {summary?.commissions?.processing?.count || 0} orders awaiting payout
+              {upcomingCount} orders awaiting payout
             </p>
+            <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
+              {summary?.commissions?.pending && (
+                <p className="text-xs text-gray-600">
+                  • {summary.commissions.pending.count} verified, awaiting release
+                </p>
+              )}
+              {summary?.commissions?.processing && (
+                <p className="text-xs text-gray-600">
+                  • {summary.commissions.processing.count} released (Printful draft/processing)
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Paid Commission */}
+          {/* Total Paid */}
           <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-gray-600">Total Paid</h3>
@@ -235,18 +245,6 @@ function EarningsPageContent() {
             <p className="text-xs text-gray-500">
               {summary?.commissions?.paid?.count || 0} orders completed
             </p>
-          </div>
-
-          {/* Total Earned */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-500">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-600">Total Earned</h3>
-              <DollarSign className="w-5 h-5 text-blue-500" />
-            </div>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-              ${summary?.totalEarned.toFixed(2) || '0.00'}
-            </p>
-            <p className="text-xs text-gray-500">All time earnings</p>
           </div>
         </div>
 
@@ -337,6 +335,63 @@ function EarningsPageContent() {
                         Disconnect
                       </button>
                     </div>
+                  </div>
+                )}
+
+                {/* Estimated Earnings Based on Printful Status */}
+                {printfulOrders.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900 mb-4">Recent Orders & Estimated Earnings</h3>
+                    <div className="space-y-3">
+                      {printfulOrders.slice(0, 5).map((order) => (
+                        <div key={order.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <p className="font-medium text-gray-900">{order.order_number}</p>
+                                {order.printful_status && (
+                                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                    order.printful_status.status === 'fulfilled' ? 'bg-green-100 text-green-700' :
+                                    order.printful_status.status === 'inprocess' ? 'bg-blue-100 text-blue-700' :
+                                    order.printful_status.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                    order.printful_status.status === 'draft' ? 'bg-gray-100 text-gray-700' :
+                                    'bg-red-100 text-red-700'
+                                  }`}>
+                                    {order.printful_status.status}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 mb-1">
+                                {order.estimated_earnings.description}
+                              </p>
+                              <div className="flex items-center gap-1">
+                                <span className={`text-xs px-2 py-0.5 rounded ${
+                                  order.estimated_earnings.confidence === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
+                                  order.estimated_earnings.confidence === 'high' ? 'bg-blue-100 text-blue-700' :
+                                  order.estimated_earnings.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                  order.estimated_earnings.confidence === 'low' ? 'bg-orange-100 text-orange-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {order.estimated_earnings.confidence} confidence
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-emerald-600">
+                                ${order.estimated_earnings.commission.toFixed(2)}
+                              </p>
+                              <p className="text-xs text-gray-500">estimated</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => router.push('/dashboard/creator/orders')}
+                      className="mt-4 w-full text-center text-sm font-medium text-blue-600 hover:text-blue-700 py-2"
+                    >
+                      View All Orders →
+                    </button>
                   </div>
                 )}
               </div>

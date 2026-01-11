@@ -49,6 +49,42 @@ export interface ProcessCheckoutData {
   };
 }
 
+export interface AuthenticatedCheckoutData {
+  paymentMethod: string;
+  shippingAddress: {
+    name: string;
+    address1: string;
+    address2?: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+    phone: string;
+  };
+  billingAddress: {
+    name: string;
+    address1: string;
+    address2?: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+    phone: string;
+  };
+  cartItems: Array<{
+    product_id: string;
+    variant_id: string;
+    product_name: string;
+    price: string;
+    quantity: number;
+    image_url: string;
+    size: string;
+    color: string;
+    source?: string;
+  }>;
+  customerNotes: string;
+}
+
 export interface Address {
   id: number;
   name: string;

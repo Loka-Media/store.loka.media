@@ -135,7 +135,7 @@ export default function UnifiedCheckoutPage() {
 
   const handleCreateOrder = async () => {
     const { customerInfo, wantsToSignup, signupInfo, setLoading, setOrderData, setClientSecret, setCurrentStep } = checkoutState;
-    
+
     try {
       setLoading(true);
 
@@ -269,9 +269,11 @@ export default function UnifiedCheckoutPage() {
         });
       }
 
+      console.log('✅ [CHECKOUT] Order created successfully, creating payment intent...');
+
       const totalAmount = checkoutState.calculateTotal(summary.subtotal);
       const paymentIntentResult = await unifiedCheckoutAPI.createStripePaymentIntent(
-        totalAmount, 
+        totalAmount,
         orderResult.order.orderNumber,
         customerInfo.email
       );
@@ -283,19 +285,21 @@ export default function UnifiedCheckoutPage() {
       setOrderData(orderResult.order);
       setClientSecret(paymentIntentResult.clientSecret);
       setCurrentStep("payment");
-
-      if (wantsToSignup) {
-        toast.success(
-          "Account created and order ready! Complete your payment to finish."
-        );
-      } else {
-        toast.success("Order created! Please complete payment.");
-      }
     } catch (error: unknown) {
-      console.error("Order creation error:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to create order";
-      toast.error(errorMessage);
+      console.error("❌ [CHECKOUT] Order creation error:", error);
+
+      // Handle specific error types
+      if (error instanceof Error) {
+        // Check if it's a region availability error
+        if (error.message.includes('not available for your shipping region') ||
+            error.message.includes('cannot be shipped')) {
+          toast.error(error.message, { duration: 6000 });
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.error("Failed to create order");
+      }
     } finally {
       setLoading(false);
     }
@@ -416,6 +420,7 @@ export default function UnifiedCheckoutPage() {
               shippingRates={checkoutState.shippingRates}
               selectedShippingRate={checkoutState.selectedShippingRate || null} // Use selectedShippingRate.id
               setSelectedShippingRate={checkoutState.setSelectedShippingRate} // Use setSelectedShippingRate
+              taxAmount={checkoutState.taxAmount} // Pass actual tax amount from Printful
             />
           </div>
         </div>

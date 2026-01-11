@@ -29,6 +29,11 @@ interface Product {
     price: number;
     sku: string;
     printful_variant_id: string;
+    printful_availability_regions?: string[] | null;
+    printful_availability_status?: Array<{
+      region: string;
+      status: string;
+    }> | null;
   }>;
 }
 
@@ -480,14 +485,31 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                       <th className="pb-2 sm:pb-3 text-white/70 font-medium">Variant</th>
                       <th className="pb-2 sm:pb-3 text-white/70 font-medium">SKU</th>
                       <th className="pb-2 sm:pb-3 text-white/70 font-medium">Current Price</th>
+                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Available Regions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {product.variants.map((variant, index) => (
+                    {product.variants.map((variant) => (
                       <tr key={variant.id} className="border-b border-white/10">
                         <td className="py-2 sm:py-3 text-white">{variant.title}</td>
                         <td className="py-2 sm:py-3 text-white/60">{variant.sku}</td>
                         <td className="py-2 sm:py-3 text-white">${(typeof variant.price === 'string' ? parseFloat(variant.price) : variant.price || 0).toFixed(2)}</td>
+                        <td className="py-2 sm:py-3">
+                          {variant.printful_availability_regions && variant.printful_availability_regions.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {variant.printful_availability_regions.map((region: string) => (
+                                <span
+                                  key={region}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-500/20 text-green-300 border border-green-500/30"
+                                >
+                                  {region}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-yellow-400 text-xs">No region data</span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

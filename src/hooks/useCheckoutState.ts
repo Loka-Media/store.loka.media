@@ -30,6 +30,7 @@ export const useCheckoutState = () => {
   const [shippingRates, setShippingRates] = useState<any[]>([]);
   const [selectedShippingRate, setSelectedShippingRate] = useState<any>(null);
   const [isFetchingShippingRates, setIsFetchingShippingRates] = useState(false);
+  const [taxAmount, setTaxAmount] = useState<number>(0);
 
   const updateCustomerInfo = (updates: Partial<CustomerInfo>) => {
     setCustomerInfo(prev => ({ ...prev, ...updates }));
@@ -45,11 +46,30 @@ export const useCheckoutState = () => {
       phone: address.phone,
     };
 
-    const cartItems = items.map((item) => ({
-      variant_id: item.variant_id,
-      quantity: item.quantity,
-      value: item.price,
-    }));
+    // Map cart items to Printful format
+    // Printful Shipping Rate API uses CATALOG variant IDs as STRINGS
+    const cartItems = items.map((item) => {
+      const variantId = item.printful_catalog_variant_id || item.printful_variant_id || item.variant_id;
+      const price = parseFloat(item.price || 0);
+
+      return {
+        variant_id: String(variantId), // Printful expects STRING
+        quantity: item.quantity,
+        value: price.toFixed(2), // Printful expects STRING with 2 decimals
+      };
+    });
+
+    console.log('🚚 [SHIPPING-RATES] Fetching rates for:', {
+      recipient,
+      items: cartItems,
+      rawItems: items.map(i => ({
+        id: i.id,
+        name: i.product_name,
+        printful_catalog_variant_id: i.printful_catalog_variant_id,
+        printful_variant_id: i.printful_variant_id,
+        variant_id: i.variant_id
+      }))
+    });
 
     const payload = {
       recipient,
@@ -59,6 +79,7 @@ export const useCheckoutState = () => {
     };
 
     const response = await printfulAPI.getShippingRates(payload);
+    console.log('🚚 [SHIPPING-RATES] Received rates:', response);
     return response;
   };
 
@@ -76,6 +97,12 @@ export const useCheckoutState = () => {
           const rates = await getShippingRates(customerInfo, items);
           setShippingRates(rates.result);
           setSelectedShippingRate(rates.result[0]); // Auto-select the first rate
+
+          // Extract tax from the shipping rate response
+          // Printful may include tax in the rate or we need to estimate from subtotal
+          if (rates.result[0]?.tax) {
+            setTaxAmount(parseFloat(rates.result[0].tax));
+          }
         } catch (error) {
           console.error("Failed to fetch shipping rates:", error);
           toast.error("Could not load shipping options for this address.");
@@ -99,7 +126,11 @@ export const useCheckoutState = () => {
       selectedShippingRate && selectedShippingRate.rate
         ? parseFloat(String(selectedShippingRate.rate)) // Ensure it's a string before parsing
         : 0;
-    const tax = subtotalAmount * 0.08;
+
+    // Use actual tax if available from Printful, otherwise estimate based on subtotal
+    // Note: Final tax will be calculated by backend when order is created
+    const tax = taxAmount > 0 ? taxAmount : subtotalAmount * 0.08;
+
     return subtotalAmount + shipping + tax;
   };
 
@@ -135,6 +166,8 @@ export const useCheckoutState = () => {
     setSelectedShippingRate,
     isFetchingShippingRates,
     setIsFetchingShippingRates,
+    taxAmount,
+    setTaxAmount,
     fetchShippingRates,
     calculateTotal,
     resetCheckoutState

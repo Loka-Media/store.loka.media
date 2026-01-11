@@ -502,9 +502,9 @@ export const printfulAPI = {
   },
 
   // Check individual variant availability dynamically
-  checkVariantAvailability: async (variantIds: number[]) => {
+  checkVariantAvailability: async (variants: Array<{ variant_id: number; quantity?: number }>) => {
     const response = await api.post('/api/printful/variants/check-availability', {
-      variantIds
+      variants
     });
     return response.data;
   },
@@ -780,13 +780,15 @@ export const printfulAPI = {
     mockupUrls: any[],
     productData: any,
     designFiles?: any[],
-    mockupInputs?: any
+    mockupInputs?: any,
+    availabilityData?: any[]
   ) => {
     const response = await api.post("/api/printful/mockups/store-permanently", {
       mockupUrls,
       productData,
       designFiles,
       mockupInputs,
+      availabilityData,
     });
     return response.data;
   },

@@ -120,7 +120,7 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading || !stripe || !elements}
+              disabled={loading}
               className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (

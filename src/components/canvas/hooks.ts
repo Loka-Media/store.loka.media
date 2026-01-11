@@ -248,7 +248,11 @@ export const useAutoSelectVariants = (
 
       try {
         // Check variant availability dynamically
-        const availabilityResponse = await printfulAPI.checkVariantAvailability(variantIds);
+        const variantsForCheck = variantIds.map((variantId: number) => ({
+          variant_id: variantId,
+          quantity: 1
+        }));
+        const availabilityResponse = await printfulAPI.checkVariantAvailability(variantsForCheck);
         
         if (availabilityResponse.result && availabilityResponse.result.variants) {
           // Create map of availability results

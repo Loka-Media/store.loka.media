@@ -156,7 +156,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       // Add to cart - backend will handle availability validation if needed
       await cartAPI.addToCart(variantId, quantity);
-      toast.success('Added to cart!');
       await refreshCart();
       return true;
     } catch (error: unknown) {
@@ -183,7 +182,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     try {
       await cartAPI.updateCartItem(cartItemId, quantity);
-      toast.success('Cart updated!');
       await refreshCart();
       return true;
     } catch (error: unknown) {
@@ -201,7 +199,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     try {
       await cartAPI.removeFromCart(cartItemId);
-      toast.success('Item removed from cart');
       await refreshCart();
       return true;
     } catch (error: unknown) {
@@ -219,7 +216,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     try {
       await cartAPI.clearCart();
-      toast.success('Cart cleared');
       await refreshCart();
       return true;
     } catch (error: unknown) {

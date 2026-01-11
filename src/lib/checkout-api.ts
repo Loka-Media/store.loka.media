@@ -1,4 +1,4 @@
-import { CheckoutData, ProcessCheckoutData } from './checkout-types';
+import { CheckoutData, ProcessCheckoutData, AuthenticatedCheckoutData } from './checkout-types';
 import { getApiUrl } from './getApiUrl';
 
 export const unifiedCheckoutAPI = {
@@ -20,7 +20,11 @@ export const unifiedCheckoutAPI = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Failed to process checkout');
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || errorData.error || 'Failed to process checkout');
+    }
     return response.json();
   },
 
@@ -46,17 +50,32 @@ export const unifiedCheckoutAPI = {
     return response.json();
   },
 
-  processAuthenticatedCheckout: async (data: any, token: string) => {
+  processAuthenticatedCheckout: async (data: AuthenticatedCheckoutData, token: string) => {
     const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/unified-checkout/process-authenticated`, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(data)
     });
-    if (!response.ok) throw new Error('Failed to process authenticated checkout');
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || errorData.error || 'Failed to process authenticated checkout');
+    }
+    return response.json();
+  },
+
+  checkVariantAvailability: async (variants: Array<{ variant_id: number | string; quantity: number }>) => {
+    const API_BASE_URL = getApiUrl();
+    const response = await fetch(`${API_BASE_URL}/api/printful/variants/check-availability`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ variants })
+    });
+    if (!response.ok) throw new Error('Failed to check variant availability');
     return response.json();
   }
 };

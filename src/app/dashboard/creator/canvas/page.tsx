@@ -101,73 +101,32 @@ function CanvasContent() {
             detailed.result?.variants || detailed.result?.product?.variants;
 
           if (product) {
-            // Get all variant IDs for dynamic availability checking
-            const allVariantIds = variants?.map((v: any) => v.id) || [];
-            
-            console.log(`🔍 Checking availability for ${allVariantIds.length} variants dynamically...`);
-            
-            let availableVariants = variants;
-            
-            try {
-              // Check variant availability dynamically using API
-              const variantCheck = await printfulAPI.checkVariantAvailability(allVariantIds);
-              
-              if (variantCheck.result && variantCheck.result.variants) {
-                // Create a map of variant availability
-                const availabilityMap = new Map();
-                variantCheck.result.variants.forEach((v: any) => {
-                  availabilityMap.set(v.variant_id, v);
-                });
-                
-                // Filter variants based on API results
-                availableVariants = variants?.filter((variant: any) => {
-                  const availabilityInfo = availabilityMap.get(variant.id);
-                  
-                  // Check multiple conditions
-                  const isInAvailabilityResults = availabilityCheck.result.available_variant_ids.includes(variant.id);
-                  const canCreateFromAPI = availabilityInfo?.can_create_product !== false;
-                  const variantCanCreate = variant.can_create_product !== false;
-                  
-                  const isAvailable = isInAvailabilityResults && canCreateFromAPI && variantCanCreate;
-                  
-                  if (!isAvailable && availabilityInfo) {
-                    console.log(`⚠️ Filtering out variant ${variant.id} (${variant.name}): ${availabilityInfo.reason}`);
-                  }
-                  
-                  return isAvailable;
-                }) || variants;
-                
-                // Show summary of filtering
-                const originalCount = variants?.length || 0;
-                const filteredCount = availableVariants?.length || 0;
-                const filteredOut = originalCount - filteredCount;
-                
-                if (filteredOut > 0) {
-                  toast(`⚠️ ${filteredOut} variant${filteredOut > 1 ? 's' : ''} filtered out (discontinued/unavailable)`, {
-                    icon: '⚠️',
-                    duration: 4000
-                  });
-                  console.log(`📊 Variant filtering: ${filteredCount}/${originalCount} variants available`);
-                }
-                
-              } else {
-                console.warn('⚠️ Could not get dynamic variant availability, using basic filtering');
-                // Fallback to basic filtering
-                availableVariants = variants?.filter((variant: any) => 
-                  availabilityCheck.result.available_variant_ids.includes(variant.id) &&
-                  variant.can_create_product !== false
-                ) || variants;
+            // Filter variants based on catalog data (no API call needed)
+            console.log(`🔍 Filtering ${variants?.length || 0} variants from catalog...`);
+
+            const availableVariants = variants?.filter((variant: any) => {
+              const isInAvailabilityResults = availabilityCheck.result.available_variant_ids.includes(variant.id);
+              const variantCanCreate = variant.can_create_product !== false;
+              const isAvailable = isInAvailabilityResults && variantCanCreate;
+
+              if (!isAvailable) {
+                console.log(`⚠️ Filtering out variant ${variant.id} (${variant.name}): not available`);
               }
-              
-            } catch (variantError) {
-              console.error('⚠️ Dynamic variant check failed:', variantError);
-              toast.error('Could not verify all variant availability. Some variants may be discontinued.');
-              
-              // Fallback to basic filtering
-              availableVariants = variants?.filter((variant: any) => 
-                availabilityCheck.result.available_variant_ids.includes(variant.id) &&
-                variant.can_create_product !== false
-              ) || variants;
+
+              return isAvailable;
+            }) || variants;
+
+            // Show summary of filtering
+            const originalCount = variants?.length || 0;
+            const filteredCount = availableVariants?.length || 0;
+            const filteredOut = originalCount - filteredCount;
+
+            if (filteredOut > 0) {
+              toast(`⚠️ ${filteredOut} variant${filteredOut > 1 ? 's' : ''} filtered out (discontinued/unavailable)`, {
+                icon: '⚠️',
+                duration: 4000
+              });
+              console.log(`📊 Variant filtering: ${filteredCount}/${originalCount} variants available`);
             }
 
             const productWithVariants = { ...product, variants: availableVariants };
@@ -673,36 +632,30 @@ function CanvasContent() {
       toast.loading("Validating product variants...", { id: "final-validation" });
       
       try {
-        const finalValidation = await printfulAPI.checkVariantAvailability(selectedVariants);
-        
-        if (finalValidation.result && finalValidation.result.variants) {
-          const unavailableVariants = finalValidation.result.variants.filter(
-            (v: any) => !v.can_create_product
+        // Validate variants from already-loaded product data
+        const unavailableVariants = selectedVariants.filter((variantId: number) => {
+          const variant = selectedProduct.variants?.find((v: any) => v.id === variantId);
+          return variant && variant.can_create_product === false;
+        });
+
+        if (unavailableVariants.length > 0) {
+          toast.dismiss("final-validation");
+          toast.error(
+            `❌ Cannot publish: ${unavailableVariants.length} variant${unavailableVariants.length > 1 ? 's are' : ' is'} no longer available. Please refresh the page and reselect variants.`,
+            { duration: 8000 }
           );
-          
-          if (unavailableVariants.length > 0) {
-            toast.dismiss("final-validation");
-            const unavailableNames = unavailableVariants.map((v: any) => 
-              `Variant ID ${v.variant_id} (${v.reason})`
-            ).join(', ');
-            
-            toast.error(
-              `❌ Cannot publish: ${unavailableVariants.length} variant${unavailableVariants.length > 1 ? 's are' : ' is'} no longer available: ${unavailableNames}. Please refresh the page and reselect variants.`,
-              { duration: 8000 }
-            );
-            console.error("❌ Final validation failed - unavailable variants:", unavailableVariants);
-            return;
-          }
+          console.error("❌ Final validation failed - unavailable variants:", unavailableVariants);
+          return;
         }
-        
+
         toast.dismiss("final-validation");
         console.log("✅ Final validation passed - all variants available for publishing");
       } catch (validationError) {
         toast.dismiss("final-validation");
         console.warn("⚠️ Final validation check failed, proceeding with caution:", validationError);
-        toast("⚠️ Could not verify all variants - proceeding with publication", { 
+        toast("⚠️ Could not verify all variants - proceeding with publication", {
           icon: '⚠️',
-          duration: 4000 
+          duration: 4000
         });
       }
 
@@ -723,11 +676,32 @@ function CanvasContent() {
       const storedMockupInputs = localStorage.getItem(`mockup_request_${selectedProduct.id}`);
       const mockupInputs = storedMockupInputs ? JSON.parse(storedMockupInputs) : null;
 
+      // Extract availability data from already-loaded product variants
+      const availabilityData = selectedVariants
+        .map((variantId: number) => {
+          const variant = selectedProduct.variants?.find((v: any) => v.id === variantId);
+          if (variant) {
+            return {
+              variant_id: variant.id,
+              availability_regions: variant.availability_regions || {},
+              availability_status: variant.availability_status || []
+            };
+          }
+          return null;
+        })
+        .filter((v: any) => v !== null);
+
+      console.log('📊 Extracted availability data from catalog:', availabilityData.length, 'variants');
+      if (availabilityData.length > 0) {
+        console.log('📊 Sample availability:', availabilityData[0]);
+      }
+
       const result = await printfulAPI.storeMockupsPermanently(
         mockupUrls,
         productData,
         designFiles,
-        mockupInputs
+        mockupInputs,
+        availabilityData
       );
 
       if (result.success) {
