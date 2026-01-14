@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGuestCart } from '@/contexts/GuestCartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -15,6 +15,7 @@ import { useAddressManagement } from '@/hooks/useAddressManagement';
 import { useCheckoutAuth } from '@/hooks/useCheckoutAuth';
 import { useCartMerge } from '@/hooks/useCartMerge';
 import { useLocationLookup } from '@/hooks/useLocationLookup';
+import { useInventoryCheck } from '@/hooks/useInventoryCheck';
 import { Address } from '@/lib/checkout-types';
 
 import { CartMergeDialog } from '@/components/checkout/CartMergeDialog';
@@ -23,6 +24,7 @@ import { CheckoutComplete } from '@/components/checkout/CheckoutComplete';
 import { CustomerInformationForm } from '@/components/checkout/CustomerInformationForm';
 import { ShippingAddressForm } from '@/components/checkout/ShippingAddressForm';
 import { OrderSummary } from '@/components/checkout/OrderSummary';
+import InventoryErrorDialog from '@/components/checkout/InventoryErrorDialog';
 
 import { unifiedCheckoutAPI } from '@/lib/checkout-api';
 import { validateZipCode } from '@/lib/location-utils';
@@ -30,16 +32,20 @@ import { validateZipCode } from '@/lib/location-utils';
 
 export default function UnifiedCheckoutPage() {
   const { user, isAuthenticated } = useAuth();
-  
+
   // Use GuestCart for both authenticated and guest users (handles both cases)
-  const { items, summary, clearCart } = useGuestCart();
+  const { items, summary, clearCart, removeFromCart } = useGuestCart();
+
+  // State for inventory error dialog
+  const [inventoryError, setInventoryError] = useState<{ unavailable_items: any[] } | null>(null);
   
   const checkoutState = useCheckoutState();
   const addressManagement = useAddressManagement();
   const checkoutAuth = useCheckoutAuth();
   const cartMerge = useCartMerge();
   const locationLookup = useLocationLookup();
-  
+  const inventoryCheck = useInventoryCheck();
+
   const isLoggedInUser = isAuthenticated;
 
   // Check if user is already logged in and pre-fill info
@@ -290,9 +296,16 @@ export default function UnifiedCheckoutPage() {
 
       // Handle specific error types
       if (error instanceof Error) {
-        // Check if it's a region availability error
-        if (error.message.includes('not available for your shipping region') ||
-            error.message.includes('cannot be shipped')) {
+        // Check if it's an inventory error with unavailable items
+        const err = error as any;
+        if (err.isInventoryError && err.unavailable_items) {
+          setInventoryError({ unavailable_items: err.unavailable_items });
+        } else if (error.message.includes('not available for your shipping region') ||
+                   error.message.includes('cannot be shipped')) {
+          toast.error(error.message, { duration: 6000 });
+        } else if (error.message.includes('Items Unavailable') ||
+                   error.message.includes('no longer available')) {
+          // Generic inventory error without structured data
           toast.error(error.message, { duration: 6000 });
         } else {
           toast.error(error.message);
@@ -312,6 +325,40 @@ export default function UnifiedCheckoutPage() {
       toast.success("Payment successful! Order placed.");
     } catch (error) {
       console.error("Payment success handling error:", error);
+    }
+  };
+
+  const handleRemoveUnavailableItems = async (variantIds: number[]) => {
+    try {
+      // Remove each unavailable item from cart
+      for (const variantId of variantIds) {
+        const variantIdStr = String(variantId);
+        const item = items.find(i =>
+          i.printful_variant_id === variantIdStr ||
+          String(i.variant_id) === variantIdStr
+        );
+        if (item) {
+          await removeFromCart(item.id);
+        }
+      }
+      toast.success("Unavailable items removed from cart");
+      setInventoryError(null);
+    } catch (error) {
+      console.error("Failed to remove unavailable items:", error);
+      toast.error("Failed to remove items. Please try manually.");
+    }
+  };
+
+  const handleCloseInventoryError = () => {
+    setInventoryError(null);
+  };
+
+  const handleCheckAvailability = async () => {
+    const result = await inventoryCheck.checkAvailability(items as any);
+    if (!result.available) {
+      toast.error(result.message || 'Some items may not be available', { duration: 4000 });
+    } else {
+      toast.success(result.message || 'All items are available', { duration: 3000 });
     }
   };
 
@@ -421,10 +468,22 @@ export default function UnifiedCheckoutPage() {
               selectedShippingRate={checkoutState.selectedShippingRate || null} // Use selectedShippingRate.id
               setSelectedShippingRate={checkoutState.setSelectedShippingRate} // Use setSelectedShippingRate
               taxAmount={checkoutState.taxAmount} // Pass actual tax amount from Printful
+              availabilityCheck={inventoryCheck.lastCheck}
+              onCheckAvailability={handleCheckAvailability}
+              checkingAvailability={inventoryCheck.checking}
             />
           </div>
         </div>
       </div>
+
+      {/* Inventory Error Dialog */}
+      {inventoryError && inventoryError.unavailable_items && (
+        <InventoryErrorDialog
+          unavailableItems={inventoryError.unavailable_items}
+          onClose={handleCloseInventoryError}
+          onRemoveItems={handleRemoveUnavailableItems}
+        />
+      )}
     </div>
   );
 }

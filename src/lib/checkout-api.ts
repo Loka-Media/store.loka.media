@@ -23,7 +23,13 @@ export const unifiedCheckoutAPI = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || errorData.error || 'Failed to process checkout');
+      const error: any = new Error(errorData.message || errorData.error || 'Failed to process checkout');
+      // Attach additional error details for inventory errors
+      if (errorData.unavailable_items) {
+        error.unavailable_items = errorData.unavailable_items;
+        error.isInventoryError = true;
+      }
+      throw error;
     }
     return response.json();
   },
@@ -63,7 +69,13 @@ export const unifiedCheckoutAPI = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || errorData.error || 'Failed to process authenticated checkout');
+      const error: any = new Error(errorData.message || errorData.error || 'Failed to process authenticated checkout');
+      // Attach additional error details for inventory errors
+      if (errorData.unavailable_items) {
+        error.unavailable_items = errorData.unavailable_items;
+        error.isInventoryError = true;
+      }
+      throw error;
     }
     return response.json();
   },

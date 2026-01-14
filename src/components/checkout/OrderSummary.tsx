@@ -1,4 +1,4 @@
-import { Package } from 'lucide-react';
+import { Package, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface CartItem {
   id: number;
@@ -7,6 +7,8 @@ interface CartItem {
   color: string;
   quantity: number;
   total_price: string;
+  printful_variant_id?: string;
+  source?: string;
 }
 
 interface ShippingRate {
@@ -14,6 +16,12 @@ interface ShippingRate {
   name: string;
   rate: number;
   currency: string;
+}
+
+interface AvailabilityCheck {
+  available: boolean;
+  message?: string;
+  timestamp?: number;
 }
 
 interface OrderSummaryProps {
@@ -27,6 +35,9 @@ interface OrderSummaryProps {
   selectedShippingRate: any;
   setSelectedShippingRate: any;
   taxAmount?: number;
+  availabilityCheck?: AvailabilityCheck | null;
+  onCheckAvailability?: () => void;
+  checkingAvailability?: boolean;
 }
 
 export const OrderSummary = ({
@@ -40,10 +51,18 @@ export const OrderSummary = ({
   selectedShippingRate,
   setSelectedShippingRate,
   taxAmount = 0,
+  availabilityCheck = null,
+  onCheckAvailability,
+  checkingAvailability = false,
 }: OrderSummaryProps) => {
   const subtotalAmount = parseFloat(summary.subtotal.replace("$", ""));
   // Use actual tax if available, otherwise estimate at 8%
   const tax = taxAmount > 0 ? taxAmount : subtotalAmount * 0.08;
+
+  // Check if cart has any Printful items
+  const hasPrintfulItems = items.some(item =>
+    item.printful_variant_id || item.source === 'printful'
+  );
 
   return (
     <div className="gradient-border-white-top rounded-xl overflow-hidden p-6 sm:p-8">
@@ -115,10 +134,68 @@ export const OrderSummary = ({
         </div>
       </div>
 
+      {/* Availability Check Section */}
+      {hasPrintfulItems && onCheckAvailability && (
+        <div className="mt-6">
+          {availabilityCheck ? (
+            <div
+              className={`flex items-center justify-between p-4 rounded-lg border ${
+                availabilityCheck.available
+                  ? 'bg-green-500/10 border-green-500/30'
+                  : 'bg-red-500/10 border-red-500/30'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                {availabilityCheck.available ? (
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-red-500" />
+                )}
+                <span
+                  className={`text-sm font-medium ${
+                    availabilityCheck.available ? 'text-green-400' : 'text-red-400'
+                  }`}
+                >
+                  {availabilityCheck.message}
+                </span>
+              </div>
+              <button
+                onClick={onCheckAvailability}
+                disabled={checkingAvailability}
+                className="text-gray-400 hover:text-white transition-colors"
+                title="Recheck availability"
+              >
+                <RefreshCw
+                  className={`w-4 h-4 ${checkingAvailability ? 'animate-spin' : ''}`}
+                />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onCheckAvailability}
+              disabled={checkingAvailability}
+              className="w-full bg-gray-800 hover:bg-gray-700 text-white py-2.5 px-4 rounded-lg font-medium transition-all duration-300 border border-gray-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+            >
+              {checkingAvailability ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Checking Availability...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Check Availability</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      )}
+
       <button
         onClick={onCreateOrder}
         disabled={loading}
-        className="w-full mt-8 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 px-4 rounded-lg font-bold transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] disabled:opacity-50"
+        className="w-full mt-6 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 px-4 rounded-lg font-bold transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] disabled:opacity-50"
       >
         {loading ? "Creating Order..." : "Continue to Payment"}
       </button>
