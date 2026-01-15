@@ -115,7 +115,7 @@ export const OrderCard = ({
         {/* Badges */}
         <div className="flex flex-wrap gap-2 mt-3">
           <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getTypeColor(order.order_type)}`}>
-            {order.order_type.toUpperCase()}
+            {order?.order_type?.toUpperCase()}
           </span>
           {order.priority && (
             <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getPriorityColor(order.priority)}`}>
@@ -179,7 +179,7 @@ export const OrderCard = ({
             {order.order_items.length > 2 && (
               <div className="col-span-2 text-center py-2 bg-slate-50 rounded-lg border border-slate-200/60">
                 <p className="text-xs font-medium text-slate-600">
-                  +{order.order_items.length - 2} more item{order.order_items.length - 2 !== 1 ? 's' : ''}
+                  +{order?.order_items?.length - 2} more item{order?.order_items?.length - 2 !== 1 ? 's' : ''}
                 </p>
               </div>
             )}
@@ -194,19 +194,19 @@ export const OrderCard = ({
           <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/60 rounded-lg p-3">
             <div className="text-xs text-slate-600 font-semibold">Order Status</div>
             <div className="text-sm font-bold text-slate-900 mt-1 capitalize">
-              {order.order_status.replace(/_/g, ' ')}
+              {order?.order_status?.replace(/_/g, ' ')}
             </div>
           </div>
           <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/60 rounded-lg p-3">
             <div className="text-xs text-slate-600 font-semibold">Payment</div>
             <div className="text-sm font-bold text-slate-900 mt-1 capitalize">
-              {order.payment_status.replace(/_/g, ' ')}
+              {order?.payment_status?.replace(/_/g, ' ')}
             </div>
           </div>
           <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/60 rounded-lg p-3">
             <div className="text-xs text-slate-600 font-semibold">Type</div>
             <div className="text-sm font-bold text-slate-900 mt-1 capitalize">
-              {order.order_type}
+              {order?.order_type?.toUpperCase()}
             </div>
           </div>
         </div>
