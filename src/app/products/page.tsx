@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 import { TrendingUp, Zap, Heart } from "lucide-react";
@@ -9,7 +9,6 @@ import { TrendingUp, Zap, Heart } from "lucide-react";
 import { ProductsHero } from "@/components/products/ProductsHero";
 import { FeaturedProducts } from "@/components/products/FeaturedProducts";
 import type { ViewType } from "@/components/products/ProductViewTabs";
-import { ProductsSidebar } from "@/components/products/ProductsSidebar";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { ProductsPagination } from "@/components/products/ProductsPagination";
 import { NoProductsFound } from "@/components/products/NoProductsFound";
@@ -33,6 +32,12 @@ export default function ProductsPage() {
 }
 
 function ProductsContent() {
+  const searchParams = useSearchParams();
+
+  // Refs to track initialization and prevent strict mode double-fetching
+  const isStaticDataFetched = useRef(false);
+  const lastFetchedFiltersRef = useRef<string | null>(null);
+
   const [products, setProducts] = useState<ExtendedProduct[]>([]);
   const [categories, setCategories] = useState<
     { category: string; product_count: number }[]
@@ -44,16 +49,17 @@ function ProductsContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeView, setActiveView] = useState<ViewType>("trending");
 
-  const [filters, setFilters] = useState({
-    category: "",
-    search: "",
-    creator: "",
+  const [filters, setFilters] = useState(() => ({
+    category: searchParams.get("category") || "",
+    search: searchParams.get("search") || "",
+    creator: searchParams.get("creator") || "",
     sortBy: "created_at",
     sortOrder: "DESC",
-    source: "all" as "printful" | "shopify" | "all",
+    source: (searchParams.get("source") as "printful" | "shopify" | "all") || "all",
     minPrice: undefined as number | undefined,
     maxPrice: undefined as number | undefined,
-  });
+  }));
+
   const [pagination, setPagination] = useState({
     total: 0,
     limit: 20,
@@ -61,36 +67,37 @@ function ProductsContent() {
     hasNext: false,
   });
 
-  const searchParams = useSearchParams();
-  // Router removed - using window.history for URL updates
-
   const fetchProducts = useCallback(
-    async (customFilters?: typeof filters, customPagination?: { limit: number; offset: number }, appendMode = false) => {
+    async (
+      customFilters: typeof filters,
+      customPagination: { limit: number; offset: number },
+      appendMode = false
+    ) => {
+      const startTime = performance.now();
       try {
         if (appendMode) {
-          setLoadingMore(true); // Only show loading on Load More button
+          setLoadingMore(true);
         } else {
-          setLoading(true); // Show full loading for initial/filter changes
+          setLoading(true);
         }
-        
-        const params = customFilters || filters;
-        const paginationParams = customPagination || { limit: pagination.limit, offset: pagination.offset };
-        
+
         const response = await productAPI.getProducts({
-          ...params,
-          limit: paginationParams.limit,
-          offset: paginationParams.offset,
+          ...customFilters,
+          limit: customPagination.limit,
+          offset: customPagination.offset,
         });
 
         if (appendMode) {
-          // Append new products to existing ones
-          setProducts(prev => [...prev, ...response.products]);
+          setProducts((prev) => [...prev, ...response.products]);
         } else {
-          // Replace products (for initial load or filter changes)
           setProducts(response.products);
         }
-        
-        setPagination(prev => ({ ...prev, ...response.pagination }));
+
+        setPagination((prev) => ({ ...prev, ...response.pagination }));
+
+        // Minimal console log as requested - only logging the total time
+        console.log(`API [Products]: ${(performance.now() - startTime).toFixed(2)}ms`);
+
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {
@@ -104,84 +111,92 @@ function ProductsContent() {
     []
   );
 
-  // Initialize from URL params and fetch initial data
-  useEffect(() => {
-    const category = searchParams.get("category") || "";
-    const search = searchParams.get("search") || "";
-    const creator = searchParams.get("creator") || "";
-    const source =
-      (searchParams.get("source") as "printful" | "shopify" | "all") || "all";
-
-    const initialFilters = {
-      category,
-      search,
-      creator,
-      source,
-      sortBy: "created_at",
-      sortOrder: "DESC",
-      minPrice: undefined,
-      maxPrice: undefined,
-    };
-
-    setFilters(initialFilters);
-    fetchCategories();
-    fetchCreators();
-
-    // Fetch products immediately with URL params and reset pagination
-    setPagination(prev => ({ ...prev, offset: 0 }));
-    fetchProducts(initialFilters, { limit: 20, offset: 0 });
-  }, [searchParams, fetchProducts]);
-
-  // Fetch products when filters change (but not on initial load)
-  useEffect(() => {
-    // Skip if this is the initial load (filters are empty/default)
-    const isInitialLoad = !filters.category && !filters.search && !filters.creator && filters.source === "all";
-    if (isInitialLoad) return;
-    
-    // Reset pagination when filters change
-    setPagination(prev => ({ ...prev, offset: 0 }));
-    fetchProducts(filters, { limit: pagination.limit, offset: 0 });
-  }, [
-    filters.category,
-    filters.search,
-    filters.creator,
-    filters.source,
-    filters.minPrice,
-    filters.maxPrice,
-    filters.sortBy,
-    filters.sortOrder,
-    fetchProducts,
-  ]);
-
-  // Fetch products when pagination changes (but not when offset is reset to 0)
-  useEffect(() => {
-    if (pagination.offset === 0) return; // Skip if offset was just reset
-    fetchProducts(filters, { limit: pagination.limit, offset: pagination.offset }, true); // true for append mode
-  }, [pagination.offset, fetchProducts]);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
+      const start = performance.now();
       const response = await productAPI.getCategories();
       setCategories(response.categories);
+      console.log(`API [Categories]: ${(performance.now() - start).toFixed(2)}ms`);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     }
-  };
+  }, []);
 
-  const fetchCreators = async () => {
+  const fetchCreators = useCallback(async () => {
     try {
+      const start = performance.now();
       const response = await productAPI.getCreators();
       setCreators(response.creators);
+      console.log(`API [Creators]: ${(performance.now() - start).toFixed(2)}ms`);
     } catch (error) {
       console.error("Failed to fetch creators:", error);
     }
-  };
+  }, []);
+
+  // 1. Static Data Fetch - Strictly Once
+  useEffect(() => {
+    if (isStaticDataFetched.current) return;
+    isStaticDataFetched.current = true;
+
+    fetchCategories();
+    fetchCreators();
+  }, [fetchCategories, fetchCreators]);
+
+  // 2. URL Sync
+  useEffect(() => {
+    const currentCategory = searchParams.get("category") || "";
+    const currentSearch = searchParams.get("search") || "";
+    const currentCreator = searchParams.get("creator") || "";
+    const currentSource = (searchParams.get("source") as "printful" | "shopify" | "all") || "all";
+
+    setFilters(prev => {
+      if (
+        prev.category === currentCategory &&
+        prev.search === currentSearch &&
+        prev.creator === currentCreator &&
+        prev.source === currentSource
+      ) {
+        return prev;
+      }
+      return {
+        ...prev,
+        category: currentCategory,
+        search: currentSearch,
+        creator: currentCreator,
+        source: currentSource
+      };
+    });
+  }, [searchParams]);
+
+  // 3. Main Data Fetch - De-duped Strict Mode Guard
+  useEffect(() => {
+    const filtersKey = JSON.stringify(filters);
+
+    // Prevent duplicate fetch on mount in strict mode
+    if (lastFetchedFiltersRef.current === filtersKey) {
+      return;
+    }
+    lastFetchedFiltersRef.current = filtersKey;
+
+    setPagination((prev) => ({ ...prev, offset: 0 }));
+    fetchProducts(filters, { limit: 20, offset: 0 });
+  }, [
+    filters,
+    fetchProducts
+  ]);
+
+  // 4. Pagination Fetch (Load More)
+  useEffect(() => {
+    if (pagination.offset === 0) return;
+    // No guard needed here as offset change is explicit user action usually
+    fetchProducts(filters, { limit: pagination.limit, offset: pagination.offset }, true);
+  }, [pagination.offset, fetchProducts, filters, pagination.limit]);
+
 
   const handleFilterChange = (key: string, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
 
-    // Update URL without triggering navigation
     const params = new URLSearchParams();
     if (newFilters.category) params.set("category", newFilters.category);
     if (newFilters.search) params.set("search", newFilters.search);
@@ -189,7 +204,6 @@ function ProductsContent() {
     if (newFilters.source && newFilters.source !== "all")
       params.set("source", newFilters.source);
 
-    // Use replace instead of push to avoid triggering searchParams change
     window.history.replaceState({}, '', `/products?${params.toString()}`);
   };
 
@@ -205,16 +219,11 @@ function ProductsContent() {
       maxPrice: undefined,
     };
     setFilters(clearedFilters);
-
-    // Update URL and fetch products
     window.history.replaceState({}, '', '/products');
-    setPagination(prev => ({ ...prev, offset: 0 }));
-    fetchProducts(clearedFilters, { limit: pagination.limit, offset: 0 });
   };
 
   const handleViewChange = (view: ViewType) => {
     setActiveView(view);
-    // Update sort based on view
     const sortConfig = {
       trending: { sortBy: "created_at", sortOrder: "DESC" },
       new: { sortBy: "created_at", sortOrder: "DESC" },
@@ -226,18 +235,14 @@ function ProductsContent() {
 
   return (
     <div className="bg-black text-white min-h-screen">
-      {/* Hero Section */}
       <ProductsHero
         creators={creators}
         categories={categories}
       />
 
-      {/* Filter Controls Section - Above Featured Products */}
       <div className="bg-black border-b border-white/10 relative z-40">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:py-8 overflow-visible">
-          {/* Row 1: Search bar (50%), Categories and Creators (50% split) */}
           <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
-            {/* Search Input - 50% on desktop */}
             <div className="relative w-full lg:w-1/2">
               <svg className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -251,9 +256,7 @@ function ProductsContent() {
               />
             </div>
 
-            {/* Dropdowns Container - 50% on desktop */}
             <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 w-full lg:w-1/2">
-              {/* All Types Dropdown */}
               <select
                 value={filters.category}
                 onChange={(e) => handleFilterChange("category", e.target.value)}
@@ -273,7 +276,6 @@ function ProductsContent() {
                 ))}
               </select>
 
-              {/* All Creators Dropdown */}
               <select
                 value={filters.creator}
                 onChange={(e) => handleFilterChange("creator", e.target.value)}
@@ -295,15 +297,13 @@ function ProductsContent() {
             </div>
           </div>
 
-          {/* Row 2: View tabs and Price Range button */}
           <div className="flex gap-2 sm:gap-3 items-center overflow-x-auto overflow-y-visible scrollbar-hide pb-2 xs:pb-0 -mx-4 xs:mx-0 px-4 xs:px-0">
             <button
               onClick={() => handleViewChange("trending")}
-              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${
-                activeView === "trending"
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "trending"
                   ? "bg-gray-800 text-white border-purple-500 shadow-[0_8px_20px_rgba(147,51,234,0.3)]"
                   : "bg-gray-800 text-white border-white/20 hover:border-purple-400/50 hover:bg-gray-700"
-              }`}
+                }`}
               title="View trending products"
             >
               <TrendingUp className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "trending" ? "text-purple-500" : "text-white/60"}`} />
@@ -311,11 +311,10 @@ function ProductsContent() {
             </button>
             <button
               onClick={() => handleViewChange("new")}
-              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${
-                activeView === "new"
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "new"
                   ? "bg-gray-800 text-white border-blue-500 shadow-[0_8px_20px_rgba(59,130,246,0.3)]"
                   : "bg-gray-800 text-white border-white/20 hover:border-blue-400/50 hover:bg-gray-700"
-              }`}
+                }`}
               title="View new arrivals"
             >
               <Zap className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "new" ? "text-blue-500" : "text-white/60"}`} />
@@ -323,11 +322,10 @@ function ProductsContent() {
             </button>
             <button
               onClick={() => handleViewChange("popular")}
-              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${
-                activeView === "popular"
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "popular"
                   ? "bg-gray-800 text-white border-red-500 shadow-[0_8px_20px_rgba(220,38,38,0.3)]"
                   : "bg-gray-800 text-white border-white/20 hover:border-red-400/50 hover:bg-gray-700"
-              }`}
+                }`}
               title="View popular products"
             >
               <Heart className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "popular" ? "text-red-500" : "text-white/60"}`} />
@@ -338,15 +336,11 @@ function ProductsContent() {
         </div>
       </div>
 
-
-      {/* Featured Products Section */}
       {!loading && products.length > 0 && filters.category === "" && (
         <FeaturedProducts products={products} />
       )}
 
-      {/* Main Content - Full Width without Sidebar */}
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
-        {/* Products Grid or Loading/Empty State */}
         {loading ? (
           <ProductsLoading message="Discovering amazing products..." />
         ) : products.length === 0 ? (
@@ -369,8 +363,6 @@ function ProductsContent() {
         )}
       </div>
 
-
-      {/* Custom Scrollbar Styling for Select Elements */}
       <style jsx global>{`
         select {
           max-height: 300px;
@@ -396,7 +388,6 @@ function ProductsContent() {
           box-shadow: 0 0 10px rgba(255, 99, 71, 0.4);
         }
 
-        /* Style option elements for better visibility */
         option {
           background-color: #1f2937;
           color: #ffffff;
