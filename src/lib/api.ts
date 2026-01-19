@@ -1142,6 +1142,27 @@ export const inventoryAPI = {
   },
 };
 
+// Creator Stripe APIs
+export const creatorStripeAPI = {
+  // Get Stripe connection status
+  getStripeStatus: async () => {
+    const response = await api.get('/api/creator/stripe/status');
+    return response.data;
+  },
+
+  // Get Stripe authorization URL
+  getStripeAuthUrl: async () => {
+    const response = await api.get('/api/creator/stripe/auth-url');
+    return response.data;
+  },
+
+  // Disconnect Stripe account
+  disconnectStripe: async () => {
+    const response = await api.post('/api/creator/stripe/disconnect');
+    return response.data;
+  },
+};
+
 // Public API (no authentication required - for guest users)
 export const publicAPI = {
   // Note: Product variant details for guest cart are now cached in localStorage

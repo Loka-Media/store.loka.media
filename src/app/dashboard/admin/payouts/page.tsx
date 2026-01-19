@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { DollarSign, Users, TrendingUp, AlertCircle, Loader, Play, BarChart3 } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { adminAPI } from '@/lib/auth';
 
 interface PendingPayout {
   id: number;
@@ -46,23 +47,11 @@ function AdminPayoutsPageContent() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
 
-      const [payoutsRes, overviewRes] = await Promise.all([
-        fetch('/api/admin/payouts/pending', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }),
-        fetch('/api/admin/commissions/overview', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }),
+      const [payoutsData, overviewData] = await Promise.all([
+        adminAPI.getPendingPayouts(),
+        adminAPI.getCommissionOverview(),
       ]);
-
-      if (!payoutsRes.ok || !overviewRes.ok) {
-        throw new Error('Failed to fetch data');
-      }
-
-      const payoutsData = await payoutsRes.json();
-      const overviewData = await overviewRes.json();
 
       setPendingPayouts(payoutsData || []);
       setOverview(overviewData);
@@ -77,21 +66,8 @@ function AdminPayoutsPageContent() {
   const handleProcessPayouts = async () => {
     try {
       setProcessing(true);
-      const token = localStorage.getItem('accessToken');
 
-      const response = await fetch('/api/admin/payouts/process', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to process payouts');
-      }
-
-      const result = await response.json();
+      const result = await adminAPI.processPayouts();
       toast.success(`Payouts processed: ${result.successful || 0} successful, ${result.failed || 0} failed`);
       await fetchData();
     } catch (error) {

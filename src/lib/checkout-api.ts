@@ -1,134 +1,95 @@
 import { CheckoutData, ProcessCheckoutData, AuthenticatedCheckoutData } from './checkout-types';
+import axios from 'axios';
 import { getApiUrl } from './getApiUrl';
+
+// Create a separate axios instance for guest checkout (no auth required)
+const guestApi = axios.create({
+  baseURL: getApiUrl(),
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Authenticated axios instance for checkout with token
+const createAuthApi = (token: string) => {
+  return axios.create({
+    baseURL: getApiUrl(),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+};
 
 export const unifiedCheckoutAPI = {
   createGuestCheckout: async (data: CheckoutData) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/guest/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error('Failed to create guest checkout');
-    return response.json();
+    const response = await guestApi.post('/api/unified-checkout/guest/create', data);
+    return response.data;
   },
 
   processCheckout: async (data: ProcessCheckoutData) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/process`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      const error: any = new Error(errorData.message || errorData.error || 'Failed to process checkout');
-      // Attach additional error details for inventory errors
-      if (errorData.unavailable_items) {
-        error.unavailable_items = errorData.unavailable_items;
-        error.isInventoryError = true;
+    try {
+      const response = await guestApi.post('/api/unified-checkout/process', data);
+      return response.data;
+    } catch (error: any) {
+      // Preserve error details for inventory errors
+      if (error.response?.data?.unavailable_items) {
+        const customError: any = new Error(
+          error.response.data.message || error.response.data.error || 'Failed to process checkout'
+        );
+        customError.unavailable_items = error.response.data.unavailable_items;
+        customError.isInventoryError = true;
+        throw customError;
       }
       throw error;
     }
-    return response.json();
   },
 
   createStripePaymentIntent: async (amount: number, orderNumber: string, customerEmail?: string) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/stripe/create-payment-intent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amount.toFixed(2), orderNumber, customerEmail })
+    const response = await guestApi.post('/api/unified-checkout/stripe/create-payment-intent', {
+      amount: amount.toFixed(2),
+      orderNumber,
+      customerEmail,
     });
-    if (!response.ok) throw new Error('Failed to create Stripe payment intent');
-    return response.json();
+    return response.data;
   },
 
   confirmStripePayment: async (paymentIntentId: string, orderNumber: string) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/stripe/confirm-payment`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentIntentId, orderNumber })
+    const response = await guestApi.post('/api/unified-checkout/stripe/confirm-payment', {
+      paymentIntentId,
+      orderNumber,
     });
-    if (!response.ok) throw new Error('Failed to confirm Stripe payment');
-    return response.json();
+    return response.data;
   },
 
   processAuthenticatedCheckout: async (data: AuthenticatedCheckoutData, token: string) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/process-authenticated`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(data)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      const error: any = new Error(errorData.message || errorData.error || 'Failed to process authenticated checkout');
-      // Attach additional error details for inventory errors
-      if (errorData.unavailable_items) {
-        error.unavailable_items = errorData.unavailable_items;
-        error.isInventoryError = true;
+    try {
+      const authApi = createAuthApi(token);
+      const response = await authApi.post('/api/unified-checkout/process-authenticated', data);
+      return response.data;
+    } catch (error: any) {
+      // Preserve error details for inventory errors
+      if (error.response?.data?.unavailable_items) {
+        const customError: any = new Error(
+          error.response.data.message || error.response.data.error || 'Failed to process authenticated checkout'
+        );
+        customError.unavailable_items = error.response.data.unavailable_items;
+        customError.isInventoryError = true;
+        throw customError;
       }
       throw error;
     }
-    return response.json();
   },
 
   checkVariantAvailability: async (variants: Array<{ variant_id: number | string; quantity: number }>) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/printful/variants/check-availability`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variants })
-    });
-    if (!response.ok) throw new Error('Failed to check variant availability');
-    return response.json();
-  }
+    const response = await guestApi.post('/api/printful/variants/check-availability', { variants });
+    return response.data;
+  },
 };
 
-export const authAPI = {
-  login: async (email: string, password: string) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Login failed');
-
-    return result;
-  },
-
-  getUserCart: async (token: string) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/cart`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    if (!response.ok) throw new Error('Failed to get user cart');
-    return response.json();
-  },
-
-  addToUserCart: async (token: string, variantId: string, quantity: number) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/cart/add`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ variantId, quantity })
-    });
-
-    if (!response.ok) throw new Error('Failed to add to user cart');
-    return response.json();
-  }
-};
+// Note: authAPI methods (login, getUserCart, addToUserCart) have been removed
+// These are now available in /src/lib/auth.ts as authAPI and /src/lib/api.ts as cartAPI
+// Use those centralized services instead:
+// - authAPI.login() from '@/lib/auth'
+// - cartAPI.getCart() from '@/lib/api'
+// - cartAPI.addToCart() from '@/lib/api'

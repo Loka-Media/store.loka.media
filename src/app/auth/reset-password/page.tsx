@@ -17,7 +17,7 @@ import {
   Key,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { getApiUrl } from "@/lib/getApiUrl";
+import { authAPI } from "@/lib/auth";
 
 // Validation schema
 const resetPasswordSchema = z.object({
@@ -63,24 +63,7 @@ function ResetPasswordContent() {
   const onSubmit = async (data: ResetPasswordForm) => {
     setLoading(true);
     try {
-      const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/api/auth/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.email,
-          otp: data.otp,
-          newPassword: data.newPassword,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to reset password");
-      }
+      await authAPI.resetPassword(data.email, data.otp, data.newPassword);
 
       setResetSuccess(true);
       toast.success("Password reset successfully!");

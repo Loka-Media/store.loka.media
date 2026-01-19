@@ -118,11 +118,11 @@ export const authAPI = {
   login: async (data: LoginData): Promise<AuthResponse> => {
     const response = await api.post('/api/auth/login', data);
     const { tokens } = response.data;
-    
+
     // Store tokens
     localStorage.setItem('accessToken', tokens.accessToken);
     localStorage.setItem('refreshToken', tokens.refreshToken);
-    
+
     return response.data;
   },
 
@@ -154,6 +154,20 @@ export const authAPI = {
 
     return response.data;
   },
+
+  forgotPassword: async (email: string) => {
+    const response = await api.post('/api/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  resetPassword: async (email: string, otp: string, newPassword: string) => {
+    const response = await api.post('/api/auth/reset-password', {
+      email,
+      otp,
+      newPassword,
+    });
+    return response.data;
+  },
 };
 
 // Admin APIs for creator management
@@ -170,6 +184,29 @@ export const adminAPI = {
 
   rejectCreatorRequest: async (requestId: number) => {
     const response = await api.post(`/api/admin/creator-requests/${requestId}/reject`);
+    return response.data;
+  },
+
+  // Creator Earnings APIs
+  getCreatorEarnings: async (params?: { limit?: number; offset?: number; sortBy?: string }) => {
+    const response = await api.get('/api/admin/creators/earnings', { params });
+    return response.data;
+  },
+
+  // Payout APIs
+  getPendingPayouts: async () => {
+    const response = await api.get('/api/admin/payouts/pending');
+    return response.data;
+  },
+
+  processPayouts: async () => {
+    const response = await api.post('/api/admin/payouts/process');
+    return response.data;
+  },
+
+  // Commission Overview APIs
+  getCommissionOverview: async () => {
+    const response = await api.get('/api/admin/commissions/overview');
     return response.data;
   },
 };

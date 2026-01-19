@@ -17,7 +17,7 @@ import {
   Clock,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { getApiUrl } from "@/lib/getApiUrl";
+import { authAPI } from "@/lib/auth";
 
 // Validation schema
 const forgotPasswordSchema = z.object({
@@ -43,20 +43,7 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (data: ForgotPasswordForm) => {
     setLoading(true);
     try {
-      const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to send reset email");
-      }
+      await authAPI.forgotPassword(data.email);
 
       setEmail(data.email);
       setEmailSent(true);
