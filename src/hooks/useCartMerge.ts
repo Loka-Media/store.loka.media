@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { CartMergeData, User, CheckoutStep } from '@/lib/checkout-types';
-import { authAPI } from '@/lib/checkout-api';
-import { CartItem } from '@/lib/api';
+import { cartAPI, CartItem } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 interface GuestCartItem {
@@ -40,7 +39,7 @@ export const useCartMerge = () => {
     }
 
     try {
-      const userCart = await authAPI.getUserCart(token);
+      const userCart = await cartAPI.getCart();
       const userCartCount = userCart.items?.length || 0;
 
       setCartMergeData({
@@ -66,14 +65,14 @@ export const useCartMerge = () => {
     
     try {
       setLoading(true);
-      
+
       for (const item of guestCartItems) {
-        await authAPI.addToUserCart(cartMergeData.token, item.variant_id.toString(), item.quantity);
+        await cartAPI.addToCart(item.variant_id, item.quantity);
       }
 
       await clearCart();
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       toast.success('Carts merged successfully! Redirecting to cart...');
       window.location.href = '/cart';
 
