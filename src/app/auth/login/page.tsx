@@ -1,33 +1,19 @@
-// pages/auth/login.tsx
 "use client";
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import GradientTitle from "@/components/ui/GradientTitle";
 import { GradientText } from "@/components/ui/GradientText";
 import StartShape from "@/components/ui/StartShape";
 import { Button } from "@/components/ui/button";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { loginSchema, LoginFormData } from "@/lib/validators/auth";
+import { extractErrorMessage, requiresEmailVerification } from "@/lib/utils/error-handler";
 
-// --- Login Form Schema ---
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(1, "Password is required"),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
-
-// --- Main Login Page Content Component ---
 function LoginPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,11 +25,11 @@ function LoginPageContent() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginForm>({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     try {
       const success = await login(data.email, data.password);
@@ -52,15 +38,8 @@ function LoginPageContent() {
         router.push(returnUrl);
       }
     } catch (error: unknown) {
-      if (error && typeof error === "object" && "response" in error) {
-        const errorWithResponse = error as {
-          response?: { data?: { requiresVerification?: boolean } };
-        };
-        if (errorWithResponse.response?.data?.requiresVerification) {
-          router.push(
-            `/auth/verify-email?email=${encodeURIComponent(data.email)}`
-          );
-        }
+      if (requiresEmailVerification(error)) {
+        router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
       }
     } finally {
       setLoading(false);
@@ -382,10 +361,8 @@ function LoginPageContent() {
   );
 }
 
-// Set display name for debugging
 LoginPageContent.displayName = "LoginPageContent";
 
-// --- Page Wrapper with Suspense ---
 export default function LoginPage() {
   return (
     <Suspense

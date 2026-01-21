@@ -39,62 +39,69 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState(0);
   const { isAuthenticated, user } = useAuth();
 
-  const fetchWishlistCount = async () => {
-    try {
-      const response = await wishlistAPI.getWishlistCount();
-      setWishlistCount(response.count);
-    } catch (error) {
-      console.error('Failed to fetch wishlist count:', error);
-    }
-  };
-
-  const refreshWishlist = useCallback(async () => {
+  const refreshWishlist = useCallback(async (force = false) => {
     if (!isAuthenticated) {
       setItems([]);
       setWishlistCount(0);
       return;
     }
-    
+
+    if (isFetching) {
+      return;
+    }
+
+    const now = Date.now();
+    const timeSinceLastFetch = now - lastFetchTime;
+    if (!force && timeSinceLastFetch < 5000) {
+      return;
+    }
+
     try {
+      setIsFetching(true);
       setLoading(true);
       const response = await wishlistAPI.getWishlist();
       setItems(response.items || []);
       setWishlistCount(response.count || 0);
+      setLastFetchTime(now);
     } catch (error) {
       console.error('Failed to fetch wishlist:', error);
-      // Don't show toast error on initial load to avoid spam
       setItems([]);
       setWishlistCount(0);
     } finally {
       setLoading(false);
+      setIsFetching(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isFetching, lastFetchTime]);
 
-  // Fetch wishlist data when user is authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
       refreshWishlist();
     } else {
-      // Clear wishlist data when user logs out
       setItems([]);
       setWishlistCount(0);
     }
-  }, [isAuthenticated, user, refreshWishlist]);
+  }, [isAuthenticated, user]);
 
-  // Add page visibility listener to refresh wishlist when user returns
   useEffect(() => {
+    let visibilityTimeout: NodeJS.Timeout;
+
     const handleVisibilityChange = () => {
       if (!document.hidden && isAuthenticated && user) {
-        // Page became visible, refresh wishlist data
-        refreshWishlist();
+        clearTimeout(visibilityTimeout);
+        visibilityTimeout = setTimeout(() => {
+          refreshWishlist();
+        }, 2000);
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
+      clearTimeout(visibilityTimeout);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isAuthenticated, user, refreshWishlist]);
@@ -108,10 +115,9 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     try {
       await wishlistAPI.addToWishlist(productId);
       toast.success('Added to wishlist!');
-      
-      // Refresh the entire wishlist to get accurate data
-      await refreshWishlist();
-      
+
+      await refreshWishlist(true);
+
       return true;
     } catch (error: unknown) {
       const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to add to wishlist';
@@ -129,10 +135,9 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     try {
       await wishlistAPI.removeFromWishlist(productId);
       toast.success('Removed from wishlist');
-      
-      // Refresh the entire wishlist to get accurate data
-      await refreshWishlist();
-      
+
+      await refreshWishlist(true);
+
       return true;
     } catch (error: unknown) {
       const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to remove item';

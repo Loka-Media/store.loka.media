@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,7 +36,6 @@ function CanvasContent() {
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId");
 
-  // Default to simplified (new) interface unless explicitly set to classic
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
@@ -53,6 +52,7 @@ function CanvasContent() {
   const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
   const [mockupStatus, setMockupStatus] = useState<string>("");
   const [printFiles, setPrintFiles] = useState<any>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const [productForm, setProductForm] = useState<ProductForm>({
     name: "",
@@ -62,7 +62,11 @@ function CanvasContent() {
     tags: []
   });
 
+  const hasInitializedRef = useRef(false);
+
   const initializeCanvas = useCallback(async () => {
+    if (isInitialized || hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
     try {
       setLoading(true);
 
@@ -74,22 +78,15 @@ function CanvasContent() {
           const availabilityCheck = await printfulAPI.checkProductAvailability(parseInt(productId));
           
           if (!availabilityCheck.result.can_create_product) {
-            toast.error(`❌ ${availabilityCheck.result.message}`);
-            toast.error("Please select a different product from the catalog", {
+            toast.error(`${availabilityCheck.result.message}. Please select a different product.`, {
               duration: 6000
             });
             router.push('/dashboard/creator/canvas');
             return;
           }
-          
-          // Show availability warnings if any
+
           if (availabilityCheck.result.warnings && availabilityCheck.result.warnings.length > 0) {
-            availabilityCheck.result.warnings.forEach((warning: string) => {
-              toast(`⚠️ ${warning}`, { 
-                icon: '⚠️',
-                duration: 4000
-              });
-            });
+            console.warn('Product availability warnings:', availabilityCheck.result.warnings);
           }
           
           // If available, proceed to get product details
@@ -116,17 +113,12 @@ function CanvasContent() {
               return isAvailable;
             }) || variants;
 
-            // Show summary of filtering
             const originalCount = variants?.length || 0;
             const filteredCount = availableVariants?.length || 0;
             const filteredOut = originalCount - filteredCount;
 
             if (filteredOut > 0) {
-              toast(`⚠️ ${filteredOut} variant${filteredOut > 1 ? 's' : ''} filtered out (discontinued/unavailable)`, {
-                icon: '⚠️',
-                duration: 4000
-              });
-              console.log(`📊 Variant filtering: ${filteredCount}/${originalCount} variants available`);
+              console.log(`📊 Variant filtering: ${filteredCount}/${originalCount} variants available (${filteredOut} filtered out)`);
             }
 
             const productWithVariants = { ...product, variants: availableVariants };
@@ -156,16 +148,7 @@ function CanvasContent() {
               });
             }
 
-            // Skip upload step and go directly to unified editor
             setStep("unified-editor");
-            
-            const availabilityStatus = availabilityCheck.result.status === 'available' 
-              ? '✅ Product is fully available' 
-              : `⚠️ Product is ${availabilityCheck.result.availability_details.availability_percentage}% available`;
-            
-            toast.success(`${availabilityStatus} - Start designing!`, {
-              duration: 3000
-            });
 
             return;
           }
@@ -221,8 +204,9 @@ function CanvasContent() {
       toast.error("Failed to initialize canvas");
     } finally {
       setLoading(false);
+      setIsInitialized(true);
     }
-  }, [productId]);
+  }, [productId, isInitialized, router]);
 
   const fetchUploadedFiles = useCallback(async () => {
     // Check if user is authenticated first
@@ -267,22 +251,20 @@ function CanvasContent() {
   };
 
   useEffect(() => {
-    if (user?.role === "creator" || user?.role === "admin") {
+    if ((user?.role === "creator" || user?.role === "admin") && !isInitialized) {
       initializeCanvas();
     }
-  }, [user, initializeCanvas]);
+  }, [user, isInitialized, initializeCanvas]);
 
-  // Separate effect to ensure uploaded files are fetched when user is ready
   useEffect(() => {
-    if (user?.role === "creator" || user?.role === "admin") {
-      // Fetch files after a short delay to ensure auth is fully ready
+    if ((user?.role === "creator" || user?.role === "admin") && isInitialized && uploadedFiles.length === 0) {
       const timer = setTimeout(() => {
         fetchUploadedFiles();
       }, 500);
 
       return () => clearTimeout(timer);
     }
-  }, [user, fetchUploadedFiles]);
+  }, [user, isInitialized, uploadedFiles.length, fetchUploadedFiles]);
 
   if (!selectedProduct && !loading) {
     return (
@@ -587,8 +569,7 @@ function CanvasContent() {
       });
 
       setMockupUrls(mockupUrls);
-      setMockupStatus("Mockup completed successfully!");
-      toast.success("Preview generated successfully!");
+      setMockupStatus("Mockup generated successfully!");
     } catch (error: any) {
       console.error("Preview generation failed:", error);
       const errorMessage =
@@ -618,7 +599,14 @@ function CanvasContent() {
     try {
       setCreating(true);
 
-      // Use the passed form data if available, otherwise fall back to state
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
       const formDataToUse = updatedProductForm || productForm;
 
       console.log('📝 Product form data being used for publishing:', {
@@ -627,36 +615,28 @@ function CanvasContent() {
         source: updatedProductForm ? 'from form submission (fresh)' : 'from state (may be stale)'
       });
 
-      // FINAL VALIDATION: Ensure all selected variants are still available before publishing
-      console.log("🔍 Performing final variant availability check before publishing...");
-      toast.loading("Validating product variants...", { id: "final-validation" });
-      
+      toast.loading("Step 1/3: Validating product variants...", { id: "publishing-progress" });
+
       try {
-        // Validate variants from already-loaded product data
         const unavailableVariants = selectedVariants.filter((variantId: number) => {
           const variant = selectedProduct.variants?.find((v: any) => v.id === variantId);
           return variant && variant.can_create_product === false;
         });
 
         if (unavailableVariants.length > 0) {
-          toast.dismiss("final-validation");
+          window.removeEventListener('beforeunload', handleBeforeUnload);
+          toast.dismiss("publishing-progress");
           toast.error(
-            `❌ Cannot publish: ${unavailableVariants.length} variant${unavailableVariants.length > 1 ? 's are' : ' is'} no longer available. Please refresh the page and reselect variants.`,
+            `Cannot publish: ${unavailableVariants.length} variant${unavailableVariants.length > 1 ? 's are' : ' is'} no longer available. Please refresh the page and reselect variants.`,
             { duration: 8000 }
           );
-          console.error("❌ Final validation failed - unavailable variants:", unavailableVariants);
+          console.error("Final validation failed - unavailable variants:", unavailableVariants);
           return;
         }
 
-        toast.dismiss("final-validation");
-        console.log("✅ Final validation passed - all variants available for publishing");
+        console.log("Validation passed - all variants available for publishing");
       } catch (validationError) {
-        toast.dismiss("final-validation");
-        console.warn("⚠️ Final validation check failed, proceeding with caution:", validationError);
-        toast("⚠️ Could not verify all variants - proceeding with publication", {
-          icon: '⚠️',
-          duration: 4000
-        });
+        console.warn("Final validation check failed, proceeding with caution:", validationError);
       }
 
       const productData = {
@@ -669,14 +649,13 @@ function CanvasContent() {
         base_product: selectedProduct
       };
 
-      toast.loading("Publishing your product to marketplace...", {
-        id: "marketplace",
+      toast.loading("Step 2/3: Uploading product images to marketplace...", {
+        id: "publishing-progress",
       });
 
       const storedMockupInputs = localStorage.getItem(`mockup_request_${selectedProduct.id}`);
       const mockupInputs = storedMockupInputs ? JSON.parse(storedMockupInputs) : null;
 
-      // Extract availability data from already-loaded product variants
       const availabilityData = selectedVariants
         .map((variantId: number) => {
           const variant = selectedProduct.variants?.find((v: any) => v.id === variantId);
@@ -696,6 +675,10 @@ function CanvasContent() {
         console.log('📊 Sample availability:', availabilityData[0]);
       }
 
+      toast.loading("Step 3/3: Publishing to marketplace... Please do not refresh or navigate away!", {
+        id: "publishing-progress",
+      });
+
       const result = await printfulAPI.storeMockupsPermanently(
         mockupUrls,
         productData,
@@ -704,54 +687,40 @@ function CanvasContent() {
         availabilityData
       );
 
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+
       if (result.success) {
         localStorage.removeItem(`mockup_request_${selectedProduct.id}`);
-        // Clear saved product form since product is now published
         if (productId) {
           localStorage.removeItem(`productForm_${productId}`);
           console.log(`🗑️ Cleared product form for product ${productId} after publishing`);
         }
       }
 
-      toast.dismiss("marketplace");
+      toast.dismiss("publishing-progress");
 
       if (result.success && result.marketplace_ready) {
-        toast.success(`🎉 "${productForm.name}" is now live in marketplace!`, {
-          duration: 6000,
+        toast.success(`"${formDataToUse.name}" is now live in the marketplace!`, {
+          duration: 4000,
         });
 
-        // Show success details
         setTimeout(() => {
-          toast.success(
-            `✅ ${result.storage_stats.total_stored} product images stored permanently`,
-            {
-              duration: 4000,
-            }
-          );
-        }, 1000);
-
-        // Clear current session and redirect
-        setTimeout(() => {
-          toast.success("🚀 Product published successfully! Redirecting...", {
-            duration: 3000,
-          });
-
-          // Reset form and redirect to products page
           setMockupUrls([]);
           setDesignFiles([]);
           window.location.href = "/dashboard/creator/products";
-        }, 3000);
+        }, 2000);
       } else {
         toast.error(
           `Failed to publish product: ${
             result.details || result.error || "Unknown error"
-          }`
+          }`,
+          { duration: 6000 }
         );
       }
     } catch (error) {
       console.error("Marketplace error:", error);
-      toast.dismiss("marketplace");
-      toast.error("Failed to publish to marketplace");
+      toast.dismiss("publishing-progress");
+      toast.error("Failed to publish to marketplace. Please try again.", { duration: 6000 });
     } finally {
       setCreating(false);
     }

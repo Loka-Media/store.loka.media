@@ -22,7 +22,7 @@ import { printfulAPI } from "@/lib/api";
 import { aspectRatioValidation } from "@/utils/aspectRatioValidation";
 
 // Import components
-import { useDesignEditorState, usePrintFilesLoader } from "./hooks";
+import { useDesignEditorState } from "./hooks";
 import {
   getActivePrintFile,
   calculateAspectRatioAwareDimensions,
@@ -69,8 +69,10 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
   const [selectedTechnique, setSelectedTechnique] = useState<string>("");
   const [availableTechniques, setAvailableTechniques] = useState<string[]>([]);
   const [loadingTechniques, setLoadingTechniques] = useState(false);
+  const [techniquesLoaded, setTechniquesLoaded] = useState(false);
+  const [printFilesLoaded, setPrintFilesLoaded] = useState(false);
+  const [loadingPrintFiles, setLoadingPrintFiles] = useState(false);
 
-  // Use existing hooks
   const stateHook = useDesignEditorState(selectedProduct, designFiles);
   const {
     selectedSizes,
@@ -104,60 +106,49 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
     }
   }, [selectedColors, selectedSizes, selectedProduct, setSelectedVariants]);
 
-  // Load print files
-  usePrintFilesLoader(
-    selectedProduct,
-    selectedVariants,
-    false,
-    false,
-    () => {},
-    () => {},
-    onPrintFilesLoaded,
-    () => {}
-  );
-
-  // Load available techniques for the product
   useEffect(() => {
-    const loadAvailableTechniques = async () => {
-      if (!selectedProduct?.id) {
-        setAvailableTechniques([]);
-        return;
-      }
+    if (currentStep >= 2 && selectedVariants.length > 0 && !printFilesLoaded && !loadingPrintFiles) {
+      const loadPrintFiles = async () => {
+        setLoadingPrintFiles(true);
+        try {
+          const data = await printfulAPI.getPrintFiles(selectedProduct.id);
+          if (data?.result) {
+            setPrintFilesLoaded(true);
+            onPrintFilesLoaded?.(data.result);
+          }
+        } catch (error) {
+          console.error("Failed to load print files:", error);
+        } finally {
+          setLoadingPrintFiles(false);
+        }
+      };
+      loadPrintFiles();
+    }
+  }, [currentStep, selectedVariants.length, printFilesLoaded, loadingPrintFiles, selectedProduct?.id, onPrintFilesLoaded]);
 
-      try {
-        setLoadingTechniques(true);
-        const data = await printfulAPI.getPrintFiles(selectedProduct.id);
+  useEffect(() => {
+    if (!printFiles || techniquesLoaded) {
+      return;
+    }
+
+    try {
+      setLoadingTechniques(true);
+
+      if (
+        printFiles?.available_techniques &&
+        Array.isArray(printFiles.available_techniques)
+      ) {
+        const techniques = printFiles.available_techniques;
+        setAvailableTechniques(techniques);
 
         if (
-          data?.result?.available_techniques &&
-          Array.isArray(data.result.available_techniques)
+          techniques.length > 0 &&
+          (!selectedTechnique || !techniques.includes(selectedTechnique))
         ) {
-          const techniques = data.result.available_techniques;
-          setAvailableTechniques(techniques);
-
-          // Set default technique if current selection is not available
-          if (
-            techniques.length > 0 &&
-            (!selectedTechnique || !techniques.includes(selectedTechnique))
-          ) {
-            setSelectedTechnique(techniques[0]);
-          }
-        } else {
-          // Fallback to common techniques
-          const fallbackTechniques = ["DTG", "DTFILM"];
-          setAvailableTechniques(fallbackTechniques);
-
-          if (
-            !selectedTechnique ||
-            !fallbackTechniques.includes(selectedTechnique)
-          ) {
-            setSelectedTechnique(fallbackTechniques[0]);
-          }
+          setSelectedTechnique(techniques[0]);
         }
-      } catch (error) {
-        console.error("Failed to load available techniques:", error);
-        // Fallback
-        const fallbackTechniques = ["DTG"];
+      } else {
+        const fallbackTechniques = ["DTG", "DTFILM"];
         setAvailableTechniques(fallbackTechniques);
 
         if (
@@ -166,13 +157,24 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         ) {
           setSelectedTechnique(fallbackTechniques[0]);
         }
-      } finally {
-        setLoadingTechniques(false);
       }
-    };
+      setTechniquesLoaded(true);
+    } catch (error) {
+      console.error("Failed to load available techniques:", error);
+      const fallbackTechniques = ["DTG"];
+      setAvailableTechniques(fallbackTechniques);
 
-    loadAvailableTechniques();
-  }, [selectedProduct?.id, selectedTechnique]);
+      if (
+        !selectedTechnique ||
+        !fallbackTechniques.includes(selectedTechnique)
+      ) {
+        setSelectedTechnique(fallbackTechniques[0]);
+      }
+      setTechniquesLoaded(true);
+    } finally {
+      setLoadingTechniques(false);
+    }
+  }, [printFiles, techniquesLoaded, selectedTechnique]);
 
   // Define wizard steps
   const steps: WizardStep[] = [

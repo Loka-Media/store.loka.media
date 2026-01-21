@@ -11,6 +11,12 @@ import { useRouter } from 'next/navigation';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { Button } from '@/components/ui/button';
 import CreativeLoader from '@/components/CreativeLoader';
+import {
+  validateProductName,
+  validateProductDescription,
+  validateProductCategory,
+  validateMarkupPercentage
+} from '@/lib/validators/product';
 
 interface Product {
   id: number;
@@ -133,8 +139,28 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim()) {
-      toast.error('Product name is required');
+    const nameValidation = validateProductName(formData.name.trim());
+    if (nameValidation !== true) {
+      toast.error(nameValidation);
+      return;
+    }
+
+    const descValidation = validateProductDescription(formData.description.trim());
+    if (descValidation !== true) {
+      toast.error(descValidation);
+      return;
+    }
+
+    const categoryValidation = validateProductCategory(formData.category.trim());
+    if (categoryValidation !== true) {
+      toast.error(categoryValidation);
+      return;
+    }
+
+    const markupValue = parseFloat(formData.markupPercentage);
+    const markupValidation = validateMarkupPercentage(markupValue);
+    if (markupValidation !== true) {
+      toast.error(markupValidation);
       return;
     }
 
@@ -142,18 +168,21 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
       setSaving(true);
 
       const updateData = {
-        ...formData,
-        basePrice: parseFloat(formData.basePrice) || 0,
-        markupPercentage: parseFloat(formData.markupPercentage) || 0
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        markupPercentage: markupValue,
+        category: formData.category.trim(),
+        tags: formData.tags
       };
 
       await productAPI.updateProduct(productId, updateData);
 
       toast.success('Product updated successfully!');
       router.push('/dashboard/creator/products');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update product:', error);
-      toast.error('Failed to update product');
+      const errorMessage = error?.response?.data?.error || error?.response?.data?.details?.[0]?.msg || 'Failed to update product';
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }

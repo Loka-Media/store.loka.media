@@ -1,50 +1,17 @@
-// pages/auth/signup/creator/page.tsx
 "use client";
 
 import { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import GradientTitle from "@/components/ui/GradientTitle";
 import { GradientText } from "@/components/ui/GradientText";
 import StartShape from "@/components/ui/StartShape";
 import { Button } from "@/components/ui/button";
-import {
-  Eye,
-  EyeOff,
-  User,
-  Mail,
-  Phone,
-  Lock,
-  Link as LinkIcon,
-  AlertCircle,
-} from "lucide-react";
-
-const creatorRegisterSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    username: z
-      .string()
-      .min(3, "Username must be at least 3 characters")
-      .regex(
-        /^[a-zA-Z0-9_]+$/,
-        "Username can only contain letters, numbers, and underscores"
-      ),
-    email: z.string().email("Please enter a valid email"),
-    phone: z.string().min(10, "Please enter a valid phone number"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string(),
-    creatorUrl: z.string().min(1, "Portfolio or social link is required"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type CreatorRegisterForm = z.infer<typeof creatorRegisterSchema>;
+import { Eye, EyeOff, User, Mail, Phone, Lock, Link as LinkIcon, AlertCircle } from "lucide-react";
+import { creatorRegisterSchema, CreatorRegisterFormData } from "@/lib/validators/auth";
 
 function CreatorSignupContent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -57,11 +24,11 @@ function CreatorSignupContent() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<CreatorRegisterForm>({
+  } = useForm<CreatorRegisterFormData>({
     resolver: zodResolver(creatorRegisterSchema),
   });
 
-  const onSubmit = async (data: CreatorRegisterForm) => {
+  const onSubmit = async (data: CreatorRegisterFormData) => {
     setLoading(true);
     try {
       const success = await registerUser({
@@ -69,9 +36,7 @@ function CreatorSignupContent() {
         role: "creator",
       });
       if (success) {
-        router.push(
-          `/auth/verify-email?email=${encodeURIComponent(data.email)}`
-        );
+        router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
       }
     } catch (error) {
       console.error("Registration error:", error);
