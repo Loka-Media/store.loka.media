@@ -21,19 +21,15 @@ export function ProductInfo({
 }: ProductInfoProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const canTruncate = description.length > TRUNCATE_LENGTH;
+  const displayPrice = selectedVariantPrice ?? basePrice;
 
   return (
     <div>
       <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{productName}</h1>
       <div className="mb-6">
         <p className="text-3xl font-bold text-orange-500">
-          {formatPrice(selectedVariantPrice ?? basePrice)}
+          {formatPrice(displayPrice)}
         </p>
-        {(selectedVariantPrice ?? basePrice) < basePrice * 1.2 && (
-          <span className="text-lg text-gray-500 line-through ml-2">
-            {formatPrice(basePrice * 1.2)}
-          </span>
-        )}
       </div>
       <div className="text-gray-300 space-y-4">
         <p className="whitespace-pre-wrap">

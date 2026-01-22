@@ -89,10 +89,9 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await productAPI.getProduct(productId);
-      const productData = response;
-      
-      console.log('Product data:', productData);
+      const response = await productAPI.getCreatorProduct(productId);
+      const productData = response.product || response;
+
       setProduct(productData);
       setFormData({
         name: productData.name || '',
@@ -170,9 +169,13 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
       const updateData = {
         name: formData.name.trim(),
         description: formData.description.trim(),
+        basePrice: parseFloat(formData.basePrice) || product?.base_price || 0,
         markupPercentage: markupValue,
         category: formData.category.trim(),
-        tags: formData.tags
+        tags: formData.tags,
+        thumbnailUrl: formData.thumbnailUrl,
+        images: formData.images,
+        status: formData.isActive ? 'active' : 'inactive'
       };
 
       await productAPI.updateProduct(productId, updateData);
