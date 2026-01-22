@@ -19,6 +19,7 @@ export interface PrintFilesData {
   }>;
   option_groups?: string[];
   options?: string[];
+  available_techniques?: string[];
 }
 
 export interface DesignFile {

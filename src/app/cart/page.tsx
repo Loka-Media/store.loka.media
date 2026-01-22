@@ -16,10 +16,10 @@ export default function CartPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  
+
   // Use GuestCart for both authenticated and guest users (handles both cases)
   const { items, summary, loading, updateCartItem, removeFromCart, clearCart, refreshCart } = useGuestCart();
-  
+
   const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
   const [deleteConfirm, setDeleteConfirm] = useState<{
     show: boolean;
@@ -38,14 +38,7 @@ export default function CartPage() {
     }
   }, [isAuthenticated, authLoading]);
 
-  // Only refresh cart on initial mount (contexts handle the rest)
-  useEffect(() => {
-    // The contexts already handle refreshing on auth changes and visibility
-    // Only do an initial refresh if the cart appears empty but we expect data
-    if (items.length === 0 && !loading) {
-      refreshCart();
-    }
-  }, []); // Empty dependency array - only run on mount
+  // Context handles data fetching - removed redundant effect
 
   // Function to get the actual color code for display
   const getColorCode = (colorName: string | null | undefined, colorCode?: string) => {
@@ -72,19 +65,19 @@ export default function CartPage() {
       'silver': '#C0C0C0',
       'fuchsia': '#FF00FF'
     };
-    
+
     // Handle null, undefined, or empty color names
     if (!colorName || typeof colorName !== 'string') {
       return colorCode || '#808080';
     }
-    
+
     const normalizedColor = colorName.toLowerCase().trim();
     return colorMap[normalizedColor] || colorCode || '#808080';
   };
 
   const handleQuantityChange = async (cartItemId: number, newQuantity: number) => {
     if (newQuantity < 1 || newQuantity > 10) return;
-    
+
     setUpdatingItems(prev => new Set(prev).add(cartItemId));
     await updateCartItem(cartItemId, newQuantity);
     setUpdatingItems(prev => {
@@ -104,7 +97,7 @@ export default function CartPage() {
 
   const confirmDelete = async () => {
     if (!deleteConfirm.itemId) return;
-    
+
     setUpdatingItems(prev => new Set(prev).add(deleteConfirm.itemId!));
     await removeFromCart(deleteConfirm.itemId);
     setUpdatingItems(prev => {
@@ -112,7 +105,7 @@ export default function CartPage() {
       newSet.delete(deleteConfirm.itemId!);
       return newSet;
     });
-    
+
     setDeleteConfirm({ show: false, itemId: null, productName: '' });
   };
 
@@ -348,8 +341,8 @@ export default function CartPage() {
       </div>
 
       {/* Simple MUI Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteConfirm.show} 
+      <Dialog
+        open={deleteConfirm.show}
         onClose={cancelDelete}
         slotProps={{
           paper: {

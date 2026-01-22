@@ -3,28 +3,13 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Mail,
-  ArrowLeft,
-  Users,
-  ShoppingBag,
-  TrendingUp,
-  Sparkles,
-  Shield,
-  Clock,
-} from "lucide-react";
+import { Mail, ArrowLeft, Users, ShoppingBag, TrendingUp, Shield, Clock } from "lucide-react";
 import toast from "react-hot-toast";
-import { getApiUrl } from "@/lib/getApiUrl";
-
-// Validation schema
-const forgotPasswordSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-});
-
-type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
+import { authAPI } from "@/lib/auth";
+import { forgotPasswordSchema, ForgotPasswordFormData } from "@/lib/validators/auth";
+import { extractErrorMessage } from "@/lib/utils/error-handler";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -36,34 +21,19 @@ export default function ForgotPasswordPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ForgotPasswordForm>({
+  } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = async (data: ForgotPasswordForm) => {
+  const onSubmit = async (data: ForgotPasswordFormData) => {
     setLoading(true);
     try {
-      const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to send reset email");
-      }
-
+      await authAPI.forgotPassword(data.email);
       setEmail(data.email);
       setEmailSent(true);
       toast.success("Password reset OTP sent to your email!");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to send reset email";
-      toast.error(errorMessage);
+      toast.error(extractErrorMessage(error, "Failed to send reset email"));
     } finally {
       setLoading(false);
     }

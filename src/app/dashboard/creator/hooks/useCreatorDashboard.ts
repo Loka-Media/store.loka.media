@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { printfulAPI, productAPI } from "@/lib/api";
 import toast from "react-hot-toast";
@@ -33,7 +33,14 @@ export function useCreatorDashboard() {
     revenue: 0,
   });
 
+  const hasInitializedRef = useRef(false);
+
   useEffect(() => {
+    if (hasInitializedRef.current) {
+      return;
+    }
+    hasInitializedRef.current = true;
+
     // Check for OAuth callback parameters
     const urlParams = new URLSearchParams(window.location.search);
     const connected = urlParams.get("connected");

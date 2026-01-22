@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Users, DollarSign, TrendingUp, Search, Loader, ArrowUpDown } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { adminAPI } from '@/lib/auth';
 
 interface CreatorEarning {
   creatorId: number;
@@ -38,22 +39,13 @@ function AdminEarningsPageContent() {
   const fetchEarnings = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
 
-      const response = await fetch(
-        `/api/admin/creators/earnings?limit=${itemsPerPage}&offset=${page * itemsPerPage}&sortBy=${sortBy}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      );
+      const data = await adminAPI.getCreatorEarnings({
+        limit: itemsPerPage,
+        offset: page * itemsPerPage,
+        sortBy: sortBy,
+      });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch earnings');
-      }
-
-      const data = await response.json();
       setEarnings(data.earnings || []);
       setTotalCount(data.total || 0);
       setFilteredEarnings(data.earnings || []);

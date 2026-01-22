@@ -2,7 +2,7 @@
 /* disable-eslint */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { printfulAPI } from "@/lib/api";
 import { Search, Package, Plus, ArrowLeft } from "lucide-react";
@@ -90,6 +90,8 @@ export default function CreatorCatalogPage() {
     null
   );
 
+  const hasFetchedCategoriesRef = useRef(false);
+
   const fetchCatalog = useCallback(
     async (categoryId: number) => {
       try {
@@ -149,6 +151,11 @@ export default function CreatorCatalogPage() {
   );
 
   useEffect(() => {
+    if (hasFetchedCategoriesRef.current) {
+      return;
+    }
+    hasFetchedCategoriesRef.current = true;
+
     fetchCategories();
   }, []);
 

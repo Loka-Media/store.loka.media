@@ -4,17 +4,12 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import Link from 'next/link';
 import { authAPI } from '@/lib/auth';
 import { Mail, ArrowLeft, Sparkles, CheckCircle, Clock, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-const otpSchema = z.object({
-  otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only numbers'),
-});
-
-type OTPForm = z.infer<typeof otpSchema>;
+import { verifyEmailSchema, VerifyEmailFormData } from '@/lib/validators/auth';
+import { extractErrorMessage } from '@/lib/utils/error-handler';
 
 function VerifyEmailPageContent() {
   const [loading, setLoading] = useState(false);
@@ -30,8 +25,8 @@ function VerifyEmailPageContent() {
     formState: { errors },
     watch,
     setValue
-  } = useForm<OTPForm>({
-    resolver: zodResolver(otpSchema),
+  } = useForm<VerifyEmailFormData>({
+    resolver: zodResolver(verifyEmailSchema),
   });
 
   const otpValue = watch('otp');
@@ -49,7 +44,7 @@ function VerifyEmailPageContent() {
     }
   }, [resendCooldown]);
 
-  const onSubmit = async (data: OTPForm) => {
+  const onSubmit = async (data: VerifyEmailFormData) => {
     if (!email) return;
 
     setLoading(true);
@@ -58,11 +53,7 @@ function VerifyEmailPageContent() {
       toast.success('Email verified successfully!');
       router.push('/auth/login');
     } catch (error: unknown) {
-      const message = (error && typeof error === 'object' && 'response' in error &&
-        error.response && typeof error.response === 'object' && 'data' in error.response &&
-        error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data &&
-        typeof error.response.data.error === 'string') ? error.response.data.error : 'Verification failed';
-      toast.error(message);
+      toast.error(extractErrorMessage(error, 'Verification failed'));
     } finally {
       setLoading(false);
     }
@@ -75,13 +66,9 @@ function VerifyEmailPageContent() {
     try {
       await authAPI.resendOTP(email);
       toast.success('OTP sent successfully!');
-      setResendCooldown(60); // 60 seconds cooldown
+      setResendCooldown(60);
     } catch (error: unknown) {
-      const message = (error && typeof error === 'object' && 'response' in error &&
-        error.response && typeof error.response === 'object' && 'data' in error.response &&
-        error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data &&
-        typeof error.response.data.error === 'string') ? error.response.data.error : 'Failed to resend OTP';
-      toast.error(message);
+      toast.error(extractErrorMessage(error, 'Failed to resend OTP'));
     } finally {
       setResendLoading(false);
     }

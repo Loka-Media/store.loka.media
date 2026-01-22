@@ -22,6 +22,7 @@ import {
 import toast from 'react-hot-toast';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { Button } from '@/components/ui/button';
+import { productDetailsSchema } from '@/lib/validators/product';
 
 interface ProductDetailsFormProps {
   initialData: {
@@ -97,21 +98,22 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Product name is required';
-    } else if (formData.name.trim().length < 3) {
-      newErrors.name = 'Product name must be at least 3 characters';
-    }
+    const validationData = {
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      markupPercentage: parseFloat(formData.markupPercentage),
+      category: formData.category,
+      tags: formData.tags,
+    };
 
-    if (!formData.description.trim()) {
-      newErrors.description = 'Product description is required';
-    } else if (formData.description.trim().length < 20) {
-      newErrors.description = 'Description must be at least 20 characters';
-    }
+    const result = productDetailsSchema.safeParse(validationData);
 
-    const markupNum = parseFloat(formData.markupPercentage);
-    if (isNaN(markupNum) || markupNum < 0 || markupNum > 500) {
-      newErrors.markupPercentage = 'Markup must be between 0% and 500%';
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0]) {
+          newErrors[issue.path[0] as string] = issue.message;
+        }
+      });
     }
 
     setErrors(newErrors);
@@ -134,10 +136,8 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
       tags: formData.tags
     };
 
-    // Pass the product data to onSave for state management
     onSave(productData);
 
-    // Also pass the data to onNext to avoid state timing issues
     const formDataForNext = {
       name: formData.name.trim(),
       description: formData.description.trim(),
@@ -146,8 +146,6 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
       tags: formData.tags
     };
     onNext(formDataForNext);
-
-    toast.success('Product details saved! Ready to go live! 🎉');
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -182,7 +180,8 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
           {onBack && (
             <button
               onClick={onBack}
-              className="mb-3 sm:mb-4 flex items-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-800 text-gray-200 border border-gray-700 rounded-lg font-bold hover:bg-gray-700 hover:border-gray-600 transition-all"
+              disabled={isLoading}
+              className="mb-3 sm:mb-4 flex items-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-800 text-gray-200 border border-gray-700 rounded-lg font-bold hover:bg-gray-700 hover:border-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-800"
             >
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="hidden sm:inline">Back to Design</span>
@@ -409,7 +408,9 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   <select
                     value={formData.category}
                     onChange={(e) => handleInputChange('category', e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none"
+                    className={`w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none ${
+                      errors.category ? 'border-orange-500/50 bg-orange-500/10' : ''
+                    }`}
                   >
                     <option value="">Select a category</option>
                     <option value="apparel">Apparel</option>
@@ -423,6 +424,12 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                     <ChevronLeft className="w-5 h-5 rotate-90" />
                   </div>
                 </div>
+                {errors.category && (
+                  <div className="mt-2 flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg px-3 py-2">
+                    <AlertCircle className="w-4 h-4 text-orange-400" />
+                    <p className="text-sm font-bold text-orange-300">{errors.category}</p>
+                  </div>
+                )}
               </div>
 
               {/* Tags */}
@@ -477,6 +484,13 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   </div>
                 )}
 
+                {errors.tags && (
+                  <div className="mt-2 flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg px-3 py-2">
+                    <AlertCircle className="w-4 h-4 text-orange-400" />
+                    <p className="text-sm font-bold text-orange-300">{errors.tags}</p>
+                  </div>
+                )}
+
                 {/* Suggested Tags */}
                 <div>
                   <p className="text-xs text-gray-500 mb-2">SUGGESTED:</p>
@@ -502,7 +516,22 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                 </div>
               </div>
 
-              {/* Submit Button */}
+              {isLoading && (
+                <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-4 mb-4 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="w-6 h-6 text-orange-400 flex-shrink-0" />
+                    <div>
+                      <p className="text-orange-400 font-bold text-sm sm:text-base">
+                        Publishing in progress...
+                      </p>
+                      <p className="text-orange-300 text-xs sm:text-sm mt-1">
+                        Do not refresh or navigate away from this page!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="w-full">
                 <Button
                   type="submit"
@@ -513,8 +542,8 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   {isLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-5 sm:h-6 w-5 sm:w-6 border-b-2 border-black" />
-                      <span className="hidden sm:inline">Saving...</span>
-                      <span className="sm:hidden">Save...</span>
+                      <span className="hidden sm:inline">Publishing to Marketplace...</span>
+                      <span className="sm:hidden">Publishing...</span>
                     </>
                   ) : (
                     <>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { printfulAPI } from '@/lib/api';
 import {
@@ -51,6 +51,8 @@ export default function FilesPage() {
     status: ''
   });
 
+  const hasFetchedRef = useRef(false);
+
   const getMimeType = (filename: string): string => {
     const ext = filename.split('.').pop()?.toLowerCase() || '';
     const mimeMap: { [key: string]: string } = {
@@ -91,7 +93,12 @@ export default function FilesPage() {
     if (user?.role !== 'creator' && user?.role !== 'admin') {
       return;
     }
-    
+
+    if (hasFetchedRef.current) {
+      return;
+    }
+    hasFetchedRef.current = true;
+
     fetchFiles();
   }, [user, fetchFiles]);
 

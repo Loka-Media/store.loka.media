@@ -3,34 +3,13 @@
 import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Lock,
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  Shield,
-  CheckCircle,
-  Sparkles,
-  Key,
-} from "lucide-react";
+import { Lock, ArrowLeft, Eye, EyeOff, Shield, CheckCircle, Key } from "lucide-react";
 import toast from "react-hot-toast";
-import { getApiUrl } from "@/lib/getApiUrl";
-
-// Validation schema
-const resetPasswordSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  otp: z.string().length(6, "OTP must be exactly 6 digits").regex(/^\d+$/, "OTP must contain only numbers"),
-  newPassword: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
+import { authAPI } from "@/lib/auth";
+import { resetPasswordSchema, ResetPasswordFormData } from "@/lib/validators/auth";
+import { extractErrorMessage } from "@/lib/utils/error-handler";
 
 function ResetPasswordContent() {
   const [loading, setLoading] = useState(false);
@@ -46,47 +25,27 @@ function ResetPasswordContent() {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<ResetPasswordForm>({
+  } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       email: emailParam,
     },
   });
 
-  // Set email from URL params
   useEffect(() => {
     if (emailParam) {
       setValue("email", emailParam);
     }
   }, [emailParam, setValue]);
 
-  const onSubmit = async (data: ResetPasswordForm) => {
+  const onSubmit = async (data: ResetPasswordFormData) => {
     setLoading(true);
     try {
-      const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/api/auth/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.email,
-          otp: data.otp,
-          newPassword: data.newPassword,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to reset password");
-      }
-
+      await authAPI.resetPassword(data.email, data.otp, data.newPassword);
       setResetSuccess(true);
       toast.success("Password reset successfully!");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to reset password";
-      toast.error(errorMessage);
+      toast.error(extractErrorMessage(error, "Failed to reset password"));
     } finally {
       setLoading(false);
     }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { LinkIcon, Unlink2, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import CreatorProtectedRoute from '@/components/CreatorProtectedRoute';
+import { creatorStripeAPI } from '@/lib/api';
 
 interface StripeStatus {
   connected: boolean;
@@ -30,19 +31,8 @@ function StripeSettingsPageContent() {
   const fetchStripeStatus = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
 
-      const response = await fetch('/api/creator/stripe/status', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch Stripe status');
-      }
-
-      const data = await response.json();
+      const data = await creatorStripeAPI.getStripeStatus();
       setStripeStatus(data);
     } catch (error) {
       console.error('Error fetching Stripe status:', error);
@@ -55,19 +45,8 @@ function StripeSettingsPageContent() {
   const handleConnectStripe = async () => {
     try {
       setConnecting(true);
-      const token = localStorage.getItem('accessToken');
 
-      const response = await fetch('/api/creator/stripe/auth-url', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get Stripe authorization URL');
-      }
-
-      const data = await response.json();
+      const data = await creatorStripeAPI.getStripeAuthUrl();
 
       // Redirect to Stripe OAuth
       window.location.href = data.authorizationUrl;
@@ -85,19 +64,8 @@ function StripeSettingsPageContent() {
 
     try {
       setDisconnecting(true);
-      const token = localStorage.getItem('accessToken');
 
-      const response = await fetch('/api/creator/stripe/disconnect', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to disconnect Stripe account');
-      }
+      await creatorStripeAPI.disconnectStripe();
 
       toast.success('Stripe account disconnected successfully');
       await fetchStripeStatus();

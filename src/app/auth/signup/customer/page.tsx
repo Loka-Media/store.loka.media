@@ -1,47 +1,17 @@
-// pages/auth/signup/customer/page.tsx
 "use client";
 
 import { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import GradientTitle from "@/components/ui/GradientTitle";
 import { GradientText } from "@/components/ui/GradientText";
 import StartShape from "@/components/ui/StartShape";
 import { Button } from "@/components/ui/button";
-import {
-  Eye,
-  EyeOff,
-  User,
-  Mail,
-  Phone,
-  Lock,
-} from "lucide-react";
-
-const customerRegisterSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    username: z
-      .string()
-      .min(3, "Username must be at least 3 characters")
-      .regex(
-        /^[a-zA-Z0-9_]+$/,
-        "Username can only contain letters, numbers, and underscores"
-      ),
-    email: z.string().email("Please enter a valid email"),
-    phone: z.string().min(10, "Please enter a valid phone number"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type CustomerRegisterForm = z.infer<typeof customerRegisterSchema>;
+import { Eye, EyeOff, User, Mail, Phone, Lock } from "lucide-react";
+import { customerRegisterSchema, CustomerRegisterFormData } from "@/lib/validators/auth";
 
 function CustomerSignupContent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -54,11 +24,11 @@ function CustomerSignupContent() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<CustomerRegisterForm>({
+  } = useForm<CustomerRegisterFormData>({
     resolver: zodResolver(customerRegisterSchema),
   });
 
-  const onSubmit = async (data: CustomerRegisterForm) => {
+  const onSubmit = async (data: CustomerRegisterFormData) => {
     setLoading(true);
     try {
       const success = await registerUser({
@@ -66,9 +36,7 @@ function CustomerSignupContent() {
         role: "user",
       });
       if (success) {
-        router.push(
-          `/auth/verify-email?email=${encodeURIComponent(data.email)}`
-        );
+        router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
       }
     } catch (error) {
       console.error("Registration error:", error);

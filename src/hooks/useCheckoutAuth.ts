@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { User, CustomerInfo } from '@/lib/checkout-types';
-import { authAPI } from '@/lib/checkout-api';
+import { authAPI } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
 export const useCheckoutAuth = () => {
@@ -19,7 +19,7 @@ export const useCheckoutAuth = () => {
         return;
       }
 
-      const result = await authAPI.login(loginInfo.email, loginInfo.password);
+      const result = await authAPI.login({ email: loginInfo.email, password: loginInfo.password });
 
       localStorage.setItem('token', result.tokens.accessToken);
       localStorage.setItem('accessToken', result.tokens.accessToken);
