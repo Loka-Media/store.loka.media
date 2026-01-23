@@ -81,7 +81,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               basePrice={product.base_price}
               selectedVariantPrice={selectedVariant?.price}
               category={product.category}
-              creatorName={product.creator?.name || product.creator_name || 'Unknown'}
+              creatorName={product.creator_name || 'Unknown'}
               markupPercentage={product.markup_percentage}
             />
 
