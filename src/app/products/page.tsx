@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
-import { TrendingUp, Zap, Heart } from "lucide-react";
+import { TrendingUp, Zap, Heart, X } from "lucide-react";
 
 import { ProductsHero } from "@/components/products/ProductsHero";
 import { FeaturedProducts } from "@/components/products/FeaturedProducts";
@@ -37,6 +37,7 @@ function ProductsContent() {
   // Refs to track initialization and prevent strict mode double-fetching
   const isStaticDataFetched = useRef(false);
   const lastFetchedFiltersRef = useRef<string | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [products, setProducts] = useState<ExtendedProduct[]>([]);
   const [categories, setCategories] = useState<
@@ -48,6 +49,7 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeView, setActiveView] = useState<ViewType>("trending");
+  const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
 
   const [filters, setFilters] = useState(() => ({
     category: searchParams.get("category") || "",
@@ -142,6 +144,35 @@ function ProductsContent() {
     fetchCreators();
   }, [fetchCategories, fetchCreators]);
 
+  // Search Input Debounce - Only update filters after user stops typing
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      if (searchInput !== filters.search) {
+        const newFilters = { ...filters, search: searchInput };
+        setFilters(newFilters);
+
+        const params = new URLSearchParams();
+        if (newFilters.category) params.set("category", newFilters.category);
+        if (searchInput) params.set("search", searchInput);
+        if (newFilters.creator) params.set("creator", newFilters.creator);
+        if (newFilters.source && newFilters.source !== "all")
+          params.set("source", newFilters.source);
+
+        window.history.replaceState({}, '', searchInput || newFilters.category || newFilters.creator ? `/products?${params.toString()}` : '/products');
+      }
+    }, 500);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchInput, filters]);
+
   // 2. URL Sync
   useEffect(() => {
     const currentCategory = searchParams.get("category") || "";
@@ -194,17 +225,21 @@ function ProductsContent() {
 
 
   const handleFilterChange = (key: string, value: string) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
+    if (key === "search") {
+      setSearchInput(value);
+    } else {
+      const newFilters = { ...filters, [key]: value };
+      setFilters(newFilters);
 
-    const params = new URLSearchParams();
-    if (newFilters.category) params.set("category", newFilters.category);
-    if (newFilters.search) params.set("search", newFilters.search);
-    if (newFilters.creator) params.set("creator", newFilters.creator);
-    if (newFilters.source && newFilters.source !== "all")
-      params.set("source", newFilters.source);
+      const params = new URLSearchParams();
+      if (newFilters.category) params.set("category", newFilters.category);
+      if (newFilters.search) params.set("search", newFilters.search);
+      if (newFilters.creator) params.set("creator", newFilters.creator);
+      if (newFilters.source && newFilters.source !== "all")
+        params.set("source", newFilters.source);
 
-    window.history.replaceState({}, '', `/products?${params.toString()}`);
+      window.history.replaceState({}, '', newFilters.category || newFilters.search || newFilters.creator ? `/products?${params.toString()}` : '/products');
+    }
   };
 
   const clearFilters = () => {
@@ -218,6 +253,7 @@ function ProductsContent() {
       minPrice: undefined,
       maxPrice: undefined,
     };
+    setSearchInput("");
     setFilters(clearedFilters);
     window.history.replaceState({}, '', '/products');
   };
@@ -235,12 +271,38 @@ function ProductsContent() {
 
   return (
     <div className="bg-black text-white min-h-screen">
+      <style>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        .filter-section-animate {
+          animation: slideDown 0.5s ease-out;
+        }
+        .products-section-animate {
+          animation: fadeIn 0.5s ease-out;
+        }
+      `}</style>
       <ProductsHero
         creators={creators}
         categories={categories}
       />
 
-      <div className="bg-black border-b border-white/10 relative z-40">
+      <div className="bg-black border-b border-white/10 relative z-40 filter-section-animate">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:py-8 overflow-visible">
           <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
             <div className="relative w-full lg:w-1/2">
@@ -250,50 +312,51 @@ function ProductsContent() {
               <input
                 type="text"
                 placeholder="Search Files"
-                value={filters.search}
+                value={searchInput}
                 onChange={(e) => handleFilterChange("search", e.target.value)}
-                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/20 bg-gradient-to-br from-gray-800 to-gray-900 text-white text-xs sm:text-sm placeholder-white/40 hover:border-orange-400/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 transition-all"
+                className={`w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border bg-gradient-to-br from-gray-800 to-gray-900 text-white text-xs sm:text-sm placeholder-white/40 focus:outline-none focus:ring-2 transition-all duration-300 ${
+                  loading && searchInput ? "border-blue-400 focus:border-blue-400 focus:ring-blue-400/20 shadow-[0_0_20px_rgba(96,165,250,0.2)]" : "border-white/20 hover:border-orange-400/50 focus:border-orange-400 focus:ring-orange-400/20 hover:shadow-[0_0_15px_rgba(255,99,71,0.15)]"
+                }`}
               />
             </div>
 
             <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 w-full lg:w-1/2">
-              <select
-                value={filters.category}
-                onChange={(e) => handleFilterChange("category", e.target.value)}
-                className="flex-1 px-4 sm:px-5 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/30 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-orange-400 hover:shadow-[0_8px_24px_rgba(255,99,71,0.15)] focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all cursor-pointer font-medium appearance-none"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 12px center',
-                  paddingRight: '32px',
-                }}
-              >
-                <option value="">All Types</option>
-                {categories.map((cat) => (
-                  <option key={cat.category} value={cat.category}>
-                    {cat.category} ({cat.product_count})
-                  </option>
-                ))}
-              </select>
+              <div className="relative flex-1">
+                <select
+                  value={filters.category}
+                  onChange={(e) => handleFilterChange("category", e.target.value)}
+                  className={`w-full px-4 sm:px-5 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:shadow-[0_8px_24px_rgba(255,99,71,0.15)] focus:outline-none focus:ring-2 transition-all cursor-pointer font-medium appearance-none ${
+                    filters.category ? "border-blue-400 focus:border-blue-400 focus:ring-blue-400/30" : "border-white/30 hover:border-orange-400 focus:border-orange-400 focus:ring-orange-400/30"
+                  }`}
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 12px center',
+                    paddingRight: '32px',
+                  }}
+                >
+                  <option value="">All Types</option>
+                  {categories.map((cat) => (
+                    <option key={cat.category} value={cat.category}>
+                      {cat.category} ({cat.product_count})
+                    </option>
+                  ))}
+                </select>
+                {filters.category && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full"></div>
+                )}
+              </div>
 
-              <select
-                value={filters.creator}
-                onChange={(e) => handleFilterChange("creator", e.target.value)}
-                className="flex-1 px-4 sm:px-5 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/30 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-orange-400 hover:shadow-[0_8px_24px_rgba(255,99,71,0.15)] focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all cursor-pointer font-medium appearance-none"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 12px center',
-                  paddingRight: '32px',
-                }}
-              >
-                <option value="">All Creators</option>
-                {creators.map((creator) => (
-                  <option key={creator.id} value={creator.name}>
-                    {creator.name} ({creator.product_count})
-                  </option>
-                ))}
-              </select>
+              {(filters.category || searchInput || filters.creator) && (
+                <button
+                  onClick={clearFilters}
+                  className="px-3 sm:px-4 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/20 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-red-400 hover:shadow-[0_8px_24px_rgba(239,68,68,0.15)] focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/30 transition-all cursor-pointer font-medium flex items-center justify-center gap-1.5"
+                  title="Clear all filters"
+                >
+                  <X className="w-4 h-4" />
+                  <span className="hidden sm:inline">Clear</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -340,7 +403,7 @@ function ProductsContent() {
         <FeaturedProducts products={products} />
       )}
 
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 products-section-animate">
         {loading ? (
           <ProductsLoading message="Discovering amazing products..." />
         ) : products.length === 0 ? (

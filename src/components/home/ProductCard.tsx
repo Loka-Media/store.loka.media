@@ -139,25 +139,20 @@ export function ProductCard({
 
       <div className="p-6 relative z-10">
         <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-          <h3 className="font-bold text-white hover:text-orange-400 transition-colors text-lg leading-tight line-clamp-2 mb-3 group-hover:text-orange-300">
+          <h3 className="font-normal text-white hover:text-orange-400 transition-colors text-lg leading-tight line-clamp-2 mb-3 group-hover:text-orange-300">
             {product.name}
           </h3>
         </Link>
 
-        {/* Creator and rating */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Creator */}
+        <div className="flex items-center mb-4">
           <div className="flex items-center bg-gray-800/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-gray-700/50">
             <div className="w-6 h-6 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mr-2">
               <User className="w-3 h-3 text-white" />
             </div>
             <span className="text-xs text-gray-300 font-medium">
-              {product.creator_name}
+              {product.creator?.name || product.creator_name || 'Unknown'}
             </span>
-          </div>
-
-          <div className="flex items-center bg-yellow-500/20 rounded-full px-2 py-1">
-            <Star className="w-3 h-3 text-yellow-400 fill-current mr-1" />
-            <span className="text-xs text-yellow-200 font-medium">4.8</span>
           </div>
         </div>
 
@@ -168,17 +163,29 @@ export function ProductCard({
               <span className="text-sm text-gray-500 line-through">
                 $
                 {(
-                  parseFloat(product.min_price?.toString().replace("$", "")) *
-                  (1 + discountPercentage / 100)
+                  parseFloat(
+                    product.price_range?.min
+                      ? product.price_range.min.toString()
+                      : product.base_price?.toString() || "0"
+                  ) * (1 + discountPercentage / 100)
                 ).toFixed(2)}
               </span>
             )}
             <span className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              {formatPrice(product.min_price)}
+              {formatPrice(
+                parseFloat(
+                  product.price_range?.min
+                    ? product.price_range.min.toString()
+                    : product.base_price?.toString() || "0"
+                )
+              )}
             </span>
-            {product.max_price > product.min_price && (
+            {product.price_range?.min &&
+              product.price_range?.max &&
+              parseFloat(product.price_range.max.toString()) >
+                parseFloat(product.price_range.min.toString()) && (
               <span className="text-sm text-gray-400">
-                - {formatPrice(product.max_price)}
+                - {formatPrice(parseFloat(product.price_range.max.toString()))}
               </span>
             )}
           </div>

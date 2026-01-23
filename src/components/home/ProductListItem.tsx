@@ -84,14 +84,14 @@ export function ProductListItem({
                   product.id
                 )}`}
               >
-                <h3 className="text-xl font-semibold text-white hover:text-orange-400 transition-colors line-clamp-2">
+                <h3 className="text-xl font-normal text-white hover:text-orange-400 transition-colors line-clamp-2">
                   {product.name}
                 </h3>
               </Link>
 
               <p className="text-gray-400 mt-1 flex items-center">
                 <User className="w-4 h-4 text-gray-500 mr-1" />
-                by {product.creator_name}
+                by {product.creator?.name || product.creator_name || 'Unknown'}
               </p>
 
               <p className="text-gray-300 mt-3 line-clamp-3 text-sm">
@@ -147,10 +147,19 @@ export function ProductListItem({
 
             <div className="md:text-right mt-4 md:mt-0 md:ml-6 flex flex-col items-start md:items-end">
               <div className="text-2xl font-bold text-white">
-                {formatPrice(product.min_price)}
-                {product.max_price > product.min_price && (
+                {formatPrice(
+                  parseFloat(
+                    product.price_range?.min
+                      ? product.price_range.min.toString()
+                      : product.base_price?.toString() || "0"
+                  )
+                )}
+                {product.price_range?.min &&
+                  product.price_range?.max &&
+                  parseFloat(product.price_range.max.toString()) >
+                    parseFloat(product.price_range.min.toString()) && (
                   <span className="text-lg text-gray-500 block">
-                    - {formatPrice(product.max_price)}
+                    - {formatPrice(parseFloat(product.price_range.max.toString()))}
                   </span>
                 )}
               </div>

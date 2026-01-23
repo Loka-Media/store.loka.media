@@ -65,24 +65,17 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                   </div>
                 </div>
 
-                {/* Rating Badge - Bottom Right */}
-                <div className="absolute bottom-3 right-3 z-10">
-                  <div className="bg-black px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
-                    <span className="text-xs font-extrabold text-white">4.8</span>
-                    <span className="text-sm">⭐</span>
-                  </div>
-                </div>
               </div>
 
               {/* Content Section - Below Image */}
               <div className="bg-black px-3 py-2.5 flex flex-col h-full">
                 {/* Creator Name */}
                 <p className="text-xs text-gray-400 font-semibold mb-1">
-                  by {product.creator_name}
+                  by {product.creator?.name || product.creator_name || 'Unknown'}
                 </p>
 
                 {/* Product Title */}
-                <div className="font-extrabold text-sm text-white mb-auto line-clamp-2 group-hover:text-orange-400 transition-colors tracking-tight">
+                <div className="font-normal text-sm text-white mb-auto line-clamp-2 group-hover:text-orange-400 transition-colors tracking-tight">
                   {product.name}
                 </div>
 

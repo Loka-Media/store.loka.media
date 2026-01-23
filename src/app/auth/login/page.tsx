@@ -87,7 +87,7 @@ function LoginPageContent() {
                     </svg>
                   </div>
                 </StartShape>
-                <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">7+</div>
+                <div className="text-lg sm:text-2xl font-normal text-white mt-2 sm:mt-3">7+</div>
                 <div className="text-xs text-white">Platforms</div>
               </div>
               <div className="text-center flex flex-col items-center">
@@ -119,7 +119,7 @@ function LoginPageContent() {
                     </svg>
                   </div>
                 </StartShape>
-                <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">40K+</div>
+                <div className="text-lg sm:text-2xl font-normal text-white mt-2 sm:mt-3">40K+</div>
                 <div className="text-xs text-white">Products</div>
               </div>
               <div className="text-center flex flex-col items-center">
@@ -146,7 +146,7 @@ function LoginPageContent() {
                     </svg>
                   </div>
                 </StartShape>
-                <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">$1M++</div>
+                <div className="text-lg sm:text-2xl font-normal text-white mt-2 sm:mt-3">$1M++</div>
                 <div className="text-xs text-white">Revenue</div>
               </div>
             </div>
@@ -272,7 +272,7 @@ function LoginPageContent() {
                 <div className="flex items-center justify-end">
                   <Link
                     href="/auth/forgot-password"
-                    className="text-xs sm:text-sm font-bold text-orange-500 hover:text-orange-600 transition-colors underline"
+                    className="text-xs sm:text-sm font-normal text-orange-500 hover:text-orange-600 transition-colors underline"
                   >
                     Forgot password?
                   </Link>
@@ -297,30 +297,70 @@ function LoginPageContent() {
                   </Button>
                 </div>
 
-                {/* Footer Links */}
+                {/* Footer Links - Enhanced Creative Section */}
                 <div className="mt-6 sm:mt-8 lg:mt-10 pt-4 sm:pt-6 lg:pt-8 border-t border-white/10">
-                  <p className="text-xs text-white/60 text-center leading-relaxed mb-4">
-                    New to our platform?
-                  </p>
-                  <div className="space-y-2.5">
+                  <style>{`
+                    @keyframes slideInUp {
+                      from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                      }
+                      to {
+                        opacity: 1;
+                        transform: translateY(0);
+                      }
+                    }
+                    @keyframes shimmerEdge {
+                      0% { border-color: rgba(34, 197, 94, 0.3); }
+                      50% { border-color: rgba(34, 197, 94, 0.8); }
+                      100% { border-color: rgba(34, 197, 94, 0.3); }
+                    }
+                    .signup-button-group {
+                      animation: slideInUp 0.6s ease-out;
+                    }
+                    .signup-button {
+                      position: relative;
+                      overflow: hidden;
+                      transition: all 0.3s ease;
+                    }
+                    .signup-button::before {
+                      content: '';
+                      position: absolute;
+                      top: 0;
+                      left: -100%;
+                      width: 100%;
+                      height: 100%;
+                      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                      transition: left 0.5s ease;
+                    }
+                    .signup-button:hover::before {
+                      left: 100%;
+                    }
+                  `}</style>
+                  <div className="text-center mb-4 sm:mb-6">
+                    <p className="text-sm sm:text-base font-normal text-white mb-1">New to our platform?</p>
+                    <p className="text-xs sm:text-sm text-white/50">Choose your path and start your creative journey</p>
+                  </div>
+
+                  <div className="space-y-2.5 signup-button-group">
                     {/* Customer Signup Button */}
                     <Button
                       href="/auth/signup/customer"
                       variant="secondary"
-                      className="w-full flex items-center justify-between gap-3 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 hover:border-green-400/60 hover:from-green-900/30 hover:to-emerald-900/30 !rounded-lg sm:!rounded-xl !text-left !px-3 sm:!px-3.5 !py-3 sm:!py-3.5"
+                      className="signup-button w-full flex items-center justify-between gap-3 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 hover:border-green-400 hover:from-green-900/40 hover:to-emerald-900/40 hover:shadow-[0_0_20px_rgba(34,197,94,0.2)] !rounded-lg sm:!rounded-xl !text-left !px-3 sm:!px-4 !py-4 sm:!py-4 transition-all duration-300 group"
                     >
                       <div className="flex items-center gap-3 flex-1">
-                        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex-shrink-0">
+                        <div className="flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                           <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 6H6.28l-.31-1.243A1 1 0 005 4H3z" />
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-white">Shop Amazing Products</p>
-                          <p className="text-xs text-white/60">Browse & buy from creators</p>
+                          <p className="text-sm font-normal text-white group-hover:text-green-300 transition-colors">Shop Amazing Products</p>
+                          <p className="text-xs text-white/60 group-hover:text-white/80 transition-colors">Browse & buy from creators</p>
                         </div>
                       </div>
-                      <div className="text-green-400 flex-shrink-0">
+                      <div className="text-green-400 flex-shrink-0 group-hover:translate-x-1 transition-transform duration-300">
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -331,20 +371,20 @@ function LoginPageContent() {
                     <Button
                       href="/auth/signup/creator"
                       variant="secondary"
-                      className="w-full flex items-center justify-between gap-3 bg-gradient-to-r from-orange-900/20 to-red-900/20 border border-orange-500/30 hover:border-orange-400/60 hover:from-orange-900/30 hover:to-red-900/30 !rounded-lg sm:!rounded-xl !text-left !px-3 sm:!px-3.5 !py-3 sm:!py-3.5"
+                      className="signup-button w-full flex items-center justify-between gap-3 bg-gradient-to-r from-orange-900/20 to-red-900/20 border border-orange-500/30 hover:border-orange-400 hover:from-orange-900/40 hover:to-red-900/40 hover:shadow-[0_0_20px_rgba(255,124,31,0.2)] !rounded-lg sm:!rounded-xl !text-left !px-3 sm:!px-4 !py-4 sm:!py-4 transition-all duration-300 group"
                     >
                       <div className="flex items-center gap-3 flex-1">
-                        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex-shrink-0">
+                        <div className="flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                           <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-white">Start Selling Now</p>
-                          <p className="text-xs text-white/60">Earn by creating & selling</p>
+                          <p className="text-sm font-normal text-white group-hover:text-orange-300 transition-colors">Start Selling Now</p>
+                          <p className="text-xs text-white/60 group-hover:text-white/80 transition-colors">Earn by creating & selling</p>
                         </div>
                       </div>
-                      <div className="text-orange-400 flex-shrink-0">
+                      <div className="text-orange-400 flex-shrink-0 group-hover:translate-x-1 transition-transform duration-300">
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>

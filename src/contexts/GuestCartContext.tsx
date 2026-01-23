@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { cartAPI, CartItem, CartSummary } from '@/lib/api';
 import { useAuth } from './AuthContext';
-import toast from 'react-hot-toast';
 
 interface GuestCartItem {
   id: number;
@@ -201,10 +200,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         setCartCount(response.summary.itemCount);
       } catch (error) {
         console.error('Failed to fetch cart:', error);
-        // Don't show error toast on background refreshes to avoid spam
-        if (forceRefresh) {
-          toast.error('Failed to load cart');
-        }
+        // Silently fail - no error toast for cart operations
       } finally {
         setLoading(false);
       }
@@ -260,8 +256,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         await refreshCart();
         return true;
       } catch (error: unknown) {
-        const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to add to cart';
-        toast.error(message);
+        console.error('Failed to add to cart:', error);
+        // Silently fail - no error toast for cart operations
         return false;
       }
     } else {
@@ -307,14 +303,11 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
             };
           } else {
             // Since there's no cached data, we cannot add the product to guest cart
-            // The ProductListItem should have cached the data, so this is an error state
             console.error('No cached product data available for variant:', variantId);
-            toast.error('Product data not available. Please try again.');
             return false;
           }
         } catch (error) {
           console.error('Failed to get cached product data:', error);
-          toast.error('Unable to add product to cart. Please try again.');
           return false;
         }
         
@@ -344,7 +337,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         return true;
       } catch (error) {
         console.error('Failed to add to guest cart:', error);
-        toast.error('Failed to add to cart');
+        // Silently fail - no error toast for cart operations
         return false;
       }
     }
@@ -358,8 +351,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         await refreshCart();
         return true;
       } catch (error: unknown) {
-        const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to update cart';
-        toast.error(message);
+        console.error('Failed to update cart:', error);
+        // Silently fail - no error toast for cart operations
         return false;
       }
     } else {
@@ -389,7 +382,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
 
         return true;
       } catch (error) {
-        toast.error('Failed to update cart');
+        console.error('Failed to update guest cart:', error);
+        // Silently fail - no error toast for cart operations
         return false;
       }
     }
@@ -403,8 +397,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         await refreshCart();
         return true;
       } catch (error: unknown) {
-        const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to remove item';
-        toast.error(message);
+        console.error('Failed to remove from cart:', error);
+        // Silently fail - no error toast for cart operations
         return false;
       }
     } else {
@@ -420,7 +414,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
 
         return true;
       } catch (error) {
-        toast.error('Failed to remove item');
+        console.error('Failed to remove from guest cart:', error);
+        // Silently fail - no error toast for cart operations
         return false;
       }
     }
@@ -434,8 +429,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         await refreshCart();
         return true;
       } catch (error: unknown) {
-        const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to clear cart';
-        toast.error(message);
+        console.error('Failed to clear cart:', error);
+        // Silently fail - no error toast for cart operations
         return false;
       }
     } else {
@@ -455,7 +450,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
 
         return true;
       } catch (error) {
-        toast.error('Failed to clear cart');
+        console.error('Failed to clear guest cart:', error);
+        // Silently fail - no error toast for cart operations
         return false;
       }
     }

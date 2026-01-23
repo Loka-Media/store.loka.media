@@ -52,7 +52,7 @@ export const useCartMerge = () => {
 
     } catch (error) {
       console.error('Cart check error:', error);
-      toast.error('Login successful, but cart check failed');
+      // Silently fail - no error toast for cart operations
     }
   }, []);
 
@@ -78,7 +78,7 @@ export const useCartMerge = () => {
 
     } catch (error) {
       console.error('Merge error:', error);
-      toast.error('Failed to merge carts');
+      // Silently fail - no error toast for cart operations
     } finally {
       setLoading(false);
     }

@@ -108,13 +108,14 @@ export function ProductListItem({ product }: ProductListItemProps) {
         const variantCacheData = {
           product_id: product.id,
           product_name: product.name,
-          price: selectedVariant.price?.toString() || product.min_price?.toString() || '25.00',
+          price: selectedVariant.price?.toString() ||
+            (product.price_range?.min ? product.price_range.min.toString() : product.base_price?.toString() || '25.00'),
           size: selectedVariant.size || selectedVariant.title?.split(' / ')[1] || 'One Size',
           color: selectedVariant.color || selectedVariant.title?.split(' / ')[0] || 'Default',
           color_code: selectedVariant.color_code || '#808080',
           image_url: selectedVariant.image_url || product.thumbnail_url || product.images?.[0],
           thumbnail_url: product.thumbnail_url || product.images?.[0],
-          creator_name: product.creator_name,
+          creator_name: product.creator?.name || product.creator_name || 'Unknown',
           source: product.product_source || 'unknown',
           shopify_variant_id: selectedVariant.shopify_variant_id,
           printful_variant_id: selectedVariant.printful_variant_id
@@ -204,7 +205,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
                   product.id
                 )}`}
               >
-                <h3 className="text-lg font-bold text-white hover:text-orange-400 transition-colors duration-200 mb-1">
+                <h3 className="text-lg font-normal text-white hover:text-orange-400 transition-colors duration-200 mb-1">
                   {product.name}
                 </h3>
               </Link>
@@ -214,12 +215,8 @@ export function ProductListItem({ product }: ProductListItemProps) {
                   <User className="w-2 h-2 text-white" />
                 </div>
                 <span className="text-gray-300 font-medium text-sm">
-                  by {product.creator_name}
+                  by {product.creator?.name || product.creator_name || 'Unknown'}
                 </span>
-                <div className="flex items-center ml-3">
-                  <Star className="w-3 h-3 text-yellow-400 fill-current mr-1" />
-                  <span className="text-yellow-200 font-medium text-sm">4.8</span>
-                </div>
 
                 {/* Inventory status */}
                 {inventoryStatus.totalCount > 0 && (
@@ -287,10 +284,19 @@ export function ProductListItem({ product }: ProductListItemProps) {
             <div className="text-right ml-4 flex flex-col items-end">
               <div className="mb-2">
                 <div className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                  {formatPrice(product.min_price)}
-                  {product.max_price > product.min_price && (
+                  {formatPrice(
+                    parseFloat(
+                      product.price_range?.min
+                        ? product.price_range.min.toString()
+                        : product.base_price?.toString() || "0"
+                    )
+                  )}
+                  {product.price_range?.min &&
+                    product.price_range?.max &&
+                    parseFloat(product.price_range.max.toString()) >
+                      parseFloat(product.price_range.min.toString()) && (
                     <div className="text-sm text-gray-400 mt-0.5">
-                      - {formatPrice(product.max_price)}
+                      - {formatPrice(parseFloat(product.price_range.max.toString()))}
                     </div>
                   )}
                 </div>

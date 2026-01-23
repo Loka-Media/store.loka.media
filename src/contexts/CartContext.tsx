@@ -1,9 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
-import { cartAPI, CartItem, CartSummary, printfulAPI, productAPI } from '@/lib/api';
+import { cartAPI, CartItem, CartSummary } from '@/lib/api';
 import { useAuth } from './AuthContext';
-import toast from 'react-hot-toast';
 
 interface CartContextType {
   items: CartItem[];
@@ -77,10 +76,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setCartCount(response.summary.itemCount);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
-      // Don't show error toast on background refreshes to avoid spam
-      if (forceRefresh) {
-        toast.error('Failed to load cart');
-      }
+      // Silently fail - no error toast for cart operations
     } finally {
       setLoading(false);
     }
@@ -149,7 +145,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = async (variantId: number, quantity: number = 1): Promise<boolean> => {
     if (!isAuthenticated) {
-      toast.error('Please login to add items to cart');
       return false;
     }
 
@@ -159,24 +154,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await refreshCart();
       return true;
     } catch (error: unknown) {
-      const errorResponse = error as { response?: { data?: { error?: string } } };
-      const message = errorResponse?.response?.data?.error || 'Failed to add to cart';
-      
-      // Handle specific availability errors from backend
-      if (message.includes('out of stock') || message.includes('unavailable') || message.includes('not available')) {
-        toast.error('Product is currently out of stock');
-      } else if (message.includes('insufficient inventory') || message.includes('not enough stock')) {
-        toast.error('Insufficient stock for the requested quantity');
-      } else {
-        toast.error(message);
-      }
+      console.error('Failed to add to cart:', error);
+      // Silently fail - no error toast for cart operations
       return false;
     }
   };
 
   const updateCartItem = async (cartItemId: number, quantity: number): Promise<boolean> => {
     if (!isAuthenticated) {
-      toast.error('Please login to update cart');
       return false;
     }
 
@@ -185,15 +170,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await refreshCart();
       return true;
     } catch (error: unknown) {
-      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to update cart';
-      toast.error(message);
+      console.error('Failed to update cart:', error);
+      // Silently fail - no error toast for cart operations
       return false;
     }
   };
 
   const removeFromCart = async (cartItemId: number): Promise<boolean> => {
     if (!isAuthenticated) {
-      toast.error('Please login to remove items');
       return false;
     }
 
@@ -202,15 +186,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await refreshCart();
       return true;
     } catch (error: unknown) {
-      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to remove item';
-      toast.error(message);
+      console.error('Failed to remove from cart:', error);
+      // Silently fail - no error toast for cart operations
       return false;
     }
   };
 
   const clearCart = async (): Promise<boolean> => {
     if (!isAuthenticated) {
-      toast.error('Please login to clear cart');
       return false;
     }
 
@@ -219,8 +202,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await refreshCart();
       return true;
     } catch (error: unknown) {
-      const message = (error as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to clear cart';
-      toast.error(message);
+      console.error('Failed to clear cart:', error);
+      // Silently fail - no error toast for cart operations
       return false;
     }
   };

@@ -5,22 +5,33 @@ import { getApiUrl } from "./getApiUrl";
 // Product interfaces
 export interface Product {
   id: number;
-  creator_id: number;
+  creator_id?: number;
   name: string;
   description: string;
-  base_price: number;
-  markup_percentage: number;
+  base_price: string | number;
+  markup_percentage?: string | number;
   category: string;
   tags: string[];
   thumbnail_url: string;
   images: string[];
-  is_active: boolean;
-  creator_name: string;
-  creator_username: string;
-  variant_count: number;
-  min_price: number;
-  max_price: number;
-  created_at: string;
+  is_active?: boolean;
+  status?: string;
+  creator_name?: string;
+  creator_username?: string;
+  creator?: {
+    name: string;
+    username: string;
+  };
+  variant_count?: number;
+  min_price?: number;
+  max_price?: number;
+  price_range?: {
+    min: string | number;
+    max: string | number;
+  };
+  source?: "printful" | "shopify";
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ProductVariant {

@@ -47,7 +47,7 @@ export default function WishlistPage() {
         color_code: firstVariant.color_code || '#808080',
         image_url: firstVariant.image_url || productData.thumbnail_url || productData.images?.[0],
         thumbnail_url: productData.thumbnail_url || productData.images?.[0],
-        creator_name: productData.creator_name,
+        creator_name: productData.creator?.name || productData.creator_name || 'Unknown',
         source: productData.product_source || 'unknown',
         shopify_variant_id: firstVariant.shopify_variant_id,
         printful_variant_id: firstVariant.printful_variant_id
@@ -98,6 +98,31 @@ export default function WishlistPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <style>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes shimmer-card {
+          0% { background-position: -1000px 0; }
+          100% { background-position: 1000px 0; }
+        }
+        .wishlist-card-animate {
+          animation: fadeInUp 0.6s ease-out forwards;
+          opacity: 0;
+        }
+        .card-shimmer {
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+          background-size: 1000px 100%;
+          animation: shimmer-card 2s infinite;
+        }
+      `}</style>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -155,77 +180,100 @@ export default function WishlistPage() {
             </div>
 
             {/* Wishlist Items Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {items.map((item) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
+              {items.map((item, index) => (
                 <div
                   key={item.id}
-                  className="group bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-700/50 hover:border-orange-500/30 backdrop-blur-sm flex flex-col"
+                  className="wishlist-card-animate"
+                  style={{
+                    animationDelay: `${index * 50}ms`,
+                  }}
                 >
                   <Link href={`/products/${item.product_id}`}>
-                    <div className="aspect-square relative overflow-hidden">
-                      <Image
-                        src={item.thumbnail_url || "/placeholder-product.svg"}
-                        alt={item.product_name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        unoptimized={true}
-                        onError={(e) => {
-                          e.currentTarget.src = "/placeholder-product.svg";
-                        }}
-                      />
+                    <div
+                      className="group relative bg-black rounded-3xl overflow-hidden hover:shadow-[0_20px_60px_rgba(255,99,71,0.3)] transition-all duration-300 cursor-pointer transform hover:-translate-y-2 flex flex-col h-full"
+                      style={{
+                        border: '1px solid transparent',
+                        backgroundImage: 'linear-gradient(#000, #000), linear-gradient(180deg, transparent, rgba(255,255,255,0.3) 70%, #ffffff)',
+                        backgroundOrigin: 'border-box',
+                        backgroundClip: 'padding-box, border-box',
+                        transition: 'all 300ms ease'
+                      }}
+                    >
+                      {/* Image Container */}
+                      <div className="relative overflow-hidden bg-gradient-to-br from-gray-800 to-black flex-shrink-0" style={{ aspectRatio: '1/1', width: '100%' }}>
+                        <Image
+                          src={item.thumbnail_url || "/placeholder-product.svg"}
+                          alt={item.product_name}
+                          fill
+                          className="object-cover transition-all duration-700 group-hover:scale-110"
+                          unoptimized={true}
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder-product.svg";
+                          }}
+                        />
+
+                        {/* Premium overlay on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        {/* Remove Button - Bottom Left with enhanced styling */}
+                        <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="p-2 sm:p-3 rounded-full transition-all duration-300 focus:outline-none backdrop-blur-md shadow-lg hover:shadow-[0_8px_20px_rgba(239,68,68,0.8)] transform hover:scale-125 bg-red-500/90 text-white"
+                            title="Remove from wishlist"
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              try {
+                                await removeFromWishlist(item.product_id);
+                              } catch (error) {
+                                console.error('Remove from wishlist failed:', error);
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-5 h-5 sm:w-6 sm:h-6 transition-all duration-300" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Content Section - Below Image with enhanced styling */}
+                      <div className="bg-gradient-to-b from-black/80 to-black px-3 sm:px-4 py-2 sm:py-3 flex flex-col flex-grow backdrop-blur-sm gap-1.5">
+                        {/* Creator Name with badge style */}
+                        <p className="text-xs text-orange-400 font-semibold inline-block bg-orange-500/20 px-2 py-0.5 rounded-full w-fit">
+                          by {item.creator?.name || item.creator_name || 'Unknown'}
+                        </p>
+
+                        {/* Product Title */}
+                        <div className="font-normal text-xs sm:text-sm text-white line-clamp-2 group-hover:text-orange-300 transition-colors duration-300 tracking-tight leading-snug flex-grow">
+                          {item.product_name}
+                        </div>
+
+                        {/* Category and Variants Info */}
+                        <div className="flex items-center justify-between gap-1 text-xs text-gray-400">
+                          {item.category && (
+                            <span className="inline-block bg-orange-800/60 text-orange-200 px-1.5 py-0.5 rounded-md font-medium text-xs">
+                              {item.category}
+                            </span>
+                          )}
+                          {item.variant_count && (
+                            <span className="text-xs text-gray-400">
+                              {item.variant_count} option{item.variant_count !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Price Section with gradient background */}
+                        <div className="flex items-center justify-between pt-1.5 border-t border-gray-700/30">
+                          <span className="text-xs sm:text-sm font-extrabold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                            {formatPrice(parseFloat(item.price_range?.min || '0'))}
+                            {item.price_range?.max && parseFloat(item.price_range.max) > parseFloat(item.price_range.min) && (
+                              <span className="text-xs text-gray-500 font-normal ml-1">- {formatPrice(parseFloat(item.price_range.max))}</span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </Link>
-
-                  <div className="p-5 flex flex-col flex-1">
-                    <Link href={`/products/${item.product_id}`}>
-                      <h3 className="font-semibold text-white hover:text-orange-400 transition-colors text-lg leading-tight line-clamp-2">
-                        {item.product_name}
-                      </h3>
-                    </Link>
-
-                    <div className="flex items-center mt-2 mb-3">
-                      <div className="w-4 h-4 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
-                        <span className="text-xs text-white font-bold">👤</span>
-                      </div>
-                      <span className="text-sm text-gray-300 font-medium truncate">
-                        by {item.creator_name}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                          {formatPrice(item.min_price)}
-                        </span>
-                        {item.max_price > item.min_price && (
-                          <span className="text-sm text-gray-400">
-                            - {formatPrice(item.max_price)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-auto flex items-center justify-between mb-3">
-                      <span className="inline-block bg-orange-800/60 text-orange-200 text-xs px-2 py-1 rounded-md font-medium">
-                        {item.category || "Uncategorized"}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {item.variant_count} options
-                      </span>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex items-center space-x-2 pt-3 border-t border-gray-700/50">
-                      <button
-                        className="flex-1 p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium flex items-center justify-center space-x-1"
-                        onClick={() => removeFromWishlist(item.product_id)}
-                        title="Remove from wishlist"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        <span>Remove</span>
-                      </button>
-                    </div>
-                  </div>
                 </div>
               ))}
             </div>
