@@ -31,10 +31,7 @@ function CustomerSignupContent() {
   const onSubmit = async (data: CustomerRegisterFormData) => {
     setLoading(true);
     try {
-      const success = await registerUser({
-        ...data,
-        role: "user",
-      });
+      const success = await registerUser(data);
       if (success) {
         router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
       }

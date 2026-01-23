@@ -58,8 +58,8 @@ function ProductsContent() {
     sortBy: "created_at",
     sortOrder: "DESC",
     source: (searchParams.get("source") as "printful" | "shopify" | "all") || "all",
-    minPrice: undefined as number | undefined,
-    maxPrice: undefined as number | undefined,
+    minPrice: searchParams.get("minPrice") ? parseFloat(searchParams.get("minPrice")!) : undefined,
+    maxPrice: searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined,
   }));
 
   const [pagination, setPagination] = useState({
@@ -83,11 +83,23 @@ function ProductsContent() {
           setLoading(true);
         }
 
-        const response = await productAPI.getProducts({
-          ...customFilters,
+        // Clean up filters - only send non-empty values
+        const cleanFilters: any = {
           limit: customPagination.limit,
           offset: customPagination.offset,
-        });
+          sortBy: customFilters.sortBy,
+          sortOrder: customFilters.sortOrder,
+        };
+
+        // Only add filter params if they have values
+        if (customFilters.category) cleanFilters.category = customFilters.category;
+        if (customFilters.search) cleanFilters.search = customFilters.search;
+        if (customFilters.creator) cleanFilters.creator = customFilters.creator;
+        if (customFilters.source && customFilters.source !== "all") cleanFilters.source = customFilters.source;
+        if (customFilters.minPrice) cleanFilters.minPrice = customFilters.minPrice;
+        if (customFilters.maxPrice) cleanFilters.maxPrice = customFilters.maxPrice;
+
+        const response = await productAPI.getProducts(cleanFilters);
 
         if (appendMode) {
           setProducts((prev) => [...prev, ...response.products]);
@@ -179,13 +191,17 @@ function ProductsContent() {
     const currentSearch = searchParams.get("search") || "";
     const currentCreator = searchParams.get("creator") || "";
     const currentSource = (searchParams.get("source") as "printful" | "shopify" | "all") || "all";
+    const currentMinPrice = searchParams.get("minPrice") ? parseFloat(searchParams.get("minPrice")!) : undefined;
+    const currentMaxPrice = searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined;
 
     setFilters(prev => {
       if (
         prev.category === currentCategory &&
         prev.search === currentSearch &&
         prev.creator === currentCreator &&
-        prev.source === currentSource
+        prev.source === currentSource &&
+        prev.minPrice === currentMinPrice &&
+        prev.maxPrice === currentMaxPrice
       ) {
         return prev;
       }
@@ -194,7 +210,9 @@ function ProductsContent() {
         category: currentCategory,
         search: currentSearch,
         creator: currentCreator,
-        source: currentSource
+        source: currentSource,
+        minPrice: currentMinPrice,
+        maxPrice: currentMaxPrice
       };
     });
   }, [searchParams]);
@@ -224,25 +242,33 @@ function ProductsContent() {
   }, [pagination.offset, fetchProducts, filters, pagination.limit]);
 
 
-  const handleFilterChange = (key: string, value: string) => {
-    if (key === "search") {
-      setSearchInput(value);
-    } else {
-      const newFilters = { ...filters, [key]: value };
-      setFilters(newFilters);
+  const updateURL = (updatedFilters: typeof filters) => {
+    const params = new URLSearchParams();
+    if (updatedFilters.category) params.set("category", updatedFilters.category);
+    if (updatedFilters.search) params.set("search", updatedFilters.search);
+    if (updatedFilters.creator) params.set("creator", updatedFilters.creator);
+    if (updatedFilters.source && updatedFilters.source !== "all")
+      params.set("source", updatedFilters.source);
+    if (updatedFilters.minPrice) params.set("minPrice", updatedFilters.minPrice.toString());
+    if (updatedFilters.maxPrice) params.set("maxPrice", updatedFilters.maxPrice.toString());
 
-      const params = new URLSearchParams();
-      if (newFilters.category) params.set("category", newFilters.category);
-      if (newFilters.search) params.set("search", newFilters.search);
-      if (newFilters.creator) params.set("creator", newFilters.creator);
-      if (newFilters.source && newFilters.source !== "all")
-        params.set("source", newFilters.source);
-
-      window.history.replaceState({}, '', newFilters.category || newFilters.search || newFilters.creator ? `/products?${params.toString()}` : '/products');
-    }
+    const newUrl = params.toString() ? `/products?${params.toString()}` : '/products';
+    window.history.replaceState({}, '', newUrl);
   };
 
-  const clearFilters = () => {
+  const handleFilterChange = (key: string, value: string | number | undefined) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    updateURL(newFilters);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Search is already triggered by filter state change
+  };
+
+  const clearFilters = useCallback(async () => {
+    // Reset all filters to default state
     const clearedFilters = {
       category: "",
       search: "",
@@ -250,13 +276,38 @@ function ProductsContent() {
       sortBy: "created_at",
       sortOrder: "DESC",
       source: "all" as const,
-      minPrice: undefined,
-      maxPrice: undefined,
+      minPrice: undefined as number | undefined,
+      maxPrice: undefined as number | undefined,
     };
-    setSearchInput("");
-    setFilters(clearedFilters);
+
+    // Clear the deduplication ref to force a fresh fetch
+    lastFetchedFiltersRef.current = null;
+
+    // Clear the URL first to avoid sync issues
     window.history.replaceState({}, '', '/products');
-  };
+
+    // Reset all state
+    setProducts([]);
+    setPagination({ total: 0, limit: 20, offset: 0, hasNext: false });
+    setFilters(clearedFilters);
+    setLoading(true);
+
+    // Force a fresh fetch with cache invalidation
+    try {
+      const response = await productAPI.getProducts({
+        ...clearedFilters,
+        limit: 20,
+        offset: 0,
+        force_refresh: true
+      });
+      setProducts(response.products);
+      setPagination(response.pagination);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const handleViewChange = (view: ViewType) => {
     setActiveView(view);
@@ -304,19 +355,23 @@ function ProductsContent() {
 
       <div className="bg-black border-b border-white/10 relative z-40 filter-section-animate">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:py-8 overflow-visible">
-          <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
             <div className="relative w-full lg:w-1/2">
               <svg className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
                 type="text"
-                placeholder="Search Files"
-                value={searchInput}
+                placeholder="Search products..."
+                value={filters.search}
                 onChange={(e) => handleFilterChange("search", e.target.value)}
-                className={`w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border bg-gradient-to-br from-gray-800 to-gray-900 text-white text-xs sm:text-sm placeholder-white/40 focus:outline-none focus:ring-2 transition-all duration-300 ${
-                  loading && searchInput ? "border-blue-400 focus:border-blue-400 focus:ring-blue-400/20 shadow-[0_0_20px_rgba(96,165,250,0.2)]" : "border-white/20 hover:border-orange-400/50 focus:border-orange-400 focus:ring-orange-400/20 hover:shadow-[0_0_15px_rgba(255,99,71,0.15)]"
-                }`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSearchSubmit(e);
+                  }
+                }}
+                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/20 bg-gradient-to-br from-gray-800 to-gray-900 text-white text-xs sm:text-sm placeholder-white/40 hover:border-orange-400/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 transition-all"
               />
             </div>
 
@@ -358,43 +413,60 @@ function ProductsContent() {
                 </button>
               )}
             </div>
-          </div>
+          </form>
 
-          <div className="flex gap-2 sm:gap-3 items-center overflow-x-auto overflow-y-visible scrollbar-hide pb-2 xs:pb-0 -mx-4 xs:mx-0 px-4 xs:px-0">
-            <button
-              onClick={() => handleViewChange("trending")}
-              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "trending"
-                  ? "bg-gray-800 text-white border-purple-500 shadow-[0_8px_20px_rgba(147,51,234,0.3)]"
-                  : "bg-gray-800 text-white border-white/20 hover:border-purple-400/50 hover:bg-gray-700"
-                }`}
-              title="View trending products"
-            >
-              <TrendingUp className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "trending" ? "text-purple-500" : "text-white/60"}`} />
-              <span className="font-normal">Trending</span>
-            </button>
-            <button
-              onClick={() => handleViewChange("new")}
-              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "new"
-                  ? "bg-gray-800 text-white border-blue-500 shadow-[0_8px_20px_rgba(59,130,246,0.3)]"
-                  : "bg-gray-800 text-white border-white/20 hover:border-blue-400/50 hover:bg-gray-700"
-                }`}
-              title="View new arrivals"
-            >
-              <Zap className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "new" ? "text-blue-500" : "text-white/60"}`} />
-              <span className="font-normal">New</span>
-            </button>
-            <button
-              onClick={() => handleViewChange("popular")}
-              className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "popular"
-                  ? "bg-gray-800 text-white border-red-500 shadow-[0_8px_20px_rgba(220,38,38,0.3)]"
-                  : "bg-gray-800 text-white border-white/20 hover:border-red-400/50 hover:bg-gray-700"
-                }`}
-              title="View popular products"
-            >
-              <Heart className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "popular" ? "text-red-500" : "text-white/60"}`} />
-              <span className="font-normal">Popular</span>
-            </button>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center mb-4">
+            <div className="flex gap-2 sm:gap-3 items-center overflow-x-auto overflow-y-visible scrollbar-hide pb-2 xs:pb-0 -mx-4 xs:mx-0 px-4 xs:px-0">
+              <button
+                onClick={() => handleViewChange("trending")}
+                className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "trending"
+                    ? "bg-gray-800 text-white border-purple-500 shadow-[0_8px_20px_rgba(147,51,234,0.3)]"
+                    : "bg-gray-800 text-white border-white/20 hover:border-purple-400/50 hover:bg-gray-700"
+                  }`}
+                title="View trending products"
+              >
+                <TrendingUp className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "trending" ? "text-purple-500" : "text-white/60"}`} />
+                <span className="font-normal">Trending</span>
+              </button>
+              <button
+                onClick={() => handleViewChange("new")}
+                className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "new"
+                    ? "bg-gray-800 text-white border-blue-500 shadow-[0_8px_20px_rgba(59,130,246,0.3)]"
+                    : "bg-gray-800 text-white border-white/20 hover:border-blue-400/50 hover:bg-gray-700"
+                  }`}
+                title="View new arrivals"
+              >
+                <Zap className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "new" ? "text-blue-500" : "text-white/60"}`} />
+                <span className="font-normal">New</span>
+              </button>
+              <button
+                onClick={() => handleViewChange("popular")}
+                className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "popular"
+                    ? "bg-gray-800 text-white border-red-500 shadow-[0_8px_20px_rgba(220,38,38,0.3)]"
+                    : "bg-gray-800 text-white border-white/20 hover:border-red-400/50 hover:bg-gray-700"
+                  }`}
+                title="View popular products"
+              >
+                <Heart className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "popular" ? "text-red-500" : "text-white/60"}`} />
+                <span className="font-normal">Popular</span>
+              </button>
+            </div>
 
+            <select
+              value={filters.source}
+              onChange={(e) => handleFilterChange("source", e.target.value as "printful" | "shopify" | "all")}
+              className="flex-shrink-0 px-4 py-2.5 sm:py-3 h-11 sm:h-12 rounded-xl border border-white/30 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-orange-400 hover:shadow-[0_8px_24px_rgba(255,99,71,0.15)] focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all cursor-pointer font-medium appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 12px center',
+                paddingRight: '32px',
+              }}
+            >
+              <option value="all">All Sources</option>
+              <option value="printful">Printful</option>
+              <option value="shopify">Shopify</option>
+            </select>
           </div>
         </div>
       </div>

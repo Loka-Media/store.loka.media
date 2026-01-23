@@ -57,13 +57,21 @@ export const CustomerInformationForm = ({
           className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500" 
         />
         <div className="md:col-span-2">
-          <input 
-            type="tel" 
-            placeholder="Phone Number" 
-            value={customerInfo.phone} 
-            onChange={(e) => updateCustomerInfo({phone: e.target.value})} 
-            className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500" 
+          <input
+            type="tel"
+            placeholder="Phone Number (Required - e.g. +1234567890)"
+            value={customerInfo.phone}
+            onChange={(e) => updateCustomerInfo({phone: e.target.value})}
+            className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500"
           />
+          {customerInfo.phone && customerInfo.phone.replace(/\D/g, '').length < 7 && (
+            <p className="text-xs text-red-400 mt-1">Phone must have at least 7 digits</p>
+          )}
+          {!customerInfo.phone.startsWith('+') && customerInfo.phone.length > 0 && (
+            <p className="text-xs text-yellow-400 mt-1">
+              Tip: Include country code (e.g. +1 for US/Canada)
+            </p>
+          )}
         </div>
       </div>
       

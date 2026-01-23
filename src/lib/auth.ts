@@ -85,7 +85,6 @@ export interface RegisterData {
   email: string;
   phone: string;
   password: string;
-  role?: 'user' | 'creator';
   creatorUrl?: string;
 }
 

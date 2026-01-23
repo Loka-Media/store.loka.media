@@ -138,9 +138,23 @@ export default function AddressesPage() {
       !addressForm.city ||
       !addressForm.zip ||
       !addressForm.country ||
-      !addressForm.state
+      !addressForm.phone
     ) {
-      toast.error("Please fill in all required fields including country and state/province");
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Validate state for countries that require it
+    const countriesRequiringState = ['US', 'CA', 'AU', 'JP'];
+    if (countriesRequiringState.includes(addressForm.country) && !addressForm.state) {
+      toast.error(`State/Province is required for ${addressForm.country}`);
+      return;
+    }
+
+    // Validate phone number
+    const phoneDigits = addressForm.phone.replace(/\D/g, '');
+    if (phoneDigits.length < 7) {
+      toast.error("Phone number must have at least 7 digits");
       return;
     }
 
@@ -388,11 +402,20 @@ export default function AddressesPage() {
 
                   <input
                     type="tel"
-                    placeholder="Phone (Optional)"
-                    value={addressForm.phone}
+                    placeholder="Phone (e.g. +1234567890) *"
+                    value={addressForm.phone || ''}
                     onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
                     className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                    required
                   />
+                  {addressForm.phone && addressForm.phone.replace(/\D/g, '').length < 7 && (
+                    <p className="text-xs text-red-400 mt-1">Phone must have at least 7 digits</p>
+                  )}
+                  {addressForm.phone && !addressForm.phone.startsWith('+') && addressForm.phone.length > 0 && (
+                    <p className="text-xs text-yellow-400 mt-1">
+                      Tip: Include country code (e.g. +1 for US/Canada)
+                    </p>
+                  )}
 
                   <input
                     type="text"

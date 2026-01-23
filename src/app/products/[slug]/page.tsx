@@ -6,6 +6,7 @@ import { useProductData } from '@/hooks/useProductData';
 import { useVariantSelection } from '@/hooks/useVariantSelection';
 import { useProductWishlist } from '@/hooks/useProductWishlist';
 import { useProductCart } from '@/hooks/useProductCart';
+import { useLocationLookup } from '@/hooks/useLocationLookup';
 
 import { EnhancedProductImageGallery } from '@/components/products/product-detail/EnhancedProductImageGallery';
 import { EnhancedProductInfo, EnhancedProductDescription } from '@/components/products/product-detail/EnhancedProductInfo';
@@ -15,6 +16,7 @@ import { FeatureCard } from '@/components/products/product-detail/FeatureCard';
 import { ProductPageLoader } from '@/components/products/product-detail/ProductPageLoader';
 import { ProductNotFound } from '@/components/products/product-detail/ProductNotFound';
 import { ProductPageNavigation } from '@/components/products/product-detail/ProductPageNavigation';
+import { getRegionName } from '@/lib/shipping-compatibility';
 
 interface ProductPageProps {
   params: Promise<{
@@ -39,8 +41,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const { isWishlisted, handleWishlistToggle } = useProductWishlist(product);
   const { handleAddToCart } = useProductCart(product, selectedVariant);
-
-  // Product fetching is now handled automatically by the hook
+  const locationLookup = useLocationLookup();
 
   useEffect(() => {
     initializeSelectedVariant();
@@ -218,6 +219,32 @@ export default function ProductPage({ params }: ProductPageProps) {
                   <div className="text-sm sm:text-base font-bold text-gray-300 mb-2 sm:mb-3">Product Description</div>
                   <EnhancedProductDescription description={product.description} />
                 </div>
+
+                {/* Shipping Availability */}
+                {selectedVariant && selectedVariant.availability_regions && selectedVariant.availability_regions.length > 0 && locationLookup.printfulCountries.length > 0 && (
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <Truck className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <div className="text-sm font-bold text-white mb-2">Ships To:</div>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedVariant.availability_regions.map((region: string) => (
+                            <span
+                              key={region}
+                              className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/20 text-green-300 border border-green-500/30"
+                            >
+                              <span className="mr-1.5">✓</span>
+                              {getRegionName(region, locationLookup.printfulCountries)}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2">
+                          ⚠️ This product can only be shipped to the regions shown above. Please ensure your shipping address is in one of these regions.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Tags and Metadata */}
                 {product.tags && product.tags.length > 0 && (

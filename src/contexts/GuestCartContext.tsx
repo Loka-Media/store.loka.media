@@ -22,6 +22,8 @@ interface GuestCartItem {
   shopify_variant_id?: string;
   printful_variant_id?: string;
   printful_catalog_variant_id?: string;
+  printful_availability_regions?: string[];
+  availability_regions?: string[];
 }
 
 interface GuestCartContextType {

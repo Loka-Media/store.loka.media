@@ -82,7 +82,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                 {/* Price */}
                 <div className="flex items-center justify-between pt-1.5">
                   <span className="text-sm font-extrabold text-cyan-400 tracking-tight">
-                    ${product.base_price}
+                    ${product.min_price || product.base_price}
                   </span>
                 </div>
               </div>
