@@ -451,22 +451,6 @@ function ProductsContent() {
                 <span className="font-normal">Popular</span>
               </button>
             </div>
-
-            <select
-              value={filters.source}
-              onChange={(e) => handleFilterChange("source", e.target.value as "printful" | "shopify" | "all")}
-              className="flex-shrink-0 px-4 py-2.5 sm:py-3 h-11 sm:h-12 rounded-xl border border-white/30 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-orange-400 hover:shadow-[0_8px_24px_rgba(255,99,71,0.15)] focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/30 transition-all cursor-pointer font-medium appearance-none"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 12px center',
-                paddingRight: '32px',
-              }}
-            >
-              <option value="all">All Sources</option>
-              <option value="printful">Printful</option>
-              <option value="shopify">Shopify</option>
-            </select>
           </div>
         </div>
       </div>

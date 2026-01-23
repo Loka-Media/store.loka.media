@@ -10,7 +10,6 @@ interface FilterState {
   maxPrice: string;
   sortBy: string;
   sortOrder: string;
-  source: "printful" | "shopify" | "all";
 }
 
 interface ProductFiltersProps {
@@ -44,29 +43,6 @@ export function ProductFilters({
           <Filter className="w-5 h-5 mr-2 text-orange-400" />
           Filters
         </h3>
-
-        {/* Product Source */}
-        <div className="mb-6">
-          <label
-            htmlFor="source-filter"
-            className="block text-sm font-medium text-gray-300 mb-2"
-          >
-            Product Source
-          </label>
-          <div className="relative">
-            <select
-              id="source-filter"
-              value={filters.source}
-              onChange={(e) => onFilterChange("source", e.target.value)}
-              className="w-full p-3 pr-10 border border-gray-700 rounded-md focus:ring-orange-500 focus:border-orange-500 bg-gray-800 text-white appearance-none"
-            >
-              <option value="all">All Sources</option>
-              <option value="printful">🎨 Printful Products</option>
-              <option value="shopify">🛍️ Shopify Products</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
 
         {/* Categories */}
         <div className="mb-6">
