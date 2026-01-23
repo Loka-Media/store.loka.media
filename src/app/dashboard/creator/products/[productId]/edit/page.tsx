@@ -23,6 +23,11 @@ interface Product {
   name: string;
   description: string;
   base_price: number;
+  markup_percentage: number;
+  min_base_cost: number;
+  max_base_cost: number;
+  min_price: number;
+  max_price: number;
   category: string;
   tags: string[];
   thumbnail_url: string;
@@ -33,6 +38,7 @@ interface Product {
     id: number;
     title: string;
     price: number;
+    base_cost: number;
     sku: string;
     printful_variant_id: string;
     printful_availability_regions?: string[] | null;
@@ -96,7 +102,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
       setFormData({
         name: productData.name || '',
         description: productData.description || '',
-        basePrice: productData.base_price?.toString() || '',
+        basePrice: productData.min_base_cost?.toString() || productData.base_price?.toString() || '',
         markupPercentage: productData.markup_percentage?.toString() || '0',
         category: productData.category || '',
         tags: productData.tags || [],
@@ -169,7 +175,6 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
       const updateData = {
         name: formData.name.trim(),
         description: formData.description.trim(),
-        basePrice: parseFloat(formData.basePrice) || product?.base_price || 0,
         markupPercentage: markupValue,
         category: formData.category.trim(),
         tags: formData.tags,
@@ -286,31 +291,61 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
 
               <div>
                 <label className="block text-sm font-medium text-white/90 mb-2">
-                  Base Price
+                  Printful Base Cost <span className="text-white/50 text-xs">(Wholesale Price)</span>
                 </label>
                 <input
-                  type="number"
-                  step="0.01"
-                  value={formData.basePrice}
-                  onChange={(e) => handleInputChange('basePrice', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
-                  placeholder="0.00"
+                  type="text"
+                  value={`$${parseFloat(formData.basePrice || '0').toFixed(2)}`}
+                  readOnly
+                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white/70 cursor-not-allowed"
+                  title="This is the wholesale cost from Printful and cannot be edited"
                 />
+                <p className="mt-1 text-xs text-white/50">This is the cost from Printful (cannot be changed)</p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-white/90 mb-2">
-                  Markup Percentage
+                  Markup Percentage *
                 </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.markupPercentage}
-                  onChange={(e) => handleInputChange('markupPercentage', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
-                  placeholder="0"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.markupPercentage}
+                    onChange={(e) => handleInputChange('markupPercentage', e.target.value)}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+                    placeholder="0"
+                    required
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50">%</span>
+                </div>
+                <p className="mt-1 text-xs text-white/50">Your profit margin on top of base cost</p>
               </div>
+
+              {product && formData.basePrice && formData.markupPercentage && (
+                <div className="md:col-span-2">
+                  <div className="p-4 bg-gradient-to-r from-accent/10 to-purple-500/10 border border-accent/30 rounded-xl">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-white/70 mb-1">Calculated Selling Price</p>
+                        <p className="text-2xl font-bold text-white">
+                          ${(parseFloat(formData.basePrice) * (1 + parseFloat(formData.markupPercentage) / 100)).toFixed(2)}
+                        </p>
+                        <p className="text-xs text-white/50 mt-1">
+                          ${parseFloat(formData.basePrice).toFixed(2)} + {formData.markupPercentage}% markup
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-white/70 mb-1">Your Profit</p>
+                        <p className="text-xl font-bold text-green-400">
+                          ${(parseFloat(formData.basePrice) * (parseFloat(formData.markupPercentage) / 100)).toFixed(2)}
+                        </p>
+                        <p className="text-xs text-white/50 mt-1">per sale</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-white/90 mb-2">
@@ -515,18 +550,26 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   <thead>
                     <tr className="text-left border-b border-white/20">
                       <th className="pb-2 sm:pb-3 text-white/70 font-medium">Variant</th>
-                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">SKU</th>
-                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Current Price</th>
+                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Base Cost</th>
+                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Selling Price</th>
+                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Profit</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {product.variants.map((variant) => (
-                      <tr key={variant.id} className="border-b border-white/10">
-                        <td className="py-2 sm:py-3 text-white">{variant.title}</td>
-                        <td className="py-2 sm:py-3 text-white/60">{variant.sku}</td>
-                        <td className="py-2 sm:py-3 text-white">${(typeof variant.price === 'string' ? parseFloat(variant.price) : variant.price || 0).toFixed(2)}</td>
-                      </tr>
-                    ))}
+                    {product.variants.map((variant) => {
+                      const baseCost = typeof variant.base_cost === 'string' ? parseFloat(variant.base_cost) : variant.base_cost || 0;
+                      const sellingPrice = typeof variant.price === 'string' ? parseFloat(variant.price) : variant.price || 0;
+                      const profit = sellingPrice - baseCost;
+
+                      return (
+                        <tr key={variant.id} className="border-b border-white/10">
+                          <td className="py-2 sm:py-3 text-white">{variant.title}</td>
+                          <td className="py-2 sm:py-3 text-white/60">${baseCost.toFixed(2)}</td>
+                          <td className="py-2 sm:py-3 text-white font-medium">${sellingPrice.toFixed(2)}</td>
+                          <td className="py-2 sm:py-3 text-green-400 font-medium">${profit.toFixed(2)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
