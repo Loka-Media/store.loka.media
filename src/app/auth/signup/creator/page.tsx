@@ -31,10 +31,7 @@ function CreatorSignupContent() {
   const onSubmit = async (data: CreatorRegisterFormData) => {
     setLoading(true);
     try {
-      const success = await registerUser({
-        ...data,
-        role: "creator",
-      });
+      const success = await registerUser(data);
       if (success) {
         router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
       }
