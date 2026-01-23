@@ -265,9 +265,9 @@ export default function WishlistPage() {
                         {/* Price Section with gradient background */}
                         <div className="flex items-center justify-between pt-1.5 border-t border-gray-700/30">
                           <span className="text-xs sm:text-sm font-extrabold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                            {formatPrice(parseFloat(item.price_range?.min || '0'))}
-                            {item.price_range?.max && parseFloat(item.price_range.max) > parseFloat(item.price_range.min) && (
-                              <span className="text-xs text-gray-500 font-normal ml-1">- {formatPrice(parseFloat(item.price_range.max))}</span>
+                            {formatPrice(parseFloat(String(item.price_range?.min) || '0'))}
+                            {item.price_range?.max && parseFloat(String(item.price_range.max)) > parseFloat(String(item.price_range.min)) && (
+                              <span className="text-xs text-gray-500 font-normal ml-1">- {formatPrice(parseFloat(String(item.price_range.max)))}</span>
                             )}
                           </span>
                         </div>

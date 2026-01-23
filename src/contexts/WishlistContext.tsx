@@ -16,8 +16,16 @@ interface WishlistItem {
   creator_id: number;
   creator_name: string;
   creator_username: string;
+  creator?: {
+    name: string;
+    username: string;
+  };
   min_price: number;
   max_price: number;
+  price_range?: {
+    min: string | number;
+    max: string | number;
+  };
   variant_count: number;
   created_at: string;
 }

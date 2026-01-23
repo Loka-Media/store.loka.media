@@ -150,11 +150,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-gray-700/30 mt-1.5 sm:mt-2">
             <span className="text-xs sm:text-sm font-extrabold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
               {formatPrice(
-                product.price_range?.min ? parseFloat(product.price_range.min) : parseFloat(product.base_price || '0')
+                product.price_range?.min ? parseFloat(String(product.price_range.min)) : parseFloat(String(product.base_price) || '0')
               )}
               {product.price_range?.min && product.price_range?.max &&
-                parseFloat(product.price_range.max) > parseFloat(product.price_range.min) && (
-                <span className="text-xs text-gray-500 font-normal ml-1">- {formatPrice(parseFloat(product.price_range.max))}</span>
+                parseFloat(String(product.price_range.max)) > parseFloat(String(product.price_range.min)) && (
+                <span className="text-xs text-gray-500 font-normal ml-1">- {formatPrice(parseFloat(String(product.price_range.max)))}</span>
               )}
             </span>
           </div>

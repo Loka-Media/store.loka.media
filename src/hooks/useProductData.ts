@@ -18,6 +18,10 @@ export interface ProductDetails {
   is_active: boolean;
   creator_name: string;
   creator_username: string;
+  creator?: {
+    name: string;
+    username: string;
+  };
   created_at: string;
   variants: ProductVariant[];
   source?: string;
