@@ -25,8 +25,8 @@ export const usernameValidator = z
 
 export const phoneValidator = z
   .string()
-  .min(10, "Please enter a valid phone number")
-  .regex(/^[0-9+\s()-]+$/, "Please enter a valid phone number");
+  .min(1, "Phone number is required")
+  .regex(/^[0-9]{10}$/, "Please enter a valid 10-digit mobile number");
 
 export const otpValidator = z
   .string()

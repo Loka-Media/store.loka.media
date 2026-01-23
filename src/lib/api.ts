@@ -42,7 +42,8 @@ export interface ProductVariant {
   compare_at_price?: number;
   weight?: number;
   weight_unit?: string;
-  availability_regions?: Record<string, string>;
+  availability_regions?: string[];
+  printful_availability_regions?: string[];
   availability_status?: Array<{
     region: string;
     status: string;
@@ -101,6 +102,16 @@ export interface Address {
   address_type?: "shipping" | "billing" | "both";
   created_at?: string;
   updated_at?: string;
+  cart_compatibility?: {
+    is_fully_compatible: boolean;
+    compatible_items_count: number;
+    incompatible_items_count: number;
+    incompatible_items: Array<{
+      id: number;
+      product_name: string;
+      available_regions: string[];
+    }>;
+  };
 }
 
 export interface Order {
@@ -155,6 +166,7 @@ export const productAPI = {
     sortBy?: string;
     sortOrder?: string;
     source?: "printful" | "shopify" | "all"; // Filter by product source
+    force_refresh?: boolean; // Force fresh data, bypass cache
   }) => {
     const response = await api.get("/api/products", { params });
     return response.data;
@@ -329,9 +341,9 @@ export const wishlistAPI = {
 
 // Address API
 export const addressAPI = {
-  // Get user addresses
+  // Get user addresses (includes cart compatibility)
   getAddresses: async () => {
-    const response = await api.get("/api/addresses");
+    const response = await api.get('/api/addresses');
     return response.data;
   },
 

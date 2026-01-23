@@ -28,6 +28,7 @@ import InventoryErrorDialog from '@/components/checkout/InventoryErrorDialog';
 
 import { unifiedCheckoutAPI } from '@/lib/checkout-api';
 import { validateZipCode } from '@/lib/location-utils';
+import { checkShippingCompatibility, formatIncompatibilityMessage, type IncompatibleItem } from '@/lib/shipping-compatibility';
 
 
 export default function UnifiedCheckoutPage() {
@@ -38,7 +39,8 @@ export default function UnifiedCheckoutPage() {
 
   // State for inventory error dialog
   const [inventoryError, setInventoryError] = useState<{ unavailable_items: any[] } | null>(null);
-  
+  const [incompatibleItems, setIncompatibleItems] = useState<IncompatibleItem[]>([]);
+
   const checkoutState = useCheckoutState();
   const addressManagement = useAddressManagement();
   const checkoutAuth = useCheckoutAuth();
@@ -57,9 +59,15 @@ export default function UnifiedCheckoutPage() {
         phone: user.phone || ''
       });
       console.log('✅ User already logged in, pre-filling info:', user.name);
-      
+
       addressManagement.loadUserAddresses().then((defaultAddress) => {
         if (defaultAddress) {
+          console.log('✅ Default address cart compatibility:', defaultAddress.cart_compatibility);
+
+          if (defaultAddress.cart_compatibility && !defaultAddress.cart_compatibility.is_fully_compatible) {
+            console.warn('⚠️ Default address has incompatible items:', defaultAddress.cart_compatibility.incompatible_items);
+          }
+
           checkoutState.updateCustomerInfo({
             address1: defaultAddress.address1,
             address2: defaultAddress.address2 || '',
@@ -73,7 +81,7 @@ export default function UnifiedCheckoutPage() {
     } else {
       addressManagement.resetAddressState();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, items]);
 
   // Update available states when country changes
   useEffect(() => {
@@ -84,10 +92,42 @@ export default function UnifiedCheckoutPage() {
     );
   }, [checkoutState.customerInfo.country, locationLookup.printfulCountries]);
 
-  // Fetch shipping rates when address information changes
+  // Check compatibility and fetch shipping rates when address changes
   useEffect(() => {
     const { address1, city, state, zip, country } = checkoutState.customerInfo;
-    if (address1 && city && state && zip && country && items.length > 0) {
+
+    if (!country || items.length === 0 || locationLookup.printfulCountries.length === 0) {
+      setIncompatibleItems([]);
+      return;
+    }
+
+    // First, check if cart items can ship to selected country
+    const incompatible = checkShippingCompatibility(
+      items,
+      country,
+      locationLookup.printfulCountries
+    );
+    setIncompatibleItems(incompatible);
+
+    if (incompatible.length > 0) {
+      // Don't fetch shipping rates if items are incompatible with selected region
+      const message = formatIncompatibilityMessage(incompatible, locationLookup.printfulCountries);
+      console.log('❌ Cannot fetch shipping rates - incompatible items:', message);
+      toast.error(message, { duration: 6000 });
+      checkoutState.setShippingRates([]);
+      checkoutState.setSelectedShippingRate(null);
+      return;
+    }
+
+    // If compatible, check if we have all required address fields
+    const countriesRequiringState = ['US', 'CA', 'AU', 'JP'];
+    const stateRequired = countriesRequiringState.includes(country);
+
+    const hasRequiredFields = address1 && city && zip && country &&
+      (!stateRequired || state);
+
+    if (hasRequiredFields) {
+      console.log('✅ All items compatible. Fetching shipping rates for:', { address1, city, state, zip, country });
       checkoutState.fetchShippingRates(items);
     }
   }, [
@@ -96,7 +136,8 @@ export default function UnifiedCheckoutPage() {
     checkoutState.customerInfo.state,
     checkoutState.customerInfo.zip,
     checkoutState.customerInfo.country,
-    items // Only depend on items and customerInfo address fields
+    items,
+    locationLookup.printfulCountries
   ]);
 
   // Create wrapper functions for hooks
@@ -145,17 +186,39 @@ export default function UnifiedCheckoutPage() {
     try {
       setLoading(true);
 
+      // Check for incompatible items
+      if (incompatibleItems.length > 0) {
+        const message = formatIncompatibilityMessage(incompatibleItems, locationLookup.printfulCountries);
+        toast.error(message);
+        setLoading(false);
+        return;
+      }
+
       // Validate all required fields
       if (
         !customerInfo.name ||
         !customerInfo.email ||
+        !customerInfo.phone ||
         !customerInfo.address1 ||
         !customerInfo.city ||
         !customerInfo.zip ||
-        !customerInfo.country ||
-        !customerInfo.state
+        !customerInfo.country
       ) {
-        toast.error("Please fill in all required fields including country and state/province");
+        toast.error("Please fill in all required fields");
+        return;
+      }
+
+      // Validate phone number
+      const phoneDigits = customerInfo.phone.replace(/\D/g, '');
+      if (phoneDigits.length < 7) {
+        toast.error("Phone number must have at least 7 digits");
+        return;
+      }
+
+      // Validate state for countries that require it (US, CA, AU, JP)
+      const countriesRequiringState = ['US', 'CA', 'AU', 'JP'];
+      if (countriesRequiringState.includes(customerInfo.country) && !customerInfo.state) {
+        toast.error(`State/Province is required for ${customerInfo.country}`);
         return;
       }
 
@@ -454,6 +517,37 @@ export default function UnifiedCheckoutPage() {
           </div>
 
           <div className="mt-8 lg:mt-0 lg:col-span-5">
+            {incompatibleItems.length > 0 && (
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0">
+                    <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-red-300 mb-2">Shipping Restriction</h3>
+                    <p className="text-sm text-red-200 mb-3">
+                      {formatIncompatibilityMessage(incompatibleItems, locationLookup.printfulCountries)}
+                    </p>
+                    <div className="space-y-2">
+                      {incompatibleItems.map((incomp) => (
+                        <div key={incomp.item.id} className="flex items-center justify-between bg-red-500/20 rounded px-3 py-2">
+                          <span className="text-sm text-white">{incomp.item.product_name}</span>
+                          <button
+                            onClick={() => removeFromCart(incomp.item.id)}
+                            className="text-xs text-red-300 hover:text-red-200 underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <OrderSummary
               items={items.map(item => ({
                 ...item,
@@ -462,12 +556,12 @@ export default function UnifiedCheckoutPage() {
               summary={summary}
               calculateTotal={() => checkoutState.calculateTotal(summary.subtotal)}
               onCreateOrder={handleCreateOrder}
-              loading={checkoutState.loading}
-              shippingCost={checkoutState.selectedShippingRate?.rate || 0} // Derived from selectedShippingRate
+              loading={checkoutState.loading || incompatibleItems.length > 0}
+              shippingCost={checkoutState.selectedShippingRate?.rate || 0}
               shippingRates={checkoutState.shippingRates}
-              selectedShippingRate={checkoutState.selectedShippingRate || null} // Use selectedShippingRate.id
-              setSelectedShippingRate={checkoutState.setSelectedShippingRate} // Use setSelectedShippingRate
-              taxAmount={checkoutState.taxAmount} // Pass actual tax amount from Printful
+              selectedShippingRate={checkoutState.selectedShippingRate || null}
+              setSelectedShippingRate={checkoutState.setSelectedShippingRate}
+              taxAmount={checkoutState.taxAmount}
               availabilityCheck={inventoryCheck.lastCheck}
               onCheckAvailability={handleCheckAvailability}
               checkingAvailability={inventoryCheck.checking}

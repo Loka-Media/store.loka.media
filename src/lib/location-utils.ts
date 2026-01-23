@@ -1,4 +1,5 @@
 import { PrintfulCountry, PrintfulState } from './checkout-types';
+import { getCountryCallingCode, CountryCode } from 'libphonenumber-js';
 
 // ZIP/Postal code format validation for different countries
 export const validateZipCode = (zipCode: string, countryCode: string): { valid: boolean; message?: string } => {
@@ -192,54 +193,46 @@ export const lookupZipCode = async (zipCode: string, countryCode: string = 'US')
   }
 };
 
+/**
+ * Format phone number for Printful API using libphonenumber-js
+ * Printful requires phone numbers in international format with + prefix
+ */
+export const formatPhoneForPrintful = (phone: string, countryCode: string): string => {
+  if (!phone) return '';
+
+  let cleaned = phone.replace(/[^\d+]/g, '');
+
+  if (cleaned.startsWith('+')) {
+    return cleaned;
+  }
+
+  try {
+    const callingCode = getCountryCallingCode(countryCode as CountryCode);
+
+    if (cleaned.startsWith('0')) {
+      cleaned = cleaned.substring(1);
+    }
+
+    return `+${callingCode}${cleaned}`;
+  } catch (error) {
+    console.warn(`Unable to get calling code for country: ${countryCode}`);
+    return phone.startsWith('+') ? phone : `+${cleaned}`;
+  }
+};
+
 export const getPrintfulCountries = async (): Promise<PrintfulCountry[]> => {
   try {
-    const response = await fetch('https://api.printful.com/countries');
+    const API_URL = typeof window !== 'undefined'
+      ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '')
+      : 'http://localhost:3001';
+
+    const response = await fetch(`${API_URL}/api/printful/countries`);
     if (!response.ok) throw new Error('Failed to fetch countries');
-    
+
     const data = await response.json();
     return data.result || [];
   } catch (error) {
     console.error('Failed to fetch Printful countries:', error);
-    return [
-      {
-        code: 'US',
-        name: 'United States',
-        states: [
-          { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
-          { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
-          { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
-          { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
-          { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
-          { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
-          { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
-          { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
-          { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
-          { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
-          { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
-          { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
-          { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
-          { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
-          { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
-          { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
-          { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }
-        ],
-        region: 'north_america'
-      },
-      {
-        code: 'CA',
-        name: 'Canada',
-        states: [
-          { code: 'AB', name: 'Alberta' }, { code: 'BC', name: 'British Columbia' },
-          { code: 'MB', name: 'Manitoba' }, { code: 'NB', name: 'New Brunswick' },
-          { code: 'NL', name: 'Newfoundland and Labrador' }, { code: 'NS', name: 'Nova Scotia' },
-          { code: 'ON', name: 'Ontario' }, { code: 'PE', name: 'Prince Edward Island' },
-          { code: 'QC', name: 'Quebec' }, { code: 'SK', name: 'Saskatchewan' },
-          { code: 'NT', name: 'Northwest Territories' }, { code: 'NU', name: 'Nunavut' },
-          { code: 'YT', name: 'Yukon' }
-        ],
-        region: 'north_america'
-      }
-    ];
+    return [];
   }
 };
