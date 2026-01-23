@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { CheckoutStep, CustomerInfo } from '@/lib/checkout-types';
 import { printfulAPI } from '@/lib/printful';
+import { formatPhoneForPrintful } from '@/lib/location-utils';
+import { validateShippingAddress, getErrorMessage, canFetchShippingRates } from '@/lib/address-validation';
 import toast from 'react-hot-toast';
 
 export const useCheckoutState = () => {
@@ -37,14 +39,24 @@ export const useCheckoutState = () => {
   };
 
   const getShippingRates = async (address: any, items: any[]) => {
-    const recipient = {
-      address1: address.address1,
-      city: address.city,
-      country_code: address.country,
-      state_code: address.state,
-      zip: address.zip,
-      phone: address.phone,
+    // Format phone number with country code prefix
+    const formattedPhone = formatPhoneForPrintful(address.phone || '', address.country || 'US');
+
+    const recipient: any = {
+      country_code: address.country, // Required
     };
+
+    // Add state_code only for US, CA, AU, JP (required by Printful)
+    if (['US', 'CA', 'AU', 'JP'].includes(address.country) && address.state) {
+      recipient.state_code = address.state;
+    }
+
+    // Add optional fields only if they exist
+    if (address.address1) recipient.address1 = address.address1;
+    if (address.address2) recipient.address2 = address.address2;
+    if (address.city) recipient.city = address.city;
+    if (address.zip) recipient.zip = address.zip;
+    if (formattedPhone) recipient.phone = formattedPhone;
 
     // Map cart items to Printful format
     // Printful Shipping Rate API uses CATALOG variant IDs as STRINGS
@@ -85,38 +97,50 @@ export const useCheckoutState = () => {
 
   const fetchShippingRates = useCallback(
     async (items: any[]) => {
-      if (
-        customerInfo.address1 &&
-        customerInfo.city &&
-        customerInfo.state &&
-        customerInfo.zip &&
-        customerInfo.country
-      ) {
-        setIsFetchingShippingRates(true);
-        try {
-          const rates = await getShippingRates(customerInfo, items);
+      // Validate address before fetching rates (phone is optional for rates but recommended)
+      const validation = validateShippingAddress(customerInfo, { requirePhone: false });
+
+      if (!validation.valid) {
+        const errorMsg = getErrorMessage(validation.errors);
+        toast.error(errorMsg);
+        return;
+      }
+
+      // Additional check for minimum requirements
+      if (!canFetchShippingRates(customerInfo)) {
+        toast.error('Please provide complete address information to calculate shipping rates');
+        return;
+      }
+
+      setIsFetchingShippingRates(true);
+      try {
+        const rates = await getShippingRates(customerInfo, items);
+
+        if (!rates.result || rates.result.length === 0) {
+          toast.error('No shipping options available for this address');
+          setShippingRates([]);
+          setSelectedShippingRate(null);
+        } else {
           setShippingRates(rates.result);
           setSelectedShippingRate(rates.result[0]); // Auto-select the first rate
+          toast.success(`Found ${rates.result.length} shipping option${rates.result.length > 1 ? 's' : ''}`);
 
           // Extract tax from the shipping rate response
-          // Printful may include tax in the rate or we need to estimate from subtotal
           if (rates.result[0]?.tax) {
             setTaxAmount(parseFloat(rates.result[0].tax));
           }
-        } catch (error) {
-          console.error("Failed to fetch shipping rates:", error);
-          toast.error("Could not load shipping options for this address.");
         }
+      } catch (error: any) {
+        console.error("Failed to fetch shipping rates:", error);
+        const errorMessage = error.response?.data?.result || error.message || 'Failed to fetch shipping rates';
+        toast.error(errorMessage);
+        setShippingRates([]);
+        setSelectedShippingRate(null);
+      } finally {
         setIsFetchingShippingRates(false);
       }
     },
-    [
-      customerInfo,
-      getShippingRates,
-      setShippingRates,
-      setSelectedShippingRate,
-      setIsFetchingShippingRates,
-    ]
+    [customerInfo]
   );
 
   const calculateTotal = (subtotal: string) => {

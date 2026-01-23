@@ -11,7 +11,6 @@ interface RegisterData {
   phone: string;
   password: string;
   confirmPassword: string;
-  role: 'user' | 'creator';
   creatorUrl?: string;
 }
 
@@ -78,34 +77,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (data: RegisterData): Promise<boolean> => {
     try {
-      // If user wants to be a creator, register as user first and create creator request
-      if (data.role === 'creator') {
-        const userData = { ...data, role: 'user' as const };
-        await authAPI.register(userData);
-        
-        // Create creator request separately if creatorUrl is provided
-        if (data.creatorUrl) {
-          try {
-            // The backend should handle creator request creation
-            // This will be stored separately for admin approval
-            await authAPI.createCreatorRequest({
-              email: data.email,
-              creatorUrl: data.creatorUrl
-            });
-          } catch (error) {
-            console.error('Failed to create creator request:', error);
-            // Don't fail the whole registration if creator request fails
-          }
-        }
-        
-        toast.success('Registration successful! Your creator application has been submitted for review. Please check your email for OTP verification.');
-      } else {
-        await authAPI.register(data);
-        toast.success('Registration successful! Please check your email for OTP verification.');
-      }
+      const registrationData = {
+        name: data.name,
+        username: data.username,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        ...(data.creatorUrl && { creatorUrl: data.creatorUrl })
+      };
+
+      await authAPI.register(registrationData);
+
+      const message = data.creatorUrl
+        ? 'Registration successful! Your creator application has been submitted for review. Please check your email for OTP verification.'
+        : 'Registration successful! Please check your email for OTP verification.';
+
+      toast.success(message);
       return true;
     } catch (error: unknown) {
-      const message = (error && typeof error === 'object' && 'response' in error && 
+      const message = (error && typeof error === 'object' && 'response' in error &&
         error.response && typeof error.response === 'object' && 'data' in error.response &&
         error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data &&
         typeof error.response.data.error === 'string') ? error.response.data.error : 'Registration failed';

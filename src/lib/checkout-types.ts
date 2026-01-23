@@ -86,7 +86,8 @@ export interface AuthenticatedCheckoutData {
 }
 
 export interface Address {
-  id: number;
+  id?: number;
+  user_id?: number;
   name: string;
   address1: string;
   address2?: string;
@@ -96,7 +97,19 @@ export interface Address {
   country: string;
   phone?: string;
   is_default?: boolean;
-  address_type?: string;
+  address_type?: "shipping" | "billing" | "both";
+  created_at?: string;
+  updated_at?: string;
+  cart_compatibility?: {
+    is_fully_compatible: boolean;
+    compatible_items_count: number;
+    incompatible_items_count: number;
+    incompatible_items: Array<{
+      id: number;
+      product_name: string;
+      available_regions: string[];
+    }>;
+  };
 }
 
 export interface User {

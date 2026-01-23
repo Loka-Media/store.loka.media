@@ -50,7 +50,6 @@ export const useAddressManagement = () => {
       const addressList = addresses.addresses || [];
       setSavedAddresses(addressList);
 
-      // If user has no addresses, default to saving new addresses
       if (addressList.length === 0) {
         setSaveNewAddress(true);
         setShowNewAddressForm(true);
@@ -62,12 +61,11 @@ export const useAddressManagement = () => {
 
       if (defaultShipping) {
         setSelectedAddressId(defaultShipping.id);
-        // Normalize state name if it's stored as full name
         const normalizedAddress = {
           ...defaultShipping,
           state: normalizeStateName(defaultShipping.state)
         };
-        console.log('✅ Loaded default shipping address');
+        console.log('✅ Loaded default shipping address with compatibility:', defaultShipping.cart_compatibility);
         return normalizedAddress;
       }
 
@@ -79,17 +77,18 @@ export const useAddressManagement = () => {
   }, []);
 
   const handleAddressSelect = useCallback((address: Address, updateCustomerInfo: (updates: Partial<CustomerInfo>) => void) => {
-    setSelectedAddressId(address.id);
+    setSelectedAddressId(address.id ?? null);
     updateCustomerInfo({
       address1: address.address1,
       address2: address.address2 || '',
       city: address.city,
       state: normalizeStateName(address.state),
       zip: address.zip,
-      country: address.country
+      country: address.country,
+      phone: address.phone || ''
     });
     setShowNewAddressForm(false);
-    console.log('✅ Selected saved address:', address.id);
+    console.log('✅ Selected saved address:', address.id, address);
   }, []);
 
   const handleNewAddress = useCallback((updateCustomerInfo: (updates: Partial<CustomerInfo>) => void) => {

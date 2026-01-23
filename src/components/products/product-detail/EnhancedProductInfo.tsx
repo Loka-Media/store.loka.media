@@ -25,10 +25,7 @@ export function EnhancedProductInfo({
   creatorName,
   markupPercentage = 20, // Default to 20% if not provided
 }: EnhancedProductInfoProps) {
-  const currentPrice = selectedVariantPrice ?? basePrice;
-  const markupFactor = 1 + (markupPercentage / 100);
-  const originalPrice = basePrice * markupFactor;
-  const savings = originalPrice - currentPrice;
+  const displayPrice = selectedVariantPrice ?? (basePrice * (1 + markupPercentage / 100));
 
   return (
     <div className="space-y-2 sm:space-y-3 md:space-y-4">
@@ -39,13 +36,6 @@ export function EnhancedProductInfo({
           <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 px-2 py-1 rounded-lg">
             <Package className="w-3 h-3 text-gray-300" />
             <span className="font-medium text-gray-300 text-xs">{category}</span>
-          </div>
-        )}
-
-        {/* Savings Badge */}
-        {savings > 0 && (
-          <div className="inline-flex items-center px-4 py-2 rounded-full font-bold text-sm" style={{ backgroundColor: '#00FF00', color: '#000' }}>
-            Save {Math.round((savings / originalPrice) * 100)}%
           </div>
         )}
       </div>
@@ -66,13 +56,8 @@ export function EnhancedProductInfo({
       <div className="space-y-1">
         <div className="flex items-baseline gap-2 flex-wrap">
           <span className="text-2xl sm:text-3xl font-bold text-cyan-400">
-            {formatPrice(currentPrice)}
+            {formatPrice(displayPrice)}
           </span>
-          {savings > 0 && (
-            <span className="text-base sm:text-lg text-gray-500 line-through font-medium">
-              {formatPrice(originalPrice)}
-            </span>
-          )}
         </div>
       </div>
     </div>

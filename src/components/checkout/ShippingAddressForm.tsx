@@ -69,7 +69,7 @@ export const ShippingAddressForm = ({
               ) || savedAddresses[0];
               
               if (defaultAddress) {
-                setSelectedAddressId(defaultAddress.id);
+                setSelectedAddressId(defaultAddress.id ?? null);
                 updateCustomerInfo({
                   address1: defaultAddress.address1,
                   address2: defaultAddress.address2 || '',
@@ -94,6 +94,7 @@ export const ShippingAddressForm = ({
           selectedAddressId={selectedAddressId}
           onAddressSelect={onAddressSelect}
           updateCustomerInfo={updateCustomerInfo}
+          printfulCountries={printfulCountries}
         />
       )}
 
@@ -158,13 +159,16 @@ export const ShippingAddressForm = ({
                   className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500"
                   disabled={!customerInfo.country || availableStates.length === 0}
                 >
-                  <option value="">{customerInfo.country ? 'Select State/Province' : 'Select Country First'}</option>
+                  <option value="">{customerInfo.country ? 'Select State/Province *' : 'Select Country First'}</option>
                   {availableStates.map(state => (
                     <option key={state.code} value={state.code}>
                       {state.name} ({state.code})
                     </option>
                   ))}
                 </select>
+                {['US', 'CA', 'AU', 'JP'].includes(customerInfo.country) && !customerInfo.state && (
+                  <p className="text-xs text-red-400 mt-1">✱ State/Province is required for {customerInfo.country}</p>
+                )}
                 {!customerInfo.country && (
                   <p className="text-xs text-orange-400 mt-1">✱ Select country first</p>
                 )}
