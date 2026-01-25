@@ -67,7 +67,7 @@ export function MakeAndSellSection() {
 
         {/* Buttons - Centered Below */}
         <div className="flex flex-row gap-3 sm:gap-6 md:gap-8 justify-center items-center">
-          <Button variant="primary" href="/dashboard/creator/canvas">
+          <Button variant="primary" href="/dashboard/creator/catalog">
             Start Now
           </Button>
           <Button variant="secondary" href="/products">

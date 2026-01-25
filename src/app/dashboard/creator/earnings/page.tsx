@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Clock, CheckCircle, AlertCircle, LinkIcon } from 'lucide-react';
+import { Clock, CheckCircle } from 'lucide-react';
 import CreatorProtectedRoute from '@/components/CreatorProtectedRoute';
 import { api } from '@/lib/auth';
 
@@ -44,16 +44,6 @@ interface PayoutHistory {
   stripe_transfer_id?: string;
 }
 
-interface StripeStatus {
-  connected: boolean;
-  stripeConnectId?: string;
-  verified?: boolean;
-  email?: string;
-  country?: string;
-  type?: string;
-  message?: string;
-}
-
 interface PrintfulStatusOrder {
   id: number;
   order_number: string;
@@ -80,7 +70,6 @@ function EarningsPageContent() {
   const [summary, setSummary] = useState<CommissionSummary | null>(null);
   const [history, setHistory] = useState<CommissionHistory[]>([]);
   const [payouts, setPayouts] = useState<PayoutHistory[]>([]);
-  const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
   const [printfulOrders, setPrintfulOrders] = useState<PrintfulStatusOrder[]>([]);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -110,12 +99,6 @@ function EarningsPageContent() {
         setPayouts(payoutRes.data.data);
       }
 
-      // Fetch Stripe status
-      const stripeRes = await api.get('/api/creator/stripe/status');
-      if (stripeRes.data) {
-        setStripeStatus(stripeRes.data.data);
-      }
-
       // Fetch orders with Printful status for estimated earnings
       const printfulOrdersRes = await api.get('/api/creator/orders/printful-status?limit=10');
       if (printfulOrdersRes.data) {
@@ -129,40 +112,13 @@ function EarningsPageContent() {
     }
   };
 
-  const handleConnectStripe = async () => {
-    try {
-      const res = await api.get('/api/creator/stripe/auth-url');
-      if (res.data) {
-        window.location.href = res.data.authUrl;
-      } else {
-        toast.error('Failed to get Stripe authorization URL');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to connect Stripe');
-    }
-  };
-
-  const handleDisconnectStripe = async () => {
-    try {
-      const res = await api.post('/api/creator/stripe/disconnect');
-      if (res.data) {
-        toast.success('Stripe account disconnected');
-        setStripeStatus(null);
-        fetchEarningsData();
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to disconnect Stripe');
-    }
-  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black to-gray-900">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-          <p className="mt-4 text-gray-600">Loading earnings data...</p>
+          <p className="mt-4 text-gray-400">Loading earnings data...</p>
         </div>
       </div>
     );
@@ -177,56 +133,36 @@ function EarningsPageContent() {
   const paidCommission = summary?.commissions?.paid?.totalAmount || '0.00';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Earnings</h1>
-          <p className="text-gray-600">Track your commissions and payouts</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Earnings</h1>
+          <p className="text-gray-400">Track your commissions and payouts</p>
         </div>
-
-        {/* Stripe Connection Alert */}
-        {!stripeStatus?.connected && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-4">
-            <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <h3 className="font-semibold text-yellow-900 mb-1">Connect Stripe Account</h3>
-              <p className="text-sm text-yellow-800 mb-4">
-                Link your Stripe account to receive payouts. Your commissions will be transferred to your bank account.
-              </p>
-              <button
-                onClick={handleConnectStripe}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
-              >
-                <LinkIcon className="w-4 h-4" />
-                Connect Stripe Account
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Upcoming Payment (includes draft orders in Printful) */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-orange-500">
+          <div className="bg-gray-800 rounded-lg shadow-sm p-6 border-l-4 border-orange-500">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-600">Upcoming Payment</h3>
+              <h3 className="text-sm font-medium text-gray-400">Upcoming Payment</h3>
               <Clock className="w-5 h-5 text-orange-500" />
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
+            <p className="text-2xl sm:text-3xl font-bold text-white mb-1">
               ${upcomingCommission}
             </p>
             <p className="text-xs text-gray-500">
               {upcomingCount} orders awaiting payout
             </p>
-            <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
+            <div className="mt-3 pt-3 border-t border-gray-700 space-y-1">
               {summary?.commissions?.pending && (
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-400">
                   • {summary.commissions.pending.count} verified, awaiting release
                 </p>
               )}
               {summary?.commissions?.processing && (
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-400">
                   • {summary.commissions.processing.count} released (Printful draft/processing)
                 </p>
               )}
@@ -234,12 +170,12 @@ function EarningsPageContent() {
           </div>
 
           {/* Total Paid */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
+          <div className="bg-gray-800 rounded-lg shadow-sm p-6 border-l-4 border-green-500">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-600">Total Paid</h3>
+              <h3 className="text-sm font-medium text-gray-400">Total Paid</h3>
               <CheckCircle className="w-5 h-5 text-green-500" />
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
+            <p className="text-2xl sm:text-3xl font-bold text-white mb-1">
               ${paidCommission}
             </p>
             <p className="text-xs text-gray-500">
@@ -249,14 +185,14 @@ function EarningsPageContent() {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm mb-6">
-          <div className="flex border-b border-gray-200">
+        <div className="bg-gray-800 rounded-lg shadow-sm mb-6">
+          <div className="flex border-b border-gray-700">
             <button
               onClick={() => setActiveTab('overview')}
               className={`flex-1 py-4 px-6 font-medium transition-colors ${
                 activeTab === 'overview'
-                  ? 'text-orange-600 border-b-2 border-orange-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-orange-400 border-b-2 border-orange-400'
+                  : 'text-gray-400 hover:text-gray-200'
               }`}
             >
               Overview
@@ -265,8 +201,8 @@ function EarningsPageContent() {
               onClick={() => setActiveTab('commissions')}
               className={`flex-1 py-4 px-6 font-medium transition-colors ${
                 activeTab === 'commissions'
-                  ? 'text-orange-600 border-b-2 border-orange-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-orange-400 border-b-2 border-orange-400'
+                  : 'text-gray-400 hover:text-gray-200'
               }`}
             >
               Commission History
@@ -275,8 +211,8 @@ function EarningsPageContent() {
               onClick={() => setActiveTab('payouts')}
               className={`flex-1 py-4 px-6 font-medium transition-colors ${
                 activeTab === 'payouts'
-                  ? 'text-orange-600 border-b-2 border-orange-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-orange-400 border-b-2 border-orange-400'
+                  : 'text-gray-400 hover:text-gray-200'
               }`}
             >
               Payouts
@@ -287,16 +223,16 @@ function EarningsPageContent() {
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 {/* Commission Timing Information */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="bg-gray-900 border border-blue-500/30 rounded-lg p-4">
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-blue-900 mb-1">How Commission Tracking Works</h4>
-                      <div className="text-sm text-blue-800 space-y-1">
+                      <h4 className="font-semibold text-blue-300 mb-1">How Commission Tracking Works</h4>
+                      <div className="text-sm text-gray-400 space-y-1">
                         <p>
                           <strong>Estimated:</strong> When orders are pending fulfillment, commissions are estimated based on expected production costs.
                         </p>
@@ -312,97 +248,75 @@ function EarningsPageContent() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-lg text-gray-900 mb-4">Earnings Summary</h3>
+                  <h3 className="font-semibold text-lg text-white mb-4">Earnings Summary</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Processing</p>
-                      <p className="text-xl font-bold text-gray-900">
+                    <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                      <p className="text-sm text-gray-400 mb-1">Processing</p>
+                      <p className="text-xl font-bold text-white">
                         {summary?.commissions?.processing?.count || 0} orders
                       </p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Paid</p>
-                      <p className="text-xl font-bold text-gray-900">
+                    <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                      <p className="text-sm text-gray-400 mb-1">Paid</p>
+                      <p className="text-xl font-bold text-white">
                         {summary?.commissions?.paid?.count || 0} orders
                       </p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Pending</p>
-                      <p className="text-xl font-bold text-gray-900">
+                    <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                      <p className="text-sm text-gray-400 mb-1">Pending</p>
+                      <p className="text-xl font-bold text-white">
                         {summary?.commissions?.pending?.count || 0} orders
                       </p>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-1">Refunded</p>
-                      <p className="text-xl font-bold text-gray-900">
+                    <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                      <p className="text-sm text-gray-400 mb-1">Refunded</p>
+                      <p className="text-xl font-bold text-white">
                         {summary?.commissions?.refunded?.count || 0} orders
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {stripeStatus?.connected && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-semibold text-green-900 mb-1">Stripe Connected</h4>
-                        <p className="text-sm text-green-800 mb-2">
-                          Account: {stripeStatus.email}
-                        </p>
-                        <p className="text-xs text-green-700">
-                          Payouts will be sent to your linked bank account
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleDisconnectStripe}
-                        className="text-sm text-red-600 hover:text-red-700 font-medium"
-                      >
-                        Disconnect
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 {/* Estimated Earnings Based on Printful Status */}
                 {printfulOrders.length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-lg text-gray-900 mb-4">Recent Orders & Estimated Earnings</h3>
+                    <h3 className="font-semibold text-lg text-white mb-4">Recent Orders & Estimated Earnings</h3>
                     <div className="space-y-3">
                       {printfulOrders.slice(0, 5).map((order) => (
-                        <div key={order.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div key={order.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
-                                <p className="font-medium text-gray-900">{order.order_number}</p>
+                                <p className="font-medium text-white">{order.order_number}</p>
                                 {order.printful_status && (
                                   <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                    order.printful_status.status === 'fulfilled' ? 'bg-green-100 text-green-700' :
-                                    order.printful_status.status === 'inprocess' ? 'bg-blue-100 text-blue-700' :
-                                    order.printful_status.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                    order.printful_status.status === 'draft' ? 'bg-gray-100 text-gray-700' :
-                                    'bg-red-100 text-red-700'
+                                    order.printful_status.status === 'fulfilled' ? 'bg-green-900 text-green-400' :
+                                    order.printful_status.status === 'inprocess' ? 'bg-blue-900 text-blue-400' :
+                                    order.printful_status.status === 'pending' ? 'bg-yellow-900 text-yellow-400' :
+                                    order.printful_status.status === 'draft' ? 'bg-gray-700 text-gray-300' :
+                                    'bg-red-900 text-red-400'
                                   }`}>
                                     {order.printful_status.status}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-sm text-gray-600 mb-1">
+                              <p className="text-sm text-gray-400 mb-1">
                                 {order.estimated_earnings.description}
                               </p>
                               <div className="flex items-center gap-1">
                                 <span className={`text-xs px-2 py-0.5 rounded ${
-                                  order.estimated_earnings.confidence === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
-                                  order.estimated_earnings.confidence === 'high' ? 'bg-blue-100 text-blue-700' :
-                                  order.estimated_earnings.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                                  order.estimated_earnings.confidence === 'low' ? 'bg-orange-100 text-orange-700' :
-                                  'bg-gray-100 text-gray-700'
+                                  order.estimated_earnings.confidence === 'confirmed' ? 'bg-emerald-900 text-emerald-400' :
+                                  order.estimated_earnings.confidence === 'high' ? 'bg-blue-900 text-blue-400' :
+                                  order.estimated_earnings.confidence === 'medium' ? 'bg-yellow-900 text-yellow-400' :
+                                  order.estimated_earnings.confidence === 'low' ? 'bg-orange-900 text-orange-400' :
+                                  'bg-gray-700 text-gray-300'
                                 }`}>
                                   {order.estimated_earnings.confidence} confidence
                                 </span>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-lg font-bold text-emerald-600">
+                              <p className="text-lg font-bold text-emerald-400">
                                 ${order.estimated_earnings.commission.toFixed(2)}
                               </p>
                               <p className="text-xs text-gray-500">estimated</p>
@@ -413,7 +327,7 @@ function EarningsPageContent() {
                     </div>
                     <button
                       onClick={() => router.push('/dashboard/creator/orders')}
-                      className="mt-4 w-full text-center text-sm font-medium text-blue-600 hover:text-blue-700 py-2"
+                      className="mt-4 w-full text-center text-sm font-medium text-blue-400 hover:text-blue-300 py-2"
                     >
                       View All Orders →
                     </button>
@@ -424,45 +338,45 @@ function EarningsPageContent() {
 
             {activeTab === 'commissions' && (
               <div>
-                <h3 className="font-semibold text-lg text-gray-900 mb-4">Recent Commissions</h3>
+                <h3 className="font-semibold text-lg text-white mb-4">Recent Commissions</h3>
                 {history.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-gray-900 border-b border-gray-700">
                         <tr>
-                          <th className="px-4 py-3 text-left font-medium text-gray-700">Order</th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-700">Amount</th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-700">Commission</th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-700">Status</th>
-                          <th className="px-4 py-3 text-left font-medium text-gray-700">Date</th>
+                          <th className="px-4 py-3 text-left font-medium text-gray-400">Order</th>
+                          <th className="px-4 py-3 text-left font-medium text-gray-400">Amount</th>
+                          <th className="px-4 py-3 text-left font-medium text-gray-400">Commission</th>
+                          <th className="px-4 py-3 text-left font-medium text-gray-400">Status</th>
+                          <th className="px-4 py-3 text-left font-medium text-gray-400">Date</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200">
+                      <tbody className="divide-y divide-gray-700">
                         {history.map((item) => (
-                          <tr key={item.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 text-gray-900">#{item.order_id}</td>
-                            <td className="px-4 py-3 text-gray-900">
+                          <tr key={item.id} className="hover:bg-gray-900">
+                            <td className="px-4 py-3 text-gray-200">#{item.order_id}</td>
+                            <td className="px-4 py-3 text-gray-200">
                               ${item.order_amount.toFixed(2)}
                             </td>
-                            <td className="px-4 py-3 font-semibold text-gray-900">
+                            <td className="px-4 py-3 font-semibold text-gray-200">
                               ${item.commission_amount.toFixed(2)}
                             </td>
                             <td className="px-4 py-3">
                               <span
                                 className={`px-2 py-1 rounded-full text-xs font-medium ${
                                   item.status === 'paid'
-                                    ? 'bg-green-100 text-green-800'
+                                    ? 'bg-green-900 text-green-400'
                                     : item.status === 'processing'
-                                    ? 'bg-blue-100 text-blue-800'
+                                    ? 'bg-blue-900 text-blue-400'
                                     : item.status === 'pending'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-red-100 text-red-800'
+                                    ? 'bg-yellow-900 text-yellow-400'
+                                    : 'bg-red-900 text-red-400'
                                 }`}
                               >
                                 {item.status}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-gray-600">
+                            <td className="px-4 py-3 text-gray-400">
                               {new Date(item.created_at).toLocaleDateString()}
                             </td>
                           </tr>
@@ -478,29 +392,29 @@ function EarningsPageContent() {
 
             {activeTab === 'payouts' && (
               <div>
-                <h3 className="font-semibold text-lg text-gray-900 mb-4">Payout History</h3>
+                <h3 className="font-semibold text-lg text-white mb-4">Payout History</h3>
                 {payouts.length > 0 ? (
                   <div className="space-y-4">
                     {payouts.map((payout) => (
-                      <div key={payout.id} className="border border-gray-200 rounded-lg p-4">
+                      <div key={payout.id} className="border border-gray-700 rounded-lg p-4 bg-gray-900">
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <p className="font-semibold text-gray-900">
+                            <p className="font-semibold text-white">
                               ${payout.total_amount.toFixed(2)}
                             </p>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-400">
                               {payout.commissions_count} commissions
                             </p>
                           </div>
                           <span
                             className={`px-3 py-1 rounded-full text-sm font-medium ${
                               payout.status === 'completed'
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-green-900 text-green-400'
                                 : payout.status === 'in_transit'
-                                ? 'bg-blue-100 text-blue-800'
+                                ? 'bg-blue-900 text-blue-400'
                                 : payout.status === 'failed'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-red-900 text-red-400'
+                                : 'bg-yellow-900 text-yellow-400'
                             }`}
                           >
                             {payout.status}
@@ -518,7 +432,7 @@ function EarningsPageContent() {
                             </p>
                           )}
                           {payout.error_message && (
-                            <p className="text-red-600">Error: {payout.error_message}</p>
+                            <p className="text-red-400">Error: {payout.error_message}</p>
                           )}
                         </div>
                       </div>
