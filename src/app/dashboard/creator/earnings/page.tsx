@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Clock, CheckCircle } from 'lucide-react';
 import CreatorProtectedRoute from '@/components/CreatorProtectedRoute';
+import GradientTitle from '@/components/ui/GradientTitle';
 import { api } from '@/lib/auth';
 
 interface CommissionSummary {
@@ -137,7 +138,7 @@ function EarningsPageContent() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Earnings</h1>
+          <GradientTitle text="Earnings" size="md" className="mb-2" />
           <p className="text-gray-400">Track your commissions and payouts</p>
         </div>
 
