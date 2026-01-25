@@ -87,7 +87,7 @@ function LoginPageContent() {
                     </svg>
                   </div>
                 </StartShape>
-                <div className="text-lg sm:text-2xl font-normal text-white mt-2 sm:mt-3">7+</div>
+                <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">7+</div>
                 <div className="text-xs text-white">Platforms</div>
               </div>
               <div className="text-center flex flex-col items-center">
@@ -119,7 +119,7 @@ function LoginPageContent() {
                     </svg>
                   </div>
                 </StartShape>
-                <div className="text-lg sm:text-2xl font-normal text-white mt-2 sm:mt-3">40K+</div>
+                <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">40K+</div>
                 <div className="text-xs text-white">Products</div>
               </div>
               <div className="text-center flex flex-col items-center">
@@ -146,7 +146,7 @@ function LoginPageContent() {
                     </svg>
                   </div>
                 </StartShape>
-                <div className="text-lg sm:text-2xl font-normal text-white mt-2 sm:mt-3">$1M++</div>
+                <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">$1M++</div>
                 <div className="text-xs text-white">Revenue</div>
               </div>
             </div>
