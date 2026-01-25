@@ -9,7 +9,9 @@ import {
   Check,
   Sparkles,
   ImageIcon,
+  Upload,
 } from "lucide-react";
+import Link from "next/link";
 import { UploadedFile } from "./types";
 
 interface QuickDesignToolsProps {
@@ -61,75 +63,96 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   return (
     <div className="space-y-6">
       {/* Uploaded Files */}
-      {uploadedFiles.length > 0 && (
-        <div className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 bg-gray-800">
-          <div className="mb-4">
-            <div className="font-bold text-white text-xs sm:text-lg flex items-center gap-2">
-              <FileImage className="w-4 h-4 sm:w-5 sm:h-5" />
-              Your Uploaded Files ({uploadedFiles.length})
+      <div className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 bg-gray-800">
+        {uploadedFiles.length > 0 ? (
+          <>
+            <div className="mb-4">
+              <div className="font-bold text-white text-xs sm:text-lg flex items-center gap-2">
+                <FileImage className="w-4 h-4 sm:w-5 sm:h-5" />
+                Your Uploaded Files ({uploadedFiles.length})
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-6">
-                {(showAllFiles ? uploadedFiles : uploadedFiles.slice(0, 12)).map((file) => {
-                  const isSelected = selectedFileId === file.id;
-                  return (
-                  <div key={file.id} className="relative">
-                    <button
-                      onClick={() => onSelectExistingFile(file)}
-                      className={`group relative rounded-lg p-1 sm:p-2 transition-all w-full ${
-                        isSelected
-                          ? "bg-black border-2 border-white shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
-                          : "bg-black border-2 border-gray-600 hover:border-white hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
-                      }`}
-                    >
-                      <div className="aspect-square bg-gray-600 border border-gray-500 rounded-lg mb-1 sm:mb-2 overflow-hidden flex items-center justify-center">
-                        {file.thumbnail_url ? (
-                          <img
-                            src={file.thumbnail_url}
-                            alt={file.filename}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <ImageIcon className="w-4 h-4 sm:w-8 sm:h-8 text-gray-400" />
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-6">
+                  {(showAllFiles ? uploadedFiles : uploadedFiles.slice(0, 12)).map((file) => {
+                    const isSelected = selectedFileId === file.id;
+                    return (
+                    <div key={file.id} className="relative">
+                      <button
+                        onClick={() => onSelectExistingFile(file)}
+                        className={`group relative rounded-lg p-1 sm:p-2 transition-all w-full ${
+                          isSelected
+                            ? "bg-black border-2 border-white shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
+                            : "bg-black border-2 border-gray-600 hover:border-white hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
+                        }`}
+                      >
+                        <div className="aspect-square bg-gray-600 border border-gray-500 rounded-lg mb-1 sm:mb-2 overflow-hidden flex items-center justify-center">
+                          {file.thumbnail_url ? (
+                            <img
+                              src={file.thumbnail_url}
+                              alt={file.filename}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="w-4 h-4 sm:w-8 sm:h-8 text-gray-400" />
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-200 truncate line-clamp-1">
+                          {file.filename}
+                        </p>
+
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 bg-black/80 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="text-white text-center">
+                            <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1" />
+                            <p className="text-xs">Use This</p>
+                          </div>
+                        </div>
+
+                        {/* Selected Indicator */}
+                        {isSelected && (
+                          <div className="absolute -top-2 -right-2 bg-white border border-white rounded-full p-1 sm:p-2 shadow-[0_4px_12px_rgba(255,255,255,0.3)]">
+                            <Check className="w-3 h-3 sm:w-4 sm:h-4 text-black" />
+                          </div>
                         )}
-                      </div>
-                      <p className="text-xs text-gray-200 truncate line-clamp-1">
-                        {file.filename}
-                      </p>
+                      </button>
+                    </div>
+                  );
+                  })}
+              </div>
 
-                      {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-black/80 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <div className="text-white text-center">
-                          <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1" />
-                          <p className="text-xs">Use This</p>
-                        </div>
-                      </div>
-
-                      {/* Selected Indicator */}
-                      {isSelected && (
-                        <div className="absolute -top-2 -right-2 bg-white border border-white rounded-full p-1 sm:p-2 shadow-[0_4px_12px_rgba(255,255,255,0.3)]">
-                          <Check className="w-3 h-3 sm:w-4 sm:h-4 text-black" />
-                        </div>
-                      )}
-                    </button>
-                  </div>
-                );
-                })}
+              {uploadedFiles.length > 12 && (
+                <button
+                  onClick={() => setShowAllFiles(!showAllFiles)}
+                  className="text-xs sm:text-sm text-orange-400 mt-4 mx-auto block px-3 sm:px-6 py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg hover:bg-orange-500/30 transition-all"
+                >
+                  {showAllFiles
+                    ? "Show Less"
+                    : `+ ${uploadedFiles.length - 12} more files available`}
+                </button>
+              )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-500/20 border border-orange-500/30 rounded-lg flex items-center justify-center mb-4">
+              <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-orange-400" />
             </div>
-
-            {uploadedFiles.length > 12 && (
-              <button
-                onClick={() => setShowAllFiles(!showAllFiles)}
-                className="text-xs sm:text-sm text-orange-400 mt-4 mx-auto block px-3 sm:px-6 py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg hover:bg-orange-500/30 transition-all"
-              >
-                {showAllFiles
-                  ? "Show Less"
-                  : `+ ${uploadedFiles.length - 12} more files available`}
-              </button>
-            )}
-        </div>
-      )}
+            <p className="text-white font-bold text-sm sm:text-base mb-2">
+              No Design Files Yet
+            </p>
+            <p className="text-gray-400 text-xs sm:text-sm mb-6">
+              Upload your design files to get started
+            </p>
+            <Link
+              href="/dashboard/creator/files"
+              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
+            >
+              <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
+              Upload Files
+            </Link>
+          </div>
+        )}
+      </div>
 
       {/* Quick Tips */}
       <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">

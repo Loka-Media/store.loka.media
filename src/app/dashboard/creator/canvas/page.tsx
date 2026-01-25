@@ -266,6 +266,13 @@ function CanvasContent() {
     }
   }, [user, isInitialized, uploadedFiles.length, fetchUploadedFiles]);
 
+  // Fetch files when entering unified-editor step to ensure they're available
+  useEffect(() => {
+    if (step === "unified-editor" && (user?.role === "creator" || user?.role === "admin")) {
+      fetchUploadedFiles();
+    }
+  }, [step, user, fetchUploadedFiles]);
+
   if (!selectedProduct && !loading) {
     return (
       <CreatorProtectedRoute>
