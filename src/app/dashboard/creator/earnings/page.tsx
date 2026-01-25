@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Clock, CheckCircle } from 'lucide-react';
+import { Clock, CheckCircle, Info } from 'lucide-react';
 import CreatorProtectedRoute from '@/components/CreatorProtectedRoute';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { api } from '@/lib/auth';
@@ -73,6 +73,7 @@ function EarningsPageContent() {
   const [payouts, setPayouts] = useState<PayoutHistory[]>([]);
   const [printfulOrders, setPrintfulOrders] = useState<PrintfulStatusOrder[]>([]);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showCommissionInfo, setShowCommissionInfo] = useState(false);
 
   useEffect(() => {
     fetchEarningsData();
@@ -190,7 +191,7 @@ function EarningsPageContent() {
           <div className="flex border-b border-gray-700">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`flex-1 py-4 px-6 font-medium transition-colors ${
+              className={`flex-1 py-2 sm:py-4 px-2 sm:px-6 text-xs sm:text-base font-medium transition-colors ${
                 activeTab === 'overview'
                   ? 'text-orange-400 border-b-2 border-orange-400'
                   : 'text-gray-400 hover:text-gray-200'
@@ -200,17 +201,18 @@ function EarningsPageContent() {
             </button>
             <button
               onClick={() => setActiveTab('commissions')}
-              className={`flex-1 py-4 px-6 font-medium transition-colors ${
+              className={`flex-1 py-2 sm:py-4 px-2 sm:px-6 text-xs sm:text-base font-medium transition-colors ${
                 activeTab === 'commissions'
                   ? 'text-orange-400 border-b-2 border-orange-400'
                   : 'text-gray-400 hover:text-gray-200'
               }`}
             >
-              Commission History
+              <span className="hidden sm:inline">Commission History</span>
+              <span className="sm:hidden">Commissions</span>
             </button>
             <button
               onClick={() => setActiveTab('payouts')}
-              className={`flex-1 py-4 px-6 font-medium transition-colors ${
+              className={`flex-1 py-2 sm:py-4 px-2 sm:px-6 text-xs sm:text-base font-medium transition-colors ${
                 activeTab === 'payouts'
                   ? 'text-orange-400 border-b-2 border-orange-400'
                   : 'text-gray-400 hover:text-gray-200'
@@ -223,30 +225,34 @@ function EarningsPageContent() {
           <div className="p-6">
             {activeTab === 'overview' && (
               <div className="space-y-6">
-                {/* Commission Timing Information */}
-                <div className="bg-gray-900 border border-blue-500/30 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 mt-0.5">
-                      <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-blue-300 mb-1">How Commission Tracking Works</h4>
-                      <div className="text-sm text-gray-400 space-y-1">
-                        <p>
-                          <strong>Estimated:</strong> When orders are pending fulfillment, commissions are estimated based on expected production costs.
-                        </p>
-                        <p>
-                          <strong>Confirmed:</strong> After order fulfillment, commissions are recalculated using actual Printful production costs for accuracy.
-                        </p>
-                        <p className="mt-2 text-xs">
-                          This ensures you receive fair and accurate commissions based on real production expenses, not estimates.
-                        </p>
-                      </div>
+                {/* Commission Tracking Info Button */}
+                <button
+                  onClick={() => setShowCommissionInfo(!showCommissionInfo)}
+                  className="w-full text-left hover:opacity-90 transition-opacity"
+                >
+                  <div className="bg-gray-900 border border-blue-500/30 rounded-lg p-4 flex items-center gap-3 hover:border-blue-400/50 transition-colors">
+                    <Info className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                    <span className="font-semibold text-blue-300 flex-1">How Commission Tracking Works</span>
+                    <span className="text-blue-400 text-lg">{showCommissionInfo ? '−' : '+'}</span>
+                  </div>
+                </button>
+
+                {/* Commission Info Details */}
+                {showCommissionInfo && (
+                  <div className="bg-gray-900 border border-blue-500/30 rounded-lg p-4 animate-in fade-in duration-300">
+                    <div className="text-sm text-gray-400 space-y-1">
+                      <p>
+                        <strong>Estimated:</strong> When orders are pending fulfillment, commissions are estimated based on expected production costs.
+                      </p>
+                      <p>
+                        <strong>Confirmed:</strong> After order fulfillment, commissions are recalculated using actual Printful production costs for accuracy.
+                      </p>
+                      <p className="mt-2 text-xs">
+                        This ensures you receive fair and accurate commissions based on real production expenses, not estimates.
+                      </p>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div>
                   <h3 className="font-semibold text-lg text-white mb-4">Earnings Summary</h3>
