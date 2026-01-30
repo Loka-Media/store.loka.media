@@ -25,18 +25,7 @@ export function TestimonialSection() {
       role: "Creator Partner",
       avatar: "https://i0.wp.com/tellyflight.com/wp-content/uploads/2023/07/345687233_702675861629777_76830047465931681_n.jpg",
     },
-    {
-      quote: "Amazing growth in just 3 months!",
-      author: "Alex Turner",
-      role: "Content Creator",
-      avatar: "https://live.staticflickr.com/65535/52955514230_8e34ee16c7_z.jpg",
-    },
-    {
-      quote: "Best platform for creators out there",
-      author: "Maria Singh",
-      role: "Influencer",
-      avatar: "https://thepersonage.com/wp-content/uploads/2020/07/Rupan-Bal-Images.jpg",
-    },
+
   ];
 
   useEffect(() => {
