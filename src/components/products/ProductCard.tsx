@@ -142,7 +142,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </p>
 
           {/* Product Title */}
-          <div className="font-normal text-xs sm:text-sm text-white mb-auto line-clamp-2 group-hover:text-orange-300 transition-colors duration-300 tracking-tight leading-snug">
+          <div className="font-normal text-xs sm:text-sm text-white mb-auto line-clamp-1 group-hover:text-orange-300 transition-colors duration-300 tracking-tight leading-snug">
             {product.name}
           </div>
 
