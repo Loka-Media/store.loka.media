@@ -109,7 +109,7 @@ export function CreatorHero({
             {/* Share Button */}
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors animate-share-flicker"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors cursor-pointer animate-share-flicker"
               title="Share this creator's profile"
             >
               <Share2 className="w-4 h-4" />

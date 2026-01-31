@@ -10,7 +10,7 @@ import Navigation from "@/components/Navigation";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 
 export default function CreatorDashboard() {
-  const { connection, products, loading, stats, handleConnectPrintful, deleteProduct } =
+  const { user, connection, products, loading, stats, handleConnectPrintful, deleteProduct } =
     useCreatorDashboard();
 
   return (
@@ -22,6 +22,7 @@ export default function CreatorDashboard() {
           <EnhancedDashboardHeader
             connection={connection}
             onConnectPrintful={handleConnectPrintful}
+            creatorUsername={user?.username || user?.name || ""}
           />
           <div className="mt-12">
             {connection && !connection.connected ? (

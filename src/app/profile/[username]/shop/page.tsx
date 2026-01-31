@@ -87,6 +87,7 @@ function CreatorShopContent() {
           sortBy: customFilters.sortBy,
           sortOrder: customFilters.sortOrder,
           creator: username, // Always filter by creator username
+          isActive: true, // Only show active products on the shop page
         };
 
         // Only add filter params if they have values
