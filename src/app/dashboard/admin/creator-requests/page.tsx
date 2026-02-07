@@ -12,16 +12,16 @@ interface CreatorRequest {
   username: string;
   email: string;
   phone: string;
-  creator_url: string;
+  creatorUrl: string;
   status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function CreatorRequestsPage() {
   const [requests, setRequests] = useState<CreatorRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState<number | null>(null);
+  const [processing, setProcessing] = useState<{ requestId: number; action: 'approve' | 'reject' } | null>(null);
 
   const fetchRequests = async () => {
     try {
@@ -42,7 +42,7 @@ export default function CreatorRequestsPage() {
   }, []);
 
   const handleApprove = async (requestId: number) => {
-    setProcessing(requestId);
+    setProcessing({ requestId, action: 'approve' });
     try {
       await adminAPI.approveCreatorRequest(requestId);
       toast.success('Creator request approved successfully');
@@ -56,7 +56,7 @@ export default function CreatorRequestsPage() {
   };
 
   const handleReject = async (requestId: number) => {
-    setProcessing(requestId);
+    setProcessing({ requestId, action: 'reject' });
     try {
       await adminAPI.rejectCreatorRequest(requestId);
       toast.success('Creator request rejected');
@@ -212,14 +212,14 @@ export default function CreatorRequestsPage() {
                         <div className="flex items-center">
                           <LinkIcon className="w-4 h-4 text-gray-500 mr-2" />
                           <a
-                            href={request.creator_url}
+                            href={request.creatorUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm text-orange-400 hover:text-orange-300 flex items-center transition-colors"
                           >
-                            {request.creator_url && request.creator_url.length > 30
-                              ? `${request.creator_url.substring(0, 30)}...`
-                              : request.creator_url || 'No URL provided'}
+                            {request.creatorUrl && request.creatorUrl.length > 30
+                              ? `${request.creatorUrl.substring(0, 30)}...`
+                              : request.creatorUrl || 'No URL provided'}
                             <ExternalLink className="w-3 h-3 ml-1" />
                           </a>
                         </div>
@@ -230,17 +230,17 @@ export default function CreatorRequestsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-400">
-                        {formatDate(request.created_at)}
+                        {formatDate(request.createdAt)}
                       </td>
                       <td className="px-6 py-4">
                         {request.status === 'pending' && (
                           <div className="flex space-x-2">
                             <button
                               onClick={() => handleApprove(request.id)}
-                              disabled={processing === request.id}
+                              disabled={processing?.requestId === request.id && processing?.action === 'approve'}
                               className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-black bg-green-500 hover:bg-green-600 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {processing === request.id ? (
+                              {processing?.requestId === request.id && processing?.action === 'approve' ? (
                                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-black mr-1"></div>
                               ) : (
                                 <CheckCircle className="w-3 h-3 mr-1" />
@@ -249,10 +249,10 @@ export default function CreatorRequestsPage() {
                             </button>
                             <button
                               onClick={() => handleReject(request.id)}
-                              disabled={processing === request.id}
+                              disabled={processing?.requestId === request.id && processing?.action === 'reject'}
                               className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-black bg-red-500 hover:bg-red-600 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {processing === request.id ? (
+                              {processing?.requestId === request.id && processing?.action === 'reject' ? (
                                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-black mr-1"></div>
                               ) : (
                                 <XCircle className="w-3 h-3 mr-1" />
@@ -263,7 +263,7 @@ export default function CreatorRequestsPage() {
                         )}
                         {request.status !== 'pending' && (
                           <span className="text-sm text-gray-400">
-                            {request.status === 'approved' ? 'Approved' : 'Rejected'} on {formatDate(request.updated_at)}
+                            {request.status === 'approved' ? 'Approved' : 'Rejected'} on {formatDate(request.updatedAt)}
                           </span>
                         )}
                       </td>

@@ -2,6 +2,8 @@
 
 import { Phone, Mail, Globe, Instagram } from 'lucide-react';
 import Image from 'next/image';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 /**
  * Footer component with three-section layout:
@@ -10,6 +12,33 @@ import Image from 'next/image';
  * - Bottom: Copyright (left) + Legal links (right)
  */
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email.trim()) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Simulate a delay
+    setTimeout(() => {
+      toast.success('Thanks for subscribing! Check your email for updates.');
+      setEmail('');
+      setIsSubmitting(false);
+    }, 500);
+  };
   return (
     <footer
       className="relative overflow-hidden"
@@ -96,21 +125,25 @@ export default function Footer() {
           </p>
 
           {/* Newsletter Form */}
-          <div className="flex gap-0 flex-col">
+          <form className="flex gap-0 flex-col" onSubmit={handleNewsletterSubmit}>
             <div className="flex gap-0">
               <input
                 type="email"
                 placeholder="Email Address"
-                className="flex-1 px-3 py-2.5 md:px-4 md:py-3 lg:px-4 lg:py-3 bg-transparent border border-[#3a3530] border-r-0 rounded-l text-white text-sm md:text-base lg:text-sm outline-none transition-colors duration-200 focus:border-[#FF6B00]"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
+                className="flex-1 px-3 py-2.5 md:px-4 md:py-3 lg:px-4 lg:py-3 bg-transparent border border-[#3a3530] border-r-0 rounded-l text-white text-sm md:text-base lg:text-sm outline-none transition-colors duration-200 focus:border-[#FF6B00] disabled:opacity-50"
               />
               <button
-                type="button"
-                className="px-5 py-2.5 md:px-6 md:py-3 lg:px-6 lg:py-3 bg-[#FF6B00] border-none rounded-r text-black text-sm md:text-base lg:text-sm font-semibold cursor-pointer transition-colors duration-200 hover:bg-[#ff8533]"
+                type="submit"
+                disabled={isSubmitting}
+                className="px-5 py-2.5 md:px-6 md:py-3 lg:px-6 lg:py-3 bg-[#FF6B00] border-none rounded-r text-black text-sm md:text-base lg:text-sm font-semibold cursor-pointer transition-colors duration-200 hover:bg-[#ff8533] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
 

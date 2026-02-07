@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, formatDate, checkoutAPI, addressAPI, Address } from '@/lib/api';
-import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus, ChevronDown, ChevronUp, LogOut } from 'lucide-react';
+import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus, ChevronDown, ChevronUp, LogOut, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -46,6 +46,7 @@ export default function ProfilePage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set());
   const [loadingImages, setLoadingImages] = useState<Set<string>>(new Set());
@@ -62,11 +63,12 @@ export default function ProfilePage() {
   const fetchUserData = async () => {
     try {
       setLoading(true);
+      setError(null);
       const [ordersResponse, addressesResponse] = await Promise.all([
         checkoutAPI.getUserOrders({ limit: 5 }),
         addressAPI.getAddresses()
       ]);
-      
+
       console.log('📦 Fetched orders:', ordersResponse.orders);
       // Log image URLs for debugging
       ordersResponse.orders.forEach((order: Order, orderIndex:any) => {
@@ -74,11 +76,12 @@ export default function ProfilePage() {
           console.log(`🖼️ Order ${orderIndex + 1}, Item ${itemIndex + 1} - Image URL:`, item.image_url);
         });
       });
-      
+
       setOrders(ordersResponse.orders);
       setAddresses(addressesResponse.addresses);
     } catch (error) {
       console.error('Failed to fetch user data:', error);
+      setError('Failed to load profile data. Please try again.');
       toast.error('Failed to load profile data');
     } finally {
       setLoading(false);
@@ -110,7 +113,59 @@ export default function ProfilePage() {
     setExpandedOrders(newExpanded);
   };
 
-  if (!isAuthenticated || loading) {
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black">
+        <CreativeLoader variant="default" message="Loading your profile..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black">
+        {/* Header */}
+        <div className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="pb-6 sm:pb-8 pt-6 sm:pt-8">
+              <GradientTitle text="My Profile" size="lg" />
+            </div>
+          </div>
+        </div>
+
+        {/* Error State */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="bg-red-500/10 border border-red-400/30 rounded-lg p-8 sm:p-12 mb-8 inline-block">
+              <AlertCircle className="w-16 h-16 sm:w-20 sm:h-20 text-red-400 mx-auto" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Profile Data Not Found</h2>
+            <p className="text-white/60 text-base sm:text-lg mb-8 max-w-lg">
+              {error}
+            </p>
+            <button
+              onClick={() => fetchUserData()}
+              disabled={loading}
+              className="inline-flex items-center px-6 sm:px-8 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-sm sm:text-base gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Retrying...</span>
+                </>
+              ) : (
+                <>
+                  <span>Try Again</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-black">
         <CreativeLoader variant="default" message="Loading your profile..." />

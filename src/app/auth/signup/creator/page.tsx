@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +18,18 @@ function CreatorSignupContent() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, user, loading: authLoading } = useAuth();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      if (user.role === 'creator') {
+        router.push('/dashboard/creator');
+      } else {
+        router.push('/products');
+      }
+    }
+  }, [user, authLoading, router]);
 
   const {
     register,
@@ -216,15 +227,22 @@ function CreatorSignupContent() {
                   </div>
                   <input
                     {...register("creatorUrl")}
-                    type="url"
-                    className="block w-full pl-10 pr-3 py-2 sm:py-3 bg-transparent border border-white/20 rounded-lg sm:rounded-xl text-xs sm:text-sm placeholder-white/40 text-white font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                    type="text"
+                    className={`block w-full pl-10 pr-3 py-2 sm:py-3 bg-transparent border rounded-lg sm:rounded-xl text-xs sm:text-sm placeholder-white/40 text-white font-medium focus:outline-none focus:ring-2 transition-all ${
+                      errors.creatorUrl
+                        ? "border-red-500/50 focus:ring-red-500 focus:border-red-500"
+                        : "border-white/20 focus:ring-orange-500 focus:border-orange-500"
+                    }`}
                     placeholder="https://instagram.com/yourhandle"
                   />
                 </div>
                 {errors.creatorUrl && (
-                  <p className="mt-2 text-sm font-bold text-red-600 bg-red-100 border-2 border-red-600 rounded-lg px-3 py-1">
-                    {errors.creatorUrl.message}
-                  </p>
+                  <div className="mt-2 flex items-start gap-2 bg-red-500/10 border border-red-500/50 rounded-lg px-3 py-2">
+                    <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs sm:text-sm text-red-400 font-medium">
+                      {errors.creatorUrl.message}
+                    </p>
+                  </div>
                 )}
               </div>
 

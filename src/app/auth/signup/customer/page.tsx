@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +18,18 @@ function CustomerSignupContent() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, user, loading: authLoading } = useAuth();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      if (user.role === 'creator') {
+        router.push('/dashboard/creator');
+      } else {
+        router.push('/products');
+      }
+    }
+  }, [user, authLoading, router]);
 
   const {
     register,

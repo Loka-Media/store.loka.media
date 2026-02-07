@@ -35,8 +35,25 @@ export const otpValidator = z
 
 export const urlValidator = z
   .string()
-  .min(1, "URL is required")
-  .url("Please enter a valid URL");
+  .min(1, "Creator URL is required")
+  .superRefine((url, ctx) => {
+    // Check if URL has a protocol
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      ctx.addIssue({
+        code: "custom",
+        message: "URL must start with https:// or http:// (e.g., https://instagram.com/yourhandle)"
+      });
+      return;
+    }
+    try {
+      new URL(url);
+    } catch {
+      ctx.addIssue({
+        code: "custom",
+        message: "Please enter a valid URL (e.g., https://instagram.com/yourhandle or https://tiktok.com/@yourhandle)"
+      });
+    }
+  });
 
 export const loginSchema = z.object({
   email: emailValidator,
