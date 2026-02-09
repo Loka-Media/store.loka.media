@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
-  X,
   FileImage,
   Trash2,
   AlertTriangle,
@@ -10,6 +11,7 @@ import {
   Sparkles,
   ImageIcon,
   Upload,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { UploadedFile } from "./types";
@@ -19,6 +21,7 @@ interface QuickDesignToolsProps {
   onDeleteFile?: (fileId: number | string) => Promise<void>;
   uploadedFiles: UploadedFile[];
   selectedFileId?: number | string;
+  productId?: number | string;
 }
 
 const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
@@ -26,18 +29,19 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   onDeleteFile,
   uploadedFiles,
   selectedFileId,
+  productId,
 }) => {
+  const router = useRouter();
   const [showAllFiles, setShowAllFiles] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<number | string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<{ id: number | string; filename: string } | null>(null);
 
-  const handleDeleteFile = (e: React.MouseEvent, file: UploadedFile) => {
-    e.stopPropagation(); // Prevent triggering file selection
-    if (!onDeleteFile) return;
-
-    setFileToDelete({ id: file.id, filename: file.filename });
-    setShowDeleteModal(true);
+  const handleUploadClick = () => {
+    const returnUrl = productId
+      ? `/dashboard/creator/canvas?productId=${productId}`
+      : '/dashboard/creator/canvas';
+    router.push(`/dashboard/creator/files?returnTo=${encodeURIComponent(returnUrl)}`);
   };
 
   const confirmDelete = async () => {
@@ -62,16 +66,41 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Uploaded Files */}
-      <div className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 bg-gray-800">
-        {uploadedFiles.length > 0 ? (
-          <>
-            <div className="mb-4">
-              <div className="font-bold text-white text-xs sm:text-lg flex items-center gap-2">
-                <FileImage className="w-4 h-4 sm:w-5 sm:h-5" />
-                Your Uploaded Files ({uploadedFiles.length})
-              </div>
+      {/* Upload New Files Button */}
+      <div className="gradient-border-white-top rounded-lg p-4 sm:p-6 bg-gray-800">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <div className="font-bold text-white text-sm sm:text-lg flex items-center gap-2">
+              <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
+              Need more designs?
             </div>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">
+              Upload new files to use in your product
+            </p>
+          </div>
+          <button
+            onClick={handleUploadClick}
+            className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold hover:from-orange-600 hover:to-orange-700 transition-all hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
+          >
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Upload New Files</span>
+            <span className="sm:hidden">Upload</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Uploaded Files */}
+      {uploadedFiles.length > 0 ? (
+        <div className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 bg-gray-800">
+          <div className="mb-4">
+            <div className="font-bold text-white text-xs sm:text-lg flex items-center gap-2">
+              <FileImage className="w-4 h-4 sm:w-5 sm:h-5" />
+              Your Uploaded Files ({uploadedFiles.length})
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Click on a file to add it to the selected placement
+            </p>
+          </div>
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-6">
                   {(showAllFiles ? uploadedFiles : uploadedFiles.slice(0, 12)).map((file) => {
@@ -88,10 +117,12 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
                       >
                         <div className="aspect-square bg-gray-600 border border-gray-500 rounded-lg mb-1 sm:mb-2 overflow-hidden flex items-center justify-center">
                           {file.thumbnail_url ? (
-                            <img
+                            <Image
                               src={file.thumbnail_url}
                               alt={file.filename}
                               className="w-full h-full object-cover"
+                              fill
+                              sizes="100%"
                             />
                           ) : (
                             <ImageIcon className="w-4 h-4 sm:w-8 sm:h-8 text-gray-400" />
@@ -131,7 +162,7 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
                     : `+ ${uploadedFiles.length - 12} more files available`}
                 </button>
               )}
-          </>
+        </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-500/20 border border-orange-500/30 rounded-lg flex items-center justify-center mb-4">
@@ -152,7 +183,6 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
             </Link>
           </div>
         )}
-      </div>
 
       {/* Quick Tips */}
       <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">

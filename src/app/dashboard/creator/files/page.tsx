@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { printfulAPI } from '@/lib/api';
 import {
   Upload,
-  ArrowLeft,
   Download,
   Trash2,
   Eye,
@@ -14,7 +14,9 @@ import {
   FileText,
   Search,
   Grid,
-  List
+  List,
+  ChevronLeft,
+  ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -39,8 +41,12 @@ interface UploadedFile {
   storage_key?: string;
 }
 
-export default function FilesPage() {
+function FilesPageContent() {
   const { user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
+
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -50,6 +56,7 @@ export default function FilesPage() {
     type: '',
     status: ''
   });
+  const [hasNewUpload, setHasNewUpload] = useState(false);
 
   const hasFetchedRef = useRef(false);
 
@@ -61,11 +68,7 @@ export default function FilesPage() {
       'png': 'image/png',
       'gif': 'image/gif',
       'webp': 'image/webp',
-      'svg': 'image/svg+xml',
-      'pdf': 'application/pdf',
-      'ai': 'application/postscript',
-      'psd': 'image/vnd.adobe.photoshop',
-      'eps': 'application/postscript'
+      'svg': 'image/svg+xml'
     };
     return mimeMap[ext] || 'application/octet-stream';
   };
@@ -102,14 +105,68 @@ export default function FilesPage() {
     fetchFiles();
   }, [user, fetchFiles]);
 
+  // Allowed file types for uploads (images only)
+  const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'svg', 'webp'];
+  const ALLOWED_MIME_TYPES = [
+    'image/png',
+    'image/jpeg',
+    'image/jpg',
+    'image/svg+xml',
+    'image/webp'
+  ];
+
+  const validateFile = (file: File): { valid: boolean; error?: string } => {
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+
+    if (!ALLOWED_EXTENSIONS.includes(extension)) {
+      return {
+        valid: false,
+        error: `Invalid file type ".${extension}". Allowed: ${ALLOWED_EXTENSIONS.join(', ').toUpperCase()}`
+      };
+    }
+
+    if (!ALLOWED_MIME_TYPES.includes(file.type) && file.type !== '') {
+      return {
+        valid: false,
+        error: `Invalid file format for "${file.name}". Please upload PNG, JPG, SVG, or WebP images.`
+      };
+    }
+
+    return { valid: true };
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (!fileList || fileList.length === 0) return;
 
+    // Validate all files first
+    const filesToUpload: File[] = [];
+    const invalidFiles: string[] = [];
+
+    Array.from(fileList).forEach((file) => {
+      const validation = validateFile(file);
+      if (validation.valid) {
+        filesToUpload.push(file);
+      } else {
+        invalidFiles.push(validation.error || `Invalid file: ${file.name}`);
+      }
+    });
+
+    // Show errors for invalid files
+    if (invalidFiles.length > 0) {
+      invalidFiles.forEach((error) => toast.error(error));
+    }
+
+    // If no valid files, exit
+    if (filesToUpload.length === 0) {
+      e.target.value = '';
+      return;
+    }
+
     setUploading(true);
 
     try {
-      const uploadPromises = Array.from(fileList).map(async (file) => {
+      const uploadPromises = filesToUpload.map(async (file) => {
         try {
           // Use uploadFileDirectly which handles multipart/form-data upload
           const response = await printfulAPI.uploadFileDirectly(file);
@@ -132,6 +189,7 @@ export default function FilesPage() {
 
       if (successfulUploads.length > 0) {
         setFiles(prev => [...successfulUploads, ...prev]);
+        setHasNewUpload(true);
       }
 
     } catch (error) {
@@ -175,6 +233,28 @@ export default function FilesPage() {
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Back to Design Banner - Shows when coming from canvas */}
+      {returnTo && (
+        <div className="bg-orange-500/10 border-b border-orange-500/30">
+                <div className= {`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 ${hasNewUpload ? 'mt-0' : 'mt-10'}`} >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <ChevronLeft className="w-5 h-5 text-orange-400" />
+                <span className="text-sm text-orange-300">
+                  {hasNewUpload ? 'Files uploaded! Ready to continue designing.' : 'Upload files for your product design'}
+                </span>
+              </div>
+              <button
+                onClick={() => router.push(returnTo)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm rounded-lg font-bold hover:from-orange-600 hover:to-orange-700 transition-all"
+              >
+                <span>{hasNewUpload ? 'Continue to Design' : 'Back to Design'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -215,13 +295,18 @@ export default function FilesPage() {
                 <input
                   type="file"
                   multiple
-                  accept=".png,.jpg,.jpeg,.pdf,.svg"
+                  accept=".png,.jpg,.jpeg,.svg,.webp,image/png,image/jpeg,image/svg+xml,image/webp"
                   onChange={handleFileUpload}
                   disabled={uploading}
                   className="hidden"
                 />
               </label>
             </div>
+          </div>
+          <div className="mt-2 sm:mt-3">
+            <p className="text-xs text-gray-400 font-medium">
+              Accepted formats: PNG, JPG, SVG, WebP
+            </p>
           </div>
         </div>
       </div>
@@ -250,9 +335,10 @@ export default function FilesPage() {
                 className="px-4 py-2.5 sm:py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
               >
                 <option value="" className="bg-gray-900">All Types</option>
-                <option value="image" className="bg-gray-900">Images</option>
-                <option value="pdf" className="bg-gray-900">PDF</option>
-                <option value="svg" className="bg-gray-900">SVG</option>
+                <option value="image/png" className="bg-gray-900">PNG</option>
+                <option value="image/jpeg" className="bg-gray-900">JPG</option>
+                <option value="image/svg" className="bg-gray-900">SVG</option>
+                <option value="image/webp" className="bg-gray-900">WebP</option>
               </select>
 
               {/* Status Filter */}
@@ -308,18 +394,21 @@ export default function FilesPage() {
               }
             </p>
             {!filters.search && !filters.type && !filters.status && (
-              <div className="mt-6">
+              <div className="mt-6 flex flex-col items-center">
                 <label className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-sm sm:text-base gap-2 cursor-pointer">
                   <Upload className="w-5 h-5" />
                   <span>Upload Your First File</span>
                   <input
                     type="file"
                     multiple
-                    accept=".png,.jpg,.jpeg,.pdf,.svg"
+                    accept=".png,.jpg,.jpeg,.svg,.webp,image/png,image/jpeg,image/svg+xml,image/webp"
                     onChange={handleFileUpload}
                     className="hidden"
                   />
                 </label>
+                <p className="text-xs text-gray-400 font-medium mt-3">
+                  Accepted formats: PNG, JPG, SVG, WebP
+                </p>
               </div>
             )}
           </div>
@@ -566,5 +655,13 @@ function FileListItem({
         </div>
       </td>
     </tr>
+  );
+}
+
+export default function FilesPage() {
+  return (
+    <Suspense fallback={<CreativeLoader variant="design" message="Loading files..." />}>
+      <FilesPageContent />
+    </Suspense>
   );
 }

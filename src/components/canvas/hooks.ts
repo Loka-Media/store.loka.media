@@ -11,8 +11,50 @@ export const useDesignEditorState = (selectedProduct: Product, designFiles?: Des
   const initialActivePlacement = initialPlacements.length > 0 ? initialPlacements[0] : "";
   const initialSelectedDesign = designFiles && designFiles.length > 0 ? designFiles[0] : null;
 
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  // Get saved selection from localStorage
+  const getSavedSelection = () => {
+    if (typeof window === 'undefined' || !selectedProduct?.id) return { sizes: [], colors: [] };
+    try {
+      const saved = localStorage.getItem(`canvas_selection_${selectedProduct.id}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { sizes: parsed.sizes || [], colors: parsed.colors || [] };
+      }
+    } catch (e) {
+      console.error('Failed to parse saved selection:', e);
+    }
+    return { sizes: [], colors: [] };
+  };
+
+  const savedSelection = getSavedSelection();
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(savedSelection.sizes);
+  const [selectedColors, setSelectedColors] = useState<string[]>(savedSelection.colors);
+
+  // Restore selection from localStorage when product changes
+  useEffect(() => {
+    if (typeof window === 'undefined' || !selectedProduct?.id) return;
+    try {
+      const saved = localStorage.getItem(`canvas_selection_${selectedProduct.id}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.sizes?.length > 0) setSelectedSizes(parsed.sizes);
+        if (parsed.colors?.length > 0) setSelectedColors(parsed.colors);
+      }
+    } catch (e) {
+      console.error('Failed to restore selection:', e);
+    }
+  }, [selectedProduct?.id]);
+
+  // Persist selection to localStorage when it changes
+  useEffect(() => {
+    if (typeof window === 'undefined' || !selectedProduct?.id) return;
+    if (selectedSizes.length > 0 || selectedColors.length > 0) {
+      localStorage.setItem(`canvas_selection_${selectedProduct.id}`, JSON.stringify({
+        sizes: selectedSizes,
+        colors: selectedColors
+      }));
+    }
+  }, [selectedSizes, selectedColors, selectedProduct?.id]);
   const [activePlacement, setActivePlacement] = useState<string>(initialActivePlacement);
   const [selectedPlacements, setSelectedPlacements] = useState<string[]>(initialPlacements);
   const [selectedDesignFile, setSelectedDesignFile] = useState<DesignFile | null>(initialSelectedDesign);
@@ -208,13 +250,30 @@ export const useAutoSelectVariants = (
   setShowLivePreview: (show: boolean) => void,
   setSelectedVariants: (variants: number[]) => void
 ) => {
-  // Auto-select all sizes and first color on product load
+  // Auto-select all sizes and first color on product load (only if no saved selection)
   useEffect(() => {
-    if (selectedProduct?.variants && uniqueSizes.length > 0 && selectedSizes.length === 0) {
-      setSelectedSizes(uniqueSizes);
+    // Check if there's a saved selection in localStorage
+    let hasSavedSelection = false;
+    if (typeof window !== 'undefined' && selectedProduct?.id) {
+      try {
+        const saved = localStorage.getItem(`canvas_selection_${selectedProduct.id}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          hasSavedSelection = (parsed.sizes?.length > 0) || (parsed.colors?.length > 0);
+        }
+      } catch (e) {
+        // Ignore errors
+      }
     }
-    if (uniqueColors.length > 0 && selectedColors.length === 0) {
-      setSelectedColors([uniqueColors[0].name]);
+
+    // Only auto-select if no saved selection exists
+    if (!hasSavedSelection) {
+      if (selectedProduct?.variants && uniqueSizes.length > 0 && selectedSizes.length === 0) {
+        setSelectedSizes(uniqueSizes);
+      }
+      if (uniqueColors.length > 0 && selectedColors.length === 0) {
+        setSelectedColors([uniqueColors[0].name]);
+      }
     }
     // CRITICAL FIX: Include all dependencies that affect the effect
   }, [selectedProduct?.id, uniqueSizes.length, uniqueColors.length, selectedSizes.length, selectedColors.length, setSelectedSizes, setSelectedColors]);
