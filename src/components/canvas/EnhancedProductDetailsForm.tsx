@@ -95,8 +95,9 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
   const avgSellingPrice = (minSellingPrice + maxSellingPrice) / 2;
   const profitMargin = ((avgProfit / avgSellingPrice) * 100).toFixed(1);
 
-  const validateForm = () => {
+  const validateForm = (): { isValid: boolean; errorMessages: string[] } => {
     const newErrors: {[key: string]: string} = {};
+    const errorMessages: string[] = [];
 
     const validationData = {
       name: formData.name.trim(),
@@ -110,21 +111,77 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
 
     if (!result.success) {
       result.error.issues.forEach((issue) => {
-        if (issue.path[0]) {
-          newErrors[issue.path[0] as string] = issue.message;
+        const fieldName = issue.path[0] as string;
+        if (fieldName) {
+          // Create user-friendly field names
+          const fieldLabels: {[key: string]: string} = {
+            name: 'Product Name',
+            description: 'Description',
+            markupPercentage: 'Markup Percentage',
+            category: 'Category',
+            tags: 'Tags'
+          };
+
+          newErrors[fieldName] = issue.message;
+          errorMessages.push(`${fieldLabels[fieldName] || fieldName}: ${issue.message}`);
         }
       });
     }
 
+    // Additional custom validations with specific messages
+    if (!formData.name.trim()) {
+      if (!newErrors.name) {
+        newErrors.name = 'Product name is required';
+        errorMessages.push('Product Name: Please enter a name for your product');
+      }
+    }
+
+    if (!formData.description.trim()) {
+      if (!newErrors.description) {
+        newErrors.description = 'Description is required';
+        errorMessages.push('Description: Please add a description for your product');
+      }
+    } else if (formData.description.trim().length < 20) {
+      if (!newErrors.description) {
+        newErrors.description = `Description must be at least 20 characters (currently ${formData.description.trim().length})`;
+        errorMessages.push(`Description: Must be at least 20 characters (you have ${formData.description.trim().length})`);
+      }
+    }
+
+    if (!formData.category) {
+      if (!newErrors.category) {
+        newErrors.category = 'Please select a category';
+        errorMessages.push('Category: Please select a category for your product');
+      }
+    }
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return { isValid: Object.keys(newErrors).length === 0, errorMessages };
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      toast.error('Please fix the errors before continuing');
+    const { isValid, errorMessages } = validateForm();
+
+    if (!isValid) {
+      // Show each error as a separate toast for clarity
+      if (errorMessages.length === 1) {
+        toast.error(errorMessages[0], { duration: 5000 });
+      } else {
+        // Show first error prominently, then list others
+        toast.error(
+          <div className="space-y-1">
+            <div className="font-bold">Please fix the following errors:</div>
+            <ul className="list-disc list-inside text-sm space-y-1">
+              {errorMessages.map((msg, i) => (
+                <li key={i}>{msg}</li>
+              ))}
+            </ul>
+          </div>,
+          { duration: 8000 }
+        );
+      }
       return;
     }
 

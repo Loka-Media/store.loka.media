@@ -103,6 +103,9 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         )
         .map((v: any) => v.id);
       setSelectedVariants(variantIds);
+    } else {
+      // Clear variants when no colors or sizes are selected
+      setSelectedVariants([]);
     }
   }, [selectedColors, selectedSizes, selectedProduct, setSelectedVariants]);
 
@@ -584,9 +587,14 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
             if (designForPlacement) {
               setSelectedDesignFile(designForPlacement);
               setSelectedFileId(designForPlacement.id);
+            } else {
+              // Clear selection when switching to a placement without a design
+              setSelectedDesignFile(null);
+              setSelectedFileId(undefined);
             }
           }}
           designsByPlacement={designsByPlacement}
+          designFiles={designFiles}
         />
       )}
 
@@ -595,7 +603,75 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         onDeleteFile={handleDeleteFile}
         uploadedFiles={uploadedFiles}
         selectedFileId={selectedFileId}
+        productId={selectedProduct?.id}
       />
+
+      {/* Design Assignment Summary - Shows all placed designs */}
+      {designFiles.length > 0 && (
+        <div className="gradient-border-white-top rounded-lg p-4 sm:p-6 bg-gray-800">
+          <div className="flex items-center justify-between mb-4">
+            <div className="font-bold text-white text-sm sm:text-lg flex items-center gap-2">
+              <Check className="w-5 h-5 text-orange-400" />
+              Your Design Assignments ({designFiles.length})
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {designFiles.map((design) => (
+              <div
+                key={design.id}
+                className={`relative rounded-lg p-2 bg-gray-900 border-2 transition-all cursor-pointer ${
+                  activePlacement === design.placement
+                    ? "border-white"
+                    : "border-gray-700 hover:border-gray-500"
+                }`}
+                onClick={() => {
+                  setActivePlacement(design.placement);
+                  setSelectedDesignFile(design);
+                  setSelectedFileId(design.id);
+                }}
+              >
+                <div className="aspect-square bg-gray-800 rounded overflow-hidden mb-2">
+                  <img
+                    src={design.url}
+                    alt={design.filename}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="text-center">
+                  <div className="text-xs sm:text-sm font-medium text-orange-400 capitalize">
+                    {printFiles?.available_placements?.[design.placement] || design.placement}
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-gray-400 truncate">
+                    {design.filename}
+                  </div>
+                </div>
+                {activePlacement === design.placement && (
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5">
+                    <Check className="w-3 h-3 text-black" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 mt-3">
+            Click on a design to edit its placement. Select another placement above to add more designs.
+          </p>
+        </div>
+      )}
+
+      {/* Continue Button - Shows when designs are added */}
+      {designFiles.length > 0 && (
+        <div className="flex justify-end pt-4">
+          <Button
+            onClick={() => setCurrentStep(3)}
+            variant="primary"
+            className="flex items-center gap-2 px-6 py-3"
+          >
+            <span>Continue to Position & Preview</span>
+            <ChevronRight className="w-5 h-5" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 

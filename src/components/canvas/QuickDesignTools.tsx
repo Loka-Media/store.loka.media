@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   X,
   FileImage,
@@ -9,6 +10,8 @@ import {
   Check,
   Sparkles,
   ImageIcon,
+  Upload,
+  Plus,
 } from "lucide-react";
 import { UploadedFile } from "./types";
 
@@ -17,6 +20,7 @@ interface QuickDesignToolsProps {
   onDeleteFile?: (fileId: number | string) => Promise<void>;
   uploadedFiles: UploadedFile[];
   selectedFileId?: number | string;
+  productId?: number | string;
 }
 
 const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
@@ -24,11 +28,20 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   onDeleteFile,
   uploadedFiles,
   selectedFileId,
+  productId,
 }) => {
+  const router = useRouter();
   const [showAllFiles, setShowAllFiles] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<number | string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<{ id: number | string; filename: string } | null>(null);
+
+  const handleUploadClick = () => {
+    const returnUrl = productId
+      ? `/dashboard/creator/canvas?productId=${productId}`
+      : '/dashboard/creator/canvas';
+    router.push(`/dashboard/creator/files?returnTo=${encodeURIComponent(returnUrl)}`);
+  };
 
   const handleDeleteFile = (e: React.MouseEvent, file: UploadedFile) => {
     e.stopPropagation(); // Prevent triggering file selection
@@ -60,6 +73,29 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Upload New Files Button */}
+      <div className="gradient-border-white-top rounded-lg p-4 sm:p-6 bg-gray-800">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <div className="font-bold text-white text-sm sm:text-lg flex items-center gap-2">
+              <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
+              Need more designs?
+            </div>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">
+              Upload new files to use in your product
+            </p>
+          </div>
+          <button
+            onClick={handleUploadClick}
+            className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold hover:from-orange-600 hover:to-orange-700 transition-all hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
+          >
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Upload New Files</span>
+            <span className="sm:hidden">Upload</span>
+          </button>
+        </div>
+      </div>
+
       {/* Uploaded Files */}
       {uploadedFiles.length > 0 && (
         <div className="gradient-border-white-bottom rounded-lg p-3 sm:p-6 bg-gray-800">
@@ -68,6 +104,9 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
               <FileImage className="w-4 h-4 sm:w-5 sm:h-5" />
               Your Uploaded Files ({uploadedFiles.length})
             </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Click on a file to add it to the selected placement
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-6">

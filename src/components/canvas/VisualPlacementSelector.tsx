@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, ImageIcon } from "lucide-react";
 import {
   FrontSVG,
   BackSVG,
@@ -9,11 +9,20 @@ import {
   RightSleeveSVG,
 } from "./PlacementSVGs";
 
+interface DesignFile {
+  id: number;
+  filename: string;
+  url: string;
+  placement: string;
+  position: any;
+}
+
 interface PlacementOption {
   id: string;
   label: string;
   hasDesign: boolean;
   image?: string;
+  designThumbnail?: string;
 }
 
 interface VisualPlacementSelectorProps {
@@ -21,6 +30,7 @@ interface VisualPlacementSelectorProps {
   selectedPlacement: string;
   onSelectPlacement: (placement: string) => void;
   designsByPlacement: Record<string, number>; // count of designs per placement
+  designFiles?: DesignFile[]; // actual design files to show thumbnails
 }
 
 const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
@@ -28,6 +38,7 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
   selectedPlacement,
   onSelectPlacement,
   designsByPlacement,
+  designFiles = [],
 }) => {
   // Get proper SVG component for each placement
   const getPlacementIcon = (placement: string) => {
@@ -48,11 +59,18 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
     return svgMap[placement.toLowerCase()] || svgMap.default;
   };
 
+  // Get design thumbnail for a placement
+  const getDesignThumbnail = (placementId: string): string | undefined => {
+    const design = designFiles.find((df) => df.placement === placementId);
+    return design?.url;
+  };
+
   const placementOptions: PlacementOption[] = Object.entries(availablePlacements).map(
     ([key, label]) => ({
       id: key,
       label: typeof label === "string" ? label : key,
       hasDesign: (designsByPlacement[key] || 0) > 0,
+      designThumbnail: getDesignThumbnail(key),
     })
   );
 
@@ -88,35 +106,50 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
               className={`relative group transition-all bg-black rounded-2xl p-2 sm:p-3 md:p-4 lg:p-5 text-left h-28 sm:h-32 md:h-36 lg:h-32 w-full ${
                 isSelected
                   ? "border-2 border-white shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
+                  : placement.hasDesign
+                  ? "border-2 border-orange-500/50 hover:border-orange-500 hover:shadow-[0_10px_30px_rgba(255,133,27,0.15)]"
                   : "border-2 border-gray-700 hover:border-white hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)]"
               }`}
             >
-              {/* Placement Icon/Illustration */}
+              {/* Placement Icon/Illustration or Design Thumbnail */}
               <div className="flex items-center justify-center mb-1.5 sm:mb-2 md:mb-3 lg:mb-4 flex-1">
-                <div
-                  className={`${
-                    isSelected
-                      ? "scale-110 text-white"
-                      : "text-gray-500 group-hover:text-white group-hover:scale-105"
-                  } transition-all w-8 h-8 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-14 lg:h-14 flex items-center justify-center`}
-                >
-                  {getPlacementIcon(placement.id)}
-                </div>
+                {placement.designThumbnail ? (
+                  <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-lg overflow-hidden border border-white/20">
+                    <img
+                      src={placement.designThumbnail}
+                      alt={`Design for ${placement.label}`}
+                      className="w-full h-full object-contain bg-gray-800"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className={`${
+                      isSelected
+                        ? "scale-110 text-white"
+                        : "text-gray-500 group-hover:text-white group-hover:scale-105"
+                    } transition-all w-8 h-8 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-14 lg:h-14 flex items-center justify-center`}
+                  >
+                    {getPlacementIcon(placement.id)}
+                  </div>
+                )}
               </div>
 
               {/* Placement Name */}
               <div className="text-center">
-                <div className="text-white text-xs sm:text-xs md:text-sm lg:text-base">
+                <div className={`text-xs sm:text-xs md:text-sm lg:text-base ${placement.hasDesign ? 'text-orange-400 font-medium' : 'text-white'}`}>
                   {placement.label}
                 </div>
+                {placement.hasDesign && (
+                  <div className="text-[10px] sm:text-xs text-orange-400/70 mt-0.5">
+                    Design added
+                  </div>
+                )}
               </div>
 
-              {/* Design Count Badge - Bottom Right */}
+              {/* Design Indicator Badge - Bottom Right */}
               {designCount > 0 && (
-                <div className="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 md:bottom-2.5 md:right-2.5 lg:bottom-3 lg:right-3 bg-transparent border border-white rounded-full min-w-6 h-6 sm:min-w-7 sm:h-7 md:min-w-8 md:h-8 flex items-center justify-center">
-                  <span className="text-xs sm:text-sm text-white font-bold">
-                    {designCount}
-                  </span>
+                <div className="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 md:bottom-2.5 md:right-2.5 lg:bottom-3 lg:right-3 bg-orange-500 border border-orange-400 rounded-full min-w-5 h-5 sm:min-w-6 sm:h-6 md:min-w-7 md:h-7 flex items-center justify-center">
+                  <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
                 </div>
               )}
 
@@ -137,9 +170,14 @@ const VisualPlacementSelector: React.FC<VisualPlacementSelectorProps> = ({
           <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-2 flex-shrink-0">
             <Sparkles className="w-5 h-5 text-orange-400" />
           </div>
-          <p className="text-sm text-gray-300">
-            <strong className="text-white">Tip:</strong> Select a placement to add your design. Click again to deselect. Each placement area can have one design that you can adjust in the next step.
-          </p>
+          <div className="text-sm text-gray-300">
+            <strong className="text-white">How to add designs to multiple sides:</strong>
+            <ol className="mt-2 space-y-1 list-decimal list-inside text-gray-400">
+              <li>Select a placement (e.g., <span className="text-white">Front</span>) and choose a design from your files below</li>
+              <li>Then select another placement (e.g., <span className="text-white">Back</span>) and choose a different design</li>
+              <li>Placements with designs will show an <span className="text-orange-400">orange border</span> and thumbnail</li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>
