@@ -58,10 +58,16 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
       }
 
       // Use unified GuestCart for both authenticated and guest users
-      await addToCart(selectedVariant.id, quantity);
+      const success = await addToCart(selectedVariant.id, quantity);
+
+      if (success) {
+        toast.success(`${product.name} added to cart!`);
+      } else {
+        toast.error('Failed to add to cart. Please try again.');
+      }
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      toast.error('Failed to add to cart');
+      toast.error('Failed to add to cart. Please try again.');
     }
   }, [selectedVariant, product, addToCart]);
 

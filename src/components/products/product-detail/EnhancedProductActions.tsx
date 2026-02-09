@@ -9,6 +9,7 @@ interface EnhancedProductActionsProps {
   selectedVariant: ProductVariant | null;
   isVariantAvailable: boolean;
   isWishlisted: boolean;
+  isWishlistLoading?: boolean;
   onAddToCart: (quantity: number) => void;
   onWishlistToggle: () => void;
 }
@@ -17,6 +18,7 @@ export function EnhancedProductActions({
   selectedVariant,
   isVariantAvailable,
   isWishlisted,
+  isWishlistLoading = false,
   onAddToCart,
   onWishlistToggle,
 }: EnhancedProductActionsProps) {
@@ -82,11 +84,23 @@ export function EnhancedProductActions({
         {/* Wishlist Button */}
         <Button
           onClick={onWishlistToggle}
+          disabled={isWishlistLoading}
           variant="secondary"
-          className="flex-1 flex items-center justify-center gap-1.5 !px-2 !py-1.5 sm:!px-3 sm:!py-2 !text-xs sm:!text-sm"
+          className={`flex-1 flex items-center justify-center gap-1.5 !px-2 !py-1.5 sm:!px-3 sm:!py-2 !text-xs sm:!text-sm transition-all ${
+            isWishlisted && !isWishlistLoading ? '!bg-orange-500/20 !border-orange-500 !text-orange-400' : ''
+          }`}
         >
-          <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted ? 'fill-current' : ''}`} />
-          {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
+          {isWishlistLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-3 w-3 border-2 border-current border-t-transparent" />
+              <span>Loading...</span>
+            </>
+          ) : (
+            <>
+              <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+              {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
+            </>
+          )}
         </Button>
       </div>
     </div>

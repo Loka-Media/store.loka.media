@@ -39,7 +39,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     initializeSelectedVariant
   } = useVariantSelection(product, isVariantAvailable);
 
-  const { isWishlisted, handleWishlistToggle } = useProductWishlist(product);
+  const { isWishlisted, isLoading: isWishlistLoading, handleWishlistToggle } = useProductWishlist(product);
   const { handleAddToCart } = useProductCart(product, selectedVariant);
   const locationLookup = useLocationLookup();
 
@@ -104,6 +104,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                   : false
               }
               isWishlisted={isWishlisted}
+              isWishlistLoading={isWishlistLoading}
               onAddToCart={handleAddToCart}
               onWishlistToggle={handleWishlistToggle}
             />

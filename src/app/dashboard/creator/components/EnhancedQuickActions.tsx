@@ -17,7 +17,7 @@ export function EnhancedQuickActions() {
     {
       href: "/dashboard/creator/catalog",
       icon: CustomCatalogIcon,
-      title: "Custom Catalog",
+      title: "Design Products",
       description: "Customizable products",
       iconColor: "text-orange-400",
     },

@@ -87,11 +87,35 @@ export default function AddressesPage() {
     if (showAddressForm) {
       setIsFormVisible(true);
       setTimeout(() => setIsFormAnimating(true), 10);
+      // Prevent background scroll when modal is open
+      document.body.style.overflow = 'hidden';
     } else {
       setIsFormAnimating(false);
       setTimeout(() => setIsFormVisible(false), 200);
+      // Re-enable background scroll when modal is closed
+      document.body.style.overflow = 'unset';
     }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [showAddressForm]);
+
+  useEffect(() => {
+    if (showDeleteModal) {
+      // Prevent background scroll when delete modal is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Re-enable background scroll when delete modal is closed
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showDeleteModal]);
 
   const fetchAddresses = async () => {
     try {
@@ -155,6 +179,19 @@ export default function AddressesPage() {
     const phoneDigits = addressForm.phone.replace(/\D/g, '');
     if (phoneDigits.length < 7) {
       toast.error("Phone number must have at least 7 digits");
+      return;
+    }
+    if (phoneDigits.length > 15) {
+      toast.error("Phone number is too long (maximum 15 digits)");
+      return;
+    }
+    if (!addressForm.phone.startsWith('+')) {
+      toast.error("Phone number must start with + for international format (e.g. +1 for US/Canada)");
+      return;
+    }
+    // Validate phone format - should only contain +, digits, spaces, dashes, parentheses
+    if (!/^[+0-9\s\-()]+$/.test(addressForm.phone)) {
+      toast.error("Phone number contains invalid characters");
       return;
     }
 
@@ -255,7 +292,7 @@ export default function AddressesPage() {
 
   return (
     <div className="min-h-[90vh] bg-black text-white">
-      <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 max-w-4xl">
+      <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 mt-6 sm:mt-8 max-w-4xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 sm:mb-8">
           <div className="flex-1">
@@ -401,20 +438,32 @@ export default function AddressesPage() {
                   />
 
                   <input
-                    type="tel"
+                    type="text"
                     placeholder="Phone (e.g. +1234567890) *"
                     value={addressForm.phone || ''}
-                    onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow digits, +, spaces, dashes, and parentheses
+                      const validatedValue = value.replace(/[^0-9+\s\-()]/g, '');
+                      setAddressForm({ ...addressForm, phone: validatedValue });
+                    }}
                     className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                     required
                   />
-                  {addressForm.phone && addressForm.phone.replace(/\D/g, '').length < 7 && (
-                    <p className="text-xs text-red-400 mt-1">Phone must have at least 7 digits</p>
-                  )}
-                  {addressForm.phone && !addressForm.phone.startsWith('+') && addressForm.phone.length > 0 && (
-                    <p className="text-xs text-yellow-400 mt-1">
-                      Tip: Include country code (e.g. +1 for US/Canada)
-                    </p>
+                  {addressForm.phone && (
+                    <>
+                      {addressForm.phone.replace(/\D/g, '').length < 7 && (
+                        <p className="text-xs text-red-400 mt-1">❌ Phone must have at least 7 digits</p>
+                      )}
+                      {addressForm.phone.replace(/\D/g, '').length >= 7 && !addressForm.phone.startsWith('+') && (
+                        <p className="text-xs text-yellow-400 mt-1">
+                          💡 Tip: Start with + for international format (e.g. +1 for US/Canada)
+                        </p>
+                      )}
+                      {addressForm.phone.replace(/\D/g, '').length >= 7 && addressForm.phone.startsWith('+') && (
+                        <p className="text-xs text-green-400 mt-1">✓ Valid phone format</p>
+                      )}
+                    </>
                   )}
 
                   <input

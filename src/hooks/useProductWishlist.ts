@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 export const useProductWishlist = (product: ProductDetails | null) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { addToWishlist, removeFromWishlist, isInWishlist, items: wishlistItems } = useWishlist();
   const { isAuthenticated } = useAuth();
 
@@ -27,6 +28,7 @@ export const useProductWishlist = (product: ProductDetails | null) => {
     }
 
     try {
+      setIsLoading(true);
       if (isWishlisted) {
         await removeFromWishlist(product.id);
         // State will be updated automatically by useEffect watching wishlistItems
@@ -36,11 +38,14 @@ export const useProductWishlist = (product: ProductDetails | null) => {
       }
     } catch (error) {
       console.error('Failed to update wishlist:', error);
+    } finally {
+      setIsLoading(false);
     }
   }, [product, isAuthenticated, isWishlisted, removeFromWishlist, addToWishlist]);
 
   return {
     isWishlisted,
+    isLoading,
     handleWishlistToggle
   };
 };

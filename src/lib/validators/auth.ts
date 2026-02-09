@@ -20,7 +20,7 @@ export const usernameValidator = z
   .max(20, "Username must not exceed 20 characters")
   .regex(
     /^[a-zA-Z0-9_]+$/,
-    "Username can only contain letters, numbers, and underscores"
+    "Username cannot contain spaces or special characters. Only letters, numbers, and underscores are allowed."
   );
 
 export const phoneValidator = z
