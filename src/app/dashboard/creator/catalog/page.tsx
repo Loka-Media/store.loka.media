@@ -151,6 +151,11 @@ export default function CreatorCatalogPage() {
   );
 
   useEffect(() => {
+    // Scroll to top on component mount
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     if (hasFetchedCategoriesRef.current) {
       return;
     }
@@ -169,11 +174,13 @@ export default function CreatorCatalogPage() {
   };
 
   const handleSelectCategory = (category: Category) => {
+    window.scrollTo(0, 0);
     setSelectedCategory(category);
     fetchCatalog(category.id);
   };
 
   const handleBackToCategories = () => {
+    window.scrollTo(0, 0);
     setSelectedCategory(null);
     setProducts([]);
   };
