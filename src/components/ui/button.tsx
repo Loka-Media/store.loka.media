@@ -44,7 +44,7 @@ export function Button({
 
   if (href) {
     return (
-      <Link href={href} className={baseClasses} style={style}>
+      <Link href={href} className={`${baseClasses} ${className}`} style={style}>
         {children}
       </Link>
     );
