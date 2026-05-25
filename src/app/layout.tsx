@@ -9,6 +9,7 @@ import { Toaster } from "react-hot-toast";
 import Navigation from "@/components/Navigation";
 import StickyHeader from "@/components/StickyHeader";
 import Footer from "@/components/home/Footer";
+import SmoothScroll from "@/components/SmoothScroll";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased font-clash">
+        <SmoothScroll />
         <AuthProvider>
           {/* <CartProvider> - Disabled to prevent duplicate API calls */}
           <GuestCartProvider>
