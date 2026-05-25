@@ -8,9 +8,9 @@ import { formatPrice } from '@/lib/api';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button as MuiButton } from '@mui/material';
 import { Button } from '@/components/ui/button';
 import GradientTitle from '@/components/ui/GradientTitle';
+import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
 
 export default function CartPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -30,6 +30,7 @@ export default function CartPage() {
     itemId: null,
     productName: ''
   });
+  const [clearCartConfirmOpen, setClearCartConfirmOpen] = useState(false);
 
   // Check authentication and redirect if not logged in
   useEffect(() => {
@@ -107,6 +108,11 @@ export default function CartPage() {
     });
 
     setDeleteConfirm({ show: false, itemId: null, productName: '' });
+  };
+
+  const confirmClearCart = async () => {
+    await clearCart();
+    setClearCartConfirmOpen(false);
   };
 
   const cancelDelete = () => {
@@ -283,11 +289,7 @@ export default function CartPage() {
                     <button
                       type="button"
                       className="text-sm text-red-500 hover:text-red-400 font-medium transition-colors"
-                      onClick={() => {
-                        if (confirm('Are you sure you want to clear your cart?')) {
-                          clearCart();
-                        }
-                      }}
+                      onClick={() => setClearCartConfirmOpen(true)}
                     >
                       Clear Cart
                     </button>
@@ -340,49 +342,23 @@ export default function CartPage() {
         )}
       </div>
 
-      {/* Simple MUI Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteConfirm.show}
+      <DeleteConfirmationModal
+        isOpen={deleteConfirm.show}
         onClose={cancelDelete}
-        slotProps={{
-          paper: {
-            style: {
-              backgroundColor: '#1f2937',
-              color: 'white',
-              border: '1px solid #374151'
-            }
-          },
-          backdrop: {
-            style: {
-              backgroundColor: 'rgba(0, 0, 0, 0.1)'
-            }
-          }
-        }}
-      >
-        <DialogTitle style={{ color: 'white' }}>
-          Remove Item
-        </DialogTitle>
-        <DialogContent>
-          <p style={{ color: '#d1d5db' }}>
-            Are you sure you want to remove &quot;{deleteConfirm.productName}&quot; from your cart?
-          </p>
-        </DialogContent>
-        <DialogActions>
-          <MuiButton
-            onClick={cancelDelete}
-            style={{ color: '#9ca3af' }}
-          >
-            Cancel
-          </MuiButton>
-          <MuiButton
-            onClick={confirmDelete}
-            style={{ color: '#ef4444' }}
-            autoFocus
-          >
-            Remove
-          </MuiButton>
-        </DialogActions>
-      </Dialog>
+        onConfirm={confirmDelete}
+        title="Remove Item"
+        description={`Are you sure you want to remove "${deleteConfirm.productName}" from your cart?`}
+        confirmButtonText="Remove"
+      />
+
+      <DeleteConfirmationModal
+        isOpen={clearCartConfirmOpen}
+        onClose={() => setClearCartConfirmOpen(false)}
+        onConfirm={confirmClearCart}
+        title="Clear Cart"
+        description="Are you sure you want to clear your cart? This will remove all items."
+        confirmButtonText="Clear Cart"
+      />
     </div>
   );
 }
