@@ -93,46 +93,43 @@ export default function Navigation() {
                       </Link>
                     )}
 
+                    <Link
+                      href="/wishlist"
+                      className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                      style={{ color: "var(--nav-text)" }}
+                    >
+                      <Heart className="w-5 h-5" />
+                      {wishlistCount > 0 && (
+                        <span
+                          className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
+                        >
+                          {wishlistCount > 99 ? "99+" : wishlistCount}
+                        </span>
+                      )}
+                    </Link>
+                    <Link
+                      href="/cart"
+                      className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                      style={{ color: "var(--nav-text)" }}
+                    >
+                      <ShoppingBag className="w-5 h-5" />
+                      {cartCount > 0 && (
+                        <span
+                          className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
+                        >
+                          {cartCount > 99 ? "99+" : cartCount}
+                        </span>
+                      )}
+                    </Link>
+
                     {user?.role === "user" && (
-                      <>
-                        <Link
-                          href="/wishlist"
-                          className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
-                          style={{ color: "var(--nav-text)" }}
-                        >
-                          <Heart className="w-5 h-5" />
-                          {wishlistCount > 0 && (
-                            <span
-                              className="absolute -top-2 -right-2 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold"
-                              style={{ background: "var(--nav-hover-bg)" }}
-                            >
-                              {wishlistCount > 99 ? "99+" : wishlistCount}
-                            </span>
-                          )}
-                        </Link>
-                        <Link
-                          href="/addresses"
-                          className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center"
-                          style={{ color: "var(--nav-text)" }}
-                        >
-                          <MapPin className="w-5 h-5" />
-                        </Link>
-                        <Link
-                          href="/cart"
-                          className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
-                          style={{ color: "var(--nav-text)" }}
-                        >
-                          <ShoppingBag className="w-5 h-5" />
-                          {cartCount > 0 && (
-                            <span
-                              className="absolute -top-2 -right-2 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold"
-                              style={{ background: "var(--nav-hover-bg)" }}
-                            >
-                              {cartCount > 99 ? "99+" : cartCount}
-                            </span>
-                          )}
-                        </Link>
-                      </>
+                      <Link
+                        href="/addresses"
+                        className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center"
+                        style={{ color: "var(--nav-text)" }}
+                      >
+                        <MapPin className="w-5 h-5" />
+                      </Link>
                     )}
 
                     {/* Separator */}
@@ -265,52 +262,52 @@ export default function Navigation() {
                 </Link>
               )}
 
+              <Link
+                href="/wishlist"
+                className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                style={{ color: "var(--nav-text)" }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Heart className="w-5 h-5 mr-3" />
+                Wishlist
+                {wishlistCount > 0 && (
+                  <span
+                    className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
+                    style={{ background: "var(--nav-hover-bg)" }}
+                  >
+                    {wishlistCount > 99 ? "99+" : wishlistCount}
+                  </span>
+                )}
+              </Link>
+
+              <Link
+                href="/cart"
+                className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                style={{ color: "var(--nav-text)" }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <ShoppingBag className="w-5 h-5 mr-3" />
+                Cart
+                {cartCount > 0 && (
+                  <span
+                    className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
+                    style={{ background: "var(--nav-hover-bg)" }}
+                  >
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
+              </Link>
+
               {user?.role === "user" && (
-                <>
-                  <Link
-                    href="/wishlist"
-                    className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                    style={{ color: "var(--nav-text)" }}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Heart className="w-5 h-5 mr-3" />
-                    Wishlist
-                    {wishlistCount > 0 && (
-                      <span
-                        className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
-                        style={{ background: "var(--nav-hover-bg)" }}
-                      >
-                        {wishlistCount > 99 ? "99+" : wishlistCount}
-                      </span>
-                    )}
-                  </Link>
-                  <Link
-                    href="/addresses"
-                    className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                    style={{ color: "var(--nav-text)" }}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <MapPin className="w-5 h-5 mr-3" />
-                    Addresses
-                  </Link>
-                  <Link
-                    href="/cart"
-                    className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                    style={{ color: "var(--nav-text)" }}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <ShoppingBag className="w-5 h-5 mr-3" />
-                    Cart
-                    {cartCount > 0 && (
-                      <span
-                        className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
-                        style={{ background: "var(--nav-hover-bg)" }}
-                      >
-                        {cartCount > 99 ? "99+" : cartCount}
-                      </span>
-                    )}
-                  </Link>
-                </>
+                <Link
+                  href="/addresses"
+                  className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                  style={{ color: "var(--nav-text)" }}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <MapPin className="w-5 h-5 mr-3" />
+                  Addresses
+                </Link>
               )}
 
               <Link

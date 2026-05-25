@@ -14,6 +14,14 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [showFullscreen, setShowFullscreen] = useState(false);
+  const thumbnailContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollSelectedThumbnailIntoView = (index: number) => {
+    const container = thumbnailContainerRef.current;
+    if (!container) return;
+    const button = container.querySelector<HTMLButtonElement>(`[data-thumb-index="${index}"]`);
+    button?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  };
 
   const handleShare = async () => {
     try {
@@ -32,11 +40,19 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
   };
 
   const prevImage = () => {
-    setSelectedImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    setSelectedImageIndex((prev) => {
+      const nextIndex = prev === 0 ? images.length - 1 : prev - 1;
+      scrollSelectedThumbnailIntoView(nextIndex);
+      return nextIndex;
+    });
   };
 
   const nextImage = () => {
-    setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    setSelectedImageIndex((prev) => {
+      const nextIndex = prev === images.length - 1 ? 0 : prev + 1;
+      scrollSelectedThumbnailIntoView(nextIndex);
+      return nextIndex;
+    });
   };
 
   return (
@@ -82,14 +98,14 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
             <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex gap-2">
               <button
                 onClick={() => setShowFullscreen(true)}
-                className="w-10 h-10 sm:w-11 sm:h-11 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/20 transition-all"
+                className="w-10 h-10 sm:w-11 sm:h-11 bg-black/75 backdrop-blur-md border border-white/40 rounded-lg flex items-center justify-center text-white shadow-lg shadow-black/50 hover:bg-orange-500 hover:border-orange-300 transition-all"
                 title="Fullscreen"
               >
                 <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={handleShare}
-                className="w-10 h-10 sm:w-11 sm:h-11 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/20 transition-all"
+                className="w-10 h-10 sm:w-11 sm:h-11 bg-black/75 backdrop-blur-md border border-white/40 rounded-lg flex items-center justify-center text-white shadow-lg shadow-black/50 hover:bg-orange-500 hover:border-orange-300 transition-all"
                 title="Share"
               >
                 <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -110,12 +126,16 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
         {/* Thumbnail Carousel */}
         {images.length > 1 && (
           <div className="relative group">
-            <div className="overflow-x-auto scrollbar-hide" data-carousel-container>
+            <div ref={thumbnailContainerRef} className="overflow-x-auto scrollbar-hide" data-carousel-container>
               <div className="flex gap-2 sm:gap-3 pb-2">
                 {images.map((image, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedImageIndex(index)}
+                    data-thumb-index={index}
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                      scrollSelectedThumbnailIntoView(index);
+                    }}
                     className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border transition-all ${
                       selectedImageIndex === index
                         ? 'border-white/40 ring-2 ring-white/20'
@@ -140,26 +160,16 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
 
             {/* Left Arrow */}
             <button
-              onClick={() => {
-                const container = document.querySelector('[data-carousel-container]');
-                if (container) {
-                  container.scrollBy({ left: -100, behavior: 'smooth' });
-                }
-              }}
-              className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              onClick={prevImage}
+              className="absolute -left-4 sm:-left-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
             {/* Right Arrow */}
             <button
-              onClick={() => {
-                const container = document.querySelector('[data-carousel-container]');
-                if (container) {
-                  container.scrollBy({ left: 100, behavior: 'smooth' });
-                }
-              }}
-              className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              onClick={nextImage}
+              className="absolute -right-4 sm:-right-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
