@@ -38,6 +38,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
             <br />
             Into Income
           </h1>
+          {/* End H1 */}
 
           {/* Subheading - Gradient from White to Black */}
           <GradientText
