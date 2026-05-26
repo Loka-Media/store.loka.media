@@ -13,7 +13,8 @@ interface ConnectionStatus {
 
 interface CreatorProduct {
   id: number;
-  is_active: boolean;
+  is_active?: boolean;
+  status?: string;
   thumbnail_url: string;
   name: string;
   min_price: number;
@@ -98,8 +99,17 @@ export function useCreatorDashboard() {
 
       // Calculate stats
       const totalProducts = response.products.length;
+      const isProductActive = (product: CreatorProduct) => {
+        if (typeof product.is_active === "boolean") {
+          return product.is_active;
+        }
+        if (typeof product.status === "string") {
+          return product.status.toLowerCase() === "active";
+        }
+        return false;
+      };
       const activeProducts = response.products.filter(
-        (p: CreatorProduct) => p.is_active
+        (p: CreatorProduct) => isProductActive(p)
       ).length;
 
       setStats({
