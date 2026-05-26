@@ -1,6 +1,7 @@
 // components/home/HeroSection.tsx
 "use client";
 
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GradientText } from "@/components/ui/GradientText";
 
@@ -10,6 +11,69 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
+  const statsRef = useRef<HTMLDivElement | null>(null);
+  const [paidToCreators, setPaidToCreators] = useState(0);
+  const [activeCreators, setActiveCreators] = useState(0);
+  const [youKeep, setYouKeep] = useState(0);
+
+  useEffect(() => {
+    const section = statsRef.current;
+    if (!section) return;
+
+    let hasAnimated = false;
+    let animationFrameId = 0;
+    const duration = 1800;
+
+    const animateValue = (
+      setter: Dispatch<SetStateAction<number>>,
+      target: number,
+      progress: number
+    ) => {
+      setter(Math.min(target, Math.floor(target * progress)));
+    };
+
+    const startAnimation = () => {
+      const startTime = performance.now();
+
+      const step = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(1, elapsed / duration);
+
+        animateValue(setPaidToCreators, 2, progress);
+        animateValue(setActiveCreators, 10, progress);
+        animateValue(setYouKeep, 90, progress);
+
+        if (progress < 1) {
+          animationFrameId = window.requestAnimationFrame(step);
+        }
+      };
+
+      animationFrameId = window.requestAnimationFrame(step);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            hasAnimated = true;
+            startAnimation();
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(section);
+
+    return () => {
+      observer.disconnect();
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-black text-white">
       {/* Main Hero Section - Matching Figma Design Exactly */}
@@ -70,6 +134,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
 
       {/* Stats Section - Black Background with Accent Cards */}
       <div
+        ref={statsRef}
         className="py-8 md:py-12 px-4 md:px-6 lg:px-8 border-t"
         style={{
           background: "#000000",
@@ -102,7 +167,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                     letterSpacing: "0.02em",
                   }}
                 >
-                  $2M+
+                  ${paidToCreators}M+
                 </div>
               </div>
             </div>
@@ -129,7 +194,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                     letterSpacing: "0.02em",
                   }}
                 >
-                  10K+
+                  {activeCreators}K+
                 </div>
               </div>
             </div>
@@ -156,7 +221,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                     letterSpacing: "0.02em",
                   }}
                 >
-                  90%
+                  {youKeep}%
                 </div>
               </div>
             </div>

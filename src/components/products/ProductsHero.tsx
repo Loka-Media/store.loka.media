@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import GradientTitle from "@/components/ui/GradientTitle";
 import { GradientText } from "@/components/ui/GradientText";
 import StartShape from "@/components/ui/StartShape";
@@ -19,6 +20,71 @@ export function ProductsHero({
   creators,
   categories,
 }: ProductsHeroProps) {
+  const statsRef = useRef<HTMLDivElement | null>(null);
+  const [productsCount, setProductsCount] = useState(0);
+  const [creatorsCount, setCreatorsCount] = useState(0);
+  const [categoriesCount, setCategoriesCount] = useState(0);
+
+  useEffect(() => {
+    const section = statsRef.current;
+    if (!section) return;
+
+    let hasAnimated = false;
+    let animationFrameId = 0;
+    const duration = 1600;
+
+    const animateValue = (
+      setter: Dispatch<SetStateAction<number>>,
+      target: number,
+      progress: number
+    ) => {
+      setter(Math.min(target, Math.floor(target * progress)));
+    };
+
+    const startAnimation = () => {
+      const startTime = performance.now();
+      const targetCreators = creators.length;
+      const targetCategories = categories.length;
+
+      const step = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(1, elapsed / duration);
+
+        animateValue(setProductsCount, 10, progress);
+        animateValue(setCreatorsCount, targetCreators, progress);
+        animateValue(setCategoriesCount, targetCategories, progress);
+
+        if (progress < 1) {
+          animationFrameId = window.requestAnimationFrame(step);
+        }
+      };
+
+      animationFrameId = window.requestAnimationFrame(step);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            hasAnimated = true;
+            startAnimation();
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(section);
+
+    return () => {
+      observer.disconnect();
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [creators.length, categories.length]);
+
   return (
     <div className="relative bg-black overflow-hidden border-b border-white/10">
       {/* Decorative Elements */}
@@ -41,7 +107,7 @@ export function ProductsHero({
           </div>
 
           {/* Stats bar - StarShape cards */}
-          <div className="grid grid-cols-3 gap-0 sm:gap-1 lg:gap-2 mb-6 sm:mb-8 lg:mb-12">
+          <div ref={statsRef} className="grid grid-cols-3 gap-0 sm:gap-1 lg:gap-2 mb-6 sm:mb-8 lg:mb-12">
             <div className="text-center flex flex-col items-center">
               <StartShape className="max-w-[80px] sm:max-w-[100px]">
                 <div className="flex justify-center">
@@ -97,7 +163,7 @@ export function ProductsHero({
                   </svg>
                 </div>
               </StartShape>
-              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">10K+</div>
+              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{productsCount}K+</div>
               <div className="text-xs text-white">Products</div>
             </div>
             <div className="text-center flex flex-col items-center">
@@ -129,7 +195,7 @@ export function ProductsHero({
                   </svg>
                 </div>
               </StartShape>
-              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{creators.length}+</div>
+              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{creatorsCount}+</div>
               <div className="text-xs text-white">Creators</div>
             </div>
             <div className="text-center flex flex-col items-center">
@@ -161,7 +227,7 @@ export function ProductsHero({
                   </svg>
                 </div>
               </StartShape>
-              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{categories.length}+</div>
+              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{categoriesCount}+</div>
               <div className="text-xs text-white">Categories</div>
             </div>
           </div>
