@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { TotalProductsIcon, ActiveProductsIcon, TotalSalesIcon, RevenueIcon } from './QuickActionIcons';
 
 interface StatsProps {
@@ -13,92 +12,38 @@ interface StatsProps {
 }
 
 export function EnhancedStatsCards({ stats }: StatsProps) {
-  const sectionRef = useRef<HTMLDivElement | null>(null);
-  const [isInView, setIsInView] = useState(false);
-  const [animatedStats, setAnimatedStats] = useState({
-    totalProducts: 0,
-    activeProducts: 0,
-    totalSales: 0,
-    revenue: 0,
-  });
-  const animatedStatsRef = useRef(animatedStats);
-
-  useEffect(() => {
-    animatedStatsRef.current = animatedStats;
-  }, [animatedStats]);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsInView(true);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.35 }
-    );
-
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isInView) return;
-
-    const duration = 1200;
-    const start = performance.now();
-    const from = { ...animatedStatsRef.current };
-    const to = { ...stats };
-    let animationFrameId = 0;
-
-    const step = (now: number) => {
-      const progress = Math.min(1, (now - start) / duration);
-      setAnimatedStats({
-        totalProducts: Math.floor(from.totalProducts + (to.totalProducts - from.totalProducts) * progress),
-        activeProducts: Math.floor(from.activeProducts + (to.activeProducts - from.activeProducts) * progress),
-        totalSales: Math.floor(from.totalSales + (to.totalSales - from.totalSales) * progress),
-        revenue: from.revenue + (to.revenue - from.revenue) * progress,
-      });
-
-      if (progress < 1) {
-        animationFrameId = window.requestAnimationFrame(step);
-      }
-    };
-
-    animationFrameId = window.requestAnimationFrame(step);
-    return () => window.cancelAnimationFrame(animationFrameId);
-  }, [isInView, stats]);
+  const safeStats = {
+    totalProducts: Math.max(0, Number(stats.totalProducts) || 0),
+    activeProducts: Math.max(0, Number(stats.activeProducts) || 0),
+    totalSales: Math.max(0, Number(stats.totalSales) || 0),
+    revenue: Math.max(0, Number(stats.revenue) || 0),
+  };
 
   const statItems = [
     {
       name: 'Total Products',
-      value: animatedStats.totalProducts,
+      value: safeStats.totalProducts,
       icon: TotalProductsIcon,
       iconColor: 'text-blue-400',
       borderColor: 'from-blue-500/20 to-blue-400/10',
     },
     {
       name: 'Active Products',
-      value: animatedStats.activeProducts,
+      value: safeStats.activeProducts,
       icon: ActiveProductsIcon,
       iconColor: 'text-green-400',
       borderColor: 'from-green-500/20 to-green-400/10',
     },
     {
       name: 'Total Sales',
-      value: animatedStats.totalSales,
+      value: safeStats.totalSales,
       icon: TotalSalesIcon,
       iconColor: 'text-purple-400',
       borderColor: 'from-purple-500/20 to-purple-400/10',
     },
     {
       name: 'Revenue',
-      value: `$${animatedStats.revenue.toFixed(2)}`,
+      value: `$${safeStats.revenue.toFixed(2)}`,
       icon: RevenueIcon,
       iconColor: 'text-orange-400',
       borderColor: 'from-orange-500/20 to-orange-400/10',
@@ -106,7 +51,7 @@ export function EnhancedStatsCards({ stats }: StatsProps) {
   ];
 
   return (
-    <div ref={sectionRef} className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-12">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-12">
       {statItems.map((item, index) => (
         <div
           key={index}

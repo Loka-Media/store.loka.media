@@ -8,6 +8,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { productAPI } from '@/lib/api';
 import { Switch } from "@/components/ui/switch";
@@ -25,10 +26,12 @@ interface CreatorProduct {
 }
 
 export default function EnhancedProductCard({ product, onDelete }: { product: CreatorProduct, onDelete: (productId: number) => void }) {
+  const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
   const [newStatus, setNewStatus] = useState<boolean | null>(null);
   const [localStatus, setLocalStatus] = useState(product.status === "active" || product.is_active);
+  const productHref = `/products/${createProductSlug(product.name, product.id)}`;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -69,8 +72,18 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
 
   return (
     <>
-      <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-        <div className="gradient-border-white-bottom overflow-hidden group cursor-pointer flex flex-col h-full hover:shadow-[0_20px_60px_rgba(255,99,71,0.3)] transition-all duration-300">
+      <div
+        role="link"
+        tabIndex={0}
+        onClick={() => router.push(productHref)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            router.push(productHref);
+          }
+        }}
+        className="gradient-border-white-bottom overflow-hidden group cursor-pointer flex flex-col h-full hover:shadow-[0_20px_60px_rgba(255,99,71,0.3)] transition-all duration-300"
+      >
           {/* Image Container */}
           <div className="w-full relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
             <Image
@@ -96,10 +109,11 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
             {/* Action buttons overlay */}
             <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex gap-1 sm:space-x-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-10">
               <Link
-                href={`/products/${createProductSlug(product.name, product.id)}`}
+                href={productHref}
                 target="_blank"
                 className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-orange-500 border border-white/20 text-white rounded-lg transition-all duration-300"
                 title="View Product"
+                onClick={(e) => e.stopPropagation()}
               >
                 <ExternalLink className="w-3 sm:w-4 h-3 sm:h-4" />
               </Link>
@@ -107,6 +121,7 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
                 href={`/dashboard/creator/products/${product.id}/edit`}
                 className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-blue-500 border border-white/20 text-white rounded-lg transition-all duration-300"
                 title="Edit Product"
+                onClick={(e) => e.stopPropagation()}
               >
                 <Edit className="w-3 sm:w-4 h-3 sm:h-4" />
               </Link>
@@ -165,7 +180,6 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
             </div>
           </div>
         </div>
-      </Link>
 
       <ConfirmationDialog
         isOpen={isDeleteDialogOpen}
