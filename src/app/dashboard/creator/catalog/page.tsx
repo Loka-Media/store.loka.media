@@ -301,7 +301,7 @@ function ProductView({
   onBackToCategories,
 }: any) {
   return (
-    <div className="flex flex-col gap-4 sm:gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6 pt-4">
       {/* Filters Section */}
       <div className="gradient-border-white-top rounded-lg p-3 sm:p-4 bg-gray-900">
         <div className="flex flex-col gap-3 items-stretch sm:flex-row sm:gap-3 sm:items-center">
@@ -392,7 +392,7 @@ function PrintfulProductCard({
           className="object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
           unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div onClick={() => onCreateProduct(product)} className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"></div>
 
         {/* Brand Badge - Top Right */}
         <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-2 sm:px-3 py-1">
@@ -404,7 +404,7 @@ function PrintfulProductCard({
         {/* Button - Bottom Left */}
         <button
           onClick={() => onCreateProduct(product)}
-          className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 p-1.5 sm:p-2.5 rounded-full bg-black border border-orange-400 text-white hover:bg-orange-500 transition-all duration-300 transform hover:scale-110 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+          className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 p-1.5 sm:p-2.5 rounded-full bg-black border border-orange-400 text-white hover:bg-orange-500 transition-all duration-300 transform hover:scale-110 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
           title="Create Product"
         >
           <Plus className="w-3 h-3 sm:w-5 sm:h-5" />
