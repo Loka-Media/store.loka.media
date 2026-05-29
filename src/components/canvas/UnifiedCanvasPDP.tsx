@@ -114,6 +114,16 @@ const Product360Viewer: React.FC<{
     setActiveIndex(0);
   }, [sortedMockups.length]);
 
+  // Preload all mockup images to prevent lag/stuck transitions during drag/click
+  useEffect(() => {
+    sortedMockups.forEach((m) => {
+      if (m?.url) {
+        const img = new Image();
+        img.src = m.url;
+      }
+    });
+  }, [sortedMockups]);
+
   if (sortedMockups.length === 0) {
     return (
       <div className="aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative">
@@ -199,15 +209,22 @@ const Product360Viewer: React.FC<{
         onTouchMove={handleTouchMove}
         onTouchEnd={handleMouseUpOrLeave}
       >
-        {/* Mockup Image View */}
-        <img 
-          src={activeMockup.url} 
-          alt={activeMockup.title || `Mockup ${activeIndex + 1}`} 
-          className="w-full h-full object-contain pointer-events-none transition-transform duration-200"
-        />
+        {/* Render all sorted mockups stacked for instant GPU-accelerated switching */}
+        {sortedMockups.map((m, idx) => (
+          <img 
+            key={idx}
+            src={m.url} 
+            alt={m.title || `Mockup ${idx + 1}`} 
+            className={`absolute inset-0 w-full h-full object-contain pointer-events-none transition-all duration-300 ease-out ${
+              idx === activeIndex 
+                ? "opacity-100 scale-100 z-10" 
+                : "opacity-0 scale-95 z-0 pointer-events-none"
+            }`}
+          />
+        ))}
 
         {/* 360 Badge Overlay */}
-        <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md border border-white/10 rounded-full py-1 px-3 flex items-center gap-1.5 shadow-lg pointer-events-none">
+        <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md border border-white/10 rounded-full py-1 px-3 flex items-center gap-1.5 shadow-lg pointer-events-none z-20">
           <RotateCw className="w-3 h-3 text-[#FF6D1F] animate-spin" style={{ animationDuration: "8s" }} />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-200">360° Spin View</span>
         </div>
@@ -217,13 +234,13 @@ const Product360Viewer: React.FC<{
           <>
             <button
               onClick={rotateLeft}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/95 text-white rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md focus:outline-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/95 text-white rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md focus:outline-none z-20"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={rotateRight}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/95 text-white rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md focus:outline-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/95 text-white rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md focus:outline-none z-20"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -231,7 +248,7 @@ const Product360Viewer: React.FC<{
         )}
 
         {/* Interactive Gesture Helper Text overlay */}
-        <div className="absolute bottom-3 inset-x-0 mx-auto w-max bg-black/65 backdrop-blur-sm border border-white/5 rounded-full py-0.5 px-3 text-[10px] text-gray-400 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+        <div className="absolute bottom-3 inset-x-0 mx-auto w-max bg-black/65 backdrop-blur-sm border border-white/5 rounded-full py-0.5 px-3 text-[10px] text-gray-400 opacity-100 transition-opacity duration-300 pointer-events-none z-20">
           Swipe or drag horizontally to rotate
         </div>
       </div>
@@ -620,24 +637,24 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     <div className="bg-[#050505] min-h-screen text-white relative pt-[30px] md:pt-[40px]">
       {/* Sticky Header with Product Info & Continue Button - offset by navbar height + 10px spacing */}
       <div className="sticky top-[90px] md:top-[98px] z-40 bg-black/80 backdrop-blur-md border-b border-white/10 py-3 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-sm sm:text-lg md:text-xl font-bold font-clash text-white line-clamp-1">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm sm:text-base md:text-lg font-bold font-clash text-white line-clamp-1">
               {selectedProduct?.title || selectedProduct?.name}
-            </h1>
-            <p className="text-[10px] sm:text-xs text-gray-400">
+            </div>
+            <p className="text-[10px] sm:text-xs text-gray-400 truncate">
               SKU: {selectedProduct?.model || selectedProduct?.id} | {selectedProduct?.type_name}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex-shrink-0 flex items-center gap-2">
             <Button
               onClick={handlePublishSubmit}
               disabled={isPublishing || !validationSummary.allValid}
-              className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {isPublishing ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
                   <span>Publishing...</span>
                 </div>
               ) : (
