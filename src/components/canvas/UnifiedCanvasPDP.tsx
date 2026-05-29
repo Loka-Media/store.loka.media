@@ -65,16 +65,85 @@ interface UnifiedCanvasPDPProps {
   isPublishing: boolean;
 }
 
+// Helper to determine readable text contrast color (black or white) based on background hex code
+const getContrastTextColor = (hexCode: string): string => {
+  if (!hexCode) return "#ffffff";
+  
+  // Handle comma-separated multi-colors (use the primary/first color)
+  let cleanHex = hexCode.split(",")[0].trim().toLowerCase();
+  
+  if (!cleanHex.startsWith("#")) {
+    // Match common light CSS color names
+    const lightColors = ["white", "yellow", "silver", "gold", "pink", "ash", "heather", "cream", "sand", "lime"];
+    if (lightColors.some(color => cleanHex.includes(color))) {
+      return "#000000";
+    }
+    return "#ffffff";
+  }
+  
+  // Expand 3-digit hex (#fff) to 6-digit hex (#ffffff)
+  if (cleanHex.length === 4) {
+    cleanHex = "#" + cleanHex[1] + cleanHex[1] + cleanHex[2] + cleanHex[2] + cleanHex[3] + cleanHex[3];
+  }
+  
+  const r = parseInt(cleanHex.substring(1, 3), 16);
+  const g = parseInt(cleanHex.substring(3, 5), 16);
+  const b = parseInt(cleanHex.substring(5, 7), 16);
+  
+  if (isNaN(r) || isNaN(g) || isNaN(b)) {
+    return "#ffffff";
+  }
+  
+  // HSP perceived brightness calculation
+  const brightness = Math.sqrt(
+    0.299 * (r * r) +
+    0.587 * (g * g) +
+    0.114 * (b * b)
+  );
+  
+  // Threshold above 145 matches light background, returning black text for high readability
+  return brightness > 145 ? "#000000" : "#ffffff";
+};
+
 // Interactive 360-degree product preview spin viewer component
 const Product360Viewer: React.FC<{
   mockupUrls: any[];
   defaultImage?: string;
   productName: string;
-}> = ({ mockupUrls, defaultImage, productName }) => {
+  designFiles: any[];
+}> = ({ mockupUrls, defaultImage, productName, designFiles }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
   const dragStartActiveIndex = useRef(0);
+
+  // Printable area mappings (percentage of mockup container) to overlay designs in real-time
+  const MOCKUP_PRINT_AREAS: Record<string, { width: number; height: number; top: number; left: number }> = {
+    front: { width: 33, height: 45, top: 24, left: 33.5 },
+    back: { width: 33, height: 45, top: 22, left: 33.5 },
+    left: { width: 15, height: 15, top: 32, left: 42.5 },
+    right: { width: 15, height: 15, top: 32, left: 42.5 },
+    sleeve_left: { width: 15, height: 15, top: 32, left: 42.5 },
+    sleeve_right: { width: 15, height: 15, top: 32, left: 42.5 },
+  };
+
+  // Find if there's an active design for a mockup view based on its title
+  const getDesignForMockup = (mockupTitle: string) => {
+    if (!designFiles || designFiles.length === 0) return null;
+    const title = mockupTitle.toLowerCase();
+    
+    let placement = "front";
+    if (title.includes("back")) placement = "back";
+    else if (title.includes("left") || title.includes("sleeve_left")) placement = "sleeve_left";
+    else if (title.includes("right") || title.includes("sleeve_right")) placement = "sleeve_right";
+    
+    return designFiles.find((d) => d.placement === placement || (d.placement === "left" && placement === "sleeve_left") || (d.placement === "right" && placement === "sleeve_right"));
+  };
+
+  const getDesignForDefault = () => {
+    if (!designFiles || designFiles.length === 0) return null;
+    return designFiles.find((d) => d.placement === "front");
+  };
 
   // Logical order of views for smooth rotation: Front -> Right Sleeve -> Back -> Left Sleeve
   const sortedMockups = useMemo(() => {
@@ -125,10 +194,48 @@ const Product360Viewer: React.FC<{
   }, [sortedMockups]);
 
   if (sortedMockups.length === 0) {
+    const design = getDesignForDefault();
+    const area = MOCKUP_PRINT_AREAS.front;
+    
+    let designStyle: React.CSSProperties = {};
+    if (design && design.position) {
+      const w = (design.position.width / design.position.area_width) * 100;
+      const h = (design.position.height / design.position.area_height) * 100;
+      const t = (design.position.top / design.position.area_height) * 100;
+      const l = (design.position.left / design.position.area_width) * 100;
+      designStyle = {
+        width: `${w}%`,
+        height: `${h}%`,
+        top: `${t}%`,
+        left: `${l}%`,
+        position: "absolute",
+      };
+    }
+
     return (
-      <div className="aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative">
+      <div className="aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative w-full">
         {defaultImage ? (
-          <img src={defaultImage} alt={productName} className="w-full h-full object-contain" />
+          <>
+            <img src={defaultImage} alt={productName} className="w-full h-full object-contain pointer-events-none" />
+            {design && (
+              <div 
+                className="absolute pointer-events-none"
+                style={{
+                  width: `${area.width}%`,
+                  height: `${area.height}%`,
+                  top: `${area.top}%`,
+                  left: `${area.left}%`,
+                }}
+              >
+                <img 
+                  src={design.url} 
+                  alt="Design Overlay" 
+                  className="object-contain w-full h-full"
+                  style={designStyle}
+                />
+              </div>
+            )}
+          </>
         ) : (
           <ShoppingBag className="w-12 h-12 text-gray-700" />
         )}
@@ -210,18 +317,27 @@ const Product360Viewer: React.FC<{
         onTouchEnd={handleMouseUpOrLeave}
       >
         {/* Render all sorted mockups stacked for instant GPU-accelerated switching */}
-        {sortedMockups.map((m, idx) => (
-          <img 
-            key={idx}
-            src={m.url} 
-            alt={m.title || `Mockup ${idx + 1}`} 
-            className={`absolute inset-0 w-full h-full object-contain pointer-events-none transition-all duration-300 ease-out ${
-              idx === activeIndex 
-                ? "opacity-100 scale-100 z-10" 
-                : "opacity-0 scale-95 z-0 pointer-events-none"
-            }`}
-          />
-        ))}
+        {sortedMockups.map((m, idx) => {
+          const isCurrent = idx === activeIndex;
+
+          return (
+            <div 
+              key={idx}
+              className={`absolute inset-0 w-full h-full transition-all duration-300 ease-out ${
+                isCurrent 
+                  ? "opacity-100 scale-100 z-10" 
+                  : "opacity-0 scale-95 z-0 pointer-events-none"
+              }`}
+            >
+              {/* Product base mockup image (contains the baked-in design generated by the API) */}
+              <img 
+                src={m.url} 
+                alt={m.title || `Mockup ${idx + 1}`} 
+                className="w-full h-full object-contain pointer-events-none"
+              />
+            </div>
+          );
+        })}
 
         {/* 360 Badge Overlay */}
         <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md border border-white/10 rounded-full py-1 px-3 flex items-center gap-1.5 shadow-lg pointer-events-none z-20">
@@ -409,13 +525,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const maxSellingPrice = maxPrice * (1 + markup / 100);
   const avgProfit = ((minSellingPrice + maxSellingPrice) / 2) - ((minPrice + maxPrice) / 2);
 
-  // Debounced auto mockup preview generator
+  // Debounced auto mockup preview generator - increased to 12s to save API rate limits, as the client side updates in real-time
   useEffect(() => {
     if (designFiles.length === 0 || selectedVariants.length === 0) return;
     
     const timer = setTimeout(() => {
       onGeneratePreview();
-    }, 4500); // Debounce to allow user to finish positioning changes
+    }, 12000); // 12-second debounce avoids 429 API rate limits during active canvas edits
     
     return () => clearTimeout(timer);
   }, [designFiles, selectedVariants]);
@@ -745,10 +861,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           <span
                             className="text-xs font-semibold whitespace-nowrap"
                             style={{
-                              color:
-                                color.code === "#ffffff" || color.code === "#fff" || color.code.toLowerCase() === "#fafafa"
-                                  ? "#000"
-                                  : "#fff",
+                              color: getContrastTextColor(color.code),
                             }}
                           >
                             {color.name}
@@ -1110,6 +1223,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           mockupUrls={mockupUrls}
                           defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
                           productName={selectedProduct?.title || selectedProduct?.name}
+                          designFiles={designFiles}
                         />
                       </div>
                     ) : (
@@ -1357,6 +1471,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 mockupUrls={mockupUrls}
                 defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
                 productName={selectedProduct?.title || selectedProduct?.name}
+                designFiles={designFiles}
               />
 
               <div className="space-y-1">
