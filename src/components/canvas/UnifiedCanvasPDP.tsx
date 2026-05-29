@@ -111,7 +111,8 @@ const Product360Viewer: React.FC<{
   defaultImage?: string;
   productName: string;
   designFiles: any[];
-}> = ({ mockupUrls, defaultImage, productName, designFiles }) => {
+  activePlacement?: string;
+}> = ({ mockupUrls, defaultImage, productName, designFiles, activePlacement = "front" }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
@@ -178,10 +179,26 @@ const Product360Viewer: React.FC<{
     return result.length > 0 ? result : mockupUrls;
   }, [mockupUrls]);
 
-  // Reset active view index when mockup set changes
+  // Reset active view index when mockup set changes or activePlacement changes
   useEffect(() => {
-    setActiveIndex(0);
-  }, [sortedMockups.length]);
+    if (!activePlacement || sortedMockups.length === 0) {
+      setActiveIndex(0);
+      return;
+    }
+    // Find index of mockup that matches activePlacement
+    const index = sortedMockups.findIndex(m => {
+      const title = (m.title || "").toLowerCase();
+      if (activePlacement === "front" && title.includes("front")) return true;
+      if (activePlacement === "back" && title.includes("back")) return true;
+      if ((activePlacement === "sleeve_left" || activePlacement === "left") && (title.includes("left") || title.includes("sleeve_left"))) return true;
+      if ((activePlacement === "sleeve_right" || activePlacement === "right") && (title.includes("right") || title.includes("sleeve_right"))) return true;
+      return false;
+    });
+    
+    if (index !== -1 && index !== activeIndex) {
+      setActiveIndex(index);
+    }
+  }, [sortedMockups, activePlacement]);
 
   // Preload all mockup images to prevent lag/stuck transitions during drag/click
   useEffect(() => {
@@ -194,15 +211,16 @@ const Product360Viewer: React.FC<{
   }, [sortedMockups]);
 
   if (sortedMockups.length === 0) {
-    const design = getDesignForDefault();
-    const area = MOCKUP_PRINT_AREAS.front;
+    const activeDesign = designFiles.find((d) => d.placement === activePlacement) || getDesignForDefault();
+    const effectivePlacement = activeDesign ? activeDesign.placement : activePlacement;
+    const area = MOCKUP_PRINT_AREAS[effectivePlacement] || MOCKUP_PRINT_AREAS.front;
     
     let designStyle: React.CSSProperties = {};
-    if (design && design.position) {
-      const w = (design.position.width / design.position.area_width) * 100;
-      const h = (design.position.height / design.position.area_height) * 100;
-      const t = (design.position.top / design.position.area_height) * 100;
-      const l = (design.position.left / design.position.area_width) * 100;
+    if (activeDesign && activeDesign.position) {
+      const w = (activeDesign.position.width / activeDesign.position.area_width) * 100;
+      const h = (activeDesign.position.height / activeDesign.position.area_height) * 100;
+      const t = (activeDesign.position.top / activeDesign.position.area_height) * 100;
+      const l = (activeDesign.position.left / activeDesign.position.area_width) * 100;
       designStyle = {
         width: `${w}%`,
         height: `${h}%`,
@@ -216,8 +234,13 @@ const Product360Viewer: React.FC<{
       <div className="aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative w-full">
         {defaultImage ? (
           <>
-            <img src={defaultImage} alt={productName} className="w-full h-full object-contain pointer-events-none" />
-            {design && (
+            <img 
+              src={defaultImage} 
+              alt={productName} 
+              className="w-full h-full object-contain pointer-events-none" 
+              style={{ transform: effectivePlacement === 'back' ? 'scaleX(-1)' : 'none' }}
+            />
+            {activeDesign && (
               <div 
                 className="absolute pointer-events-none"
                 style={{
@@ -228,7 +251,7 @@ const Product360Viewer: React.FC<{
                 }}
               >
                 <img 
-                  src={design.url ? design.url.replace(/%25/g, '%') : ''} 
+                  src={activeDesign.url ? activeDesign.url.replace(/%25/g, '%') : ''} 
                   alt="Design Overlay" 
                   className="object-contain w-full h-full"
                   style={designStyle}
@@ -1259,6 +1282,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
                           productName={selectedProduct?.title || selectedProduct?.name}
                           designFiles={designFiles}
+                          activePlacement={activePlacement}
                         />
                       </div>
                     ) : (
@@ -1507,6 +1531,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
                 productName={selectedProduct?.title || selectedProduct?.name}
                 designFiles={designFiles}
+                activePlacement={activePlacement}
               />
 
               <div className="space-y-1">
