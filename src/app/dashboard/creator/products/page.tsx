@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import { productAPI, formatPrice } from "@/lib/api";
 import { createProductSlug } from "@/lib/utils";
 import {
@@ -359,6 +360,8 @@ function ProductGridCard({
   product: Product;
   onDelete: (id: number) => void;
 }) {
+  const router = useRouter();
+
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -369,80 +372,93 @@ function ProductGridCard({
     e.stopPropagation();
   };
 
+  const handleCardClick = () => {
+    router.push(`/products/${createProductSlug(product.name, product.id)}`);
+  };
+
   return (
-    <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-      <div className="group cursor-pointer">
-        <div className="gradient-border-white-bottom overflow-hidden">
-          <div className="w-full relative" style={{ aspectRatio: "1/1" }}>
-            <Image
-              src={product.thumbnail_url || "/placeholder-product.png"}
-              alt={product.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+      className="group cursor-pointer"
+    >
+      <div className="gradient-border-white-bottom overflow-hidden">
+        <div className="w-full relative" style={{ aspectRatio: "1/1" }}>
+          <Image
+            src={product.thumbnail_url || "/placeholder-product.png"}
+            alt={product.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-            <div className="absolute top-3 right-3">
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${
-                  product.is_active
-                    ? "bg-green-500/20 text-green-400 border border-green-500/50"
-                    : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
-                }`}
-              >
-                {product.is_active ? "●" : "○"}
-              </span>
-            </div>
-
-            {/* Action buttons overlay */}
-            <div className="absolute bottom-3 right-3 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
-              <Link
-                href={`/dashboard/creator/products/${product.id}/edit`}
-                className="p-2 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
-                title="Edit product"
-                onClick={handleEdit}
-              >
-                <Edit className="w-4 h-4" />
-              </Link>
-              <button
-                onClick={handleDelete}
-                className="p-2 bg-white/10 border border-white/20 text-white hover:bg-red-500/20 rounded-lg transition-all backdrop-blur-sm"
-                title="Delete product"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
+          <div className="absolute top-3 right-3">
+            <span
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${
+                product.is_active
+                  ? "bg-green-500/20 text-green-400 border border-green-500/50"
+                  : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
+              }`}
+            >
+              {product.is_active ? "●" : "○"}
+            </span>
           </div>
 
-          <div className="p-4 sm:p-6">
-            <h3 className="font-bold text-sm sm:text-base text-white mb-2 truncate group-hover:text-white/80 transition-colors">
-              {product.name}
-            </h3>
+          {/* Action buttons overlay */}
+          <div className="absolute bottom-3 right-3 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+            <Link
+              href={`/dashboard/creator/products/${product.id}/edit`}
+              className="p-2 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
+              title="Edit product"
+              onClick={handleEdit}
+            >
+              <Edit className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="p-2 bg-white/10 border border-white/20 text-white hover:bg-red-500/20 rounded-lg transition-all backdrop-blur-sm"
+              title="Delete product"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
 
-            <p className="text-xs sm:text-sm text-gray-400 font-medium mb-3">
-              {product.category || "Uncategorized"}
-            </p>
+        <div className="p-4 sm:p-6">
+          <h3 className="font-bold text-sm sm:text-base text-white mb-2 truncate group-hover:text-white/80 transition-colors">
+            {product.name}
+          </h3>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-lg sm:text-xl font-bold text-white">
-                  {formatPrice(product.min_price)}
-                </div>
-                {product.max_price > product.min_price && (
-                  <div className="text-xs text-gray-400">
-                    to {formatPrice(product.max_price)}
-                  </div>
-                )}
+          <p className="text-xs sm:text-sm text-gray-400 font-medium mb-3">
+            {product.category || "Uncategorized"}
+          </p>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-lg sm:text-xl font-bold text-white">
+                {formatPrice(product.min_price)}
               </div>
-              <span className="text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/50 px-2.5 py-1 rounded-full">
-                {product.variant_count}
-              </span>
+              {product.max_price > product.min_price && (
+                <div className="text-xs text-gray-400">
+                  to {formatPrice(product.max_price)}
+                </div>
+              )}
             </div>
+            <span className="text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/50 px-2.5 py-1 rounded-full">
+              {product.variant_count}
+            </span>
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 

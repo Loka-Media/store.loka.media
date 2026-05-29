@@ -7,7 +7,7 @@ import CreativeLoader from "@/components/CreativeLoader";
 
 interface CreatorProduct {
   id: number;
-  is_active: boolean;
+  is_active?: boolean;
   thumbnail_url: string;
   name: string;
   min_price: number;

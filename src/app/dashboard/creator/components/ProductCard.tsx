@@ -7,6 +7,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { productAPI } from '@/lib/api';
 import { Switch } from "@/components/ui/switch";
@@ -26,6 +27,8 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
   const [newStatus, setNewStatus] = useState<boolean | null>(null);
+
+  const router = useRouter();
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -73,74 +76,87 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
     }).format(price);
   };
 
+  const handleCardClick = () => {
+    router.push(`/products/${createProductSlug(product.name, product.id)}`);
+  };
+
   return (
     <>
-    <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-      <div className="relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group cursor-pointer hover:border-orange-500/50">
-        <div className="w-full relative overflow-hidden rounded-t-xl" style={{ aspectRatio: '1/1' }}>
-          <Image
-            src={product.thumbnail_url || "/placeholder-product.png"}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-            <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
-              <Switch
-                checked={product.status === "active"}
-                onCheckedChange={handleStatusChange}
-                id={`status-switch-${product.id}`}
-              />
-              <label
-                htmlFor={`status-switch-${product.id}`}
-                className="text-sm font-semibold text-white"
-              >
-                {product.status === "active" ? "Active" : "Inactive"}
-              </label>
-            </div>
-          </div>
-          
-          {/* Action buttons overlay */}
-          <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Link
-              href={`/dashboard/creator/products/${product.id}/edit`}
-              className="p-2 bg-gray-900/80 text-orange-400 hover:text-white hover:bg-orange-600 rounded-lg transition-colors backdrop-blur-sm"
-              title="Edit Product"
-              onClick={handleEdit}
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+      className="relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group cursor-pointer hover:border-orange-500/50"
+    >
+      <div className="w-full relative overflow-hidden rounded-t-xl" style={{ aspectRatio: '1/1' }}>
+        <Image
+          src={product.thumbnail_url || "/placeholder-product.png"}
+          alt={product.name}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+          <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+            <Switch
+              checked={product.status === "active"}
+              onCheckedChange={handleStatusChange}
+              id={`status-switch-${product.id}`}
+            />
+            <label
+              htmlFor={`status-switch-${product.id}`}
+              className="text-sm font-semibold text-white"
             >
-              <Edit className="w-4 h-4" />
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="p-2 bg-gray-900/80 text-red-400 hover:text-white hover:bg-red-600 rounded-lg transition-colors backdrop-blur-sm"
-              title="Delete Product"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+              {product.status === "active" ? "Active" : "Inactive"}
+            </label>
           </div>
         </div>
-        <div className="p-4">
-          <h3 className="font-bold text-lg text-white truncate mb-1 group-hover:text-orange-300 transition-colors">
-            {product.name}
-          </h3>
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-orange-400 font-semibold">
-              {formatPrice(product.min_price)}
-              {product.max_price > product.min_price && (
-                <span> - {formatPrice(product.max_price)}</span>
-              )}
-            </span>
-            <span className="text-sm text-gray-400 bg-gray-800/50 px-2 py-1 rounded-lg">
-              {product.variant_count} variants
-            </span>
-          </div>
-          <div className="text-xs text-gray-500 bg-gray-800/30 px-3 py-2 rounded-lg">
-            Click to view full product details
-          </div>
+        
+        {/* Action buttons overlay */}
+        <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Link
+            href={`/dashboard/creator/products/${product.id}/edit`}
+            className="p-2 bg-gray-900/80 text-orange-400 hover:text-white hover:bg-orange-600 rounded-lg transition-colors backdrop-blur-sm"
+            title="Edit Product"
+            onClick={handleEdit}
+          >
+            <Edit className="w-4 h-4" />
+          </Link>
+          <button
+            onClick={handleDelete}
+            className="p-2 bg-gray-900/80 text-red-400 hover:text-white hover:bg-red-600 rounded-lg transition-colors backdrop-blur-sm"
+            title="Delete Product"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
-    </Link>
+      <div className="p-4">
+        <h3 className="font-bold text-lg text-white truncate mb-1 group-hover:text-orange-300 transition-colors">
+          {product.name}
+        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-orange-400 font-semibold">
+            {formatPrice(product.min_price)}
+            {product.max_price > product.min_price && (
+              <span> - {formatPrice(product.max_price)}</span>
+            )}
+          </span>
+          <span className="text-sm text-gray-400 bg-gray-800/50 px-2 py-1 rounded-lg">
+            {product.variant_count} variants
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 bg-gray-800/30 px-3 py-2 rounded-lg">
+          Click to view full product details
+        </div>
+      </div>
+    </div>
     <ConfirmationDialog
       isOpen={isDeleteDialogOpen}
       onClose={() => setIsDeleteDialogOpen(false)}

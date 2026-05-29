@@ -12,8 +12,7 @@ import { printfulAPI } from "@/lib/api";
 import { mockupAPI } from "@/lib/MockupAPI";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 
-import EnhancedCanvasWizard from "@/components/canvas/EnhancedCanvasWizard";
-import EnhancedProductDetailsForm from "@/components/canvas/EnhancedProductDetailsForm";
+import UnifiedCanvasPDP from "@/components/canvas/UnifiedCanvasPDP";
 import CreativeLoader from "@/components/CreativeLoader";
 
 import {
@@ -272,6 +271,14 @@ function CanvasContent() {
       fetchUploadedFiles();
     }
   }, [step, user, fetchUploadedFiles]);
+
+  // Autosave productForm to localStorage when it changes
+  useEffect(() => {
+    if (productId && isInitialized) {
+      const savedFormKey = `productForm_${productId}`;
+      localStorage.setItem(savedFormKey, JSON.stringify(productForm));
+    }
+  }, [productForm, productId, isInitialized]);
 
   if (!selectedProduct && !loading) {
     return (
@@ -747,73 +754,25 @@ function CanvasContent() {
         {loading ? (
           <CreativeLoader variant="design" message="Loading design canvas..." />
         ) : (
-          <>
-            {step === "unified-editor" ? (
-              <EnhancedCanvasWizard
-                selectedProduct={selectedProduct}
-                selectedVariants={selectedVariants}
-                setSelectedVariants={setSelectedVariants}
-                designFiles={designFiles}
-                setDesignFiles={setDesignFiles}
-                uploadedFiles={uploadedFiles}
-                printFiles={printFiles}
-                onGeneratePreview={generatePreview}
-                isGeneratingPreview={isGeneratingMockup}
-                mockupUrls={mockupUrls}
-                mockupStatus={mockupStatus}
-                onNext={handleNextStep}
-                onPrev={handlePrevStep}
-                onPrintFilesLoaded={handlePrintFilesLoaded}
-                onRefreshFiles={fetchUploadedFiles}
-              />
-            ) : (
-              <>
-                {step === "product-details" && (
-                  <EnhancedProductDetailsForm
-                    initialData={{
-                      name: productForm.name,
-                      description: productForm.description,
-                      markupPercentage: productForm.markupPercentage,
-                      category: productForm.category,
-                    }}
-                    onSave={(data) => {
-                      const updatedForm = {
-                        ...productForm,
-                        name: data.name,
-                        description: data.description,
-                        markupPercentage: data.markupPercentage.toString(),
-                        category: data.category,
-                        tags: data.tags || []
-                      };
-                      setProductForm(updatedForm);
-
-                      // Persist to localStorage for this product
-                      if (productId) {
-                        const savedFormKey = `productForm_${productId}`;
-                        localStorage.setItem(savedFormKey, JSON.stringify(updatedForm));
-                        console.log(`💾 Saved product form for product ${productId}`);
-                      }
-                    }}
-                    onNext={(formData) => {
-                      // Use the form data passed from the form component
-                      // This ensures we use the user's latest edits
-                      if (formData) {
-                        handleGoLiveToMarketplace(formData as ProductForm);
-                      } else {
-                        handleGoLiveToMarketplace();
-                      }
-                    }}
-                    onBack={handlePrevStep}
-                    isLoading={creating}
-                    selectedProduct={selectedProduct}
-                    selectedVariants={selectedVariants}
-                    mockupUrls={mockupUrls}
-                    designFiles={designFiles}
-                  />
-                )}
-              </>
-            )}
-          </>
+          <UnifiedCanvasPDP
+            selectedProduct={selectedProduct}
+            selectedVariants={selectedVariants}
+            setSelectedVariants={setSelectedVariants}
+            designFiles={designFiles}
+            setDesignFiles={setDesignFiles}
+            uploadedFiles={uploadedFiles}
+            printFiles={printFiles}
+            onGeneratePreview={generatePreview}
+            isGeneratingPreview={isGeneratingMockup}
+            mockupUrls={mockupUrls}
+            mockupStatus={mockupStatus}
+            onPrintFilesLoaded={handlePrintFilesLoaded}
+            onRefreshFiles={fetchUploadedFiles}
+            productForm={productForm}
+            setProductForm={setProductForm}
+            onPublish={handleGoLiveToMarketplace}
+            isPublishing={creating}
+          />
         )}
       </div>
       </div>
