@@ -52,7 +52,7 @@ export function EnhancedDashboardHeader({
 
   return (
     <div className="border-b border-white/10 pb-8 sm:pb-12">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-8">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-8 pt-4">
         <div className="flex-1">
           <div className="mb-6">
             <GradientTitle text="Creator Dashboard" size="sm" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl" />

@@ -109,7 +109,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
             className="block mb-10 md:mb-14 leading-relaxed max-w-3xl mx-auto"
             gradient="linear-gradient(91.77deg, #FFFFFF 0%, #000000 136.03%)"
             style={{
-              fontSize: "clamp(1rem, 2.5vw, 1.625rem)",
+              fontSize: "clamp(1rem, 2.5vw, 1.2rem)",
               fontWeight: 400,
             }}
           >

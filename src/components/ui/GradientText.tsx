@@ -16,6 +16,7 @@ export function GradientText({
   children,
   className = '',
   gradient = 'linear-gradient(91.77deg, #FFFFFF 0%, #000000 136.03%)',
+  fontfamily = 'var(--font-family-satoshi)',
   style = {},
 }: GradientTextProps) {
   return (
@@ -26,6 +27,7 @@ export function GradientText({
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         backgroundClip: 'text',
+        fontFamily: fontfamily,
         ...style,
       }}
     >
