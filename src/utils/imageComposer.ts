@@ -112,7 +112,15 @@ export const mergeDesignsIntoComposite = async (
           });
         } else {
           // Regular image
-          img.src = design.url;
+          let cleanedUrl = design.url;
+          if (cleanedUrl && cleanedUrl.includes('%25')) {
+            try {
+              cleanedUrl = cleanedUrl.replace(/%25/g, '%');
+            } catch (e) {
+              console.error("Failed to clean design.url in imageComposer:", e);
+            }
+          }
+          img.src = cleanedUrl;
         }
       });
       

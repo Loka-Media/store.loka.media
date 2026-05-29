@@ -350,7 +350,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     ) : (
                       // Render image
                       <img
-                        src={design.url}
+                        src={design.url ? design.url.replace(/%25/g, '%') : ''}
                         alt={design.filename}
                         className="w-full h-full object-contain"
                         draggable={false}

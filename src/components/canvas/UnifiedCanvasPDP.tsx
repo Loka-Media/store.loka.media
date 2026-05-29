@@ -228,7 +228,7 @@ const Product360Viewer: React.FC<{
                 }}
               >
                 <img 
-                  src={design.url} 
+                  src={design.url ? design.url.replace(/%25/g, '%') : ''} 
                   alt="Design Overlay" 
                   className="object-contain w-full h-full"
                   style={designStyle}
@@ -525,16 +525,37 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const maxSellingPrice = maxPrice * (1 + markup / 100);
   const avgProfit = ((minSellingPrice + maxSellingPrice) / 2) - ((minPrice + maxPrice) / 2);
 
-  // Debounced auto mockup preview generator - increased to 12s to save API rate limits, as the client side updates in real-time
+  // Cooldown state for manual preview regeneration
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  const handleManualRegenerate = async () => {
+    if (cooldown > 0) return;
+    setCooldown(30); // Set 30-second cooldown
+    await onGeneratePreview();
+  };
+
+  // Debounced auto mockup preview generator - ONLY triggers automatically if we don't have mockups yet
   useEffect(() => {
     if (designFiles.length === 0 || selectedVariants.length === 0) return;
     
+    // If mockups are already generated, do not auto-regenerate on changes (prevents 429 rate limit spam)
+    // The client-side real-time overlay shows layout edits instantly!
+    if (mockupUrls && mockupUrls.length > 0) return;
+    
     const timer = setTimeout(() => {
       onGeneratePreview();
-    }, 12000); // 12-second debounce avoids 429 API rate limits during active canvas edits
+    }, 8000); // 8-second debounce for initial load
     
     return () => clearTimeout(timer);
-  }, [designFiles, selectedVariants]);
+  }, [designFiles, selectedVariants, mockupUrls, onGeneratePreview]);
 
   // Drag and Drop Upload Handlers
   const handleDragOver = (e: React.DragEvent) => {
@@ -689,9 +710,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       mockups: mockupUrls && mockupUrls.length > 0,
       details: productForm.name.trim().length > 0 && productForm.description.trim().length >= 20,
     };
+
+    // Note: aspectRatio check is non-blocking (warnings only, does not prevent publishing)
+    const blockingChecks = {
+      variants: checks.variants,
+      designs: checks.designs,
+      mockups: checks.mockups,
+      details: checks.details,
+    };
+
     return {
       ...checks,
-      allValid: Object.values(checks).every(Boolean),
+      allValid: Object.values(blockingChecks).every(Boolean),
     };
   }, [selectedVariants, designFiles, aspectRatioIssues, mockupUrls, productForm]);
 
@@ -1157,11 +1187,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     Mockups regenerate automatically when designs are saved.
                   </p>
                   <Button
-                    onClick={() => onGeneratePreview()}
-                    disabled={isGeneratingPreview || designFiles.length === 0}
-                    className="bg-white/5 hover:bg-white/10 text-white font-semibold text-xs py-2 px-3 border border-white/10 rounded-lg self-start sm:self-auto"
+                    onClick={handleManualRegenerate}
+                    disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
+                    className="bg-white/5 hover:bg-white/10 text-white font-semibold text-xs py-2 px-3 border border-white/10 rounded-lg self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isGeneratingPreview ? "Generating..." : "Regenerate Previews"}
+                    {isGeneratingPreview 
+                      ? "Generating..." 
+                      : cooldown > 0 
+                        ? `Wait ${cooldown}s` 
+                        : "Regenerate Previews"
+                    }
                   </Button>
                 </div>
 
@@ -1409,13 +1444,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2.5 bg-black/40 border border-white/5 p-3 rounded-xl">
-                    <div className={`p-1.5 rounded-full ${validationSummary.aspectRatio ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                      {validationSummary.aspectRatio ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                    <div className={`p-1.5 rounded-full ${validationSummary.aspectRatio ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}`}>
+                      {validationSummary.aspectRatio ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
                     </div>
                     <div>
-                      <div className="font-bold">Aspect Ratio Correct</div>
+                      <div className="font-bold">Aspect Ratio Status</div>
                       <div className="text-[10px] text-gray-500">
-                        {validationSummary.aspectRatio ? "All placements pass backend validation" : `${aspectRatioIssues.length} aspect ratio issue(s) need fixing`}
+                        {validationSummary.aspectRatio ? "All placements pass backend validation" : `${aspectRatioIssues.length} aspect ratio warning(s) (non-blocking)`}
                       </div>
                     </div>
                   </div>

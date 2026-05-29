@@ -587,7 +587,17 @@ export const printfulAPI = {
 
   getFiles: async () => {
     const response = await api.get("/api/printful/files");
-    return response.data;
+    const data = response.data;
+    if (data && Array.isArray(data.result)) {
+      data.result = data.result.map((file: any) => {
+        if (file) {
+          if (file.file_url) file.file_url = file.file_url.replace(/%25/g, '%');
+          if (file.thumbnail_url) file.thumbnail_url = file.thumbnail_url.replace(/%25/g, '%');
+        }
+        return file;
+      });
+    }
+    return data;
   },
 
 
@@ -723,7 +733,12 @@ export const printfulAPI = {
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data;
+    const data = response.data;
+    if (data && data.result) {
+      if (data.result.file_url) data.result.file_url = data.result.file_url.replace(/%25/g, '%');
+      if (data.result.thumbnail_url) data.result.thumbnail_url = data.result.thumbnail_url.replace(/%25/g, '%');
+    }
+    return data;
   },
 
   // Delete uploaded file
