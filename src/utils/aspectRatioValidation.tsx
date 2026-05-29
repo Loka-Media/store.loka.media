@@ -21,7 +21,6 @@ export function aspectRatioValidation(
     }
 
     const img = new Image();
-    img.crossOrigin = "anonymous";
 
     img.onload = () => {
       const imageWidth = img.naturalWidth;
@@ -58,6 +57,16 @@ export function aspectRatioValidation(
 
     img.onerror = () => reject(new Error("Image failed to load"));
 
-    img.src = imageUrl;
+    // Clean double-encoded URL (e.g. %2520 -> %20)
+    let cleanedUrl = imageUrl;
+    if (cleanedUrl && cleanedUrl.includes('%25')) {
+      try {
+        cleanedUrl = cleanedUrl.replace(/%25/g, '%');
+      } catch (e) {
+        console.error("Failed to clean imageUrl:", e);
+      }
+    }
+
+    img.src = cleanedUrl;
   });
 }

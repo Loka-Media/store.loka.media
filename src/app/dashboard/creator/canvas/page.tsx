@@ -586,10 +586,12 @@ function CanvasContent() {
       setMockupStatus("Mockup generated successfully!");
     } catch (error: any) {
       console.error("Preview generation failed:", error);
-      const errorMessage =
-        error?.response?.data?.error ||
-        error.message ||
-        "Failed to generate preview.";
+      let errorMessage = "Failed to generate preview.";
+      if (error?.response?.status === 429) {
+        errorMessage = "Printful rate limit reached. Please wait 30-60 seconds before regenerating mockups.";
+      } else {
+        errorMessage = error?.response?.data?.error || error.message || errorMessage;
+      }
       setMockupStatus(`Error: ${errorMessage}`);
       toast.error(errorMessage);
     } finally {

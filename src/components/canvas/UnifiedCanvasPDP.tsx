@@ -65,16 +65,86 @@ interface UnifiedCanvasPDPProps {
   isPublishing: boolean;
 }
 
+// Helper to determine readable text contrast color (black or white) based on background hex code
+const getContrastTextColor = (hexCode: string): string => {
+  if (!hexCode) return "#ffffff";
+  
+  // Handle comma-separated multi-colors (use the primary/first color)
+  let cleanHex = hexCode.split(",")[0].trim().toLowerCase();
+  
+  if (!cleanHex.startsWith("#")) {
+    // Match common light CSS color names
+    const lightColors = ["white", "yellow", "silver", "gold", "pink", "ash", "heather", "cream", "sand", "lime"];
+    if (lightColors.some(color => cleanHex.includes(color))) {
+      return "#000000";
+    }
+    return "#ffffff";
+  }
+  
+  // Expand 3-digit hex (#fff) to 6-digit hex (#ffffff)
+  if (cleanHex.length === 4) {
+    cleanHex = "#" + cleanHex[1] + cleanHex[1] + cleanHex[2] + cleanHex[2] + cleanHex[3] + cleanHex[3];
+  }
+  
+  const r = parseInt(cleanHex.substring(1, 3), 16);
+  const g = parseInt(cleanHex.substring(3, 5), 16);
+  const b = parseInt(cleanHex.substring(5, 7), 16);
+  
+  if (isNaN(r) || isNaN(g) || isNaN(b)) {
+    return "#ffffff";
+  }
+  
+  // HSP perceived brightness calculation
+  const brightness = Math.sqrt(
+    0.299 * (r * r) +
+    0.587 * (g * g) +
+    0.114 * (b * b)
+  );
+  
+  // Threshold above 145 matches light background, returning black text for high readability
+  return brightness > 145 ? "#000000" : "#ffffff";
+};
+
 // Interactive 360-degree product preview spin viewer component
 const Product360Viewer: React.FC<{
   mockupUrls: any[];
   defaultImage?: string;
   productName: string;
-}> = ({ mockupUrls, defaultImage, productName }) => {
+  designFiles: any[];
+  activePlacement?: string;
+}> = ({ mockupUrls, defaultImage, productName, designFiles, activePlacement = "front" }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
   const dragStartActiveIndex = useRef(0);
+
+  // Printable area mappings (percentage of mockup container) to overlay designs in real-time
+  const MOCKUP_PRINT_AREAS: Record<string, { width: number; height: number; top: number; left: number }> = {
+    front: { width: 33, height: 45, top: 24, left: 33.5 },
+    back: { width: 33, height: 45, top: 22, left: 33.5 },
+    left: { width: 15, height: 15, top: 32, left: 42.5 },
+    right: { width: 15, height: 15, top: 32, left: 42.5 },
+    sleeve_left: { width: 15, height: 15, top: 32, left: 42.5 },
+    sleeve_right: { width: 15, height: 15, top: 32, left: 42.5 },
+  };
+
+  // Find if there's an active design for a mockup view based on its title
+  const getDesignForMockup = (mockupTitle: string) => {
+    if (!designFiles || designFiles.length === 0) return null;
+    const title = mockupTitle.toLowerCase();
+    
+    let placement = "front";
+    if (title.includes("back")) placement = "back";
+    else if (title.includes("left") || title.includes("sleeve_left")) placement = "sleeve_left";
+    else if (title.includes("right") || title.includes("sleeve_right")) placement = "sleeve_right";
+    
+    return designFiles.find((d) => d.placement === placement || (d.placement === "left" && placement === "sleeve_left") || (d.placement === "right" && placement === "sleeve_right"));
+  };
+
+  const getDesignForDefault = () => {
+    if (!designFiles || designFiles.length === 0) return null;
+    return designFiles.find((d) => d.placement === "front");
+  };
 
   // Logical order of views for smooth rotation: Front -> Right Sleeve -> Back -> Left Sleeve
   const sortedMockups = useMemo(() => {
@@ -109,16 +179,86 @@ const Product360Viewer: React.FC<{
     return result.length > 0 ? result : mockupUrls;
   }, [mockupUrls]);
 
-  // Reset active view index when mockup set changes
+  // Reset active view index when mockup set changes or activePlacement changes
   useEffect(() => {
-    setActiveIndex(0);
-  }, [sortedMockups.length]);
+    if (!activePlacement || sortedMockups.length === 0) {
+      setActiveIndex(0);
+      return;
+    }
+    // Find index of mockup that matches activePlacement
+    const index = sortedMockups.findIndex(m => {
+      const title = (m.title || "").toLowerCase();
+      if (activePlacement === "front" && title.includes("front")) return true;
+      if (activePlacement === "back" && title.includes("back")) return true;
+      if ((activePlacement === "sleeve_left" || activePlacement === "left") && (title.includes("left") || title.includes("sleeve_left"))) return true;
+      if ((activePlacement === "sleeve_right" || activePlacement === "right") && (title.includes("right") || title.includes("sleeve_right"))) return true;
+      return false;
+    });
+    
+    if (index !== -1 && index !== activeIndex) {
+      setActiveIndex(index);
+    }
+  }, [sortedMockups, activePlacement]);
+
+  // Preload all mockup images to prevent lag/stuck transitions during drag/click
+  useEffect(() => {
+    sortedMockups.forEach((m) => {
+      if (m?.url) {
+        const img = new Image();
+        img.src = m.url;
+      }
+    });
+  }, [sortedMockups]);
 
   if (sortedMockups.length === 0) {
+    const activeDesign = designFiles.find((d) => d.placement === activePlacement) || getDesignForDefault();
+    const effectivePlacement = activeDesign ? activeDesign.placement : activePlacement;
+    const area = MOCKUP_PRINT_AREAS[effectivePlacement] || MOCKUP_PRINT_AREAS.front;
+    
+    let designStyle: React.CSSProperties = {};
+    if (activeDesign && activeDesign.position) {
+      const w = (activeDesign.position.width / activeDesign.position.area_width) * 100;
+      const h = (activeDesign.position.height / activeDesign.position.area_height) * 100;
+      const t = (activeDesign.position.top / activeDesign.position.area_height) * 100;
+      const l = (activeDesign.position.left / activeDesign.position.area_width) * 100;
+      designStyle = {
+        width: `${w}%`,
+        height: `${h}%`,
+        top: `${t}%`,
+        left: `${l}%`,
+        position: "absolute",
+      };
+    }
+
     return (
-      <div className="aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative">
+      <div className="aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative w-full">
         {defaultImage ? (
-          <img src={defaultImage} alt={productName} className="w-full h-full object-contain" />
+          <>
+            <img 
+              src={defaultImage} 
+              alt={productName} 
+              className="w-full h-full object-contain pointer-events-none" 
+              style={{ transform: effectivePlacement === 'back' ? 'scaleX(-1)' : 'none' }}
+            />
+            {activeDesign && (
+              <div 
+                className="absolute pointer-events-none"
+                style={{
+                  width: `${area.width}%`,
+                  height: `${area.height}%`,
+                  top: `${area.top}%`,
+                  left: `${area.left}%`,
+                }}
+              >
+                <img 
+                  src={activeDesign.url ? activeDesign.url.replace(/%25/g, '%') : ''} 
+                  alt="Design Overlay" 
+                  className="object-contain w-full h-full"
+                  style={designStyle}
+                />
+              </div>
+            )}
+          </>
         ) : (
           <ShoppingBag className="w-12 h-12 text-gray-700" />
         )}
@@ -199,15 +339,31 @@ const Product360Viewer: React.FC<{
         onTouchMove={handleTouchMove}
         onTouchEnd={handleMouseUpOrLeave}
       >
-        {/* Mockup Image View */}
-        <img 
-          src={activeMockup.url} 
-          alt={activeMockup.title || `Mockup ${activeIndex + 1}`} 
-          className="w-full h-full object-contain pointer-events-none transition-transform duration-200"
-        />
+        {/* Render all sorted mockups stacked for instant GPU-accelerated switching */}
+        {sortedMockups.map((m, idx) => {
+          const isCurrent = idx === activeIndex;
+
+          return (
+            <div 
+              key={idx}
+              className={`absolute inset-0 w-full h-full transition-all duration-300 ease-out ${
+                isCurrent 
+                  ? "opacity-100 scale-100 z-10" 
+                  : "opacity-0 scale-95 z-0 pointer-events-none"
+              }`}
+            >
+              {/* Product base mockup image (contains the baked-in design generated by the API) */}
+              <img 
+                src={m.url} 
+                alt={m.title || `Mockup ${idx + 1}`} 
+                className="w-full h-full object-contain pointer-events-none"
+              />
+            </div>
+          );
+        })}
 
         {/* 360 Badge Overlay */}
-        <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md border border-white/10 rounded-full py-1 px-3 flex items-center gap-1.5 shadow-lg pointer-events-none">
+        <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md border border-white/10 rounded-full py-1 px-3 flex items-center gap-1.5 shadow-lg pointer-events-none z-20">
           <RotateCw className="w-3 h-3 text-[#FF6D1F] animate-spin" style={{ animationDuration: "8s" }} />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-200">360° Spin View</span>
         </div>
@@ -217,13 +373,13 @@ const Product360Viewer: React.FC<{
           <>
             <button
               onClick={rotateLeft}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/95 text-white rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md focus:outline-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/95 text-white rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md focus:outline-none z-20"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={rotateRight}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/95 text-white rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md focus:outline-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/95 text-white rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md focus:outline-none z-20"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -231,7 +387,7 @@ const Product360Viewer: React.FC<{
         )}
 
         {/* Interactive Gesture Helper Text overlay */}
-        <div className="absolute bottom-3 inset-x-0 mx-auto w-max bg-black/65 backdrop-blur-sm border border-white/5 rounded-full py-0.5 px-3 text-[10px] text-gray-400 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+        <div className="absolute bottom-3 inset-x-0 mx-auto w-max bg-black/65 backdrop-blur-sm border border-white/5 rounded-full py-0.5 px-3 text-[10px] text-gray-400 opacity-100 transition-opacity duration-300 pointer-events-none z-20">
           Swipe or drag horizontally to rotate
         </div>
       </div>
@@ -392,16 +548,37 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const maxSellingPrice = maxPrice * (1 + markup / 100);
   const avgProfit = ((minSellingPrice + maxSellingPrice) / 2) - ((minPrice + maxPrice) / 2);
 
-  // Debounced auto mockup preview generator
+  // Cooldown state for manual preview regeneration
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  const handleManualRegenerate = async () => {
+    if (cooldown > 0) return;
+    setCooldown(30); // Set 30-second cooldown
+    await onGeneratePreview();
+  };
+
+  // Debounced auto mockup preview generator - ONLY triggers automatically if we don't have mockups yet
   useEffect(() => {
     if (designFiles.length === 0 || selectedVariants.length === 0) return;
     
+    // If mockups are already generated, do not auto-regenerate on changes (prevents 429 rate limit spam)
+    // The client-side real-time overlay shows layout edits instantly!
+    if (mockupUrls && mockupUrls.length > 0) return;
+    
     const timer = setTimeout(() => {
       onGeneratePreview();
-    }, 4500); // Debounce to allow user to finish positioning changes
+    }, 8000); // 8-second debounce for initial load
     
     return () => clearTimeout(timer);
-  }, [designFiles, selectedVariants]);
+  }, [designFiles, selectedVariants, mockupUrls, onGeneratePreview]);
 
   // Drag and Drop Upload Handlers
   const handleDragOver = (e: React.DragEvent) => {
@@ -556,9 +733,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       mockups: mockupUrls && mockupUrls.length > 0,
       details: productForm.name.trim().length > 0 && productForm.description.trim().length >= 20,
     };
+
+    // Note: aspectRatio check is non-blocking (warnings only, does not prevent publishing)
+    const blockingChecks = {
+      variants: checks.variants,
+      designs: checks.designs,
+      mockups: checks.mockups,
+      details: checks.details,
+    };
+
     return {
       ...checks,
-      allValid: Object.values(checks).every(Boolean),
+      allValid: Object.values(blockingChecks).every(Boolean),
     };
   }, [selectedVariants, designFiles, aspectRatioIssues, mockupUrls, productForm]);
 
@@ -620,24 +806,24 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     <div className="bg-[#050505] min-h-screen text-white relative pt-[30px] md:pt-[40px]">
       {/* Sticky Header with Product Info & Continue Button - offset by navbar height + 10px spacing */}
       <div className="sticky top-[90px] md:top-[98px] z-40 bg-black/80 backdrop-blur-md border-b border-white/10 py-3 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-sm sm:text-lg md:text-xl font-bold font-clash text-white line-clamp-1">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm sm:text-base md:text-lg font-bold font-clash text-white line-clamp-1">
               {selectedProduct?.title || selectedProduct?.name}
-            </h1>
-            <p className="text-[10px] sm:text-xs text-gray-400">
+            </div>
+            <p className="text-[10px] sm:text-xs text-gray-400 truncate">
               SKU: {selectedProduct?.model || selectedProduct?.id} | {selectedProduct?.type_name}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex-shrink-0 flex items-center gap-2">
             <Button
               onClick={handlePublishSubmit}
               disabled={isPublishing || !validationSummary.allValid}
-              className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {isPublishing ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
                   <span>Publishing...</span>
                 </div>
               ) : (
@@ -690,7 +876,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("variants")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <Palette className="w-5 h-5 text-[#FF6D1F]" />
-                1. Choose Variants (Colors & Sizes)
+       Choose Variants (Colors & Sizes)
               </h3>
               {openAccordions.variants ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -728,10 +914,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           <span
                             className="text-xs font-semibold whitespace-nowrap"
                             style={{
-                              color:
-                                color.code === "#ffffff" || color.code === "#fff" || color.code.toLowerCase() === "#fafafa"
-                                  ? "#000"
-                                  : "#fff",
+                              color: getContrastTextColor(color.code),
                             }}
                           >
                             {color.name}
@@ -819,7 +1002,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("design")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <Upload className="w-5 h-5 text-[#FF6D1F]" />
-                2. Design Upload & Placement
+               Design Upload & Placement
               </h3>
               {openAccordions.design ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -955,7 +1138,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("editor")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <ImageUpscale className="w-5 h-5 text-[#FF6D1F]" />
-                3. Live Position Editor
+          Live Position Editor
               </h3>
               {openAccordions.editor ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1015,7 +1198,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("mockups")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <Sparkles className="w-5 h-5 text-[#FF6D1F]" />
-                4. Live Product Mockups
+               Live Product Mockups
               </h3>
               {openAccordions.mockups ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1027,11 +1210,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     Mockups regenerate automatically when designs are saved.
                   </p>
                   <Button
-                    onClick={() => onGeneratePreview()}
-                    disabled={isGeneratingPreview || designFiles.length === 0}
-                    className="bg-white/5 hover:bg-white/10 text-white font-semibold text-xs py-2 px-3 border border-white/10 rounded-lg self-start sm:self-auto"
+                    onClick={handleManualRegenerate}
+                    disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
+                    className="bg-white/5 hover:bg-white/10 text-white font-semibold text-xs py-2 px-3 border border-white/10 rounded-lg self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isGeneratingPreview ? "Generating..." : "Regenerate Previews"}
+                    {isGeneratingPreview 
+                      ? "Generating..." 
+                      : cooldown > 0 
+                        ? `Wait ${cooldown}s` 
+                        : "Regenerate Previews"
+                    }
                   </Button>
                 </div>
 
@@ -1093,6 +1281,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           mockupUrls={mockupUrls}
                           defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
                           productName={selectedProduct?.title || selectedProduct?.name}
+                          designFiles={designFiles}
+                          activePlacement={activePlacement}
                         />
                       </div>
                     ) : (
@@ -1127,7 +1317,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("listing")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <FileText className="w-5 h-5 text-[#FF6D1F]" />
-                5. Storefront Listing Details
+               Storefront Listing Details
               </h3>
               {openAccordions.listing ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1245,7 +1435,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("review")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <ScanEye className="w-5 h-5 text-[#FF6D1F]" />
-                6. Customization Review Checklist
+              Customization Review Checklist
               </h3>
               {openAccordions.review ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1278,13 +1468,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2.5 bg-black/40 border border-white/5 p-3 rounded-xl">
-                    <div className={`p-1.5 rounded-full ${validationSummary.aspectRatio ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                      {validationSummary.aspectRatio ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                    <div className={`p-1.5 rounded-full ${validationSummary.aspectRatio ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}`}>
+                      {validationSummary.aspectRatio ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
                     </div>
                     <div>
-                      <div className="font-bold">Aspect Ratio Correct</div>
+                      <div className="font-bold">Aspect Ratio Status</div>
                       <div className="text-[10px] text-gray-500">
-                        {validationSummary.aspectRatio ? "All placements pass backend validation" : `${aspectRatioIssues.length} aspect ratio issue(s) need fixing`}
+                        {validationSummary.aspectRatio ? "All placements pass backend validation" : `${aspectRatioIssues.length} aspect ratio warning(s) (non-blocking)`}
                       </div>
                     </div>
                   </div>
@@ -1340,6 +1530,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 mockupUrls={mockupUrls}
                 defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
                 productName={selectedProduct?.title || selectedProduct?.name}
+                designFiles={designFiles}
+                activePlacement={activePlacement}
               />
 
               <div className="space-y-1">

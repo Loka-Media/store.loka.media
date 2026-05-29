@@ -187,7 +187,6 @@ export const calculateAspectRatioAwareDimensions = async (
 ): Promise<{ width: number; height: number; adapted: boolean; originalRatio: number; finalRatio: number }> => {
   return new Promise((resolve) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
     let resolved = false;
 
     // CRITICAL FIX: Add timeout to prevent hanging promises (images that never load)
@@ -299,7 +298,17 @@ export const calculateAspectRatioAwareDimensions = async (
       });
     };
 
-    img.src = imageUrl;
+    // Clean double-encoded URL (e.g. %2520 -> %20)
+    let cleanedUrl = imageUrl;
+    if (cleanedUrl && cleanedUrl.includes('%25')) {
+      try {
+        cleanedUrl = cleanedUrl.replace(/%25/g, '%');
+      } catch (e) {
+        console.error("Failed to clean imageUrl in calculateAspectRatioAwareDimensions:", e);
+      }
+    }
+
+    img.src = cleanedUrl;
   });
 };
 

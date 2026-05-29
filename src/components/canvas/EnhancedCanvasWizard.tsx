@@ -632,7 +632,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
               >
                 <div className="aspect-square bg-gray-800 rounded overflow-hidden mb-2">
                   <img
-                    src={design.url}
+                    src={design.url ? design.url.replace(/%25/g, '%') : ''}
                     alt={design.filename}
                     className="w-full h-full object-contain"
                   />
