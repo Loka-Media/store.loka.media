@@ -853,7 +853,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("variants")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <Palette className="w-5 h-5 text-[#FF6D1F]" />
-                1. Choose Variants (Colors & Sizes)
+       Choose Variants (Colors & Sizes)
               </h3>
               {openAccordions.variants ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -979,7 +979,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("design")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <Upload className="w-5 h-5 text-[#FF6D1F]" />
-                2. Design Upload & Placement
+               Design Upload & Placement
               </h3>
               {openAccordions.design ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1115,7 +1115,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("editor")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <ImageUpscale className="w-5 h-5 text-[#FF6D1F]" />
-                3. Live Position Editor
+          Live Position Editor
               </h3>
               {openAccordions.editor ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1175,7 +1175,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("mockups")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <Sparkles className="w-5 h-5 text-[#FF6D1F]" />
-                4. Live Product Mockups
+               Live Product Mockups
               </h3>
               {openAccordions.mockups ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1293,7 +1293,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("listing")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <FileText className="w-5 h-5 text-[#FF6D1F]" />
-                5. Storefront Listing Details
+               Storefront Listing Details
               </h3>
               {openAccordions.listing ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1411,7 +1411,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("review")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <ScanEye className="w-5 h-5 text-[#FF6D1F]" />
-                6. Customization Review Checklist
+              Customization Review Checklist
               </h3>
               {openAccordions.review ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
