@@ -10,7 +10,9 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { printfulAPI } from "@/lib/api";
 import { mockupAPI } from "@/lib/MockupAPI";
+import { retryWithExponentialBackoff } from "@/lib/retryWithBackoff";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
+import { useDebouncePreview } from "@/hooks/useDebouncePreview";
 
 import UnifiedCanvasPDP from "@/components/canvas/UnifiedCanvasPDP";
 import CreativeLoader from "@/components/CreativeLoader";
@@ -62,6 +64,7 @@ function CanvasContent() {
   });
 
   const hasInitializedRef = useRef(false);
+  const previewGenerationRef = useRef<(designFiles?: any[]) => Promise<void>>();
 
   const initializeCanvas = useCallback(async () => {
     if (isInitialized || hasInitializedRef.current) return;
@@ -311,13 +314,18 @@ function CanvasContent() {
     console.log("Print files loaded:", printFilesData);
   };
 
-  const generatePreview = async (advancedOptions?: {
-    technique?: string;
-    optionGroups?: string[];
-    options?: string[];
-    lifelike?: boolean;
-    width?: number;
-  }) => {
+  const generatePreview = useCallback(async (
+    updatedDesignFiles?: typeof designFiles,
+    advancedOptions?: {
+      technique?: string;
+      optionGroups?: string[];
+      options?: string[];
+      lifelike?: boolean;
+      width?: number;
+    }
+  ) => {
+    const designFilesToUse = updatedDesignFiles || designFiles;
+
     if (!selectedProduct || !selectedVariants.length) {
       toast.error("Missing product or variants for mockup.");
       return;
@@ -345,7 +353,7 @@ function CanvasContent() {
       console.log("Selected Product:", selectedProduct);
       console.log("Selected Variant IDs:", variantIds);
       console.log("Available Product Variants:", selectedProduct.variants);
-      console.log("Design Files:", designFiles);
+      console.log("Design Files:", designFilesToUse);
       console.log("advancedOptions", advancedOptions);
 
       // Validate that variant IDs actually belong to this product
@@ -369,10 +377,10 @@ function CanvasContent() {
       console.log("🎨 Processing designs for mockup generation...");
       console.log("🔧 printFiles state:", printFiles);
       
-      let finalDesignFiles = [...designFiles];
+      let finalDesignFiles = [...designFilesToUse];
       
       // Check if we have multiple designs per placement that need compositing
-      const designsByPlacement = designFiles.reduce<Record<string, typeof designFiles>>((acc, design) => {
+      const designsByPlacement = designFilesToUse.reduce<Record<string, typeof designFiles>>((acc, design) => {
         if (!acc[design.placement]) acc[design.placement] = [];
         acc[design.placement].push(design);
         return acc;
@@ -401,18 +409,18 @@ function CanvasContent() {
         try {
           setMockupStatus("Creating composite images for multiple designs...");
           console.log("🔧 Multiple designs detected, creating composite images...");
-          console.log(`Input designs for compositing:`, designFiles.map(d => ({placement: d.placement, filename: d.filename, url: d.url.substring(0, 60)})));
+          console.log(`Input designs for compositing:`, designFilesToUse.map(d => ({placement: d.placement, filename: d.filename, url: d.url.substring(0, 60)})));
           
           // Import the composite image creator
           const { createCompositeImagesForPlacements } = await import('../../../../utils/imageComposer');
           
           // Create composite images for placements with multiple designs
           const compositeDesigns = await createCompositeImagesForPlacements(
-            designFiles.filter(file => file.placement && file.url),
+            designFilesToUse.filter(file => file.placement && file.url),
             printFiles
           );
           
-          console.log(`✅ Composite creation complete: ${designFiles.length} original → ${compositeDesigns.length} final designs`);
+          console.log(`✅ Composite creation complete: ${designFilesToUse.length} original → ${compositeDesigns.length} final designs`);
           
           // CRITICAL VALIDATION: Ensure compositeDesigns is valid
           if (!compositeDesigns || compositeDesigns.length === 0) {
@@ -446,12 +454,12 @@ function CanvasContent() {
           console.error("❌ Error type:", typeof error);
           console.error("❌ Error message:", error instanceof Error ? error.message : String(error));
           console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-          console.error("❌ Failed with designFiles count:", designFiles.length);
+          console.error("❌ Failed with designFiles count:", designFilesToUse.length);
           console.error("❌ Failed with printFiles:", printFiles);
           
           setMockupStatus("Composite creation failed, using individual designs...");
           // Continue with original design files
-          finalDesignFiles = [...designFiles];
+          finalDesignFiles = [...designFilesToUse];
           
           console.log('💥 FALLBACK - Using original designs:');
           finalDesignFiles.forEach((design, index) => {
@@ -577,28 +585,49 @@ function CanvasContent() {
         console.error('🚨 CRITICAL ERROR: mockupOptions.designFiles is undefined!');
       }
 
-      const mockupUrls = await mockupAPI.generateProductMockup({
-        ...mockupOptions,
-        printFiles
-      });
+      const mockupUrls = await retryWithExponentialBackoff(
+        () => mockupAPI.generateProductMockup({
+          ...mockupOptions,
+          printFiles
+        }),
+        {
+          maxRetries: 3,
+          initialDelayMs: 2000,
+          maxDelayMs: 15000,
+          backoffMultiplier: 2
+        }
+      );
 
       setMockupUrls(mockupUrls);
       setMockupStatus("Mockup generated successfully!");
     } catch (error: any) {
       console.error("Preview generation failed:", error);
       let errorMessage = "Failed to generate preview.";
-      if (error?.response?.status === 429) {
-        errorMessage = "Printful rate limit reached. Please wait 30-60 seconds before regenerating mockups.";
+
+      if (error?.response?.status === 429 || error?.message?.includes("429")) {
+        errorMessage = "System is processing previews. Your request has been queued and will be generated shortly. Please wait...";
+        console.warn("⚠️ 429 Rate limit caught - request will be retried");
+      } else if (error?.response?.status === 500) {
+        errorMessage = "Unable to generate mockup right now. Please try again in a moment.";
+      } else if (error?.message?.includes("queue")) {
+        errorMessage = "Your preview has been queued. This helps prevent server overload. Please wait...";
       } else {
-        errorMessage = error?.response?.data?.error || error.message || errorMessage;
+        const backendError = error?.response?.data?.error || error?.response?.data?.message;
+        errorMessage = backendError || error.message || errorMessage;
       }
-      setMockupStatus(`Error: ${errorMessage}`);
-      toast.error(errorMessage);
+
+      setMockupStatus(`Processing...`);
+      // Don't show error toast for queued/rate limit errors - just update status silently
+      if (!errorMessage.includes("queue") && !errorMessage.includes("queued")) {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsGeneratingMockup(false);
     }
-  };
+  }, [selectedProduct, selectedVariants, designFiles, printFiles]);
 
+  // Setup debounced preview generation to prevent 429 rate limit errors
+  const { debouncedGeneratePreview } = useDebouncePreview(generatePreview, 2000);
 
   // Handle going live to marketplace with product details
   const handleGoLiveToMarketplace = async (updatedProductForm?: typeof productForm) => {
@@ -764,7 +793,7 @@ function CanvasContent() {
             setDesignFiles={setDesignFiles}
             uploadedFiles={uploadedFiles}
             printFiles={printFiles}
-            onGeneratePreview={generatePreview}
+            onGeneratePreview={debouncedGeneratePreview}
             isGeneratingPreview={isGeneratingMockup}
             mockupUrls={mockupUrls}
             mockupStatus={mockupStatus}

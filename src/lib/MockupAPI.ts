@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { printfulAPI } from "./api";
+import { mockupRequestQueue } from "./requestQueue";
 import { DesignFile } from "./types";
 
 type Placement = string;
@@ -253,7 +254,18 @@ class MockupAPI {
       }
       onStatusUpdate?.("Creating mockup generation task...", 0);
 
-      const taskResponse = await this.createMockupTask(productId, mockupData);
+      // Use request queue to prevent concurrent mockup task creation (prevents 429 rate limit)
+      console.log(`📋 Queuing mockup task creation for product ${productId}`);
+      const queueStats = (mockupRequestQueue as any).getStats?.();
+      if (queueStats) {
+        console.log(`   Queue stats: ${queueStats.queued} queued, ${queueStats.active} active`);
+      }
+
+      const taskResponse = await mockupRequestQueue.enqueue(
+        `/api/printful/mockup-generator/create-task/${productId}`,
+        () => this.createMockupTask(productId, mockupData),
+        1 // Only allow 1 concurrent mockup task creation
+      );
 
       if (!taskResponse.result?.task_key) {
         throw new Error("No task key returned from mockup creation");

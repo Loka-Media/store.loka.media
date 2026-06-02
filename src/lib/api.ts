@@ -1,6 +1,42 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "./auth";
-import { getApiUrl } from "./getApiUrl";
+
+const printfulProxyRequest = async (
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
+  path: string,
+  body?: any
+) => {
+  if (typeof window !== "undefined") {
+    const url = new URL(path, window.location.origin);
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url.toString(), {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Printful proxy request failed: ${response.status} ${response.statusText} - ${errorBody}`);
+    }
+
+    return response.json();
+  }
+
+  const response = await api.request({
+    url: path,
+    method,
+    data: body,
+  });
+  return response.data;
+};
 
 // Product interfaces
 export interface Product {
@@ -677,17 +713,19 @@ export const printfulAPI = {
     }
   ) => {
     console.log("Creating mockup task with data:", mockupData);
-    const response = await api.post(
+    return await printfulProxyRequest(
+      "POST",
       `/api/printful/mockup-generator/create-task/${productId}`,
       mockupData
     );
-    return response.data;
   },
 
   // Get mockup task status
   getMockupTaskStatus: async (taskKey: string) => {
-    const response = await api.get(`/api/printful/mockup-tasks/${taskKey}`);
-    return response.data;
+    return await printfulProxyRequest(
+      "GET",
+      `/api/printful/mockup-tasks/${taskKey}`
+    );
   },
 
   getPrintFiles: async (
@@ -702,8 +740,7 @@ export const printfulAPI = {
     const url = `/api/printful/mockup-generator/printfiles/${productId}${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-    const response = await api.get(url);
-    return response.data;
+    return await printfulProxyRequest("GET", url);
   },
 
   // Get layout templates for a product
@@ -719,8 +756,7 @@ export const printfulAPI = {
     const url = `/api/printful/mockup-generator/templates/${productId}${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-    const response = await api.get(url);
-    return response.data;
+    return await printfulProxyRequest("GET", url);
   },
 
   // Upload file directly (multipart/form-data)

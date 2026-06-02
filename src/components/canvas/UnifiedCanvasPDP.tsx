@@ -47,7 +47,7 @@ interface UnifiedCanvasPDPProps {
   setDesignFiles: React.Dispatch<React.SetStateAction<any[]>>;
   uploadedFiles: any[];
   printFiles: any | null;
-  onGeneratePreview: (advancedOptions?: any) => Promise<void>;
+  onGeneratePreview: (updatedDesignFiles?: any[], advancedOptions?: any) => Promise<void>;
   isGeneratingPreview: boolean;
   mockupUrls: any[];
   mockupStatus: string;
@@ -68,10 +68,10 @@ interface UnifiedCanvasPDPProps {
 // Helper to determine readable text contrast color (black or white) based on background hex code
 const getContrastTextColor = (hexCode: string): string => {
   if (!hexCode) return "#ffffff";
-  
+
   // Handle comma-separated multi-colors (use the primary/first color)
   let cleanHex = hexCode.split(",")[0].trim().toLowerCase();
-  
+
   if (!cleanHex.startsWith("#")) {
     // Match common light CSS color names
     const lightColors = ["white", "yellow", "silver", "gold", "pink", "ash", "heather", "cream", "sand", "lime"];
@@ -80,27 +80,27 @@ const getContrastTextColor = (hexCode: string): string => {
     }
     return "#ffffff";
   }
-  
+
   // Expand 3-digit hex (#fff) to 6-digit hex (#ffffff)
   if (cleanHex.length === 4) {
     cleanHex = "#" + cleanHex[1] + cleanHex[1] + cleanHex[2] + cleanHex[2] + cleanHex[3] + cleanHex[3];
   }
-  
+
   const r = parseInt(cleanHex.substring(1, 3), 16);
   const g = parseInt(cleanHex.substring(3, 5), 16);
   const b = parseInt(cleanHex.substring(5, 7), 16);
-  
+
   if (isNaN(r) || isNaN(g) || isNaN(b)) {
     return "#ffffff";
   }
-  
+
   // HSP perceived brightness calculation
   const brightness = Math.sqrt(
     0.299 * (r * r) +
     0.587 * (g * g) +
     0.114 * (b * b)
   );
-  
+
   // Threshold above 145 matches light background, returning black text for high readability
   return brightness > 145 ? "#000000" : "#ffffff";
 };
@@ -132,12 +132,12 @@ const Product360Viewer: React.FC<{
   const getDesignForMockup = (mockupTitle: string) => {
     if (!designFiles || designFiles.length === 0) return null;
     const title = mockupTitle.toLowerCase();
-    
+
     let placement = "front";
     if (title.includes("back")) placement = "back";
     else if (title.includes("left") || title.includes("sleeve_left")) placement = "sleeve_left";
     else if (title.includes("right") || title.includes("sleeve_right")) placement = "sleeve_right";
-    
+
     return designFiles.find((d) => d.placement === placement || (d.placement === "left" && placement === "sleeve_left") || (d.placement === "right" && placement === "sleeve_right"));
   };
 
@@ -151,7 +151,7 @@ const Product360Viewer: React.FC<{
     if (!mockupUrls || mockupUrls.length === 0) return [];
     const order = ["front", "right", "back", "left"];
     const result: any[] = [];
-    
+
     const getPlacementType = (title: string) => {
       const t = title.toLowerCase();
       if (t.includes("front")) return "front";
@@ -160,13 +160,13 @@ const Product360Viewer: React.FC<{
       if (t.includes("left") || t.includes("sleeve_left")) return "left";
       return "other";
     };
-    
+
     const groups: Record<string, any[]> = { front: [], right: [], back: [], left: [], other: [] };
     mockupUrls.forEach((m) => {
       const type = getPlacementType(m.title || "");
       groups[type].push(m);
     });
-    
+
     order.forEach((key) => {
       if (groups[key].length > 0) {
         result.push(...groups[key]);
@@ -175,7 +175,7 @@ const Product360Viewer: React.FC<{
     if (groups.other.length > 0) {
       result.push(...groups.other);
     }
-    
+
     return result.length > 0 ? result : mockupUrls;
   }, [mockupUrls]);
 
@@ -194,7 +194,7 @@ const Product360Viewer: React.FC<{
       if ((activePlacement === "sleeve_right" || activePlacement === "right") && (title.includes("right") || title.includes("sleeve_right"))) return true;
       return false;
     });
-    
+
     if (index !== -1 && index !== activeIndex) {
       setActiveIndex(index);
     }
@@ -214,7 +214,7 @@ const Product360Viewer: React.FC<{
     const activeDesign = designFiles.find((d) => d.placement === activePlacement) || getDesignForDefault();
     const effectivePlacement = activeDesign ? activeDesign.placement : activePlacement;
     const area = MOCKUP_PRINT_AREAS[effectivePlacement] || MOCKUP_PRINT_AREAS.front;
-    
+
     let designStyle: React.CSSProperties = {};
     if (activeDesign && activeDesign.position) {
       const w = (activeDesign.position.width / activeDesign.position.area_width) * 100;
@@ -234,14 +234,14 @@ const Product360Viewer: React.FC<{
       <div className="aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative w-full">
         {defaultImage ? (
           <>
-            <img 
-              src={defaultImage} 
-              alt={productName} 
-              className="w-full h-full object-contain pointer-events-none" 
+            <img
+              src={defaultImage}
+              alt={productName}
+              className="w-full h-full object-contain pointer-events-none"
               style={{ transform: effectivePlacement === 'back' ? 'scaleX(-1)' : 'none' }}
             />
             {activeDesign && (
-              <div 
+              <div
                 className="absolute pointer-events-none"
                 style={{
                   width: `${area.width}%`,
@@ -250,9 +250,9 @@ const Product360Viewer: React.FC<{
                   left: `${area.left}%`,
                 }}
               >
-                <img 
-                  src={activeDesign.url ? activeDesign.url.replace(/%25/g, '%') : ''} 
-                  alt="Design Overlay" 
+                <img
+                  src={activeDesign.url ? activeDesign.url.replace(/%25/g, '%') : ''}
+                  alt="Design Overlay"
                   className="object-contain w-full h-full"
                   style={designStyle}
                 />
@@ -280,7 +280,7 @@ const Product360Viewer: React.FC<{
     const deltaX = e.clientX - dragStartX.current;
     const threshold = 35; // Pixels per rotation step
     const indexOffset = -Math.round(deltaX / threshold); // Drag left, rotate clockwise
-    
+
     let newIndex = (dragStartActiveIndex.current + indexOffset) % sortedMockups.length;
     if (newIndex < 0) {
       newIndex += sortedMockups.length;
@@ -305,7 +305,7 @@ const Product360Viewer: React.FC<{
     const deltaX = e.touches[0].clientX - dragStartX.current;
     const threshold = 35;
     const indexOffset = -Math.round(deltaX / threshold);
-    
+
     let newIndex = (dragStartActiveIndex.current + indexOffset) % sortedMockups.length;
     if (newIndex < 0) {
       newIndex += sortedMockups.length;
@@ -327,10 +327,9 @@ const Product360Viewer: React.FC<{
 
   return (
     <div className="space-y-3 w-full">
-      <div 
-        className={`aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative group select-none cursor-grab active:cursor-grabbing transition-all duration-300 ${
-          isDragging ? "border-[#FF6D1F]/50 shadow-[0_0_20px_rgba(255,109,31,0.15)]" : ""
-        }`}
+      <div
+        className={`aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative group select-none cursor-grab active:cursor-grabbing transition-all duration-300 ${isDragging ? "border-[#FF6D1F]/50 shadow-[0_0_20px_rgba(255,109,31,0.15)]" : ""
+          }`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
@@ -344,18 +343,17 @@ const Product360Viewer: React.FC<{
           const isCurrent = idx === activeIndex;
 
           return (
-            <div 
+            <div
               key={idx}
-              className={`absolute inset-0 w-full h-full transition-all duration-300 ease-out ${
-                isCurrent 
-                  ? "opacity-100 scale-100 z-10" 
-                  : "opacity-0 scale-95 z-0 pointer-events-none"
-              }`}
+              className={`absolute inset-0 w-full h-full transition-all duration-300 ease-out ${isCurrent
+                ? "opacity-100 scale-100 z-10"
+                : "opacity-0 scale-95 z-0 pointer-events-none"
+                }`}
             >
               {/* Product base mockup image (contains the baked-in design generated by the API) */}
-              <img 
-                src={m.url} 
-                alt={m.title || `Mockup ${idx + 1}`} 
+              <img
+                src={m.url}
+                alt={m.title || `Mockup ${idx + 1}`}
                 className="w-full h-full object-contain pointer-events-none"
               />
             </div>
@@ -403,11 +401,10 @@ const Product360Viewer: React.FC<{
               <button
                 key={idx}
                 onClick={() => setActiveIndex(idx)}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  idx === activeIndex 
-                    ? "bg-[#FF6D1F] w-3" 
-                    : "bg-white/20 hover:bg-white/40"
-                }`}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === activeIndex
+                  ? "bg-[#FF6D1F] w-3"
+                  : "bg-white/20 hover:bg-white/40"
+                  }`}
               />
             ))}
           </div>
@@ -456,12 +453,178 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [isRemovingBackground, setIsRemovingBackground] = useState(false);
   const [selectedTechnique, setSelectedTechnique] = useState<string>("");
   const [availableTechniques, setAvailableTechniques] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const skipAutoPreviewRef = useRef(false);
+
+  const dataUrlToFile = async (dataUrl: string, filename: string): Promise<File> => {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type || "image/png" });
+  };
+
+  const getImageSourceForBackgroundRemoval = (imageUrl: string): string => {
+    if (!imageUrl) return imageUrl;
+    if (imageUrl.startsWith("data:") || imageUrl.startsWith("blob:")) return imageUrl;
+    if (imageUrl.startsWith("/")) return imageUrl;
+    if (typeof window !== "undefined" && imageUrl.startsWith(window.location.origin)) return imageUrl;
+    return `/api/image-proxy?url=${encodeURIComponent(imageUrl)}`;
+  };
+
+  const removeWhiteBackgroundFromImage = async (imageUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Unable to create canvas context."));
+            return;
+          }
+
+          ctx.drawImage(image, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+
+          const sampleCorners = [
+            [0, 0],
+            [canvas.width - 1, 0],
+            [0, canvas.height - 1],
+            [canvas.width - 1, canvas.height - 1],
+          ];
+
+          const backgroundSamples = sampleCorners.map(([x, y]) => {
+            const idx = (y * canvas.width + x) * 4;
+            return {
+              r: data[idx],
+              g: data[idx + 1],
+              b: data[idx + 2],
+            };
+          });
+
+          const averageBg = backgroundSamples.reduce(
+            (acc, sample) => ({
+              r: acc.r + sample.r,
+              g: acc.g + sample.g,
+              b: acc.b + sample.b,
+            }),
+            { r: 0, g: 0, b: 0 }
+          );
+
+          averageBg.r /= backgroundSamples.length;
+          averageBg.g /= backgroundSamples.length;
+          averageBg.b /= backgroundSamples.length;
+
+          const squaredDistance = (r: number, g: number, b: number) => {
+            return (
+              (r - averageBg.r) * (r - averageBg.r) +
+              (g - averageBg.g) * (g - averageBg.g) +
+              (b - averageBg.b) * (b - averageBg.b)
+            );
+          };
+
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const alpha = data[i + 3];
+            const brightness = (r + g + b) / 3;
+            const bgDistance = Math.sqrt(squaredDistance(r, g, b));
+
+            // Remove near-white / background-like pixels while preserving darker design details
+            const isNearTransparentBackground =
+              alpha > 0 &&
+              ((brightness >= 235 && bgDistance < 80) ||
+                (r >= 245 && g >= 245 && b >= 245));
+
+            if (isNearTransparentBackground) {
+              data[i + 3] = 0;
+            }
+          }
+
+          ctx.putImageData(imageData, 0, 0);
+          resolve(canvas.toDataURL("image/png"));
+        } catch (err) {
+          reject(err);
+        }
+      };
+      image.onerror = () => {
+        reject(new Error("Failed to load image for background removal."));
+      };
+      image.src = getImageSourceForBackgroundRemoval(imageUrl);
+    });
+  };
+
+  const handleRemoveDesignBackground = async () => {
+    if (!selectedDesignFile) {
+      toast.error("Select a design first.");
+      return;
+    }
+
+    const imageUrl = String(selectedDesignFile.url || "");
+    if (!imageUrl) {
+      toast.error("Unable to locate the selected design image.");
+      return;
+    }
+
+    const isSvg = imageUrl.includes("image/svg+xml") || imageUrl.toLowerCase().endsWith(".svg");
+    if (isSvg) {
+      toast.error("Background removal is only available for raster designs (PNG/JPG/WebP). Please use a transparent SVG or a raster format.");
+      return;
+    }
+
+    const proxiedUrl = getImageSourceForBackgroundRemoval(imageUrl);
+
+    setIsRemovingBackground(true);
+    try {
+      const updatedUrl = await removeWhiteBackgroundFromImage(proxiedUrl);
+      let finalUrl = updatedUrl;
+
+      if (updatedUrl.startsWith("data:")) {
+        try {
+          const filename = selectedDesignFile.filename || `design-${Date.now()}.png`;
+          const file = await dataUrlToFile(updatedUrl, filename);
+          const uploadResponse = await printfulAPI.uploadFileDirectly(file);
+          const uploadedUrl = uploadResponse?.result?.file_url || uploadResponse?.file_url;
+          if (uploadedUrl) {
+            finalUrl = uploadedUrl.replace(/%25/g, "%");
+          } else {
+            console.warn("Background removal produced a data URL, but upload response did not include a remote file URL.", uploadResponse);
+          }
+        } catch (uploadError) {
+          console.error("Background removed but upload failed:", uploadError);
+          toast.error("Background removed locally, but upload failed. Please try again.");
+        }
+      }
+
+      const updatedDesign = { ...selectedDesignFile, url: finalUrl };
+      const newDesignFiles = designFiles.map((design) =>
+        design.id === updatedDesign.id ? updatedDesign : design
+      );
+      setDesignFiles(newDesignFiles);
+      setSelectedDesignFile(updatedDesign);
+      toast.success("Background removed from selected design.");
+
+      if (onGeneratePreview && !isGeneratingPreview) {
+        skipAutoPreviewRef.current = true;
+        await onGeneratePreview(newDesignFiles);
+      }
+    } catch (err) {
+      console.error("Background removal failed:", err);
+      toast.error("Could not remove the background. Try a transparent PNG or a different file.");
+    } finally {
+      setIsRemovingBackground(false);
+    }
+  };
 
   // Extract unique colors & sizes
   const uniqueColors = useMemo(() => {
@@ -568,15 +731,20 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   // Debounced auto mockup preview generator - ONLY triggers automatically if we don't have mockups yet
   useEffect(() => {
     if (designFiles.length === 0 || selectedVariants.length === 0) return;
-    
+
     // If mockups are already generated, do not auto-regenerate on changes (prevents 429 rate limit spam)
     // The client-side real-time overlay shows layout edits instantly!
     if (mockupUrls && mockupUrls.length > 0) return;
-    
+
+    if (skipAutoPreviewRef.current) {
+      skipAutoPreviewRef.current = false;
+      return;
+    }
+
     const timer = setTimeout(() => {
       onGeneratePreview();
     }, 8000); // 8-second debounce for initial load
-    
+
     return () => clearTimeout(timer);
   }, [designFiles, selectedVariants, mockupUrls, onGeneratePreview]);
 
@@ -835,10 +1003,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       </div>
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 lg:py-10 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        
+
         {/* LEFT COLUMN: Main PDP Customizer Workspace */}
         <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-          
+
           {/* Section 1: Product Information */}
           <div className="gradient-border-white-top p-5 sm:p-6 bg-gray-900/60 rounded-3xl backdrop-blur-sm border border-white/5">
             <div className="flex flex-col md:flex-row gap-5">
@@ -876,7 +1044,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("variants")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <Palette className="w-5 h-5 text-[#FF6D1F]" />
-       Choose Variants (Colors & Sizes)
+                Choose Variants (Colors & Sizes)
               </h3>
               {openAccordions.variants ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -906,9 +1074,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               setSelectedColors([...selectedColors, color.name]);
                             }
                           }}
-                          className={`relative border-2 rounded-full px-4 py-2 flex items-center gap-2 transition-all duration-300 ${
-                            isSelected ? "border-white scale-105" : "border-transparent hover:border-white/30"
-                          }`}
+                          className={`relative border-2 rounded-full px-4 py-2 flex items-center gap-2 transition-all duration-300 ${isSelected ? "border-white scale-105" : "border-transparent hover:border-white/30"
+                            }`}
                           style={{ backgroundColor: color.code }}
                         >
                           <span
@@ -963,11 +1130,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               setSelectedSizes([...selectedSizes, size]);
                             }
                           }}
-                          className={`border-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 ${
-                            isSelected
-                              ? "border-[#FF6D1F] bg-[#FF6D1F]/10 text-white font-bold"
-                              : "border-white/10 bg-white/5 text-gray-300 hover:border-white/35"
-                          }`}
+                          className={`border-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 ${isSelected
+                            ? "border-[#FF6D1F] bg-[#FF6D1F]/10 text-white font-bold"
+                            : "border-white/10 bg-white/5 text-gray-300 hover:border-white/35"
+                            }`}
                         >
                           {size}
                         </button>
@@ -1002,7 +1168,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("design")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <Upload className="w-5 h-5 text-[#FF6D1F]" />
-               Design Upload & Placement
+                Design Upload & Placement
               </h3>
               {openAccordions.design ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1020,13 +1186,12 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         <div
                           key={placement}
                           onClick={() => setActivePlacement(placement)}
-                          className={`cursor-pointer rounded-2xl p-4 border-2 transition-all flex flex-col items-center justify-center gap-2 h-28 relative ${
-                            isActive
-                              ? "border-white bg-white/5"
-                              : hasAssigned
+                          className={`cursor-pointer rounded-2xl p-4 border-2 transition-all flex flex-col items-center justify-center gap-2 h-28 relative ${isActive
+                            ? "border-white bg-white/5"
+                            : hasAssigned
                               ? "border-[#FF6D1F]/50 bg-[#FF6D1F]/5"
                               : "border-white/10 bg-black/30 hover:border-white/30"
-                          }`}
+                            }`}
                         >
                           {hasAssigned ? (
                             <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/20">
@@ -1065,11 +1230,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-3xl p-6 sm:p-10 text-center cursor-pointer transition-all duration-300 ${
-                    isDragging
-                      ? "border-[#FF6D1F] bg-[#FF6D1F]/10 scale-[1.01]"
-                      : "border-white/10 bg-black/40 hover:border-white/30"
-                  }`}
+                  className={`border-2 border-dashed rounded-3xl p-6 sm:p-10 text-center cursor-pointer transition-all duration-300 ${isDragging
+                    ? "border-[#FF6D1F] bg-[#FF6D1F]/10 scale-[1.01]"
+                    : "border-white/10 bg-black/40 hover:border-white/30"
+                    }`}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <input
@@ -1109,9 +1273,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           <div
                             key={file.id}
                             onClick={() => handleAddDesign(file)}
-                            className={`group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border-2 transition-all bg-black/50 ${
-                              isAssigned ? "border-[#FF6D1F]" : "border-white/10 hover:border-white/30"
-                            }`}
+                            className={`group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border-2 transition-all bg-black/50 ${isAssigned ? "border-[#FF6D1F]" : "border-white/10 hover:border-white/30"
+                              }`}
                           >
                             <img
                               src={file.thumbnail_url || file.file_url}
@@ -1138,7 +1301,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("editor")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <ImageUpscale className="w-5 h-5 text-[#FF6D1F]" />
-          Live Position Editor
+                Live Position Editor
               </h3>
               {openAccordions.editor ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1186,6 +1349,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           Center Bottom
                         </button>
                       </div>
+                      <div className="grid grid-cols-1 gap-2 mt-2">
+                        <button
+                          type="button"
+                          onClick={handleRemoveDesignBackground}
+                          disabled={!selectedDesignFile || isRemovingBackground}
+                          className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-xs font-bold hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {isRemovingBackground ? "Removing Background..." : "Remove Background"}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1198,7 +1371,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("mockups")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <Sparkles className="w-5 h-5 text-[#FF6D1F]" />
-               Live Product Mockups
+                Live Product Mockups
               </h3>
               {openAccordions.mockups ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1214,10 +1387,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
                     className="bg-white/5 hover:bg-white/10 text-white font-semibold text-xs py-2 px-3 border border-white/10 rounded-lg self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isGeneratingPreview 
-                      ? "Generating..." 
-                      : cooldown > 0 
-                        ? `Wait ${cooldown}s` 
+                    {isGeneratingPreview
+                      ? "Generating..."
+                      : cooldown > 0
+                        ? `Wait ${cooldown}s`
                         : "Regenerate Previews"
                     }
                   </Button>
@@ -1236,11 +1409,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <button
                       type="button"
                       onClick={() => setMockupViewMode("360")}
-                      className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
-                        mockupViewMode === "360"
-                          ? "bg-[#FF6D1F] text-white"
-                          : "text-gray-400 hover:text-white"
-                      }`}
+                      className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${mockupViewMode === "360"
+                        ? "bg-[#FF6D1F] text-white"
+                        : "text-gray-400 hover:text-white"
+                        }`}
                     >
                       <RotateCw className="w-3.5 h-3.5" />
                       360° Spin
@@ -1248,11 +1420,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <button
                       type="button"
                       onClick={() => setMockupViewMode("grid")}
-                      className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
-                        mockupViewMode === "grid"
-                          ? "bg-[#FF6D1F] text-white"
-                          : "text-gray-400 hover:text-white"
-                      }`}
+                      className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${mockupViewMode === "grid"
+                        ? "bg-[#FF6D1F] text-white"
+                        : "text-gray-400 hover:text-white"
+                        }`}
                     >
                       <Palette className="w-3.5 h-3.5" />
                       Grid View
@@ -1317,7 +1488,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("listing")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <FileText className="w-5 h-5 text-[#FF6D1F]" />
-               Storefront Listing Details
+                Storefront Listing Details
               </h3>
               {openAccordions.listing ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1334,9 +1505,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     value={productForm.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     placeholder="E.g., Limited Edition Neon Horizon Oversized Hoodie"
-                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${
-                      formErrors.name ? "border-red-500/50 bg-red-500/5" : "border-white/10"
-                    }`}
+                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${formErrors.name ? "border-red-500/50 bg-red-500/5" : "border-white/10"
+                      }`}
                   />
                   {formErrors.name && <p className="text-xs text-red-400 mt-1">{formErrors.name}</p>}
                 </div>
@@ -1351,9 +1521,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     onChange={(e) => handleInputChange("description", e.target.value)}
                     rows={4}
                     placeholder="Describe your design and brand story... Must be at least 20 characters."
-                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all resize-none ${
-                      formErrors.description ? "border-red-500/50 bg-red-500/5" : "border-white/10"
-                    }`}
+                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all resize-none ${formErrors.description ? "border-red-500/50 bg-red-500/5" : "border-white/10"
+                      }`}
                   />
                   {formErrors.description ? (
                     <p className="text-xs text-red-400 mt-1">{formErrors.description}</p>
@@ -1373,9 +1542,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <select
                       value={productForm.category}
                       onChange={(e) => handleInputChange("category", e.target.value)}
-                      className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${
-                        formErrors.category ? "border-red-500/50 bg-red-500/5" : "border-white/10"
-                      }`}
+                      className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${formErrors.category ? "border-red-500/50 bg-red-500/5" : "border-white/10"
+                        }`}
                     >
                       <option value="" disabled>Select category</option>
                       <option value="apparel">Apparel</option>
@@ -1435,7 +1603,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("review")}>
               <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                 <ScanEye className="w-5 h-5 text-[#FF6D1F]" />
-              Customization Review Checklist
+                Customization Review Checklist
               </h3>
               {openAccordions.review ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </div>
@@ -1523,7 +1691,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
         {/* RIGHT COLUMN: Sticky Right Sidebar (Desktop) */}
         <div className="hidden lg:block">
           <div className="sticky top-[110px] space-y-6">
-            
+
             {/* Thumbnail Preview Card */}
             <div className="bg-gray-900/50 border border-white/10 rounded-3xl p-5 space-y-5">
               <Product360Viewer
@@ -1596,11 +1764,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       key={v}
                       type="button"
                       onClick={() => handleInputChange("markupPercentage", v.toString())}
-                      className={`text-[10px] font-bold px-2 py-1 rounded-md border transition-all ${
-                        markup === v
-                          ? "border-[#FF6D1F] bg-[#FF6D1F] text-white"
-                          : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10"
-                      }`}
+                      className={`text-[10px] font-bold px-2 py-1 rounded-md border transition-all ${markup === v
+                        ? "border-[#FF6D1F] bg-[#FF6D1F] text-white"
+                        : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10"
+                        }`}
                     >
                       {v}%
                     </button>
@@ -1645,7 +1812,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 )}
               </Button>
             </div>
-            
+
             {/* Creator Help banner */}
             <div className="bg-[#FF6D1F]/5 border border-[#FF6D1F]/15 rounded-3xl p-5 space-y-3">
               <h5 className="font-bold text-sm text-white flex items-center gap-1.5">
