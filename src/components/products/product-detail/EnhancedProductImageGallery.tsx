@@ -62,7 +62,7 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
         <div className="relative group">
           <div className="aspect-square overflow-hidden rounded-xl bg-white/5 border border-white/10 relative transition-all hover:border-white/20">
             <Image
-              src={images[selectedImageIndex]}
+              src={images[selectedImageIndex]?.startsWith('//') ? `https:${images[selectedImageIndex]}` : images[selectedImageIndex]}
               alt={productName}
               width={600}
               height={600}
@@ -143,7 +143,7 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
                     }`}
                   >
                     <Image
-                      src={image}
+                      src={image?.startsWith('//') ? `https:${image}` : image}
                       alt={`${productName} view ${index + 1}`}
                       width={100}
                       height={100}
@@ -190,7 +190,7 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
 
           <div className="relative max-w-5xl max-h-[90vh]">
             <Image
-              src={images[selectedImageIndex]}
+              src={images[selectedImageIndex]?.startsWith('//') ? `https:${images[selectedImageIndex]}` : images[selectedImageIndex]}
               alt={productName}
               width={1200}
               height={1200}

@@ -147,25 +147,50 @@ export const getActivePrintFile = (
   selectedVariants: number[],
   activePlacement: string
 ): PrintFile | null => {
-  if (!printFiles || selectedVariants.length === 0 || !activePlacement) return null;
+  if (!printFiles || !activePlacement) return null;
 
-  // CRITICAL FIX: Add null safety checks for arrays
+  // Add safety checks for arrays
   if (!Array.isArray(printFiles.variant_printfiles) || !Array.isArray(printFiles.printfiles)) {
     console.warn("Invalid printFiles structure - missing variant_printfiles or printfiles arrays");
     return null;
   }
 
-  const variantPrintFile = printFiles.variant_printfiles.find((vp) =>
-    selectedVariants.includes(vp.variant_id)
-  );
+  // 1. Try to find matching variant printfile
+  let variantPrintFile = null;
+  if (selectedVariants && selectedVariants.length > 0) {
+    variantPrintFile = printFiles.variant_printfiles.find((vp) =>
+      selectedVariants.includes(vp.variant_id)
+    );
+  }
 
-  if (!variantPrintFile || !variantPrintFile.placements || !variantPrintFile.placements[activePlacement]) {
+  // 2. Fallback: use first variant printfile if no match/no selected variants
+  if (!variantPrintFile && printFiles.variant_printfiles.length > 0) {
+    variantPrintFile = printFiles.variant_printfiles[0];
+  }
+
+  if (!variantPrintFile || !variantPrintFile.placements) {
     return null;
   }
 
-  const printFileId = variantPrintFile.placements[activePlacement];
+  // Map placements (UI can be sleeve_left/left/left_sleeve, API is usually left_sleeve)
+  let printFileId = variantPrintFile.placements[activePlacement];
+  if (!printFileId) {
+    const cleanPlacement = activePlacement.toLowerCase();
+    let keysToTry: string[] = [];
+    if (cleanPlacement === "left" || cleanPlacement === "sleeve_left" || cleanPlacement === "left_sleeve") {
+      keysToTry = ["left_sleeve", "sleeve_left", "left"];
+    } else if (cleanPlacement === "right" || cleanPlacement === "sleeve_right" || cleanPlacement === "right_sleeve") {
+      keysToTry = ["right_sleeve", "sleeve_right", "right"];
+    }
+    
+    for (const key of keysToTry) {
+      if (variantPrintFile.placements[key]) {
+        printFileId = variantPrintFile.placements[key];
+        break;
+      }
+    }
+  }
 
-  // CRITICAL FIX: Ensure printFileId is valid before searching
   if (!printFileId) return null;
 
   return printFiles.printfiles.find((pf) => pf && pf.printfile_id === printFileId) || null;

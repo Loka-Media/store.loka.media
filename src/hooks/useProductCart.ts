@@ -40,7 +40,7 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
         creator_name: product.creator?.name || product.creator_name || 'Unknown',
         source: product.source || 'unknown',
         shopify_variant_id: selectedVariant.shopify_variant_id,
-        printful_variant_id: selectedVariant.printful_variant_id
+        printful_variant_id: selectedVariant.printify_variant_id
       };
 
       // Store in localStorage for guest cart

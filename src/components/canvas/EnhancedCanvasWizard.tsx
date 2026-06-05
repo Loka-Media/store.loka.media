@@ -267,6 +267,8 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 
       const newDesign: any = {
         id: Date.now(),
+        printify_id: file.id,
+        imageId: file.id,
         filename: file.filename,
         url: imageUrl,
         type: "design",
@@ -293,7 +295,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 
   const handleDeleteFile = async (fileId: number | string) => {
     try {
-      await printfulAPI.deleteFile(fileId);
+      await printfulAPI.deleteFile(fileId.toString());
       toast.success("File deleted successfully");
 
       // Refresh the files list
@@ -603,6 +605,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         onDeleteFile={handleDeleteFile}
         uploadedFiles={uploadedFiles}
         selectedFileId={selectedFileId}
+        blueprintId={selectedProduct?.id}
         productId={selectedProduct?.id}
       />
 

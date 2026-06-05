@@ -87,9 +87,17 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
           {/* Image Container */}
           <div className="w-full relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
             <Image
-              src={product.thumbnail_url || "/placeholder-product.png"}
+              src={(() => {
+                let url = product.thumbnail_url;
+                if (typeof url === 'string' && url.startsWith('[')) {
+                  try { const parsed = JSON.parse(url); if (parsed.length) url = parsed[0]; } catch(e) {}
+                }
+                if (!url) return "/placeholder-product.png";
+                return url.startsWith('//') ? `https:${url}` : url;
+              })()}
               alt={product.name}
               fill
+              unoptimized
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />

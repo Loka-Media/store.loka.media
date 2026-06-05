@@ -74,11 +74,12 @@ export function RegionalAvailabilityPreview({
           variant => selectedVariants.includes(variant.id)
         );
 
-        // Get catalog data from Printful to check real-time availability
-        const catalogProduct = await printfulAPI.getProductDetails(selectedProduct.id);
+        // Get catalog data from Printify blueprint to check real-time availability
+        const detailed = await printfulAPI.getBlueprintDetails(selectedProduct.id);
+        const catalogProduct = detailed?.data || detailed;
         
-        if (catalogProduct && catalogProduct.result && catalogProduct.result.variants) {
-          const printfulVariants = catalogProduct.result.variants;
+        if (catalogProduct && catalogProduct.variants) {
+          const printifyVariants = catalogProduct.variants;
           const regions = Object.keys(REGION_NAMES);
           const newRegionalData: RegionalData = {};
 
@@ -93,15 +94,11 @@ export function RegionalAvailabilityPreview({
             }> = [];
 
             selectedVariantObjects.forEach(variant => {
-              // Find corresponding Printful variant
-              const printfulVariant = printfulVariants.find((pv: { id: number; availability_status?: Array<{ region: string; status: string }> }) => pv.id === variant.id);
+              // Find corresponding Printify variant
+              const printifyVariant = printifyVariants.find((pv: { id: number; is_available?: boolean }) => pv.id === variant.id);
               
-              let isAvailable = false;
-              if (printfulVariant && printfulVariant.availability_status) {
-                isAvailable = printfulVariant.availability_status.some(
-                  (status: { region: string; status: string }) => status.region === region && status.status === 'in_stock'
-                );
-              }
+              // Printify variants are generally available if is_available is true
+              let isAvailable = printifyVariant ? printifyVariant.is_available !== false : false;
 
               if (isAvailable) availableCount++;
 

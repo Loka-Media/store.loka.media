@@ -82,7 +82,7 @@ export const unifiedCheckoutAPI = {
   },
 
   checkVariantAvailability: async (variants: Array<{ variant_id: number | string; quantity: number }>) => {
-    const response = await guestApi.post('/api/printful/variants/check-availability', { variants });
+    const response = await guestApi.post('/api/printify/variants/check-availability', { variants });
     return response.data;
   },
 };

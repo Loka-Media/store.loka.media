@@ -105,8 +105,6 @@ export default function CreatorCatalogPage() {
         const response = await printfulAPI.getCatalog({
           ...filters,
           category: categoryId.toString(),
-          // Don't use strict_inventory_check by default - let users see all products
-          include_unavailable: false, // Still filter out clearly deprecated products
         });
 
         console.log(`📦 API Response:`, response);
@@ -194,7 +192,7 @@ export default function CreatorCatalogPage() {
     );
 
     // Navigate to design canvas workflow with 4 steps
-    router.push(`/dashboard/creator/canvas?productId=${printfulProduct.id}`);
+    router.push(`/dashboard/creator/canvas?blueprintId=${printfulProduct.id}`);
   };
 
   return (

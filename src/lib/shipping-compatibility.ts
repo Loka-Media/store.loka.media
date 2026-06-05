@@ -3,6 +3,7 @@ export interface CartItem {
   product_name: string;
   availability_regions?: string[];
   printful_availability_regions?: string[];
+  printify_availability_regions?: string[];
   printful_variant_id?: string;
   source?: string;
 }
@@ -13,17 +14,20 @@ export interface IncompatibleItem {
   requestedRegion: string;
 }
 
-export interface PrintfulCountry {
+export interface ShippingCountry {
   name: string;
   code: string;
   region: string;
   states: any[] | null;
 }
 
+// Backwards-compatible alias
+export type PrintfulCountry = ShippingCountry;
+
 export const checkShippingCompatibility = (
   items: CartItem[],
   countryCode: string,
-  countries: PrintfulCountry[]
+  countries: ShippingCountry[]
 ): IncompatibleItem[] => {
   if (!countryCode || !countries) return [];
 
@@ -33,11 +37,11 @@ export const checkShippingCompatibility = (
   const incompatibleItems: IncompatibleItem[] = [];
 
   for (const item of items) {
-    if (item.source !== 'printful' && !item.printful_variant_id) {
+    if (item.source !== 'printify' && !item.printful_variant_id) {
       continue;
     }
 
-    const availabilityRegions = item.printful_availability_regions || item.availability_regions;
+    const availabilityRegions = item.printify_availability_regions || item.printful_availability_regions || item.availability_regions;
 
     if (availabilityRegions && Array.isArray(availabilityRegions)) {
       const isCompatible = checkRegionCompatibility(
@@ -64,7 +68,7 @@ const checkRegionCompatibility = (
   availableRegions: string[],
   countryCode: string,
   countryRegion: string,
-  countries: PrintfulCountry[]
+  countries: ShippingCountry[]
 ): boolean => {
   if (availableRegions.includes(countryCode)) {
     return true;
@@ -85,7 +89,7 @@ const checkRegionCompatibility = (
   return false;
 };
 
-export const getRegionName = (regionCode: string, countries: PrintfulCountry[]): string => {
+export const getRegionName = (regionCode: string, countries: ShippingCountry[]): string => {
   const country = countries.find(c => c.code === regionCode);
   if (country) {
     return country.name;
@@ -109,7 +113,7 @@ export const getRegionName = (regionCode: string, countries: PrintfulCountry[]):
 
 export const formatIncompatibilityMessage = (
   incompatibleItems: IncompatibleItem[],
-  countries: PrintfulCountry[]
+  countries: ShippingCountry[]
 ): string => {
   if (incompatibleItems.length === 0) return '';
 

@@ -1,14 +1,18 @@
-export interface PrintfulState {
+export interface ShippingState {
   code: string;
   name: string;
 }
 
-export interface PrintfulCountry {
+export interface ShippingCountry {
   code: string;
   name: string;
-  states: PrintfulState[];
+  states: ShippingState[];
   region: string;
 }
+
+// Backwards-compatible aliases
+export type PrintfulState = ShippingState;
+export type PrintfulCountry = ShippingCountry;
 
 export interface CheckoutData {
   email: string;

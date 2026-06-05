@@ -76,12 +76,21 @@ function FilesPageContent() {
   const fetchFiles = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await printfulAPI.getFiles();
-      const processedFiles = (response.result || []).map((file: any) => ({
-        ...file,
-        size: file.file_size,
+      const saved = localStorage.getItem("uploaded_printify_images");
+      const filesFromLS = saved ? JSON.parse(saved) : [];
+      const processedFiles = filesFromLS.map((file: any) => ({
+        id: file.id,
+        filename: file.filename,
+        url: file.file_url,
+        thumbnail_url: file.thumbnail_url,
+        type: 'image',
+        file_size: 0,
+        size: 0,
         status: 'ok',
-        mime_type: getMimeType(file.filename)
+        created: Math.floor(Date.now() / 1000),
+        mime_type: getMimeType(file.filename),
+        width: file.width,
+        height: file.height
       }));
       setFiles(processedFiles);
     } catch (error) {
@@ -170,9 +179,23 @@ function FilesPageContent() {
         try {
           // Use uploadFileDirectly which handles multipart/form-data upload
           const response = await printfulAPI.uploadFileDirectly(file);
-          if (response.result) {
+          const imgData = response.result || response.data || response;
+          if (imgData && imgData.id) {
             toast.success(`Uploaded ${file.name}`);
-            return response.result;
+            return {
+              id: imgData.id,
+              filename: imgData.file_name || file.name,
+              url: imgData.preview_url,
+              thumbnail_url: imgData.preview_url,
+              type: 'image',
+              file_size: file.size,
+              size: file.size,
+              status: 'ok',
+              created: Math.floor(Date.now() / 1000),
+              mime_type: file.type,
+              width: imgData.width,
+              height: imgData.height
+            };
           } else {
             toast.error(`Failed to upload ${file.name}`);
             return null;
@@ -184,12 +207,31 @@ function FilesPageContent() {
         }
       });
 
-      const uploadedFiles = await Promise.all(uploadPromises);
-      const successfulUploads = uploadedFiles.filter(Boolean);
+      const uploadedFilesResult = await Promise.all(uploadPromises);
+      const successfulUploads = uploadedFilesResult.filter(Boolean) as UploadedFile[];
 
       if (successfulUploads.length > 0) {
         setFiles(prev => [...successfulUploads, ...prev]);
         setHasNewUpload(true);
+
+        // Save new uploads to localStorage
+        const saved = localStorage.getItem("uploaded_printify_images");
+        const existing = saved ? JSON.parse(saved) : [];
+        const merged = [...existing];
+        successfulUploads.forEach((newFile) => {
+          const lsFile = {
+            id: newFile.id,
+            filename: newFile.filename,
+            file_url: newFile.url,
+            thumbnail_url: newFile.thumbnail_url,
+            width: newFile.width,
+            height: newFile.height,
+          };
+          if (!merged.some((f: any) => f.id === lsFile.id)) {
+            merged.unshift(lsFile);
+          }
+        });
+        localStorage.setItem("uploaded_printify_images", JSON.stringify(merged));
       }
 
     } catch (error) {
@@ -202,13 +244,24 @@ function FilesPageContent() {
     }
   };
 
-  const handleDeleteFile = async (fileId: number) => {
+  const handleDeleteFile = async (fileId: number | string) => {
     if (!confirm('Are you sure you want to delete this file?')) return;
 
     try {
       // Call the delete API endpoint
-      await printfulAPI.deleteFile(fileId);
+      await printfulAPI.deleteFile(fileId.toString());
+      
+      // Update state
       setFiles(prev => prev.filter(f => f.id !== fileId));
+      
+      // Update localStorage
+      const saved = localStorage.getItem("uploaded_printify_images");
+      if (saved) {
+        const existing = JSON.parse(saved);
+        const filtered = existing.filter((f: any) => f.id !== fileId);
+        localStorage.setItem("uploaded_printify_images", JSON.stringify(filtered));
+      }
+      
       toast.success('File deleted successfully');
     } catch (error) {
       console.error('Failed to delete file:', error);

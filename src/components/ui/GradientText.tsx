@@ -5,6 +5,7 @@ interface GradientTextProps {
   className?: string;
   gradient?: string;
   style?: CSSProperties;
+  fontfamily?: string;
 }
 
 /**

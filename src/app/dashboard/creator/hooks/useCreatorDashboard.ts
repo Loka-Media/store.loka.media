@@ -128,24 +128,18 @@ export function useCreatorDashboard() {
 
   const handleConnectPrintful = async () => {
     try {
-      const response = await printfulAPI.initializeAuth();
+      const response = await printfulAPI.getConnectionStatus();
 
       if (response.connected) {
         setConnection({ connected: true, adminAccount: true });
-        toast.success("Connected to Printful admin account");
-      } else if (response.needsAuth && response.authUrl) {
-        // Need OAuth authorization - redirect to Printful
-        toast("🔑 Admin authorization required. Redirecting to Printful...");
-        setTimeout(() => {
-          window.location.href = response.authUrl;
-        }, 1500);
+        toast.success("Connected to Printify account successfully!");
       } else {
-        setConnection({ connected: false, adminAccount: true });
-        toast.error("Failed to connect to Printful");
+        setConnection({ connected: false, adminAccount: false });
+        toast.error("Failed to connect to Printify. Check API key configuration.");
       }
     } catch (error) {
       console.error("Failed to test connection:", error);
-      toast.error("Failed to connect to Printful");
+      toast.error("Failed to connect to Printify");
     }
   };
 

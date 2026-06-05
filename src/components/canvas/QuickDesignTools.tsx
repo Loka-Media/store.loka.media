@@ -21,6 +21,7 @@ interface QuickDesignToolsProps {
   onDeleteFile?: (fileId: number | string) => Promise<void>;
   uploadedFiles: UploadedFile[];
   selectedFileId?: number | string;
+  blueprintId?: number | string;
   productId?: number | string;
 }
 
@@ -29,6 +30,7 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   onDeleteFile,
   uploadedFiles,
   selectedFileId,
+  blueprintId,
   productId,
 }) => {
   const router = useRouter();
@@ -38,8 +40,9 @@ const QuickDesignTools: React.FC<QuickDesignToolsProps> = ({
   const [fileToDelete, setFileToDelete] = useState<{ id: number | string; filename: string } | null>(null);
 
   const handleUploadClick = () => {
-    const returnUrl = productId
-      ? `/dashboard/creator/canvas?productId=${productId}`
+    const activeId = blueprintId || productId;
+    const returnUrl = activeId
+      ? `/dashboard/creator/canvas?blueprintId=${activeId}`
       : '/dashboard/creator/canvas';
     router.push(`/dashboard/creator/files?returnTo=${encodeURIComponent(returnUrl)}`);
   };

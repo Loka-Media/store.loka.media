@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "./auth";
 
-const printfulProxyRequest = async (
+const printifyProxyRequest = async (
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
   body?: any
@@ -24,7 +24,7 @@ const printfulProxyRequest = async (
 
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(`Printful proxy request failed: ${response.status} ${response.statusText} - ${errorBody}`);
+      throw new Error(`Printify proxy request failed: ${response.status} ${response.statusText} - ${errorBody}`);
     }
 
     return response.json();
@@ -65,7 +65,7 @@ export interface Product {
     min: string | number;
     max: string | number;
   };
-  source?: "printful" | "shopify";
+  source?: "printify" | "shopify";
   created_at?: string;
   updated_at?: string;
 }
@@ -73,7 +73,7 @@ export interface Product {
 export interface ProductVariant {
   id: number;
   product_id: number;
-  printful_variant_id?: number;
+  printify_variant_id?: number;
   shopify_variant_id?: string;
   title: string;
   size?: string;
@@ -90,7 +90,7 @@ export interface ProductVariant {
   weight?: number;
   weight_unit?: string;
   availability_regions?: string[];
-  printful_availability_regions?: string[];
+  printify_availability_regions?: string[];
   availability_status?: Array<{
     region: string;
     status: string;
@@ -247,9 +247,9 @@ export const productAPI = {
     tags?: string[];
     thumbnailUrl?: string;
     images?: string[];
-    printfulSyncProductId: number;
+    printifyProductId: string;
     variants: Array<{
-      printfulVariantId: number;
+      printifyVariantId: number;
       size: string;
       color: string;
       colorCode: string;
@@ -508,21 +508,24 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
-// Printful API
-export const printfulAPI = {
-  // Initialize OAuth flow
-  initializeAuth: async () => {
-    const response = await api.get("/api/printful/auth/init");
-    return response.data;
-  },
-
-  // Get connection status
+// Printify API
+export const printifyAPI = {
+  // Get Printify shop connection status
   getConnectionStatus: async () => {
-    const response = await api.get("/api/printful/connection/status");
-    return response.data;
+    try {
+      await printifyProxyRequest("GET", "/api/printify/products?limit=1");
+      return { connected: true, adminAccount: true, provider: 'printify' };
+    } catch (error) {
+      console.error('Printify connection check failed:', error);
+      return { connected: false, adminAccount: false, provider: 'printify' };
+    }
   },
 
-  // Get Printful catalog
+  getCategories: async () => {
+    return printifyProxyRequest("GET", "/api/printify/catalog/categories");
+  },
+
+  // Get Printify blueprints catalog
   getCatalog: async (params?: {
     category?: string;
     search?: string;
@@ -530,265 +533,134 @@ export const printfulAPI = {
     offset?: number;
     sortBy?: string;
     sortOrder?: string;
-    strict_inventory_check?: string;
-    target_regions?: string;
-    include_unavailable?: boolean;
-    customer_country?: string;
   }) => {
-    const response = await api.get("/api/printful/catalog", { params });
-    return response.data;
-  },
-
-  // Get Printful categories
-  getCategories: async () => {
-    const response = await api.get("/api/printful/categories");
-    return response.data;
-  },
-
-  // Get product details with variants
-  getProductDetails: async (productId: number) => {
-    const response = await api.get(`/api/printful/catalog/${productId}`);
-    return response.data;
-  },
-
-  // Check product availability before creation
-  checkProductAvailability: async (productId: number, targetRegions: string[] = ['US', 'EU']) => {
-    const params = new URLSearchParams();
-    params.append('target_regions', targetRegions.join(','));
-    
-    const response = await api.get(`/api/printful/catalog/${productId}/availability?${params}`);
-    return response.data;
-  },
-
-  // Check individual variant availability dynamically
-  checkVariantAvailability: async (variants: Array<{ variant_id: number; quantity?: number }>) => {
-    const response = await api.post('/api/printful/variants/check-availability', {
-      variants
-    });
-    return response.data;
-  },
-
-  // Upload file to Printful
-  uploadFile: async (fileData: {
-    filename: string;
-    url: string;
-    type?: string;
-  }) => {
-    try {
-      console.log("API uploadFile called with:", fileData);
-
-      const response = await api.post("/api/printful/files", fileData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+    const query = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined) query.append(key, String(val));
       });
-
-      console.log("API response:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("API uploadFile error:", error);
-
-      // Fallback: try with fetch instead of axios
-      try {
-        console.log("Trying fallback with fetch...");
-        const token = localStorage.getItem("accessToken");
-        const apiUrl = getApiUrl();
-
-        const fetchResponse = await fetch(
-          `${apiUrl}/api/printful/files`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(fileData),
-          }
-        );
-
-        const result = await fetchResponse.json();
-        console.log("Fetch response:", result);
-
-        if (!fetchResponse.ok) {
-          throw new Error(result.error || "Upload failed");
-        }
-
-        return result;
-      } catch (fetchError) {
-        console.error("Fetch fallback also failed:", fetchError);
-        throw error; // throw original error
-      }
     }
+    const queryString = query.toString();
+    const path = `/api/printify/catalog${queryString ? `?${queryString}` : ''}`;
+    return printifyProxyRequest("GET", path);
+  },
+
+  // Get blueprint details (product template)
+  getBlueprintDetails: async (blueprintId: number) => {
+    return printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}`);
+  },
+
+  // Get print provider variants for blueprint
+  getBlueprintVariantsForProvider: async (blueprintId: number, providerId: number) => {
+    return printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers/${providerId}/variants`);
+  },
+
+  // Get Printify shop product (published product) details
+  getProductDetails: async (productId: string) => {
+    return printifyProxyRequest("GET", `/api/printify/products/${productId}`);
+  },
+
+  // Get print providers for a blueprint
+  checkProductAvailability: async (blueprintId: number) => {
+    const data = await printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers`);
+    return {
+      result: {
+        can_create_product: true,
+        message: 'Product available via Printify',
+        warnings: [],
+        available_variant_ids: [],
+        providers: data?.data || []
+      }
+    };
+  },
+
+  // Check individual variant availability
+  checkVariantAvailability: async (variants: Array<{ variant_id: number; quantity?: number }>) => {
+    return printifyProxyRequest("POST", '/api/printify/variants/check-availability', { variants });
+  },
+
+  // Upload file to Printify
+  uploadFile: async (fileData: {
+    file_name: string;
+    url?: string;
+    contents?: string;  // base64
+  }) => {
+    return printifyProxyRequest("POST", '/api/printify/uploads/images', fileData);
   },
 
   getFiles: async () => {
-    const response = await api.get("/api/printful/files");
-    const data = response.data;
-    if (data && Array.isArray(data.result)) {
-      data.result = data.result.map((file: any) => {
-        if (file) {
-          if (file.file_url) file.file_url = file.file_url.replace(/%25/g, '%');
-          if (file.thumbnail_url) file.thumbnail_url = file.thumbnail_url.replace(/%25/g, '%');
-        }
-        return file;
+    return { result: [], data: [] };
+  },
+
+  // Mock getPrintFiles for backward compatibility with components
+  getPrintFiles: async (productId: number, technique?: string) => {
+    return {
+      result: {
+        product_id: productId,
+        available_placements: {
+          front: "Front",
+          back: "Back",
+          left: "Left Sleeve",
+          right: "Right Sleeve"
+        },
+        available_techniques: ["DTG"],
+        printfiles: [],
+        variant_printfiles: [],
+        options: [],
+        option_groups: []
+      }
+    };
+  },
+
+  // Create Printify product in shop
+  createShopProduct: async (productData: any) => {
+    return printifyProxyRequest("POST", '/api/printify/products', productData);
+  },
+
+  // Get all shop products
+  getShopProducts: async (params?: { page?: number; limit?: number }) => {
+    const query = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined) query.append(key, String(val));
       });
     }
-    return data;
+    const queryString = query.toString();
+    const path = `/api/printify/products${queryString ? `?${queryString}` : ''}`;
+    return printifyProxyRequest("GET", path);
   },
 
-
-  // Create sync product
-  createSyncProduct: async (productData: {
-    sync_product: {
-      name: string;
-      thumbnail: string;
-      external_id?: string;
-    };
-    sync_variants: Array<{
-      variant_id: number;
-      retail_price: string;
-      external_id?: string;
-      files: Array<{
-        url: string;
-        type: string;
-      }>;
-    }>;
-  }) => {
-    const response = await api.post("/api/printful/products", productData);
-    return response.data;
-  },
-
-  // Get sync products
-  getSyncProducts: async () => {
-    const response = await api.get("/api/printful/products/sync");
-    return response.data;
-  },
-
-  // Get single sync product
-  getSyncProduct: async (productId: number) => {
-    const response = await api.get(`/api/printful/products/sync/${productId}`);
-    return response.data;
-  },
-
-  // Sync products to database
+  // Sync all products from Printify to database
   syncProductsToDatabase: async () => {
-    const response = await api.post("/api/printful/products/sync-to-db");
-    return response.data;
+    return printifyProxyRequest("POST", '/api/printify/sync/all');
   },
 
-  // Access design canvas
-  getCanvas: async (productId?: number) => {
-    const response = await api.get("/api/printful/canvas", {
-      params: productId ? { productId } : {},
-    });
-    return response.data;
+  // Get mockups for a Printify shop product
+  getMockups: async (printifyProductId: string) => {
+    return printifyProxyRequest("GET", `/api/printify/mockups/${printifyProductId}`);
   },
 
-  // Create mockup generation task
-  createMockupTask: async (
-    productId: number,
-    mockupData: {
-      variant_ids: number[];
-      format: string;
-      width?: number;
-      product_options?: {
-        lifelike?: boolean;
-        [key: string]: unknown;
-      };
-      option_groups?: string[];
-      options?: string[];
-      files?: Array<{
-        placement: string;
-        image_url: string;
-        position?: {
-          area_width: number;
-          area_height: number;
-          width: number;
-          height: number;
-          top: number;
-          left: number;
-        };
-      }>;
-      product_template_id?: number;
-    }
-  ) => {
-    console.log("Creating mockup task with data:", mockupData);
-    return await printfulProxyRequest(
-      "POST",
-      `/api/printful/mockup-generator/create-task/${productId}`,
-      mockupData
-    );
-  },
-
-  // Get mockup task status
-  getMockupTaskStatus: async (taskKey: string) => {
-    return await printfulProxyRequest(
-      "GET",
-      `/api/printful/mockup-tasks/${taskKey}`
-    );
-  },
-
-  getPrintFiles: async (
-    productId: number,
-    technique?: string,
-    orientation?: string
-  ) => {
-    const params = new URLSearchParams();
-    if (technique) params.append("technique", technique);
-    if (orientation) params.append("orientation", orientation);
-
-    const url = `/api/printful/mockup-generator/printfiles/${productId}${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
-    return await printfulProxyRequest("GET", url);
-  },
-
-  // Get layout templates for a product
-  getLayoutTemplates: async (
-    productId: number,
-    technique?: string,
-    orientation?: string
-  ) => {
-    const params = new URLSearchParams();
-    if (technique) params.append("technique", technique);
-    if (orientation) params.append("orientation", orientation);
-
-    const url = `/api/printful/mockup-generator/templates/${productId}${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
-    return await printfulProxyRequest("GET", url);
-  },
-
-  // Upload file directly (multipart/form-data)
+  // Upload file directly (multipart/form-data) to Printify
   uploadFileDirectly: async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await api.post("/api/printful/files", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const reader = new FileReader();
+    const base64 = await new Promise<string>((resolve, reject) => {
+      reader.onload = () => resolve((reader.result as string).split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
     });
-    const data = response.data;
-    if (data && data.result) {
-      if (data.result.file_url) data.result.file_url = data.result.file_url.replace(/%25/g, '%');
-      if (data.result.thumbnail_url) data.result.thumbnail_url = data.result.thumbnail_url.replace(/%25/g, '%');
-    }
-    return data;
+
+    return printifyProxyRequest("POST", '/api/printify/uploads/images', {
+      file_name: file.name,
+      contents: base64,
+    });
   },
 
-  // Delete uploaded file
-  deleteFile: async function(fileId: number | string) {
-    try {
-      const response = await api.delete(`/api/printful/files/${fileId}`);
-      return response.data;
-    } catch (error) {
-      console.error("Failed to delete file:", error);
-      throw error;
-    }
+  // Archive (delete) uploaded image
+  deleteFile: async function(imageId: string) {
+    return printifyProxyRequest("POST", `/api/printify/uploads/${imageId}/archive`);
   },
 
-  // Store mockups permanently to DigitalOcean
+  // Store mockups permanently — forwards to backend for DB storage
   storeMockupsPermanently: async (
     mockupUrls: any[],
     productData: any,
@@ -796,33 +668,64 @@ export const printfulAPI = {
     mockupInputs?: any,
     availabilityData?: any[]
   ) => {
-    const response = await api.post("/api/printful/mockups/store-permanently", {
+    return printifyProxyRequest("POST", '/api/printify/sync/product', {
       mockupUrls,
       productData,
       designFiles,
       mockupInputs,
       availabilityData,
     });
-    return response.data;
   },
 
-  // DEPRECATED: Use checkProductAvailability instead for accurate warehouse data
-  checkInventory: async (
-    variantIds: number[], 
-    targetRegions: string[] = ['US', 'EU'], 
-    customerCountry?: string
+  // Generate preview mockups on Printify by creating/updating a temporary draft product
+  generatePreviewMockups: async (
+    productData: any,
+    designFiles: any[]
   ) => {
-    console.warn('checkInventory is deprecated. Use checkProductAvailability for accurate warehouse data.');
-    const response = await api.post('/api/printful/inventory/check', { 
-      variant_ids: variantIds,
-      target_regions: targetRegions,
-      customer_country: customerCountry
+    return printifyProxyRequest("POST", '/api/printify/sync/product', {
+      productData,
+      designFiles,
+      isPreview: true,
     });
-    return response.data;
   },
 
-  // Warehouse API functions removed - using existing regional inventory system
+  // Get shipping rates
+  getShippingRates: async (request: any) => {
+    return printifyProxyRequest("POST", '/api/printify/shipping/rates', request);
+  },
+
+  // Get all shops
+  getShops: async () => {
+    return printifyProxyRequest("GET", '/api/printify/shops');
+  },
+
+  // Get current shop
+  getShop: async () => {
+    return printifyProxyRequest("GET", '/api/printify/shops/current');
+  },
+
+  // Get all uploaded images
+  getImages: async (params?: { limit?: number; page?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.page) query.set('page', String(params.page));
+    const qs = query.toString() ? `?${query.toString()}` : '';
+    return printifyProxyRequest("GET", `/api/printify/uploads${qs ? `?${qs}` : ''}`);
+  },
+
+  // Get global print providers list
+  getPrintProvidersList: async () => {
+    return printifyProxyRequest("GET", '/api/printify/catalog/print_providers');
+  },
+
+  // Get shipping profiles for blueprint + provider
+  getShippingProfiles: async (blueprintId: number, providerId: number) => {
+    return printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers/${providerId}/shipping`);
+  },
 };
+
+// Backwards-compatible alias — any code still importing printfulAPI will work
+export const printfulAPI = printifyAPI;
 
 // Shopify API (NEW - Complete Integration)
 export const shopifyAPI = {

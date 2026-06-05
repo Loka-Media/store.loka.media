@@ -8,7 +8,7 @@ import { AlertCircle, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { printfulAPI } from "@/lib/api";
+import { printifyAPI } from "@/lib/api";
 import { mockupAPI } from "@/lib/MockupAPI";
 import { retryWithExponentialBackoff } from "@/lib/retryWithBackoff";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
@@ -31,11 +31,45 @@ export default function CanvasPage() {
   );
 }
 
+const COLOR_MAP: Record<string, string> = {
+  black: '#000000',
+  white: '#ffffff',
+  red: '#ff0000',
+  blue: '#0000ff',
+  green: '#008000',
+  yellow: '#ffff00',
+  navy: '#000080',
+  grey: '#808080',
+  gray: '#808080',
+  orange: '#ffa500',
+  pink: '#ffc0cb',
+  purple: '#800080',
+  brown: '#a52a2a',
+  gold: '#ffd700',
+  silver: '#c0c0c0',
+  charcoal: '#36454f',
+  heather: '#9aa0a6',
+  royal: '#4169e1',
+  forest: '#228b22',
+  maroon: '#800000',
+  sand: '#c2b280',
+  olive: '#808000',
+  cream: '#fffdd0',
+};
+
+function getColorCode(colorName: string): string {
+  const name = colorName.toLowerCase();
+  for (const [key, hex] of Object.entries(COLOR_MAP)) {
+    if (name.includes(key)) return hex;
+  }
+  return '#cccccc';
+}
+
 function CanvasContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const productId = searchParams.get("productId");
+  const blueprintId = searchParams.get("blueprintId") || searchParams.get("productId");
 
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +98,7 @@ function CanvasContent() {
   });
 
   const hasInitializedRef = useRef(false);
-  const previewGenerationRef = useRef<(designFiles?: any[]) => Promise<void>>();
+  const previewGenerationRef = useRef<((designFiles?: any[]) => Promise<void>) | null>(null);
 
   const initializeCanvas = useCallback(async () => {
     if (isInitialized || hasInitializedRef.current) return;
@@ -72,48 +106,24 @@ function CanvasContent() {
     try {
       setLoading(true);
 
-      // Check if productId is provided in URL
-      if (productId) {
+      // Check if blueprintId is provided in URL
+      if (blueprintId) {
         try {
-          // First, check product availability
-          console.log(`🔍 Checking availability for product ${productId}...`);
-          const availabilityCheck = await printfulAPI.checkProductAvailability(parseInt(productId));
-          
-          if (!availabilityCheck.result.can_create_product) {
-            toast.error(`${availabilityCheck.result.message}. Please select a different product.`, {
-              duration: 6000
-            });
-            router.push('/dashboard/creator/canvas');
-            return;
-          }
-
-          if (availabilityCheck.result.warnings && availabilityCheck.result.warnings.length > 0) {
-            console.warn('Product availability warnings:', availabilityCheck.result.warnings);
-          }
-          
-          // If available, proceed to get product details
-          const detailed = await printfulAPI.getProductDetails(
-            parseInt(productId)
+          // Fetch blueprint details (includes providers and variants)
+          console.log(`🔍 Fetching blueprint details for ${blueprintId}...`);
+          const detailed = await printifyAPI.getBlueprintDetails(
+            parseInt(blueprintId)
           );
-          const product = detailed.result?.product || detailed.result;
-          const variants =
-            detailed.result?.variants || detailed.result?.product?.variants;
+          const product = detailed?.data || detailed;
+          const variants = detailed?.data?.variants || [];
 
           if (product) {
-            // Filter variants based on catalog data (no API call needed)
-            console.log(`🔍 Filtering ${variants?.length || 0} variants from catalog...`);
+            console.log(`🔍 Processing ${variants?.length || 0} blueprint variants...`);
 
+            // For Printify blueprints, all variants are available
             const availableVariants = variants?.filter((variant: any) => {
-              const isInAvailabilityResults = availabilityCheck.result.available_variant_ids.includes(variant.id);
-              const variantCanCreate = variant.can_create_product !== false;
-              const isAvailable = isInAvailabilityResults && variantCanCreate;
-
-              if (!isAvailable) {
-                console.log(`⚠️ Filtering out variant ${variant.id} (${variant.name}): not available`);
-              }
-
-              return isAvailable;
-            }) || variants;
+              return variant.is_available !== false;
+            }) || variants || [];
 
             const originalCount = variants?.length || 0;
             const filteredCount = availableVariants?.length || 0;
@@ -125,27 +135,73 @@ function CanvasContent() {
 
             const productWithVariants = { ...product, variants: availableVariants };
             setSelectedProduct(productWithVariants);
+
+            // Compute printFiles from Printify variant placeholders
+            if (availableVariants.length > 0) {
+              const variant_printfiles = availableVariants.map((v: any) => {
+                const placements: Record<string, number> = {};
+                v.placeholders?.forEach((p: any) => {
+                  const pos = p.position === 'left_sleeve' ? 'left' : p.position === 'right_sleeve' ? 'right' : p.position;
+                  if (pos === 'left') {
+                    placements['left'] = v.id * 10 + 3;
+                    placements['sleeve_left'] = v.id * 10 + 3;
+                  } else if (pos === 'right') {
+                    placements['right'] = v.id * 10 + 4;
+                    placements['sleeve_right'] = v.id * 10 + 4;
+                  } else {
+                    placements[pos] = v.id * 10 + (pos === 'front' ? 1 : pos === 'back' ? 2 : 5);
+                  }
+                });
+                return {
+                  variant_id: v.id,
+                  placements
+                };
+              });
+
+              const printfiles: any[] = [];
+              availableVariants.forEach((v: any) => {
+                v.placeholders?.forEach((p: any) => {
+                  const pos = p.position === 'left_sleeve' ? 'left' : p.position === 'right_sleeve' ? 'right' : p.position;
+                  const printfile_id = v.id * 10 + (pos === 'front' ? 1 : pos === 'back' ? 2 : pos === 'left' ? 3 : pos === 'right' ? 4 : 5);
+                  if (!printfiles.some(pf => pf.printfile_id === printfile_id)) {
+                    printfiles.push({
+                      printfile_id,
+                      width: p.width,
+                      height: p.height
+                    });
+                  }
+                });
+              });
+
+              const computedPrintFiles = {
+                variant_printfiles,
+                printfiles,
+                available_techniques: ['DTG']
+              };
+              setPrintFiles(computedPrintFiles);
+              console.log('computedPrintFiles from Printify placeholders:', computedPrintFiles);
+            }
             localStorage.setItem(
-              "selectedPrintfulProduct",
+              'selectedPrintifyProduct',
               JSON.stringify(productWithVariants)
             );
 
             // Check if there's saved product form data for this product
-            const savedFormKey = `productForm_${productId}`;
+            const savedFormKey = `productForm_${blueprintId}`;
             const savedForm = localStorage.getItem(savedFormKey);
 
             if (savedForm) {
               // Use saved form data if it exists
               const parsedForm = JSON.parse(savedForm);
               setProductForm(parsedForm);
-              console.log(`📝 Loaded saved product form for product ${productId}`);
+              console.log(`📝 Loaded saved product form for product ${blueprintId}`);
             } else {
               // Initialize with default Printful product data
               setProductForm({
                 name: `Custom ${product.title || product.model}`,
-                description: product.description || "",
-                markupPercentage: "30",
-                category: product.type_name || product.type,
+                description: product.description || '',
+                markupPercentage: '30',
+                category: product.type_name || product.type || '',
                 tags: []
               });
             }
@@ -157,34 +213,31 @@ function CanvasContent() {
         } catch (error: any) {
           console.error("Failed to load product from URL:", error);
           
-          // Handle 404 errors for deprecated products
+          // Handle 404 errors for unavailable blueprints
           if (error?.response?.status === 404) {
             const errorData = error?.response?.data;
-            const message = errorData?.message || "This product is no longer available in Printful catalog. Please select a different product.";
+            const message = errorData?.message || 'This product blueprint is no longer available in Printify catalog. Please select a different product.';
             
             toast.error(message, { duration: 5000 });
-            router.push("/dashboard/creator/catalog");
+            router.push('/dashboard/creator/catalog');
             return;
           } else {
-            toast.error("Failed to load product details. Please try again.");
+            toast.error('Failed to load product details. Please try again.');
           }
         }
       }
 
       // Fallback to localStorage
-      const savedProduct = localStorage.getItem("selectedPrintfulProduct");
+      const savedProduct = localStorage.getItem('selectedPrintifyProduct') ||
+        localStorage.getItem('selectedPrintfulProduct'); // legacy key
       if (savedProduct) {
         const product = JSON.parse(savedProduct);
         if (!product.variants?.length) {
-          const detailed = await printfulAPI.getProductDetails(product.id);
-          const variants =
-            detailed.result?.variants || detailed.result?.product?.variants;
+          const detailed = await printifyAPI.getBlueprintDetails(product.id);
+          const variants = detailed?.data?.variants || [];
           if (variants?.length) {
             const updatedProduct = { ...product, variants };
-            localStorage.setItem(
-              "selectedPrintfulProduct",
-              JSON.stringify(updatedProduct)
-            );
+            localStorage.setItem('selectedPrintifyProduct', JSON.stringify(updatedProduct));
             setSelectedProduct(updatedProduct);
           } else {
             setSelectedProduct(product);
@@ -208,32 +261,19 @@ function CanvasContent() {
       setLoading(false);
       setIsInitialized(true);
     }
-  }, [productId, isInitialized, router]);
+  }, [blueprintId, isInitialized, router]);
 
   const fetchUploadedFiles = useCallback(async () => {
-    // Check if user is authenticated first
-    if (!user || (user.role !== "creator" && user.role !== "admin")) {
-      console.log("User not authenticated, skipping file fetch");
-      setUploadedFiles([]);
-      return;
-    }
-
     try {
-      const response = await printfulAPI.getFiles();
-      console.log("Fetched files response:", response);
-      // Use the correct response format from our updated API
-      setUploadedFiles(response.result || []);
-    } catch (err: any) {
-      if (err?.response?.status === 401) {
-        console.log("Authentication required for file access");
-        // Don't show error for auth issues, just set empty array
-      } else {
-        console.error("Fetching files failed:", err);
-      }
-      // Set empty array on error
+      const saved = localStorage.getItem("uploaded_printify_images");
+      const files = saved ? JSON.parse(saved) : [];
+      setUploadedFiles(files);
+      console.log(`📂 Loaded ${files.length} design files from localStorage`);
+    } catch (error) {
+      console.error("Failed to load uploaded files:", error);
       setUploadedFiles([]);
     }
-  }, [user]);
+  }, []);
 
 
   const handleNextStep = () => {
@@ -277,11 +317,11 @@ function CanvasContent() {
 
   // Autosave productForm to localStorage when it changes
   useEffect(() => {
-    if (productId && isInitialized) {
-      const savedFormKey = `productForm_${productId}`;
+    if (blueprintId && isInitialized) {
+      const savedFormKey = `productForm_${blueprintId}`;
       localStorage.setItem(savedFormKey, JSON.stringify(productForm));
     }
-  }, [productForm, productId, isInitialized]);
+  }, [productForm, blueprintId, isInitialized]);
 
   if (!selectedProduct && !loading) {
     return (
@@ -309,6 +349,102 @@ function CanvasContent() {
     );
   }
 
+  const handleProviderChange = async (providerId: number) => {
+    if (!selectedProduct) return;
+    try {
+      setLoading(true);
+      const toastId = toast.loading("Switching print provider and loading variants...");
+      
+      const response = await printifyAPI.getBlueprintVariantsForProvider(selectedProduct.id, providerId);
+      const variantsData = response?.data || response;
+      
+      const rawVariants = variantsData?.variants || [];
+      const updatedVariants = rawVariants.map((v: any) => ({
+        id: v.id,
+        title: v.title,
+        color: v.options?.color || 'Default',
+        color_code: getColorCode(v.options?.color || ''),
+        size: v.options?.size || 'OS',
+        image: selectedProduct.images?.[0] || '/placeholder-product.png',
+        price: '15.00',
+        is_available: true,
+        placeholders: v.placeholders
+      }));
+
+      // Compute printFiles from variant placeholders for the new provider
+      let computedPrintFiles = null;
+      if (updatedVariants.length > 0) {
+        const variant_printfiles = updatedVariants.map((v: any) => {
+          const placements: Record<string, number> = {};
+          v.placeholders?.forEach((p: any) => {
+            const pos = p.position === 'left_sleeve' ? 'left' : p.position === 'right_sleeve' ? 'right' : p.position;
+            if (pos === 'left') {
+              placements['left'] = v.id * 10 + 3;
+              placements['sleeve_left'] = v.id * 10 + 3;
+            } else if (pos === 'right') {
+              placements['right'] = v.id * 10 + 4;
+              placements['sleeve_right'] = v.id * 10 + 4;
+            } else {
+              placements[pos] = v.id * 10 + (pos === 'front' ? 1 : pos === 'back' ? 2 : 5);
+            }
+          });
+          return {
+            variant_id: v.id,
+            placements
+          };
+        });
+
+        const printfiles: any[] = [];
+        updatedVariants.forEach((v: any) => {
+          v.placeholders?.forEach((p: any) => {
+            const pos = p.position === 'left_sleeve' ? 'left' : p.position === 'right_sleeve' ? 'right' : p.position;
+            const printfile_id = v.id * 10 + (pos === 'front' ? 1 : pos === 'back' ? 2 : pos === 'left' ? 3 : pos === 'right' ? 4 : 5);
+            if (!printfiles.some(pf => pf.printfile_id === printfile_id)) {
+              printfiles.push({
+                printfile_id,
+                width: p.width,
+                height: p.height
+              });
+            }
+          });
+        });
+
+        computedPrintFiles = {
+          variant_printfiles,
+          printfiles,
+          available_techniques: ['DTG']
+        };
+      }
+
+      setSelectedProduct((prev: any) => {
+        if (!prev) return prev;
+        const updated = {
+          ...prev,
+          variants: updatedVariants,
+          print_provider_id: providerId,
+          printProviderId: providerId
+        };
+        localStorage.setItem('selectedPrintifyProduct', JSON.stringify(updated));
+        return updated;
+      });
+
+      if (computedPrintFiles) {
+        setPrintFiles(computedPrintFiles);
+      }
+      
+      // Clear selected variants and selections to avoid mismatch
+      setSelectedVariants([]);
+      
+      toast.dismiss(toastId);
+      toast.success("Print provider updated successfully!");
+    } catch (err) {
+      console.error("Failed to change provider:", err);
+      toast.error("Failed to load variants for selected provider.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePrintFilesLoaded = (printFilesData: any) => {
     setPrintFiles(printFilesData);
     console.log("Print files loaded:", printFilesData);
@@ -316,7 +452,7 @@ function CanvasContent() {
 
   const generatePreview = useCallback(async (
     updatedDesignFiles?: typeof designFiles,
-    advancedOptions?: {
+    _advancedOptions?: {
       technique?: string;
       optionGroups?: string[];
       options?: string[];
@@ -324,315 +460,94 @@ function CanvasContent() {
       width?: number;
     }
   ) => {
-    const designFilesToUse = updatedDesignFiles || designFiles;
-
     if (!selectedProduct || !selectedVariants.length) {
-      toast.error("Missing product or variants for mockup.");
+      toast.error('Missing product or variants for mockup.');
+      return;
+    }
+
+    const filesToUse = updatedDesignFiles || designFiles;
+    if (!filesToUse || filesToUse.length === 0) {
+      toast.error('Please add at least one design to the product before generating preview.');
       return;
     }
 
     try {
       setIsGeneratingMockup(true);
-      setMockupStatus("Preparing mockup generation...");
+      setMockupStatus('Generating Printify mockups...');
       setMockupUrls([]); // Clear previous mockups
 
       const variantIds = selectedVariants.map((v: any) =>
-        typeof v === "number" ? v : v.id
+        typeof v === 'number' ? v : v.id
       );
 
-      if (variantIds.length === 0 || variantIds.some((id) => !id)) {
-        toast.error("No valid variant IDs selected for the mockup.");
-        setIsGeneratingMockup(false);
-        setMockupStatus("");
-        return;
-      }
-
-      // Debug logging to identify the mismatch
-      console.log("=== MOCKUP DEBUG INFO ===");
-      console.log("Selected Product ID:", selectedProduct.id);
-      console.log("Selected Product:", selectedProduct);
-      console.log("Selected Variant IDs:", variantIds);
-      console.log("Available Product Variants:", selectedProduct.variants);
-      console.log("Design Files:", designFilesToUse);
-      console.log("advancedOptions", advancedOptions);
-
-      // Validate that variant IDs actually belong to this product
-      const validVariantIds = variantIds.filter((variantId: number) =>
-        selectedProduct.variants?.some((v: any) => v.id === variantId)
-      );
-
-      console.log("Valid Variant IDs (filtered):", validVariantIds);
-
-      if (validVariantIds.length === 0) {
-        toast.error(
-          "No valid variants found for this product. Please reselect variants."
-        );
-        setIsGeneratingMockup(false);
-        setMockupStatus("");
-        return;
-      }
-
-      // COMPOSITE IMAGE CREATION for multiple designs per placement
-      setMockupStatus("Processing multiple designs per placement...");
-      console.log("🎨 Processing designs for mockup generation...");
-      console.log("🔧 printFiles state:", printFiles);
-      
-      let finalDesignFiles = [...designFilesToUse];
-      
-      // Check if we have multiple designs per placement that need compositing
-      const designsByPlacement = designFilesToUse.reduce<Record<string, typeof designFiles>>((acc, design) => {
-        if (!acc[design.placement]) acc[design.placement] = [];
-        acc[design.placement].push(design);
-        return acc;
-      }, {});
-      
-      const needsCompositing = Object.values(designsByPlacement).some(designs => designs.length > 1);
-      
-      console.log('🔍 COMPOSITING DECISION:');
-      console.log('  needsCompositing:', needsCompositing);
-      console.log('  printFiles available:', !!printFiles);
-      console.log('  designsByPlacement:', designsByPlacement);
-      
-      // Debug: Log the composite decision logic
-      Object.values(designsByPlacement).forEach((designs, index) => {
-        console.log(`  Placement ${index + 1}: ${designs.length} designs - ${designs.length > 1 ? 'NEEDS COMPOSITE' : 'single design'}`);
-      });
-      
-      if (!needsCompositing) {
-        console.log('🚫 COMPOSITING SKIPPED - No placements have multiple designs');
-      }
-      if (!printFiles) {
-        console.log('🚫 COMPOSITING SKIPPED - printFiles is null/undefined');
-      }
-      
-      if (needsCompositing && printFiles) {
-        try {
-          setMockupStatus("Creating composite images for multiple designs...");
-          console.log("🔧 Multiple designs detected, creating composite images...");
-          console.log(`Input designs for compositing:`, designFilesToUse.map(d => ({placement: d.placement, filename: d.filename, url: d.url.substring(0, 60)})));
-          
-          // Import the composite image creator
-          const { createCompositeImagesForPlacements } = await import('../../../../utils/imageComposer');
-          
-          // Create composite images for placements with multiple designs
-          const compositeDesigns = await createCompositeImagesForPlacements(
-            designFilesToUse.filter(file => file.placement && file.url),
-            printFiles
-          );
-          
-          console.log(`✅ Composite creation complete: ${designFilesToUse.length} original → ${compositeDesigns.length} final designs`);
-          
-          // CRITICAL VALIDATION: Ensure compositeDesigns is valid
-          if (!compositeDesigns || compositeDesigns.length === 0) {
-            throw new Error('Composite creation returned empty result');
-          }
-          
-          // Validate that we actually have composite designs (not fallback individual designs)
-          const hasActualComposites = Object.values(designsByPlacement).some(designs => 
-            designs.length > 1 && compositeDesigns.some(comp => 
-              comp.placement === designs[0].placement && comp.url !== designs[0].url
-            )
-          );
-          
-          if (!hasActualComposites) {
-            console.warn('⚠️ WARNING: No actual composite images were created - all were fallbacks');
-          }
-          
-          // CRITICAL: Make sure we're using the composite designs
-          finalDesignFiles = compositeDesigns;
-          
-          // Update the design state with composite designs for future operations (async)
-          setDesignFiles(compositeDesigns);
-          
-          console.log('🎯 COMPOSITE RESULTS - finalDesignFiles updated with:');
-          finalDesignFiles.forEach((design, index) => {
-            console.log(`  COMPOSITE ${index + 1}: ${design.placement} - ${design.filename} - ${design.url}`);
-          });
-          
-        } catch (error) {
-          console.error("❌ COMPOSITE CREATION FAILED:", error);
-          console.error("❌ Error type:", typeof error);
-          console.error("❌ Error message:", error instanceof Error ? error.message : String(error));
-          console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace');
-          console.error("❌ Failed with designFiles count:", designFilesToUse.length);
-          console.error("❌ Failed with printFiles:", printFiles);
-          
-          setMockupStatus("Composite creation failed, using individual designs...");
-          // Continue with original design files
-          finalDesignFiles = [...designFilesToUse];
-          
-          console.log('💥 FALLBACK - Using original designs:');
-          finalDesignFiles.forEach((design, index) => {
-            console.log(`  FALLBACK ${index + 1}: ${design.placement} - ${design.filename} - ${design.url}`);
-          });
-        }
-      } else {
-        console.log('ℹ️  No compositing needed - using original designs as-is');
-        if (!needsCompositing) {
-          console.log('   Reason: needsCompositing = false');
-          console.log('   designsByPlacement:', Object.keys(designsByPlacement).map(placement => `${placement}: ${designsByPlacement[placement].length} designs`));
-        }
-        if (!printFiles) {
-          console.log('   Reason: printFiles not available');
-        }
-      }
-      
-      console.log(`📸 Final design files for mockup: ${finalDesignFiles.length} designs`);
-      finalDesignFiles.forEach((design, index) => {
-        console.log(`  ${index + 1}. ${design.placement}: ${design.filename} - ${design.url.substring(0, 60)}...`);
-      });
-
-      // Prepare advanced mockup options
-      const mockupOptions: any = {
-        productId: selectedProduct.id,
-        variantIds: validVariantIds.slice(0, 3), // Use first 3 valid variants for preview
-        designFiles: finalDesignFiles, // CRITICAL: Use finalDesignFiles (composite if created, original if not)
-        format: "jpg" as const,
-        onStatusUpdate: (status: string, attempts: number) => {
-          setMockupStatus(status);
-          console.log(`Mockup status update: ${status} (attempt ${attempts})`);
-        },
+      const productData = {
+        id: selectedProduct?.id,
+        name: productForm.name.trim() || `Custom ${selectedProduct.title || selectedProduct.model}`,
+        description: productForm.description.trim(),
+        category: productForm.category,
+        markupPercentage: parseFloat(productForm.markupPercentage),
+        variants: variantIds,
+        base_product: selectedProduct
       };
 
-      // Add advanced options if provided, but be conservative with filters
-      if (advancedOptions) {
-        // Always set a reasonable width
-        mockupOptions.width = advancedOptions.width || 1600;
+      console.log('🖼️ Calling Printify sync api to generate mockups for product (preview)...');
+      const result = await printifyAPI.generatePreviewMockups(productData, filesToUse);
 
-        // Set product options (lifelike rendering)
-        mockupOptions.productOptions = {
-          lifelike:
-            advancedOptions.lifelike !== undefined
-              ? advancedOptions.lifelike
-              : true,
-        };
-
-        // IMPORTANT: Only add option filters if user explicitly selected specific ones
-        // Having ALL options selected is more restrictive than having NONE selected
-        const hasSpecificOptionGroups =
-          advancedOptions.optionGroups &&
-          advancedOptions.optionGroups.length > 0 &&
-          advancedOptions.optionGroups.length < 4; // Less than all 4 option groups
-
-        const hasSpecificOptions =
-          advancedOptions.options &&
-          advancedOptions.options.length > 0 &&
-          advancedOptions.options.length < 6; // Less than all 6 options
-
-        if (hasSpecificOptionGroups) {
-          mockupOptions.optionGroups = advancedOptions.optionGroups;
-          console.log(
-            "✅ Adding selective option groups filter:",
-            advancedOptions.optionGroups
-          );
-        } else {
-          console.log("⭕ Skipping option groups filter (allowing all styles)");
+      if (result && result.success) {
+        if (result.printify_product_id) {
+          setSelectedProduct((prev: any) => {
+            if (!prev) return prev;
+            const updated = { ...prev, printify_id: result.printify_product_id };
+            localStorage.setItem('selectedPrintifyProduct', JSON.stringify(updated));
+            return updated;
+          });
         }
 
-        if (hasSpecificOptions) {
-          mockupOptions.options = advancedOptions.options;
-          console.log(
-            "✅ Adding selective options filter:",
-            advancedOptions.options
-          );
-        } else {
-          console.log("⭕ Skipping options filter (allowing all options)");
-        }
+        const formattedMockups = (result.mockups || []).map((m: any) => ({
+          url: m.src || m.url || '',
+          placement: m.position || m.placement || 'front',
+          variant_ids: m.variantIds || m.variant_ids || [],
+          title: m.label || m.title || '',
+          option: m.position || m.placement || 'front',
+          option_group: 'Printify Mockup',
+        }));
 
-        // Debug: Log what we're sending to the API
-        console.log("🔍 Advanced Options Debug:", {
-          provided: {
-            technique: advancedOptions.technique,
-            optionGroups: advancedOptions.optionGroups,
-            options: advancedOptions.options,
-            lifelike: advancedOptions.lifelike,
-            width: advancedOptions.width,
-          },
-          sending: {
-            width: mockupOptions.width,
-            productOptions: mockupOptions.productOptions,
-            optionGroups: mockupOptions.optionGroups,
-            options: mockupOptions.options,
-          },
-        });
-      }
-      console.log("🔍 Mockup Options Debug:", mockupOptions);
+        // Filter mockups to only those relevant to selected variants
+        const filtered = variantIds.length > 0
+          ? formattedMockups.filter((m: any) =>
+              m.variant_ids.length === 0 ||
+              m.variant_ids.some((vid: number) => variantIds.includes(vid))
+            )
+          : formattedMockups;
 
-      // CRITICAL DEBUG: Log what we're actually sending to the mockup API
-      console.log('🚀 FINAL CHECK - About to send to mockupAPI.generateProductMockup:');
-      console.log('mockupOptions.designFiles length:', mockupOptions.designFiles?.length);
-      console.log('mockupOptions.designFiles full data:', JSON.stringify(mockupOptions.designFiles, null, 2));
-      
-      if (mockupOptions.designFiles) {
-        mockupOptions.designFiles.forEach((design: any, index: number) => {
-          console.log(`  FINAL DESIGN ${index + 1}: ${design.placement} - ${design.filename} - ${design.url}`);
-        });
-        
-        // Count designs per placement to detect if compositing worked
-        const placementCount = mockupOptions.designFiles.reduce((acc: any, design: any) => {
-          acc[design.placement] = (acc[design.placement] || 0) + 1;
-          return acc;
-        }, {});
-        console.log('🔢 CRITICAL CHECK - Designs per placement in mockupOptions:', placementCount);
-        
-        // If we still have multiple designs per placement, something went wrong
-        Object.entries(placementCount).forEach(([placement, count]) => {
-          if ((count as number) > 1) {
-            console.error(`🚨 CRITICAL ERROR: Still have ${count} designs for placement '${placement}' - composite creation failed!`);
-          }
-        });
+        setMockupUrls(filtered.length > 0 ? filtered : formattedMockups);
+        setMockupStatus('Mockups loaded successfully!');
+        toast.success('Preview mockups generated successfully!');
       } else {
-        console.error('🚨 CRITICAL ERROR: mockupOptions.designFiles is undefined!');
+        throw new Error(result?.message || 'Failed to generate preview');
       }
-
-      const mockupUrls = await retryWithExponentialBackoff(
-        () => mockupAPI.generateProductMockup({
-          ...mockupOptions,
-          printFiles
-        }),
-        {
-          maxRetries: 3,
-          initialDelayMs: 2000,
-          maxDelayMs: 15000,
-          backoffMultiplier: 2
-        }
-      );
-
-      setMockupUrls(mockupUrls);
-      setMockupStatus("Mockup generated successfully!");
     } catch (error: any) {
-      console.error("Preview generation failed:", error);
-      let errorMessage = "Failed to generate preview.";
-
-      if (error?.response?.status === 429 || error?.message?.includes("429")) {
-        errorMessage = "System is processing previews. Your request has been queued and will be generated shortly. Please wait...";
-        console.warn("⚠️ 429 Rate limit caught - request will be retried");
-      } else if (error?.response?.status === 500) {
-        errorMessage = "Unable to generate mockup right now. Please try again in a moment.";
-      } else if (error?.message?.includes("queue")) {
-        errorMessage = "Your preview has been queued. This helps prevent server overload. Please wait...";
-      } else {
-        const backendError = error?.response?.data?.error || error?.response?.data?.message;
-        errorMessage = backendError || error.message || errorMessage;
-      }
-
-      setMockupStatus(`Processing...`);
-      // Don't show error toast for queued/rate limit errors - just update status silently
-      if (!errorMessage.includes("queue") && !errorMessage.includes("queued")) {
-        toast.error(errorMessage);
-      }
+      console.error('Mockup fetch failed:', error);
+      setMockupStatus('Failed to load mockups.');
+      toast.error('Failed to load product mockups. Please try again.');
     } finally {
       setIsGeneratingMockup(false);
     }
-  }, [selectedProduct, selectedVariants, designFiles, printFiles]);
+  }, [selectedProduct, selectedVariants, designFiles, productForm]);
 
-  // Setup debounced preview generation to prevent 429 rate limit errors
+  // Setup debounced preview generation
   const { debouncedGeneratePreview } = useDebouncePreview(generatePreview, 2000);
 
   // Handle going live to marketplace with product details
   const handleGoLiveToMarketplace = async (updatedProductForm?: typeof productForm) => {
-    if (!mockupUrls || mockupUrls.length === 0) {
+    const isBlueprint = !selectedProduct?.printify_id;
+    if (!isBlueprint && (!mockupUrls || mockupUrls.length === 0)) {
       toast.error("No mockups available. Please generate mockups first.");
+      return;
+    }
+
+    if (isBlueprint && (!designFiles || designFiles.length === 0)) {
+      toast.error("Please add at least one design to the product before publishing.");
       return;
     }
 
@@ -724,7 +639,7 @@ function CanvasContent() {
         id: "publishing-progress",
       });
 
-      const result = await printfulAPI.storeMockupsPermanently(
+      const result = await printifyAPI.storeMockupsPermanently(
         mockupUrls,
         productData,
         designFiles,
@@ -736,9 +651,8 @@ function CanvasContent() {
 
       if (result.success) {
         localStorage.removeItem(`mockup_request_${selectedProduct.id}`);
-        if (productId) {
-          localStorage.removeItem(`productForm_${productId}`);
-          console.log(`🗑️ Cleared product form for product ${productId} after publishing`);
+        if (blueprintId) {
+          localStorage.removeItem(`productForm_${blueprintId}`);
         }
       }
 
@@ -803,6 +717,7 @@ function CanvasContent() {
             setProductForm={setProductForm}
             onPublish={handleGoLiveToMarketplace}
             isPublishing={creating}
+            onProviderChange={handleProviderChange}
           />
         )}
       </div>

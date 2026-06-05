@@ -35,8 +35,8 @@ export const useProductData = (slug: string) => {
   const hasInitialized = useRef<boolean>(false);
 
   const isVariantAvailable = useCallback((variant: ProductVariant, source?: string) => {
-    const isPrintfulProduct = !!variant.printful_variant_id || source === 'printful';
-    if (isPrintfulProduct) {
+    const isPrintifyProduct = !!variant.printify_variant_id || source === 'printify';
+    if (isPrintifyProduct) {
       return variant.available_for_sale !== false;
     }
     
@@ -64,6 +64,23 @@ export const useProductData = (slug: string) => {
       const productId = parsedSlug ? parsedSlug.id : slug;
 
       const response = await productAPI.getProduct(productId);
+
+      // Fix stringified array from backend
+      if (typeof response.images === 'string') {
+        try {
+          response.images = JSON.parse(response.images);
+        } catch (e) {
+          response.images = [];
+        }
+      }
+
+      if (typeof response.thumbnail_url === 'string' && response.thumbnail_url.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(response.thumbnail_url);
+          if (parsed.length) response.thumbnail_url = parsed[0];
+        } catch (e) {}
+      }
+
       setProduct(response);
 
       if (!parsedSlug && response.name) {

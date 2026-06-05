@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   Check,
   Upload,
@@ -63,6 +63,7 @@ interface UnifiedCanvasPDPProps {
   setProductForm: React.Dispatch<React.SetStateAction<any>>;
   onPublish: (updatedProductForm?: any) => Promise<void>;
   isPublishing: boolean;
+  onProviderChange?: (providerId: number) => Promise<void>;
 }
 
 // Helper to determine readable text contrast color (black or white) based on background hex code
@@ -105,14 +106,78 @@ const getContrastTextColor = (hexCode: string): string => {
   return brightness > 145 ? "#000000" : "#ffffff";
 };
 
+// Helper to check if a product name indicates it is an apparel item
+const isApparelByName = (name: string): boolean => {
+  if (!name) return true;
+  const lowerName = name.toLowerCase();
+  const nonApparelKeywords = [
+    "mug", "drinkware", "tumbler", "bottle", "cup", "glass",
+    "poster", "canvas", "frame", "wall art", "print",
+    "pillow", "blanket", "cushion", "rug", "towel",
+    "sticker", "decal",
+    "phone case", "case", "tech", "laptop sleeve",
+    "notebook", "journal", "calendar", "card",
+    "bag", "tote", "backpack", "pouch",
+    "ornament", "magnet", "coaster", "keychain", "puzzle"
+  ];
+  return !nonApparelKeywords.some(keyword => lowerName.includes(keyword));
+};
+
+// Helper to check if a product object indicates it is an apparel item
+const isApparelProduct = (product: any): boolean => {
+  if (!product) return true;
+  const type = (product.type_name || product.type || "").toLowerCase();
+  const title = (product.title || product.name || "").toLowerCase();
+  
+  const nonApparelKeywords = [
+    "mug", "drinkware", "tumbler", "bottle", "cup", "glass",
+    "poster", "canvas", "frame", "wall art", "print",
+    "pillow", "blanket", "cushion", "rug", "towel",
+    "sticker", "decal",
+    "phone case", "case", "tech", "laptop sleeve",
+    "notebook", "journal", "calendar", "card",
+    "bag", "tote", "backpack", "pouch",
+    "ornament", "magnet", "coaster", "keychain", "puzzle"
+  ];
+
+  return !nonApparelKeywords.some(keyword => type.includes(keyword) || title.includes(keyword));
+};
+
+// Helper to render the vector outline based on placement and fabric color
+const renderVectorOutline = (placement: string, fillHex: string, className?: string) => {
+  const p = placement.toLowerCase();
+  const fill = fillHex || "#ffffff";
+  const contrastText = getContrastTextColor(fill);
+  const stroke = contrastText === "#ffffff" ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.15)";
+  const strokeWidth = 0.8;
+
+  const props = {
+    className,
+    fill,
+    stroke,
+    strokeWidth,
+    width: "100%",
+    height: "100%",
+  };
+
+  if (p.includes("back")) return <BackSVG {...props} />;
+  if (p.includes("left") || p.includes("sleeve_left")) return <LeftSleeveSVG {...props} />;
+  if (p.includes("right") || p.includes("sleeve_right")) return <RightSleeveSVG {...props} />;
+  return <FrontSVG {...props} />;
+};
+
+// Interactive 360-degree product preview spin viewer component
 // Interactive 360-degree product preview spin viewer component
 const Product360Viewer: React.FC<{
   mockupUrls: any[];
+  images?: string[];
   defaultImage?: string;
   productName: string;
   designFiles: any[];
   activePlacement?: string;
-}> = ({ mockupUrls, defaultImage, productName, designFiles, activePlacement = "front" }) => {
+  onPlacementChange?: (placement: string) => void;
+  activeColorHex?: string;
+}> = ({ mockupUrls, images = [], defaultImage, productName, designFiles, activePlacement = "front", onPlacementChange, activeColorHex }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
@@ -129,16 +194,17 @@ const Product360Viewer: React.FC<{
   };
 
   // Find if there's an active design for a mockup view based on its title
-  const getDesignForMockup = (mockupTitle: string) => {
+  const getDesignForMockup = (mockupTitle: string, placement?: string) => {
     if (!designFiles || designFiles.length === 0) return null;
     const title = mockupTitle.toLowerCase();
+    const p = (placement || "").toLowerCase();
 
-    let placement = "front";
-    if (title.includes("back")) placement = "back";
-    else if (title.includes("left") || title.includes("sleeve_left")) placement = "sleeve_left";
-    else if (title.includes("right") || title.includes("sleeve_right")) placement = "sleeve_right";
+    let resolvedPlacement = "front";
+    if (p.includes("back") || title.includes("back")) resolvedPlacement = "back";
+    else if (p.includes("left") || title.includes("left")) resolvedPlacement = "sleeve_left";
+    else if (p.includes("right") || title.includes("right")) resolvedPlacement = "sleeve_right";
 
-    return designFiles.find((d) => d.placement === placement || (d.placement === "left" && placement === "sleeve_left") || (d.placement === "right" && placement === "sleeve_right"));
+    return designFiles.find((d) => d.placement === resolvedPlacement || (d.placement === "left" && resolvedPlacement === "sleeve_left") || (d.placement === "right" && resolvedPlacement === "sleeve_right"));
   };
 
   const getDesignForDefault = () => {
@@ -148,12 +214,73 @@ const Product360Viewer: React.FC<{
 
   // Logical order of views for smooth rotation: Front -> Right Sleeve -> Back -> Left Sleeve
   const sortedMockups = useMemo(() => {
-    if (!mockupUrls || mockupUrls.length === 0) return [];
+    let itemsToProcess = mockupUrls || [];
+    const isBlueprint = !mockupUrls || mockupUrls.length === 0;
+
+    if (itemsToProcess.length === 0) {
+      if (images && images.length > 0) {
+        itemsToProcess = images.map((url, index) => {
+          let placement = "front";
+          // Match index 2 or URL text for back view
+          if (index === 2 || url.toLowerCase().includes("back") || url.toLowerCase().includes("reverse")) {
+            placement = "back";
+          } else if (url.toLowerCase().includes("left") || url.toLowerCase().includes("sleeve_left")) {
+            placement = "sleeve_left";
+          } else if (url.toLowerCase().includes("right") || url.toLowerCase().includes("sleeve_right")) {
+            placement = "sleeve_right";
+          } else if (index > 0) {
+            placement = `other_${index}`;
+          }
+          
+          let title = "Front View";
+          if (placement === "back") title = "Back View";
+          else if (placement === "sleeve_left") title = "Left Sleeve";
+          else if (placement === "sleeve_right") title = "Right Sleeve";
+          else if (placement.startsWith("other_")) title = `Angle View ${index}`;
+
+          return {
+            url,
+            placement,
+            title,
+          };
+        });
+      }
+    }
+
+    if (itemsToProcess.length === 0) return [];
+
+    // Filter out duplicate mockup URLs
+    const seenUrls = new Set<string>();
+    itemsToProcess = itemsToProcess.filter((m) => {
+      const url = m.url || m.src || "";
+      if (!url) return false;
+      if (seenUrls.has(url)) return false;
+      seenUrls.add(url);
+      return true;
+    });
+
+    // Filter unique placements for blueprint mode to avoid duplicate thumbnails
+    if (isBlueprint) {
+      const seen = new Set();
+      itemsToProcess = itemsToProcess.filter((m) => {
+        const placement = m.placement || "front";
+        if (seen.has(placement)) return false;
+        seen.add(placement);
+        return true;
+      });
+    }
+
     const order = ["front", "right", "back", "left"];
     const result: any[] = [];
 
-    const getPlacementType = (title: string) => {
-      const t = title.toLowerCase();
+    const getPlacementType = (title: string, placement?: string) => {
+      const p = (placement || "").toLowerCase();
+      if (p.includes("front")) return "front";
+      if (p.includes("back")) return "back";
+      if (p.includes("right") || p.includes("sleeve_right")) return "right";
+      if (p.includes("left") || p.includes("sleeve_left")) return "left";
+
+      const t = (title || "").toLowerCase();
       if (t.includes("front")) return "front";
       if (t.includes("back")) return "back";
       if (t.includes("right") || t.includes("sleeve_right")) return "right";
@@ -162,8 +289,8 @@ const Product360Viewer: React.FC<{
     };
 
     const groups: Record<string, any[]> = { front: [], right: [], back: [], left: [], other: [] };
-    mockupUrls.forEach((m) => {
-      const type = getPlacementType(m.title || "");
+    itemsToProcess.forEach((m) => {
+      const type = getPlacementType(m.title || "", m.placement);
       groups[type].push(m);
     });
 
@@ -176,8 +303,8 @@ const Product360Viewer: React.FC<{
       result.push(...groups.other);
     }
 
-    return result.length > 0 ? result : mockupUrls;
-  }, [mockupUrls]);
+    return result.length > 0 ? result : itemsToProcess;
+  }, [mockupUrls, images]);
 
   // Reset active view index when mockup set changes or activePlacement changes
   useEffect(() => {
@@ -188,10 +315,11 @@ const Product360Viewer: React.FC<{
     // Find index of mockup that matches activePlacement
     const index = sortedMockups.findIndex(m => {
       const title = (m.title || "").toLowerCase();
-      if (activePlacement === "front" && title.includes("front")) return true;
-      if (activePlacement === "back" && title.includes("back")) return true;
-      if ((activePlacement === "sleeve_left" || activePlacement === "left") && (title.includes("left") || title.includes("sleeve_left"))) return true;
-      if ((activePlacement === "sleeve_right" || activePlacement === "right") && (title.includes("right") || title.includes("sleeve_right"))) return true;
+      const placement = (m.placement || "").toLowerCase();
+      if (activePlacement === "front" && (title.includes("front") || placement === "front")) return true;
+      if (activePlacement === "back" && (title.includes("back") || placement === "back")) return true;
+      if ((activePlacement === "sleeve_left" || activePlacement === "left") && (title.includes("left") || title.includes("sleeve_left") || placement === "sleeve_left" || placement === "left")) return true;
+      if ((activePlacement === "sleeve_right" || activePlacement === "right") && (title.includes("right") || title.includes("sleeve_right") || placement === "sleeve_right" || placement === "right")) return true;
       return false;
     });
 
@@ -200,7 +328,7 @@ const Product360Viewer: React.FC<{
     }
   }, [sortedMockups, activePlacement]);
 
-  // Preload all mockup images to prevent lag/stuck transitions during drag/click
+  // Preload all mockup/catalog images
   useEffect(() => {
     sortedMockups.forEach((m) => {
       if (m?.url) {
@@ -231,37 +359,22 @@ const Product360Viewer: React.FC<{
     }
 
     return (
-      <div className="aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative w-full">
-        {defaultImage ? (
-          <>
+      <div className="aspect-square bg-[#f4f4f5] rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative w-full p-8">
+        <div className="relative w-full h-full flex items-center justify-center">
+          {isApparelByName(productName) ? (
+            renderVectorOutline(effectivePlacement, activeColorHex || "#ffffff", "w-full h-full object-contain max-h-[85%] max-w-[85%] select-none")
+          ) : defaultImage ? (
             <img
               src={defaultImage}
               alt={productName}
               className="w-full h-full object-contain pointer-events-none"
-              style={{ transform: effectivePlacement === 'back' ? 'scaleX(-1)' : 'none' }}
             />
-            {activeDesign && (
-              <div
-                className="absolute pointer-events-none"
-                style={{
-                  width: `${area.width}%`,
-                  height: `${area.height}%`,
-                  top: `${area.top}%`,
-                  left: `${area.left}%`,
-                }}
-              >
-                <img
-                  src={activeDesign.url ? activeDesign.url.replace(/%25/g, '%') : ''}
-                  alt="Design Overlay"
-                  className="object-contain w-full h-full"
-                  style={designStyle}
-                />
-              </div>
-            )}
-          </>
-        ) : (
-          <ShoppingBag className="w-12 h-12 text-gray-700" />
-        )}
+          ) : (
+            <ShoppingBag className="w-12 h-12 text-gray-400" />
+          )}
+          
+    
+        </div>
       </div>
     );
   }
@@ -286,7 +399,7 @@ const Product360Viewer: React.FC<{
       newIndex += sortedMockups.length;
     }
     if (newIndex !== activeIndex) {
-      setActiveIndex(newIndex);
+      handleThumbnailClick(newIndex);
     }
   };
 
@@ -311,24 +424,38 @@ const Product360Viewer: React.FC<{
       newIndex += sortedMockups.length;
     }
     if (newIndex !== activeIndex) {
-      setActiveIndex(newIndex);
+      handleThumbnailClick(newIndex);
     }
   };
 
   const rotateLeft = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveIndex((prev) => (prev - 1 + sortedMockups.length) % sortedMockups.length);
+    const newIndex = (activeIndex - 1 + sortedMockups.length) % sortedMockups.length;
+    handleThumbnailClick(newIndex);
   };
 
   const rotateRight = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveIndex((prev) => (prev + 1) % sortedMockups.length);
+    const newIndex = (activeIndex + 1) % sortedMockups.length;
+    handleThumbnailClick(newIndex);
+  };
+
+  const handleThumbnailClick = (idx: number) => {
+    setActiveIndex(idx);
+    const item = sortedMockups[idx];
+    if (item && onPlacementChange) {
+      const placement = item.placement || "front";
+      const validPlacements = ["front", "back", "left", "right", "sleeve_left", "sleeve_right"];
+      if (validPlacements.includes(placement.toLowerCase())) {
+        onPlacementChange(placement);
+      }
+    }
   };
 
   return (
-    <div className="space-y-3 w-full">
+    <div className="space-y-4 w-full">
       <div
-        className={`aspect-square bg-black/45 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative group select-none cursor-grab active:cursor-grabbing transition-all duration-300 ${isDragging ? "border-[#FF6D1F]/50 shadow-[0_0_20px_rgba(255,109,31,0.15)]" : ""
+        className={`aspect-square bg-[#f4f4f5] rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative group select-none cursor-grab active:cursor-grabbing transition-all duration-300 ${isDragging ? "border-[#FF6D1F]/50 shadow-[0_0_20px_rgba(255,109,31,0.15)]" : ""
           }`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -341,21 +468,53 @@ const Product360Viewer: React.FC<{
         {/* Render all sorted mockups stacked for instant GPU-accelerated switching */}
         {sortedMockups.map((m, idx) => {
           const isCurrent = idx === activeIndex;
+          const isBlueprint = !mockupUrls || mockupUrls.length === 0;
+
+          // Find overlay design if we don't have generated mockups
+          const design = isBlueprint ? getDesignForMockup(m.title || "", m.placement) : null;
+          const effectivePlacement = design ? design.placement : (m.placement || "front");
+          const area = MOCKUP_PRINT_AREAS[effectivePlacement] || MOCKUP_PRINT_AREAS.front;
+
+          let designStyle: React.CSSProperties = {};
+          if (design && design.position) {
+            const w = (design.position.width / design.position.area_width) * 100;
+            const h = (design.position.height / design.position.area_height) * 100;
+            const t = (design.position.top / design.position.area_height) * 100;
+            const l = (design.position.left / design.position.area_width) * 100;
+            designStyle = {
+              width: `${w}%`,
+              height: `${h}%`,
+              top: `${t}%`,
+              left: `${l}%`,
+              position: "absolute",
+            };
+          }
 
           return (
             <div
               key={idx}
-              className={`absolute inset-0 w-full h-full transition-all duration-300 ease-out ${isCurrent
+              className={`absolute inset-0 w-full h-full transition-all duration-300 ease-out p-8 ${isCurrent
                 ? "opacity-100 scale-100 z-10"
                 : "opacity-0 scale-95 z-0 pointer-events-none"
                 }`}
             >
-              {/* Product base mockup image (contains the baked-in design generated by the API) */}
-              <img
-                src={m.url}
-                alt={m.title || `Mockup ${idx + 1}`}
-                className="w-full h-full object-contain pointer-events-none"
-              />
+              {isBlueprint ? (
+                <div className="relative w-full h-full flex items-center justify-center bg-[#f4f4f5] rounded-2xl">
+                  <img
+                    src={m.url}
+                    alt={m.title || `Catalog Image ${idx + 1}`}
+                    className="w-full h-full object-contain pointer-events-none"
+                  />
+                </div>
+              ) : (
+                <div className="relative w-full h-full flex items-center justify-center bg-white rounded-2xl">
+                  <img
+                    src={m.url}
+                    alt={m.title || `Mockup ${idx + 1}`}
+                    className="w-full h-full object-contain pointer-events-none"
+                  />
+                </div>
+              )}
             </div>
           );
         })}
@@ -363,7 +522,7 @@ const Product360Viewer: React.FC<{
         {/* 360 Badge Overlay */}
         <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md border border-white/10 rounded-full py-1 px-3 flex items-center gap-1.5 shadow-lg pointer-events-none z-20">
           <RotateCw className="w-3 h-3 text-[#FF6D1F] animate-spin" style={{ animationDuration: "8s" }} />
-          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-200">360° Spin View</span>
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-200">Interactive Preview</span>
         </div>
 
         {/* Manual Arrow Controls (Hover State) */}
@@ -386,27 +545,68 @@ const Product360Viewer: React.FC<{
 
         {/* Interactive Gesture Helper Text overlay */}
         <div className="absolute bottom-3 inset-x-0 mx-auto w-max bg-black/65 backdrop-blur-sm border border-white/5 rounded-full py-0.5 px-3 text-[10px] text-gray-400 opacity-100 transition-opacity duration-300 pointer-events-none z-20">
-          Swipe or drag horizontally to rotate
+          Swipe/drag to spin or choose thumbnails below
         </div>
       </div>
 
-      {/* active view title and dots */}
+      {/* Thumbnail Carousel Underneath */}
       {sortedMockups.length > 1 && (
-        <div className="flex items-center justify-between px-1">
-          <span className="text-[10px] sm:text-[11px] font-semibold text-gray-400 capitalize bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
-            {activeMockup.title || "Product View"}
-          </span>
-          <div className="flex gap-1.5">
-            {sortedMockups.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveIndex(idx)}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === activeIndex
-                  ? "bg-[#FF6D1F] w-3"
-                  : "bg-white/20 hover:bg-white/40"
-                  }`}
-              />
-            ))}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 capitalize bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+              {activeMockup.title || "Product View"}
+            </span>
+            <span className="text-[10px] text-gray-500">
+              {activeIndex + 1} of {sortedMockups.length}
+            </span>
+          </div>
+
+          <div className="relative group/carousel">
+            <div className="flex gap-2.5 overflow-x-auto pb-2 pt-1 px-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+              {sortedMockups.map((m, idx) => {
+                const isSelected = idx === activeIndex;
+                const isBlueprint = !mockupUrls || mockupUrls.length === 0;
+                const design = isBlueprint ? getDesignForMockup(m.title || "", m.placement) : null;
+                const effectivePlacement = design ? design.placement : (m.placement || "front");
+                const area = MOCKUP_PRINT_AREAS[effectivePlacement] || MOCKUP_PRINT_AREAS.front;
+
+                let designStyle: React.CSSProperties = {};
+                if (design && design.position) {
+                  const w = (design.position.width / design.position.area_width) * 100;
+                  const h = (design.position.height / design.position.area_height) * 100;
+                  const t = (design.position.top / design.position.area_height) * 100;
+                  const l = (design.position.left / design.position.area_width) * 100;
+                  designStyle = {
+                    width: `${w}%`,
+                    height: `${h}%`,
+                    top: `${t}%`,
+                    left: `${l}%`,
+                    position: "absolute",
+                  };
+                }
+
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleThumbnailClick(idx)}
+                    className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 flex items-center justify-center ${isSelected
+                      ? "border-[#FF6D1F] scale-105 shadow-[0_0_12px_rgba(255,109,31,0.25)]"
+                      : "border-white/10 hover:border-white/30"
+                      } ${isBlueprint ? "bg-[#f4f4f5]" : "bg-black/40"}`}
+                  >
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <img
+                        src={m.url}
+                        alt={`Thumbnail ${idx + 1}`}
+                        className="w-full h-full object-contain pointer-events-none"
+                      />
+                    </div>
+
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -432,6 +632,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   setProductForm,
   onPublish,
   isPublishing,
+  onProviderChange,
 }) => {
   // Mobile accordion state
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
@@ -451,6 +652,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const [aspectRatioIssues, setAspectRatioIssues] = useState<any[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [activeColor, setActiveColor] = useState<string>("");
+
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [isRemovingBackground, setIsRemovingBackground] = useState(false);
@@ -461,6 +664,52 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const skipAutoPreviewRef = useRef(false);
+
+  // Get unique supported placements from printFiles based on blueprint
+  const getSupportedPlacements = useCallback(() => {
+    if (!printFiles || !printFiles.variant_printfiles || printFiles.variant_printfiles.length === 0) {
+      // Fallback if printFiles is not yet loaded
+      return ["front", "back", "sleeve_left", "sleeve_right"];
+    }
+
+    const defaultPlacements = ["front", "back", "sleeve_left", "sleeve_right", "neck"];
+    
+    // Collect all supported placement keys across all variant_printfiles
+    const supportedKeys = new Set<string>();
+    printFiles.variant_printfiles.forEach((vp: any) => {
+      if (vp.placements) {
+        Object.keys(vp.placements).forEach((k) => {
+          supportedKeys.add(k.toLowerCase());
+        });
+      }
+    });
+
+    // Filter the default list to only those that exist in supportedKeys
+    const filtered = defaultPlacements.filter((placement) => {
+      const p = placement.toLowerCase();
+      if (p === "sleeve_left" && (supportedKeys.has("left") || supportedKeys.has("sleeve_left"))) return true;
+      if (p === "sleeve_right" && (supportedKeys.has("right") || supportedKeys.has("sleeve_right"))) return true;
+      return supportedKeys.has(p);
+    });
+
+    // Fallback to ["front"] if empty for safety
+    return filtered.length > 0 ? filtered : ["front"];
+  }, [printFiles]);
+
+  // Reset activePlacement if it becomes invalid/unsupported
+  useEffect(() => {
+    if (printFiles) {
+      const supported = getSupportedPlacements();
+      if (supported.length > 0) {
+        const hasLeft = activePlacement === "sleeve_left" && (supported.includes("left") || supported.includes("sleeve_left"));
+        const hasRight = activePlacement === "sleeve_right" && (supported.includes("right") || supported.includes("sleeve_right"));
+        
+        if (!supported.includes(activePlacement) && !hasLeft && !hasRight) {
+          setActivePlacement(supported[0]);
+        }
+      }
+    }
+  }, [printFiles, activePlacement, getSupportedPlacements]);
 
   const dataUrlToFile = async (dataUrl: string, filename: string): Promise<File> => {
     const response = await fetch(dataUrl);
@@ -645,15 +894,55 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     return [...new Set(selectedProduct?.variants?.map((v: any) => v.size) || [])] as string[];
   }, [selectedProduct]);
 
+  const activeColorHex = useMemo(() => {
+    const matched = uniqueColors.find((c: any) => c.name === activeColor);
+    return matched ? matched.code : "";
+  }, [uniqueColors, activeColor]);
+
+  const filteredMockupUrls = useMemo(() => {
+    if (!mockupUrls || mockupUrls.length === 0) return [];
+    if (!activeColor) return mockupUrls;
+
+    // Find the variant IDs for the active color
+    const activeVariantIds = selectedProduct?.variants
+      ?.filter((v: any) => v.color === activeColor)
+      ?.map((v: any) => v.id) || [];
+
+    if (activeVariantIds.length === 0) return mockupUrls;
+
+    const filtered = mockupUrls.filter((m: any) => 
+      !m.variant_ids || 
+      m.variant_ids.length === 0 || 
+      m.variant_ids.some((vid: any) => activeVariantIds.includes(vid))
+    );
+
+    return filtered.length > 0 ? filtered : mockupUrls;
+  }, [mockupUrls, activeColor, selectedProduct]);
+
+  // Reset selections when product or provider changes
+  useEffect(() => {
+    setSelectedColors([]);
+    setSelectedSizes([]);
+    setActiveColor("");
+  }, [selectedProduct?.id, selectedProduct?.print_provider_id, selectedProduct?.printProviderId]);
+
   // Load saved local selections or default to first options
   useEffect(() => {
     if (uniqueColors.length > 0 && selectedColors.length === 0) {
       setSelectedColors([uniqueColors[0].name]);
+      setActiveColor(uniqueColors[0].name);
     }
     if (uniqueSizes.length > 0 && selectedSizes.length === 0) {
       setSelectedSizes(uniqueSizes);
     }
   }, [uniqueColors, uniqueSizes]);
+
+  // Keep activeColor in sync if it is no longer selected
+  useEffect(() => {
+    if (selectedColors.length > 0 && !selectedColors.includes(activeColor)) {
+      setActiveColor(selectedColors[0]);
+    }
+  }, [selectedColors, activeColor]);
 
   // Auto-select variants when colors/sizes change
   useEffect(() => {
@@ -787,9 +1076,35 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     const toastId = toast.loading(`Uploading ${validFiles.length} file(s)...`);
 
     try {
+      const uploadedList = [];
       for (const file of validFiles) {
-        await printfulAPI.uploadFileDirectly(file);
+        const response = await printfulAPI.uploadFileDirectly(file);
+        const imgData = response?.data || response;
+        if (imgData && imgData.id) {
+          const newFile = {
+            id: imgData.id,
+            filename: imgData.file_name || file.name,
+            file_url: imgData.preview_url,
+            thumbnail_url: imgData.preview_url,
+            width: imgData.width,
+            height: imgData.height,
+          };
+          uploadedList.push(newFile);
+        }
       }
+
+      if (uploadedList.length > 0) {
+        const saved = localStorage.getItem("uploaded_printify_images");
+        const existing = saved ? JSON.parse(saved) : [];
+        const merged = [...existing];
+        uploadedList.forEach((newFile) => {
+          if (!merged.some((f: any) => f.id === newFile.id)) {
+            merged.unshift(newFile);
+          }
+        });
+        localStorage.setItem("uploaded_printify_images", JSON.stringify(merged));
+      }
+
       toast.success("Files uploaded successfully!", { id: toastId });
       onRefreshFiles();
     } catch (err) {
@@ -824,6 +1139,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
     const newDesign: any = {
       id: Date.now(),
+      printify_id: file.id,
+      imageId: file.id,
       filename: file.filename,
       url: file.file_url || file.thumbnail_url || "",
       type: "design",
@@ -894,11 +1211,12 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Validations checklist helper
   const validationSummary = useMemo(() => {
+    const isBlueprint = !selectedProduct?.printify_id;
     const checks = {
       variants: selectedVariants.length > 0,
       designs: designFiles.length > 0,
       aspectRatio: aspectRatioIssues.length === 0,
-      mockups: mockupUrls && mockupUrls.length > 0,
+      mockups: isBlueprint ? true : (mockupUrls && mockupUrls.length > 0),
       details: productForm.name.trim().length > 0 && productForm.description.trim().length >= 20,
     };
 
@@ -914,7 +1232,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       ...checks,
       allValid: Object.values(blockingChecks).every(Boolean),
     };
-  }, [selectedVariants, designFiles, aspectRatioIssues, mockupUrls, productForm]);
+  }, [selectedVariants, designFiles, aspectRatioIssues, mockupUrls, productForm, selectedProduct]);
 
   // Publish submit action
   const handlePublishSubmit = async () => {
@@ -951,6 +1269,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       sleeve_right: "Right Sleeve",
       left: "Left Sleeve",
       right: "Right Sleeve",
+      neck: "Neck Label",
     };
     return labels[placementId.toLowerCase()] || placementId;
   };
@@ -963,6 +1282,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       right: <RightSleeveSVG className="w-5 h-5" />,
       sleeve_left: <LeftSleeveSVG className="w-5 h-5" />,
       sleeve_right: <RightSleeveSVG className="w-5 h-5" />,
+      neck: <Tag className="w-5 h-5 text-orange-400" />,
     };
     return svgs[placementId.toLowerCase()] || <FrontSVG className="w-5 h-5" />;
   };
@@ -1010,10 +1330,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           {/* Section 1: Product Information */}
           <div className="gradient-border-white-top p-5 sm:p-6 bg-gray-900/60 rounded-3xl backdrop-blur-sm border border-white/5">
             <div className="flex flex-col md:flex-row gap-5">
-              <div className="w-full md:w-1/3 aspect-square relative bg-black/40 rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center">
-                {selectedProduct?.image || (variants.length > 0 && variants[0]?.image) ? (
+              <div className="w-full md:w-1/3 aspect-square relative bg-[#f4f4f5] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-4">
+                {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                   <img
-                    src={selectedProduct?.image || variants[0]?.image}
+                    src={selectedProduct?.image || selectedProduct?.images?.[0]}
                     alt={selectedProduct?.title}
                     className="w-full h-full object-contain"
                   />
@@ -1021,6 +1341,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <ShoppingBag className="w-12 h-12 text-gray-600" />
                 )}
               </div>
+
               <div className="flex-1 space-y-2">
                 <span className="text-[10px] sm:text-xs font-semibold bg-[#FF6D1F]/20 text-[#FF6D1F] px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Base Catalog Item
@@ -1051,6 +1372,42 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
             {openAccordions.variants && (
               <div className="space-y-6 pt-3 animate-fadeIn">
+                {/* Print Provider Select */}
+                {selectedProduct?.providers && selectedProduct.providers.length > 0 && (
+                  <div className="space-y-3 pb-4 border-b border-white/5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs sm:text-sm font-semibold text-gray-300 flex items-center gap-1.5">
+                        <ShoppingBag className="w-4 h-4 text-[#FF6D1F]" />
+                        Select Print Provider
+                      </label>
+                      <span className="text-[10px] text-gray-500">
+                        {selectedProduct.providers.length} provider(s) available
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <select
+                        value={selectedProduct.print_provider_id || selectedProduct.printProviderId || ""}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (val && onProviderChange) {
+                            onProviderChange(val);
+                          }
+                        }}
+                        className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-xs sm:text-sm text-gray-200 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all cursor-pointer appearance-none"
+                      >
+                        {selectedProduct.providers.map((provider: any) => (
+                          <option key={provider.id} value={provider.id} className="bg-gray-950 text-gray-200">
+                            {provider.title} (ID: {provider.id})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Colors Select */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -1064,6 +1421,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         <button
                           key={color.name}
                           onClick={() => {
+                            setActiveColor(color.name);
                             if (isSelected) {
                               if (selectedColors.length > 1) {
                                 setSelectedColors(selectedColors.filter((c) => c !== color.name));
@@ -1074,8 +1432,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               setSelectedColors([...selectedColors, color.name]);
                             }
                           }}
-                          className={`relative border-2 rounded-full px-4 py-2 flex items-center gap-2 transition-all duration-300 ${isSelected ? "border-white scale-105" : "border-transparent hover:border-white/30"
-                            }`}
+                          className={`relative border-2 rounded-full px-4 py-2 flex items-center gap-2 transition-all duration-300 ${
+                            isSelected 
+                              ? (activeColor === color.name ? "border-[#FF6D1F] scale-105 shadow-[0_0_12px_rgba(255,109,31,0.3)]" : "border-white scale-105") 
+                              : "border-transparent hover:border-white/30"
+                          }`}
                           style={{ backgroundColor: color.code }}
                         >
                           <span
@@ -1178,8 +1539,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 {/* Placement Cards */}
                 <div className="space-y-3">
                   <label className="text-xs sm:text-sm font-semibold text-gray-300">Choose Placement Target</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {["front", "back", "sleeve_left", "sleeve_right"].map((placement) => {
+                  <div className={`grid gap-3 grid-cols-2 sm:grid-cols-${Math.min(getSupportedPlacements().length, 4)}`}>
+                    {getSupportedPlacements().map((placement) => {
                       const isActive = activePlacement === placement;
                       const hasAssigned = designFiles.find((d) => d.placement === placement);
                       return (
@@ -1445,30 +1806,101 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         </div>
                       ))}
                     </div>
-                  ) : mockupUrls && mockupUrls.length > 0 ? (
+                  ) : (mockupUrls && mockupUrls.length > 0) || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                     mockupViewMode === "360" ? (
                       <div className="max-w-md mx-auto">
                         <Product360Viewer
                           mockupUrls={mockupUrls}
+                          images={selectedProduct?.images || []}
                           defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
                           productName={selectedProduct?.title || selectedProduct?.name}
                           designFiles={designFiles}
                           activePlacement={activePlacement}
+                          onPlacementChange={setActivePlacement}
+                          activeColorHex={activeColorHex}
                         />
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-4">
-                        {mockupUrls.slice(0, 4).map((m: any, index: number) => (
-                          <div
-                            key={index}
-                            className="border border-white/10 rounded-2xl overflow-hidden bg-black/40 hover:shadow-[0_10px_30px_rgba(255,109,31,0.1)] transition-all duration-300"
-                          >
-                            <img src={m.url} alt={m.title || `Mockup ${index + 1}`} className="w-full h-auto" />
-                            <div className="bg-gray-900/80 p-2 text-center text-[10px] sm:text-xs text-gray-400 border-t border-white/5">
-                              {m.title || "Product View"}
+                        {((mockupUrls && mockupUrls.length > 0) ? mockupUrls : (selectedProduct?.images || []).map((url: string, index: number) => {
+                          let placement = "front";
+                          if (index === 2 || url.toLowerCase().includes("back") || url.toLowerCase().includes("reverse")) {
+                            placement = "back";
+                          } else if (url.toLowerCase().includes("left") || url.toLowerCase().includes("sleeve_left")) {
+                            placement = "sleeve_left";
+                          } else if (url.toLowerCase().includes("right") || url.toLowerCase().includes("sleeve_right")) {
+                            placement = "sleeve_right";
+                          } else if (index > 0) {
+                            placement = `other_${index}`;
+                          }
+                          
+                          let title = "Front View";
+                          if (placement === "back") title = "Back View";
+                          else if (placement === "sleeve_left") title = "Left Sleeve";
+                          else if (placement === "sleeve_right") title = "Right Sleeve";
+                          else if (placement.startsWith("other_")) title = `Angle View ${index}`;
+
+                          return {
+                            url,
+                            placement,
+                            title,
+                          };
+                        })).map((m: any, index: number) => {
+                          const isBlueprint = !mockupUrls || mockupUrls.length === 0;
+                          
+                          // Find overlay design if we don't have generated mockups
+                          const design = isBlueprint ? designFiles.find(d => d.placement === m.placement) : null;
+                          const effectivePlacement = design ? design.placement : (m.placement || "front");
+                          
+                          const MOCKUP_PRINT_AREAS: Record<string, { width: number; height: number; top: number; left: number }> = {
+                            front: { width: 33, height: 45, top: 24, left: 33.5 },
+                            back: { width: 33, height: 45, top: 22, left: 33.5 },
+                            left: { width: 15, height: 15, top: 32, left: 42.5 },
+                            right: { width: 15, height: 15, top: 32, left: 42.5 },
+                            sleeve_left: { width: 15, height: 15, top: 32, left: 42.5 },
+                            sleeve_right: { width: 15, height: 15, top: 32, left: 42.5 },
+                          };
+                          const area = MOCKUP_PRINT_AREAS[effectivePlacement] || MOCKUP_PRINT_AREAS.front;
+
+                          let designStyle: React.CSSProperties = {};
+                          if (design && design.position) {
+                            const w = (design.position.width / design.position.area_width) * 100;
+                            const h = (design.position.height / design.position.area_height) * 100;
+                            const t = (design.position.top / design.position.area_height) * 100;
+                            const l = (design.position.left / design.position.area_width) * 100;
+                            designStyle = {
+                              width: `${w}%`,
+                              height: `${h}%`,
+                              top: `${t}%`,
+                              left: `${l}%`,
+                              position: "absolute",
+                            };
+                          }
+                           return (
+                            <div
+                              key={index}
+                              className={`border border-white/10 rounded-2xl overflow-hidden hover:shadow-[0_10px_30px_rgba(255,109,31,0.1)] transition-all duration-300 relative aspect-square p-6 ${
+                                isBlueprint ? "bg-[#f4f4f5]" : "bg-black/40"
+                              }`}
+                            >
+                              {isBlueprint ? (
+                                <div className="relative w-full h-full flex items-center justify-center">
+                                  <img
+                                    src={m.url}
+                                    alt={m.title || `Catalog Image ${index + 1}`}
+                                    className="w-full h-full object-contain pointer-events-none"
+                                  />
+                                </div>
+                              ) : (
+                                <img src={m.url} alt={m.title || `Mockup ${index + 1}`} className="w-full h-full object-contain pointer-events-none" />
+                              )}
+                              
+                              <div className="absolute bottom-0 inset-x-0 bg-gray-900/80 p-2 text-center text-[10px] sm:text-xs text-gray-400 border-t border-white/5 z-20">
+                                {m.title || "Product View"}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )
                   ) : (
@@ -1654,7 +2086,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <div>
                       <div className="font-bold">Product Previews Ready</div>
                       <div className="text-[10px] text-gray-500">
-                        {validationSummary.mockups ? `${mockupUrls.length} view mockups ready` : "No mockups generated yet"}
+                        {validationSummary.mockups 
+                          ? (!selectedProduct?.printify_id ? "Vector outlines loaded" : `${mockupUrls.length} view mockups ready`) 
+                          : "No mockups generated yet"}
                       </div>
                     </div>
                   </div>
@@ -1695,11 +2129,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             {/* Thumbnail Preview Card */}
             <div className="bg-gray-900/50 border border-white/10 rounded-3xl p-5 space-y-5">
               <Product360Viewer
-                mockupUrls={mockupUrls}
+                mockupUrls={filteredMockupUrls}
+                images={selectedProduct?.images || []}
                 defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
                 productName={selectedProduct?.title || selectedProduct?.name}
                 designFiles={designFiles}
                 activePlacement={activePlacement}
+                onPlacementChange={setActivePlacement}
+                activeColorHex={activeColorHex}
               />
 
               <div className="space-y-1">

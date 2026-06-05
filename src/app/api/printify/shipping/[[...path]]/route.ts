@@ -1,0 +1,116 @@
+/**
+ * Printify Shipping API Route (Catch-All)
+ * POST /api/printify/shipping/rates → calculate shipping for an order
+ * GET  /api/printify/shipping/countries → list supported countries (static list)
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { printifyShippingAPI } from '@/services/printify/PrintifyClient';
+
+// Static list of countries supported by Printify for address forms
+// This replaces the old Printful /countries endpoint
+const SUPPORTED_COUNTRIES = [
+  { code: 'US', name: 'United States', region: 'north_america', states: [
+    { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
+    { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
+    { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
+    { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
+    { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
+    { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
+    { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
+    { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
+    { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
+    { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
+    { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
+    { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
+    { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
+    { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
+    { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
+    { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
+    { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }, { code: 'DC', name: 'District of Columbia' },
+  ]},
+  { code: 'CA', name: 'Canada', region: 'north_america', states: [
+    { code: 'AB', name: 'Alberta' }, { code: 'BC', name: 'British Columbia' }, { code: 'MB', name: 'Manitoba' },
+    { code: 'NB', name: 'New Brunswick' }, { code: 'NL', name: 'Newfoundland and Labrador' },
+    { code: 'NS', name: 'Nova Scotia' }, { code: 'ON', name: 'Ontario' }, { code: 'PE', name: 'Prince Edward Island' },
+    { code: 'QC', name: 'Quebec' }, { code: 'SK', name: 'Saskatchewan' },
+  ]},
+  { code: 'GB', name: 'United Kingdom', region: 'europe', states: [] },
+  { code: 'DE', name: 'Germany', region: 'europe', states: [] },
+  { code: 'FR', name: 'France', region: 'europe', states: [] },
+  { code: 'IT', name: 'Italy', region: 'europe', states: [] },
+  { code: 'ES', name: 'Spain', region: 'europe', states: [] },
+  { code: 'NL', name: 'Netherlands', region: 'europe', states: [] },
+  { code: 'BE', name: 'Belgium', region: 'europe', states: [] },
+  { code: 'SE', name: 'Sweden', region: 'europe', states: [] },
+  { code: 'NO', name: 'Norway', region: 'europe', states: [] },
+  { code: 'DK', name: 'Denmark', region: 'europe', states: [] },
+  { code: 'FI', name: 'Finland', region: 'europe', states: [] },
+  { code: 'AT', name: 'Austria', region: 'europe', states: [] },
+  { code: 'CH', name: 'Switzerland', region: 'europe', states: [] },
+  { code: 'PL', name: 'Poland', region: 'europe', states: [] },
+  { code: 'CZ', name: 'Czech Republic', region: 'europe', states: [] },
+  { code: 'PT', name: 'Portugal', region: 'europe', states: [] },
+  { code: 'IE', name: 'Ireland', region: 'europe', states: [] },
+  { code: 'RO', name: 'Romania', region: 'europe', states: [] },
+  { code: 'HU', name: 'Hungary', region: 'europe', states: [] },
+  { code: 'SK', name: 'Slovakia', region: 'europe', states: [] },
+  { code: 'HR', name: 'Croatia', region: 'europe', states: [] },
+  { code: 'AU', name: 'Australia', region: 'oceania', states: [
+    { code: 'ACT', name: 'Australian Capital Territory' }, { code: 'NSW', name: 'New South Wales' },
+    { code: 'NT', name: 'Northern Territory' }, { code: 'QLD', name: 'Queensland' },
+    { code: 'SA', name: 'South Australia' }, { code: 'TAS', name: 'Tasmania' },
+    { code: 'VIC', name: 'Victoria' }, { code: 'WA', name: 'Western Australia' },
+  ]},
+  { code: 'NZ', name: 'New Zealand', region: 'oceania', states: [] },
+  { code: 'JP', name: 'Japan', region: 'asia', states: [] },
+  { code: 'SG', name: 'Singapore', region: 'asia', states: [] },
+  { code: 'HK', name: 'Hong Kong', region: 'asia', states: [] },
+  { code: 'IN', name: 'India', region: 'asia', states: [] },
+  { code: 'BR', name: 'Brazil', region: 'south_america', states: [] },
+  { code: 'MX', name: 'Mexico', region: 'north_america', states: [] },
+  { code: 'AR', name: 'Argentina', region: 'south_america', states: [] },
+  { code: 'ZA', name: 'South Africa', region: 'africa', states: [] },
+];
+
+export async function GET(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // GET /api/printify/shipping/countries → return country list
+  if (pathname.endsWith('/countries')) {
+    return NextResponse.json({ result: SUPPORTED_COUNTRIES });
+  }
+
+  return NextResponse.json({ error: 'Not found' }, { status: 404 });
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    // POST /api/printify/shipping/rates → calculate shipping
+    const rates = await printifyShippingAPI.calculateShipping(body);
+
+    // Normalize to a format compatible with existing checkout code
+    const allRates = [
+      ...(rates.standard || []),
+      ...(rates.express || []),
+      ...(rates.priority || []),
+    ].map(rate => ({
+      id: rate.id,
+      name: rate.title,
+      carrier: rate.carrier,
+      rate: (rate.rate / 100).toFixed(2),   // cents → dollars string
+      minDeliveryDays: rate.minDeliveryDays,
+      maxDeliveryDays: rate.maxDeliveryDays,
+      currency: rate.currency || 'USD',
+    }));
+
+    return NextResponse.json({ success: true, result: allRates });
+
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Shipping calculation failed';
+    console.error('[Printify Shipping POST]', message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

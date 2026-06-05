@@ -18,7 +18,11 @@ const nextConfig: NextConfig = {
       'images.stockvault.net',
       'burst.shopifycdn.com',
       'cdn.shopify.com',
-      'allbuckets-1754371568222.nyc3.digitaloceanspaces.com'
+      'allbuckets-1754371568222.nyc3.digitaloceanspaces.com',
+      'images.printify.com',
+      'images-api.printify.com',
+      'mockup-api.printify.com',
+      'pf-images-production.s3.amazonaws.com'
     ],
     remotePatterns: [
       {
@@ -48,6 +52,30 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'allbuckets-1754371568222.nyc3.digitaloceanspaces.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.printify.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images-api.printify.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mockup-api.printify.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pf-images-production.s3.amazonaws.com',
         port: '',
         pathname: '/**',
       }

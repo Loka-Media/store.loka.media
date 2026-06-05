@@ -194,10 +194,10 @@ export const lookupZipCode = async (zipCode: string, countryCode: string = 'US')
 };
 
 /**
- * Format phone number for Printful API using libphonenumber-js
- * Printful requires phone numbers in international format with + prefix
+ * Format phone number for international shipping using libphonenumber-js
+ * Requires phone numbers in international format with + prefix
  */
-export const formatPhoneForPrintful = (phone: string, countryCode: string): string => {
+export const formatPhoneForShipping = (phone: string, countryCode: string): string => {
   if (!phone) return '';
 
   let cleaned = phone.replace(/[^\d+]/g, '');
@@ -220,19 +220,34 @@ export const formatPhoneForPrintful = (phone: string, countryCode: string): stri
   }
 };
 
-export const getPrintfulCountries = async (): Promise<PrintfulCountry[]> => {
+export const getShippingCountries = async (): Promise<PrintfulCountry[]> => {
   try {
     const API_URL = typeof window !== 'undefined'
       ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '')
       : 'http://localhost:3001';
 
-    const response = await fetch(`${API_URL}/api/printful/countries`);
-    if (!response.ok) throw new Error('Failed to fetch countries');
+    // First try the new Printify shipping countries endpoint
+    try {
+      const response = await fetch(`/api/printify/shipping/countries`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.result || [];
+      }
+    } catch {
+      // Fallback to backend
+    }
 
+    const response = await fetch(`${API_URL}/api/printify/shipping/countries`);
+    if (!response.ok) throw new Error('Failed to fetch countries');
     const data = await response.json();
     return data.result || [];
   } catch (error) {
-    console.error('Failed to fetch Printful countries:', error);
+    console.error('Failed to fetch shipping countries:', error);
     return [];
   }
 };
+
+// Backwards-compatible alias
+export const getPrintfulCountries = getShippingCountries;
+// Backwards-compatible alias
+export const formatPhoneForPrintful = formatPhoneForShipping;
