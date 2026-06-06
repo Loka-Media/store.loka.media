@@ -401,9 +401,12 @@ if (!isPreview) {
   (async () => {
     try {
       await printifyProductsAPI.publishProduct(printifyProductId);
-      console.log('[Printify Sync] Product published to shop.');
+      console.log('[Printify Sync] Product published to shop. Waiting 2 seconds for state registration...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      await printifyProductsAPI.setPublishingSucceeded(printifyProductId);
+      console.log('[Printify Sync] Product publishing succeeded set.');
     } catch (pubErr) {
-      console.warn('[Printify Sync] Shop publish step failed (non-fatal):', pubErr);
+      console.warn('[Printify Sync] Shop publish/success step failed (non-fatal):', pubErr);
       try {
         const errMsg = (pubErr as any).message || '';
         if (typeof errMsg === 'string' && (errMsg.includes('code":8254') || (errMsg.includes('Shop') && errMsg.includes('not connected')))) {

@@ -61,12 +61,34 @@ export async function POST(
   try {
     const { path } = await params;
     const segments = path || [];
-    const body = await request.json();
+
+    // Safely parse body if present
+    let body: any = {};
+    try {
+      body = await request.json();
+    } catch {
+      // Empty or invalid body is acceptable
+    }
 
     // POST /api/printify/products/:id/publish
     if (segments.length === 2 && segments[1] === 'publish') {
-      await printifyProductsAPI.publishProduct(segments[0], body);
-      return NextResponse.json({ success: true, message: 'Product published' });
+      const productId = segments[0];
+      // Run the publishing and completion notification in the background to return instantly to UI
+      (async () => {
+        try {
+          console.log(`[Printify API] Starting background publish for product: ${productId}`);
+          await printifyProductsAPI.publishProduct(productId, body);
+          console.log(`[Printify API] Publish initiated. Waiting 2 seconds for state registration...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          console.log(`[Printify API] Sending publishing succeeded for product: ${productId}`);
+          await printifyProductsAPI.setPublishingSucceeded(productId);
+          console.log(`[Printify API] Background publish completed successfully for product: ${productId}`);
+        } catch (error) {
+          console.error(`[Printify API] Background publish failed for product ${productId}:`, error);
+        }
+      })();
+
+      return NextResponse.json({ success: true, message: 'Product publishing initiated' });
     }
 
     // POST /api/printify/products → create

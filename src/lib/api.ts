@@ -722,6 +722,11 @@ export const printifyAPI = {
   getShippingProfiles: async (blueprintId: number, providerId: number) => {
     return printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers/${providerId}/shipping`);
   },
+
+  // Publish product (handles both publish and publishing_succeeded in the background on the server)
+  publishProduct: async (productId: string | number) => {
+    return printifyProxyRequest("POST", `/api/printify/products/${productId}/publish`);
+  },
 };
 
 // Backwards-compatible alias — any code still importing printfulAPI will work

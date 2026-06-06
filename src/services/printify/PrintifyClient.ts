@@ -227,7 +227,12 @@ export const printifyProductsAPI = {
     const { shopId } = getConfig();
     return printifyFetch<void>(`/shops/${shopId}/products/${productId}/publishing_succeeded.json`, {
       method: 'POST',
-      body: JSON.stringify({ external: { id: productId, handle: productId } }),
+      body: JSON.stringify({
+        external: {
+          id: productId,
+          handle: `https://store.loka.media/products/${productId}`
+        }
+      }),
     });
   },
 };
