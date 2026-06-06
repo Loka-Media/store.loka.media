@@ -109,8 +109,7 @@ export default function CreatorCatalogPage() {
 
         console.log(`📦 API Response:`, response);
         console.log(
-          `📦 Fetched ${
-            response.result?.length || 0
+          `📦 Fetched ${response.result?.length || 0
           } products from category ${categoryId}`
         );
 
@@ -271,12 +270,17 @@ function CategoryCard({ category, onSelect }: any) {
       onClick={() => onSelect(category)}
     >
       <div className="aspect-square relative overflow-hidden">
-        <Image
-          src={category.image_url || "/placeholder-product.png"}
+  <Image
+  src={
+    category.image_url ||
+    category.image ||
+    "/placeholder-product.png"
+  }
           alt={category.title}
           fill
           className="object-cover group-hover:scale-110 transition-transform duration-500"
           unoptimized
+          priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>

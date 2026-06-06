@@ -13,11 +13,41 @@ import {
 } from '@/services/printify/PrintifyClient';
 
 const STATIC_CATEGORIES = [
-  { id: 1, parent_id: 0, title: "T-Shirts", image_url: "https://images.printify.com/api/catalog/6013ebb8868c2d1b463283c7.jpg" },
-  { id: 2, parent_id: 0, title: "Hoodies & Sweatshirts", image_url: "https://images.printify.com/api/catalog/60829871758c0e6db614f04c.jpg" },
-  { id: 3, parent_id: 0, title: "Mugs & Drinkware", image_url: "https://images.printify.com/api/catalog/60d2cc950d87ab060e2db401.jpg" },
-  { id: 4, parent_id: 0, title: "Home & Living", image_url: "https://images.printify.com/api/catalog/5c7d1e8d6f1b34000868f047.jpg" },
-  { id: 5, parent_id: 0, title: "Accessories", image_url: "https://images.printify.com/api/catalog/5e3bded4cb3a1100084f7b2c.jpg" }
+  {
+    id: 1,
+    parent_id: 0,
+    title: "T-Shirts",
+    image_url:
+      "https://images.printify.com/66d82988a65761e5f9096537"
+  },
+  {
+    id: 2,
+    parent_id: 0,
+    title: "Hoodies & Sweatshirts",
+    image_url:
+      "https://images.printify.com/66dedd239da894140e0af9e2"
+  },
+  {
+    id: 3,
+    parent_id: 0,
+    title: "Mugs & Drinkware",
+    image_url:
+      "https://images.printify.com/66c42e5361b2691da8085442"
+  },
+  {
+    id: 4,
+    parent_id: 0,
+    title: "Home & Living",
+    image_url:
+      "https://images.printify.com/66c44156f0147a606a0fc682"
+  },
+  {
+    id: 5,
+    parent_id: 0,
+    title: "Accessories",
+    image_url:
+      "https://images.printify.com/66d824496c2346293e0162c3"
+  }
 ];
 
 const COLOR_MAP: Record<string, string> = {
@@ -56,6 +86,8 @@ function getColorCode(colorName: string): string {
 
 const blueprintCache = new Map<number, { data: any; timestamp: number }>();
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
+let catalogCache: { data: any[]; timestamp: number } | null = null;
+const CATALOG_CACHE_TTL = 30 * 60 * 1000; // 30 minutes cache for the whole catalog
 
 export async function GET(
   request: NextRequest,
@@ -78,7 +110,16 @@ export async function GET(
 
     // GET /api/printify/catalog  → list all blueprints (transformed and filtered)
     if (segments.length === 0) {
-      const blueprints = await printifyCatalogAPI.getBlueprints();
+      let blueprints = [];
+      if (catalogCache && (Date.now() - catalogCache.timestamp < CATALOG_CACHE_TTL)) {
+        console.log(`[Printify Catalog Cache] Returning cached catalog list`);
+        blueprints = catalogCache.data;
+      } else {
+        console.log(`[Printify Catalog Cache] Fetching fresh catalog list from Printify`);
+        blueprints = await printifyCatalogAPI.getBlueprints();
+        catalogCache = { data: blueprints, timestamp: Date.now() };
+      }
+
       const categoryId = parseInt(searchParams.get('category') || '0');
       const search = (searchParams.get('search') || '').toLowerCase();
 

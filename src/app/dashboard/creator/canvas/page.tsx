@@ -471,10 +471,20 @@ function CanvasContent() {
       return;
     }
 
+    let progressTimer: NodeJS.Timeout | undefined;
+
     try {
       setIsGeneratingMockup(true);
-      setMockupStatus('Generating Printify mockups...');
+      let currentProgress = 0;
+      setMockupStatus(`Generating Printify mockups... ${currentProgress}%`);
       setMockupUrls([]); // Clear previous mockups
+
+      // Simulate progress for better UX
+      progressTimer = setInterval(() => {
+        currentProgress += Math.floor(Math.random() * 8) + 2; // Increase by 2-9%
+        if (currentProgress > 98) currentProgress = 98; // Cap at 98% until actual completion
+        setMockupStatus(`Generating Printify mockups... ${currentProgress}%`);
+      }, 800);
 
       const variantIds = selectedVariants.map((v: any) =>
         typeof v === 'number' ? v : v.id
@@ -531,6 +541,7 @@ function CanvasContent() {
       setMockupStatus('Failed to load mockups.');
       toast.error('Failed to load product mockups. Please try again.');
     } finally {
+      if (progressTimer) clearInterval(progressTimer);
       setIsGeneratingMockup(false);
     }
   }, [selectedProduct, selectedVariants, designFiles, productForm]);

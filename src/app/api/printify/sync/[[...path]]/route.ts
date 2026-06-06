@@ -128,31 +128,37 @@ async function buildPrintifyProductPayload(
   }
 
   // Build variant pricing (Printify prices are in cents)
-  const variantPayload = allVariants
-    .filter((v: any) => selectedVariantIds.includes(Number(v.id)) && v.is_enabled !== false)
-    .map((v: any) => {
-      const priceVal = typeof v.price === 'string' ? parseFloat(v.price) * 100 : v.price;
-      const baseCents: number = typeof priceVal === 'number' && !isNaN(priceVal) ? priceVal : 1500;
-      const retailCents = Math.round(baseCents * (1 + markupPercent / 100));
-      return { id: Number(v.id), price: retailCents, is_enabled: true };
-    });
+  // Printify API requires ALL variants of the blueprint/provider to be sent.
+  // We set is_enabled: false for the ones not selected.
+  const variantPayload = allVariants.map((v: any) => {
+    const isSelected = selectedVariantIds.includes(Number(v.id));
+    const priceVal = typeof v.price === 'string' ? parseFloat(v.price) * 100 : v.price;
+    const baseCents: number = typeof priceVal === 'number' && !isNaN(priceVal) ? priceVal : 1500;
+    const retailCents = Math.round(baseCents * (1 + markupPercent / 100));
+    return { 
+      id: Number(v.id), 
+      price: retailCents, 
+      is_enabled: isSelected 
+    };
+  });
 
-  if (variantPayload.length === 0) {
-    console.warn('[Printify Payload Builder] Variant payload is empty after filtering. selectedVariantIds:', selectedVariantIds);
-    logToFile(`[Printify Payload Builder] Variant payload is empty after filtering. selectedVariantIds: ${JSON.stringify(selectedVariantIds)}`);
-    
-    // Last-ditch effort: if variant payload is still empty, manually construct them from the selected variant IDs
-    console.log('[Printify Payload Builder] Variant payload empty, building fallback variant payload...');
-    selectedVariantIds.forEach((id: number) => {
-      variantPayload.push({
-        id: Number(id),
-        price: Math.round(1500 * (1 + markupPercent / 100)), // Default retail price cents
-        is_enabled: true
+  const activeVariantIds = variantPayload.filter((v: any) => v.is_enabled).map((v: any) => v.id);
+
+  if (activeVariantIds.length === 0) {
+    console.warn('[Printify Payload Builder] No enabled variants after processing. selectedVariantIds:', selectedVariantIds);
+    logToFile(`[Printify Payload Builder] No enabled variants after processing.`);
+    // Fallback if somehow nothing matched
+    if (selectedVariantIds.length > 0) {
+      selectedVariantIds.forEach((id: number) => {
+        const existing = variantPayload.find((v: any) => v.id === Number(id));
+        if (existing) existing.is_enabled = true;
+        else variantPayload.push({ id: Number(id), price: Math.round(1500 * (1 + markupPercent / 100)), is_enabled: true });
+        if (!activeVariantIds.includes(Number(id))) activeVariantIds.push(Number(id));
       });
-    });
+    } else {
+      return null;
+    }
   }
-
-  const activeVariantIds = variantPayload.map((v: any) => v.id);
 
   // Build print areas from uploaded design files
   const printAreas: any[] = [];
@@ -231,9 +237,12 @@ async function buildPrintifyProductPayload(
       }
     }
 
+    // Printify requires ALL product variants (even disabled ones) to be assigned to a print area
+    const allVariantIds = variantPayload.map((v: any) => v.id);
+
     if (placeholders.length > 0) {
       printAreas.push({
-        variant_ids: activeVariantIds,
+        variant_ids: allVariantIds,
         placeholders: placeholders,
       });
     }

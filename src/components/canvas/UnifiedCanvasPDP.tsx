@@ -379,7 +379,8 @@ const Product360Viewer: React.FC<{
     );
   }
 
-  const activeMockup = sortedMockups[activeIndex];
+  const safeActiveIndex = activeIndex >= sortedMockups.length ? 0 : activeIndex;
+  const activeMockup = sortedMockups[safeActiveIndex] || sortedMockups[0];
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -1741,7 +1742,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               <div className="space-y-6 pt-3 animate-fadeIn">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <p className="text-xs sm:text-sm text-gray-400">
-                    Mockups regenerate automatically when designs are saved.
+                    Real-time local preview is active. To fetch high-quality Printify mockups, click regenerate.
                   </p>
                   <Button
                     onClick={handleManualRegenerate}
