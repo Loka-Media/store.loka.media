@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { printfulAPI } from "@/lib/api";
 import { Search, Package, Plus, ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import toast from "react-hot-toast";
 import Navigation from "@/components/Navigation";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
@@ -270,18 +271,15 @@ function CategoryCard({ category, onSelect }: any) {
       onClick={() => onSelect(category)}
     >
       <div className="aspect-square relative overflow-hidden">
-  <Image
-  src={
-    category.image_url ||
-    category.image ||
-    "/placeholder-product.png"
-  }
-          alt={category.title}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-500"
-          unoptimized
-          priority
-        />
+          {/* Image with fallback */}
+          <ImageWithFallback
+            src={category.image_url || category.image || '/placeholder-product.png'}
+            alt={category.title}
+            fill
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            unoptimized
+            priority
+          />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
       <div className="p-2 sm:p-3">

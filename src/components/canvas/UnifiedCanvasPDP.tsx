@@ -1018,24 +1018,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     await onGeneratePreview();
   };
 
-  // Debounced auto mockup preview generator - ONLY triggers automatically if we don't have mockups yet
+  // Auto mockup preview generator is disabled to prevent slow "Generating Printify mockups..." loops
+  // We rely on the local 360 viewer for real-time preview, and only generate on publish or manual click
   useEffect(() => {
-    if (designFiles.length === 0 || selectedVariants.length === 0) return;
-
-    // If mockups are already generated, do not auto-regenerate on changes (prevents 429 rate limit spam)
-    // The client-side real-time overlay shows layout edits instantly!
-    if (mockupUrls && mockupUrls.length > 0) return;
-
-    if (skipAutoPreviewRef.current) {
-      skipAutoPreviewRef.current = false;
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      onGeneratePreview();
-    }, 8000); // 8-second debounce for initial load
-
-    return () => clearTimeout(timer);
+    // Intentionally disabled auto-generation for faster user experience
   }, [designFiles, selectedVariants, mockupUrls, onGeneratePreview]);
 
   // Drag and Drop Upload Handlers

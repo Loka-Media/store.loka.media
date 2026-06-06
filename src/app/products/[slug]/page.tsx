@@ -55,9 +55,16 @@ export default function ProductPage({ params }: ProductPageProps) {
     return <ProductNotFound />;
   }
 
-  const images = product.images && product.images.length > 0
+  const extractImageUrl = (img: any) => {
+    if (typeof img === 'string') return img;
+    return img?.src || img?.url || '';
+  };
+
+  const rawImages = product.images && product.images.length > 0
     ? product.images
     : [product.thumbnail_url || '/placeholder-product.svg'];
+    
+  const images = rawImages.map(extractImageUrl).filter(Boolean);
 
   return (
     <div className="bg-black min-h-screen text-white">

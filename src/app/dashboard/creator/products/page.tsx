@@ -376,6 +376,12 @@ function ProductGridCard({
     router.push(`/products/${createProductSlug(product.name, product.id)}`);
   };
 
+  const getImageUrl = (url: any) => {
+    if (!url) return "/placeholder-product.png";
+    const strUrl = typeof url === 'string' ? url : url.src || url.url || "/placeholder-product.png";
+    return strUrl.startsWith('//') ? `https:${strUrl}` : strUrl;
+  };
+
   return (
     <div
       role="link"
@@ -392,7 +398,7 @@ function ProductGridCard({
       <div className="gradient-border-white-bottom overflow-hidden">
         <div className="w-full relative" style={{ aspectRatio: "1/1" }}>
           <Image
-            src={product.thumbnail_url || "/placeholder-product.png"}
+            src={getImageUrl(product.thumbnail_url)}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -487,6 +493,12 @@ function ProductListRow({
     e.stopPropagation();
   };
 
+  const getImageUrl = (url: any) => {
+    if (!url) return "/placeholder-product.png";
+    const strUrl = typeof url === 'string' ? url : url.src || url.url || "/placeholder-product.png";
+    return strUrl.startsWith('//') ? `https:${strUrl}` : strUrl;
+  };
+
   return (
     <tr
       className="hover:bg-white/5 transition-colors cursor-pointer group"
@@ -505,7 +517,7 @@ function ProductListRow({
               style={{ aspectRatio: "1/1" }}
             >
               <Image
-                src={product.thumbnail_url || "/placeholder-product.png"}
+                src={getImageUrl(product.thumbnail_url)}
                 alt={product.name}
                 fill
                 className="object-cover"

@@ -39,21 +39,54 @@ async function printifyFetch<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const { apiKey } = getConfig();
-
   const url = `${PRINTIFY_BASE_URL}${path}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'User-Agent': 'LokMedia-Store/1.0',
-      ...options.headers,
-    },
-  });
 
-  if (!response.ok) {
+  // ---------- retry configuration ----------
+  const MAX_RETRIES = Number(process.env.PRINTIFY_MAX_RETRIES) || 5; // default 5 attempts
+  const BASE_DELAY_MS = 1000; // 1 s base for exponential back‑off
+
+  const isRetryable = (status: number) => {
+    // 429 Too Many Requests or any 5xx server error are retryable
+    return status === 429 || (status >= 500 && status < 600);
+  };
+
+  let attempt = 0;
+  while (true) {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'LokMedia-Store/1.0',
+        ...options.headers,
+      },
+    });
+
+    if (response.ok) {
+      if (response.status === 204) return {} as T;
+      return (await response.json()) as T;
+    }
+
+    const status = response.status;
+    if (isRetryable(status) && attempt < MAX_RETRIES) {
+      // Respect Retry‑After header if present (seconds)
+      const retryAfter = response.headers.get('Retry-After');
+      // Retry backoff with cap (max 5 seconds)
+      const backoffBase = retryAfter ? parseInt(retryAfter, 10) * 1000 : BASE_DELAY_MS * Math.pow(2, attempt);
+      const cappedBackoff = Math.min(backoffBase, 5000); // max 5 s
+      const jitter = Math.floor(Math.random() * 400) - 200; // ±200 ms
+      const backoff = Math.max(0, cappedBackoff + jitter);
+      console.warn(
+        `[Printify Sync] Retry ${attempt + 1}/${MAX_RETRIES} for ${path} (status ${status}) after ${backoff}ms`
+      );
+      await new Promise((resolve) => setTimeout(resolve, backoff));
+      attempt++;
+      continue;
+    }
+
+    // Non‑retryable or exhausted attempts – build error message
     const errorBody = await response.text();
-    let errorMessage = `Printify API error: ${response.status} ${response.statusText}`;
+    let errorMessage = `Printify API error: ${status} ${response.statusText}`;
     try {
       const errorJson = JSON.parse(errorBody);
       errorMessage = errorJson.message || errorJson.error || errorMessage;
@@ -61,17 +94,11 @@ async function printifyFetch<T>(
         errorMessage += ` - Details: ${JSON.stringify(errorJson.errors)}`;
       }
     } catch {
-      // Use default message
+      // keep default message
     }
     throw new Error(errorMessage);
   }
 
-  // Handle 204 No Content
-  if (response.status === 204) {
-    return {} as T;
-  }
-
-  return response.json() as Promise<T>;
 }
 
 // ============================================================

@@ -662,6 +662,16 @@ function CanvasContent() {
 
       if (result.success) {
         localStorage.removeItem(`mockup_request_${selectedProduct.id}`);
+        // ---- Publish product to Printify ----
+        try {
+          // First, publish the product with required fields
+          await printifyProductsAPI.publishProduct(selectedProduct.id);
+          // Then notify publishing succeeded
+          await printifyProductsAPI.setPublishingSucceeded(selectedProduct.id);
+        } catch (publishError) {
+          console.error('Publish API error:', publishError);
+          toast.error('Publishing to Printify failed. Please try again.');
+        }
         if (blueprintId) {
           localStorage.removeItem(`productForm_${blueprintId}`);
         }
