@@ -6,6 +6,13 @@ import { Save, AlertCircle, CheckCircle, Eye, EyeOff, Lock, DollarSign, Edit2, T
 import CreatorProtectedRoute from '@/components/CreatorProtectedRoute';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { api } from '@/lib/auth';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface BankDetails {
   id?: number;
@@ -520,42 +527,48 @@ function PayoutSettingsPageContent() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">Bank Country *</label>
-                <select
-                  name="bank_country"
-                  value={bankDetails.bank_country}
-                  onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                <Select
+                  value={bankDetails.bank_country || "US"}
+                  onValueChange={(val) => setBankDetails(prev => ({ ...prev, bank_country: val }))}
                 >
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="GB">United Kingdom</option>
-                  <option value="AU">Australia</option>
-                  <option value="DE">Germany</option>
-                  <option value="FR">France</option>
-                  <option value="JP">Japan</option>
-                  <option value="IN">India</option>
-                  <option value="MX">Mexico</option>
-                  <option value="BR">Brazil</option>
-                </select>
+                  <SelectTrigger className="w-full h-[46px] bg-gray-900 border-gray-600 rounded-lg text-white">
+                    <SelectValue placeholder="Select Country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="US">United States</SelectItem>
+                    <SelectItem value="CA">Canada</SelectItem>
+                    <SelectItem value="GB">United Kingdom</SelectItem>
+                    <SelectItem value="AU">Australia</SelectItem>
+                    <SelectItem value="DE">Germany</SelectItem>
+                    <SelectItem value="FR">France</SelectItem>
+                    <SelectItem value="JP">Japan</SelectItem>
+                    <SelectItem value="IN">India</SelectItem>
+                    <SelectItem value="MX">Mexico</SelectItem>
+                    <SelectItem value="BR">Brazil</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">Currency *</label>
-                <select
-                  name="currency"
-                  value={bankDetails.currency}
-                  onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                <Select
+                  value={bankDetails.currency || "USD"}
+                  onValueChange={(val) => setBankDetails(prev => ({ ...prev, currency: val }))}
                 >
-                  <option value="USD">USD - US Dollar</option>
-                  <option value="CAD">CAD - Canadian Dollar</option>
-                  <option value="GBP">GBP - British Pound</option>
-                  <option value="AUD">AUD - Australian Dollar</option>
-                  <option value="EUR">EUR - Euro</option>
-                  <option value="JPY">JPY - Japanese Yen</option>
-                  <option value="INR">INR - Indian Rupee</option>
-                  <option value="MXN">MXN - Mexican Peso</option>
-                  <option value="BRL">BRL - Brazilian Real</option>
-                </select>
+                  <SelectTrigger className="w-full h-[46px] bg-gray-900 border-gray-600 rounded-lg text-white">
+                    <SelectValue placeholder="Select Currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD - US Dollar</SelectItem>
+                    <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
+                    <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                    <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>
+                    <SelectItem value="EUR">EUR - Euro</SelectItem>
+                    <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
+                    <SelectItem value="INR">INR - Indian Rupee</SelectItem>
+                    <SelectItem value="MXN">MXN - Mexican Peso</SelectItem>
+                    <SelectItem value="BRL">BRL - Brazilian Real</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -634,15 +647,18 @@ function PayoutSettingsPageContent() {
 
             <div>
               <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">Account Type *</label>
-              <select
-                name="account_type"
-                value={bankDetails.account_type}
-                onChange={handleChange}
-                className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+              <Select
+                value={bankDetails.account_type || "checking"}
+                onValueChange={(val) => setBankDetails(prev => ({ ...prev, account_type: val as any }))}
               >
-                <option value="checking">Checking</option>
-                <option value="savings">Savings</option>
-              </select>
+                <SelectTrigger className="w-full h-[46px] bg-gray-900 border-gray-600 rounded-lg text-white">
+                  <SelectValue placeholder="Account Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="checking">Checking</SelectItem>
+                  <SelectItem value="savings">Savings</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -655,16 +671,19 @@ function PayoutSettingsPageContent() {
 
             <div>
               <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">Tax ID Type *</label>
-              <select
-                name="tax_id_type"
-                value={bankDetails.tax_id_type}
-                onChange={handleChange}
-                className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+              <Select
+                value={bankDetails.tax_id_type || "ssn"}
+                onValueChange={(val) => setBankDetails(prev => ({ ...prev, tax_id_type: val as any }))}
               >
-                <option value="ssn">Social Security Number (SSN)</option>
-                <option value="ein">Employer Identification Number (EIN)</option>
-                <option value="other">Other Tax ID</option>
-              </select>
+                <SelectTrigger className="w-full h-[46px] bg-gray-900 border-gray-600 rounded-lg text-white">
+                  <SelectValue placeholder="Tax ID Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ssn">Social Security Number (SSN)</SelectItem>
+                  <SelectItem value="ein">Employer Identification Number (EIN)</SelectItem>
+                  <SelectItem value="other">Other Tax ID</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

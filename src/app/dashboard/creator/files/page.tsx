@@ -24,6 +24,13 @@ import toast from 'react-hot-toast';
 import GradientTitle from '@/components/ui/GradientTitle';
 import CreativeLoader from '@/components/CreativeLoader';
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface UploadedFile {
   id: number;
@@ -412,29 +419,37 @@ function FilesPageContent() {
               </div>
 
               {/* Type Filter */}
-              <select
-                value={filters.type}
-                onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-                className="px-4 py-2.5 sm:py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
+              <Select
+                value={filters.type || "all"}
+                onValueChange={(val) => setFilters(prev => ({ ...prev, type: val === "all" ? "" : val }))}
               >
-                <option value="" className="bg-gray-900">All Types</option>
-                <option value="image/png" className="bg-gray-900">PNG</option>
-                <option value="image/jpeg" className="bg-gray-900">JPG</option>
-                <option value="image/svg" className="bg-gray-900">SVG</option>
-                <option value="image/webp" className="bg-gray-900">WebP</option>
-              </select>
+                <SelectTrigger className="w-[140px] h-[42px] sm:h-[46px] bg-white/5 border-white/20 rounded-lg">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="image/png">PNG</SelectItem>
+                  <SelectItem value="image/jpeg">JPG</SelectItem>
+                  <SelectItem value="image/svg">SVG</SelectItem>
+                  <SelectItem value="image/webp">WebP</SelectItem>
+                </SelectContent>
+              </Select>
 
               {/* Status Filter */}
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                className="px-4 py-2.5 sm:py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
+              <Select
+                value={filters.status || "all"}
+                onValueChange={(val) => setFilters(prev => ({ ...prev, status: val === "all" ? "" : val }))}
               >
-                <option value="" className="bg-gray-900">All Status</option>
-                <option value="ok" className="bg-gray-900">Ready</option>
-                <option value="processing" className="bg-gray-900">Processing</option>
-                <option value="failed" className="bg-gray-900">Failed</option>
-              </select>
+                <SelectTrigger className="w-[140px] h-[42px] sm:h-[46px] bg-white/5 border-white/20 rounded-lg">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="ok">Ready</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center space-x-3 sm:space-x-4">

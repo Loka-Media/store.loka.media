@@ -1,6 +1,13 @@
 "use client";
 
-import { Filter, ChevronDown } from "lucide-react";
+import { Filter } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface FilterState {
   category: string;
@@ -52,22 +59,22 @@ export function ProductFilters({
           >
             Category
           </label>
-          <div className="relative">
-            <select
-              id="category-filter"
-              value={filters.category}
-              onChange={(e) => onFilterChange("category", e.target.value)}
-              className="w-full p-3 pr-10 border border-gray-700 rounded-md focus:ring-orange-500 focus:border-orange-500 bg-gray-800 text-white appearance-none"
-            >
-              <option value="">All Categories</option>
+          <Select
+            value={filters.category || "all"}
+            onValueChange={(val) => onFilterChange("category", val === "all" ? "" : val)}
+          >
+            <SelectTrigger id="category-filter" className="w-full h-12 bg-gray-800 border-gray-700">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
               {categories.map((cat) => (
-                <option key={cat.category} value={cat.category}>
+                <SelectItem key={cat.category} value={cat.category}>
                   {cat.category} ({cat.product_count})
-                </option>
+                </SelectItem>
               ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Creators */}
@@ -78,22 +85,22 @@ export function ProductFilters({
           >
             Creator
           </label>
-          <div className="relative">
-            <select
-              id="creator-filter"
-              value={filters.creator}
-              onChange={(e) => onFilterChange("creator", e.target.value)}
-              className="w-full p-3 pr-10 border border-gray-700 rounded-md focus:ring-orange-500 focus:border-orange-500 bg-gray-800 text-white appearance-none"
-            >
-              <option value="">All Creators</option>
+          <Select
+            value={filters.creator || "all"}
+            onValueChange={(val) => onFilterChange("creator", val === "all" ? "" : val)}
+          >
+            <SelectTrigger id="creator-filter" className="w-full h-12 bg-gray-800 border-gray-700">
+              <SelectValue placeholder="All Creators" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Creators</SelectItem>
               {creators.map((creator) => (
-                <option key={creator.id} value={creator.name}>
+                <SelectItem key={creator.id} value={creator.name}>
                   {creator.name} ({creator.product_count})
-                </option>
+                </SelectItem>
               ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Price Range */}
@@ -130,19 +137,19 @@ export function ProductFilters({
           >
             Sort By
           </label>
-          <div className="relative">
-            <select
-              id="sort-by"
-              value={filters.sortBy}
-              onChange={(e) => onFiltersUpdate({ sortBy: e.target.value })}
-              className="w-full p-3 pr-10 border border-gray-700 rounded-md focus:ring-orange-500 focus:border-orange-500 bg-gray-800 text-white appearance-none"
-            >
-              <option value="created_at">Newest</option>
-              <option value="name">Name (A-Z)</option>
-              <option value="min_price">Price (Low to High)</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
+          <Select
+            value={filters.sortBy || "created_at"}
+            onValueChange={(val) => onFiltersUpdate({ sortBy: val })}
+          >
+            <SelectTrigger id="sort-by" className="w-full h-12 bg-gray-800 border-gray-700">
+              <SelectValue placeholder="Sort By" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="created_at">Newest</SelectItem>
+              <SelectItem value="name">Name (A-Z)</SelectItem>
+              <SelectItem value="min_price">Price (Low to High)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Sort Order */}
@@ -153,18 +160,18 @@ export function ProductFilters({
           >
             Sort Order
           </label>
-          <div className="relative">
-            <select
-              id="sort-order"
-              value={filters.sortOrder}
-              onChange={(e) => onFiltersUpdate({ sortOrder: e.target.value })}
-              className="w-full p-3 pr-10 border border-gray-700 rounded-md focus:ring-orange-500 focus:border-orange-500 bg-gray-800 text-white appearance-none"
-            >
-              <option value="DESC">Descending</option>
-              <option value="ASC">Ascending</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          </div>
+          <Select
+            value={filters.sortOrder || "DESC"}
+            onValueChange={(val) => onFiltersUpdate({ sortOrder: val })}
+          >
+            <SelectTrigger id="sort-order" className="w-full h-12 bg-gray-800 border-gray-700">
+              <SelectValue placeholder="Sort Order" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="DESC">Descending</SelectItem>
+              <SelectItem value="ASC">Ascending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <button

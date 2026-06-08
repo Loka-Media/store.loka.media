@@ -1,4 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ProductsControlsProps {
   loading: boolean;
@@ -38,28 +45,25 @@ export function ProductsControls({
       </div>
 
       {/* Sort Dropdown */}
-      <div className="relative">
-        <select
-          value={`${filters.sortBy}-${filters.sortOrder}`}
-          onChange={(e) => {
-            const [sortBy, sortOrder] = e.target.value.split("-");
-            setFilters((prev: any) => ({ ...prev, sortBy, sortOrder }));
-          }}
-          className="w-full sm:w-auto px-4 py-3 bg-white border border-black rounded-lg text-black text-sm font-extrabold transition-all duration-200 focus:outline-none hover:bg-yellow-50 appearance-none pr-10 hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
-        >
-          <option value="created_at-DESC">Newest First</option>
-          <option value="created_at-ASC">Oldest First</option>
-          <option value="base_price-ASC">Price: Low to High</option>
-          <option value="base_price-DESC">Price: High to Low</option>
-          <option value="name-ASC">Name: A to Z</option>
-          <option value="name-DESC">Name: Z to A</option>
-        </select>
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-          <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
+      <Select
+        value={`${filters.sortBy}-${filters.sortOrder}`}
+        onValueChange={(val) => {
+          const [sortBy, sortOrder] = val.split("-");
+          setFilters((prev: any) => ({ ...prev, sortBy, sortOrder }));
+        }}
+      >
+        <SelectTrigger className="w-[200px] h-12 bg-gray-800 border-gray-700">
+          <SelectValue placeholder="Sort By" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="created_at-DESC">Newest First</SelectItem>
+          <SelectItem value="created_at-ASC">Oldest First</SelectItem>
+          <SelectItem value="base_price-ASC">Price: Low to High</SelectItem>
+          <SelectItem value="base_price-DESC">Price: High to Low</SelectItem>
+          <SelectItem value="name-ASC">Name: A to Z</SelectItem>
+          <SelectItem value="name-DESC">Name: Z to A</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

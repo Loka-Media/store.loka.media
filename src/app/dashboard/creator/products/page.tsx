@@ -13,6 +13,13 @@ import GradientTitle from "@/components/ui/GradientTitle";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import CreativeLoader from "@/components/CreativeLoader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Product {
   id: number;
@@ -228,58 +235,42 @@ export default function CreatorProductsPage() {
               </div>
 
               {/* Category Filter */}
-              <select
-                value={filters.category}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, category: e.target.value }))
-                }
-                className="px-4 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
+              <Select
+                value={filters.category || "all"}
+                onValueChange={(val) => setFilters((prev) => ({ ...prev, category: val === "all" ? "" : val }))}
               >
-                <option value="" className="bg-black">
-                  All Categories
-                </option>
-                <option value="T-Shirts" className="bg-black">
-                  T-Shirts
-                </option>
-                <option value="Hoodies" className="bg-black">
-                  Hoodies
-                </option>
-                <option value="Mugs" className="bg-black">
-                  Mugs
-                </option>
-                <option value="Posters" className="bg-black">
-                  Posters
-                </option>
-              </select>
+                <SelectTrigger className="w-[160px] h-[42px] sm:h-[46px] bg-white/10 border-white/20 rounded-lg">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="T-Shirts">T-Shirts</SelectItem>
+                  <SelectItem value="Hoodies">Hoodies</SelectItem>
+                  <SelectItem value="Mugs">Mugs</SelectItem>
+                  <SelectItem value="Posters">Posters</SelectItem>
+                </SelectContent>
+              </Select>
 
               {/* Sort */}
-              <select
+              <Select
                 value={`${filters.sortBy}-${filters.sortOrder}`}
-                onChange={(e) => {
-                  const [sortBy, sortOrder] = e.target.value.split("-");
+                onValueChange={(val) => {
+                  const [sortBy, sortOrder] = val.split("-");
                   setFilters((prev) => ({ ...prev, sortBy, sortOrder }));
                 }}
-                className="px-4 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
               >
-                <option value="created_at-DESC" className="bg-black">
-                  Newest First
-                </option>
-                <option value="created_at-ASC" className="bg-black">
-                  Oldest First
-                </option>
-                <option value="name-ASC" className="bg-black">
-                  Name: A to Z
-                </option>
-                <option value="name-DESC" className="bg-black">
-                  Name: Z to A
-                </option>
-                <option value="base_price-ASC" className="bg-black">
-                  Price: Low to High
-                </option>
-                <option value="base_price-DESC" className="bg-black">
-                  Price: High to Low
-                </option>
-              </select>
+                <SelectTrigger className="w-[180px] h-[42px] sm:h-[46px] bg-white/10 border-white/20 rounded-lg">
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created_at-DESC">Newest First</SelectItem>
+                  <SelectItem value="created_at-ASC">Oldest First</SelectItem>
+                  <SelectItem value="name-ASC">Name: A to Z</SelectItem>
+                  <SelectItem value="name-DESC">Name: Z to A</SelectItem>
+                  <SelectItem value="base_price-ASC">Price: Low to High</SelectItem>
+                  <SelectItem value="base_price-DESC">Price: High to Low</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center justify-between">

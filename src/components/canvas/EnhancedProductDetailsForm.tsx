@@ -22,6 +22,13 @@ import {
 import toast from 'react-hot-toast';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { productDetailsSchema } from '@/lib/validators/product';
 
 interface ProductDetailsFormProps {
@@ -461,26 +468,23 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   <Tag className="w-5 h-5" />
                   Category *
                 </label>
-                <div className="relative">
-                  <select
-                    value={formData.category}
-                    onChange={(e) => handleInputChange('category', e.target.value)}
-                    className={`w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all appearance-none ${
-                      errors.category ? 'border-orange-500/50 bg-orange-500/10' : ''
-                    }`}
-                  >
-                    <option value="">Select a category</option>
-                    <option value="apparel">Apparel</option>
-                    <option value="accessories">Accessories</option>
-                    <option value="home-living">Home & Living</option>
-                    <option value="stationery">Stationery</option>
-                    <option value="bags">Bags</option>
-                    <option value="other">Other</option>
-                  </select>
-                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    <ChevronLeft className="w-5 h-5 rotate-90" />
-                  </div>
-                </div>
+                <Select
+                  value={formData.category || "placeholder"}
+                  onValueChange={(val) => handleInputChange('category', val === "placeholder" ? "" : val)}
+                >
+                  <SelectTrigger className={`w-full h-12 bg-gray-800 rounded-lg text-white ${errors.category ? 'border-orange-500/50 bg-orange-500/10' : 'border-gray-700'}`}>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="placeholder" disabled>Select a category</SelectItem>
+                    <SelectItem value="apparel">Apparel</SelectItem>
+                    <SelectItem value="accessories">Accessories</SelectItem>
+                    <SelectItem value="home-living">Home & Living</SelectItem>
+                    <SelectItem value="stationery">Stationery</SelectItem>
+                    <SelectItem value="bags">Bags</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
                 {errors.category && (
                   <div className="mt-2 flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg px-3 py-2">
                     <AlertCircle className="w-4 h-4 text-orange-400" />

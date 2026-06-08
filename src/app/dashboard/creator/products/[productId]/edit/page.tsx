@@ -12,6 +12,13 @@ import GradientTitle from '@/components/ui/GradientTitle';
 import { Button } from '@/components/ui/button';
 import CreativeLoader from '@/components/CreativeLoader';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   validateProductName,
   validateProductDescription,
   validateProductCategory,
@@ -351,19 +358,23 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                 <label className="block text-sm font-medium text-white/90 mb-2">
                   Category
                 </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => handleInputChange('category', e.target.value)}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+                <Select
+                  value={formData.category || "placeholder"}
+                  onValueChange={(val) => handleInputChange('category', val === "placeholder" ? "" : val)}
                 >
-                  <option value="">Select Category</option>
-                  <option value="T-Shirts">T-Shirts</option>
-                  <option value="Hoodies">Hoodies</option>
-                  <option value="Mugs">Mugs</option>
-                  <option value="Posters">Posters</option>
-                  <option value="Stickers">Stickers</option>
-                  <option value="Phone Cases">Phone Cases</option>
-                </select>
+                  <SelectTrigger className="w-full h-[50px] bg-white/10 border-white/20 rounded-xl">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="placeholder" disabled>Select Category</SelectItem>
+                    <SelectItem value="T-Shirts">T-Shirts</SelectItem>
+                    <SelectItem value="Hoodies">Hoodies</SelectItem>
+                    <SelectItem value="Mugs">Mugs</SelectItem>
+                    <SelectItem value="Posters">Posters</SelectItem>
+                    <SelectItem value="Stickers">Stickers</SelectItem>
+                    <SelectItem value="Phone Cases">Phone Cases</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>

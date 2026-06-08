@@ -13,6 +13,13 @@ import {
   TrendingUp,
   Clock
 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Product {
   product_id: number;
@@ -187,21 +194,25 @@ export default function CreatorOrdersPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-4 py-2">
+              <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-gray-600" />
-                <select
+                <Select
                   value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
+                  onValueChange={(val) => {
+                    setStatusFilter(val);
                     setPagination(prev => ({ ...prev, offset: 0 }));
                   }}
-                  className="bg-transparent border-none focus:outline-none text-sm font-medium text-gray-700"
                 >
-                  <option value="all">All Orders</option>
-                  <option value="pending">Upcoming Commission</option>
-                  <option value="processing">Ready for Payout</option>
-                  <option value="paid">Paid</option>
-                </select>
+                  <SelectTrigger className="w-[200px] h-[42px] bg-white border-gray-300 rounded-lg text-gray-900">
+                    <SelectValue placeholder="All Orders" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Orders</SelectItem>
+                    <SelectItem value="pending">Upcoming Commission</SelectItem>
+                    <SelectItem value="processing">Ready for Payout</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

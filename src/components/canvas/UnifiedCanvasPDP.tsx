@@ -32,6 +32,13 @@ import {
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { printfulAPI } from "@/lib/api";
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition } from "./utils";
 import DesignCanvasTab from "./DesignCanvasTab";
@@ -1377,27 +1384,26 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         {selectedProduct.providers.length} provider(s) available
                       </span>
                     </div>
-                    <div className="relative">
-                      <select
-                        value={selectedProduct.print_provider_id || selectedProduct.printProviderId || ""}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value);
-                          if (val && onProviderChange) {
-                            onProviderChange(val);
-                          }
-                        }}
-                        className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-xs sm:text-sm text-gray-200 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all cursor-pointer appearance-none"
-                      >
+                    <Select
+                      value={String(selectedProduct.print_provider_id || selectedProduct.printProviderId || "")}
+                      onValueChange={(val) => {
+                        const numericVal = parseInt(val);
+                        if (numericVal && onProviderChange) {
+                          onProviderChange(numericVal);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full h-[46px] bg-black/60 border-white/10 rounded-xl px-4 text-xs sm:text-sm text-gray-200">
+                        <SelectValue placeholder="Select Print Provider" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {selectedProduct.providers.map((provider: any) => (
-                          <option key={provider.id} value={provider.id} className="bg-gray-950 text-gray-200">
+                          <SelectItem key={provider.id} value={String(provider.id)}>
                             {provider.title} (ID: {provider.id})
-                          </option>
+                          </SelectItem>
                         ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                        <ChevronDown className="w-4 h-4" />
-                      </div>
-                    </div>
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
 
@@ -1992,20 +1998,23 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <label className="block text-xs sm:text-sm font-semibold text-gray-300">
                       Marketplace Category *
                     </label>
-                    <select
-                      value={productForm.category}
-                      onChange={(e) => handleInputChange("category", e.target.value)}
-                      className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${formErrors.category ? "border-red-500/50 bg-red-500/5" : "border-white/10"
-                        }`}
+                    <Select
+                      value={productForm.category || "placeholder"}
+                      onValueChange={(val) => handleInputChange("category", val)}
                     >
-                      <option value="" disabled>Select category</option>
-                      <option value="apparel">Apparel</option>
-                      <option value="accessories">Accessories</option>
-                      <option value="home-living">Home & Living</option>
-                      <option value="stationery">Stationery</option>
-                      <option value="bags">Bags</option>
-                      <option value="other">Other</option>
-                    </select>
+                      <SelectTrigger className={`w-full h-[46px] px-4 bg-black/60 rounded-xl text-sm text-white ${formErrors.category ? "border-red-500/50 bg-red-500/5" : "border-white/10"}`}>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="placeholder" disabled>Select category</SelectItem>
+                        <SelectItem value="apparel">Apparel</SelectItem>
+                        <SelectItem value="accessories">Accessories</SelectItem>
+                        <SelectItem value="home-living">Home & Living</SelectItem>
+                        <SelectItem value="stationery">Stationery</SelectItem>
+                        <SelectItem value="bags">Bags</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                     {formErrors.category && <p className="text-xs text-red-400 mt-1">{formErrors.category}</p>}
                   </div>
 
