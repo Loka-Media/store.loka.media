@@ -22,7 +22,8 @@ const nextConfig: NextConfig = {
       'images.printify.com',
       'images-api.printify.com',
       'mockup-api.printify.com',
-      'pf-images-production.s3.amazonaws.com'
+      'pf-images-production.s3.amazonaws.com',
+      'pfy-prod-image-storage.s3.us-east-2.amazonaws.com'
     ],
     remotePatterns: [
       {
@@ -76,6 +77,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'pf-images-production.s3.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pfy-prod-image-storage.s3.us-east-2.amazonaws.com',
         port: '',
         pathname: '/**',
       }

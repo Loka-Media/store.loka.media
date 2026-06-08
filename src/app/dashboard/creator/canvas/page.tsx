@@ -77,6 +77,9 @@ function CanvasContent() {
   const [designFiles, setDesignFiles] = useState<DesignFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isFetchingFiles, setIsFetchingFiles] = useState(false);
   const [step, setStep] = useState<
     | "upload"
     | "unified-editor"
@@ -263,15 +266,33 @@ function CanvasContent() {
     }
   }, [blueprintId, isInitialized, router]);
 
-  const fetchUploadedFiles = useCallback(async () => {
+  const fetchUploadedFiles = useCallback(async (page: number = 1) => {
     try {
+      setIsFetchingFiles(true);
+      const res = await printifyAPI.getImages({ limit: 12, page });
+      // API typically returns data inside data, e.g. { data: { current_page, last_page, data: [...] } }
+      const imagesData = res?.data || res;
+      if (imagesData && Array.isArray(imagesData.data)) {
+        setUploadedFiles(imagesData.data);
+        setCurrentPage(imagesData.current_page || page);
+        setTotalPages(imagesData.last_page || Math.ceil(imagesData.total / 12) || 1);
+        // Save first page to local storage as fallback
+        if (page === 1) {
+          localStorage.setItem("uploaded_printify_images", JSON.stringify(imagesData.data));
+        }
+      } else {
+        throw new Error("Invalid API response format");
+      }
+    } catch (error) {
+      console.error("Failed to fetch files from API, using fallback:", error);
       const saved = localStorage.getItem("uploaded_printify_images");
       const files = saved ? JSON.parse(saved) : [];
-      setUploadedFiles(files);
-      console.log(`📂 Loaded ${files.length} design files from localStorage`);
-    } catch (error) {
-      console.error("Failed to load uploaded files:", error);
-      setUploadedFiles([]);
+      // Quick local pagination fallback
+      setUploadedFiles(files.slice((page - 1) * 12, page * 12));
+      setTotalPages(Math.ceil(files.length / 12) || 1);
+      setCurrentPage(page);
+    } finally {
+      setIsFetchingFiles(false);
     }
   }, []);
 
@@ -730,6 +751,9 @@ function CanvasContent() {
             onPublish={handleGoLiveToMarketplace}
             isPublishing={creating}
             onProviderChange={handleProviderChange}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            isFetchingFiles={isFetchingFiles}
           />
         )}
       </div>

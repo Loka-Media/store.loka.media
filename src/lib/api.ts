@@ -27,7 +27,11 @@ const printifyProxyRequest = async (
       throw new Error(`Printify proxy request failed: ${response.status} ${response.statusText} - ${errorBody}`);
     }
 
-    return response.json();
+    const text = await response.text();
+    if (!text) {
+      return {};
+    }
+    return JSON.parse(text);
   }
 
   const response = await api.request({

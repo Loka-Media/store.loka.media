@@ -41,7 +41,6 @@ export async function POST(
   try {
     const { path } = await params;
     const segments = path || [];
-    const body = await request.json();
 
     // POST /api/printify/uploads/:id/archive → delete
     if (segments.length === 2 && segments[1] === 'archive') {
@@ -51,6 +50,7 @@ export async function POST(
 
     // POST /api/printify/uploads/images → upload
     // Body: { file_name, url } or { file_name, contents (base64) }
+    const body = await request.json();
     const image = await printifyUploadsAPI.uploadImage(body);
     return NextResponse.json({ success: true, data: image }, { status: 201 });
 

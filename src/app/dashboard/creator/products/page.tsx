@@ -135,6 +135,29 @@ export default function CreatorProductsPage() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  const handleSyncPrintify = async () => {
+    try {
+      const toastId = toast.loading("Syncing products from Printify...");
+      // Hit the Next.js API route which will fetch all Printify products and save to backend
+      const res = await fetch("/api/printify/sync/all", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || "Synced successfully", { id: toastId });
+        fetchProducts(); // Refresh the list
+      } else {
+        throw new Error(data.error || "Sync failed");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to sync products from Printify");
+    }
+  };
+
   if (!user || (user.role !== "creator" && user.role !== "admin")) {
     return null;
   }
@@ -145,7 +168,7 @@ export default function CreatorProductsPage() {
       <div className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6 sm:py-8">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full justify-between">
               <Link
                 href="/dashboard/creator"
                 className="inline-flex items-center px-4 py-2 text-white/70 hover:text-white transition-colors"
@@ -153,6 +176,13 @@ export default function CreatorProductsPage() {
                 <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 <span className="text-sm sm:text-base font-medium">Back</span>
               </Link>
+              
+              <Button 
+                onClick={handleSyncPrintify}
+                className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
+              >
+                Sync from Printify
+              </Button>
             </div>
           </div>
           <div className="pb-6 sm:pb-8">
@@ -382,6 +412,12 @@ function ProductGridCard({
     return strUrl.startsWith('//') ? `https:${strUrl}` : strUrl;
   };
 
+  const [imgSrc, setImgSrc] = useState(() => getImageUrl(product.thumbnail_url));
+
+  useEffect(() => {
+    setImgSrc(getImageUrl(product.thumbnail_url));
+  }, [product.thumbnail_url]);
+
   return (
     <div
       role="link"
@@ -398,11 +434,13 @@ function ProductGridCard({
       <div className="gradient-border-white-bottom overflow-hidden">
         <div className="w-full relative" style={{ aspectRatio: "1/1" }}>
           <Image
-            src={getImageUrl(product.thumbnail_url)}
+            src={imgSrc}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            unoptimized
+            onError={() => setImgSrc("/placeholder-product.png")}
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -499,6 +537,12 @@ function ProductListRow({
     return strUrl.startsWith('//') ? `https:${strUrl}` : strUrl;
   };
 
+  const [imgSrc, setImgSrc] = useState(() => getImageUrl(product.thumbnail_url));
+
+  useEffect(() => {
+    setImgSrc(getImageUrl(product.thumbnail_url));
+  }, [product.thumbnail_url]);
+
   return (
     <tr
       className="hover:bg-white/5 transition-colors cursor-pointer group"
@@ -517,11 +561,13 @@ function ProductListRow({
               style={{ aspectRatio: "1/1" }}
             >
               <Image
-                src={getImageUrl(product.thumbnail_url)}
+                src={imgSrc}
                 alt={product.name}
                 fill
                 className="object-cover"
                 sizes="48px"
+                unoptimized
+                onError={() => setImgSrc("/placeholder-product.png")}
               />
             </div>
           </div>

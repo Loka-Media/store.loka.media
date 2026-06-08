@@ -52,7 +52,7 @@ interface UnifiedCanvasPDPProps {
   mockupUrls: any[];
   mockupStatus: string;
   onPrintFilesLoaded: (printFiles: any) => void;
-  onRefreshFiles: () => void;
+  onRefreshFiles: (page?: number) => void;
   productForm: {
     name: string;
     description: string;
@@ -64,6 +64,9 @@ interface UnifiedCanvasPDPProps {
   onPublish: (updatedProductForm?: any) => Promise<void>;
   isPublishing: boolean;
   onProviderChange?: (providerId: number) => Promise<void>;
+  currentPage?: number;
+  totalPages?: number;
+  isFetchingFiles?: boolean;
 }
 
 // Helper to determine readable text contrast color (black or white) based on background hex code
@@ -563,7 +566,7 @@ const Product360Viewer: React.FC<{
           </div>
 
           <div className="relative group/carousel">
-            <div className="flex gap-2.5 overflow-x-auto pb-2 pt-1 px-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div className="flex gap-2.5 overflow-x-auto pb-2 pt-1 px-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent [&::-webkit-scrollbar]:h-[5px]">
               {sortedMockups.map((m, idx) => {
                 const isSelected = idx === activeIndex;
                 const isBlueprint = !mockupUrls || mockupUrls.length === 0;
@@ -634,6 +637,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   onPublish,
   isPublishing,
   onProviderChange,
+  currentPage = 1,
+  totalPages = 1,
+  isFetchingFiles = false,
 }) => {
   // Mobile accordion state
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
@@ -1128,8 +1134,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       id: Date.now(),
       printify_id: file.id,
       imageId: file.id,
-      filename: file.filename,
-      url: file.file_url || file.thumbnail_url || "",
+      filename: file.filename || file.file_name,
+      url: file.file_url || file.thumbnail_url || file.preview_url || "",
       type: "design",
       placement: activePlacement,
       position: {
@@ -1610,12 +1616,40 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                 {/* Uploaded Gallery */}
                 <div className="space-y-3">
-                  <label className="text-xs sm:text-sm font-semibold text-gray-300">
-                    Your Uploaded designs ({uploadedFiles.length})
-                  </label>
-                  {uploadedFiles.length > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs sm:text-sm font-semibold text-gray-300">
+                      Your Uploaded designs
+                    </label>
+                    {totalPages > 1 && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => onRefreshFiles(currentPage - 1)}
+                          disabled={currentPage <= 1 || isFetchingFiles}
+                          className="p-1 rounded-md bg-white/5 hover:bg-white/10 disabled:opacity-50 transition-colors"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <span className="text-xs font-medium text-gray-400">
+                          {currentPage} / {totalPages}
+                        </span>
+                        <button
+                          onClick={() => onRefreshFiles(currentPage + 1)}
+                          disabled={currentPage >= totalPages || isFetchingFiles}
+                          className="p-1 rounded-md bg-white/5 hover:bg-white/10 disabled:opacity-50 transition-colors"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {isFetchingFiles ? (
+                    <div className="flex flex-col items-center justify-center py-10 gap-2 border border-white/5 rounded-2xl bg-black/20">
+                      <Loader2 className="w-6 h-6 text-[#FF6D1F] animate-spin" />
+                      <span className="text-xs text-gray-400">Loading designs...</span>
+                    </div>
+                  ) : uploadedFiles.length > 0 ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                      {uploadedFiles.slice(0, 12).map((file) => {
+                      {uploadedFiles.map((file) => {
                         const isAssigned = selectedFileId === file.id;
                         return (
                           <div
@@ -1625,8 +1659,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               }`}
                           >
                             <img
-                              src={file.thumbnail_url || file.file_url}
-                              alt={file.filename}
+                              src={file.thumbnail_url || file.file_url || file.preview_url}
+                              alt={file.filename || file.file_name || "Uploaded design"}
                               className="w-full h-full object-cover p-1 bg-gray-800"
                             />
                             <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -1637,7 +1671,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       })}
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-500">No uploaded files yet. Upload a design above to customize.</p>
+                    <p className="text-xs text-gray-500 py-4 text-center border border-white/5 rounded-2xl bg-black/20">No uploaded files yet. Upload a design above to customize.</p>
                   )}
                 </div>
               </div>
