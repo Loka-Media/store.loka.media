@@ -85,10 +85,10 @@ function FilesPageContent() {
         url: file.file_url || file.thumbnail_url || file.preview_url || "",
         thumbnail_url: file.thumbnail_url || file.preview_url || "",
         type: 'image',
-        file_size: 0,
-        size: 0,
+        file_size: file.size || 0,
+        size: file.size || 0,
         status: 'ok',
-        created: Math.floor(Date.now() / 1000),
+        created: file.created || Math.floor(Date.now() / 1000),
         mime_type: getMimeType(file.filename || file.file_name || ""),
         width: file.width,
         height: file.height
@@ -227,6 +227,8 @@ function FilesPageContent() {
             thumbnail_url: newFile.thumbnail_url,
             width: newFile.width,
             height: newFile.height,
+            size: newFile.size,
+            created: newFile.created
           };
           if (!merged.some((f: any) => f.id === lsFile.id)) {
             merged.unshift(lsFile);
@@ -313,7 +315,7 @@ function FilesPageContent() {
       <div className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 sm:py-8 gap-4 sm:gap-0">
-            <div className="flex-1">
+            <div className="flex-1 mt-4">
               <Link
                 href="/dashboard/creator"
                 className="inline-flex items-center px-3 sm:px-6 py-1.5 sm:py-3 text-white/70 hover:text-white border border-white/20 rounded-lg font-bold hover:bg-white/5 transition-all text-xs sm:text-sm gap-2 mb-3 sm:mb-4"
@@ -478,36 +480,38 @@ function FilesPageContent() {
           </div>
         ) : (
           <div className="gradient-border-white-top overflow-hidden">
-            <table className="min-w-full divide-y divide-white/10">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
-                    File
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
-                    Size
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
-                    Uploaded
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10">
-                {filteredFiles.map((file) => (
-                  <FileListItem
-                    key={file.id}
-                    file={file}
-                    onDelete={() => handleDeleteFile(file.id)}
-                  />
-                ))}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/10">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
+                      File
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
+                      Size
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
+                      Uploaded
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-white/70 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {filteredFiles.map((file) => (
+                    <FileListItem
+                      key={file.id}
+                      file={file}
+                      onDelete={() => handleDeleteFile(file.id)}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
