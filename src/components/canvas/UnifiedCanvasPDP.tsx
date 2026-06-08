@@ -1306,7 +1306,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           <div className="flex-shrink-0 flex items-center gap-2">
             <Button
               onClick={handlePublishSubmit}
-              disabled={isPublishing || !validationSummary.allValid}
+              disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || mockupStatus !== 'Mockups loaded successfully!'}
+              title={mockupStatus !== 'Mockups loaded successfully!' ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}
               className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {isPublishing ? (
@@ -2315,8 +2316,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
         </div>
         <Button
           onClick={handlePublishSubmit}
-          disabled={isPublishing || !validationSummary.allValid}
-          className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all"
+          disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || mockupStatus !== 'Mockups loaded successfully!'}
+          title={mockupStatus !== 'Mockups loaded successfully!' ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}
+          className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPublishing ? "Publishing..." : "Publish Product"}
         </Button>
