@@ -4,23 +4,19 @@ import { useState, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { EffectCards, Autoplay } from 'swiper/modules';
+
+import 'swiper/css';
+import 'swiper/css/effect-cards';
+
 
 
 export function QualityProductsSection() {
   const [expandedSection, setExpandedSection] = useState<string | null>(
     "create"
   );
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
   const images = ["/images/1.jpeg", "/images/2.jpeg", "/images/3.jpeg", "/images/4.jpeg", "/images/5.jpeg"];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [images.length]);
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -74,49 +70,41 @@ export function QualityProductsSection() {
         </div>
 
         {/* Bottom - Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-16 items-start">
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 md:gap-10 lg:gap-0">
           {/* Left side - Scrolling Images */}
-          <div className="relative">
-            <div className="relative rounded-2xl overflow-hidden aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] border border-white/20 hover:shadow-[12px_12px_0_0_rgba(255,255,255,0.1)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+          <div className="relative w-full lg:w-[33%]">
+            <Swiper
+              effect={'cards'}
+              grabCursor={true}
+              modules={[EffectCards, Autoplay]}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              className="w-full max-w-[340px] sm:max-w-[380px] md:max-w-[420px] aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] mx-auto"
+            >
               {images.map((image, index) => (
-                <div
-                  key={index}
-                  className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentImageIndex
-                    ? "opacity-100 scale-100"
-                    : "opacity-0 scale-105"
-                    }`}
-                >
+                <SwiperSlide key={index} className="rounded-2xl overflow-hidden border border-white/20">
                   <img
                     src={image}
                     alt={`Product showcase ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                </div>
+                </SwiperSlide>
               ))}
-
-              {/* Image indicators */}
-              <div className="absolute bottom-3 sm:bottom-4 md:bottom-5 left-3 sm:left-4 md:left-5 z-10 flex space-x-1.5 sm:space-x-2">
-                {images.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300 border border-white ${index === currentImageIndex ? "bg-white" : "bg-white/40"
-                      }`}
-                  />
-                ))}
-              </div>
-            </div>
+            </Swiper>
           </div>
 
           {/* Right side - Content */}
-          <div className="space-y-2 sm:space-y-3">
+          <div className="w-full lg:w-[60%] space-y-2 sm:space-y-3">
             {/* Create beautiful products */}
             <div className="group relative bg-white/10 border border-white/20 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[6px_6px_0_0_rgba(255,255,255,0.1)] hover:translate-x-[-2px] hover:translate-y-[-2px]">
               <button
                 onClick={() => toggleSection("create")}
                 className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
               >
-                <span className="text-lg sm:text-lg md:text-lg font-extrabold text-white transition-all duration-300">
+                <span className="text-lg sm:text-lg md:text-lg font-extrabold text-white transition-all duration-300" style={{color:"#EB1DEF"}}>
                   Create beautiful products
                 </span>
                 <div className="relative">
@@ -153,7 +141,7 @@ export function QualityProductsSection() {
                 onClick={() => toggleSection("shop")}
                 className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
               >
-                <span className="text-lg sm:text-lg md:text-lg font-extrabold text-white transition-all duration-300">
+                <span className="text-lg sm:text-lg md:text-lg font-extrabold text-white transition-all duration-300"  style={{color:"#FFF085"}}>
                   Launch your own shop
                 </span>
                 <div className="relative">
@@ -187,7 +175,7 @@ export function QualityProductsSection() {
                 onClick={() => toggleSection("shipping")}
                 className="relative w-full flex items-center justify-between p-4 sm:p-5 md:p-6 text-left"
               >
-                <span className="text-lg sm:text-lg md:text-lg font-extrabold text-white transition-all duration-300">
+                <span className="text-lg sm:text-lg md:text-lg font-extrabold text-white transition-all duration-300"  style={{color:"#29FB8A"}}>
                   We handle shipping & support
                 </span>
                 <div className="relative">
