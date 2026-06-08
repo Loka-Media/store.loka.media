@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { printfulAPI } from "@/lib/api";
+import { printifyAPI } from "@/lib/api";
 import { Search, Package, Plus, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
@@ -103,7 +103,7 @@ export default function CreatorCatalogPage() {
         );
 
         // Use basic filtering - show all products but filter out deprecated ones
-        const response = await printfulAPI.getCatalog({
+        const response = await printifyAPI.getCatalog({
           ...filters,
           category: categoryId.toString(),
         });
@@ -164,7 +164,7 @@ export default function CreatorCatalogPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await printfulAPI.getCategories();
+      const response = await printifyAPI.getCategories();
       setCategories(response.result?.categories || []);
     } catch (error) {
       console.error("Failed to fetch categories:", error);

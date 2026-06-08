@@ -116,15 +116,15 @@ export const uploadIconAsImage = async (
   iconData: Blob,
   iconName: string
 ): Promise<{ url: string; filename: string }> => {
-  // Import the printfulAPI to use existing upload infrastructure
-  const { printfulAPI } = await import('../lib/api');
+  // Import the printifyAPI to use existing upload infrastructure
+  const { printifyAPI } = await import('../lib/api');
   
   // Create a File object from the blob
   const filename = `clipart-${iconName}-${Date.now()}.png`;
   const file = new File([iconData], filename, { type: 'image/png' });
   
   // Use the existing upload method
-  const result = await printfulAPI.uploadFileDirectly(file);
+  const result = await printifyAPI.uploadFileDirectly(file);
   
   return {
     url: result.result.file_url,

@@ -1,6 +1,6 @@
 import { Check, AlertTriangle } from 'lucide-react';
 import { Address, CustomerInfo } from '@/lib/checkout-types';
-import { PrintfulCountry } from '@/lib/shipping-compatibility';
+import { ShippingCountry } from '@/lib/shipping-compatibility';
 import { getRegionName } from '@/lib/shipping-compatibility';
 
 interface SavedAddressListProps {
@@ -8,7 +8,7 @@ interface SavedAddressListProps {
   selectedAddressId: number | null;
   onAddressSelect: (address: Address, updateCustomerInfo: (updates: Partial<CustomerInfo>) => void) => void;
   updateCustomerInfo: (updates: Partial<CustomerInfo>) => void;
-  printfulCountries?: PrintfulCountry[];
+  printfulCountries?: ShippingCountry[];
 }
 
 export const SavedAddressList = ({

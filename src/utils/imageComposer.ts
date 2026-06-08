@@ -184,8 +184,8 @@ export const uploadCompositeImage = async (
   try {
     console.log(`📤 Uploading composite image: ${filename} (size: ${blob.size} bytes)`);
     
-    // Import the printfulAPI to use existing upload infrastructure
-    const { printfulAPI } = await import('../lib/api');
+    // Import the printifyAPI to use existing upload infrastructure
+    const { printifyAPI } = await import('../lib/api');
     
     // Create a File object from the blob
     const file = new File([blob], filename, { type: 'image/png' });
@@ -193,7 +193,7 @@ export const uploadCompositeImage = async (
     console.log(`📤 Created file object: ${file.name}, type: ${file.type}, size: ${file.size}`);
     
     // Use the existing upload method
-    const result = await printfulAPI.uploadFileDirectly(file);
+    const result = await printifyAPI.uploadFileDirectly(file);
     
     console.log(`📤 Upload result:`, result);
     

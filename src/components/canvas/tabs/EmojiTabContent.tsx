@@ -194,15 +194,15 @@ const EmojiTabContent: React.FC<EmojiTabContentProps> = ({
             }
             
             try {
-              // Import the printfulAPI to use existing upload infrastructure
-              const { printfulAPI } = await import('../../../lib/api');
+              // Import the printifyAPI to use existing upload infrastructure
+              const { printifyAPI } = await import('../../../lib/api');
               
               // Create a File object from the blob
               const filename = `openmoji-${emojiData.hexcode}-${Date.now()}.png`;
               const file = new File([blob], filename, { type: 'image/png' });
               
               // Upload the file
-              const result = await printfulAPI.uploadFileDirectly(file);
+              const result = await printifyAPI.uploadFileDirectly(file);
               
               resolve({
                 imageUrl: result.result.file_url,

@@ -39,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { printfulAPI } from "@/lib/api";
+import { printifyAPI } from "@/lib/api";
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition } from "./utils";
 import DesignCanvasTab from "./DesignCanvasTab";
 import PrintingTechniqueSelector from "./PrintingTechniqueSelector";
@@ -856,7 +856,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
         try {
           const filename = selectedDesignFile.filename || `design-${Date.now()}.png`;
           const file = await dataUrlToFile(updatedUrl, filename);
-          const uploadResponse = await printfulAPI.uploadFileDirectly(file);
+          const uploadResponse = await printifyAPI.uploadFileDirectly(file);
           const uploadedUrl = uploadResponse?.result?.file_url || uploadResponse?.file_url;
           if (uploadedUrl) {
             finalUrl = uploadedUrl.replace(/%25/g, "%");
@@ -975,7 +975,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     if (selectedVariants.length > 0 && !printFiles) {
       const loadPrintFiles = async () => {
         try {
-          const data = await printfulAPI.getPrintFiles(selectedProduct.id);
+          const data = await printifyAPI.getPrintFiles(selectedProduct.id);
           if (data?.result) {
             onPrintFilesLoaded(data.result);
             if (data.result.available_techniques) {
@@ -1078,7 +1078,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     try {
       const uploadedList = [];
       for (const file of validFiles) {
-        const response = await printfulAPI.uploadFileDirectly(file);
+        const response = await printifyAPI.uploadFileDirectly(file);
         const imgData = response?.data || response;
         if (imgData && imgData.id) {
           const newFile = {
@@ -1304,21 +1304,22 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             </p>
           </div>
           <div className="flex-shrink-0 flex items-center gap-2">
-            <Button
-              onClick={handlePublishSubmit}
-              disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || mockupStatus !== 'Mockups loaded successfully!'}
-              title={mockupStatus !== 'Mockups loaded successfully!' ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}
-              className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-            >
-              {isPublishing ? (
-                <div className="flex items-center gap-2 whitespace-nowrap">
-                  <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                  <span>Publishing...</span>
-                </div>
-              ) : (
-                "Publish Product"
-              )}
-            </Button>
+            <div title={mockupStatus !== 'Mockups loaded successfully!' ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
+              <Button
+                onClick={handlePublishSubmit}
+                disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || mockupStatus !== 'Mockups loaded successfully!'}
+                className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {isPublishing ? (
+                  <div className="flex items-center gap-2 whitespace-nowrap">
+                    <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                    <span>Publishing...</span>
+                  </div>
+                ) : (
+                  "Publish Product"
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -2314,14 +2315,15 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             </div>
           </div>
         </div>
-        <Button
-          onClick={handlePublishSubmit}
-          disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || mockupStatus !== 'Mockups loaded successfully!'}
-          title={mockupStatus !== 'Mockups loaded successfully!' ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}
-          className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isPublishing ? "Publishing..." : "Publish Product"}
-        </Button>
+        <div title={mockupStatus !== 'Mockups loaded successfully!' ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
+          <Button
+            onClick={handlePublishSubmit}
+            disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || mockupStatus !== 'Mockups loaded successfully!'}
+            className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isPublishing ? "Publishing..." : "Publish Product"}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -733,9 +733,6 @@ export const printifyAPI = {
   },
 };
 
-// Backwards-compatible alias — any code still importing printfulAPI will work
-export const printfulAPI = printifyAPI;
-
 // Shopify API (NEW - Complete Integration)
 export const shopifyAPI = {
   // Authentication & Connection

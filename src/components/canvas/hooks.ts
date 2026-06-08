@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { printfulAPI } from '@/lib/api';
+import { printifyAPI } from '@/lib/api';
 import { Product, DesignFile, PrintFilesData, AdvancedMockupOptions, EmbroideryOptions } from './types';
 import { getUniqueSizes, getUniqueColors } from './utils';
 
@@ -167,7 +167,7 @@ export const usePrintFilesLoader = (
 
         try {
           // Try without technique parameter first (API will use default)
-          printFilesResponse = await printfulAPI.getPrintFiles(selectedProduct.id);
+          printFilesResponse = await printifyAPI.getPrintFiles(selectedProduct.id);
           console.log(`✅ Successfully loaded print files with default technique`);
         } catch (error: any) {
           console.warn("Default technique attempt failed:", error);
@@ -204,7 +204,7 @@ export const usePrintFilesLoader = (
 
               try {
                 setSelectedTechnique?.(technique);
-                printFilesResponse = await printfulAPI.getPrintFiles(selectedProduct.id, technique);
+                printFilesResponse = await printifyAPI.getPrintFiles(selectedProduct.id, technique);
                 console.log(`✅ Successfully loaded print files with technique: ${technique}`);
                 loadSucceeded = true;
                 break;
@@ -311,7 +311,7 @@ export const useAutoSelectVariants = (
           variant_id: variantId,
           quantity: 1
         }));
-        const availabilityResponse = await printfulAPI.checkVariantAvailability(variantsForCheck);
+        const availabilityResponse = await printifyAPI.checkVariantAvailability(variantsForCheck);
         
         if (availabilityResponse.result && availabilityResponse.result.variants) {
           // Create map of availability results

@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { printfulAPI, productAPI } from "@/lib/api";
+import { printifyAPI, productAPI } from "@/lib/api";
 import toast from "react-hot-toast";
 
 interface ConnectionStatus {
@@ -73,7 +73,7 @@ export function useCreatorDashboard() {
 
   const checkPrintfulConnection = async () => {
     try {
-      const status = await printfulAPI.getConnectionStatus();
+      const status = await printifyAPI.getConnectionStatus();
       setConnection({
         connected: status.connected || false,
         adminAccount: status.adminAccount || true,
@@ -128,7 +128,7 @@ export function useCreatorDashboard() {
 
   const handleConnectPrintful = async () => {
     try {
-      const response = await printfulAPI.getConnectionStatus();
+      const response = await printifyAPI.getConnectionStatus();
 
       if (response.connected) {
         setConnection({ connected: true, adminAccount: true });

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Globe, Check, X, AlertTriangle, RefreshCw, Eye } from 'lucide-react';
-import { printfulAPI } from '@/lib/api';
+import { printifyAPI } from '@/lib/api';
 
 interface ProductVariant {
   id: number;
@@ -75,7 +75,7 @@ export function RegionalAvailabilityPreview({
         );
 
         // Get catalog data from Printify blueprint to check real-time availability
-        const detailed = await printfulAPI.getBlueprintDetails(selectedProduct.id);
+        const detailed = await printifyAPI.getBlueprintDetails(selectedProduct.id);
         const catalogProduct = detailed?.data || detailed;
         
         if (catalogProduct && catalogProduct.variants) {

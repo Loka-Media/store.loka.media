@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { printfulAPI } from '@/lib/api';
+import { printifyAPI } from '@/lib/api';
 import {
   Upload,
   Download,
@@ -187,7 +187,7 @@ function FilesPageContent() {
       const uploadPromises = filesToUpload.map(async (file) => {
         try {
           // Use uploadFileDirectly which handles multipart/form-data upload
-          const response = await printfulAPI.uploadFileDirectly(file);
+          const response = await printifyAPI.uploadFileDirectly(file);
           const imgData = response.result || response.data || response;
           if (imgData && imgData.id) {
             toast.success(`Uploaded ${file.name}`);
@@ -284,7 +284,7 @@ function FilesPageContent() {
     setDeleteState(prev => ({ ...prev, isDeleting: true }));
     try {
       // Call the delete API endpoint
-      await printfulAPI.deleteFile(deleteState.fileId.toString());
+      await printifyAPI.deleteFile(deleteState.fileId.toString());
       
       // Update state
       setFiles(prev => prev.filter(f => f.id !== deleteState.fileId));

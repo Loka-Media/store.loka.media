@@ -2,9 +2,7 @@ export interface CartItem {
   id: number;
   product_name: string;
   availability_regions?: string[];
-  printful_availability_regions?: string[];
   printify_availability_regions?: string[];
-  printful_variant_id?: string;
   source?: string;
 }
 
@@ -21,8 +19,6 @@ export interface ShippingCountry {
   states: any[] | null;
 }
 
-// Backwards-compatible alias
-export type PrintfulCountry = ShippingCountry;
 
 export const checkShippingCompatibility = (
   items: CartItem[],
@@ -37,11 +33,11 @@ export const checkShippingCompatibility = (
   const incompatibleItems: IncompatibleItem[] = [];
 
   for (const item of items) {
-    if (item.source !== 'printify' && !item.printful_variant_id) {
+    if (item.source !== 'printify') {
       continue;
     }
 
-    const availabilityRegions = item.printify_availability_regions || item.printful_availability_regions || item.availability_regions;
+    const availabilityRegions = item.printify_availability_regions || item.availability_regions;
 
     if (availabilityRegions && Array.isArray(availabilityRegions)) {
       const isCompatible = checkRegionCompatibility(

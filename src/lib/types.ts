@@ -81,22 +81,3 @@ export interface ProductForm {
   tags: string[];
 }
 
-export interface PrintfulVariant {
-  id: number;
-  price: string;
-  size: string;
-  color: string;
-  color_code: string;
-  image: string;
-}
-
-export interface PrintfulProduct {
-  id: number;
-  title: string;
-  model?: string;
-  description: string;
-  image: string;
-  type?: string;
-  type_name?: string;
-  variants?: PrintfulVariant[];
-}

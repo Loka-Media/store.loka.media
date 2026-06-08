@@ -18,7 +18,7 @@ import {
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { UnifiedDesignEditorProps, UploadedFile } from "./types";
-import { printfulAPI } from "@/lib/api";
+import { printifyAPI } from "@/lib/api";
 import { aspectRatioValidation } from "@/utils/aspectRatioValidation";
 
 // Import components
@@ -114,7 +114,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
       const loadPrintFiles = async () => {
         setLoadingPrintFiles(true);
         try {
-          const data = await printfulAPI.getPrintFiles(selectedProduct.id);
+          const data = await printifyAPI.getPrintFiles(selectedProduct.id);
           if (data?.result) {
             setPrintFilesLoaded(true);
             onPrintFilesLoaded?.(data.result);
@@ -295,7 +295,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
 
   const handleDeleteFile = async (fileId: number | string) => {
     try {
-      await printfulAPI.deleteFile(fileId.toString());
+      await printifyAPI.deleteFile(fileId.toString());
       toast.success("File deleted successfully");
 
       // Refresh the files list

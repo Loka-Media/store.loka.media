@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { CheckoutStep, CustomerInfo } from '@/lib/checkout-types';
-import { printfulAPI } from '@/lib/printful';
+import { printifyAPI } from '@/lib/api';
 import { formatPhoneForPrintful } from '@/lib/location-utils';
 import { validateShippingAddress, getErrorMessage, canFetchShippingRates } from '@/lib/address-validation';
 import toast from 'react-hot-toast';
@@ -90,7 +90,7 @@ export const useCheckoutState = () => {
       locale: "en_US",
     };
 
-    const response = await printfulAPI.getShippingRates(payload);
+    const response = await printifyAPI.getShippingRates(payload);
     console.log('🚚 [SHIPPING-RATES] Received rates:', response);
     return response;
   };

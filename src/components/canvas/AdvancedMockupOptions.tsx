@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { printfulAPI } from '@/lib/api';
+import { printifyAPI } from '@/lib/api';
 import { Settings, Palette, Sparkles } from 'lucide-react';
 
 // All possible printing techniques with descriptions
@@ -92,7 +92,7 @@ const AdvancedMockupOptions: React.FC<AdvancedMockupOptionsProps> = ({
         setError(null);
 
         // First, try to get print files without technique parameter
-        const data = await printfulAPI.getPrintFiles(selectedProduct.id);
+        const data = await printifyAPI.getPrintFiles(selectedProduct.id);
         
         if (data?.result?.available_techniques && Array.isArray(data.result.available_techniques)) {
           const techniques = data.result.available_techniques;
@@ -165,7 +165,7 @@ const AdvancedMockupOptions: React.FC<AdvancedMockupOptionsProps> = ({
         setLoading(true);
         setError(null);
         
-        const data = await printfulAPI.getPrintFiles(selectedProduct.id, selectedTechnique);
+        const data = await printifyAPI.getPrintFiles(selectedProduct.id, selectedTechnique);
         setPrintFilesData(data?.result || null);
       } catch (err) {
         console.error('Failed to load print files data:', err);
