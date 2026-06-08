@@ -23,6 +23,7 @@ import Image from 'next/image';
 import toast from 'react-hot-toast';
 import GradientTitle from '@/components/ui/GradientTitle';
 import CreativeLoader from '@/components/CreativeLoader';
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 
 interface UploadedFile {
   id: number;
@@ -247,28 +248,54 @@ function FilesPageContent() {
     }
   };
 
-  const handleDeleteFile = async (fileId: number | string) => {
-    if (!confirm('Are you sure you want to delete this file?')) return;
+  const [deleteState, setDeleteState] = useState<{
+    isOpen: boolean;
+    fileId: number | string | null;
+    filename: string;
+    isDeleting: boolean;
+  }>({
+    isOpen: false,
+    fileId: null,
+    filename: "",
+    isDeleting: false,
+  });
 
+  const confirmDeleteFile = (fileId: number | string) => {
+    const file = files.find((f) => f.id === fileId);
+    if (!file) return;
+    setDeleteState({
+      isOpen: true,
+      fileId,
+      filename: file.filename,
+      isDeleting: false,
+    });
+  };
+
+  const executeDeleteFile = async () => {
+    if (!deleteState.fileId) return;
+
+    setDeleteState(prev => ({ ...prev, isDeleting: true }));
     try {
       // Call the delete API endpoint
-      await printfulAPI.deleteFile(fileId.toString());
+      await printfulAPI.deleteFile(deleteState.fileId.toString());
       
       // Update state
-      setFiles(prev => prev.filter(f => f.id !== fileId));
+      setFiles(prev => prev.filter(f => f.id !== deleteState.fileId));
       
       // Update localStorage
       const saved = localStorage.getItem("uploaded_printify_images");
       if (saved) {
         const existing = JSON.parse(saved);
-        const filtered = existing.filter((f: any) => f.id !== fileId);
+        const filtered = existing.filter((f: any) => f.id !== deleteState.fileId);
         localStorage.setItem("uploaded_printify_images", JSON.stringify(filtered));
       }
       
       toast.success('File deleted successfully');
+      setDeleteState({ isOpen: false, fileId: null, filename: "", isDeleting: false });
     } catch (error) {
       console.error('Failed to delete file:', error);
       toast.error('Failed to delete file');
+      setDeleteState(prev => ({ ...prev, isDeleting: false }));
     }
   };
 
@@ -474,7 +501,7 @@ function FilesPageContent() {
               <FileGridItem
                 key={file.id}
                 file={file}
-                onDelete={() => handleDeleteFile(file.id)}
+                onDelete={() => confirmDeleteFile(file.id)}
               />
             ))}
           </div>
@@ -506,7 +533,7 @@ function FilesPageContent() {
                     <FileListItem
                       key={file.id}
                       file={file}
-                      onDelete={() => handleDeleteFile(file.id)}
+                      onDelete={() => confirmDeleteFile(file.id)}
                     />
                   ))}
                 </tbody>
@@ -515,6 +542,15 @@ function FilesPageContent() {
           </div>
         )}
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={deleteState.isOpen}
+        onClose={() => setDeleteState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={executeDeleteFile}
+        title="Delete File"
+        itemName={deleteState.filename}
+        isLoading={deleteState.isDeleting}
+      />
     </div>
   );
 }

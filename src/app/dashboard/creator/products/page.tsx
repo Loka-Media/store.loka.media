@@ -5,22 +5,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { productAPI, formatPrice } from "@/lib/api";
 import { createProductSlug } from "@/lib/utils";
-import {
-  ArrowLeft,
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Package,
-  Grid,
-  List,
-  Loader2,
-} from "lucide-react";
+import { ArrowLeft, Edit, ExternalLink, Grid, List, Plus, Search, Trash2, Package, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import GradientTitle from "@/components/ui/GradientTitle";
 import { Button } from "@/components/ui/button";
+import { DeleteConfirmationModal } from "@/components/ui/DeleteConfirmationModal";
 import CreativeLoader from "@/components/CreativeLoader";
 
 interface Product {
@@ -110,16 +101,42 @@ export default function CreatorProductsPage() {
     fetchProducts();
   }, [user, filters, fetchProducts]);
 
-  const handleDeleteProduct = async (productId: number) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+  const [deleteState, setDeleteState] = useState<{
+    isOpen: boolean;
+    productId: number | null;
+    productName: string;
+    isDeleting: boolean;
+  }>({
+    isOpen: false,
+    productId: null,
+    productName: "",
+    isDeleting: false,
+  });
 
+  const confirmDeleteProduct = (productId: number) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    setDeleteState({
+      isOpen: true,
+      productId: product.id,
+      productName: product.name,
+      isDeleting: false,
+    });
+  };
+
+  const executeDeleteProduct = async () => {
+    if (!deleteState.productId) return;
+    
+    setDeleteState((prev) => ({ ...prev, isDeleting: true }));
     try {
-      await productAPI.deleteProduct(productId);
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
+      await productAPI.deleteProduct(deleteState.productId);
+      setProducts((prev) => prev.filter((p) => p.id !== deleteState.productId));
       toast.success("Product deleted successfully");
+      setDeleteState({ isOpen: false, productId: null, productName: "", isDeleting: false });
     } catch (error) {
       console.error("Failed to delete product:", error);
       toast.error("Failed to delete product");
+      setDeleteState((prev) => ({ ...prev, isDeleting: false }));
     }
   };
 
@@ -325,7 +342,7 @@ export default function CreatorProductsPage() {
               <ProductGridCard
                 key={product.id}
                 product={product}
-                onDelete={handleDeleteProduct}
+                onDelete={confirmDeleteProduct}
               />
             ))}
           </div>
@@ -362,7 +379,7 @@ export default function CreatorProductsPage() {
                   <ProductListRow
                     key={product.id}
                     product={product}
-                    onDelete={handleDeleteProduct}
+                    onDelete={confirmDeleteProduct}
                   />
                 ))}
               </tbody>
@@ -370,6 +387,15 @@ export default function CreatorProductsPage() {
           </div>
         )}
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={deleteState.isOpen}
+        onClose={() => setDeleteState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={executeDeleteProduct}
+        title="Delete Product"
+        itemName={deleteState.productName}
+        isLoading={deleteState.isDeleting}
+      />
     </div>
   );
 }
