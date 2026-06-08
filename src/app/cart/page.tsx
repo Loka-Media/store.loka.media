@@ -162,7 +162,7 @@ export default function CartPage() {
     <div className="min-h-screen bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 pt-3">
           <div>
             <GradientTitle text="Shopping Cart" size="sm" />
             <p className="text-gray-400 font-medium mt-2">

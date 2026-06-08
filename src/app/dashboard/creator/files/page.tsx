@@ -61,6 +61,7 @@ function FilesPageContent() {
   const hasFetchedRef = useRef(false);
 
   const getMimeType = (filename: string): string => {
+    if (!filename) return 'application/octet-stream';
     const ext = filename.split('.').pop()?.toLowerCase() || '';
     const mimeMap: { [key: string]: string } = {
       'jpg': 'image/jpeg',
@@ -80,15 +81,15 @@ function FilesPageContent() {
       const filesFromLS = saved ? JSON.parse(saved) : [];
       const processedFiles = filesFromLS.map((file: any) => ({
         id: file.id,
-        filename: file.filename,
-        url: file.file_url,
-        thumbnail_url: file.thumbnail_url,
+        filename: file.filename || file.file_name || "Unknown File",
+        url: file.file_url || file.thumbnail_url || file.preview_url || "",
+        thumbnail_url: file.thumbnail_url || file.preview_url || "",
         type: 'image',
         file_size: 0,
         size: 0,
         status: 'ok',
         created: Math.floor(Date.now() / 1000),
-        mime_type: getMimeType(file.filename),
+        mime_type: getMimeType(file.filename || file.file_name || ""),
         width: file.width,
         height: file.height
       }));

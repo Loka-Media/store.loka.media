@@ -86,8 +86,8 @@ export default function UnifiedCheckoutPage() {
   // Update available states when country changes
   useEffect(() => {
     locationLookup.updateAvailableStates(
-      checkoutState.customerInfo.country, 
-      checkoutState.customerInfo.state, 
+      checkoutState.customerInfo.country,
+      checkoutState.customerInfo.state,
       checkoutState.updateCustomerInfo
     );
   }, [checkoutState.customerInfo.country, locationLookup.printfulCountries]);
@@ -151,21 +151,21 @@ export default function UnifiedCheckoutPage() {
 
   const handleZipCodeChange = (zipCode: string) => {
     locationLookup.handleZipCodeChange(
-      zipCode, 
-      checkoutState.customerInfo.country, 
+      zipCode,
+      checkoutState.customerInfo.country,
       checkoutState.updateCustomerInfo
     );
   };
 
   const handleLogin = () => {
     checkoutAuth.handleLogin(
-      checkoutState.setLoading, 
+      checkoutState.setLoading,
       (token, userInfo) => {
         cartMerge.checkCartMerge(
-          token, 
-          userInfo, 
-          items, 
-          checkoutState.setCurrentStep, 
+          token,
+          userInfo,
+          items,
+          checkoutState.setCurrentStep,
           (userInfo) => checkoutAuth.fillUserInfo(userInfo, checkoutState.updateCustomerInfo)
         );
       }
@@ -364,10 +364,10 @@ export default function UnifiedCheckoutPage() {
         if (err.isInventoryError && err.unavailable_items) {
           setInventoryError({ unavailable_items: err.unavailable_items });
         } else if (error.message.includes('not available for your shipping region') ||
-                   error.message.includes('cannot be shipped')) {
+          error.message.includes('cannot be shipped')) {
           toast.error(error.message, { duration: 6000 });
         } else if (error.message.includes('Items Unavailable') ||
-                   error.message.includes('no longer available')) {
+          error.message.includes('no longer available')) {
           // Generic inventory error without structured data
           toast.error(error.message, { duration: 6000 });
         } else {
@@ -444,9 +444,9 @@ export default function UnifiedCheckoutPage() {
 
   // Payment step
   if (checkoutState.currentStep === 'payment' && checkoutState.orderData && checkoutState.clientSecret) {
-    return <StripePaymentForm 
-      orderData={checkoutState.orderData} 
-      clientSecret={checkoutState.clientSecret} 
+    return <StripePaymentForm
+      orderData={checkoutState.orderData}
+      clientSecret={checkoutState.clientSecret}
       onPaymentSuccess={handlePaymentSuccess}
       totalAmount={checkoutState.calculateTotal(summary.subtotal)}
       loading={checkoutState.loading}
@@ -469,7 +469,7 @@ export default function UnifiedCheckoutPage() {
   return (
     <div className="min-h-screen bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 pt-3">
           <GradientTitle text="Checkout" size="sm" />
           <Link href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-900 hover:bg-gray-800 hover:border-gray-600 transition-all duration-300">
             <ArrowLeft className="w-4 h-4 mr-2" />

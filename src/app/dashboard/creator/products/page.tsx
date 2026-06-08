@@ -176,13 +176,6 @@ export default function CreatorProductsPage() {
                 <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 <span className="text-sm sm:text-base font-medium">Back</span>
               </Link>
-              
-              <Button 
-                onClick={handleSyncPrintify}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
-              >
-                Sync from Printify
-              </Button>
             </div>
           </div>
           <div className="pb-6 sm:pb-8">
@@ -277,21 +270,19 @@ export default function CreatorProductsPage() {
               <div className="flex border border-white/20 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 sm:p-2.5 transition-all text-sm sm:text-base font-medium ${
-                    viewMode === "grid"
-                      ? "bg-white/20 text-white"
-                      : "bg-transparent text-white/70 hover:text-white"
-                  }`}
+                  className={`p-2 sm:p-2.5 transition-all text-sm sm:text-base font-medium ${viewMode === "grid"
+                    ? "bg-white/20 text-white"
+                    : "bg-transparent text-white/70 hover:text-white"
+                    }`}
                 >
                   <Grid className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 sm:p-2.5 transition-all text-sm sm:text-base font-medium border-l border-white/20 ${
-                    viewMode === "list"
-                      ? "bg-white/20 text-white"
-                      : "bg-transparent text-white/70 hover:text-white"
-                  }`}
+                  className={`p-2 sm:p-2.5 transition-all text-sm sm:text-base font-medium border-l border-white/20 ${viewMode === "list"
+                    ? "bg-white/20 text-white"
+                    : "bg-transparent text-white/70 hover:text-white"
+                    }`}
                 >
                   <List className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
@@ -446,11 +437,10 @@ function ProductGridCard({
 
           <div className="absolute top-3 right-3">
             <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${
-                product.is_active
-                  ? "bg-green-500/20 text-green-400 border border-green-500/50"
-                  : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
-              }`}
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${product.is_active
+                ? "bg-green-500/20 text-green-400 border border-green-500/50"
+                : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
+                }`}
             >
               {product.is_active ? "●" : "○"}
             </span>
@@ -594,11 +584,10 @@ function ProductListRow({
       </td>
       <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
         <span
-          className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
-            product.is_active
-              ? "bg-green-500/20 text-green-400 border border-green-500/50"
-              : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
-          }`}
+          className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${product.is_active
+            ? "bg-green-500/20 text-green-400 border border-green-500/50"
+            : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
+            }`}
         >
           {product.is_active ? "● Active" : "● Inactive"}
         </span>

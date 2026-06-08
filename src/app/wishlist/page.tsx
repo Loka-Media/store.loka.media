@@ -36,7 +36,7 @@ export default function WishlistPage() {
 
       // Use the first available variant
       const firstVariant = productData.variants[0];
-      
+
       // Cache variant data for guest cart before adding to cart
       const variantCacheData = {
         product_id: productData.id,
@@ -52,14 +52,14 @@ export default function WishlistPage() {
         shopify_variant_id: firstVariant.shopify_variant_id,
         printful_variant_id: firstVariant.printful_variant_id
       };
-      
+
       // Store in localStorage for guest cart
       try {
         localStorage.setItem(`product_variant_${firstVariant.id}`, JSON.stringify(variantCacheData));
       } catch (error) {
         console.warn('Failed to cache variant data:', error);
       }
-      
+
       await addToCart(firstVariant.id, 1);
     } catch (error) {
       console.error("Failed to add to cart:", error);
@@ -125,7 +125,7 @@ export default function WishlistPage() {
       `}</style>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 pt-3">
           <div>
             <GradientTitle text="My Wishlist" size="sm" />
             <p className="text-gray-400 mt-2 text-lg">
