@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 import { TrendingUp, Zap, Heart, X } from "lucide-react";
 
@@ -33,6 +33,7 @@ export default function ProductsPage() {
 
 function ProductsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Refs to track initialization and prevent strict mode double-fetching
   const isStaticDataFetched = useRef(false);
@@ -70,56 +71,20 @@ function ProductsContent() {
   });
 
   const fetchProducts = useCallback(
-    async (
-      customFilters: typeof filters,
-      customPagination: { limit: number; offset: number },
-      appendMode = false
-    ) => {
+    async () => {
       const startTime = performance.now();
       try {
-        if (appendMode) {
-          setLoadingMore(true);
-        } else {
-          setLoading(true);
-        }
-
-        // Clean up filters - only send non-empty values
-        const cleanFilters: any = {
-          limit: customPagination.limit,
-          offset: customPagination.offset,
-          sortBy: customFilters.sortBy,
-          sortOrder: customFilters.sortOrder,
-        };
-
-        // Only add filter params if they have values
-        if (customFilters.category) cleanFilters.category = customFilters.category;
-        if (customFilters.search) cleanFilters.search = customFilters.search;
-        if (customFilters.creator) cleanFilters.creator = customFilters.creator;
-        if (customFilters.source && customFilters.source !== "all") cleanFilters.source = customFilters.source;
-        if (customFilters.minPrice) cleanFilters.minPrice = customFilters.minPrice;
-        if (customFilters.maxPrice) cleanFilters.maxPrice = customFilters.maxPrice;
-
-        const response = await productAPI.getProducts(cleanFilters);
-
-        if (appendMode) {
-          setProducts((prev) => [...prev, ...response.products]);
-        } else {
-          setProducts(response.products);
-        }
-
-        setPagination((prev) => ({ ...prev, ...response.pagination }));
-
-        // Minimal console log as requested - only logging the total time
+        setLoading(true);
+        const response = await productAPI.getProducts({
+          limit: 1000,
+          offset: 0,
+        });
+        setProducts(response.products);
         console.log(`API [Products]: ${(performance.now() - startTime).toFixed(2)}ms`);
-
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {
-        if (appendMode) {
-          setLoadingMore(false);
-        } else {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     },
     []
@@ -154,7 +119,8 @@ function ProductsContent() {
 
     fetchCategories();
     fetchCreators();
-  }, [fetchCategories, fetchCreators]);
+    fetchProducts();
+  }, [fetchCategories, fetchCreators, fetchProducts]);
 
   // Search Input Debounce - Only update filters after user stops typing
   useEffect(() => {
@@ -174,7 +140,8 @@ function ProductsContent() {
         if (newFilters.source && newFilters.source !== "all")
           params.set("source", newFilters.source);
 
-        window.history.replaceState({}, '', searchInput || newFilters.category || newFilters.creator ? `/products?${params.toString()}` : '/products');
+        const newUrl = searchInput || newFilters.category || newFilters.creator ? `/products?${params.toString()}` : '/products';
+        router.replace(newUrl, { scroll: false });
       }
     }, 500);
 
@@ -183,7 +150,7 @@ function ProductsContent() {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [searchInput, filters]);
+  }, [searchInput, filters, router]);
 
   // 2. URL Sync
   useEffect(() => {
@@ -217,29 +184,50 @@ function ProductsContent() {
     });
   }, [searchParams]);
 
-  // 3. Main Data Fetch - De-duped Strict Mode Guard
+  // 3. Reset pagination offset when filters change
   useEffect(() => {
-    const filtersKey = JSON.stringify(filters);
-
-    // Prevent duplicate fetch on mount in strict mode
-    if (lastFetchedFiltersRef.current === filtersKey) {
-      return;
-    }
-    lastFetchedFiltersRef.current = filtersKey;
-
     setPagination((prev) => ({ ...prev, offset: 0 }));
-    fetchProducts(filters, { limit: 20, offset: 0 });
-  }, [
-    filters,
-    fetchProducts
-  ]);
+  }, [filters]);
 
-  // 4. Pagination Fetch (Load More)
-  useEffect(() => {
-    if (pagination.offset === 0) return;
-    // No guard needed here as offset change is explicit user action usually
-    fetchProducts(filters, { limit: pagination.limit, offset: pagination.offset }, true);
-  }, [pagination.offset, fetchProducts, filters, pagination.limit]);
+  // 4. Local client-side filtering, sorting, and pagination logic
+  const filteredProducts = products.filter((product) => {
+    if (filters.category && product.category !== filters.category) {
+      return false;
+    }
+    if (filters.search) {
+      const query = filters.search.toLowerCase();
+      const nameMatch = product.name?.toLowerCase().includes(query);
+      const descMatch = product.description?.toLowerCase().includes(query);
+      const categoryMatch = product.category?.toLowerCase().includes(query);
+      if (!nameMatch && !descMatch && !categoryMatch) {
+        return false;
+      }
+    }
+    if (filters.creator && String(product.creator_id) !== filters.creator && product.creator_name !== filters.creator) {
+      return false;
+    }
+    if (filters.source && filters.source !== "all" && product.source !== filters.source) {
+      return false;
+    }
+    return true;
+  });
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (filters.sortBy === "created_at") {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return filters.sortOrder === "DESC" ? dateB - dateA : dateA - dateB;
+    }
+    if (filters.sortBy === "base_price") {
+      const priceA = parseFloat(String(a.base_price)) || 0;
+      const priceB = parseFloat(String(b.base_price)) || 0;
+      return filters.sortOrder === "DESC" ? priceB - priceA : priceA - priceB;
+    }
+    return 0;
+  });
+
+  const paginatedProducts = sortedProducts.slice(0, pagination.offset + pagination.limit);
+  const hasNext = sortedProducts.length > paginatedProducts.length;
 
 
   const updateURL = (updatedFilters: typeof filters) => {
@@ -253,7 +241,7 @@ function ProductsContent() {
     if (updatedFilters.maxPrice) params.set("maxPrice", updatedFilters.maxPrice.toString());
 
     const newUrl = params.toString() ? `/products?${params.toString()}` : '/products';
-    window.history.replaceState({}, '', newUrl);
+    router.replace(newUrl, { scroll: false });
   };
 
   const handleFilterChange = (key: string, value: string | number | undefined) => {
@@ -267,7 +255,7 @@ function ProductsContent() {
     // Search is already triggered by filter state change
   };
 
-  const clearFilters = useCallback(async () => {
+  const clearFilters = useCallback(() => {
     // Reset all filters to default state
     const clearedFilters = {
       category: "",
@@ -280,34 +268,16 @@ function ProductsContent() {
       maxPrice: undefined as number | undefined,
     };
 
-    // Clear the deduplication ref to force a fresh fetch
-    lastFetchedFiltersRef.current = null;
+    // Reset search input state
+    setSearchInput("");
 
     // Clear the URL first to avoid sync issues
-    window.history.replaceState({}, '', '/products');
+    router.replace('/products', { scroll: false });
 
     // Reset all state
-    setProducts([]);
     setPagination({ total: 0, limit: 20, offset: 0, hasNext: false });
     setFilters(clearedFilters);
-    setLoading(true);
-
-    // Force a fresh fetch with cache invalidation
-    try {
-      const response = await productAPI.getProducts({
-        ...clearedFilters,
-        limit: 20,
-        offset: 0,
-        force_refresh: true
-      });
-      setProducts(response.products);
-      setPagination(response.pagination);
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  }, [router]);
 
   const handleViewChange = (view: ViewType) => {
     setActiveView(view);
@@ -455,22 +425,22 @@ function ProductsContent() {
         </div>
       </div>
 
-      {!loading && products.length > 0 && filters.category === "" && (
-        <FeaturedProducts products={products} />
+      {!loading && paginatedProducts.length > 0 && filters.category === "" && (
+        <FeaturedProducts products={paginatedProducts} />
       )}
 
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 products-section-animate">
         {loading ? (
           <ProductsLoading message="Discovering amazing products..." />
-        ) : products.length === 0 ? (
+        ) : paginatedProducts.length === 0 ? (
           <NoProductsFound clearFilters={clearFilters} />
         ) : (
           <>
-            <ProductsGrid products={products} />
+            <ProductsGrid products={paginatedProducts} />
 
             <ProductsPagination
-              hasNext={pagination.hasNext}
-              loading={loadingMore}
+              hasNext={hasNext}
+              loading={false}
               onLoadMore={() => {
                 setPagination((prev) => ({
                   ...prev,

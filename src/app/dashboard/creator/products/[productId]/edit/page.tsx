@@ -187,7 +187,9 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
         tags: formData.tags,
         thumbnailUrl: formData.thumbnailUrl,
         images: formData.images,
-        status: formData.isActive ? 'active' : 'inactive'
+        status: formData.isActive ? 'active' : 'inactive',
+        is_active: formData.isActive,
+        isActive: formData.isActive
       };
 
       await productAPI.updateProduct(productId, updateData);
@@ -251,7 +253,6 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
             <div className="flex items-center gap-2 sm:gap-4">
               <Link
                 href={`/products/${product.name.toLowerCase().replace(/\s+/g, '-')}-${product.id}`}
-                target="_blank"
                 className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-lg sm:rounded-xl transition-colors text-xs sm:text-sm"
               >
                 <Eye className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
@@ -569,7 +570,8 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   <tbody>
                     {product.variants.map((variant) => {
                       const baseCost = typeof variant.base_cost === 'string' ? parseFloat(variant.base_cost) : variant.base_cost || 0;
-                      const sellingPrice = typeof variant.price === 'string' ? parseFloat(variant.price) : variant.price || 0;
+                      const markupVal = parseFloat(formData.markupPercentage) || 0;
+                      const sellingPrice = baseCost * (1 + markupVal / 100);
                       const profit = sellingPrice - baseCost;
 
                       return (

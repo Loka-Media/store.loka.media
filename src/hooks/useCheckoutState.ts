@@ -42,52 +42,42 @@ export const useCheckoutState = () => {
     // Format phone number with country code prefix
     const formattedPhone = formatPhoneForPrintful(address.phone || '', address.country || 'US');
 
-    const recipient: any = {
-      country_code: address.country, // Required
+    // Split recipient name into first and last name (Printify expects first_name and last_name)
+    const nameParts = (address.name || 'Customer Name').trim().split(/\s+/);
+    const first_name = nameParts[0] || 'Customer';
+    const last_name = nameParts.slice(1).join(' ') || 'Customer';
+
+    const address_to = {
+      first_name,
+      last_name,
+      address1: address.address1 || '',
+      address2: address.address2 || '',
+      city: address.city || '',
+      region: address.state || '', // Printify uses region for state/province
+      country: address.country,
+      zip: address.zip || '',
+      phone: formattedPhone || '',
+      email: address.email || 'customer@example.com',
     };
 
-    // Add state_code only for US, CA, AU, JP (required by Printful)
-    if (['US', 'CA', 'AU', 'JP'].includes(address.country) && address.state) {
-      recipient.state_code = address.state;
-    }
-
-    // Add optional fields only if they exist
-    if (address.address1) recipient.address1 = address.address1;
-    if (address.address2) recipient.address2 = address.address2;
-    if (address.city) recipient.city = address.city;
-    if (address.zip) recipient.zip = address.zip;
-    if (formattedPhone) recipient.phone = formattedPhone;
-
-    // Map cart items to Printful format
-    // Printful Shipping Rate API uses CATALOG variant IDs as STRINGS
-    const cartItems = items.map((item) => {
+    // Map cart items to Printify format
+    const line_items = items.map((item) => {
       const variantId = item.printful_catalog_variant_id || item.printful_variant_id || item.variant_id;
-      const price = parseFloat(item.price || 0);
-
       return {
-        variant_id: String(variantId), // Printful expects STRING
-        quantity: item.quantity,
-        value: price.toFixed(2), // Printful expects STRING with 2 decimals
+        product_id: String(item.product_id || ''),
+        variant_id: Number(variantId),
+        quantity: Number(item.quantity || 1),
       };
     });
 
-    console.log('🚚 [SHIPPING-RATES] Fetching rates for:', {
-      recipient,
-      items: cartItems,
-      rawItems: items.map(i => ({
-        id: i.id,
-        name: i.product_name,
-        printful_catalog_variant_id: i.printful_catalog_variant_id,
-        printful_variant_id: i.printful_variant_id,
-        variant_id: i.variant_id
-      }))
+    console.log('🚚 [SHIPPING-RATES] Fetching rates for Printify:', {
+      address_to,
+      line_items
     });
 
     const payload = {
-      recipient,
-      items: cartItems,
-      currency: "USD",
-      locale: "en_US",
+      address_to,
+      line_items,
     };
 
     const response = await printifyAPI.getShippingRates(payload);
@@ -96,20 +86,26 @@ export const useCheckoutState = () => {
   };
 
   const fetchShippingRates = useCallback(
-    async (items: any[]) => {
+    async (items: any[], options?: { silent?: boolean }) => {
+      const silent = options?.silent ?? true;
+
       // Validate address before fetching rates (phone is optional for rates but recommended)
       const validation = validateShippingAddress(customerInfo, { requirePhone: false });
 
       if (!validation.valid) {
-        const errorMsg = getErrorMessage(validation.errors);
-        toast.error(errorMsg);
-        return;
+        if (!silent) {
+          const errorMsg = getErrorMessage(validation.errors);
+          toast.error(errorMsg);
+        }
+        return false;
       }
 
       // Additional check for minimum requirements
       if (!canFetchShippingRates(customerInfo)) {
-        toast.error('Please provide complete address information to calculate shipping rates');
-        return;
+        if (!silent) {
+          toast.error('Please provide complete address information to calculate shipping rates');
+        }
+        return false;
       }
 
       setIsFetchingShippingRates(true);
@@ -117,25 +113,34 @@ export const useCheckoutState = () => {
         const rates = await getShippingRates(customerInfo, items);
 
         if (!rates.result || rates.result.length === 0) {
-          toast.error('No shipping options available for this address');
+          if (!silent) {
+            toast.error('No shipping options available for this address');
+          }
           setShippingRates([]);
           setSelectedShippingRate(null);
+          return false;
         } else {
           setShippingRates(rates.result);
           setSelectedShippingRate(rates.result[0]); // Auto-select the first rate
-          toast.success(`Found ${rates.result.length} shipping option${rates.result.length > 1 ? 's' : ''}`);
+          if (!silent) {
+            toast.success(`Found ${rates.result.length} shipping option${rates.result.length > 1 ? 's' : ''}`);
+          }
 
           // Extract tax from the shipping rate response
           if (rates.result[0]?.tax) {
             setTaxAmount(parseFloat(rates.result[0].tax));
           }
+          return true;
         }
       } catch (error: any) {
         console.error("Failed to fetch shipping rates:", error);
-        const errorMessage = error.response?.data?.result || error.message || 'Failed to fetch shipping rates';
-        toast.error(errorMessage);
+        if (!silent) {
+          const errorMessage = error.response?.data?.result || error.message || 'Failed to fetch shipping rates';
+          toast.error(errorMessage);
+        }
         setShippingRates([]);
         setSelectedShippingRate(null);
+        return false;
       } finally {
         setIsFetchingShippingRates(false);
       }

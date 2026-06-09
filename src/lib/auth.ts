@@ -25,8 +25,16 @@ api.interceptors.request.use(
 
 // Response interceptor to handle token refresh
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`[API SUCCESS] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+    return response;
+  },
   async (error) => {
+    console.error(`[API ERROR] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+      status: error.response?.status,
+      data: error.response?.data,
+      payload: error.config?.data
+    });
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -47,7 +55,8 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return api(originalRequest);
         }
-      } catch {
+      } catch (refreshError) {
+        console.error("Token refresh failed:", refreshError);
         // Refresh failed, clear tokens and redirect to login
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');

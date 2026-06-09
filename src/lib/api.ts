@@ -297,7 +297,11 @@ export const productAPI = {
 
   // Creator: Update product status
   updateProductStatus: async (productId: number, is_active: boolean) => {
-    const response = await api.patch(`/api/products/${productId}/status`, { is_active });
+    const response = await api.patch(`/api/products/${productId}/status`, {
+      is_active,
+      isActive: is_active,
+      status: is_active ? 'active' : 'inactive'
+    });
     return response.data;
   },
 };

@@ -205,6 +205,7 @@ export default function UnifiedCheckoutPage() {
         !customerInfo.country
       ) {
         toast.error("Please fill in all required fields");
+        setLoading(false);
         return;
       }
 
@@ -212,6 +213,7 @@ export default function UnifiedCheckoutPage() {
       const phoneDigits = customerInfo.phone.replace(/\D/g, '');
       if (phoneDigits.length < 7) {
         toast.error("Phone number must have at least 7 digits");
+        setLoading(false);
         return;
       }
 
@@ -219,6 +221,7 @@ export default function UnifiedCheckoutPage() {
       const countriesRequiringState = ['US', 'CA', 'AU', 'JP'];
       if (countriesRequiringState.includes(customerInfo.country) && !customerInfo.state) {
         toast.error(`State/Province is required for ${customerInfo.country}`);
+        setLoading(false);
         return;
       }
 
@@ -226,7 +229,23 @@ export default function UnifiedCheckoutPage() {
       const zipValidation = validateZipCode(customerInfo.zip, customerInfo.country);
       if (!zipValidation.valid) {
         toast.error(zipValidation.message || "Invalid postal code format");
+        setLoading(false);
         return;
+      }
+
+      // Verify shipping rates
+      if (checkoutState.isFetchingShippingRates) {
+        toast.error("Calculating shipping rates, please wait...");
+        setLoading(false);
+        return;
+      }
+
+      if (checkoutState.shippingRates.length === 0 || !checkoutState.selectedShippingRate) {
+        const success = await checkoutState.fetchShippingRates(items, { silent: false });
+        if (!success) {
+          setLoading(false);
+          return;
+        }
       }
 
       // Save new address for logged-in users if they want to

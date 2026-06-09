@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
 import { Address, CustomerInfo, PrintfulCountry, PrintfulState } from '@/lib/checkout-types';
 import { SavedAddressList } from './SavedAddressList';
+import { getZipCodeConfig } from '@/lib/location-utils';
 
 interface ShippingAddressFormProps {
   isLoggedInUser: boolean;
@@ -177,24 +178,31 @@ export const ShippingAddressForm = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
-                <input
-                  type="text"
-                  placeholder={customerInfo.country === 'CA' ? 'Postal Code (e.g. M5V 3A8) *' : 'ZIP Code (e.g. 90210) *'}
-                  value={customerInfo.zip}
-                  onChange={(e) => handleZipCodeChange(e.target.value)}
-                  className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500"
-                  maxLength={customerInfo.country === 'CA' ? 7 : 5}
-                />
-                {isLoadingLocation && (
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
-                  </div>
-                )}
-                {customerInfo.zip && customerInfo.country && (
-                  <div className="text-xs text-gray-400 mt-1">
-                    {customerInfo.country === 'CA' ? '6-7 characters (e.g. M5V 3A8)' : '5 digits (e.g. 90210)'}
-                  </div>
-                )}
+                {(() => {
+                  const zipConfig = getZipCodeConfig(customerInfo.country);
+                  return (
+                    <>
+                      <input
+                        type="text"
+                        placeholder={zipConfig.placeholder}
+                        value={customerInfo.zip}
+                        onChange={(e) => handleZipCodeChange(e.target.value)}
+                        className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500"
+                        maxLength={zipConfig.maxLength}
+                      />
+                      {isLoadingLocation && (
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
+                        </div>
+                      )}
+                      {customerInfo.zip && customerInfo.country && (
+                        <div className="text-xs text-gray-400 mt-1">
+                          Format: {zipConfig.helperText}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
               <div>
                 <select

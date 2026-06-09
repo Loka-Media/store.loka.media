@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { productAPI, formatPrice } from "@/lib/api";
 import { createProductSlug } from "@/lib/utils";
-import { ArrowLeft, Edit, ExternalLink, Grid, List, Plus, Search, Trash2, Package, Loader2 } from "lucide-react";
+import { ArrowLeft, Edit, ExternalLink, Grid, List, Plus, Search, Trash2, Package, Loader2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -49,7 +49,7 @@ export default function CreatorProductsPage() {
   const [filters, setFilters] = useState({
     search: "",
     category: "",
-    status: "",
+    status: "active",
     sortBy: "created_at",
     sortOrder: "DESC",
   });
@@ -63,17 +63,10 @@ export default function CreatorProductsPage() {
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const apiParams: any = {
-        limit: pagination.limit,
-        offset: pagination.offset,
+      const apiParams = {
+        limit: 1000,
+        offset: 0,
       };
-
-      // Only include filters if they have values
-      if (filters.search) apiParams.search = filters.search;
-      if (filters.category) apiParams.category = filters.category;
-      if (filters.status) apiParams.status = filters.status;
-      if (filters.sortBy) apiParams.sortBy = filters.sortBy;
-      if (filters.sortOrder) apiParams.sortOrder = filters.sortOrder;
 
       const response = await productAPI.getCreatorProducts(apiParams);
 
@@ -86,8 +79,8 @@ export default function CreatorProductsPage() {
       setProducts(transformedProducts);
       setPagination(
         response.pagination || {
-          total: 0,
-          limit: 20,
+          total: response.products?.length || 0,
+          limit: 1000,
           offset: 0,
           hasNext: false,
         }
@@ -98,7 +91,7 @@ export default function CreatorProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.limit, pagination.offset]);
+  }, []);
 
   useEffect(() => {
     if (user?.role !== "creator" && user?.role !== "admin") {
@@ -106,7 +99,7 @@ export default function CreatorProductsPage() {
     }
 
     fetchProducts();
-  }, [user, filters, fetchProducts]);
+  }, [user, fetchProducts]);
 
   const [deleteState, setDeleteState] = useState<{
     isOpen: boolean;
@@ -147,6 +140,11 @@ export default function CreatorProductsPage() {
     }
   };
 
+  // Extract unique categories from the products list dynamically
+  const availableCategories = Array.from(
+    new Set(products.map((p) => p.category).filter(Boolean))
+  );
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       !filters.search ||
@@ -154,10 +152,79 @@ export default function CreatorProductsPage() {
       product.description.toLowerCase().includes(filters.search.toLowerCase());
     const matchesCategory =
       !filters.category || product.category === filters.category;
-    const matchesStatus = !filters.status;
+    const matchesStatus =
+      !filters.status ||
+      (filters.status === "active" ? product.is_active : !product.is_active);
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
+
+  const sortedAndFilteredProducts = [...filteredProducts].sort((a, b) => {
+    if (filters.sortBy === "created_at") {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return filters.sortOrder === "DESC" ? dateB - dateA : dateA - dateB;
+    }
+    if (filters.sortBy === "name") {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+      if (nameA < nameB) return filters.sortOrder === "ASC" ? -1 : 1;
+      if (nameA > nameB) return filters.sortOrder === "ASC" ? 1 : -1;
+      return 0;
+    }
+    if (filters.sortBy === "base_price") {
+      const priceA = Number(a.base_price) || 0;
+      const priceB = Number(b.base_price) || 0;
+      return filters.sortOrder === "DESC" ? priceB - priceA : priceA - priceB;
+    }
+    return 0;
+  });
+
+  const handleToggleStatus = async (productId: number, currentStatus: boolean, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const newStatus = !currentStatus;
+    const toastId = toast.loading(newStatus ? "Activating product..." : "Deactivating product...");
+    
+    const prod = products.find(p => p.id === productId);
+    if (!prod) {
+      toast.error("Product not found in state", { id: toastId });
+      return;
+    }
+
+    try {
+      try {
+        // First try the specialized status patch endpoint with all formatting variants
+        await productAPI.updateProductStatus(productId, newStatus);
+      } catch (patchError) {
+        console.warn("PATCH /status endpoint failed, falling back to full PUT update:", patchError);
+        // Fall back to updating the full product details with all status variants
+        const updateData = {
+          name: prod.name,
+          description: prod.description,
+          markupPercentage: prod.markup_percentage,
+          category: prod.category,
+          tags: prod.tags || [],
+          thumbnailUrl: prod.thumbnail_url,
+          images: prod.images || [],
+          status: newStatus ? 'active' : 'inactive',
+          is_active: newStatus,
+          isActive: newStatus
+        };
+        await productAPI.updateProduct(productId, updateData);
+      }
+
+      setProducts((prev) =>
+        prev.map((p) => (p.id === productId ? { ...p, is_active: newStatus, status: newStatus ? 'active' : 'inactive' } : p))
+      );
+      toast.success(newStatus ? "Product status updated successfully" : "Product status updated successfully", { id: toastId });
+    } catch (error) {
+      console.error("Failed to toggle product status:", error);
+      toast.error(newStatus ? "Failed to activate product" : "Failed to deactivate product", { id: toastId });
+    }
+  };
 
   const handleSyncPrintify = async () => {
     try {
@@ -216,6 +283,68 @@ export default function CreatorProductsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Status Tabs */}
+        <div className="flex border-b border-white/10 mb-6 gap-6">
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, status: "active" }))}
+            className={`pb-3 text-sm font-semibold relative transition-all ${
+              filters.status === "active"
+                ? "text-white"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+              Active Products
+              <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs font-normal text-gray-400">
+                {products.filter(p => p.is_active).length}
+              </span>
+            </span>
+            {filters.status === "active" && (
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#FF6D1F]"></span>
+            )}
+          </button>
+          
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, status: "inactive" }))}
+            className={`pb-3 text-sm font-semibold relative transition-all ${
+              filters.status === "inactive"
+                ? "text-white"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-gray-500"></span>
+              Inactive Products
+              <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs font-normal text-gray-400">
+                {products.filter(p => !p.is_active).length}
+              </span>
+            </span>
+            {filters.status === "inactive" && (
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#FF6D1F]"></span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, status: "" }))}
+            className={`pb-3 text-sm font-semibold relative transition-all ${
+              filters.status === ""
+                ? "text-white"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              All Products
+              <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs font-normal text-gray-400">
+                {products.length}
+              </span>
+            </span>
+            {filters.status === "" && (
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#FF6D1F]"></span>
+            )}
+          </button>
+        </div>
+
         {/* Filters and Controls */}
         <div className="gradient-border-white-bottom p-6 sm:p-8 mb-8">
           <div className="flex flex-col gap-6">
@@ -244,10 +373,11 @@ export default function CreatorProductsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="T-Shirts">T-Shirts</SelectItem>
-                  <SelectItem value="Hoodies">Hoodies</SelectItem>
-                  <SelectItem value="Mugs">Mugs</SelectItem>
-                  <SelectItem value="Posters">Posters</SelectItem>
+                  {availableCategories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -297,7 +427,7 @@ export default function CreatorProductsPage() {
               </div>
 
               <div className="text-xs sm:text-sm font-medium text-gray-400">
-                <span className="text-white/80">{filteredProducts.length}</span>{" "}
+                <span className="text-white/80">{sortedAndFilteredProducts.length}</span>{" "}
                 products
               </div>
             </div>
@@ -307,7 +437,7 @@ export default function CreatorProductsPage() {
         {/* Products Display */}
         {loading ? (
           <CreativeLoader variant="product" message="Loading your products..." />
-        ) : filteredProducts.length === 0 ? (
+        ) : sortedAndFilteredProducts.length === 0 ? (
           <div className="gradient-border-white-bottom p-8 sm:p-12 flex flex-col items-center justify-center text-center">
             <div className="text-orange-400 mb-6">
               <Package className="mx-auto h-16 w-16 sm:h-20 sm:w-20" />
@@ -329,11 +459,12 @@ export default function CreatorProductsPage() {
           </div>
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-            {filteredProducts.map((product) => (
+            {sortedAndFilteredProducts.map((product) => (
               <ProductGridCard
                 key={product.id}
                 product={product}
                 onDelete={confirmDeleteProduct}
+                onToggleStatus={handleToggleStatus}
               />
             ))}
           </div>
@@ -366,11 +497,12 @@ export default function CreatorProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
-                {filteredProducts.map((product) => (
+                {sortedAndFilteredProducts.map((product) => (
                   <ProductListRow
                     key={product.id}
                     product={product}
                     onDelete={confirmDeleteProduct}
+                    onToggleStatus={handleToggleStatus}
                   />
                 ))}
               </tbody>
@@ -394,9 +526,11 @@ export default function CreatorProductsPage() {
 function ProductGridCard({
   product,
   onDelete,
+  onToggleStatus,
 }: {
   product: Product;
   onDelete: (id: number) => void;
+  onToggleStatus: (id: number, currentStatus: boolean, e?: React.MouseEvent) => void;
 }) {
   const router = useRouter();
 
@@ -408,6 +542,12 @@ function ProductGridCard({
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
+  };
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleStatus(product.id, product.is_active, e);
   };
 
   const handleCardClick = () => {
@@ -452,19 +592,30 @@ function ProductGridCard({
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          <div className="absolute top-3 right-3">
+          <button
+            onClick={handleToggle}
+            className="absolute top-3 right-3 z-10"
+            title={product.is_active ? "Deactivate product" : "Activate product"}
+          >
             <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${product.is_active
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold transition-all hover:scale-105 ${product.is_active
                 ? "bg-green-500/20 text-green-400 border border-green-500/50"
                 : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
                 }`}
             >
-              {product.is_active ? "●" : "○"}
+              {product.is_active ? "● Active" : "○ Inactive"}
             </span>
-          </div>
+          </button>
 
           {/* Action buttons overlay */}
           <div className="absolute bottom-3 right-3 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              onClick={handleToggle}
+              className="p-2 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
+              title={product.is_active ? "Deactivate product" : "Activate product"}
+            >
+              {product.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
             <Link
               href={`/dashboard/creator/products/${product.id}/edit`}
               className="p-2 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
@@ -516,9 +667,11 @@ function ProductGridCard({
 function ProductListRow({
   product,
   onDelete,
+  onToggleStatus,
 }: {
   product: Product;
   onDelete: (id: number) => void;
+  onToggleStatus: (id: number, currentStatus: boolean, e?: React.MouseEvent) => void;
 }) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -536,6 +689,12 @@ function ProductListRow({
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
+  };
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleStatus(product.id, product.is_active, e);
   };
 
   const getImageUrl = (url: any) => {
@@ -600,14 +759,20 @@ function ProductListRow({
         )}
       </td>
       <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-        <span
-          className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${product.is_active
-            ? "bg-green-500/20 text-green-400 border border-green-500/50"
-            : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
-            }`}
+        <button
+          onClick={handleToggle}
+          className="hover:scale-105 transition-all"
+          title={product.is_active ? "Deactivate product" : "Activate product"}
         >
-          {product.is_active ? "● Active" : "● Inactive"}
-        </span>
+          <span
+            className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${product.is_active
+              ? "bg-green-500/20 text-green-400 border border-green-500/50"
+              : "bg-gray-500/20 text-gray-400 border border-gray-500/50"
+              }`}
+          >
+            {product.is_active ? "● Active" : "● Inactive"}
+          </span>
+        </button>
       </td>
       <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-400">
         {product.variant_count}
@@ -617,6 +782,13 @@ function ProductListRow({
       </td>
       <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium">
         <div className="flex justify-end gap-2">
+          <button
+            onClick={handleToggle}
+            className="p-1.5 sm:p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+            title={product.is_active ? "Deactivate" : "Activate"}
+          >
+            {product.is_active ? <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+          </button>
           <Link
             href={`/dashboard/creator/products/${product.id}/edit`}
             className="p-1.5 sm:p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"

@@ -8,8 +8,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GradientText } from "@/components/ui/GradientText";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function HowItWorksSection() {
+  const { isAuthenticated } = useAuth();
   const iconHoverStyles = `
     .group:hover .icon-inner {
       color: #FF6D1F !important;
@@ -182,12 +184,14 @@ export function HowItWorksSection() {
               </p>
 
               <div className="flex flex-row gap-4 sm:gap-6 md:gap-8 justify-center items-center flex-wrap">
-                <Button variant="primary" href="/auth/signup/creator">
-                  <span className="flex items-center justify-center">
-                    Get Started Free
-                    {/* <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" /> */}
-                  </span>
-                </Button>
+                {!isAuthenticated && (
+                  <Button variant="primary" href="/auth/signup/creator">
+                    <span className="flex items-center justify-center">
+                      Get Started Free
+                      {/* <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" /> */}
+                    </span>
+                  </Button>
+                )}
 
                 <Button variant="secondary" href="/products">
                   <span>View Products</span>

@@ -73,7 +73,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const response = await cartAPI.getCart();
       setItems(response.items);
       setSummary(response.summary);
-      setCartCount(response.summary.itemCount);
+      const actualCount = response.items.reduce((sum, item) => sum + item.quantity, 0);
+      setCartCount(response.summary?.itemCount || actualCount);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
       // Silently fail - no error toast for cart operations

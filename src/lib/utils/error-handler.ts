@@ -17,20 +17,24 @@ export function extractErrorMessage(
     return defaultMessage;
   }
 
-  if (error instanceof Error) {
-    return error.message || defaultMessage;
-  }
-
-  if (typeof error === "object" && "response" in error) {
+  if (typeof error === "object" && error !== null && "response" in error) {
     const apiError = error as APIErrorResponse;
 
-    if (apiError.response?.data?.error) {
+    if (apiError.response?.data?.error && typeof apiError.response.data.error === "string") {
       return apiError.response.data.error;
     }
 
-    if (apiError.response?.data?.message) {
+    if (apiError.response?.data?.message && typeof apiError.response.data.message === "string") {
       return apiError.response.data.message;
     }
+  }
+
+  if (error instanceof Error) {
+    // If it's an Axios error and the backend sent a 404 but no specific error message
+    if ((error as any).isAxiosError && (error as any).response?.status === 404 && error.message.includes('404')) {
+      return "The requested resource was not found or the email does not exist.";
+    }
+    return error.message || defaultMessage;
   }
 
   if (typeof error === "string") {
@@ -38,11 +42,11 @@ export function extractErrorMessage(
   }
 
   if (
-    typeof error === "object" &&
+    typeof error === "object" && error !== null &&
     "message" in error &&
-    typeof error.message === "string"
+    typeof (error as any).message === "string"
   ) {
-    return error.message;
+    return (error as any).message;
   }
 
   return defaultMessage;

@@ -1,6 +1,37 @@
 import { PrintfulCountry, PrintfulState } from './checkout-types';
 import { getCountryCallingCode, CountryCode } from 'libphonenumber-js';
 
+export const getZipCodeConfig = (countryCode: string): { maxLength: number; placeholder: string; helperText: string } => {
+  const configs: Record<string, { maxLength: number; placeholder: string; helperText: string }> = {
+    'US': { maxLength: 10, placeholder: 'ZIP Code (e.g. 90210) *', helperText: '5 digits or 5+4 digits (ZIP+4)' },
+    'CA': { maxLength: 7, placeholder: 'Postal Code (e.g. M5V 3A8) *', helperText: 'A1A 1A1 format' },
+    'GB': { maxLength: 8, placeholder: 'Postcode (e.g. SW1A 1AA) *', helperText: 'UK postcode format' },
+    'IN': { maxLength: 6, placeholder: 'PIN Code (e.g. 110001) *', helperText: '6 digits (PIN code)' },
+    'CN': { maxLength: 6, placeholder: 'Postal Code (e.g. 100000) *', helperText: '6 digits' },
+    'SG': { maxLength: 6, placeholder: 'Postal Code (e.g. 018956) *', helperText: '6 digits' },
+    'BR': { maxLength: 9, placeholder: 'Postal Code (e.g. 01310-100) *', helperText: '8-9 characters (5+3 digits)' },
+    'JP': { maxLength: 8, placeholder: 'Postal Code (e.g. 100-0001) *', helperText: '7 characters (3-4 digits)' },
+    'PL': { maxLength: 6, placeholder: 'Postal Code (e.g. 00-001) *', helperText: '6 characters (2-3 digits)' },
+    'CZ': { maxLength: 6, placeholder: 'Postal Code (e.g. 110 00) *', helperText: '6 characters (3-2 digits)' },
+  };
+
+  const defaultConfig = { maxLength: 10, placeholder: 'ZIP/Postal Code *', helperText: 'Enter valid ZIP/Postal code' };
+
+  if (!countryCode) return defaultConfig;
+
+  // For 4 digit countries (AU, NZ, BE, CH, NO, DK, AT)
+  if (['AU', 'NZ', 'BE', 'CH', 'NO', 'DK', 'AT'].includes(countryCode)) {
+    return { maxLength: 4, placeholder: 'Postcode (e.g. 2000) *', helperText: '4 digits' };
+  }
+
+  // For 5 digit countries (DE, FR, IT, ES, SE, MX)
+  if (['DE', 'FR', 'IT', 'ES', 'SE', 'MX'].includes(countryCode)) {
+    return { maxLength: 5, placeholder: 'Postal Code (e.g. 10115) *', helperText: '5 digits' };
+  }
+
+  return configs[countryCode] || defaultConfig;
+};
+
 // ZIP/Postal code format validation for different countries
 export const validateZipCode = (zipCode: string, countryCode: string): { valid: boolean; message?: string } => {
   if (!zipCode || !countryCode) {

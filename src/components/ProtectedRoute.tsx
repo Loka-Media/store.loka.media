@@ -38,7 +38,7 @@ export default function ProtectedRoute({
 
     // If authentication is required but user is not logged in
     if (requiresAuth && !user) {
-      router.push(redirectTo);
+      router.replace(redirectTo);
       return;
     }
 
@@ -47,11 +47,11 @@ export default function ProtectedRoute({
       // Special handling for creators - check approval status
       if (user.role === 'creator' && allowedRoles.includes('creator')) {
         if (user.creatorStatus !== 'approved') {
-          router.push('/dashboard');
+          router.replace('/dashboard');
           return;
         }
       } else {
-        router.push('/dashboard');
+        router.replace('/dashboard');
         return;
       }
     }

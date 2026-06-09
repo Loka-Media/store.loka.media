@@ -200,7 +200,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         }));
         setItems(guestCartItems);
         setSummary(response.summary);
-        setCartCount(response.summary.itemCount);
+        const actualCount = guestCartItems.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(response.summary?.itemCount || actualCount);
       } catch (error) {
         console.error('Failed to fetch cart:', error);
         // Silently fail - no error toast for cart operations

@@ -17,7 +17,7 @@ export default function CreatorProtectedRoute({ children }: CreatorProtectedRout
 
     // Only allow access if user is admin OR is a creator with approved status
     if (!user) {
-      router.push('/auth/login');
+      router.replace('/auth/login');
       return;
     }
 
@@ -27,7 +27,7 @@ export default function CreatorProtectedRoute({ children }: CreatorProtectedRout
     }
     
     if (user.role !== 'creator' || user.creatorStatus !== 'approved') {
-      router.push('/dashboard');
+      router.replace('/dashboard');
       return;
     }
   }, [user, loading, router]);

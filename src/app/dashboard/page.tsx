@@ -15,15 +15,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push("/auth/login");
+      router.replace("/auth/login");
     } else if (!loading && user) {
       // Redirect to role-specific dashboard
       if (user.role === "creator" && user.creatorStatus === "approved") {
-        router.push("/dashboard/creator");
+        router.replace("/dashboard/creator");
       } else if (user.role === "admin") {
-        router.push("/dashboard/admin");
+        router.replace("/dashboard/admin");
       } else if (user.role === "user" && !user.creatorStatus) {
-        router.push("/");
+        router.replace("/");
       }
       // Users with pending/rejected creator status stay on main dashboard
     }

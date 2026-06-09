@@ -95,7 +95,7 @@ export default function Navigation() {
 
                     <Link
                       href="/wishlist"
-                      className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                      className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
                       style={{ color: "var(--nav-text)" }}
                     >
                       <Heart className="w-5 h-5" />
@@ -106,10 +106,13 @@ export default function Navigation() {
                           {wishlistCount > 99 ? "99+" : wishlistCount}
                         </span>
                       )}
+                      <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                        Wishlist
+                      </span>
                     </Link>
                     <Link
                       href="/cart"
-                      className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                      className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
                       style={{ color: "var(--nav-text)" }}
                     >
                       <ShoppingBag className="w-5 h-5" />
@@ -120,6 +123,9 @@ export default function Navigation() {
                           {cartCount > 99 ? "99+" : cartCount}
                         </span>
                       )}
+                      <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                        Cart
+                      </span>
                     </Link>
 
                     {user?.role === "user" && (
@@ -159,18 +165,20 @@ export default function Navigation() {
                   <>
                     <Link
                       href="/cart"
-                      className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                      className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
                       style={{ color: "var(--nav-text)" }}
                     >
                       <ShoppingBag className="w-5 h-5" />
                       {cartCount > 0 && (
                         <span
-                          className="absolute -top-2 -right-2 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-extrabold"
-                          style={{ background: "var(--nav-hover-bg)" }}
+                          className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
                         >
                           {cartCount > 99 ? "99+" : cartCount}
                         </span>
                       )}
+                      <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                        Cart
+                      </span>
                     </Link>
 
                     {/* Separator */}

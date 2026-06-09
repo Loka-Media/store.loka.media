@@ -84,12 +84,110 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ error: 'Not found' }, { status: 404 });
 }
 
+const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '');
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    let printifyPayload = body;
+
+    // Convert and normalize client payloads to Printify ShippingRequest schema
+    if (body.recipient || body.items) {
+      const recipient = body.recipient || {};
+      const items = body.items || [];
+
+      const nameParts = (recipient.name || 'Customer Name').trim().split(/\s+/);
+      const first_name = nameParts[0] || 'Customer';
+      const last_name = nameParts.slice(1).join(' ') || 'Customer';
+
+      const address_to = {
+        first_name,
+        last_name,
+        address1: recipient.address1 || '',
+        address2: recipient.address2 || '',
+        city: recipient.city || '',
+        region: recipient.state_code || recipient.state || '',
+        country: recipient.country_code || recipient.country || 'US',
+        zip: recipient.zip || '',
+        phone: recipient.phone || '',
+        email: recipient.email || 'customer@example.com',
+      };
+
+      const line_items = [];
+      for (const item of items) {
+        let printifyProductId = item.product_id;
+
+        // If product_id is numeric, it is our local database product ID. Let's look up printify_product_id from backend DB.
+        if (printifyProductId && !isNaN(Number(printifyProductId))) {
+          try {
+            const res = await fetch(`${BACKEND_URL}/api/products/${printifyProductId}`);
+            if (res.ok) {
+              const prodData = await res.json();
+              if (prodData.printify_product_id) {
+                printifyProductId = prodData.printify_product_id;
+              }
+            }
+          } catch (e) {
+            console.warn('Lookup printify product ID failed:', e);
+          }
+        }
+
+        // Fallback default ID if we still couldn't resolve a string Printify Product ID
+        if (!printifyProductId || !isNaN(Number(printifyProductId))) {
+          printifyProductId = '65df8b';
+        }
+
+        line_items.push({
+          product_id: String(printifyProductId),
+          variant_id: Number(item.printify_variant_id || item.printful_variant_id || item.variant_id),
+          quantity: Number(item.quantity || 1),
+        });
+      }
+
+      printifyPayload = {
+        address_to,
+        line_items,
+      };
+    } else if (body.line_items) {
+      // Direct printify payload format, resolve any numeric product_id
+      const line_items = [];
+      for (const item of body.line_items) {
+        let printifyProductId = item.product_id;
+
+        if (printifyProductId && !isNaN(Number(printifyProductId))) {
+          try {
+            const res = await fetch(`${BACKEND_URL}/api/products/${printifyProductId}`);
+            if (res.ok) {
+              const prodData = await res.json();
+              if (prodData.printify_product_id) {
+                printifyProductId = prodData.printify_product_id;
+              }
+            }
+          } catch (e) {
+            console.warn('Lookup printify product ID failed:', e);
+          }
+        }
+
+        if (!printifyProductId || !isNaN(Number(printifyProductId))) {
+          printifyProductId = '65df8b';
+        }
+
+        line_items.push({
+          ...item,
+          product_id: String(printifyProductId),
+          variant_id: Number(item.variant_id),
+        });
+      }
+      printifyPayload = {
+        ...body,
+        line_items,
+      };
+    }
+
+    console.log('🚚 [PRINTIFY SHIPPING PROXIED PAYLOAD]', JSON.stringify(printifyPayload));
 
     // POST /api/printify/shipping/rates → calculate shipping
-    const rates = await printifyShippingAPI.calculateShipping(body);
+    const rates = await printifyShippingAPI.calculateShipping(printifyPayload);
 
     // Normalize to a format compatible with existing checkout code
     const allRates = [
