@@ -89,16 +89,19 @@ export default function AddressesPage() {
       setTimeout(() => setIsFormAnimating(true), 10);
       // Prevent background scroll when modal is open
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
       setIsFormAnimating(false);
       setTimeout(() => setIsFormVisible(false), 200);
       // Re-enable background scroll when modal is closed
       document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
     }
 
     // Cleanup on unmount
     return () => {
       document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
     };
   }, [showAddressForm]);
 
@@ -106,14 +109,17 @@ export default function AddressesPage() {
     if (showDeleteModal) {
       // Prevent background scroll when delete modal is open
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
       // Re-enable background scroll when delete modal is closed
       document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
     }
 
     // Cleanup on unmount
     return () => {
       document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
     };
   }, [showDeleteModal]);
 
@@ -397,12 +403,14 @@ export default function AddressesPage() {
         {/* Address Form Modal */}
         {isFormVisible && (
           <div
+            data-lenis-prevent
             className={`fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-3 sm:p-4 transition-all duration-200 ${
               isFormAnimating ? 'opacity-100' : 'opacity-0'
             }`}
             onClick={resetForm}
           >
             <div
+              data-lenis-prevent
               className={`w-full max-w-2xl sm:max-w-4xl mx-auto p-4 sm:p-6 border border-gray-700/50 rounded-lg bg-gray-900 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto transform transition-all duration-200 ${
                 isFormAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
               }`}
@@ -430,7 +438,7 @@ export default function AddressesPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <input
                     type="text"
-                    placeholder="Full Name"
+                    placeholder="Full Name *"
                     value={addressForm.name}
                     onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })}
                     className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
@@ -468,7 +476,7 @@ export default function AddressesPage() {
 
                   <input
                     type="text"
-                    placeholder="Address Line 1"
+                    placeholder="Address Line 1 *"
                     value={addressForm.address1}
                     onChange={(e) => setAddressForm({ ...addressForm, address1: e.target.value })}
                     className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"

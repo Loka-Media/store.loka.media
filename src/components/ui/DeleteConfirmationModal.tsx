@@ -43,12 +43,14 @@ export function DeleteConfirmationModal({
 
   return (
     <div 
+      data-lenis-prevent
       className={`fixed inset-0 bg-black/50 backdrop-blur-md overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 transition-all duration-300 ${
         isAnimating ? 'opacity-100' : 'opacity-0'
       }`}
       onClick={onClose}
     >
       <div 
+        data-lenis-prevent
         className={`w-full max-w-md mx-auto bg-white dark:bg-gray-900 shadow-2xl rounded-2xl transform transition-all duration-300 ${
           isAnimating ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-4'
         } overflow-hidden`}
