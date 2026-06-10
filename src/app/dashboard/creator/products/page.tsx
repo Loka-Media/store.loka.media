@@ -313,13 +313,7 @@ export default function CreatorProductsPage() {
                 : "text-gray-400 hover:text-white"
             }`}
           >
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-gray-500"></span>
-              Inactive Products
-              <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs font-normal text-gray-400">
-                {products.filter(p => !p.is_active).length}
-              </span>
-            </span>
+
             {filters.status === "inactive" && (
               <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#FF6D1F]"></span>
             )}
