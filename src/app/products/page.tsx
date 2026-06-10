@@ -119,8 +119,12 @@ function ProductsContent() {
 
     fetchCategories();
     fetchCreators();
+  }, [fetchCategories, fetchCreators]);
+
+  // Fetch products (static fetch, then filter locally)
+  useEffect(() => {
     fetchProducts();
-  }, [fetchCategories, fetchCreators, fetchProducts]);
+  }, [fetchProducts]);
 
   // Search Input Debounce - Only update filters after user stops typing
   useEffect(() => {
@@ -203,9 +207,25 @@ function ProductsContent() {
         return false;
       }
     }
-    if (filters.creator && String(product.creator_id) !== filters.creator && product.creator_name !== filters.creator) {
-      return false;
+
+    if (filters.creator) {
+      const creatorFilter = String(filters.creator).toLowerCase().trim();
+      
+      const isIdMatch = product.creator_id && String(product.creator_id) === creatorFilter;
+      const isUserIdMatch = (product as any).user_id && String((product as any).user_id) === creatorFilter;
+      const isNameMatch = product.creator_name && product.creator_name.toLowerCase().includes(creatorFilter);
+      const isUsernameMatch = product.creator_username && product.creator_username.toLowerCase().includes(creatorFilter);
+      
+      const creatorObj = product.creator as any;
+      const isObjIdMatch = creatorObj?.id && String(creatorObj.id) === creatorFilter;
+      const isObjNameMatch = creatorObj?.name && creatorObj.name.toLowerCase().includes(creatorFilter);
+      const isObjUsernameMatch = creatorObj?.username && creatorObj.username.toLowerCase().includes(creatorFilter);
+
+      if (!isIdMatch && !isUserIdMatch && !isNameMatch && !isUsernameMatch && !isObjIdMatch && !isObjNameMatch && !isObjUsernameMatch) {
+        return false;
+      }
     }
+
     if (filters.source && filters.source !== "all" && product.source !== filters.source) {
       return false;
     }

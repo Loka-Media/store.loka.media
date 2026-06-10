@@ -70,6 +70,13 @@ export default function Navigation() {
                 >
                   Discover
                 </Link>
+                <Link
+                  href="/creators"
+                  className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
+                  style={{ color: "var(--nav-text)" }}
+                >
+                  Creators
+                </Link>
 
                 {isAuthenticated ? (
                   <>
@@ -247,6 +254,14 @@ export default function Navigation() {
             onClick={() => setIsMenuOpen(false)}
           >
             Discover
+          </Link>
+          <Link
+            href="/creators"
+            className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+            style={{ color: "var(--nav-text)" }}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Creators
           </Link>
 
           {isAuthenticated ? (
