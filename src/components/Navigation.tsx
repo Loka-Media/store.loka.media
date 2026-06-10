@@ -147,10 +147,13 @@ export default function Navigation() {
                     {/* User section */}
                     <Link
                       href="/profile"
-                      className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center"
+                      className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
                       style={{ color: "var(--nav-text)" }}
                     >
                       <User className="w-5 h-5" />
+                      <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                        Profile
+                      </span>
                     </Link>
 
                     <button

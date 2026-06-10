@@ -401,6 +401,16 @@ export default function CreatorProductsPage() {
                   <SelectItem value="base_price-DESC">Price: High to Low</SelectItem>
                 </SelectContent>
               </Select>
+
+              {/* Clear Filters Button */}
+              {(filters.search || filters.category || filters.sortBy !== "created_at" || filters.sortOrder !== "DESC") && (
+                <button 
+                  onClick={() => setFilters(prev => ({ ...prev, search: "", category: "", sortBy: "created_at", sortOrder: "DESC" }))}
+                  className="h-[42px] sm:h-[46px] px-4 rounded-lg bg-white/5 border border-white/20 hover:bg-white/10 text-white text-sm font-medium transition-colors"
+                >
+                  Clear
+                </button>
+              )}
             </div>
 
             <div className="flex items-center justify-between">
