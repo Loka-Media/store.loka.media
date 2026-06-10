@@ -86,7 +86,7 @@ export function EnhancedDashboardHeader({
             className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg font-bold hover:shadow-[0_10px_30px_rgba(255,99,71,0.3)] transition-all duration-300 text-sm sm:text-base flex-shrink-0"
           >
             <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-            Connect Printful
+            Connect Printify
           </button>
         )}
       </div>

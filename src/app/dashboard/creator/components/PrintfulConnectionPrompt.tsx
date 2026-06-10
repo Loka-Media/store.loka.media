@@ -1,8 +1,8 @@
 
 'use client';
 
-import { 
-  Package, 
+import {
+  Package,
   ExternalLink
 } from 'lucide-react';
 
@@ -23,7 +23,7 @@ export default function PrintfulConnectionPrompt({ onConnect }: { onConnect: () 
       <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6 sm:p-8 mb-8">
         <p className="text-sm sm:text-base text-orange-200">
           <strong className="text-orange-300">✨ What You'll Get:</strong>
-          <br/>
+          <br />
           <span className="block text-gray-400 mt-2">
             • Access to thousands of products • Real-time inventory sync • Automated order fulfillment • Dedicated support
           </span>
@@ -35,7 +35,7 @@ export default function PrintfulConnectionPrompt({ onConnect }: { onConnect: () 
         className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-[0_10px_30px_rgba(255,99,71,0.3)] transition-all text-sm sm:text-base"
       >
         <ExternalLink className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-        Connect Printful Now
+        Connect Printify Now
       </button>
     </div>
   );

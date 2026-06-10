@@ -24,7 +24,7 @@ export function DashboardHeader({ connection, onConnectPrintful }: DashboardHead
               Manage your products, integrations, and sales performance.
             </p>
           </div>
-          
+
           {connection?.connected ? (
             <div className="flex flex-wrap items-center gap-3">
               <Link
@@ -41,7 +41,7 @@ export function DashboardHeader({ connection, onConnectPrintful }: DashboardHead
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
             >
               <ExternalLink className="w-4 h-4 mr-2" />
-              Connect Printful Account
+              Connect Printify Account
             </button>
           )}
         </div>
