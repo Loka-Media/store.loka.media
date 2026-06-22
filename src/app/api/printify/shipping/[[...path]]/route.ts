@@ -10,31 +10,35 @@ import { printifyShippingAPI, printifyCatalogAPI } from '@/services/printify/Pri
 // Static list of countries supported by Printify for address forms
 // This replaces the old Printful /countries endpoint
 const SUPPORTED_COUNTRIES = [
-  { code: 'US', name: 'United States', region: 'north_america', states: [
-    { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
-    { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
-    { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
-    { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
-    { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
-    { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
-    { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
-    { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
-    { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
-    { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
-    { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
-    { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
-    { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
-    { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
-    { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
-    { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
-    { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }, { code: 'DC', name: 'District of Columbia' },
-  ]},
-  { code: 'CA', name: 'Canada', region: 'north_america', states: [
-    { code: 'AB', name: 'Alberta' }, { code: 'BC', name: 'British Columbia' }, { code: 'MB', name: 'Manitoba' },
-    { code: 'NB', name: 'New Brunswick' }, { code: 'NL', name: 'Newfoundland and Labrador' },
-    { code: 'NS', name: 'Nova Scotia' }, { code: 'ON', name: 'Ontario' }, { code: 'PE', name: 'Prince Edward Island' },
-    { code: 'QC', name: 'Quebec' }, { code: 'SK', name: 'Saskatchewan' },
-  ]},
+  {
+    code: 'US', name: 'United States', region: 'north_america', states: [
+      { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
+      { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
+      { code: 'CT', name: 'Connecticut' }, { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
+      { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' }, { code: 'ID', name: 'Idaho' },
+      { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
+      { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' }, { code: 'LA', name: 'Louisiana' },
+      { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
+      { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' }, { code: 'MS', name: 'Mississippi' },
+      { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
+      { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' }, { code: 'NJ', name: 'New Jersey' },
+      { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
+      { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' }, { code: 'OK', name: 'Oklahoma' },
+      { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
+      { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' }, { code: 'TN', name: 'Tennessee' },
+      { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
+      { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' }, { code: 'WV', name: 'West Virginia' },
+      { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }, { code: 'DC', name: 'District of Columbia' },
+    ]
+  },
+  {
+    code: 'CA', name: 'Canada', region: 'north_america', states: [
+      { code: 'AB', name: 'Alberta' }, { code: 'BC', name: 'British Columbia' }, { code: 'MB', name: 'Manitoba' },
+      { code: 'NB', name: 'New Brunswick' }, { code: 'NL', name: 'Newfoundland and Labrador' },
+      { code: 'NS', name: 'Nova Scotia' }, { code: 'ON', name: 'Ontario' }, { code: 'PE', name: 'Prince Edward Island' },
+      { code: 'QC', name: 'Quebec' }, { code: 'SK', name: 'Saskatchewan' },
+    ]
+  },
   { code: 'GB', name: 'United Kingdom', region: 'europe', states: [] },
   { code: 'DE', name: 'Germany', region: 'europe', states: [] },
   { code: 'FR', name: 'France', region: 'europe', states: [] },
@@ -56,12 +60,14 @@ const SUPPORTED_COUNTRIES = [
   { code: 'HU', name: 'Hungary', region: 'europe', states: [] },
   { code: 'SK', name: 'Slovakia', region: 'europe', states: [] },
   { code: 'HR', name: 'Croatia', region: 'europe', states: [] },
-  { code: 'AU', name: 'Australia', region: 'oceania', states: [
-    { code: 'ACT', name: 'Australian Capital Territory' }, { code: 'NSW', name: 'New South Wales' },
-    { code: 'NT', name: 'Northern Territory' }, { code: 'QLD', name: 'Queensland' },
-    { code: 'SA', name: 'South Australia' }, { code: 'TAS', name: 'Tasmania' },
-    { code: 'VIC', name: 'Victoria' }, { code: 'WA', name: 'Western Australia' },
-  ]},
+  {
+    code: 'AU', name: 'Australia', region: 'oceania', states: [
+      { code: 'ACT', name: 'Australian Capital Territory' }, { code: 'NSW', name: 'New South Wales' },
+      { code: 'NT', name: 'Northern Territory' }, { code: 'QLD', name: 'Queensland' },
+      { code: 'SA', name: 'South Australia' }, { code: 'TAS', name: 'Tasmania' },
+      { code: 'VIC', name: 'Victoria' }, { code: 'WA', name: 'Western Australia' },
+    ]
+  },
   { code: 'NZ', name: 'New Zealand', region: 'oceania', states: [] },
   { code: 'JP', name: 'Japan', region: 'asia', states: [] },
   { code: 'SG', name: 'Singapore', region: 'asia', states: [] },
@@ -115,38 +121,23 @@ export async function POST(request: NextRequest) {
 
       const line_items = [];
       for (const item of items) {
-        let printifyProductId = item.product_id;
-        let blueprintId: number | null = null;
-        let printProviderId: number | null = null;
-
-        // Check if it's a numeric ID (either local DB or a catalog Blueprint ID)
-        if (printifyProductId && !isNaN(Number(printifyProductId))) {
-          // Assume it might be a blueprint ID if it's numeric!
-          blueprintId = Number(printifyProductId);
-          try {
-            const providers = await printifyCatalogAPI.getPrintProviders(blueprintId);
-            if (providers && providers.length > 0) {
-              printProviderId = providers[0].id;
-            }
-          } catch (e) {
-            console.warn('Lookup print provider for blueprint failed:', e);
-          }
-        }
-
-        if (blueprintId && printProviderId) {
+        if (item.blueprint_id && item.print_provider_id) {
           line_items.push({
-            blueprint_id: blueprintId,
-            print_provider_id: printProviderId,
+            blueprint_id: Number(item.blueprint_id),
+            print_provider_id: Number(item.print_provider_id),
+            variant_id: Number(item.printify_variant_id || item.printful_variant_id || item.variant_id),
+            quantity: Number(item.quantity || 1),
+          });
+        } else if (item.printify_product_id) {
+          line_items.push({
+            product_id: String(item.printify_product_id),
             variant_id: Number(item.printify_variant_id || item.printful_variant_id || item.variant_id),
             quantity: Number(item.quantity || 1),
           });
         } else {
-          // Fallback if we still don't have a valid ID
-          if (!printifyProductId || !isNaN(Number(printifyProductId))) {
-            printifyProductId = '65df8b';
-          }
+          // If no Printify identifiers exist, pass the local IDs (which will fail cleanly as 404 rather than assuming wrong blueprints)
           line_items.push({
-            product_id: String(printifyProductId),
+            product_id: String(item.product_id),
             variant_id: Number(item.printify_variant_id || item.printful_variant_id || item.variant_id),
             quantity: Number(item.quantity || 1),
           });
@@ -160,57 +151,65 @@ export async function POST(request: NextRequest) {
     } else if (body.line_items) {
       // Direct printify payload format, resolve any numeric product_id
       const line_items = [];
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      
       for (const item of body.line_items) {
         let printifyProductId = item.product_id;
-        let blueprintId: number | null = null;
-        let printProviderId: number | null = null;
-
-        if (printifyProductId && !isNaN(Number(printifyProductId))) {
-          blueprintId = Number(printifyProductId);
-          try {
-            const providers = await printifyCatalogAPI.getPrintProviders(blueprintId);
-            if (providers && providers.length > 0) {
-              printProviderId = providers[0].id;
+        let printifyVariantId = item.variant_id;
+        
+        // Before calculating shipping, fetch the actual product linked to the cart item.
+        try {
+          const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/products/${item.product_id}`);
+          if (res.ok) {
+            const productData = await res.json();
+            printifyProductId = productData.printify_product_id || productData.printful_sync_product_id || productData.printful_product_id || productData.blueprint_id || item.product_id;
+            
+            // Find the correct variant if printify_variant_id is available
+            if (productData.variants) {
+              const matchedVariant = productData.variants.find((v: any) => v.id == item.variant_id);
+              if (matchedVariant) {
+                printifyVariantId = matchedVariant.printify_variant_id || matchedVariant.printful_variant_id || item.variant_id;
+              }
             }
-          } catch (e) {
-            console.warn('Lookup print provider for blueprint failed:', e);
           }
+        } catch (e) {
+          console.warn('Failed to fetch product data from backend', e);
         }
 
-        if (blueprintId && printProviderId) {
-          line_items.push({
-            ...item,
-            blueprint_id: blueprintId,
-            print_provider_id: printProviderId,
-            variant_id: Number(item.variant_id),
-          });
-          // Remove product_id if it exists since we are using blueprint_id
-          delete line_items[line_items.length - 1].product_id;
-        } else {
-          if (!printifyProductId || !isNaN(Number(printifyProductId))) {
-            printifyProductId = '65df8b';
-          }
-          line_items.push({
-            ...item,
-            product_id: String(printifyProductId),
-            variant_id: Number(item.variant_id),
-          });
-        }
+        line_items.push({
+          product_id: String(printifyProductId),
+          variant_id: Number(printifyVariantId),
+          quantity: Number(item.quantity || 1),
+        });
       }
+
       printifyPayload = {
         ...body,
         line_items,
       };
     }
 
-    console.log('🚚 [PRINTIFY SHIPPING PROXIED PAYLOAD]', JSON.stringify(printifyPayload));
+    console.log(
+      '🚚 SHIPPING REQUEST',
+      JSON.stringify(printifyPayload, null, 2)
+    );
 
     // POST /api/printify/shipping/rates → calculate shipping
     let rates;
     try {
       rates = await printifyShippingAPI.calculateShipping(printifyPayload);
-    } catch (e: any) {
-      if (e.message && (e.message.includes('Not Found') || e.message.includes('404'))) {
+
+      console.log(
+        '✅ SHIPPING RESPONSE',
+        JSON.stringify(rates, null, 2)
+      );
+    } catch (error: any) {
+      console.error(
+        '❌ SHIPPING ERROR',
+        error.response?.data || error.message
+      );
+
+      if (error.message && (error.message.toLowerCase().includes('not found') || error.message.includes('404'))) {
         console.warn('Printify shipping calculation failed with Not Found. Returning mock flat rate shipping.');
         rates = {
           standard: [
@@ -226,7 +225,7 @@ export async function POST(request: NextRequest) {
           ]
         };
       } else {
-        throw e;
+        throw error;
       }
     }
 

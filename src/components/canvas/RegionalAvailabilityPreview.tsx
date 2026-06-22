@@ -280,7 +280,6 @@ export function RegionalAvailabilityPreview({
                             <li>Italy</li>
                             <li>Spain</li>
                             <li>Brazil</li>
-                            <li>India</li>
                             <li>Japan</li>
                             <li>New Zealand</li>
                             <li>Mexico</li>

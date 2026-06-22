@@ -268,6 +268,25 @@ export default function UnifiedCheckoutPage() {
         }
       }
 
+      // 1. Generate orderNumber client-side
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const orderNumber = `ORD-${timestamp}-${random}`;
+
+      // 2. Create payment intent first
+      const totalAmount = checkoutState.calculateTotal(summary.subtotal);
+      console.log('✅ [CHECKOUT] Creating payment intent first...');
+      const paymentIntentResult = await unifiedCheckoutAPI.createStripePaymentIntent(
+        totalAmount,
+        orderNumber,
+        customerInfo.email
+      );
+
+      if (!paymentIntentResult.success) {
+        throw new Error("Failed to create payment intent");
+      }
+
+      console.log('✅ [CHECKOUT] Payment intent created successfully, processing order...');
       let orderResult;
 
       if (isLoggedInUser && !wantsToSignup) {
@@ -278,7 +297,29 @@ export default function UnifiedCheckoutPage() {
           return;
         }
 
+        const authCartItems = items.map((item) => ({
+          product_id: String(item.printify_product_id || item.product_id),
+          variant_id: String(item.printify_variant_id || item.printful_variant_id || item.variant_id),
+          printify_product_id: item.printify_product_id || undefined,
+          printify_variant_id: item.printify_variant_id || item.printful_variant_id || undefined,
+          blueprint_id: item.blueprint_id || undefined,
+          print_provider_id: item.print_provider_id || undefined,
+          product_name: item.product_name,
+          price: String(item.price),
+          quantity: item.quantity,
+          image_url: item.image_url || "",
+          size: item.size,
+          color: item.color,
+          source: item.source && item.source !== 'unknown' ? item.source : (item.printify_variant_id ? 'printify' : (item.printful_variant_id ? 'printful' : 'unknown')),
+        }));
+
+        console.log(
+          'CART ITEMS BEFORE SHIPPING',
+          JSON.stringify(authCartItems, null, 2)
+        );
+
         orderResult = await unifiedCheckoutAPI.processAuthenticatedCheckout({
+          orderNumber,
           paymentMethod: "stripe",
           shippingAddress: {
             name: customerInfo.name,
@@ -300,18 +341,8 @@ export default function UnifiedCheckoutPage() {
             country: customerInfo.country,
             phone: customerInfo.phone,
           },
-          cartItems: items.map((item) => ({
-            product_id: String(item.product_id),
-            variant_id: String(item.variant_id),
-            product_name: item.product_name,
-            price: String(item.price),
-            quantity: item.quantity,
-            image_url: item.image_url || "",
-            size: item.size,
-            color: item.color,
-            source: item.source || "printful",
-          })),
-          customerNotes: ""
+          cartItems: authCartItems,
+          customerNotes: "",
         }, token);
       } else {
         // Guest checkout or user wants to signup
@@ -332,20 +363,33 @@ export default function UnifiedCheckoutPage() {
             country: customerInfo.country,
             phone: customerInfo.phone,
           },
-          cartItems: items.map((item) => ({
-            product_id: String(item.product_id),
-            variant_id: String(item.variant_id),
-            product_name: item.product_name,
-            price: String(item.price),
-            quantity: item.quantity,
-            image_url: item.image_url || "",
-            size: item.size,
-            color: item.color,
-            source: item.source || "printful",
-          })),
+          cartItems: items.map((item) => {
+            const mappedItem = {
+              product_id: String(item.printify_product_id || item.product_id),
+              variant_id: String(item.printify_variant_id || item.printful_variant_id || item.variant_id),
+              printify_product_id: item.printify_product_id || undefined,
+              printify_variant_id: item.printify_variant_id || item.printful_variant_id || undefined,
+              blueprint_id: item.blueprint_id || undefined,
+              print_provider_id: item.print_provider_id || undefined,
+              product_name: item.product_name,
+              price: String(item.price),
+              quantity: item.quantity,
+              image_url: item.image_url || "",
+              size: item.size,
+              color: item.color,
+              source: item.source && item.source !== 'unknown' ? item.source : (item.printify_variant_id ? 'printify' : (item.printful_variant_id ? 'printful' : 'unknown')),
+            };
+            return mappedItem;
+          }),
         });
 
+        console.log(
+          'CART ITEMS BEFORE SHIPPING',
+          JSON.stringify(sessionData.cartItems, null, 2)
+        );
+
         orderResult = await unifiedCheckoutAPI.processCheckout({
+          orderNumber,
           sessionToken: sessionData.session.session_token,
           paymentMethod: "stripe",
           ...(wantsToSignup && {
@@ -357,19 +401,7 @@ export default function UnifiedCheckoutPage() {
         });
       }
 
-      console.log('✅ [CHECKOUT] Order created successfully, creating payment intent...');
-
-      const totalAmount = checkoutState.calculateTotal(summary.subtotal);
-      const paymentIntentResult = await unifiedCheckoutAPI.createStripePaymentIntent(
-        totalAmount,
-        orderResult.order.orderNumber,
-        customerInfo.email
-      );
-
-      if (!paymentIntentResult.success) {
-        throw new Error("Failed to create payment intent");
-      }
-
+      console.log('✅ [CHECKOUT] Order processed successfully in database');
       setOrderData(orderResult.order);
       setClientSecret(paymentIntentResult.clientSecret);
       setCurrentStep("payment");

@@ -23,6 +23,8 @@ export interface CheckoutData {
   };
   shippingAddress: {
     name: string;
+    first_name?: string;
+    last_name?: string;
     address1: string;
     address2: string;
     city: string;
@@ -42,21 +44,29 @@ export interface CheckoutData {
     color: string;
     source?: string;
   }>;
+  shippingCost?: number | string;
+  shippingMethod?: string;
 }
 
 export interface ProcessCheckoutData {
+  orderNumber?: string;
   sessionToken: string;
   paymentMethod: string;
   loginCredentials?: {
     email: string;
     password: string;
   };
+  shippingCost?: number | string;
+  shippingMethod?: string;
 }
 
 export interface AuthenticatedCheckoutData {
+  orderNumber?: string;
   paymentMethod: string;
   shippingAddress: {
     name: string;
+    first_name?: string;
+    last_name?: string;
     address1: string;
     address2?: string;
     city: string;
@@ -67,6 +77,8 @@ export interface AuthenticatedCheckoutData {
   };
   billingAddress: {
     name: string;
+    first_name?: string;
+    last_name?: string;
     address1: string;
     address2?: string;
     city: string;
@@ -87,6 +99,8 @@ export interface AuthenticatedCheckoutData {
     source?: string;
   }>;
   customerNotes: string;
+  shippingCost?: number | string;
+  shippingMethod?: string;
 }
 
 export interface Address {

@@ -40,7 +40,11 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
         creator_name: product.creator?.name || product.creator_name || 'Unknown',
         source: product.source || 'unknown',
         shopify_variant_id: selectedVariant.shopify_variant_id,
-        printful_variant_id: selectedVariant.printify_variant_id
+        printify_variant_id: selectedVariant.printify_variant_id,
+        printful_variant_id: (selectedVariant as any).printful_variant_id || (product.source === 'printful' ? selectedVariant.id : undefined),
+        printify_product_id: (product as any).printify_id || (product as any).printify_product_id,
+        blueprint_id: (product as any).blueprint_id,
+        print_provider_id: (product as any).print_provider_id
       };
 
       // Store in localStorage for guest cart

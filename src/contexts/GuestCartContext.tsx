@@ -25,6 +25,10 @@ interface GuestCartItem {
   printful_catalog_variant_id?: string;
   printful_availability_regions?: string[];
   availability_regions?: string[];
+  printify_product_id?: string | number;
+  printify_variant_id?: string | number;
+  blueprint_id?: string | number;
+  print_provider_id?: string | number;
 }
 
 interface GuestCartContextType {
@@ -303,7 +307,11 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
               creator_name: cachedData.creator_name || 'Creator',
               source: cachedData.source || 'unknown',
               shopify_variant_id: cachedData.shopify_variant_id,
-              printful_variant_id: cachedData.printful_variant_id
+              printful_variant_id: cachedData.printful_variant_id,
+              printify_product_id: cachedData.printify_product_id,
+              printify_variant_id: cachedData.printify_variant_id,
+              blueprint_id: cachedData.blueprint_id,
+              print_provider_id: cachedData.print_provider_id
             };
           } else {
             // Since there's no cached data, we cannot add the product to guest cart

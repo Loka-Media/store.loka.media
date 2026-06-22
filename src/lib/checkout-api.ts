@@ -64,11 +64,13 @@ export const unifiedCheckoutAPI = {
 
   processAuthenticatedCheckout: async (data: AuthenticatedCheckoutData, token: string) => {
     try {
+      console.log('📦 [processAuthenticatedCheckout] Payload:', JSON.stringify(data, null, 2));
       const authApi = createAuthApi(token);
       const response = await authApi.post('/api/unified-checkout/process-authenticated', data);
       return response.data;
     } catch (error: any) {
       // Preserve error details for inventory errors
+      console.error('❌ [processAuthenticatedCheckout] Error:', error.response?.data || error.message);
       if (error.response?.data?.unavailable_items) {
         const customError: any = new Error(
           error.response.data.message || error.response.data.error || 'Failed to process authenticated checkout'
