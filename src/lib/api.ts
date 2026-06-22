@@ -517,6 +517,10 @@ export const formatDate = (dateString: string): string => {
 };
 
 // Printify API
+export interface ShippingProfile {
+  countries: string[];
+}
+
 export const printifyAPI = {
   // Get Printify shop connection status
   getConnectionStatus: async () => {
@@ -554,13 +558,18 @@ export const printifyAPI = {
   },
 
   // Get blueprint details (product template)
-  getBlueprintDetails: async (blueprintId: number) => {
+  getBlueprintDetails: async (blueprintId: number | string) => {
     return printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}`);
   },
 
   // Get print provider variants for blueprint
-  getBlueprintVariantsForProvider: async (blueprintId: number, providerId: number) => {
+  getBlueprintVariantsForProvider: async (blueprintId: number | string, providerId: number | string) => {
     return printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers/${providerId}/variants`);
+  },
+
+  // Get shipping profiles for a blueprint and provider
+  getShippingProfiles: async (blueprintId: number | string, providerId: number | string): Promise<{ profiles: ShippingProfile[] }> => {
+    return printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers/${providerId}/shipping`);
   },
 
   // Get Printify shop product (published product) details
@@ -569,7 +578,7 @@ export const printifyAPI = {
   },
 
   // Get print providers for a blueprint
-  checkProductAvailability: async (blueprintId: number) => {
+  checkProductAvailability: async (blueprintId: number | string) => {
     const data = await printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers`);
     return {
       result: {
@@ -664,7 +673,7 @@ export const printifyAPI = {
   },
 
   // Archive (delete) uploaded image
-  deleteFile: async function(imageId: string) {
+  deleteFile: async function (imageId: string) {
     return printifyProxyRequest("POST", `/api/printify/uploads/${imageId}/archive`);
   },
 
@@ -726,10 +735,6 @@ export const printifyAPI = {
     return printifyProxyRequest("GET", '/api/printify/catalog/print_providers');
   },
 
-  // Get shipping profiles for blueprint + provider
-  getShippingProfiles: async (blueprintId: number, providerId: number) => {
-    return printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers/${providerId}/shipping`);
-  },
 
   // Publish product (handles both publish and publishing_succeeded in the background on the server)
   publishProduct: async (productId: string | number) => {

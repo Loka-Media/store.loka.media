@@ -276,8 +276,8 @@ function CategoryCard({ category, onSelect }: any) {
             src={category.image_url || category.image || '/placeholder-product.png'}
             alt={category.title}
             fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             className="object-cover group-hover:scale-110 transition-transform duration-500"
-            unoptimized
             priority
           />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -389,8 +389,8 @@ function PrintfulProductCard({
           src={product.image || "/placeholder-product.png"}
           alt={product.title || product.model}
           fill
+          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           className="object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
-          unoptimized
         />
         <div onClick={() => onCreateProduct(product)} className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"></div>
 
@@ -479,8 +479,8 @@ function ProductDetailsModal({
                 src={product.image || "/placeholder-product.png"}
                 alt={product.title || product.model}
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
-                unoptimized
               />
             </div>
 
