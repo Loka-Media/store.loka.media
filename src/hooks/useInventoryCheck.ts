@@ -13,7 +13,7 @@ interface CartItem {
 interface AvailabilityResult {
   available: boolean;
   checks?: Array<{
-    variant_id: number;
+    variant_id: number | string;
     available: boolean;
     name?: string;
     reason?: string;
@@ -45,7 +45,7 @@ export function useInventoryCheck() {
         quantity: item.quantity
       }));
 
-      const response = await unifiedCheckoutAPI.checkVariantAvailability(variants);
+      const response = await unifiedCheckoutAPI.checkVariantAvailability(variants) as any;
 
       const result: AvailabilityResult = {
         available: response.all_available || response.success,
