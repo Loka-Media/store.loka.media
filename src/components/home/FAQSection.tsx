@@ -142,7 +142,7 @@ export function FAQSection() {
         </div>
 
         {/* FAQ Items - Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:gap-6">
           {faqs.map((faq, index) => (
             <div
               key={index}

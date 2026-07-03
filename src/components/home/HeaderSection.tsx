@@ -135,7 +135,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
       {/* Stats Section - Black Background with Accent Cards */}
       <div
         ref={statsRef}
-        className="py-8 md:py-12 px-4 md:px-6 lg:px-8 border-t"
+        className="py-8 md:py-12 px-4 md:px-6 lg:px-8"
         style={{
           background: "#000000",
           borderColor: "rgba(255, 255, 255, 0.1)",
@@ -147,11 +147,11 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {/* Stat Card 1 */}
             <div className="gradient-border-white-top p-4 sm:p-6 md:p-8">
-              <div className="flex flex-col h-full justify-between items-center text-center">
+              <div className="flex flex-col h-full justify-between items-center text-center gap-4" >
                 <div
                   className="font-medium"
                   style={{
-                    fontSize: "0.875rem",
+                    fontSize: "1.3rem",
                     color: "rgba(255, 255, 255, 0.8)",
                     letterSpacing: "0.01em",
                   }}
@@ -159,7 +159,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   Paid to creators
                 </div>
                 <div
-                  className="font-extrabold tracking-wider"
+                  className="font-bold tracking-wider"
                   style={{
                     fontSize: "clamp(1.5rem, 5vw, 5rem)",
                     color: "#FF6D1F",
@@ -174,11 +174,11 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
 
             {/* Stat Card 2 */}
             <div className="gradient-border-white-top p-4 sm:p-6 md:p-8">
-              <div className="flex flex-col h-full justify-between items-center text-center">
+              <div className="flex flex-col h-full justify-between items-center text-center gap-4" >
                 <div
                   className="font-medium"
                   style={{
-                    fontSize: "0.875rem",
+                    fontSize: "1.3rem",
                     color: "rgba(255, 255, 255, 0.8)",
                     letterSpacing: "0.01em",
                   }}
@@ -186,7 +186,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   Active creators
                 </div>
                 <div
-                  className="font-extrabold tracking-wider"
+                  className="font-bold tracking-wider"
                   style={{
                     fontSize: "clamp(1.5rem, 5vw, 5rem)",
                     color: "#FF6D1F",
@@ -201,11 +201,11 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
 
             {/* Stat Card 3 */}
             <div className="col-span-2 md:col-span-1 gradient-border-white-top p-4 sm:p-6 md:p-8 w-1/2 mx-auto md:w-full">
-              <div className="flex flex-col h-full justify-between items-center text-center">
+              <div className="flex flex-col h-full justify-between items-center text-center gap-4">
                 <div
                   className="font-medium"
                   style={{
-                    fontSize: "0.875rem",
+                    fontSize: "1.3rem",
                     color: "rgba(255, 255, 255, 0.8)",
                     letterSpacing: "0.01em",
                   }}
@@ -213,7 +213,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   You keep
                 </div>
                 <div
-                  className="font-extrabold tracking-wider"
+                  className="font-bold tracking-wider"
                   style={{
                     fontSize: "clamp(1.5rem, 5vw, 5rem)",
                     color: "#FF6D1F",
