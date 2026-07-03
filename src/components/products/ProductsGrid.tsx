@@ -1,5 +1,6 @@
 import { ExtendedProduct } from "@/lib/api";
 import { ProductCard } from "./ProductCard";
+import GradientTitle from "../ui/GradientTitle";
 
 interface ProductsGridProps {
   products: ExtendedProduct[];
@@ -24,6 +25,9 @@ export function ProductsGrid({ products }: ProductsGridProps) {
           opacity: 0;
         }
       `}</style>
+      <div className="mb-6 sm:mb-10">
+        <GradientTitle text="All Products" size="sm" className="sm:!text-2xl md:!text-3xl lg:!text-4xl" />
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
         {products.map((product, index) => (
           <div

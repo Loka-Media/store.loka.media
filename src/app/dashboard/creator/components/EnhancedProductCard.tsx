@@ -84,110 +84,127 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
         }}
         className="gradient-border-white-bottom overflow-hidden group cursor-pointer flex flex-col h-full hover:shadow-[0_20px_60px_rgba(255,99,71,0.3)] transition-all duration-300"
       >
-          {/* Image Container */}
-          <div className="w-full relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
-            <Image
-              src={(() => {
-                let url = product.thumbnail_url;
-                if (typeof url === 'string' && url.startsWith('[')) {
-                  try { const parsed = JSON.parse(url); if (parsed.length) url = parsed[0]; } catch(e) {}
-                }
-                if (!url) return "/placeholder-product.png";
-                return url.startsWith('//') ? `https:${url}` : url;
-              })()}
-              alt={product.name}
-              fill
-              unoptimized
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            />
+        {/* Image Container */}
+        <div className="w-full relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
+          <Image
+            src={(() => {
+              let url = product.thumbnail_url;
+              if (typeof url === 'string' && url.startsWith('[')) {
+                try { const parsed = JSON.parse(url); if (parsed.length) url = parsed[0]; } catch (e) { }
+              }
+              if (!url) return "/placeholder-product.png";
+              return url.startsWith('//') ? `https:${url}` : url;
+            })()}
+            alt={product.name}
+            fill
+            unoptimized
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
 
-            {/* Status badge */}
-            <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10">
-              <span className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-bold ${
-                localStatus
-                  ? 'bg-green-500/20 border border-green-500 text-green-400'
-                  : 'bg-gray-500/20 border border-gray-500 text-gray-400'
+          {/* Status badge */}
+          <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">
+            <span className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-medium ${localStatus
+              ? 'bg-[#00D953] border border-green-500 text-black'
+              : 'bg-gray-500/20 border border-gray-500 text-gray-400'
               }`}>
-                <span className="sm:hidden">{localStatus ? '✓' : '○'}</span>
-                <span className="hidden sm:inline">{localStatus ? '✓ Active' : 'Inactive'}</span>
-              </span>
-            </div>
-
-            {/* Action buttons overlay */}
-            <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex gap-1 sm:space-x-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-10">
-              <Link
-                href={productHref}
-                target="_blank"
-                className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-orange-500 border border-white/20 text-white rounded-lg transition-all duration-300"
-                title="View Product"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ExternalLink className="w-3 sm:w-4 h-3 sm:h-4" />
-              </Link>
-              <Link
-                href={`/dashboard/creator/products/${product.id}/edit`}
-                className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-blue-500 border border-white/20 text-white rounded-lg transition-all duration-300"
-                title="Edit Product"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Edit className="w-3 sm:w-4 h-3 sm:h-4" />
-              </Link>
-              <button
-                onClick={handleDelete}
-                className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-red-500 border border-white/20 text-white rounded-lg transition-all duration-300"
-                title="Delete Product"
-              >
-                <Trash2 className="w-3 sm:w-4 h-3 sm:h-4" />
-              </button>
-            </div>
-
-            {/* Status toggle at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={localStatus}
-                  onCheckedChange={handleStatusChange}
-                  id={`status-switch-${product.id}`}
-                />
-                <label
-                  htmlFor={`status-switch-${product.id}`}
-                  className="text-sm font-bold text-white cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
-                  {localStatus ? "Active" : "Inactive"}
-                </label>
-              </div>
-            </div>
+              <span className="sm:hidden">{localStatus ? '✓' : '○'}</span>
+              <span className="hidden sm:inline">{localStatus ? 'Active' : 'Inactive'}</span>
+            </span>
+          </div>
+          <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 z-10">
+            <span className="text-xs font-medium bg-black  text-white px-2.5 py-1 rounded-xl">
+              {product.variant_count} variants
+            </span>
+          </div>
+          {/* Action buttons overlay */}
+          <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex gap-1 sm:space-x-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-10">
+            <Link
+              href={productHref}
+              target="_blank"
+              className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-orange-500 border border-white/20 text-white rounded-lg transition-all duration-300"
+              title="View Product"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-3 sm:w-4 h-3 sm:h-4" />
+            </Link>
+            <Link
+              href={`/dashboard/creator/products/${product.id}/edit`}
+              className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-blue-500 border border-white/20 text-white rounded-lg transition-all duration-300"
+              title="Edit Product"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Edit className="w-3 sm:w-4 h-3 sm:h-4" />
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-red-500 border border-white/20 text-white rounded-lg transition-all duration-300"
+              title="Delete Product"
+            >
+              <Trash2 className="w-3 sm:w-4 h-3 sm:h-4" />
+            </button>
           </div>
 
-          {/* Content Section */}
-          <div className="p-4 sm:p-6 flex flex-col flex-1 bg-black">
-            <h3 className="font-extrabold text-sm text-white truncate mb-2 group-hover:text-orange-400 transition-colors line-clamp-2 tracking-tight">
-              {product.name}
-            </h3>
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <span className="text-sm sm:text-base font-bold text-cyan-400">
-                {formatPrice(product.min_price)}
-                {product.max_price > product.min_price && (
-                  <span className="text-xs text-gray-400 font-normal ml-1">- {formatPrice(product.max_price)}</span>
-                )}
-              </span>
-              <span className="text-xs font-bold bg-purple-500/20 border border-purple-500 text-purple-400 px-2.5 py-1 rounded-full">
-                {product.variant_count} variants
-              </span>
-            </div>
-            <div className="text-xs font-medium text-gray-400 text-center mt-auto">
-              Click to view product
+          {/* Status toggle at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={localStatus}
+                onCheckedChange={handleStatusChange}
+                id={`status-switch-${product.id}`}
+              />
+              <label
+                htmlFor={`status-switch-${product.id}`}
+                className="text-sm font-bold text-white cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                {localStatus ? "Active" : "Inactive"}
+              </label>
             </div>
           </div>
         </div>
+
+        {/* Content Section */}
+        <div className="p-4 sm:p-6 flex flex-col flex-1 bg-black">
+          <h3 className="font-extrabold text-center text-sm text-white truncate mb-2 group-hover:text-orange-400 transition-colors line-clamp-2 tracking-tight">
+            {product.name}
+          </h3>
+          <div className="flex items-center justify-center mb-3 flex-wrap gap-2">
+            <span className="text-sm sm:text-base font-bold text-cyan-400">
+              {formatPrice(product.min_price)}
+              {product.max_price > product.min_price && (
+                <span className="text-xs text-gray-400 font-normal ml-1">- {formatPrice(product.max_price)}</span>
+              )}
+            </span>
+
+          </div>
+          <div className="mt-auto pt-3 sm:pt-4">
+            <div className="w-full border border-[#FF6D1F] rounded-full
+                  py-2
+                  sm:py-2.5
+                  md:py-3
+                  lg:py-3
+                  xl:py-3
+                  text-center">
+              <span className="text-[#FF6D1F]
+                     text-[11px]
+                     sm:text-xs
+                     md:text-sm
+                     lg:text-sm
+                     xl:text-base
+                     font-semibold">
+                Click to View product
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <ConfirmationDialog
         isOpen={isDeleteDialogOpen}
@@ -201,9 +218,8 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
         onClose={() => setShowStatusConfirmDialog(false)}
         onConfirm={confirmStatusChange}
         title={`Confirm ${newStatus ? "Activation" : "Deactivation"}`}
-        description={`Are you sure you want to ${
-          newStatus ? "activate" : "deactivate"
-        } this product?`}
+        description={`Are you sure you want to ${newStatus ? "activate" : "deactivate"
+          } this product?`}
       />
     </>
   );

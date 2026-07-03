@@ -25,15 +25,30 @@ interface ProductsSectionProps {
 export function EnhancedProductsSection({ products, loading, onDelete }: ProductsSectionProps) {
   return (
     <div className="border-t border-white/10 pt-12">
-      <div className="mb-8 flex items-center justify-between">
-        <GradientTitle text="Products" size="sm" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl" />
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <GradientTitle
+          text="Your Products"
+          size="sm"
+          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
+        />
+
         {products.length > 0 && (
           <Link
             href="/dashboard/creator/products"
-            className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-white/10 border border-white/20 text-white font-bold rounded-lg hover:bg-white/20 transition-all group text-sm sm:text-base"
+            className="w-full sm:w-auto inline-flex items-center justify-center
+                 px-5 sm:px-8
+                 py-3 sm:py-4
+                 bg-[#FF6D1F]
+                 text-black
+                 font-medium
+                 rounded-full
+                 hover:bg-[#ff7d38]
+                 transition-all
+                 duration-300
+                 text-sm sm:text-base lg:text-lg
+                 whitespace-nowrap"
           >
-            View All
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            View All {products.length} Products
           </Link>
         )}
       </div>

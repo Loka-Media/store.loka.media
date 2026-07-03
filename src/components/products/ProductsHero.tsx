@@ -164,7 +164,7 @@ export function ProductsHero({
                 </div>
               </StartShape>
               <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{productsCount}K+</div>
-              <div className="text-xs text-white">Products</div>
+              <div className="text-xs text-white">Creators</div>
             </div>
             <div className="text-center flex flex-col items-center">
               <StartShape className="max-w-[80px] sm:max-w-[100px]">
@@ -196,7 +196,7 @@ export function ProductsHero({
                 </div>
               </StartShape>
               <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{creatorsCount}+</div>
-              <div className="text-xs text-white">Creators</div>
+              <div className="text-xs text-white">Products</div>
             </div>
             <div className="text-center flex flex-col items-center">
               <StartShape className="max-w-[80px] sm:max-w-[100px]">

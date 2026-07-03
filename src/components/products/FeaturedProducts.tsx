@@ -70,18 +70,18 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
               {/* Content Section - Below Image */}
               <div className="bg-black px-3 py-2.5 flex flex-col h-full">
                 {/* Creator Name */}
-                <p className="text-xs text-gray-400 font-semibold mb-1">
+                <p className="text-xs text-gray-400 font-semibold mb-1 text-center">
                   by {product.creator?.name || product.creator_name || 'Unknown'}
                 </p>
 
                 {/* Product Title */}
-                <div className="font-normal text-sm text-white mb-auto line-clamp-2 group-hover:text-orange-400 transition-colors tracking-tight">
+                <div className="font-normal text-center text-sm text-white mb-auto line-clamp-2 group-hover:text-orange-400 transition-colors tracking-tight">
                   {product.name}
                 </div>
 
                 {/* Price */}
                 <div className="flex items-center justify-between pt-1.5">
-                  <span className="text-sm font-extrabold text-cyan-400 tracking-tight">
+                  <span className="text-sm text-center font-extrabold text-cyan-400 tracking-tight">
                     ${product.min_price || product.base_price}
                   </span>
                 </div>

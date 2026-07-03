@@ -50,6 +50,7 @@ function ProductsContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeView, setActiveView] = useState<ViewType>("trending");
   const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
+  const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false);
 
   const [filters, setFilters] = useState(() => ({
     category: searchParams.get("category") || "",
@@ -355,103 +356,199 @@ function ProductsContent() {
 
       <div className="bg-black border-b border-white/10 relative z-40 filter-section-animate">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:py-8 overflow-visible">
-          <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
-            <div className="relative w-full lg:w-1/2">
-              <svg className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleSearchSubmit(e);
-                  }
-                }}
-                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/20 bg-gradient-to-br from-gray-800 to-gray-900 text-white text-xs sm:text-sm placeholder-white/40 hover:border-orange-400/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 transition-all"
-              />
-            </div>
-
-            <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 w-full lg:w-1/2">
-              <div className="relative flex-1">
-                <select
-                  value={filters.category}
-                  onChange={(e) => handleFilterChange("category", e.target.value)}
-                  className={`w-full px-4 sm:px-5 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:shadow-[0_8px_24px_rgba(255,99,71,0.15)] focus:outline-none focus:ring-2 transition-all cursor-pointer font-medium appearance-none ${
-                    filters.category ? "border-blue-400 focus:border-blue-400 focus:ring-blue-400/30" : "border-white/30 hover:border-orange-400 focus:border-orange-400 focus:ring-orange-400/30"
-                  }`}
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 12px center',
-                    paddingRight: '32px',
+          <form onSubmit={handleSearchSubmit} className="space-y-4 mb-4 sm:mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-4 items-center">
+              <div className="relative">
+                <svg className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearchSubmit(e);
+                    }
                   }}
-                >
-                  <option value="">All Types</option>
-                  {categories.map((cat) => (
-                    <option key={cat.category} value={cat.category}>
-                      {cat.category} ({cat.product_count})
-                    </option>
-                  ))}
-                </select>
-                {filters.category && (
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full"></div>
-                )}
+                  className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 h-12 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm placeholder-white/40 hover:border-orange-400/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 transition-all"
+                />
               </div>
 
-              {(filters.category || searchInput || filters.creator) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="relative">
+                  <select
+                    value={filters.category}
+                    onChange={(e) => handleFilterChange("category", e.target.value)}
+                    className={`w-full px-4 py-3 h-12 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm appearance-none cursor-pointer ${filters.category ? "border-blue-400 focus:border-blue-400" : "hover:border-orange-400 focus:border-orange-400"}`}
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 16px center',
+                    }}
+                  >
+                    <option value="">All Types</option>
+                    {categories.map((cat) => (
+                      <option key={cat.category} value={cat.category}>
+                        {cat.category} ({cat.product_count})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="relative">
+                  <select
+                    value={filters.creator}
+                    onChange={(e) => handleFilterChange("creator", e.target.value)}
+                    className={`w-full px-4 py-3 h-12 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm appearance-none cursor-pointer ${filters.creator ? "border-blue-400 focus:border-blue-400" : "hover:border-orange-400 focus:border-orange-400"}`}
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 16px center',
+                    }}
+                  >
+                    <option value="">All Creators</option>
+                    {creators.map((creator) => (
+                      <option key={creator.id} value={creator.name}>
+                        {creator.name} ({creator.product_count})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={clearFilters}
-                  className="px-3 sm:px-4 py-3 sm:py-3.5 h-11 sm:h-12 rounded-xl border border-white/20 bg-gradient-to-br from-gray-700 to-gray-800 text-white text-xs sm:text-sm hover:border-red-400 hover:shadow-[0_8px_24px_rgba(239,68,68,0.15)] focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-400/30 transition-all cursor-pointer font-medium flex items-center justify-center gap-1.5"
-                  title="Clear all filters"
+                  type="button"
+                  onClick={() => handleViewChange("trending")}
+                  className={`px-4 py-3 rounded-2xl text-sm font-semibold border transition-all flex items-center gap-2 ${activeView === "trending"
+                    ? "bg-gray-800 text-white border-purple-500"
+                    : "bg-gray-900 text-white border-white/20 hover:border-purple-400 hover:bg-gray-800"
+                    }`}
+                >
+                  Trending
+                  <TrendingUp className={`w-4 h-4 ${activeView === "trending" ? "text-purple-400" : "text-white/60"}`} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleViewChange("new")}
+                  className={`px-4 py-3 rounded-2xl text-sm font-semibold border transition-all flex items-center gap-2 ${activeView === "new"
+                    ? "bg-gray-800 text-white border-blue-500"
+                    : "bg-gray-900 text-white border-white/20 hover:border-blue-400 hover:bg-gray-800"
+                    }`}
+                >
+                  New
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    viewBox="0 0 42 42"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M19.25 22.75V26.25C19.25 26.7458 19.4177 27.1615 19.7531 27.4969C20.0885 27.8323 20.5042 28 21 28C21.4958 28 21.9115 27.8323 22.2469 27.4969C22.5823 27.1615 22.75 26.7458 22.75 26.25V22.75H26.25C26.7458 22.75 27.1615 22.5823 27.4969 22.2469C27.8323 21.9115 28 21.4958 28 21C28 20.5042 27.8323 20.0885 27.4969 19.7531C27.1615 19.4177 26.7458 19.25 26.25 19.25H22.75V15.75C22.75 15.2542 22.5823 14.8385 22.2469 14.5031C21.9115 14.1677 21.4958 14 21 14C20.5042 14 20.0885 14.1677 19.7531 14.5031C19.4177 14.8385 19.25 15.2542 19.25 15.75V19.25H15.75C15.2542 19.25 14.8385 19.4177 14.5031 19.7531C14.1677 20.0885 14 20.5042 14 21C14 21.4958 14.1677 21.9115 14.5031 22.2469C14.8385 22.5823 15.2542 22.75 15.75 22.75H19.25ZM21 38.5C20.5333 38.5 20.0885 38.4198 19.6656 38.2594C19.2427 38.099 18.8708 37.8438 18.55 37.4938L4.59375 23.4937C4.27292 23.1438 4.01042 22.7573 3.80625 22.3344C3.60208 21.9115 3.5 21.4667 3.5 21C3.5 20.5333 3.60208 20.0885 3.80625 19.6656C4.01042 19.2427 4.27292 18.8708 4.59375 18.55L18.55 4.55C18.9 4.2 19.2792 3.9375 19.6875 3.7625C20.0958 3.5875 20.5333 3.5 21 3.5C21.4667 3.5 21.9188 3.5875 22.3563 3.7625C22.7938 3.9375 23.1729 4.2 23.4937 4.55L37.4062 18.55C37.7271 18.9 37.9896 19.2792 38.1938 19.6875C38.3979 20.0958 38.5 20.5333 38.5 21C38.5 21.4667 38.4052 21.9115 38.2156 22.3344C38.026 22.7573 37.7562 23.1438 37.4062 23.4937L23.4937 37.4938C23.1729 37.8146 22.7938 38.0625 22.3563 38.2375C21.9188 38.4125 21.4667 38.5 21 38.5ZM21 35L34.9563 21L21 7L7.04375 21L21 35Z"
+                      fill={activeView === "new" ? "#3A61FF" : "#9CA3AF"}
+                    />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleViewChange("popular")}
+                  className={`px-4 py-3 rounded-2xl text-sm font-semibold border transition-all flex items-center gap-2 ${activeView === "popular"
+                    ? "bg-gray-800 text-white border-red-500"
+                    : "bg-gray-900 text-white border-white/20 hover:border-red-400 hover:bg-gray-800"
+                    }`}
+                >
+                  Popular
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    viewBox="0 0 42 42"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <mask
+                      id="heartMask"
+                      style={{ maskType: "alpha" }}
+                      maskUnits="userSpaceOnUse"
+                      x="0"
+                      y="0"
+                      width="42"
+                      height="42"
+                    >
+                      <rect width="42" height="42" fill="#D9D9D9" />
+                    </mask>
+
+                    <g mask="url(#heartMask)">
+                      <path
+                        d="M21 38.5009C17.0917 38.5009 13.7812 37.1446 11.0687 34.4321C8.35625 31.7196 7 28.4092 7 24.5009C7 21.205 7.97708 18.0404 9.93125 15.0071C11.8854 11.9738 14.5687 9.31961 17.9812 7.04461C18.6229 6.60711 19.2865 6.58524 19.9719 6.97899C20.6573 7.37274 21 7.96336 21 8.75086V11.0259C21 12.0175 21.3427 12.8488 22.0281 13.5196C22.7135 14.1904 23.5521 14.5259 24.5438 14.5259C25.0396 14.5259 25.5135 14.4165 25.9656 14.1977C26.4177 13.979 26.8188 13.6654 27.1688 13.2571C27.4021 12.9654 27.701 12.7832 28.0656 12.7102C28.4302 12.6373 28.7729 12.7175 29.0938 12.9509C30.9312 14.2634 32.375 15.9404 33.425 17.9821C34.475 20.0238 35 22.1967 35 24.5009C35 28.4092 33.6438 31.7196 30.9312 34.4321C28.2188 37.1446 24.9083 38.5009 21 38.5009ZM10.5 24.5009C10.5 26.0175 10.8063 27.454 11.4188 28.8102C12.0312 30.1665 12.9062 31.355 14.0438 32.3759C14.0146 32.23 14 32.0988 14 31.9821V31.5884C14 30.655 14.175 29.78 14.525 28.9634C14.875 28.1467 15.3854 27.4029 16.0563 26.7321L21 21.8759L25.9438 26.7321C26.6146 27.4029 27.125 28.1467 27.475 28.9634C27.825 29.78 28 30.655 28 31.5884V31.9821C28 32.0988 27.9854 32.23 27.9563 32.3759C29.0938 31.355 29.9688 30.1665 30.5813 28.8102C31.1938 27.454 31.5 26.0175 31.5 24.5009C31.5 23.0425 31.2302 21.6644 30.6906 20.3665C30.151 19.0686 29.3708 17.9092 28.35 16.8884C27.7667 17.2675 27.1542 17.5519 26.5125 17.7415C25.8708 17.9311 25.2146 18.0259 24.5438 18.0259C22.7354 18.0259 21.1677 17.4279 19.8406 16.2321C18.5135 15.0363 17.7479 13.5634 17.5437 11.8134C15.2688 13.7384 13.526 15.7873 12.3156 17.9602C11.1052 20.1332 10.5 22.3134 10.5 24.5009ZM21 26.7759L18.5063 29.2259C18.1854 29.5467 17.9375 29.9113 17.7625 30.3196C17.5875 30.7279 17.5 31.1509 17.5 31.5884C17.5 32.5217 17.8427 33.3238 18.5281 33.9946C19.2135 34.6654 20.0375 35.0009 21 35.0009C21.9625 35.0009 22.7865 34.6654 23.4719 33.9946C24.1573 33.3238 24.5 32.5217 24.5 31.5884C24.5 31.1217 24.4125 30.6915 24.2375 30.2977C24.0625 29.904 23.8146 29.5467 23.4937 29.2259L21 26.7759Z"
+                        fill={activeView === "popular" ? "#FF1F1F" : "#9CA3AF"}
+                      />
+                    </g>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="w-full lg:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setIsPriceRangeOpen((open) => !open)}
+                  className="w-full lg:w-auto px-4 py-3 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm font-semibold hover:border-orange-400 hover:bg-gray-800 transition-all"
+                >
+                  {filters.minPrice !== undefined || filters.maxPrice !== undefined
+                    ? `$${filters.minPrice ?? 0} - $${filters.maxPrice ?? "Any"}`
+                    : "$ Price Range"}
+                </button>
+              </div>
+            </div>
+
+            {isPriceRangeOpen && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl border border-white/10 bg-gray-950/90">
+                <input
+                  type="number"
+                  placeholder="Min Price"
+                  value={filters.minPrice ?? ""}
+                  onChange={(e) =>
+                    handleFilterChange(
+                      "minPrice",
+                      e.target.value ? Number(e.target.value) : undefined
+                    )
+                  }
+                  className="w-full px-4 py-3 rounded-2xl border border-white/20 bg-black text-white text-sm placeholder-white/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+                />
+                <input
+                  type="number"
+                  placeholder="Max Price"
+                  value={filters.maxPrice ?? ""}
+                  onChange={(e) =>
+                    handleFilterChange(
+                      "maxPrice",
+                      e.target.value ? Number(e.target.value) : undefined
+                    )
+                  }
+                  className="w-full px-4 py-3 rounded-2xl border border-white/20 bg-black text-white text-sm placeholder-white/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+                />
+              </div>
+            )}
+
+            {(filters.category || searchInput || filters.creator || filters.minPrice !== undefined || filters.maxPrice !== undefined) && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearFilters();
+                    setIsPriceRangeOpen(false);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-3 h-12 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm font-semibold hover:border-red-400 hover:bg-gray-800 transition-all"
                 >
                   <X className="w-4 h-4" />
-                  <span className="hidden sm:inline">Clear</span>
+                  Clear
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </form>
-
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center mb-4">
-            <div className="flex gap-2 sm:gap-3 items-center overflow-x-auto overflow-y-visible scrollbar-hide pb-2 xs:pb-0 -mx-4 xs:mx-0 px-4 xs:px-0">
-              <button
-                onClick={() => handleViewChange("trending")}
-                className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "trending"
-                    ? "bg-gray-800 text-white border-purple-500 shadow-[0_8px_20px_rgba(147,51,234,0.3)]"
-                    : "bg-gray-800 text-white border-white/20 hover:border-purple-400/50 hover:bg-gray-700"
-                  }`}
-                title="View trending products"
-              >
-                <TrendingUp className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "trending" ? "text-purple-500" : "text-white/60"}`} />
-                <span className="font-normal">Trending</span>
-              </button>
-              <button
-                onClick={() => handleViewChange("new")}
-                className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "new"
-                    ? "bg-gray-800 text-white border-blue-500 shadow-[0_8px_20px_rgba(59,130,246,0.3)]"
-                    : "bg-gray-800 text-white border-white/20 hover:border-blue-400/50 hover:bg-gray-700"
-                  }`}
-                title="View new arrivals"
-              >
-                <Zap className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "new" ? "text-blue-500" : "text-white/60"}`} />
-                <span className="font-normal">New</span>
-              </button>
-              <button
-                onClick={() => handleViewChange("popular")}
-                className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "popular"
-                    ? "bg-gray-800 text-white border-red-500 shadow-[0_8px_20px_rgba(220,38,38,0.3)]"
-                    : "bg-gray-800 text-white border-white/20 hover:border-red-400/50 hover:bg-gray-700"
-                  }`}
-                title="View popular products"
-              >
-                <Heart className={`w-4 h-4 sm:w-4 sm:h-4 ${activeView === "popular" ? "text-red-500" : "text-white/60"}`} />
-                <span className="font-normal">Popular</span>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
