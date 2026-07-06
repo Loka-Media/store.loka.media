@@ -55,19 +55,27 @@ export function EnhancedStatsCards({ stats }: StatsProps) {
       {statItems.map((item, index) => (
         <div
           key={index}
-          className="gradient-border-white-top p-4 sm:p-6 md:p-8 group hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300"
+          className="gradient-border-white-top p-4 sm:p-5 rounded-2xl group hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300"
         >
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <dt className="text-xs sm:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 sm:mb-3">
-                {item.name}
-              </dt>
-              <dd className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <div className="flex flex-col h-full">
+            {/* Top Row */}
+            <div className="flex items-start justify-between">
+              <div
+                className={`${item.iconColor} opacity-80 group-hover:opacity-100 transition-opacity w-8 h-8 sm:w-10 sm:h-10`}
+              >
+                <item.icon />
+              </div>
+
+              <span className="text-2xl sm:text-3xl font-extrabold text-white">
                 {item.value}
-              </dd>
+              </span>
             </div>
-            <div className={`${item.iconColor} opacity-60 group-hover:opacity-100 transition-opacity duration-300 h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16 lg:h-20 lg:w-20 flex-shrink-0`}>
-              <item.icon />
+
+            {/* Bottom Label */}
+            <div className="mt-8 flex justify-end">
+              <p className="text-gray-400 text-sm sm:text-base font-medium">
+                {item.name}
+              </p>
             </div>
           </div>
         </div>

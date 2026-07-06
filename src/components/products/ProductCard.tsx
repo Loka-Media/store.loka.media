@@ -137,18 +137,18 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Content Section - Below Image with enhanced styling */}
         <div className="bg-gradient-to-b from-black/80 to-black px-2 sm:px-4 py-2 sm:py-3 flex flex-col h-full backdrop-blur-sm">
           {/* Creator Name with badge style */}
-          <p className="text-xs text-orange-400 font-semibold mb-1 sm:mb-1.5 inline-block bg-orange-500/20 px-2 py-1 rounded-full w-fit">
+          <p className="text-xs text-gray-400 font-semibold mb-1 text-center">
             by {product.creator?.name || product.creator_name || 'Unknown'}
           </p>
 
           {/* Product Title */}
-          <div className="font-normal text-xs sm:text-sm text-white mb-auto line-clamp-1 group-hover:text-orange-300 transition-colors duration-300 tracking-tight leading-snug">
+          <div className="font-normal text-xs text-center sm:text-sm text-white mb-auto line-clamp-1 group-hover:text-orange-300 transition-colors duration-300 tracking-tight leading-snug">
             {product.name}
           </div>
 
           {/* Price Section with gradient background */}
-          <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-gray-700/30 mt-1.5 sm:mt-2">
-            <span className="text-xs sm:text-sm font-extrabold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+          <div className="flex items-center justify-center pt-1.5 sm:pt-2 border-t border-gray-700/30 mt-1.5 sm:mt-2">
+            <span className="text-sm text-center font-extrabold text-cyan-400 tracking-tight">
               {formatPrice(
                 product.price_range?.min ? parseFloat(String(product.price_range.min)) : parseFloat(String(product.base_price) || '0')
               )}

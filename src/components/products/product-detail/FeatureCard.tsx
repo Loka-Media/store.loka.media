@@ -33,7 +33,7 @@ export function FeatureCard({ icon: Icon, iconSvg, color, title, subtitle }: Fea
         </div>
       </StartShape>
       <div className="text-center">
-        <p className={`text-xs sm:text-base font-bold ${colorMap[color]}`}>{title}</p>
+        <p className={`!text-xs sm:text-base font-bold ${colorMap[color]}`}>{title}</p>
         <p className="text-xs text-gray-400 mt-0.5 sm:mt-1">{subtitle}</p>
       </div>
     </div>
