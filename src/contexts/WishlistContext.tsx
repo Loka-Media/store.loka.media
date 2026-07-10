@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { wishlistAPI } from '@/lib/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
@@ -47,8 +47,8 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
-  const [lastFetchTime, setLastFetchTime] = useState(0);
+  const isFetchingRef = useRef(false);
+  const lastFetchTimeRef = useRef(0);
   const { isAuthenticated, user } = useAuth();
 
   const refreshWishlist = useCallback(async (force = false) => {
@@ -58,32 +58,32 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (isFetching) {
+    if (isFetchingRef.current) {
       return;
     }
 
     const now = Date.now();
-    const timeSinceLastFetch = now - lastFetchTime;
+    const timeSinceLastFetch = now - lastFetchTimeRef.current;
     if (!force && timeSinceLastFetch < 5000) {
       return;
     }
 
     try {
-      setIsFetching(true);
+      isFetchingRef.current = true;
       setLoading(true);
       const response = await wishlistAPI.getWishlist();
       setItems(response.items || []);
       setWishlistCount(response.count || 0);
-      setLastFetchTime(now);
+      lastFetchTimeRef.current = now;
     } catch (error) {
       console.error('Failed to fetch wishlist:', error);
       setItems([]);
       setWishlistCount(0);
     } finally {
       setLoading(false);
-      setIsFetching(false);
+      isFetchingRef.current = false;
     }
-  }, [isAuthenticated, isFetching, lastFetchTime]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -91,7 +91,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     } else {
       setItems([]);
       setWishlistCount(0);
-      setLastFetchTime(0);
+      lastFetchTimeRef.current = 0;
     }
   }, [isAuthenticated, user, refreshWishlist]);
 
