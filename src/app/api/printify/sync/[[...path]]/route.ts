@@ -317,7 +317,7 @@ export async function POST(request: NextRequest) {
       const product = await printifyProductsAPI.getProduct(productId);
       const transformed = transformProductForStorefront(product);
 
-      await postToBackend('/api/printful/mockups/store-permanently', transformed, authHeader);
+      await postToBackend('/api/printify/mockups/store-permanently', transformed, authHeader);
 
       return NextResponse.json({
         success: true,
@@ -480,10 +480,10 @@ if (!isPreview) {
           availabilityData,
         };
 
-        console.log('[Printify Sync] Posting publishing payload to backend /api/printful/mockups/store-permanently...');
-        logToFile(`[Printify Sync] Posting publishing payload to backend /api/printful/mockups/store-permanently...`);
+        console.log('[Printify Sync] Posting publishing payload to backend /api/printify/mockups/store-permanently...');
+        logToFile(`[Printify Sync] Posting publishing payload to backend /api/printify/mockups/store-permanently...`);
         const saved = await postToBackend(
-          '/api/printful/mockups/store-permanently',
+          '/api/printify/mockups/store-permanently',
           backendPayload,
           authHeader
         );
