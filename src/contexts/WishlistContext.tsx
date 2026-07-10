@@ -87,12 +87,13 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      refreshWishlist();
+      refreshWishlist(true);
     } else {
       setItems([]);
       setWishlistCount(0);
+      setLastFetchTime(0);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, refreshWishlist]);
 
   useEffect(() => {
     let visibilityTimeout: NodeJS.Timeout;
