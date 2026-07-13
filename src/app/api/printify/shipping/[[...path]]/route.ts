@@ -121,6 +121,11 @@ export async function POST(request: NextRequest) {
 
       const line_items = [];
       for (const item of items) {
+        const itemSource = item.source || 'printify';
+        if (itemSource !== 'printify') {
+          continue; // Skip non-Printify items (e.g. Printful, Shopify)
+        }
+
         if (item.blueprint_id && item.print_provider_id) {
           line_items.push({
             blueprint_id: Number(item.blueprint_id),
@@ -156,12 +161,16 @@ export async function POST(request: NextRequest) {
       for (const item of body.line_items) {
         let printifyProductId = item.product_id;
         let printifyVariantId = item.variant_id;
+        let isPrintify = true;
         
         // Before calculating shipping, fetch the actual product linked to the cart item.
         try {
           const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/products/${item.product_id}`);
           if (res.ok) {
             const productData = await res.json();
+            if (productData.source === 'printful' || productData.source === 'shopify') {
+              isPrintify = false;
+            }
             printifyProductId = productData.printify_product_id || productData.printful_sync_product_id || productData.printful_product_id || productData.blueprint_id || item.product_id;
             
             // Find the correct variant if printify_variant_id is available
@@ -176,11 +185,13 @@ export async function POST(request: NextRequest) {
           console.warn('Failed to fetch product data from backend', e);
         }
 
-        line_items.push({
-          product_id: String(printifyProductId),
-          variant_id: Number(printifyVariantId),
-          quantity: Number(item.quantity || 1),
-        });
+        if (isPrintify) {
+          line_items.push({
+            product_id: String(printifyProductId),
+            variant_id: Number(printifyVariantId),
+            quantity: Number(item.quantity || 1),
+          });
+        }
       }
 
       printifyPayload = {
@@ -196,53 +207,185 @@ export async function POST(request: NextRequest) {
 
     // POST /api/printify/shipping/rates → calculate shipping
     let rates;
-    try {
-      rates = await printifyShippingAPI.calculateShipping(printifyPayload);
+    if (!printifyPayload.line_items || printifyPayload.line_items.length === 0) {
+      console.log('Bypassing Printify API call as there are no Printify items in the request.');
+      rates = {
+        standard: [
+          {
+            id: 'mock_standard',
+            title: 'Standard Shipping',
+            carrier: 'Generic',
+            rate: 599, // $5.99
+            minDeliveryDays: 3,
+            maxDeliveryDays: 7,
+            currency: 'USD'
+          }
+        ]
+      };
+    } else {
+      try {
+        rates = await printifyShippingAPI.calculateShipping(printifyPayload);
 
-      console.log(
-        '✅ SHIPPING RESPONSE',
-        JSON.stringify(rates, null, 2)
-      );
-    } catch (error: any) {
-      console.error(
-        '❌ SHIPPING ERROR',
-        error.response?.data || error.message
-      );
+        console.log(
+          '✅ SHIPPING RESPONSE',
+          JSON.stringify(rates, null, 2)
+        );
+      } catch (error: any) {
+        console.error(
+          '❌ SHIPPING ERROR',
+          error.response?.data || error.message
+        );
 
-      if (error.message && (error.message.toLowerCase().includes('not found') || error.message.includes('404'))) {
-        console.warn('Printify shipping calculation failed with Not Found. Returning mock flat rate shipping.');
-        rates = {
-          standard: [
-            {
-              id: 'mock_standard',
-              title: 'Standard Shipping',
-              carrier: 'Generic',
-              rate: 599, // $5.99
-              minDeliveryDays: 3,
-              maxDeliveryDays: 7,
-              currency: 'USD'
-            }
-          ]
-        };
-      } else {
-        throw error;
+        if (error.message && (error.message.toLowerCase().includes('not found') || error.message.includes('404'))) {
+          console.warn('Printify shipping calculation failed with Not Found. Returning mock flat rate shipping.');
+          rates = {
+            standard: [
+              {
+                id: 'mock_standard',
+                title: 'Standard Shipping',
+                carrier: 'Generic',
+                rate: 599, // $5.99
+                minDeliveryDays: 3,
+                maxDeliveryDays: 7,
+                currency: 'USD'
+              }
+            ]
+          };
+        } else {
+          throw error;
+        }
       }
     }
 
     // Normalize to a format compatible with existing checkout code
-    const allRates = [
-      ...(rates.standard || []),
-      ...(rates.express || []),
-      ...(rates.priority || []),
-    ].map(rate => ({
-      id: rate.id,
-      name: rate.title,
-      carrier: rate.carrier,
-      rate: (rate.rate / 100).toFixed(2),   // cents → dollars string
-      minDeliveryDays: rate.minDeliveryDays,
-      maxDeliveryDays: rate.maxDeliveryDays,
-      currency: rate.currency || 'USD',
-    }));
+    const allRates: any[] = [];
+
+    if (rates) {
+      // Standard Rate
+      if (typeof rates.standard === 'number') {
+        allRates.push({
+          id: 'standard',
+          name: 'Standard Shipping',
+          carrier: 'Standard',
+          rate: (rates.standard / 100).toFixed(2),
+          minDeliveryDays: 3,
+          maxDeliveryDays: 7,
+          currency: 'USD',
+        });
+      } else if (Array.isArray(rates.standard)) {
+        rates.standard.forEach((rate: any) => {
+          allRates.push({
+            id: rate.id || 'standard',
+            name: rate.title || 'Standard Shipping',
+            carrier: rate.carrier || 'Standard',
+            rate: ((rate.rate || 0) / 100).toFixed(2),
+            minDeliveryDays: rate.minDeliveryDays || 3,
+            maxDeliveryDays: rate.maxDeliveryDays || 7,
+            currency: rate.currency || 'USD',
+          });
+        });
+      }
+
+      // Express Rate
+      if (typeof rates.express === 'number') {
+        allRates.push({
+          id: 'express',
+          name: 'Express Shipping',
+          carrier: 'Express',
+          rate: (rates.express / 100).toFixed(2),
+          minDeliveryDays: 2,
+          maxDeliveryDays: 3,
+          currency: 'USD',
+        });
+      } else if (Array.isArray(rates.express)) {
+        rates.express.forEach((rate: any) => {
+          allRates.push({
+            id: rate.id || 'express',
+            name: rate.title || 'Express Shipping',
+            carrier: rate.carrier || 'Express',
+            rate: ((rate.rate || 0) / 100).toFixed(2),
+            minDeliveryDays: rate.minDeliveryDays || 2,
+            maxDeliveryDays: rate.maxDeliveryDays || 3,
+            currency: rate.currency || 'USD',
+          });
+        });
+      }
+
+      // Priority Rate
+      if (typeof rates.priority === 'number') {
+        allRates.push({
+          id: 'priority',
+          name: 'Priority Shipping',
+          carrier: 'Priority',
+          rate: (rates.priority / 100).toFixed(2),
+          minDeliveryDays: 1,
+          maxDeliveryDays: 2,
+          currency: 'USD',
+        });
+      } else if (Array.isArray(rates.priority)) {
+        rates.priority.forEach((rate: any) => {
+          allRates.push({
+            id: rate.id || 'priority',
+            name: rate.title || 'Priority Shipping',
+            carrier: rate.carrier || 'Priority',
+            rate: ((rate.rate || 0) / 100).toFixed(2),
+            minDeliveryDays: rate.minDeliveryDays || 1,
+            maxDeliveryDays: rate.maxDeliveryDays || 2,
+            currency: rate.currency || 'USD',
+          });
+        });
+      }
+
+      // Printify Express Rate
+      if (typeof rates.printify_express === 'number') {
+        allRates.push({
+          id: 'printify_express',
+          name: 'Printify Express Shipping',
+          carrier: 'Printify Express',
+          rate: (rates.printify_express / 100).toFixed(2),
+          minDeliveryDays: 2,
+          maxDeliveryDays: 5,
+          currency: 'USD',
+        });
+      } else if (Array.isArray(rates.printify_express)) {
+        rates.printify_express.forEach((rate: any) => {
+          allRates.push({
+            id: rate.id || 'printify_express',
+            name: rate.title || 'Printify Express Shipping',
+            carrier: rate.carrier || 'Printify Express',
+            rate: ((rate.rate || 0) / 100).toFixed(2),
+            minDeliveryDays: rate.minDeliveryDays || 2,
+            maxDeliveryDays: rate.maxDeliveryDays || 5,
+            currency: rate.currency || 'USD',
+          });
+        });
+      }
+
+      // Economy Rate
+      if (typeof rates.economy === 'number') {
+        allRates.push({
+          id: 'economy',
+          name: 'Economy Shipping',
+          carrier: 'Economy',
+          rate: (rates.economy / 100).toFixed(2),
+          minDeliveryDays: 5,
+          maxDeliveryDays: 10,
+          currency: 'USD',
+        });
+      } else if (Array.isArray(rates.economy)) {
+        rates.economy.forEach((rate: any) => {
+          allRates.push({
+            id: rate.id || 'economy',
+            name: rate.title || 'Economy Shipping',
+            carrier: rate.carrier || 'Economy',
+            rate: ((rate.rate || 0) / 100).toFixed(2),
+            minDeliveryDays: rate.minDeliveryDays || 5,
+            maxDeliveryDays: rate.maxDeliveryDays || 10,
+            currency: rate.currency || 'USD',
+          });
+        });
+      }
+    }
 
     return NextResponse.json({ success: true, result: allRates });
 
