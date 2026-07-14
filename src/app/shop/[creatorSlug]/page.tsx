@@ -48,6 +48,24 @@ function CreatorShopContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeView, setActiveView] = useState<ViewType>("trending");
   const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollArrows, setShowScrollArrows] = useState(false);
+
+  const checkScrollability = useCallback(() => {
+    if (categoryScrollRef.current) {
+      const { scrollWidth, clientWidth } = categoryScrollRef.current;
+      setShowScrollArrows(scrollWidth > clientWidth);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkScrollability();
+    const timer = setTimeout(checkScrollability, 150);
+    window.addEventListener("resize", checkScrollability);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", checkScrollability);
+    };
+  }, [categories, checkScrollability]);
 
   const [filters, setFilters] = useState(() => ({
     category: searchParams.get("category") || "",
@@ -125,13 +143,13 @@ function CreatorShopContent() {
   const fetchCategories = useCallback(async () => {
     try {
       const start = performance.now();
-      const response = await productAPI.getCategories();
+      const response = await productAPI.getCategories({ creator: creatorSlug });
       setCategories(response.categories);
       console.log(`API [Categories]: ${(performance.now() - start).toFixed(2)}ms`);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     }
-  }, []);
+  }, [creatorSlug]);
 
   const fetchCreator = useCallback(async () => {
     try {
@@ -150,6 +168,7 @@ function CreatorShopContent() {
         setCreator({
           name: matchingCreator.name,
           username: matchingCreator.username,
+          profileImg: matchingCreator.profile_img,
         });
       } else {
         // Fallback: query backend directly for a product to see if we can extract creator details
@@ -323,6 +342,7 @@ function CreatorShopContent() {
         <CreatorHero
           creatorName={creator.name}
           creatorUsername={creator.username}
+          avatarUrl={creator.profileImg || creator.profile_img || undefined}
           isVerified={false}
           tagline="Exclusive drops and curated essentials."
           productCount={pagination.total}
@@ -336,13 +356,15 @@ function CreatorShopContent() {
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Left Arrow */}
-              <button
-                onClick={() => scrollCategories("left")}
-                className="flex-shrink-0 p-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors"
-                title="Scroll left"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+              {showScrollArrows && (
+                <button
+                  onClick={() => scrollCategories("left")}
+                  className="flex-shrink-0 p-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors"
+                  title="Scroll left"
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              )}
 
               {/* Category Chips Container */}
               <div
@@ -375,13 +397,15 @@ function CreatorShopContent() {
               </div>
 
               {/* Right Arrow */}
-              <button
-                onClick={() => scrollCategories("right")}
-                className="flex-shrink-0 p-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors"
-                title="Scroll right"
-              >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+              {showScrollArrows && (
+                <button
+                  onClick={() => scrollCategories("right")}
+                  className="flex-shrink-0 p-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors"
+                  title="Scroll right"
+                >
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              )}
             </div>
           </div>
 

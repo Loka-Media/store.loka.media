@@ -48,6 +48,24 @@ function CreatorShopContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeView, setActiveView] = useState<ViewType>("trending");
   const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollArrows, setShowScrollArrows] = useState(false);
+
+  const checkScrollability = useCallback(() => {
+    if (categoryScrollRef.current) {
+      const { scrollWidth, clientWidth } = categoryScrollRef.current;
+      setShowScrollArrows(scrollWidth > clientWidth);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkScrollability();
+    const timer = setTimeout(checkScrollability, 150);
+    window.addEventListener("resize", checkScrollability);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", checkScrollability);
+    };
+  }, [categories, checkScrollability]);
 
   const [filters, setFilters] = useState(() => ({
     category: searchParams.get("category") || "",
@@ -126,32 +144,48 @@ function CreatorShopContent() {
   const fetchCategories = useCallback(async () => {
     try {
       const start = performance.now();
-      const response = await productAPI.getCategories();
+      const response = await productAPI.getCategories({ creator: username });
       setCategories(response.categories);
       console.log(`API [Categories]: ${(performance.now() - start).toFixed(2)}ms`);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     }
-  }, []);
+  }, [username]);
 
   const fetchCreator = useCallback(async () => {
     try {
       const start = performance.now();
-      const response = await productAPI.getProducts({ creator: username, limit: 1, offset: 0 });
+      
+      // Try to find matching creator in creators list to get official name, username, and profile image
+      const creatorsRes = await productAPI.getCreators();
+      const list = creatorsRes.creators || [];
+      const matchingCreator = list.find(
+        (c: any) =>
+          c.username.toLowerCase() === username.toLowerCase() ||
+          c.name.replace(/\s+/g, "").toLowerCase() === username.toLowerCase()
+      );
 
-      if (response.products.length > 0 && response.products[0].creator) {
-        // Extract creator info from first product
-        const creatorInfo = {
-          name: response.products[0].creator.name || response.products[0].creator_name,
-          username: response.products[0].creator.username || username,
-        };
-        setCreator(creatorInfo);
-      } else {
-        // Fallback creator info
+      if (matchingCreator) {
         setCreator({
-          name: username,
-          username: username,
+          name: matchingCreator.name,
+          username: matchingCreator.username,
+          profileImg: matchingCreator.profile_img,
         });
+      } else {
+        // Fallback: check products
+        const response = await productAPI.getProducts({ creator: username, limit: 1, offset: 0 });
+        if (response.products.length > 0 && response.products[0].creator) {
+          const creatorInfo = {
+            name: response.products[0].creator.name || response.products[0].creator_name,
+            username: response.products[0].creator.username || username,
+          };
+          setCreator(creatorInfo);
+        } else {
+          setCreator({
+            name: username,
+            username: username,
+          });
+        }
       }
 
       console.log(`API [Creator Info]: ${(performance.now() - start).toFixed(2)}ms`);
@@ -311,6 +345,7 @@ function CreatorShopContent() {
         <CreatorHero
           creatorName={creator.name}
           creatorUsername={creator.username}
+          avatarUrl={creator.profileImg || creator.profile_img || undefined}
           isVerified={false}
           tagline="Exclusive drops and curated essentials."
           productCount={pagination.total}
@@ -324,13 +359,15 @@ function CreatorShopContent() {
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Left Arrow */}
-              <button
-                onClick={() => scrollCategories("left")}
-                className="flex-shrink-0 p-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors"
-                title="Scroll left"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+              {showScrollArrows && (
+                <button
+                  onClick={() => scrollCategories("left")}
+                  className="flex-shrink-0 p-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors"
+                  title="Scroll left"
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              )}
 
               {/* Category Chips Container */}
               <div
@@ -363,13 +400,15 @@ function CreatorShopContent() {
               </div>
 
               {/* Right Arrow */}
-              <button
-                onClick={() => scrollCategories("right")}
-                className="flex-shrink-0 p-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors"
-                title="Scroll right"
-              >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+              {showScrollArrows && (
+                <button
+                  onClick={() => scrollCategories("right")}
+                  className="flex-shrink-0 p-2 rounded-lg border border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-colors"
+                  title="Scroll right"
+                >
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              )}
             </div>
           </div>
 

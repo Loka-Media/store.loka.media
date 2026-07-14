@@ -77,6 +77,7 @@ export interface User {
   role: 'user' | 'creator' | 'admin';
   isVerified: boolean;
   creatorStatus?: 'pending' | 'approved' | 'rejected' | null;
+  profileImg?: string | null;
 }
 
 export interface AuthResponse {

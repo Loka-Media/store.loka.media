@@ -229,9 +229,9 @@ export const productAPI = {
     return response.data;
   },
 
-  // Get categories
-  getCategories: async () => {
-    const response = await api.get("/api/products/categories");
+  // Get all active product categories (supports optional creator filter)
+  getCategories: async (params?: { creator?: string }) => {
+    const response = await api.get("/api/products/categories", { params });
     return response.data;
   },
 
@@ -487,14 +487,14 @@ export const checkoutAPI = {
 // User Profile API
 export const userAPI = {
   // Update user profile
-  updateProfile: async (userData: { name?: string; phone?: string }) => {
-    const response = await api.put("/auth/me", userData);
+  updateProfile: async (userData: { name?: string; phone?: string; profile_img?: string }) => {
+    const response = await api.put("/api/auth/me", userData);
     return response.data;
   },
 
   // Update user location
   updateLocation: async (locationData: { country: string; region?: string }) => {
-    const response = await api.put("/auth/me/location", locationData);
+    const response = await api.put("/api/auth/me/location", locationData);
     return response.data;
   },
 };

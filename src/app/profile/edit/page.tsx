@@ -20,6 +20,39 @@ export default function EditProfilePage() {
   });
   const [loading, setLoading] = useState(false);
 
+  const [tempAvatarUrl, setTempAvatarUrl] = useState<string | null>(null);
+  const [base64Image, setBase64Image] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate type
+    const validTypes = ['image/png', 'image/jpeg', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a valid image file (PNG, JPG, or WEBP)');
+      return;
+    }
+
+    // Validate size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const resultStr = reader.result as string;
+      setTempAvatarUrl(resultStr);
+      setBase64Image(resultStr);
+    };
+    reader.onerror = () => {
+      toast.error('Failed to read image file');
+    };
+    reader.readAsDataURL(file);
+  };
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/auth/login');
@@ -60,7 +93,8 @@ export default function EditProfilePage() {
       
       await userAPI.updateProfile({
         name: formData.name.trim(),
-        phone: formData.phone.trim()
+        phone: formData.phone.trim(),
+        profile_img: base64Image || undefined
       });
 
       toast.success('Profile updated successfully!');
@@ -106,12 +140,31 @@ export default function EditProfilePage() {
         <div className="gradient-border-white-top p-6 sm:p-8 mb-8">
           <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-8">
             {/* Avatar & Username/Email */}
-            <div className="flex items-center gap-4">
-              {/* Avatar */}
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-white/20 bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                  <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+            <div className="flex items-center gap-6">
+              {/* Avatar with upload overlay */}
+              <div className="flex-shrink-0 relative group">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-white/20 bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center relative">
+                  {tempAvatarUrl || user?.profileImg ? (
+                    <img
+                      src={tempAvatarUrl || user?.profileImg || undefined}
+                      alt={user?.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                  )}
                 </div>
+                <label className="absolute -bottom-2 -right-2 bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded-full cursor-pointer transition-colors shadow-lg border border-black flex items-center justify-center">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                </label>
               </div>
               {/* Name & Username */}
               <div>

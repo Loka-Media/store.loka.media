@@ -274,10 +274,18 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Profile Card */}
             <div className="gradient-border-white-right rounded-2xl p-3 flex items-center gap-5 min-h-[110px]">
-              <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-400 to-pink-400">
-                <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-10 h-10 text-white" />
-                </div>
+              <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-purple-400 to-pink-400 relative">
+                {user?.profileImg ? (
+                  <img
+                    src={user.profileImg || undefined}
+                    alt={user?.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="w-10 h-10 text-white" />
+                  </div>
+                )}
               </div>
 
               <div>
