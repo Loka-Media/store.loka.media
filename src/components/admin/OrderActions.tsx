@@ -4,7 +4,6 @@ interface OrderActionsProps {
   orderStatus: string;
   paymentStatus: string;
   onVerifyPayment: () => void;
-  onReleasePayment: () => void;
   onMarkProcessing?: () => void;
   onMarkShipped?: () => void;
   loading?: boolean;
@@ -14,7 +13,6 @@ export const OrderActions = ({
   orderStatus,
   paymentStatus,
   onVerifyPayment,
-  onReleasePayment,
   onMarkProcessing,
   onMarkShipped,
   loading = false
@@ -59,17 +57,7 @@ export const OrderActions = ({
           </button>
         )}
 
-        {/* Release Payment */}
-        {canReleasePayment && (
-          <button
-            onClick={onReleasePayment}
-            disabled={loading}
-            className="w-full flex items-center justify-center px-4 py-2 bg-emerald-100 hover:bg-emerald-200 border border-emerald-200 text-emerald-700 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Send className="w-4 h-4 mr-2" />
-            Release Payment & Submit to Printful
-          </button>
-        )}
+
 
         {/* Mark as Processing */}
         {canMarkProcessing && onMarkProcessing && (

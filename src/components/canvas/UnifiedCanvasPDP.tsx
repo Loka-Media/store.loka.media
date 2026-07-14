@@ -76,6 +76,20 @@ interface UnifiedCanvasPDPProps {
   isFetchingFiles?: boolean;
 }
 
+const cleanDescription = (text?: string): string => {
+  if (!text) return "";
+  // Strip HTML tags
+  let clean = text.replace(/<[^>]*>?/gm, '');
+  // Decode common HTML entities
+  clean = clean
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;/g, "'");
+  return clean.trim();
+};
+
 // Helper to determine readable text contrast color (black or white) based on background hex code
 const getContrastTextColor = (hexCode: string): string => {
   if (!hexCode) return "#ffffff";
@@ -1351,8 +1365,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
                   {selectedProduct?.title || selectedProduct?.name}
                 </h2>
-                <div className="text-xs sm:text-sm text-gray-400 font-medium line-clamp-3">
-                  {selectedProduct?.description || "High-quality custom creator merchandise product. Select colors and sizes, add designs on print areas, and preview your premium storefront ready mockup."}
+                <div className="text-xs sm:text-sm text-gray-400 font-medium line-clamp-3 break-words overflow-hidden text-ellipsis">
+                  {cleanDescription(selectedProduct?.description) || "High-quality custom creator merchandise product. Select colors and sizes, add designs on print areas, and preview your premium storefront ready mockup."}
                 </div>
                 <div className="flex flex-wrap gap-4 pt-2 text-xs text-gray-500">
                   <div>Type: <span className="text-white">{selectedProduct?.type_name || "Apparel"}</span></div>

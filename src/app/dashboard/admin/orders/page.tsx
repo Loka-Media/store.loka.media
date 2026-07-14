@@ -8,23 +8,16 @@ import {
   Package,
   DollarSign,
   Clock,
-  CheckCircle,
   AlertTriangle,
   Eye,
-  Send,
   RefreshCw,
-  Search,
-  ArrowRight,
-  Printer,
-  Truck,
-  CheckCheck,
-  XCircle,
-  AlertCircle
+  Search
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { OrderCard } from '@/components/admin/OrderCard';
 import { OrderStatusPipeline } from '@/components/admin/OrderStatusPipeline';
 import CommissionBreakdownModal from '@/components/admin/CommissionBreakdownModal';
+import Navigation from '@/components/Navigation';
 
 // Admin API functions using the configured axios instance
 const adminAPI = {
@@ -167,7 +160,6 @@ export default function AdminOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showCommissionModal, setShowCommissionModal] = useState(false);
 
   // Filters
@@ -181,12 +173,6 @@ export default function AdminOrdersPage() {
     bankAmountVerified: '',
     verificationNotes: '',
     approveOrder: true
-  });
-  
-  // Payment release form
-  const [paymentForm, setPaymentForm] = useState({
-    vendorEmail: '',
-    notes: ''
   });
 
   useEffect(() => {
@@ -226,18 +212,12 @@ export default function AdminOrdersPage() {
     try {
       setLoading(true);
       
-      // Check if we have a token before making API calls
       const token = localStorage.getItem('accessToken');
       if (!token) {
         toast.error('No authentication token found. Please log in again.');
         router.push('/auth/login');
         return;
       }
-      
-      // Debug logs
-      console.log('Loading dashboard data...');
-      console.log('User:', user);
-      console.log('Token in storage:', token ? 'Present' : 'Missing');
       
       const [statsData, ordersData] = await Promise.all([
         adminAPI.getDashboardStats(),
@@ -272,9 +252,7 @@ export default function AdminOrdersPage() {
 
   const handleOrderClick = async (order: Order) => {
     try {
-      console.log('Fetching order details for order ID:', order.id);
       const orderDetails = await adminAPI.getOrderDetails(order.id.toString());
-      console.log('Order details received:', orderDetails);
       setSelectedOrder({ ...order, ...orderDetails.order });
       setShowOrderModal(true);
     } catch (error: unknown) {
@@ -298,6 +276,52 @@ export default function AdminOrdersPage() {
       
       toast.success(result.message);
       setShowVerificationModal(false);
+      
+      // If payment is successfully verified and approved, process auto-fulfillment popups/toasts
+      if (verificationForm.approveOrder && result.released) {
+        const hasPrintful = result.summary && result.summary.printfulItems > 0;
+        const hasShopify = result.actions?.shopifyCheckout?.url && result.fulfillment?.shopify;
+        
+        if (hasShopify && hasPrintful) {
+          const popup = window.open(result.actions.shopifyCheckout.url, '_blank');
+          if (!popup) {
+            toast.error(
+              `⚠️ Popup blocked! Please manually open:\n${result.actions.shopifyCheckout.url}`,
+              { duration: 10000 }
+            );
+          }
+          
+          toast.success(
+            `✅ Order Approved & Submitted Successfully!\n\n` +
+            `🖨️ Printify: ${result.summary.printfulItems} items sent to production\n` +
+            `🛒 Shopify: Checkout link opened in new tab`,
+            { duration: 8000 }
+          );
+        } else if (hasShopify) {
+          const popup = window.open(result.actions.shopifyCheckout.url, '_blank');
+          if (!popup) {
+            toast.error(
+              `⚠️ Popup blocked! Please manually open:\n${result.actions.shopifyCheckout.url}`,
+              { duration: 10000 }
+            );
+          }
+          
+          toast.success(
+            `✅ Order Approved!\n\n` +
+            `🛒 Shopify checkout link opened in new tab`,
+            { duration: 6000 }
+          );
+        } else if (hasPrintful) {
+          toast.success(
+            `✅ Order Approved Successfully!\n\n` +
+            `🖨️ ${result.summary.printfulItems} items sent to Printify for production`,
+            { duration: 5000 }
+          );
+        }
+      } else if (verificationForm.approveOrder && !result.released && result.releaseError) {
+        toast.error(`⚠️ Payment verified, but auto-submit failed: ${result.releaseError}`, { duration: 6000 });
+      }
+
       setVerificationForm({
         bankAmountVerified: '',
         verificationNotes: '',
@@ -313,124 +337,31 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handleReleasePayment = async () => {
-    if (!selectedOrder) return;
-
-    try {
-      setLoading(true);
-      const result: ReleasePaymentResponse = await adminAPI.releasePayment(selectedOrder.id.toString(), paymentForm);
-      
-      // Handle different fulfillment scenarios
-      const hasPrintful = result.fulfillment.printful && result.summary.printfulItems > 0;
-      const hasShopify = result.actions?.shopifyCheckout?.url && result.fulfillment.shopify;
-      
-      if (hasShopify && hasPrintful) {
-        // Mixed order: Both Printful and Shopify
-        const popup = window.open(result.actions!.shopifyCheckout!.url, '_blank');
-        
-        if (!popup) {
-          toast.error(
-            `⚠️ Popup blocked! Please manually open:\n${result.actions!.shopifyCheckout!.url}`,
-            { duration: 10000 }
-          );
-        }
-        
-        toast.success(
-          `✅ Payment Released Successfully!\n\n` +
-          `🖨️ Printful: ${result.summary.printfulItems} items sent to production\n` +
-          `🛒 Shopify: ${result.fulfillment.shopify!.items_count || 0} items checkout opened in new tab\n` +
-          `💰 Shopify Amount: $${result.actions!.shopifyCheckout!.amount}`,
-          { duration: 8000 }
-        );
-      } else if (hasShopify) {
-        // Shopify only
-        const popup = window.open(result.actions!.shopifyCheckout!.url, '_blank');
-        
-        if (!popup) {
-          toast.error(
-            `⚠️ Popup blocked! Please manually open:\n${result.actions!.shopifyCheckout!.url}`,
-            { duration: 10000 }
-          );
-        }
-        
-        toast.success(
-          `✅ Payment Released!\n\n` +
-          `🛒 Shopify checkout opened in new tab\n` +
-          `💰 Amount: $${result.actions!.shopifyCheckout!.amount} (${result.fulfillment.shopify!.items_count || 0} items)`,
-          { duration: 6000 }
-        );
-      } else if (hasPrintful) {
-        // Printful only
-        toast.success(
-          `✅ Payment Released Successfully!\n\n` +
-          `🖨️ ${result.summary.printfulItems} items sent to Printful for production`,
-          { duration: 4000 }
-        );
-      } else {
-        // Fallback
-        toast.success(result.message);
-      }
-      
-      setShowPaymentModal(false);
-      setPaymentForm({
-        vendorEmail: '',
-        notes: ''
-      });
-      
-      await loadDashboardData();
-    } catch (error: unknown) {
-      console.error('Payment release error:', error);
-      toast.error('Failed to release payment');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-gray-700 text-gray-300';
-      case 'payment_received': return 'bg-blue-900/30 text-blue-300';
-      case 'verified': return 'bg-green-900/30 text-green-300';
-      case 'processing': return 'bg-yellow-900/30 text-yellow-300';
-      case 'fulfilled': return 'bg-purple-900/30 text-purple-300';
-      case 'cancelled': return 'bg-red-900/30 text-red-300';
-      default: return 'bg-gray-700 text-gray-300';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-900/30 text-red-300';
-      case 'high': return 'bg-orange-900/30 text-orange-300';
-      case 'medium': return 'bg-yellow-900/30 text-yellow-300';
-      case 'low': return 'bg-green-900/30 text-green-300';
-      default: return 'bg-gray-700 text-gray-300';
-    }
-  };
-
   if (loading && !stats) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-slate-900">
+    <div className="min-h-screen bg-black text-white">
+      <Navigation />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Order Management</h1>
-            <p className="text-slate-500 mt-2 text-lg">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Order Management</h1>
+            <p className="text-gray-400 mt-2 text-lg">
               Manage and process marketplace orders
             </p>
           </div>
           <button
             onClick={loadDashboardData}
             disabled={loading}
-            className="inline-flex items-center px-6 py-3 border border-slate-200 text-sm font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-50 hover:shadow-lg transition-all duration-200 disabled:opacity-50 shadow-sm"
+            className="inline-flex items-center px-6 py-3 border border-white/10 text-sm font-medium rounded-xl text-white bg-neutral-900 hover:bg-neutral-800 transition-all duration-200 disabled:opacity-50"
           >
             <RefreshCw
               className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
@@ -442,17 +373,17 @@ export default function AdminOrdersPage() {
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-7 shadow-sm hover:shadow-md hover:border-slate-300/60 transition-all duration-200">
+            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-100/80 p-3 rounded-xl">
-                  <Package className="h-6 w-6 text-blue-600" />
+                <div className="flex-shrink-0 bg-blue-500/10 p-3 rounded-xl">
+                  <Package className="h-6 w-6 text-blue-400" />
                 </div>
                 <div className="ml-4 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-slate-600 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Pending Orders
                     </dt>
-                    <dd className="text-2xl font-bold text-slate-900 mt-1">
+                    <dd className="text-2xl font-bold text-white mt-1">
                       {stats.orders.paymentReceived}
                     </dd>
                   </dl>
@@ -460,35 +391,35 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-7 shadow-sm hover:shadow-md hover:border-slate-300/60 transition-all duration-200">
+            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-green-100/80 p-3 rounded-xl">
-                  <DollarSign className="h-6 w-6 text-green-600" />
+                <div className="flex-shrink-0 bg-green-500/10 p-3 rounded-xl">
+                  <DollarSign className="h-6 w-6 text-green-400" />
                 </div>
                 <div className="ml-4 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-slate-600 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Escrowed Funds
                     </dt>
-                    <dd className="text-2xl font-bold text-slate-900 mt-1">
-                      ${stats.payments.totalEscrowed}
+                    <dd className="text-2xl font-bold text-white mt-1">
+                      ${parseFloat(stats.payments.totalEscrowed).toFixed(2)}
                     </dd>
                   </dl>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-7 shadow-sm hover:shadow-md hover:border-slate-300/60 transition-all duration-200">
+            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-amber-100/80 p-3 rounded-xl">
-                  <Clock className="h-6 w-6 text-amber-600" />
+                <div className="flex-shrink-0 bg-amber-500/10 p-3 rounded-xl">
+                  <Clock className="h-6 w-6 text-amber-400" />
                 </div>
                 <div className="ml-4 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-slate-600 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Verification Queue
                     </dt>
-                    <dd className="text-2xl font-bold text-slate-900 mt-1">
+                    <dd className="text-2xl font-bold text-white mt-1">
                       {stats.verification.totalPending}
                     </dd>
                   </dl>
@@ -496,17 +427,17 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-7 shadow-sm hover:shadow-md hover:border-slate-300/60 transition-all duration-200">
+            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-red-100/80 p-3 rounded-xl">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                <div className="flex-shrink-0 bg-red-500/10 p-3 rounded-xl">
+                  <AlertTriangle className="h-6 w-6 text-red-400" />
                 </div>
                 <div className="ml-4 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-slate-600 truncate">
+                    <dt className="text-sm font-medium text-gray-400 truncate">
                       Urgent Items
                     </dt>
-                    <dd className="text-2xl font-bold text-slate-900 mt-1">
+                    <dd className="text-2xl font-bold text-white mt-1">
                       {stats.verification.urgent}
                     </dd>
                   </dl>
@@ -517,16 +448,16 @@ export default function AdminOrdersPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-8 mb-8 shadow-sm">
+        <div className="bg-neutral-900/40 backdrop-blur-sm rounded-2xl border border-white/10 p-8 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
+              <label className="block text-sm font-semibold text-gray-300 mb-3">
                 Status
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
+                className="w-full p-3 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 transition-all cursor-pointer"
               >
                 <option value="">All Orders</option>
                 <option value="pending">Pending</option>
@@ -539,13 +470,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
+              <label className="block text-sm font-semibold text-gray-300 mb-3">
                 Order Type
               </label>
               <select
                 value={orderTypeFilter}
                 onChange={(e) => setOrderTypeFilter(e.target.value)}
-                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
+                className="w-full p-3 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 transition-all cursor-pointer"
               >
                 <option value="">All Types</option>
                 <option value="printful">Printful</option>
@@ -555,13 +486,13 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
+              <label className="block text-sm font-semibold text-gray-300 mb-3">
                 Priority
               </label>
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
+                className="w-full p-3 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 transition-all cursor-pointer"
               >
                 <option value="">All Priorities</option>
                 <option value="urgent">Urgent</option>
@@ -572,7 +503,7 @@ export default function AdminOrdersPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
+              <label className="block text-sm font-semibold text-gray-300 mb-3">
                 Search
               </label>
               <div className="relative">
@@ -581,9 +512,9 @@ export default function AdminOrdersPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Order number, email..."
-                  className="w-full p-3 pl-10 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
+                  className="w-full p-3 pl-10 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 placeholder-gray-500 transition-all"
                 />
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                <Search className="w-4 h-4 text-gray-500 absolute left-3 top-3.5" />
               </div>
             </div>
           </div>
@@ -592,8 +523,8 @@ export default function AdminOrdersPage() {
         {/* Orders Grid */}
         <div>
           <div className="mb-8">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-2">Active Orders</h2>
-            <p className="text-slate-600 text-sm">
+            <h2 className="text-2xl font-bold text-white mb-2">Active Orders</h2>
+            <p className="text-gray-400 text-sm">
               {orders.length} order{orders.length !== 1 ? 's' : ''} found
             </p>
           </div>
@@ -605,7 +536,7 @@ export default function AdminOrdersPage() {
                   key={order.id}
                   order={order}
                   onViewDetails={handleOrderClick}
-                  onVerifyPayment={(order) => {
+                  onVerifyPayment={(order: any) => {
                     setSelectedOrder(order);
                     setVerificationForm({
                       bankAmountVerified: order.customer_payment_amount,
@@ -614,33 +545,22 @@ export default function AdminOrdersPage() {
                     });
                     setShowVerificationModal(true);
                   }}
-                  onReleasePayment={(order) => {
-                    setSelectedOrder(order);
-                    setPaymentForm({
-                      vendorEmail:
-                        order.order_type === "shopify"
-                          ? "shopify@vendor.com"
-                          : "printful@vendor.com",
-                      notes: `Payment for order ${order.order_number}`,
-                    });
-                    setShowPaymentModal(true);
-                  }}
                   loading={loading}
                 />
               ))}
             </div>
           ) : (
-            <div className="text-center py-20 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-sm">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full mb-4">
-                <Package className="w-8 h-8 text-slate-500" />
+            <div className="text-center py-20 bg-neutral-900/40 border border-white/10 rounded-2xl">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-800 rounded-full mb-4">
+                <Package className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">No orders found</h3>
-              <p className="text-slate-600 mb-8 max-w-sm mx-auto">
+              <h3 className="text-lg font-semibold text-white mb-2">No orders found</h3>
+              <p className="text-gray-400 mb-8 max-w-sm mx-auto">
                 No orders match the current filters. Try adjusting your search criteria.
               </p>
               <button
                 onClick={loadDashboardData}
-                className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg"
+                className="inline-flex items-center px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-black text-sm font-semibold rounded-lg transition-all"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh Orders
@@ -651,16 +571,16 @@ export default function AdminOrdersPage() {
 
         {/* Order Details Modal */}
         {showOrderModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 overflow-y-auto h-full w-full z-50 backdrop-blur-sm">
-            <div className="relative top-20 mx-auto p-6 border border-slate-200/60 w-full max-w-4xl shadow-2xl rounded-2xl bg-white">
-              <div className="mt-3">
-                <div className="flex items-start justify-between mb-6 pb-4 border-b border-slate-200">
-                  <h3 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+          <div className="fixed inset-0 bg-black/85 overflow-y-auto h-full w-full z-50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="relative mx-auto p-6 border border-white/10 w-full max-w-4xl shadow-2xl rounded-2xl bg-neutral-900 text-white">
+              <div>
+                <div className="flex items-start justify-between mb-6 pb-4 border-b border-white/10">
+                  <h3 className="text-xl font-bold text-white">
                     Order Details - {selectedOrder.order_number}
                   </h3>
                   <button
                     onClick={() => setShowOrderModal(false)}
-                    className="text-slate-400 hover:text-slate-600 text-2xl transition-colors"
+                    className="text-gray-400 hover:text-white text-2xl transition-colors"
                   >
                     ×
                   </button>
@@ -668,7 +588,7 @@ export default function AdminOrdersPage() {
 
                 {/* Status Pipeline */}
                 <div className="mb-8">
-                  <h4 className="font-semibold text-slate-900 mb-4">Order Status Pipeline</h4>
+                  <h4 className="font-semibold text-white mb-4">Order Status Pipeline</h4>
                   <OrderStatusPipeline
                     orderStatus={selectedOrder.order_status}
                     paymentStatus={selectedOrder.payment_status}
@@ -679,59 +599,59 @@ export default function AdminOrdersPage() {
                   {/* Order Info */}
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold text-slate-900 mb-3">
+                      <h4 className="font-semibold text-white mb-3">
                         Order Information
                       </h4>
-                      <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200/60 space-y-3">
-                        <p className="text-slate-700">
-                          <span className="font-semibold text-slate-900">Type:</span>{" "}
-                          <span className="ml-2 inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium capitalize">{selectedOrder.order_type}</span>
+                      <div className="bg-neutral-950 p-4 rounded-xl border border-white/5 space-y-3">
+                        <p className="text-gray-300">
+                          <span className="font-semibold text-white">Type:</span>{" "}
+                          <span className="ml-2 inline-block px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full text-sm font-medium capitalize">{selectedOrder.order_type}</span>
                         </p>
-                        <p className="text-slate-700">
-                          <span className="font-semibold text-slate-900">
+                        <p className="text-gray-300">
+                          <span className="font-semibold text-white">
                             Status:
                           </span>{" "}
-                          <span className="ml-2 inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium capitalize">{selectedOrder.order_status}</span>
+                          <span className="ml-2 inline-block px-3 py-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full text-sm font-medium capitalize">{selectedOrder.order_status}</span>
                         </p>
-                        <p className="text-slate-700">
-                          <span className="font-semibold text-slate-900">
+                        <p className="text-gray-300">
+                          <span className="font-semibold text-white">
                             Payment Status:
                           </span>{" "}
-                          <span className="ml-2 inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium capitalize">{selectedOrder.payment_status}</span>
+                          <span className="ml-2 inline-block px-3 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded-full text-sm font-medium capitalize">{selectedOrder.payment_status}</span>
                         </p>
-                        <p className="text-slate-700">
-                          <span className="font-semibold text-slate-900">
+                        <p className="text-gray-300">
+                          <span className="font-semibold text-white">
                             Amount:
                           </span>{" "}
-                          <span className="ml-2 font-semibold text-slate-900">
+                          <span className="ml-2 font-semibold text-white">
                             $
                             {parseFloat(
                               selectedOrder.customer_payment_amount
                             ).toFixed(2)}
                           </span>
                         </p>
-                        <p className="text-slate-700">
-                          <span className="font-semibold text-slate-900">
+                        <p className="text-gray-300">
+                          <span className="font-semibold text-white">
                             Created:
                           </span>{" "}
-                          <span className="ml-2 text-slate-600">{new Date(selectedOrder.created_at).toLocaleString()}</span>
+                          <span className="ml-2 text-gray-400">{new Date(selectedOrder.created_at).toLocaleString()}</span>
                         </p>
                       </div>
                     </div>
 
                     {/* Customer Info */}
                     <div>
-                      <h4 className="font-semibold text-slate-900 mb-3">
+                      <h4 className="font-semibold text-white mb-3">
                         Customer Information
                       </h4>
-                      <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200/60 space-y-3">
-                        <p className="text-slate-700">
-                          <span className="font-semibold text-slate-900">Name:</span>{" "}
-                          <span className="ml-2 text-slate-600">{selectedOrder.customer_name || "Guest"}</span>
+                      <div className="bg-neutral-950 p-4 rounded-xl border border-white/5 space-y-3">
+                        <p className="text-gray-300">
+                          <span className="font-semibold text-white">Name:</span>{" "}
+                          <span className="ml-2 text-gray-400">{selectedOrder.customer_name || "Guest"}</span>
                         </p>
-                        <p className="text-slate-700">
-                          <span className="font-semibold text-slate-900">Email:</span>{" "}
-                          <span className="ml-2 text-slate-600">{selectedOrder.customer_email || "N/A"}</span>
+                        <p className="text-gray-300">
+                          <span className="font-semibold text-white">Email:</span>{" "}
+                          <span className="ml-2 text-gray-400">{selectedOrder.customer_email || "N/A"}</span>
                         </p>
                       </div>
                     </div>
@@ -740,12 +660,12 @@ export default function AdminOrdersPage() {
                   {/* Shipping Address */}
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold text-slate-900 mb-3">
+                      <h4 className="font-semibold text-white mb-3">
                         Shipping Address
                       </h4>
                       {selectedOrder.shipping_address && (
-                        <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200/60 text-slate-700 space-y-1">
-                          <p className="font-semibold text-slate-900">
+                        <div className="bg-neutral-950 p-4 rounded-xl border border-white/5 text-gray-300 space-y-1">
+                          <p className="font-semibold text-white">
                             {selectedOrder.shipping_address.name}
                           </p>
                           <p className="text-sm">
@@ -773,10 +693,10 @@ export default function AdminOrdersPage() {
 
                     {/* Order Items */}
                     <div>
-                      <h4 className="font-semibold text-slate-900 mb-3">
+                      <h4 className="font-semibold text-white mb-3">
                         Order Items
                       </h4>
-                      <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200/60 max-h-48 overflow-y-auto">
+                      <div className="bg-neutral-950 p-4 rounded-xl border border-white/5 max-h-48 overflow-y-auto">
                         {selectedOrder.order_items &&
                           selectedOrder.order_items.map(
                             (item: unknown, index: number) => {
@@ -790,16 +710,16 @@ export default function AdminOrdersPage() {
                               return (
                                 <div
                                   key={index}
-                                  className="border-b border-slate-200 last:border-b-0 pb-3 mb-3 last:mb-0"
+                                  className="border-b border-white/10 last:border-b-0 pb-3 mb-3 last:mb-0"
                                 >
-                                  <p className="font-semibold text-slate-900">
+                                  <p className="font-semibold text-white">
                                     {orderItem.product_name}
                                   </p>
-                                  <p className="text-sm text-slate-600">
+                                  <p className="text-sm text-gray-400">
                                     {orderItem.size} • {orderItem.color} • Qty:{" "}
                                     {orderItem.quantity}
                                   </p>
-                                  <p className="text-sm font-medium text-slate-700">
+                                  <p className="text-sm font-medium text-orange-400">
                                     $
                                     {orderItem.price
                                       ? parseFloat(orderItem.price).toFixed(2)
@@ -815,10 +735,10 @@ export default function AdminOrdersPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-slate-200">
+                <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-white/10">
                   <button
                     onClick={() => setShowOrderModal(false)}
-                    className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="px-4 py-2.5 text-sm font-medium text-white bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
                   >
                     Close
                   </button>
@@ -830,16 +750,16 @@ export default function AdminOrdersPage() {
 
         {/* Payment Verification Modal */}
         {showVerificationModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 overflow-y-auto h-full w-full z-50 backdrop-blur-sm">
-            <div className="relative top-32 mx-auto p-6 border border-slate-200/60 w-full max-w-md shadow-2xl rounded-2xl bg-white">
-              <div className="mt-0">
-                <div className="flex items-start justify-between mb-6 pb-4 border-b border-slate-200">
-                  <h3 className="text-lg font-bold text-slate-900">
+          <div className="fixed inset-0 bg-black/85 overflow-y-auto h-full w-full z-50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="relative mx-auto p-6 border border-white/10 w-full max-w-md shadow-2xl rounded-2xl bg-neutral-900 text-white">
+              <div>
+                <div className="flex items-start justify-between mb-6 pb-4 border-b border-white/10">
+                  <h3 className="text-lg font-bold text-white">
                     Verify Payment
                   </h3>
                   <button
                     onClick={() => setShowVerificationModal(false)}
-                    className="text-slate-400 hover:text-slate-600 text-2xl transition-colors"
+                    className="text-gray-400 hover:text-white text-2xl transition-colors"
                   >
                     ×
                   </button>
@@ -847,7 +767,7 @@ export default function AdminOrdersPage() {
 
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Bank Amount Verified ($)
                     </label>
                     <input
@@ -860,13 +780,13 @@ export default function AdminOrdersPage() {
                           bankAmountVerified: e.target.value,
                         })
                       }
-                      className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
+                      className="w-full p-3 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 transition-all placeholder-gray-600"
                       placeholder="Enter verified amount"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Verification Notes
                     </label>
                     <textarea
@@ -878,12 +798,12 @@ export default function AdminOrdersPage() {
                         })
                       }
                       rows={3}
-                      className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
+                      className="w-full p-3 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 transition-all placeholder-gray-600"
                       placeholder="Enter verification notes..."
                     />
                   </div>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
                     <label className="flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -894,19 +814,19 @@ export default function AdminOrdersPage() {
                             approveOrder: e.target.checked,
                           })
                         }
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                        className="h-4 w-4 text-blue-500 bg-black border-white/20 focus:ring-0 focus:ring-offset-0 rounded"
                       />
-                      <span className="ml-3 text-sm font-medium text-slate-700">
+                      <span className="ml-3 text-sm font-medium text-blue-400">
                         Approve order for processing
                       </span>
                     </label>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-slate-200">
+                <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-white/10">
                   <button
                     onClick={() => setShowVerificationModal(false)}
-                    className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="px-4 py-2.5 text-sm font-medium text-white bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
                   >
                     Cancel
                   </button>
@@ -917,102 +837,9 @@ export default function AdminOrdersPage() {
                       !verificationForm.bankAmountVerified ||
                       !verificationForm.verificationNotes
                     }
-                    className="px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 border border-transparent rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2.5 text-sm font-semibold text-black bg-orange-500 hover:bg-orange-600 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "Verifying..." : "Verify Payment"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Payment Release Modal */}
-        {showPaymentModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 overflow-y-auto h-full w-full z-50 backdrop-blur-sm">
-            <div className="relative top-32 mx-auto p-6 border border-slate-200/60 w-full max-w-md shadow-2xl rounded-2xl bg-white">
-              <div className="mt-0">
-                <div className="flex items-start justify-between mb-6 pb-4 border-b border-slate-200">
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Release Payment
-                  </h3>
-                  <button
-                    onClick={() => setShowPaymentModal(false)}
-                    className="text-slate-400 hover:text-slate-600 text-2xl transition-colors"
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Vendor Email
-                    </label>
-                    <input
-                      type="email"
-                      value={paymentForm.vendorEmail}
-                      onChange={(e) =>
-                        setPaymentForm({
-                          ...paymentForm,
-                          vendorEmail: e.target.value,
-                        })
-                      }
-                      className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
-                      placeholder="vendor@example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Notes
-                    </label>
-                    <textarea
-                      value={paymentForm.notes}
-                      onChange={(e) =>
-                        setPaymentForm({
-                          ...paymentForm,
-                          notes: e.target.value,
-                        })
-                      }
-                      rows={3}
-                      className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-400 transition-all shadow-sm hover:border-slate-300"
-                      placeholder="Payment notes..."
-                    />
-                  </div>
-
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                    <p className="text-sm text-slate-700">
-                      <span className="font-semibold block mb-1">Amount Summary</span>
-                      <span className="text-emerald-700 font-semibold">Amount to release:</span> <span className="text-emerald-900 font-bold">${selectedOrder.vendor_payment_amount || "Calculating..."}</span>
-                      <br />
-                      <span className="text-orange-600 font-semibold">Admin fee:</span> <span className="text-orange-900 font-bold">${selectedOrder.admin_fee || "Calculating..."}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-slate-200">
-                  <button
-                    onClick={() => {
-                      setShowPaymentModal(false);
-                      setShowCommissionModal(true);
-                    }}
-                    className="px-4 py-2.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
-                  >
-                    View Commission
-                  </button>
-                  <button
-                    onClick={() => setShowPaymentModal(false)}
-                    className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleReleasePayment}
-                    disabled={loading || !paymentForm.vendorEmail}
-                    className="px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 border border-transparent rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? "Releasing..." : "Release Payment"}
                   </button>
                 </div>
               </div>

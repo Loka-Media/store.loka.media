@@ -74,44 +74,44 @@ export const OrderStatusPipeline = ({
   const isCurrent = (index: number) => index === currentStageIndex;
 
   const getColorClasses = (color: string, isActive: boolean) => {
-    const baseClasses = 'rounded-full p-3 transition-all duration-300';
+    const baseClasses = 'rounded-full p-3 transition-all duration-300 border';
 
     if (!isActive) {
-      return `${baseClasses} bg-slate-100 text-slate-400`;
+      return `${baseClasses} bg-neutral-900 border-white/5 text-gray-500`;
     }
 
     switch (color) {
       case 'blue':
-        return `${baseClasses} bg-blue-100 text-blue-600`;
+        return `${baseClasses} bg-blue-500/10 border-blue-500/30 text-blue-400`;
       case 'yellow':
-        return `${baseClasses} bg-yellow-100 text-yellow-600`;
+        return `${baseClasses} bg-amber-500/10 border-amber-500/30 text-amber-400`;
       case 'orange':
-        return `${baseClasses} bg-orange-100 text-orange-600`;
+        return `${baseClasses} bg-orange-500/10 border-orange-500/30 text-orange-400`;
       case 'purple':
-        return `${baseClasses} bg-purple-100 text-purple-600`;
+        return `${baseClasses} bg-purple-500/10 border-purple-500/30 text-purple-400`;
       case 'green':
-        return `${baseClasses} bg-green-100 text-green-600`;
+        return `${baseClasses} bg-green-500/10 border-green-500/30 text-green-400`;
       default:
-        return `${baseClasses} bg-slate-100 text-slate-400`;
+        return `${baseClasses} bg-neutral-900 border-white/5 text-gray-500`;
     }
   };
 
   const getTextColor = (color: string, isActive: boolean) => {
-    if (!isActive) return 'text-slate-500';
+    if (!isActive) return 'text-gray-500';
 
     switch (color) {
       case 'blue':
-        return 'text-blue-700';
+        return 'text-blue-400';
       case 'yellow':
-        return 'text-yellow-700';
+        return 'text-amber-400';
       case 'orange':
-        return 'text-orange-700';
+        return 'text-orange-400';
       case 'purple':
-        return 'text-purple-700';
+        return 'text-purple-400';
       case 'green':
-        return 'text-green-700';
+        return 'text-green-400';
       default:
-        return 'text-slate-700';
+        return 'text-white';
     }
   };
 
@@ -123,7 +123,6 @@ export const OrderStatusPipeline = ({
           {stages.map((stage, index) => {
             const Icon = stage.icon;
             const isActive = isCompleted(index);
-            const isCurrentStage = isCurrent(index);
 
             return (
               <div key={stage.key} className="flex items-center">
@@ -133,14 +132,14 @@ export const OrderStatusPipeline = ({
                     className={`${getColorClasses(
                       stage.color,
                       isActive
-                    )} ${isCurrent(index) ? 'ring-2 ring-offset-2 ring-offset-white' + (stage.color === 'blue' ? ' ring-blue-500' : stage.color === 'yellow' ? ' ring-yellow-500' : stage.color === 'orange' ? ' ring-orange-500' : ' ring-slate-400') : ''}`}
+                    )} ${isCurrent(index) ? 'ring-2 ring-offset-2 ring-offset-black' + (stage.color === 'blue' ? ' ring-blue-500' : stage.color === 'yellow' ? ' ring-amber-500' : stage.color === 'orange' ? ' ring-orange-500' : ' ring-gray-400') : ''}`}
                   >
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className={`mt-2 text-xs font-semibold whitespace-nowrap ${getTextColor(stage.color, isActive)}`}>
                     {stage.label}
                   </div>
-                  <div className="text-xs text-slate-400 mt-1 whitespace-nowrap">
+                  <div className="text-[10px] text-gray-500 mt-1 whitespace-nowrap">
                     {stage.description}
                   </div>
                 </div>
@@ -151,8 +150,8 @@ export const OrderStatusPipeline = ({
                     <ArrowRight
                       className={`w-4 h-4 ${
                         index < currentStageIndex
-                          ? 'text-green-600'
-                          : 'text-slate-300'
+                          ? 'text-green-500'
+                          : 'text-gray-700'
                       }`}
                     />
                   </div>
@@ -165,40 +164,40 @@ export const OrderStatusPipeline = ({
 
       {/* Status Summary */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
-        <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/60 rounded-lg p-3">
-          <div className="text-xs text-slate-600 font-semibold">Order Status</div>
+        <div className="bg-neutral-900/60 border border-white/10 rounded-xl p-3">
+          <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Order Status</div>
           <div className={`text-sm font-bold mt-1 ${
-            orderStatus === 'pending' ? 'text-slate-700' :
-            orderStatus === 'payment_received' ? 'text-blue-700' :
-            orderStatus === 'verified' ? 'text-yellow-700' :
-            orderStatus === 'processing' ? 'text-orange-700' :
-            orderStatus === 'fulfilled' ? 'text-purple-700' :
-            'text-green-700'
+            orderStatus === 'pending' ? 'text-gray-400' :
+            orderStatus === 'payment_received' ? 'text-blue-400' :
+            orderStatus === 'verified' ? 'text-amber-400' :
+            orderStatus === 'processing' ? 'text-orange-400' :
+            orderStatus === 'fulfilled' ? 'text-purple-400' :
+            'text-green-400'
           }`}>
             {orderStatus.replace(/_/g, ' ').toUpperCase()}
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/60 rounded-lg p-3">
-          <div className="text-xs text-slate-600 font-semibold">Payment Status</div>
+        <div className="bg-neutral-900/60 border border-white/10 rounded-xl p-3">
+          <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Payment Status</div>
           <div className={`text-sm font-bold mt-1 ${
-            paymentStatus === 'pending' ? 'text-slate-700' :
-            paymentStatus === 'completed' ? 'text-green-700' :
-            paymentStatus === 'released' ? 'text-blue-700' :
-            'text-yellow-700'
+            paymentStatus === 'pending' ? 'text-gray-400' :
+            paymentStatus === 'completed' ? 'text-green-400' :
+            paymentStatus === 'released' ? 'text-blue-400' :
+            'text-amber-400'
           }`}>
             {paymentStatus.replace(/_/g, ' ').toUpperCase()}
           </div>
         </div>
 
         {printfulStatus && (
-          <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200/60 rounded-lg p-3">
-            <div className="text-xs text-slate-600 font-semibold">Printful Status</div>
+          <div className="bg-neutral-900/60 border border-white/10 rounded-xl p-3">
+            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Printful Status</div>
             <div className={`text-sm font-bold mt-1 ${
-              printfulStatus === 'processing' ? 'text-orange-700' :
-              printfulStatus === 'shipped' ? 'text-purple-700' :
-              printfulStatus === 'delivered' ? 'text-green-700' :
-              'text-slate-700'
+              printfulStatus === 'processing' ? 'text-orange-400' :
+              printfulStatus === 'shipped' ? 'text-purple-400' :
+              printfulStatus === 'delivered' ? 'text-green-400' :
+              'text-gray-400'
             }`}>
               {printfulStatus.toUpperCase()}
             </div>

@@ -10,8 +10,18 @@ import Navigation from "@/components/Navigation";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 
 export default function CreatorDashboard() {
-  const { user, connection, products, loading, stats, handleConnectPrintful, deleteProduct } =
-    useCreatorDashboard();
+  const { 
+    user, 
+    connection, 
+    products, 
+    loading, 
+    stats, 
+    creators,
+    selectedCreatorId,
+    setSelectedCreatorId,
+    handleConnectPrintful, 
+    deleteProduct 
+  } = useCreatorDashboard();
 
   return (
     <CreatorProtectedRoute>
@@ -24,6 +34,25 @@ export default function CreatorDashboard() {
             onConnectPrintful={handleConnectPrintful}
             creatorUsername={user?.username || user?.name || ""}
           />
+
+          {user?.role === "admin" && (
+            <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-neutral-900/60 border border-white/10 p-4 rounded-2xl backdrop-blur-md">
+              <span className="text-sm font-semibold text-gray-400">View Platform Dashboard For:</span>
+              <select
+                value={selectedCreatorId}
+                onChange={(e) => setSelectedCreatorId(e.target.value)}
+                className="bg-black border border-white/20 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-orange-500 cursor-pointer min-w-[220px]"
+              >
+                <option value="all">All Creators (Platform Total)</option>
+                {creators.map((creator) => (
+                  <option key={creator.id} value={creator.id}>
+                    {creator.name} (@{creator.username})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div className="mt-12">
             {connection && !connection.connected ? (
               <PrintfulConnectionPrompt onConnect={handleConnectPrintful} />

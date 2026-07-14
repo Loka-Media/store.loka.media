@@ -23,6 +23,8 @@ interface CreatorProduct {
   min_price: number;
   max_price: number;
   variant_count: number;
+  creator_name?: string;
+  creator_username?: string;
 }
 
 export default function EnhancedProductCard({ product, onDelete }: { product: CreatorProduct, onDelete: (productId: number) => void }) {
@@ -172,6 +174,11 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
 
         {/* Content Section */}
         <div className="p-4 sm:p-6 flex flex-col flex-1 bg-black">
+          {product.creator_name && (
+            <span className="text-[10px] text-gray-500 font-medium uppercase text-center mb-1 tracking-wider block">
+              by {product.creator_name}
+            </span>
+          )}
           <h3 className="font-extrabold text-center text-sm text-white truncate mb-2 group-hover:text-orange-400 transition-colors line-clamp-2 tracking-tight">
             {product.name}
           </h3>

@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { printifyAPI, productAPI } from "@/lib/api";
+import { api } from "@/lib/auth";
 import toast from "react-hot-toast";
 
 interface ConnectionStatus {
@@ -20,6 +21,8 @@ interface CreatorProduct {
   min_price: number;
   max_price: number;
   variant_count: number;
+  creator_name?: string;
+  creator_username?: string;
 }
 
 export function useCreatorDashboard() {
@@ -27,6 +30,8 @@ export function useCreatorDashboard() {
   const [connection, setConnection] = useState<ConnectionStatus | null>(null);
   const [products, setProducts] = useState<CreatorProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCreatorId, setSelectedCreatorId] = useState<string | number>("all");
+  const [creators, setCreators] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalProducts: 0,
     activeProducts: 0,
@@ -68,8 +73,27 @@ export function useCreatorDashboard() {
     }
 
     checkPrintfulConnection();
-    fetchCreatorProducts();
   }, []);
+
+  // Fetch creators list for admin dropdown
+  useEffect(() => {
+    if (user?.role === "admin") {
+      const fetchCreators = async () => {
+        try {
+          const response = await productAPI.getCreators();
+          setCreators(response.creators || []);
+        } catch (error) {
+          console.error("Failed to fetch creators list:", error);
+        }
+      };
+      fetchCreators();
+    }
+  }, [user]);
+
+  // Fetch products and stats whenever selectedCreatorId changes
+  useEffect(() => {
+    fetchDashboardData();
+  }, [selectedCreatorId, user]);
 
   const checkPrintfulConnection = async () => {
     try {
@@ -79,26 +103,36 @@ export function useCreatorDashboard() {
         adminAccount: status.adminAccount || true,
       });
     } catch (error: any) {
-      // Handle authentication errors gracefully
       if (error?.response?.status === 401) {
         console.log("Authentication required for Printful connection check");
       } else {
         console.error("Failed to check Printful connection:", error);
       }
-      // If connection check fails, assume Printful is available (admin account setup)
-      // Only show connection prompt if there's a real configuration issue
       setConnection({ connected: true, adminAccount: true });
     }
   };
 
-  const fetchCreatorProducts = async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await productAPI.getCreatorProducts();
-      setProducts(response.products);
+      
+      // Build parameters
+      const params: any = {};
+      if (user?.role === "admin") {
+        params.creatorId = selectedCreatorId;
+      }
 
-      // Calculate stats
-      const totalProducts = response.products.length;
+      // Fetch products and commission summary in parallel
+      const [productsResponse, summaryResponse] = await Promise.all([
+        productAPI.getCreatorProducts(params),
+        api.get("/api/creator/commissions/summary", { params: { creatorId: selectedCreatorId } })
+      ]);
+
+      const fetchedProducts = productsResponse.products || [];
+      setProducts(fetchedProducts);
+
+      // Calculate products stats
+      const totalProducts = fetchedProducts.length;
       const isProductActive = (product: CreatorProduct) => {
         if (typeof product.is_active === "boolean") {
           return product.is_active;
@@ -108,19 +142,29 @@ export function useCreatorDashboard() {
         }
         return false;
       };
-      const activeProducts = response.products.filter(
-        (p: CreatorProduct) => isProductActive(p)
-      ).length;
+      const activeProducts = fetchedProducts.filter((p: CreatorProduct) => isProductActive(p)).length;
+
+      // Extract stats from commission summary
+      let totalSales = 0;
+      let revenue = 0;
+
+      if (summaryResponse.data && summaryResponse.data.data) {
+        const commissions = summaryResponse.data.data.commissions || {};
+        Object.keys(commissions).forEach(status => {
+          totalSales += parseInt(commissions[status].count || 0);
+          revenue += parseFloat(commissions[status].totalAmount || 0);
+        });
+      }
 
       setStats({
         totalProducts,
         activeProducts,
-        totalSales: 0, // TODO: Implement sales tracking
-        revenue: 0, // TODO: Implement revenue tracking
+        totalSales,
+        revenue: parseFloat(revenue.toFixed(2)),
       });
     } catch (error) {
-      console.error("Failed to fetch products:", error);
-      toast.error("Failed to load your products");
+      console.error("Failed to fetch dashboard data:", error);
+      toast.error("Failed to load dashboard statistics");
     } finally {
       setLoading(false);
     }
@@ -147,7 +191,7 @@ export function useCreatorDashboard() {
     try {
       await productAPI.deleteProduct(productId);
       toast.success("Product deleted successfully");
-      fetchCreatorProducts(); // Refresh products list
+      fetchDashboardData(); // Refresh list and stats
     } catch (error) {
       console.error("Failed to delete product:", error);
       toast.error("Failed to delete product");
@@ -160,7 +204,11 @@ export function useCreatorDashboard() {
     products,
     loading,
     stats,
+    creators,
+    selectedCreatorId,
+    setSelectedCreatorId,
     handleConnectPrintful,
     deleteProduct,
+    refreshData: fetchDashboardData
   };
 }

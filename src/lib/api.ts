@@ -267,7 +267,7 @@ export const productAPI = {
   },
 
   // Creator: Get my products
-  getCreatorProducts: async (params?: { limit?: number; offset?: number }) => {
+  getCreatorProducts: async (params?: { limit?: number; offset?: number; creatorId?: string | number }) => {
     const response = await api.get("/api/products/creator/my-products", {
       params,
     });

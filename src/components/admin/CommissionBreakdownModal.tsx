@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Users, DollarSign, TrendingUp, Package } from 'lucide-react';
+import { X, Users, DollarSign, TrendingUp, Package, AlertCircle, CheckCircle } from 'lucide-react';
 import { api } from '@/lib/auth';
 
 interface CommissionBreakdown {
@@ -94,15 +94,15 @@ export default function CommissionBreakdownModal({
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-500/10 text-gray-400 border border-gray-500/25';
       case 'processing':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-blue-500/10 text-blue-400 border border-blue-500/25';
       case 'paid':
-        return 'bg-emerald-100 text-emerald-700';
+        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25';
       case 'refunded':
-        return 'bg-red-100 text-red-700';
+        return 'bg-red-500/10 text-red-400 border border-red-500/25';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-500/10 text-gray-400 border border-gray-500/25';
     }
   };
 
@@ -118,40 +118,37 @@ export default function CommissionBreakdownModal({
   };
 
   const getCommissionType = () => {
-    if (!data) return { type: 'unknown', label: 'Unknown', color: 'bg-gray-100 text-gray-700' };
+    if (!data) return { type: 'unknown', label: 'Unknown', color: 'bg-gray-500/10 text-gray-400 border border-gray-500/20' };
 
-    // Commissions are confirmed after payment release (when actual Printful costs are known)
     if (data.paymentStatus === 'released' || data.orderStatus === 'fulfilled' || data.orderStatus === 'shipped') {
-      return { type: 'confirmed', label: 'Confirmed', color: 'bg-green-100 text-green-700' };
+      return { type: 'confirmed', label: 'Confirmed', color: 'bg-green-500/10 text-green-400 border border-green-500/25' };
     }
 
-    // Commissions are estimated before payment release
     if (data.paymentStatus === 'escrowed' || data.orderStatus === 'processing') {
-      return { type: 'estimated', label: 'Estimated', color: 'bg-yellow-100 text-yellow-700' };
+      return { type: 'estimated', label: 'Estimated', color: 'bg-amber-500/10 text-amber-400 border border-amber-500/25' };
     }
 
-    // No commissions tracked yet
     if (data.breakdown.length === 0) {
-      return { type: 'not_tracked', label: 'Not Tracked', color: 'bg-gray-100 text-gray-600' };
+      return { type: 'not_tracked', label: 'Not Tracked', color: 'bg-gray-500/10 text-gray-400 border border-gray-500/20' };
     }
 
-    return { type: 'pending', label: 'Pending', color: 'bg-blue-100 text-blue-700' };
+    return { type: 'pending', label: 'Pending', color: 'bg-blue-500/10 text-blue-400 border border-blue-500/25' };
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-neutral-900 border border-white/10 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col text-white">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center">
+        <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div>
               <h2 className="text-2xl font-bold flex items-center gap-2">
                 <TrendingUp className="w-6 h-6" />
                 Commission Breakdown
               </h2>
-              <p className="text-blue-100 text-sm mt-1">Order: {orderNumber}</p>
+              <p className="text-orange-100 text-sm mt-1">Order: {orderNumber}</p>
             </div>
             {data && (
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCommissionType().color}`}>
@@ -168,15 +165,15 @@ export default function CommissionBreakdownModal({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 bg-black">
           {loading && (
             <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded">
               {error}
             </div>
           )}
@@ -185,16 +182,14 @@ export default function CommissionBreakdownModal({
             <div className="space-y-6">
               {/* Commission Status Info */}
               {getCommissionType().type === 'estimated' && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-amber-400">
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
+                      <AlertCircle className="w-5 h-5 text-amber-400" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-yellow-900 mb-1">Estimated Commissions</h4>
-                      <p className="text-sm text-yellow-800">
+                      <h4 className="font-semibold text-white mb-1">Estimated Commissions</h4>
+                      <p className="text-sm text-gray-300">
                         Commission amounts shown are <strong>estimates</strong> based on pre-order calculations.
                         Final confirmed amounts will be calculated after payment release, using actual Printful production costs.
                       </p>
@@ -204,16 +199,14 @@ export default function CommissionBreakdownModal({
               )}
 
               {getCommissionType().type === 'confirmed' && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 text-green-400">
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
+                      <CheckCircle className="w-5 h-5 text-green-400" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-green-900 mb-1">Confirmed Commissions</h4>
-                      <p className="text-sm text-green-800">
+                      <h4 className="font-semibold text-white mb-1">Confirmed Commissions</h4>
+                      <p className="text-sm text-gray-300">
                         Commission amounts are <strong>confirmed</strong> and calculated using actual Printful production costs after order fulfillment.
                       </p>
                     </div>
@@ -222,16 +215,14 @@ export default function CommissionBreakdownModal({
               )}
 
               {getCommissionType().type === 'not_tracked' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 text-blue-400">
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
+                      <AlertCircle className="w-5 h-5 text-blue-400" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-blue-900 mb-1">Commissions Not Yet Tracked</h4>
-                      <p className="text-sm text-blue-800">
+                      <h4 className="font-semibold text-white mb-1">Commissions Not Yet Tracked</h4>
+                      <p className="text-sm text-gray-300">
                         Commissions will be tracked after payment verification and order processing. This ensures accurate calculations based on actual production costs.
                       </p>
                     </div>
@@ -240,25 +231,25 @@ export default function CommissionBreakdownModal({
               )}
 
               {/* Order Summary */}
-              <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-neutral-900 border border-white/5 rounded-lg p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <p className="text-sm text-gray-600">Order Total</p>
-                  <p className="text-xl font-bold text-gray-900">{formatCurrency(data.orderTotal)}</p>
+                  <p className="text-sm text-gray-400">Order Total</p>
+                  <p className="text-xl font-bold text-white">{formatCurrency(data.orderTotal)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Platform Fee</p>
-                  <p className="text-xl font-bold text-orange-600">{formatCurrency(data.adminFee)}</p>
+                  <p className="text-sm text-gray-400">Platform Fee</p>
+                  <p className="text-xl font-bold text-orange-400">{formatCurrency(data.adminFee)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Vendor Cost</p>
-                  <p className="text-xl font-bold text-purple-600">{formatCurrency(data.vendorPaymentAmount)}</p>
+                  <p className="text-sm text-gray-400">Vendor Cost</p>
+                  <p className="text-xl font-bold text-purple-400">{formatCurrency(data.vendorPaymentAmount)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 flex items-center gap-1">
-                    <Users className="w-4 h-4" />
+                  <p className="text-sm text-gray-400 flex items-center gap-1">
+                    <Users className="w-4 h-4 text-blue-400" />
                     Creators
                   </p>
-                  <p className="text-xl font-bold text-blue-600">{data.creatorsCount}</p>
+                  <p className="text-xl font-bold text-blue-400">{data.creatorsCount}</p>
                 </div>
               </div>
 
@@ -270,19 +261,19 @@ export default function CommissionBreakdownModal({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-[#FF6D1F]" />
                     Creator Commissions
                   </h3>
 
                   {data.breakdown.map((creator) => (
                     <div
                       key={creator.creatorId}
-                      className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition"
+                      className="border border-white/10 bg-neutral-900/60 rounded-lg overflow-hidden hover:shadow-[0_10px_30px_rgba(255,109,31,0.08)] transition"
                     >
                       {/* Creator Summary */}
                       <div
-                        className="bg-white p-4 cursor-pointer"
+                        className="bg-[#141414] p-4 cursor-pointer"
                         onClick={() =>
                           setSelectedCreator(
                             selectedCreator === creator.creatorId ? null : creator.creatorId
@@ -292,27 +283,27 @@ export default function CommissionBreakdownModal({
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-semibold text-gray-900">{creator.creatorName}</h4>
+                              <h4 className="font-semibold text-white">{creator.creatorName}</h4>
                               <span
-                                className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadgeColor(
+                                className={`text-xs px-2 py-1 rounded-full font-medium border ${getStatusBadgeColor(
                                   creator.status
                                 )}`}
                               >
-                                {creator.status}
+                                {creator.status.toUpperCase()}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-600">{creator.creatorEmail}</p>
+                            <p className="text-sm text-gray-400">{creator.creatorEmail}</p>
                             <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                              <Package className="w-3 h-3" />
+                              <Package className="w-3 h-3 text-orange-400" />
                               {creator.productsCount} product{creator.productsCount !== 1 ? 's' : ''}
                             </p>
                           </div>
 
                           <div className="text-right">
-                            <p className="text-2xl font-bold text-emerald-600">
+                            <p className="text-2xl font-bold text-emerald-400">
                               {formatCurrency(creator.commission)}
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-400 mt-1">
                               Revenue: {formatCurrency(creator.totalRevenue)}
                             </p>
                           </div>
@@ -320,27 +311,27 @@ export default function CommissionBreakdownModal({
 
                         {/* Fee Breakdown */}
                         <div className="mt-4 grid grid-cols-4 gap-2 text-xs">
-                          <div className="bg-gray-50 rounded p-2">
-                            <p className="text-gray-600">Stripe Fee</p>
-                            <p className="font-semibold text-gray-900">
+                          <div className="bg-neutral-950 border border-white/5 rounded p-2">
+                            <p className="text-gray-500">Stripe Fee</p>
+                            <p className="font-semibold text-white">
                               {formatCurrency(creator.stripeFee)}
                             </p>
                           </div>
-                          <div className="bg-orange-50 rounded p-2">
-                            <p className="text-orange-600">Platform Fee</p>
-                            <p className="font-semibold text-orange-900">
+                          <div className="bg-orange-500/10 border border-orange-500/20 rounded p-2 text-orange-400">
+                            <p className="text-orange-400">Platform Fee</p>
+                            <p className="font-semibold text-white">
                               {formatCurrency(creator.platformFee)}
                             </p>
                           </div>
-                          <div className="bg-purple-50 rounded p-2">
-                            <p className="text-purple-600">Production Cost</p>
-                            <p className="font-semibold text-purple-900">
+                          <div className="bg-purple-500/10 border border-purple-500/20 rounded p-2 text-purple-400">
+                            <p className="text-purple-400">Production Cost</p>
+                            <p className="font-semibold text-white">
                               {formatCurrency(creator.printfulCost)}
                             </p>
                           </div>
-                          <div className="bg-emerald-50 rounded p-2">
-                            <p className="text-emerald-600">Net Commission</p>
-                            <p className="font-semibold text-emerald-900">
+                          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded p-2 text-emerald-400">
+                            <p className="text-emerald-400">Net Commission</p>
+                            <p className="font-semibold text-white">
                               {formatCurrency(creator.commission)}
                             </p>
                           </div>
@@ -349,26 +340,26 @@ export default function CommissionBreakdownModal({
 
                       {/* Product Details (Expandable) */}
                       {selectedCreator === creator.creatorId && (
-                        <div className="bg-gray-50 border-t border-gray-200 p-4">
-                          <h5 className="text-sm font-semibold text-gray-700 mb-3">Product Breakdown:</h5>
+                        <div className="bg-neutral-950 border-t border-white/10 p-4">
+                          <h5 className="text-sm font-semibold text-gray-300 mb-3">Product Breakdown:</h5>
                           <div className="space-y-2">
                             {getCreatorDetails(creator.creatorId).map((detail) => (
                               <div
                                 key={detail.id}
-                                className="bg-white rounded p-3 text-sm border border-gray-200"
+                                className="bg-neutral-900 rounded p-3 text-sm border border-white/5"
                               >
                                 <div className="flex justify-between items-start">
                                   <div>
-                                    <p className="font-medium text-gray-900">{detail.productName}</p>
+                                    <p className="font-medium text-white">{detail.productName}</p>
                                     <p className="text-xs text-gray-500 mt-1">
                                       Product ID: {detail.productId}
                                     </p>
                                   </div>
                                   <div className="text-right">
-                                    <p className="font-bold text-emerald-600">
+                                    <p className="font-bold text-emerald-400">
                                       {formatCurrency(detail.commissionAmount)}
                                     </p>
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-xs text-gray-400">
                                       from {formatCurrency(detail.orderAmount)}
                                     </p>
                                   </div>
@@ -387,10 +378,10 @@ export default function CommissionBreakdownModal({
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <div className="bg-neutral-950 px-6 py-4 border-t border-white/10">
           <button
             onClick={onClose}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition font-medium"
+            className="w-full bg-[#FF6D1F] hover:bg-[#ff7d38] text-black py-2.5 px-4 rounded-lg font-bold transition duration-300"
           >
             Close
           </button>
