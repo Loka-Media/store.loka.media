@@ -1,103 +1,316 @@
 'use client';
 
-import Navigation from '@/components/Navigation';
+const privacySections = [
+  {
+    id: "information-collected",
+    title: "1. Information We Collect",
+    content: (
+      <>
+        <p className="mb-4">
+          Loka collects information to provide a better experience and activate your creator storefront. We collect the following types of information:
+        </p>
+        <p className="mb-4">
+          <strong className="text-white">Information You Provide Directly:</strong>
+        </p>
+        <ul className="list-disc pl-6 mb-4 space-y-2 text-[#cccccc]">
+          <li>
+            <strong className="text-white">Account & Registration Info:</strong> Full name, email address, mobile phone number, and password when you register.
+          </li>
+          <li>
+            <strong className="text-white">Creator Verification Data:</strong> Social media links and handles (Instagram, Spotify, TikTok, YouTube) and agency affiliation details (managed vs. independent).
+          </li>
+          <li>
+            <strong className="text-white">Financial Details:</strong> Direct deposit account numbers, tax identification information, or regional IDs needed for distributing earnings and executing payouts.
+          </li>
+        </ul>
+        <p className="mb-4">
+          <strong className="text-white">Information Collected Automatically:</strong>
+        </p>
+        <ul className="list-disc pl-6 mb-4 space-y-2 text-[#cccccc]">
+          <li>
+            <strong className="text-white">Device & Connection Data:</strong> IP address, device type, browser specifications, operating system details, and referring URL.
+          </li>
+          <li>
+            <strong className="text-white">Usage Behavior:</strong> Pages visited, time spent on storefronts, navigation patterns, and button clicks.
+          </li>
+          <li>
+            <strong className="text-white">Referrals:</strong> Links and codes used to sign up for early access waitlists.
+          </li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "how-we-use",
+    title: "2. How We Use Your Information",
+    content: (
+      <>
+        <p className="mb-4">
+          We use the information we collect for several essential business purposes:
+        </p>
+        <ul className="list-disc pl-6 mb-4 space-y-2 text-[#cccccc]">
+          <li>To activate, host, and personalize your custom creator storefront.</li>
+          <li>To process and fulfill fan orders, coordinate apparel printing, and dispatch shipping packages.</li>
+          <li>To calculate and transfer creator royalties or payout commissions.</li>
+          <li>To send you transactional notifications, platform notices, security alerts, and customer service updates.</li>
+          <li>To distribute newsletters and marketing updates (which you can opt-out of at any time).</li>
+          <li>To verify account validity and protect the Platform against fraudulent behavior or intellectual property violations.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "sharing",
+    title: "3. Sharing of Information",
+    content: (
+      <>
+        <p className="mb-4">
+          We do not sell your personal details to third parties. We share your information only in the following controlled contexts:
+        </p>
+        <ul className="list-disc pl-6 mb-4 space-y-2 text-[#cccccc]">
+          <li>
+            <strong className="text-white">Fulfillment & Sourcing Networks:</strong> Order details, product preferences, and shipping addresses are shared with print-on-demand suppliers and shipping couriers to produce and deliver custom merchandise.
+          </li>
+          <li>
+            <strong className="text-white">Payment Processing Partners:</strong> Email address, transaction costs, and payout details are shared with verified payment processors (e.g., Stripe, bank transfer gateways) to manage deposits.
+          </li>
+          <li>
+            <strong className="text-white">Agencies & Team Members:</strong> If your account is registered as Agency Managed, your details and earnings reports are accessible by your authorized talent agency.
+          </li>
+          <li>
+            <strong className="text-white">Legal Obligations:</strong> We may share data when compelled to do so by applicable laws, subpoenas, court commands, or to safeguard intellectual property copyrights.
+          </li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "cookies",
+    title: "4. Cookies & Tracking Technologies",
+    content: (
+      <>
+        <p className="mb-4">
+          Loka uses cookies, web beacons, and unique identifiers to enhance storefront operations:
+        </p>
+        <ul className="list-disc pl-6 mb-4 space-y-2 text-[#cccccc]">
+          <li>
+            <strong className="text-white">Essential Cookies:</strong> Used to maintain shopping carts, hold session details, and secure user logins.
+          </li>
+          <li>
+            <strong className="text-white">Analytical Cookies:</strong> Help us measure storefront performance, tracking page traffic via services like Google Analytics.
+          </li>
+          <li>
+            <strong className="text-white">Preference Cookies:</strong> Remember sizing choices, region settings, and display preferences.
+          </li>
+        </ul>
+        <p>
+          You can disable or customize cookies in your browser settings; however, disabling essential cookies may impact store checkout flows.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "security",
+    title: "5. Data Security & Storage",
+    content: (
+      <>
+        <p className="mb-4">
+          We implement rigorous administrative, technical, and physical security measures to protect your personal details:
+        </p>
+        <ul className="list-disc pl-6 mb-4 space-y-2 text-[#cccccc]">
+          <li>All platform traffic is encrypted using SSL (Secure Sockets Layer) and HTTPS protocols.</li>
+          <li>Data databases are stored on secure cloud services with restricted operational access.</li>
+          <li>Payment card details are processed directly by PCI-compliant gateways and are never saved on Loka servers.</li>
+        </ul>
+        <p>
+          While we take extensive precautions, no storage or network transfer is 100% secure. You are advised to safeguard your storefront credentials and notify us if you notice suspicious behaviors.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "international-transfers",
+    title: "6. International Data Transfers",
+    content: (
+      <>
+        <p className="mb-4">
+          Loka is a global platform with operational facilities located in Canada (Winnipeg, Toronto), the USA (Los Angeles), and India.
+        </p>
+        <p>
+          By accessing the Platform, you acknowledge that your information may be transferred to, stored, and processed in regions outside your country of residence, where local privacy policies might differ from regional policies in your home country. We utilize legal transfer guidelines (including standard contract clauses) to verify that your data remains securely protected.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "privacy-rights",
+    title: "7. Your Privacy Rights",
+    content: (
+      <>
+        <p className="mb-4">
+          Depending on your location (such as Canada, the European Union under GDPR, or California under CCPA), you may hold specific privacy privileges:
+        </p>
+        <ul className="list-disc pl-6 mb-4 space-y-2 text-[#cccccc]">
+          <li>
+            <strong className="text-white">Right of Access:</strong> Review the personal data Loka holds about you.
+          </li>
+          <li>
+            <strong className="text-white">Right to Correction:</strong> Update or correct inaccurate registration details.
+          </li>
+          <li>
+            <strong className="text-white">Right to Deletion:</strong> Request that we delete your account and personal details (subject to active transaction records).
+          </li>
+          <li>
+            <strong className="text-white">Right to Opt-Out:</strong> Cancel email marketing subscriptions or object to automated profiling.
+          </li>
+        </ul>
+        <p>
+          To exercise any of these privileges, please send a message to our legal operations team at{" "}
+          <a href="mailto:hello@loka.media" className="text-[#FF6D1F] hover:underline">
+            hello@loka.media
+          </a>.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "children",
+    title: "8. Children's Privacy",
+    content: (
+      <>
+        <p className="mb-4">
+          Our Services are designed for professional creators and are not structured for children under the age of 13.
+        </p>
+        <p>
+          Loka does not knowingly collect personal details from children under 13. If you believe a minor has registered an account or provided personal details without parental permission, contact us immediately, and we will delete the data from our databases.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "changes",
+    title: "9. Changes to This Privacy Policy",
+    content: (
+      <>
+        <p className="mb-4">
+          We may update this Privacy Policy from time to time to align with legal guidelines, server adjustments, or product enhancements.
+        </p>
+        <p>
+          Changes will be published directly on this route with an updated &quot;Last Updated&quot; marker at the top. We encourage you to review this document regularly to remain informed about how we safeguard your information.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "contact-info",
+    title: "10. Contact Details",
+    content: (
+      <>
+        <p className="mb-4">
+          If you have questions, feedback, or complaints regarding this Privacy Policy, please get in touch with us:
+        </p>
+        <div className="bg-[#1A1A1A] p-6 rounded-2xl border border-white/10 space-y-3 max-w-md">
+          <div className="flex items-center gap-3">
+            <span className="text-white font-bold font-clash">Email:</span>
+            <a href="mailto:hello@loka.media" className="text-[#FF6D1F] hover:underline text-sm md:text-base">
+              hello@loka.media
+            </a>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-white font-bold font-clash">Phone:</span>
+            <a href="tel:1-888-568-5652" className="text-[#FF6D1F] hover:underline text-sm md:text-base">
+              1-888-568-5652 (loka)
+            </a>
+          </div>
+          <div>
+            <span className="text-white font-bold font-clash block mb-1">Corporate Addresses:</span>
+            <p className="text-xs text-[#cccccc] leading-relaxed">
+              Winnipeg, Manitoba, Canada | Toronto, Ontario, Canada <br />
+              Los Angeles, California, USA | Mumbai / Bangalore, India
+            </p>
+          </div>
+        </div>
+      </>
+    ),
+  },
+];
 
-export default function PrivacyPolicyPage() {
+export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <Navigation />
+    <div className="min-h-screen bg-black font-satoshi flex flex-col justify-between overflow-x-clip">
+      <main className="bg-black flex-grow pt-[40px] md:pt-[60px] pb-16 px-4 sm:px-6 md:px-12 max-w-[1400px] mx-auto w-full relative">
+        {/* Decorative ambient light blur */}
+        <div className="absolute top-0 right-1/4 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-[#FF6D1F]/5 rounded-full blur-[100px] sm:blur-[180px] pointer-events-none" />
+        <div className="absolute top-1/3 left-1/10 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-[#B94D13]/5 rounded-full blur-[80px] sm:blur-[150px] pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 mt-16">
-        <div className="prose prose-lg max-w-none">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">Privacy Policy</h1>
-          <p className="text-gray-600 mb-8">Last Updated: July 7, 2025</p>
-
-          <p>
-            This Privacy Policy describes how your personal information is collected, used, and shared when you visit or make a purchase from Loka Store (the "Site").
-          </p>
-
-          <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Personal Information We Collect</h2>
-
-          <p>
-            When you visit the Site, we automatically collect certain information about your device, including information about your web browser, IP address, time zone, and some of the cookies that are installed on your device. Additionally, as you browse the Site, we collect information about the individual web pages or products that you view, what websites or search terms referred you to the Site, and information about how you interact with the Site. We refer to this automatically collected information as "Device Information".
-          </p>
-
-          <p>We collect Device Information using the following technologies:</p>
-
-          <ul>
-            <li><strong>"Cookies"</strong> are data files that are placed on your device or computer and often include an anonymous unique identifier. For more information about cookies, and how to disable cookies, visit <a href="http://www.allaboutcookies.org" className="text-pink-500 hover:text-pink-600">http://www.allaboutcookies.org</a>.</li>
-            <li><strong>"Log files"</strong> track actions occurring on the Site, and collect data including your IP address, browser type, Internet service provider, referring/exit pages, and date/time stamps.</li>
-            <li><strong>"Web beacons", "tags", and "pixels"</strong> are electronic files used to record information about how you browse the Site.</li>
-          </ul>
-
-          <p>
-            Additionally, when you make a purchase or attempt to make a purchase through the Site, we collect certain information from you, including your name, billing address, shipping address, payment information (including credit card numbers), email address, and phone number. We refer to this information as "Order Information".
-          </p>
-
-          <p>
-            When we talk about "Personal Information" in this Privacy Policy, we are talking both about Device Information and Order Information.
-          </p>
-
-          <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">How Do We Use Your Personal Information?</h2>
-
-          <p>We use the Order Information that we collect generally to fulfill any orders placed through the Site (including processing your payment information, arranging for shipping, and providing you with invoices and/or order confirmations). Additionally, we use this Order Information to:</p>
-
-          <ul>
-            <li>Communicate with you;</li>
-            <li>Screen our orders for potential risk or fraud; and</li>
-            <li>When in line with the preferences you have shared with us, provide you with information or advertising relating to our products or services.</li>
-          </ul>
-
-          <p>
-            We use the Device Information that we collect to help us screen for potential risk and fraud (in particular, your IP address), and more generally to improve and optimize our Site (for example, by generating analytics about how our customers browse and interact with the Site, and to assess the success of our marketing and advertising campaigns).
-          </p>
-
-          <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Sharing Your Personal Information</h2>
-
-          <p>
-            We share your Personal Information with third parties to help us use your Personal Information, as described above. For example, we use Stripe to power our payment processing and Printful/Shopify for product fulfillment. We also use Google Analytics to help us understand how our customers use the Site -- you can read more about how Google uses your Personal Information here: <a href="https://www.google.com/intl/en/policies/privacy/" className="text-pink-500 hover:text-pink-600">https://www.google.com/intl/en/policies/privacy/</a>. You can also opt-out of Google Analytics here: <a href="https://tools.google.com/dlpage/gaoptout" className="text-pink-500 hover:text-pink-600">https://tools.google.com/dlpage/gaoptout</a>.
-          </p>
-
-          <p>
-            Finally, we may also share your Personal Information to comply with applicable laws and regulations, to respond to a subpoena, search warrant or other lawful requests for information we receive, or to otherwise protect our rights.
-          </p>
-
-          <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Creator Platform</h2>
-
-          <p>Loka Store operates as a marketplace platform where creators can design and sell custom products. When you create an account as a creator or make purchases from creators:</p>
-
-          <ul>
-            <li>Creator account information is stored securely</li>
-            <li>Product designs and customizations are processed through our design platform</li>
-            <li>Order fulfillment is handled through our integrated partners (Printful, Shopify)</li>
-            <li>Creator earnings and analytics data are maintained for tax and business purposes</li>
-          </ul>
-
-          <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Your Rights</h2>
-          
-          <p>
-            If you are a European resident, you have the right to access personal information we hold about you and to ask that your personal information be corrected, updated, or deleted. If you would like to exercise this right, please contact us through the contact information below.
-          </p>
-
-          <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Data Retention</h2>
-
-          <p>
-            When you place an order through the site, we will maintain your Order Information for our records unless and until you ask us to delete this information and/or we have no legitimate purpose to keep it.
-          </p>
-
-          <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Changes</h2>
-
-          <p>
-            We may update this privacy policy from time to time in order to reflect, for example, changes to our practices or for other operational, legal or regulatory reasons.
-          </p>
-
-          <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Contact Us</h2>
-
-          <p>
-            For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by e-mail at <a href="mailto:privacy@loka.media" className="text-pink-500 hover:text-pink-600">privacy@loka.media</a>.
+        {/* Title / Header section */}
+        <div className="text-center md:text-left mb-12 sm:mb-16 md:mb-20 max-w-4xl">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-clash tracking-tight mb-4 uppercase">
+            <span
+              style={{
+                background: "linear-gradient(273.09deg, #9E4719 0.41%, #FFFFFF 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              Privacy Policy
+            </span>
+          </h1>
+          <p className="text-sm sm:text-base md:text-lg text-[#8B8B8B] font-satoshi leading-relaxed">
+            Last Updated: July 13, 2026. Please read this privacy policy carefully to understand our data practices.
           </p>
         </div>
-      </div>
+
+        {/* Layout Grid: Sidebar Index (left) + Clauses (right) */}
+        <div className="flex flex-col lg:flex-row gap-10 items-start relative">
+          
+          {/* Left Sticky Sidebar Index for Desktop */}
+          <aside className="w-full lg:w-[320px] shrink-0 sticky top-[120px] hidden lg:block bg-[#111111]/80 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-lg">
+            <h3 className="text-sm font-bold font-clash text-[#FF6D1F] uppercase tracking-wider mb-4 border-b border-white/10 pb-2">
+              On This Page
+            </h3>
+            <nav className="flex flex-col gap-3">
+              {privacySections.map((section) => (
+                <a
+                  key={section.id}
+                  href={`#${section.id}`}
+                  className="text-xs md:text-sm text-[#8B8B8B] hover:text-white transition-all font-satoshi hover:translate-x-1 duration-200 inline-block truncate"
+                >
+                  {section.title}
+                </a>
+              ))}
+            </nav>
+          </aside>
+
+          {/* Right Main Clauses Content */}
+          <div className="flex-1 w-full space-y-12">
+            {privacySections.map((section) => (
+              <section
+                key={section.id}
+                id={section.id}
+                className="scroll-mt-[130px] w-full bg-[#1A1A1A]/40 backdrop-blur-sm rounded-3xl p-6 sm:p-10 border border-white/10 hover:border-white/20 transition-all duration-300 shadow-xl"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(26,26,26,0.3), rgba(26,26,26,0.3)),
+                    linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%)
+                  `,
+                  backgroundOrigin: "border-box",
+                  backgroundClip: "padding-box, border-box",
+                }}
+              >
+                <h2 className="text-xl sm:text-2xl font-bold font-clash text-white mb-6 tracking-wide">
+                  {section.title}
+                </h2>
+                <div className="text-sm sm:text-base text-[#cccccc] font-satoshi leading-relaxed space-y-4">
+                  {section.content}
+                </div>
+              </section>
+            ))}
+          </div>
+
+        </div>
+      </main>
     </div>
   );
 }
