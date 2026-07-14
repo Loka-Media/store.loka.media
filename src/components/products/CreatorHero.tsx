@@ -31,7 +31,7 @@ export function CreatorHero({
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
-    const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/profile/${creatorUsername}/shop`;
+    const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/shop/${creatorUsername}`;
 
     if (navigator.share) {
       try {

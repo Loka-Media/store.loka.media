@@ -26,7 +26,7 @@ export function EnhancedDashboardHeader({
   const handleShare = async () => {
     if (!creatorUsername) return;
 
-    const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/profile/${creatorUsername}/shop`;
+    const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/shop/${creatorUsername}`;
 
     if (navigator.share) {
       try {

@@ -33,7 +33,7 @@ export default function CreatorShopPage() {
 function CreatorShopContent() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const username = params.username as string;
+  const creatorSlug = params.creatorSlug as string;
 
   // Refs to track initialization and prevent strict mode double-fetching
   const isStaticDataFetched = useRef(false);
@@ -86,7 +86,7 @@ function CreatorShopContent() {
           offset: customPagination.offset,
           sortBy: customFilters.sortBy,
           sortOrder: customFilters.sortOrder,
-          creator: username, // Always filter by creator username
+          creator: creatorSlug, // Always filter by creator slug/username
           isActive: true, // Only show active products on the shop page
         };
 
@@ -107,7 +107,6 @@ function CreatorShopContent() {
 
         setPagination((prev) => ({ ...prev, ...response.pagination }));
 
-        // Minimal console log as requested - only logging the total time
         console.log(`API [Creator Products]: ${(performance.now() - startTime).toFixed(2)}ms`);
 
       } catch (error) {
@@ -120,7 +119,7 @@ function CreatorShopContent() {
         }
       }
     },
-    [username]
+    [creatorSlug]
   );
 
   const fetchCategories = useCallback(async () => {
@@ -137,32 +136,48 @@ function CreatorShopContent() {
   const fetchCreator = useCallback(async () => {
     try {
       const start = performance.now();
-      const response = await productAPI.getProducts({ creator: username, limit: 1, offset: 0 });
+      
+      // Try to find matching creator in creators list to get official name and username
+      const creatorsRes = await productAPI.getCreators();
+      const list = creatorsRes.creators || [];
+      const matchingCreator = list.find(
+        (c: any) =>
+          c.username.toLowerCase() === creatorSlug.toLowerCase() ||
+          c.name.replace(/\s+/g, "").toLowerCase() === creatorSlug.toLowerCase()
+      );
 
-      if (response.products.length > 0 && response.products[0].creator) {
-        // Extract creator info from first product
-        const creatorInfo = {
-          name: response.products[0].creator.name || response.products[0].creator_name,
-          username: response.products[0].creator.username || username,
-        };
-        setCreator(creatorInfo);
-      } else {
-        // Fallback creator info
+      if (matchingCreator) {
         setCreator({
-          name: username,
-          username: username,
+          name: matchingCreator.name,
+          username: matchingCreator.username,
         });
+      } else {
+        // Fallback: query backend directly for a product to see if we can extract creator details
+        const response = await productAPI.getProducts({ creator: creatorSlug, limit: 1, offset: 0 });
+        if (response.products.length > 0 && response.products[0].creator) {
+          const creatorInfo = {
+            name: response.products[0].creator.name || response.products[0].creator_name,
+            username: response.products[0].creator.username || creatorSlug,
+          };
+          setCreator(creatorInfo);
+        } else {
+          // Default fallback using slug
+          setCreator({
+            name: creatorSlug,
+            username: creatorSlug,
+          });
+        }
       }
 
       console.log(`API [Creator Info]: ${(performance.now() - start).toFixed(2)}ms`);
     } catch (error) {
       console.error("Failed to fetch creator info:", error);
       setCreator({
-        name: username,
-        username: username,
+        name: creatorSlug,
+        username: creatorSlug,
       });
     }
-  }, [username]);
+  }, [creatorSlug]);
 
   // 1. Static Data Fetch - Strictly Once
   useEffect(() => {
@@ -203,7 +218,6 @@ function CreatorShopContent() {
   useEffect(() => {
     const filtersKey = JSON.stringify(filters);
 
-    // Prevent duplicate fetch on mount in strict mode
     if (lastFetchedFiltersRef.current === filtersKey) {
       return;
     }
@@ -219,10 +233,8 @@ function CreatorShopContent() {
   // 4. Pagination Fetch (Load More)
   useEffect(() => {
     if (pagination.offset === 0) return;
-    // No guard needed here as offset change is explicit user action usually
     fetchProducts(filters, { limit: pagination.limit, offset: pagination.offset }, true);
   }, [pagination.offset, fetchProducts, filters, pagination.limit]);
-
 
   const updateURL = (updatedFilters: typeof filters) => {
     const params = new URLSearchParams();
@@ -232,7 +244,7 @@ function CreatorShopContent() {
     if (updatedFilters.minPrice) params.set("minPrice", updatedFilters.minPrice.toString());
     if (updatedFilters.maxPrice) params.set("maxPrice", updatedFilters.maxPrice.toString());
 
-    const newUrl = params.toString() ? `/profile/${username}/shop?${params.toString()}` : `/profile/${username}/shop`;
+    const newUrl = params.toString() ? `/shop/${creatorSlug}?${params.toString()}` : `/shop/${creatorSlug}`;
     window.history.replaceState({}, '', newUrl);
   };
 
@@ -436,7 +448,6 @@ function CreatorShopContent() {
           </>
         )}
       </div>
-
     </div>
   );
 }

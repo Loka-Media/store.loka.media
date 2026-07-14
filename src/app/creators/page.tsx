@@ -91,7 +91,7 @@ export default function CreatorsPage() {
             {filteredCreators.map((creator, index) => (
               <Link
                 key={creator.id}
-                href={`/products?creator=${encodeURIComponent(creator.name)}`}
+                href={`/shop/${creator.username || creator.name.replace(/\s+/g, '')}`}
                 className="group"
                 style={{ animationDelay: `${index * 50}ms` }}
               >

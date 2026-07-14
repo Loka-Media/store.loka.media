@@ -35,6 +35,34 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // Redirect legacy /products?creator=... requests to /shop/[creatorSlug]
+  useEffect(() => {
+    const creatorParam = searchParams.get("creator");
+    if (creatorParam) {
+      const redirectLegacyCreator = async () => {
+        try {
+          const response = await productAPI.getCreators();
+          const list = response.creators || [];
+          const matchingCreator = list.find(
+            (c: any) =>
+              c.name.toLowerCase() === creatorParam.toLowerCase() ||
+              c.username.toLowerCase() === creatorParam.toLowerCase()
+          );
+          if (matchingCreator) {
+            router.replace(`/shop/${matchingCreator.username}`);
+          } else {
+            const slug = creatorParam.replace(/\s+/g, "");
+            router.replace(`/shop/${slug}`);
+          }
+        } catch (error) {
+          const slug = creatorParam.replace(/\s+/g, "");
+          router.replace(`/shop/${slug}`);
+        }
+      };
+      redirectLegacyCreator();
+    }
+  }, [searchParams, router]);
+
   // Refs to track initialization and prevent strict mode double-fetching
   const isStaticDataFetched = useRef(false);
   const lastFetchedFiltersRef = useRef<string | null>(null);
