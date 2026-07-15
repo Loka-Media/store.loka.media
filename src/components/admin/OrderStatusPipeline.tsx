@@ -118,7 +118,7 @@ export const OrderStatusPipeline = ({
   return (
     <div className="w-full">
       {/* Status Pipeline */}
-      <div className="overflow-x-auto pb-4">
+      <div className="overflow-x-auto pb-4 scrollbar-hide">
         <div className="flex items-center gap-2 min-w-max px-4">
           {stages.map((stage, index) => {
             const Icon = stage.icon;

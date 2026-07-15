@@ -208,6 +208,18 @@ export default function AdminOrdersPage() {
     }
   }, [searchTerm]);
 
+  // Prevent background scrolling when modals are open
+  useEffect(() => {
+    if (showOrderModal || showVerificationModal || showCommissionModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showOrderModal, showVerificationModal, showCommissionModal]);
+
   const loadDashboardData = async () => {
     try {
       setLoading(true);
@@ -571,7 +583,7 @@ export default function AdminOrdersPage() {
 
         {/* Order Details Modal */}
         {showOrderModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black/85 overflow-y-auto h-full w-full z-50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/85 overflow-y-auto h-full w-full z-50 backdrop-blur-sm flex items-start justify-center p-4 md:py-12">
             <div className="relative mx-auto p-6 border border-white/10 w-full max-w-4xl shadow-2xl rounded-2xl bg-neutral-900 text-white">
               <div>
                 <div className="flex items-start justify-between mb-6 pb-4 border-b border-white/10">
