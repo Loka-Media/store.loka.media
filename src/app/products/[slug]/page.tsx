@@ -63,8 +63,39 @@ export default function ProductPage({ params }: ProductPageProps) {
   const rawImages = product.images && product.images.length > 0
     ? product.images
     : [product.thumbnail_url || '/placeholder-product.svg'];
-    
-  const images = rawImages.map(extractImageUrl).filter(Boolean);
+
+  const selectedColor = selectedVariant ? getVariantColorAndSize(selectedVariant).color : undefined;
+
+  let images = rawImages.map(extractImageUrl).filter(Boolean);
+
+  if (selectedColor && selectedColor !== 'Default') {
+    const colorVariants = product.variants.filter((v) => getVariantColorAndSize(v).color === selectedColor);
+    const colorVariantIds = new Set(
+      colorVariants.flatMap((v) => [v.id, v.printify_variant_id].filter(Boolean) as number[])
+    );
+
+    // 1. Try to filter using mockup metadata if available
+    if (product.mockups && product.mockups.length > 0) {
+      const filteredMockups = product.mockups.filter(mockup => {
+        const mockVariantIds = mockup.variant_ids || [];
+        return mockVariantIds.some(id => colorVariantIds.has(id));
+      });
+      if (filteredMockups.length > 0) {
+        images = filteredMockups.map(m => m.permanent_url);
+      }
+    } else {
+      // 2. Try to filter using variant image_url
+      const variantImages = colorVariants.map(v => v.image_url).filter(Boolean) as string[];
+      if (variantImages.length > 0) {
+        const matchedImages = images.filter(img => variantImages.some(vImg => vImg.includes(img) || img.includes(vImg)));
+        if (matchedImages.length > 0) {
+          images = matchedImages;
+        } else {
+          images = Array.from(new Set(variantImages));
+        }
+      }
+    }
+  }
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -77,7 +108,11 @@ export default function ProductPage({ params }: ProductPageProps) {
         <div className="gradient-border-white-top p-3 sm:p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
           {/* TOP LEFT - Image Gallery */}
           <div>
-            <EnhancedProductImageGallery productName={product.name} images={images} />
+            <EnhancedProductImageGallery 
+              key={selectedColor || 'default'}
+              productName={product.name} 
+              images={images} 
+            />
           </div>
 
           {/* TOP RIGHT - Product Info & Actions */}

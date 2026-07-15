@@ -25,25 +25,15 @@ export function DashboardHeader({ connection, onConnectPrintful }: DashboardHead
             </p>
           </div>
 
-          {connection?.connected ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/dashboard/creator/products"
-                className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 hover:border-orange-500 transition-colors"
-              >
-                <Package className="w-4 h-4 mr-2" />
-                My Products
-              </Link>
-            </div>
-          ) : (
-            <button
-              onClick={onConnectPrintful}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/dashboard/creator/products"
+              className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 hover:border-orange-500 transition-colors"
             >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Connect Printify Account
-            </button>
-          )}
+              <Package className="w-4 h-4 mr-2" />
+              My Products
+            </Link>
+          </div>
         </div>
       </div>
     </div>

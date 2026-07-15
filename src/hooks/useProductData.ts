@@ -15,6 +15,11 @@ export interface ProductDetails {
   tags: string[];
   thumbnail_url: string;
   images: string[];
+  mockups?: Array<{
+    permanent_url: string;
+    variant_ids: number[];
+    placement: string;
+  }>;
   is_active: boolean;
   creator_name: string;
   creator_username: string;

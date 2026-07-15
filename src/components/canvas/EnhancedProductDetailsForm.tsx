@@ -89,16 +89,20 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
     selectedVariantIds.includes(v.id)
   ) || [];
 
-  // Get price range from selected variants
+  // Get price range from selected variants (representing original Printify wholesale cost)
   const variantPrices = variants.map((v: any) => parseFloat(v.price || 0)).filter((p: number) => p > 0);
   const minPrice = variantPrices.length > 0 ? Math.min(...variantPrices) : 20;
   const maxPrice = variantPrices.length > 0 ? Math.max(...variantPrices) : 20;
-  const hasPriceRange = minPrice !== maxPrice;
+
+  // Compute Loka Base Cost (hiding Printify cost behind a 35% platform markup)
+  const minLokaBase = minPrice * 1.35;
+  const maxLokaBase = maxPrice * 1.35;
+  const hasPriceRange = minLokaBase !== maxLokaBase;
 
   const markup = parseFloat(formData.markupPercentage) || 0;
-  const minSellingPrice = minPrice * (1 + markup / 100);
-  const maxSellingPrice = maxPrice * (1 + markup / 100);
-  const avgProfit = ((minSellingPrice + maxSellingPrice) / 2) - ((minPrice + maxPrice) / 2);
+  const minSellingPrice = minLokaBase * (1 + markup / 100);
+  const maxSellingPrice = maxLokaBase * (1 + markup / 100);
+  const avgProfit = ((minSellingPrice + maxSellingPrice) / 2) - ((minLokaBase + maxLokaBase) / 2);
   const avgSellingPrice = (minSellingPrice + maxSellingPrice) / 2;
   const profitMargin = ((avgProfit / avgSellingPrice) * 100).toFixed(1);
 
@@ -422,11 +426,11 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-gray-300">Base Cost Range:</span>
+                        <span className="text-gray-300">Production Cost Range:</span>
                         <span className="text-white">
                           {hasPriceRange
-                            ? `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`
-                            : `$${minPrice.toFixed(2)}`
+                            ? `$${minLokaBase.toFixed(2)} - $${maxLokaBase.toFixed(2)}`
+                            : `$${minLokaBase.toFixed(2)}`
                           }
                         </span>
                       </div>
@@ -452,7 +456,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                           <p className="text-xs text-gray-400 flex items-start gap-2">
                             <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                             <span>
-                              Different sizes have different base costs. Your {markup}% markup is applied to each variant individually. Larger sizes (2XL-6XL) cost more and will be priced higher accordingly.
+                              Different sizes have different production costs. Your {markup}% markup is applied to each variant individually. Larger sizes (2XL-6XL) cost more and will be priced higher accordingly.
                             </span>
                           </p>
                         </div>

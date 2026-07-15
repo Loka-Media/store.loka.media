@@ -43,7 +43,7 @@ html {
 
 /* Scrollbar styling for Chrome, Safari, and Edge */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -52,8 +52,7 @@ html {
 
 ::-webkit-scrollbar-thumb {
   background: #FF6D1F;
-  border-radius: 6px;
-  border: 2px solid #000000;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

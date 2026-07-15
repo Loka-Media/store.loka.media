@@ -210,13 +210,40 @@ export default function AdminOrdersPage() {
 
   // Prevent background scrolling when modals are open
   useEffect(() => {
-    if (showOrderModal || showVerificationModal || showCommissionModal) {
+    const anyModalOpen = showOrderModal || showVerificationModal || showCommissionModal;
+
+    if (anyModalOpen) {
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     }
+
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [showOrderModal, showVerificationModal, showCommissionModal]);
+
+  // Block Lenis smooth scroll on background when any modal is open
+  useEffect(() => {
+    const anyModalOpen = showOrderModal || showVerificationModal || showCommissionModal;
+    if (!anyModalOpen) return;
+
+    const preventScroll = (e: WheelEvent | TouchEvent) => {
+      // Allow scroll if event originates inside a modal overlay (data-lenis-prevent)
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-modal-scroll]')) return;
+      e.preventDefault();
+    };
+
+    window.addEventListener('wheel', preventScroll as EventListener, { passive: false });
+    window.addEventListener('touchmove', preventScroll as EventListener, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', preventScroll as EventListener);
+      window.removeEventListener('touchmove', preventScroll as EventListener);
     };
   }, [showOrderModal, showVerificationModal, showCommissionModal]);
 
@@ -583,7 +610,7 @@ export default function AdminOrdersPage() {
 
         {/* Order Details Modal */}
         {showOrderModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black/85 overflow-y-auto h-full w-full z-50 backdrop-blur-sm flex items-start justify-center p-4 md:py-12">
+          <div data-lenis-prevent data-modal-scroll className="fixed inset-0 bg-black/85 overflow-y-auto h-full w-full z-50 backdrop-blur-sm flex items-start justify-center p-4 md:py-12">
             <div className="relative mx-auto p-6 border border-white/10 w-full max-w-4xl shadow-2xl rounded-2xl bg-neutral-900 text-white">
               <div>
                 <div className="flex items-start justify-between mb-6 pb-4 border-b border-white/10">

@@ -5,7 +5,6 @@ import { EnhancedDashboardHeader } from "./components/EnhancedDashboardHeader";
 import { EnhancedStatsCards } from "./components/EnhancedStatsCards";
 import { EnhancedQuickActions } from "./components/EnhancedQuickActions";
 import { EnhancedProductsSection } from "./components/EnhancedProductsSection";
-import PrintfulConnectionPrompt from "./components/PrintfulConnectionPrompt";
 import Navigation from "@/components/Navigation";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 
@@ -54,15 +53,9 @@ export default function CreatorDashboard() {
           )}
 
           <div className="mt-12">
-            {connection && !connection.connected ? (
-              <PrintfulConnectionPrompt onConnect={handleConnectPrintful} />
-            ) : (
-              <>
-                <EnhancedStatsCards stats={stats} />
-                <EnhancedQuickActions />
-                <EnhancedProductsSection products={products} loading={loading} onDelete={deleteProduct} />
-              </>
-            )}
+            <EnhancedStatsCards stats={stats} />
+            <EnhancedQuickActions />
+            <EnhancedProductsSection products={products} loading={loading} onDelete={deleteProduct} />
           </div>
         </div>
       </div>

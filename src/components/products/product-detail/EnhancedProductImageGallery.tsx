@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Share2, X, Maximize2 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -15,6 +15,39 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
   const [isZoomed, setIsZoomed] = useState(false);
   const [showFullscreen, setShowFullscreen] = useState(false);
   const thumbnailContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (showFullscreen) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [showFullscreen]);
+
+  useEffect(() => {
+    if (!showFullscreen) return;
+
+    const preventScroll = (e: WheelEvent | TouchEvent) => {
+      // Allow scroll if event originates inside modal
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-modal-scroll]')) return;
+      e.preventDefault();
+    };
+
+    window.addEventListener('wheel', preventScroll as EventListener, { passive: false });
+    window.addEventListener('touchmove', preventScroll as EventListener, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', preventScroll as EventListener);
+      window.removeEventListener('touchmove', preventScroll as EventListener);
+    };
+  }, [showFullscreen]);
 
   const scrollSelectedThumbnailIntoView = (index: number) => {
     const container = thumbnailContainerRef.current;
@@ -180,7 +213,7 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
 
       {/* Fullscreen Modal */}
       {showFullscreen && (
-        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+        <div data-lenis-prevent data-modal-scroll className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
           <button
             onClick={() => setShowFullscreen(false)}
             className="absolute top-4 right-4 w-11 h-11 bg-white/10 border border-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/20 transition-all"

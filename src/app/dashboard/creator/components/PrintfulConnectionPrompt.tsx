@@ -30,13 +30,7 @@ export default function PrintfulConnectionPrompt({ onConnect }: { onConnect: () 
         </p>
       </div>
 
-      <button
-        onClick={onConnect}
-        className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-[0_10px_30px_rgba(255,99,71,0.3)] transition-all text-sm sm:text-base"
-      >
-        <ExternalLink className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-        Connect Printify Now
-      </button>
+
     </div>
   );
 }

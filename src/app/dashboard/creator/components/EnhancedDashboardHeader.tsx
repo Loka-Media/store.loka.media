@@ -62,33 +62,23 @@ export function EnhancedDashboardHeader({
           </div>
         </div>
 
-        {connection?.connected ? (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0">
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg font-bold text-white hover:bg-white/20 transition-all duration-300 text-sm sm:text-base cursor-pointer animate-share-flicker"
-              title="Share your creator profile"
-            >
-              <Share2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              {copied ? "Copied!" : "Share"}
-            </button>
-            <Link
-              href="/dashboard/creator/products"
-              className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg font-bold text-white hover:bg-white/20 transition-all duration-300 text-sm sm:text-base"
-            >
-              <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              My Products
-            </Link>
-          </div>
-        ) : (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0">
           <button
-            onClick={onConnectPrintful}
-            className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg font-bold hover:shadow-[0_10px_30px_rgba(255,99,71,0.3)] transition-all duration-300 text-sm sm:text-base flex-shrink-0"
+            onClick={handleShare}
+            className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg font-bold text-white hover:bg-white/20 transition-all duration-300 text-sm sm:text-base cursor-pointer animate-share-flicker"
+            title="Share your creator profile"
           >
-            <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-            Connect Printify
+            <Share2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            {copied ? "Copied!" : "Share"}
           </button>
-        )}
+          <Link
+            href="/dashboard/creator/products"
+            className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg font-bold text-white hover:bg-white/20 transition-all duration-300 text-sm sm:text-base"
+          >
+            <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            My Products
+          </Link>
+        </div>
       </div>
     </div>
   );
