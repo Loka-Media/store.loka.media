@@ -7,6 +7,7 @@ import { createProductSlug } from "@/lib/utils";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import {
   Heart,
   Star,
@@ -27,6 +28,8 @@ interface ProductListItemProps {
 }
 
 export function ProductListItem({ product }: ProductListItemProps) {
+  const { getProductPriceRange, calculateSellingPrice } = useGlobalMarkup();
+  const { minPrice, maxPrice } = getProductPriceRange(product);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [inventoryStatus, setInventoryStatus] = useState<{
     isAvailable: boolean;
@@ -105,11 +108,12 @@ export function ProductListItem({ product }: ProductListItemProps) {
 
         // Cache variant data for guest cart before adding to cart
         const selectedVariant = availableVariants[0];
+        const vCost = selectedVariant.cost || (selectedVariant.price ? parseFloat(selectedVariant.price) / 1.35 : parseFloat(product.base_price?.toString() || '20.00'));
         const variantCacheData = {
           product_id: product.id,
           product_name: product.name,
-          price: selectedVariant.price?.toString() ||
-            (product.price_range?.min ? product.price_range.min.toString() : product.base_price?.toString() || '25.00'),
+          cost: vCost,
+          price: calculateSellingPrice(vCost).toString(),
           size: selectedVariant.size || selectedVariant.title?.split(' / ')[1] || 'One Size',
           color: selectedVariant.color || selectedVariant.title?.split(' / ')[0] || 'Default',
           color_code: selectedVariant.color_code || '#808080',
@@ -284,19 +288,10 @@ export function ProductListItem({ product }: ProductListItemProps) {
             <div className="text-right ml-4 flex flex-col items-end">
               <div className="mb-2">
                 <div className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                  {formatPrice(
-                    parseFloat(
-                      product.price_range?.min
-                        ? product.price_range.min.toString()
-                        : product.base_price?.toString() || "0"
-                    )
-                  )}
-                  {product.price_range?.min &&
-                    product.price_range?.max &&
-                    parseFloat(product.price_range.max.toString()) >
-                      parseFloat(product.price_range.min.toString()) && (
+                  {formatPrice(minPrice)}
+                  {maxPrice > minPrice && (
                     <div className="text-sm text-gray-400 mt-0.5">
-                      - {formatPrice(parseFloat(product.price_range.max.toString()))}
+                      - {formatPrice(maxPrice)}
                     </div>
                   )}
                 </div>

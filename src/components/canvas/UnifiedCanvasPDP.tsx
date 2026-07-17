@@ -28,7 +28,9 @@ import {
   ChevronLeft,
   ChevronRight,
   RotateCw,
+  Percent,
 } from "lucide-react";
+import { Slider } from "@mui/material";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { printifyAPI } from "@/lib/api";
+import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
+
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition } from "./utils";
 import DesignCanvasTab from "./DesignCanvasTab";
 import PrintingTechniqueSelector from "./PrintingTechniqueSelector";
@@ -152,7 +156,7 @@ const isApparelProduct = (product: any): boolean => {
   if (!product) return true;
   const type = (product.type_name || product.type || "").toLowerCase();
   const title = (product.title || product.name || "").toLowerCase();
-  
+
   const nonApparelKeywords = [
     "mug", "drinkware", "tumbler", "bottle", "cup", "glass",
     "poster", "canvas", "frame", "wall art", "print",
@@ -255,7 +259,7 @@ const Product360Viewer: React.FC<{
           } else if (index > 0) {
             placement = `other_${index}`;
           }
-          
+
           let title = "Front View";
           if (placement === "back") title = "Back View";
           else if (placement === "sleeve_left") title = "Left Sleeve";
@@ -396,8 +400,8 @@ const Product360Viewer: React.FC<{
           ) : (
             <ShoppingBag className="w-12 h-12 text-gray-400" />
           )}
-          
-    
+
+
         </div>
       </div>
     );
@@ -662,6 +666,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   totalPages = 1,
   isFetchingFiles = false,
 }) => {
+  const { globalMarkup, categoryMarkup, calculateSellingPrice } = useGlobalMarkup();
   // Mobile accordion state
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     variants: true,
@@ -690,6 +695,52 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const [tagInput, setTagInput] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
+  // ── Creator Markup ───────────────────────────────────────────────────────
+  const CREATOR_MARKUP_PRESETS = [0, 10, 20, 30, 35, 40, 50, 75, 100];
+  const [creatorMarkup, setCreatorMarkup] = useState<number>(() => {
+    const parsed = parseFloat(productForm.markupPercentage);
+    return isNaN(parsed) ? 30 : parsed;
+  });
+
+  // Sync slider when saved productForm is restored from localStorage
+  useEffect(() => {
+    const parsed = parseFloat(productForm.markupPercentage);
+    if (!isNaN(parsed) && parsed !== creatorMarkup) {
+      setCreatorMarkup(parsed);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productForm.markupPercentage]);
+
+  const handleCreatorMarkupChange = (_e: Event, val: number | number[]) => {
+    const v = val as number;
+    setCreatorMarkup(v);
+    setProductForm((prev: any) => ({ ...prev, markupPercentage: String(v) }));
+  };
+
+  const handleCreatorPresetClick = (preset: number) => {
+    setCreatorMarkup(preset);
+    setProductForm((prev: any) => ({ ...prev, markupPercentage: String(preset) }));
+  };
+
+  const creatorSliderSx = {
+    color: '#FF6D1F',
+    height: 8,
+    '& .MuiSlider-track': {
+      border: 'none',
+      background: 'linear-gradient(90deg, #FF6D1F, #FF8343)',
+    },
+    '& .MuiSlider-thumb': {
+      height: 22,
+      width: 22,
+      backgroundColor: '#fff',
+      border: '2px solid #FF6D1F',
+      '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': { boxShadow: 'inherit' },
+      '&::before': { display: 'none' },
+    },
+    '& .MuiSlider-rail': { opacity: 0.28, backgroundColor: '#d8d8d8' },
+  };
+  // ─────────────────────────────────────────────────────────────────────────
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const skipAutoPreviewRef = useRef(false);
 
@@ -701,7 +752,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     }
 
     const defaultPlacements = ["front", "back", "sleeve_left", "sleeve_right", "neck"];
-    
+
     // Collect all supported placement keys across all variant_printfiles
     const supportedKeys = new Set<string>();
     printFiles.variant_printfiles.forEach((vp: any) => {
@@ -731,7 +782,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       if (supported.length > 0) {
         const hasLeft = activePlacement === "sleeve_left" && (supported.includes("left") || supported.includes("sleeve_left"));
         const hasRight = activePlacement === "sleeve_right" && (supported.includes("right") || supported.includes("sleeve_right"));
-        
+
         if (!supported.includes(activePlacement) && !hasLeft && !hasRight) {
           setActivePlacement(supported[0]);
         }
@@ -938,9 +989,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
     if (activeVariantIds.length === 0) return mockupUrls;
 
-    const filtered = mockupUrls.filter((m: any) => 
-      !m.variant_ids || 
-      m.variant_ids.length === 0 || 
+    const filtered = mockupUrls.filter((m: any) =>
+      !m.variant_ids ||
+      m.variant_ids.length === 0 ||
       m.variant_ids.some((vid: any) => activeVariantIds.includes(vid))
     );
 
@@ -1010,23 +1061,69 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     setOpenAccordions((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Pricing calculations
+  // Pricing calculations — matches Catalog card formula exactly
   const variants = useMemo(() => {
     return selectedProduct?.variants?.filter((v: any) => selectedVariants.includes(v.id)) || [];
   }, [selectedProduct, selectedVariants]);
 
-  const variantPrices = useMemo(() => {
-    return variants.map((v: any) => parseFloat(v.price || 0)).filter((p: number) => p > 0);
-  }, [variants]);
+  // Base cost uses same formula as Catalog Product Card:
+  // product.premiumPrice || (product.price * 0.77)
+  // Falls back to lowest variant price if product-level price fields are missing
+  const productBaseCost = useMemo(() => {
+    if (!selectedProduct) return 0;
 
-  const minPrice = variantPrices.length > 0 ? Math.min(...variantPrices) : 20;
-  const maxPrice = variantPrices.length > 0 ? Math.max(...variantPrices) : 20;
-  const hasPriceRange = minPrice !== maxPrice;
+    // Primary: use product-level fields (matches Catalog card exactly)
+    if (selectedProduct.premiumPrice) {
+      return parseFloat(selectedProduct.premiumPrice);
+    }
+    if (selectedProduct.price) {
+      return parseFloat((parseFloat(selectedProduct.price) * 0.77).toFixed(2));
+    }
 
-  const markup = parseFloat(productForm.markupPercentage) || 0;
-  const minSellingPrice = minPrice * (1 + markup / 100);
-  const maxSellingPrice = maxPrice * (1 + markup / 100);
-  const avgProfit = ((minSellingPrice + maxSellingPrice) / 2) - ((minPrice + maxPrice) / 2);
+    // Fallback: compute from lowest selected variant price (wholesale → premium)
+    const allVariants = selectedProduct?.variants || [];
+    const activeVariants = allVariants.filter((v: any) => selectedVariants.includes(v.id));
+    const sourceVariants = activeVariants.length > 0 ? activeVariants : allVariants;
+    if (sourceVariants.length > 0) {
+      const prices = sourceVariants
+        .map((v: any) => parseFloat(v.price || '0'))
+        .filter((p: number) => p > 0);
+      if (prices.length > 0) {
+        return parseFloat((Math.min(...prices) * 0.77).toFixed(2));
+      }
+    }
+
+    return 0;
+  }, [selectedProduct, selectedVariants]);
+
+  // Platform selling price = admin/category markup applied (no creator markup yet)
+  // Uses context's calculateSellingPrice with no category arg → matches Catalog card behavior
+  const platformSellingPrice = calculateSellingPrice(productBaseCost);
+
+  // Apply creator markup on top of the platform price
+  const creatorMarkupMultiplier = 1 + creatorMarkup / 100;
+  const minSellingPrice = Math.round(platformSellingPrice * creatorMarkupMultiplier * 100) / 100;
+  const maxSellingPrice = minSellingPrice;
+  const hasPriceRange = false;
+
+  // Creator Profit = only the portion generated by the Creator Markup
+  const creatorProfit = Math.round((minSellingPrice - platformSellingPrice) * 100) / 100;
+
+  // Pricing debug log whenever pricing elements change
+  useEffect(() => {
+    if (!selectedProduct) return;
+    const blueprintId = selectedProduct.id;
+    const providerId = selectedProduct.printProviderId || selectedProduct.print_provider_id;
+
+    console.log(`[Canvas Pricing Debug]
+- Blueprint ID: ${blueprintId}
+- Print Provider ID: ${providerId}
+- Product Base Cost (Premium): $${productBaseCost.toFixed(2)}
+- Platform Selling Price (Admin/Category): $${platformSellingPrice.toFixed(2)}
+- Creator Markup: ${creatorMarkup}%
+- Retail Price shown in UI: $${minSellingPrice.toFixed(2)}
+- Creator Profit shown in UI: $${creatorProfit.toFixed(2)}`);
+  }, [selectedProduct, productBaseCost, platformSellingPrice, minSellingPrice, creatorProfit, creatorMarkup]);
 
   // Cooldown state for manual preview regeneration
   const [cooldown, setCooldown] = useState(0);
@@ -1447,11 +1544,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               setSelectedColors([...selectedColors, color.name]);
                             }
                           }}
-                          className={`relative border-2 rounded-full px-4 py-2 flex items-center gap-2 transition-all duration-300 ${
-                            isSelected 
-                              ? (activeColor === color.name ? "border-[#FF6D1F] scale-105 shadow-[0_0_12px_rgba(255,109,31,0.3)]" : "border-white scale-105") 
-                              : "border-transparent hover:border-white/30"
-                          }`}
+                          className={`relative border-2 rounded-full px-4 py-2 flex items-center gap-2 transition-all duration-300 ${isSelected
+                            ? (activeColor === color.name ? "border-[#FF6D1F] scale-105 shadow-[0_0_12px_rgba(255,109,31,0.3)]" : "border-white scale-105")
+                            : "border-transparent hover:border-white/30"
+                            }`}
                           style={{ backgroundColor: color.code }}
                         >
                           <span
@@ -1876,7 +1972,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           } else if (index > 0) {
                             placement = `other_${index}`;
                           }
-                          
+
                           let title = "Front View";
                           if (placement === "back") title = "Back View";
                           else if (placement === "sleeve_left") title = "Left Sleeve";
@@ -1890,11 +1986,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           };
                         })).map((m: any, index: number) => {
                           const isBlueprint = !mockupUrls || mockupUrls.length === 0;
-                          
+
                           // Find overlay design if we don't have generated mockups
                           const design = isBlueprint ? designFiles.find(d => d.placement === m.placement) : null;
                           const effectivePlacement = design ? design.placement : (m.placement || "front");
-                          
+
                           const MOCKUP_PRINT_AREAS: Record<string, { width: number; height: number; top: number; left: number }> = {
                             front: { width: 33, height: 45, top: 24, left: 33.5 },
                             back: { width: 33, height: 45, top: 22, left: 33.5 },
@@ -1919,12 +2015,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               position: "absolute",
                             };
                           }
-                           return (
+                          return (
                             <div
                               key={index}
-                              className={`border border-white/10 rounded-2xl overflow-hidden hover:shadow-[0_10px_30px_rgba(255,109,31,0.1)] transition-all duration-300 relative aspect-square p-6 ${
-                                isBlueprint ? "bg-[#f4f4f5]" : "bg-black/40"
-                              }`}
+                              className={`border border-white/10 rounded-2xl overflow-hidden hover:shadow-[0_10px_30px_rgba(255,109,31,0.1)] transition-all duration-300 relative aspect-square p-6 ${isBlueprint ? "bg-[#f4f4f5]" : "bg-black/40"
+                                }`}
                             >
                               {isBlueprint ? (
                                 <div className="relative w-full h-full flex items-center justify-center">
@@ -1937,7 +2032,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               ) : (
                                 <img src={m.url} alt={m.title || `Mockup ${index + 1}`} className="w-full h-full object-contain pointer-events-none" />
                               )}
-                              
+
                               <div className="absolute bottom-0 inset-x-0 bg-gray-900/80 p-2 text-center text-[10px] sm:text-xs text-gray-400 border-t border-white/5 z-20">
                                 {m.title || "Product View"}
                               </div>
@@ -2132,8 +2227,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <div>
                       <div className="font-bold">Product Previews Ready</div>
                       <div className="text-[10px] text-gray-500">
-                        {validationSummary.mockups 
-                          ? (!selectedProduct?.printify_id ? "Vector outlines loaded" : `${mockupUrls.length} view mockups ready`) 
+                        {validationSummary.mockups
+                          ? (!selectedProduct?.printify_id ? "Vector outlines loaded" : `${mockupUrls.length} view mockups ready`)
                           : "No mockups generated yet"}
                       </div>
                     </div>
@@ -2222,58 +2317,71 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
               <hr className="border-white/10" />
 
-              {/* Pricing Calculator */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-gray-300">Markup Percentage</span>
-                  <span className="text-sm font-bold text-[#FF6D1F]">{markup}%</span>
+              {/* Creator Markup */}
+              <div className="relative p-5 bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl border border-white/8 shadow-xl overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-orange-500/5 rounded-full blur-2xl pointer-events-none" />
+
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                    <Percent className="w-4 h-4 text-orange-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Creator Markup</h3>
+                    <p className="text-[10px] text-gray-400">Set your own additional markup for this product.</p>
+                  </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="5"
-                    value={markup}
-                    onChange={(e) => handleInputChange("markupPercentage", e.target.value)}
-                    className="w-full accent-[#FF6D1F] bg-gray-800 rounded-lg appearance-none cursor-pointer h-2"
-                  />
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {[20, 30, 40, 50, 75, 100].map((v) => (
-                    <button
-                      key={v}
-                      type="button"
-                      onClick={() => handleInputChange("markupPercentage", v.toString())}
-                      className={`text-[10px] font-bold px-2 py-1 rounded-md border transition-all ${markup === v
-                        ? "border-[#FF6D1F] bg-[#FF6D1F] text-white"
-                        : "border-white/10 bg-white/5 text-gray-400 hover:bg-white/10"
-                        }`}
-                    >
-                      {v}%
-                    </button>
-                  ))}
-                </div>
-
-                <div className="bg-black/60 border border-white/5 p-4 rounded-2xl space-y-2.5 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Avg Base Cost:</span>
-                    <span className="font-semibold text-white">
-                      {hasPriceRange ? `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}` : `$${minPrice.toFixed(2)}`}
+                <div className="space-y-4 py-1">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-xs font-semibold text-gray-400">Your Markup</span>
+                    <span className="text-3xl font-extrabold text-orange-400 tabular-nums">
+                      {creatorMarkup}%
                     </span>
                   </div>
+
+                  <div className="px-1">
+                    <Slider
+                      value={creatorMarkup}
+                      min={0}
+                      max={100}
+                      step={1}
+                      onChange={handleCreatorMarkupChange}
+                      sx={creatorSliderSx}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Quick Presets</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {CREATOR_MARKUP_PRESETS.map((preset) => (
+                        <button
+                          key={preset}
+                          onClick={() => handleCreatorPresetClick(preset)}
+                          className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
+                            creatorMarkup === preset
+                              ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)]'
+                              : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200'
+                          }`}
+                        >
+                          {preset}%
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pricing Summary */}
+                <div className="mt-4 bg-black/60 border border-white/5 p-3 rounded-xl space-y-2 text-[11px]">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Retail Price:</span>
-                    <span className="font-bold text-white text-sm">
+                    <span className="text-gray-500">Final Price:</span>
+                    <span className="font-bold text-white text-xs">
                       {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="flex justify-between border-t border-white/15 pt-2">
-                    <span className="text-gray-300">Estimated Profit:</span>
-                    <span className="font-extrabold text-green-400 text-sm">
-                      +${avgProfit.toFixed(2)}
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Creator Profit:</span>
+                    <span className="font-extrabold text-green-400 text-xs">
+                      +${creatorProfit.toFixed(2)}
                     </span>
                   </div>
                 </div>

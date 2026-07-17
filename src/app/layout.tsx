@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { GuestCartProvider } from "@/contexts/GuestCartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import { GlobalMarkupProvider } from "@/contexts/GlobalMarkupContext";
 import { Toaster } from "react-hot-toast";
 import Navigation from "@/components/Navigation";
 import StickyHeader from "@/components/StickyHeader";
@@ -62,21 +63,24 @@ export default function RootLayout({
       <body className="antialiased font-clash">
         <SmoothScroll />
         <AuthProvider>
-          {/* <CartProvider> - Disabled to prevent duplicate API calls */}
-          <GuestCartProvider>
-            <WishlistProvider>
-              <Navigation />
-              {/* <StickyHeader /> */}
-              <div className="pt-16">
-                {children}
-                <Footer />
-              </div>
-              <Toaster position="top-right" />
-            </WishlistProvider>
-          </GuestCartProvider>
-          {/* </CartProvider> */}
+          <GlobalMarkupProvider>
+            {/* <CartProvider> - Disabled to prevent duplicate API calls */}
+            <GuestCartProvider>
+              <WishlistProvider>
+                <Navigation />
+                {/* <StickyHeader /> */}
+                <div className="pt-16">
+                  {children}
+                  <Footer />
+                </div>
+                <Toaster position="top-right" />
+              </WishlistProvider>
+            </GuestCartProvider>
+            {/* </CartProvider> */}
+          </GlobalMarkupProvider>
         </AuthProvider>
       </body>
     </html>
   );
 }
+

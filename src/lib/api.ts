@@ -577,6 +577,12 @@ export const printifyAPI = {
     return printifyProxyRequest("GET", `/api/printify/products/${productId}`);
   },
 
+  // Get print providers list for a blueprint
+  getBlueprintProviders: async (blueprintId: number | string) => {
+    const data = await printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers`);
+    return data?.data || data;
+  },
+
   // Get print providers for a blueprint
   checkProductAvailability: async (blueprintId: number | string) => {
     const data = await printifyProxyRequest("GET", `/api/printify/catalog/${blueprintId}/providers`);

@@ -121,10 +121,10 @@ export default function ProductPage({ params }: ProductPageProps) {
               productName={product.name}
               description={product.description}
               basePrice={product.base_price}
+              selectedVariantCost={selectedVariant?.cost}
               selectedVariantPrice={selectedVariant?.price}
               category={product.category}
               creatorName={product.creator?.name || product.creator_name || 'Unknown'}
-              markupPercentage={product.markup_percentage}
             />
 
             <EnhancedProductVariantSelector

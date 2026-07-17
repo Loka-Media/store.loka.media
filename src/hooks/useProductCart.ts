@@ -3,12 +3,14 @@ import { useRouter } from 'next/navigation';
 import { ProductVariant } from '@/lib/api';
 import { useGuestCart } from '@/contexts/GuestCartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 import { ProductDetails } from './useProductData';
 import toast from 'react-hot-toast';
 
 export const useProductCart = (product: ProductDetails | null, selectedVariant: ProductVariant | null) => {
   const { addToCart } = useGuestCart();
   const { isAuthenticated } = useAuth();
+  const { calculateSellingPrice } = useGlobalMarkup();
   const router = useRouter();
 
   const handleAddToCart = useCallback(async (quantity: number) => {
@@ -27,11 +29,13 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
     console.log('🛒 Add to cart called for product:', product?.name, 'variant:', selectedVariant.id);
 
     try {
+      const vCost = selectedVariant.cost || (selectedVariant.price ? parseFloat(String(selectedVariant.price)) / 1.35 : parseFloat(product.base_price?.toString() || '20.00'));
       // Cache variant data for guest cart before adding to cart
       const variantCacheData = {
         product_id: product.id,
         product_name: product.name,
-        price: selectedVariant.price?.toString() || product.base_price?.toString() || '25.00',
+        cost: vCost,
+        price: calculateSellingPrice(vCost).toString(),
         size: selectedVariant.size || selectedVariant.title?.split(' / ')[1] || 'One Size',
         color: selectedVariant.color || selectedVariant.title?.split(' / ')[0] || 'Default',
         color_code: selectedVariant.color_code || '#808080',

@@ -3,15 +3,16 @@
 import { useState } from 'react';
 import { formatPrice } from '@/lib/api';
 import { Package } from 'lucide-react';
+import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 
 interface EnhancedProductInfoProps {
   productName: string;
   description: string;
   basePrice: number;
+  selectedVariantCost?: number;
   selectedVariantPrice?: number;
   category?: string;
   creatorName?: string;
-  markupPercentage?: number;
 }
 
 const TRUNCATE_LENGTH = 200;
@@ -20,12 +21,19 @@ export function EnhancedProductInfo({
   productName,
   description,
   basePrice,
+  selectedVariantCost,
   selectedVariantPrice,
   category,
   creatorName,
-  markupPercentage = 20, // Default to 20% if not provided
 }: EnhancedProductInfoProps) {
-  const displayPrice = selectedVariantPrice ?? (basePrice * (1 + markupPercentage / 100));
+  const { calculateSellingPrice } = useGlobalMarkup();
+  
+  // Calculate retail price dynamically
+  const cost = selectedVariantCost !== undefined && selectedVariantCost !== null && selectedVariantCost > 0
+    ? selectedVariantCost
+    : (selectedVariantPrice ? selectedVariantPrice / 1.35 : basePrice);
+    
+  const displayPrice = calculateSellingPrice(cost, category);
 
   return (
     <div className="space-y-2 sm:space-y-3 md:space-y-4">

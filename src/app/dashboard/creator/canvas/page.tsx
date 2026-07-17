@@ -112,13 +112,41 @@ function CanvasContent() {
       // Check if blueprintId is provided in URL
       if (blueprintId) {
         try {
-          // Fetch blueprint details (includes providers and variants)
+          // Fetch blueprint details
           console.log(`🔍 Fetching blueprint details for ${blueprintId}...`);
           const detailed = await printifyAPI.getBlueprintDetails(
             parseInt(blueprintId)
           );
           const product = detailed?.data || detailed;
-          const variants = detailed?.data?.variants || [];
+
+          // Call GET /v1/catalog/blueprints/{blueprint_id}/print_providers.json
+          console.log(`🔍 Fetching print providers dynamically for blueprint ${blueprintId}...`);
+          const providers = await printifyAPI.getBlueprintProviders(blueprintId);
+          product.providers = providers;
+
+          // Select first print provider as default and fetch variants dynamically
+          const defaultProviderId = providers[0]?.id;
+          let variants = [];
+          if (defaultProviderId) {
+            console.log(`🔍 Fetching variants dynamically for blueprint ${blueprintId} and print provider ${defaultProviderId}...`);
+            const variantsResponse = await printifyAPI.getBlueprintVariantsForProvider(blueprintId, defaultProviderId);
+            const variantsData = variantsResponse?.data || variantsResponse;
+            const rawVariants = variantsData?.variants || [];
+            variants = rawVariants.map((v: any) => ({
+              id: v.id,
+              title: v.title,
+              color: v.options?.color || 'Default',
+              color_code: getColorCode(v.options?.color || ''),
+              size: v.options?.size || 'OS',
+              image: product.images?.[0] || '/placeholder-product.png',
+              price: v.price || '15.00',
+              is_available: true,
+              placeholders: v.placeholders
+            }));
+            
+            product.print_provider_id = defaultProviderId;
+            product.printProviderId = defaultProviderId;
+          }
 
           if (product) {
             console.log(`🔍 Processing ${variants?.length || 0} blueprint variants...`);
@@ -387,7 +415,7 @@ function CanvasContent() {
         color_code: getColorCode(v.options?.color || ''),
         size: v.options?.size || 'OS',
         image: selectedProduct.images?.[0] || '/placeholder-product.png',
-        price: '15.00',
+        price: v.price || '15.00',
         is_available: true,
         placeholders: v.placeholders
       }));

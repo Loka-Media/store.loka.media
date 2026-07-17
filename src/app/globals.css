@@ -68,7 +68,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Clash Display', var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Satoshi', var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -76,7 +76,7 @@ body {
 
 /* Typography System - Based on Clash Display */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Clash Display', var(--font-inter), sans-serif;
+  font-family: 'Clash Display', var(--font-inter), sans-serif !important;
   font-weight: 600;
   line-height: 110%;
   letter-spacing: -0.02em;

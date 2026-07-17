@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useRouter } from "next/navigation";
 import { productAPI, formatPrice } from "@/lib/api";
 import { createProductSlug } from "@/lib/utils";
@@ -537,6 +538,16 @@ function ProductGridCard({
   onToggleStatus: (id: number, currentStatus: boolean, e?: React.MouseEvent) => void;
 }) {
   const router = useRouter();
+  const { globalMarkup } = useGlobalMarkup();
+
+  const baseMarkup = (product as any).markup_percentage !== undefined ? (product as any).markup_percentage : 35;
+  const baseCostMin = (product as any).base_price !== undefined ? parseFloat(String((product as any).base_price)) : product.min_price / (1 + baseMarkup / 100);
+  const baseCostMax = (product as any).base_price !== undefined && product.max_price === product.min_price
+    ? parseFloat(String((product as any).base_price))
+    : product.max_price / (1 + baseMarkup / 100);
+
+  const minSellingPrice = baseCostMin * (1 + globalMarkup / 100);
+  const maxSellingPrice = baseCostMax * (1 + globalMarkup / 100);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -650,11 +661,11 @@ function ProductGridCard({
           <div className="flex items-center justify-between">
             <div>
               <div className="text-lg sm:text-xl font-bold text-white">
-                {formatPrice(product.min_price)}
+                {formatPrice(minSellingPrice)}
               </div>
-              {product.max_price > product.min_price && (
+              {maxSellingPrice > minSellingPrice && (
                 <div className="text-xs text-gray-400">
-                  to {formatPrice(product.max_price)}
+                  to {formatPrice(maxSellingPrice)}
                 </div>
               )}
             </div>
@@ -677,6 +688,17 @@ function ProductListRow({
   onDelete: (id: number) => void;
   onToggleStatus: (id: number, currentStatus: boolean, e?: React.MouseEvent) => void;
 }) {
+  const { globalMarkup } = useGlobalMarkup();
+
+  const baseMarkup = (product as any).markup_percentage !== undefined ? (product as any).markup_percentage : 35;
+  const baseCostMin = (product as any).base_price !== undefined ? parseFloat(String((product as any).base_price)) : product.min_price / (1 + baseMarkup / 100);
+  const baseCostMax = (product as any).base_price !== undefined && product.max_price === product.min_price
+    ? parseFloat(String((product as any).base_price))
+    : product.max_price / (1 + baseMarkup / 100);
+
+  const minSellingPrice = baseCostMin * (1 + globalMarkup / 100);
+  const maxSellingPrice = baseCostMax * (1 + globalMarkup / 100);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -755,10 +777,10 @@ function ProductListRow({
         {product.category || "Uncategorized"}
       </td>
       <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-white font-medium">
-        {formatPrice(product.min_price)}
-        {product.max_price > product.min_price && (
+        {formatPrice(minSellingPrice)}
+        {maxSellingPrice > minSellingPrice && (
           <div className="text-gray-400 text-xs">
-            to {formatPrice(product.max_price)}
+            to {formatPrice(maxSellingPrice)}
           </div>
         )}
       </td>

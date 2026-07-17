@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Store, Users, Package, ShoppingCart } from 'lucide-react';
+import { Store, Users, Package, ShoppingCart, Settings } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 
 export default function AdminDashboard() {
@@ -23,31 +23,16 @@ export default function AdminDashboard() {
       color: 'bg-purple-500',
       stats: 'Recent orders'
     },
-    // {
-    //   title: 'Product Analytics',
-    //   description: 'View sales analytics, popular products, and performance metrics',
-    //   icon: BarChart3,
-    //   href: '/dashboard/admin/analytics',
-    //   color: 'bg-orange-500',
-    //   stats: 'Revenue tracking'
-    // },
-    // {
-    //   title: 'Marketplace Products',
-    //   description: 'Manage all published products across creators',
-    //   icon: Package,
-    //   href: '/dashboard/admin/products',
-    //   color: 'bg-indigo-500',
-    //   stats: 'Published products'
-    // },
-    // {
-    //   title: 'System Settings',
-    //   description: 'Configure platform settings, integrations, and preferences',
-    //   icon: Settings,
-    //   href: '/dashboard/admin/settings',
-    //   color: 'bg-gray-500',
-    //   stats: 'Configuration'
-    // }
+    {
+      title: 'Product Pricing',
+      description: 'Configure platform-wide markup settings for all products',
+      icon: Settings,
+      href: '/dashboard/admin/settings/pricing',
+      color: 'bg-orange-500',
+      stats: 'Pricing & Markup'
+    }
   ];
+
 
   return (
     <div className="min-h-screen bg-black text-white">

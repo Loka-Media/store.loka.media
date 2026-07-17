@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
+import { calculatePremiumPrice, calculateSellingPrice } from '@/lib/pricing';
 import {
   Save,
   DollarSign,
@@ -71,6 +73,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
   mockupUrls = [],
   designFiles = []
 }) => {
+  const { globalMarkup } = useGlobalMarkup();
   const [formData, setFormData] = useState({
     name: initialData.name || '',
     description: initialData.description || '',
@@ -94,17 +97,17 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
   const minPrice = variantPrices.length > 0 ? Math.min(...variantPrices) : 20;
   const maxPrice = variantPrices.length > 0 ? Math.max(...variantPrices) : 20;
 
-  // Compute Loka Base Cost (hiding Printify cost behind a 35% platform markup)
-  const minLokaBase = minPrice * 1.35;
-  const maxLokaBase = maxPrice * 1.35;
+  // Compute Loka Base Cost (actual Printify Premium price)
+  const minLokaBase = calculatePremiumPrice(minPrice);
+  const maxLokaBase = calculatePremiumPrice(maxPrice);
   const hasPriceRange = minLokaBase !== maxLokaBase;
 
-  const markup = parseFloat(formData.markupPercentage) || 0;
-  const minSellingPrice = minLokaBase * (1 + markup / 100);
-  const maxSellingPrice = maxLokaBase * (1 + markup / 100);
+  const markup = globalMarkup;
+  const minSellingPrice = calculateSellingPrice(minLokaBase, markup);
+  const maxSellingPrice = calculateSellingPrice(maxLokaBase, markup);
   const avgProfit = ((minSellingPrice + maxSellingPrice) / 2) - ((minLokaBase + maxLokaBase) / 2);
   const avgSellingPrice = (minSellingPrice + maxSellingPrice) / 2;
-  const profitMargin = ((avgProfit / avgSellingPrice) * 100).toFixed(1);
+  const profitMargin = avgSellingPrice > 0 ? ((avgProfit / avgSellingPrice) * 100).toFixed(1) : '0.0';
 
   const validateForm = (): { isValid: boolean; errorMessages: string[] } => {
     const newErrors: {[key: string]: string} = {};
@@ -113,7 +116,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
     const validationData = {
       name: formData.name.trim(),
       description: formData.description.trim(),
-      markupPercentage: parseFloat(formData.markupPercentage),
+      markupPercentage: globalMarkup,
       category: formData.category,
       tags: formData.tags,
     };
@@ -199,7 +202,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
     const productData = {
       name: formData.name.trim(),
       description: formData.description.trim(),
-      markupPercentage: parseFloat(formData.markupPercentage),
+      markupPercentage: globalMarkup,
       category: formData.category,
       tags: formData.tags
     };
@@ -209,7 +212,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
     const formDataForNext = {
       name: formData.name.trim(),
       description: formData.description.trim(),
-      markupPercentage: formData.markupPercentage,
+      markupPercentage: String(globalMarkup),
       category: formData.category,
       tags: formData.tags
     };
@@ -376,50 +379,14 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                 </div>
 
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-300 mb-2">
-                      Markup Percentage
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={formData.markupPercentage}
-                        onChange={(e) => handleInputChange('markupPercentage', e.target.value)}
-                        className={`w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all pr-12 ${
-                          errors.markupPercentage ? 'border-orange-500/50 bg-orange-500/10' : ''
-                        }`}
-                        min="0"
-                        max="500"
-                        step="5"
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
-                        %
-                      </span>
+                  <div className="p-4 bg-gray-800 border border-white/10 rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="block text-sm text-gray-300 font-bold">Global Platform Markup</span>
+                      <span className="text-xs text-gray-400 mt-1 block">Configured centrally by platform administrators.</span>
                     </div>
-                    {errors.markupPercentage && (
-                      <div className="mt-2 flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg px-3 py-2">
-                        <AlertCircle className="w-4 h-4 text-orange-400" />
-                        <p className="text-sm font-bold text-orange-300">{errors.markupPercentage}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Quick Markup Buttons */}
-                  <div className="flex flex-wrap gap-2">
-                    {[20, 30, 40, 50, 75, 100].map((value) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => handleInputChange('markupPercentage', value.toString())}
-                        className={`px-4 py-2 border border-gray-700 rounded-lg text-sm transition-all ${
-                          formData.markupPercentage === value.toString()
-                            ? 'bg-orange-500 text-white border-orange-500 shadow-[0_10px_30px_rgba(255,133,27,0.2)]'
-                            : 'bg-gray-800 text-gray-200 hover:bg-gray-700 hover:border-gray-600'
-                        }`}
-                      >
-                        {value}%
-                      </button>
-                    ))}
+                    <span className="text-2xl font-extrabold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-4 py-1.5 rounded-xl">
+                      {globalMarkup}%
+                    </span>
                   </div>
 
                   {/* Pricing Summary */}

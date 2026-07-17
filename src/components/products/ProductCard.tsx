@@ -6,6 +6,7 @@ import { formatPrice, ExtendedProduct } from "@/lib/api";
 import { createProductSlug } from "@/lib/utils";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { Heart, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,6 +21,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { addToWishlist, removeFromWishlist, items: wishlistItems } = useWishlist();
   const { isAuthenticated } = useAuth();
+  const { getProductPriceRange } = useGlobalMarkup();
+
+  const { minPrice, maxPrice } = getProductPriceRange(product);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -149,12 +153,9 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Price Section with gradient background */}
           <div className="flex items-center justify-center pt-1.5 sm:pt-2 border-t border-gray-700/30 mt-1.5 sm:mt-2">
             <span className="text-sm text-center font-extrabold text-cyan-400 tracking-tight">
-              {formatPrice(
-                product.price_range?.min ? parseFloat(String(product.price_range.min)) : parseFloat(String(product.base_price) || '0')
-              )}
-              {product.price_range?.min && product.price_range?.max &&
-                parseFloat(String(product.price_range.max)) > parseFloat(String(product.price_range.min)) && (
-                <span className="text-xs text-gray-500 font-normal ml-1">- {formatPrice(parseFloat(String(product.price_range.max)))}</span>
+              {formatPrice(minPrice)}
+              {maxPrice > minPrice && (
+                <span className="text-xs text-gray-500 font-normal ml-1">- {formatPrice(maxPrice)}</span>
               )}
             </span>
           </div>
@@ -163,3 +164,4 @@ export function ProductCard({ product }: ProductCardProps) {
     </Link>
   );
 }
+

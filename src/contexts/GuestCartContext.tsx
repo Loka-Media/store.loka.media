@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { cartAPI, CartItem, CartSummary } from '@/lib/api';
 import { useAuth } from './AuthContext';
+import { useGlobalMarkup } from './GlobalMarkupContext';
 import toast from 'react-hot-toast';
 
 interface GuestCartItem {
@@ -11,6 +12,7 @@ interface GuestCartItem {
   variant_id: number;
   product_name: string;
   price: string;
+  cost?: number;
   quantity: number;
   total_price: string;
   size: string;
@@ -46,6 +48,7 @@ interface GuestCartContextType {
 const GuestCartContext = createContext<GuestCartContextType | undefined>(undefined);
 
 export function GuestCartProvider({ children }: { children: React.ReactNode }) {
+  const { globalMarkup, calculateSellingPrice } = useGlobalMarkup();
   const [items, setItems] = useState<GuestCartItem[]>([]);
   const [summary, setSummary] = useState<CartSummary>({
     itemCount: 0,
@@ -57,6 +60,34 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
   const [cartCount, setCartCount] = useState(0);
   const [isClient, setIsClient] = useState(false);
   const { isAuthenticated, user } = useAuth();
+
+  const processedItems = useMemo(() => {
+    return items.map((item) => {
+      const itemCost = item.cost !== undefined && item.cost !== null && !isNaN(Number(item.cost))
+        ? Number(item.cost)
+        : (item.price ? parseFloat(item.price) / 1.35 : 20.00);
+      const dynamicPrice = calculateSellingPrice(itemCost);
+      return {
+        ...item,
+        price: dynamicPrice.toFixed(2),
+        total_price: (dynamicPrice * item.quantity).toFixed(2)
+      };
+    });
+  }, [items, calculateSellingPrice]);
+
+  const processedSummary = useMemo(() => {
+    const subtotal = processedItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+    const totalItems = processedItems.reduce((sum, item) => sum + item.quantity, 0);
+    const shipping = processedItems.length > 0 ? 5.99 : 0;
+    const total = subtotal + shipping;
+
+    return {
+      itemCount: totalItems,
+      subtotal: subtotal.toFixed(2),
+      shipping: shipping.toFixed(2),
+      total: total.toFixed(2)
+    };
+  }, [processedItems]);
 
   // Ensure we're on the client side
   useEffect(() => {
@@ -200,7 +231,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         const guestCartItems: GuestCartItem[] = response.items.map((item: CartItem) => ({
           ...item,
           price: String(item.price),
-          total_price: String(item.total_price)
+          total_price: String(item.total_price),
+          cost: (item as any).cost || parseFloat(String(item.price)) / 1.35
         }));
         setItems(guestCartItems);
         setSummary(response.summary);
@@ -296,6 +328,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
               product_id: cachedData.product_id || 0,
               variant_id: variantId,
               product_name: cachedData.product_name || 'Product',
+              cost: cachedData.cost || parseFloat(cachedData.price || '25.00') / 1.35,
               price: cachedData.price || '25.00',
               quantity,
               total_price: (parseFloat(cachedData.price || '25.00') * quantity).toFixed(2),
@@ -472,8 +505,8 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
   return (
     <GuestCartContext.Provider
       value={{
-        items,
-        summary,
+        items: processedItems,
+        summary: processedSummary,
         loading,
         cartCount,
         addToCart,

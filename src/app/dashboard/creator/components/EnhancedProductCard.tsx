@@ -13,6 +13,7 @@ import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { productAPI } from '@/lib/api';
 import { Switch } from "@/components/ui/switch";
 import { createProductSlug } from '@/lib/utils';
+import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 
 interface CreatorProduct {
   id: number;
@@ -25,10 +26,24 @@ interface CreatorProduct {
   variant_count: number;
   creator_name?: string;
   creator_username?: string;
+  base_price?: number | string;
+  markup_percentage?: number;
 }
 
 export default function EnhancedProductCard({ product, onDelete }: { product: CreatorProduct, onDelete: (productId: number) => void }) {
   const router = useRouter();
+  const { globalMarkup } = useGlobalMarkup();
+  
+  // Calculate dynamic selling price range
+  const baseMarkup = product.markup_percentage !== undefined ? product.markup_percentage : 35;
+  const baseCostMin = product.base_price !== undefined ? parseFloat(String(product.base_price)) : product.min_price / (1 + baseMarkup / 100);
+  const baseCostMax = product.base_price !== undefined && product.max_price === product.min_price
+    ? parseFloat(String(product.base_price))
+    : product.max_price / (1 + baseMarkup / 100);
+
+  const minSellingPrice = baseCostMin * (1 + globalMarkup / 100);
+  const maxSellingPrice = baseCostMax * (1 + globalMarkup / 100);
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
   const [newStatus, setNewStatus] = useState<boolean | null>(null);
@@ -184,9 +199,9 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
           </h3>
           <div className="flex items-center justify-center mb-3 flex-wrap gap-2">
             <span className="text-sm sm:text-base font-bold text-cyan-400">
-              {formatPrice(product.min_price)}
-              {product.max_price > product.min_price && (
-                <span className="text-xs text-gray-400 font-normal ml-1">- {formatPrice(product.max_price)}</span>
+              {formatPrice(minSellingPrice)}
+              {maxSellingPrice > minSellingPrice && (
+                <span className="text-xs text-gray-400 font-normal ml-1">- {formatPrice(maxSellingPrice)}</span>
               )}
             </span>
 
