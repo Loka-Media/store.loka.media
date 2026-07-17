@@ -118,8 +118,8 @@ export const OrderStatusPipeline = ({
   return (
     <div className="w-full">
       {/* Status Pipeline */}
-      <div className="overflow-x-auto pb-4 scrollbar-hide">
-        <div className="flex items-center gap-2 min-w-max px-4">
+      <div className="overflow-x-auto overflow-y-visible pb-4 pt-2 scrollbar-hide">
+        <div className="flex items-start gap-2 min-w-max px-4">
           {stages.map((stage, index) => {
             const Icon = stage.icon;
             const isActive = isCompleted(index);
@@ -132,11 +132,11 @@ export const OrderStatusPipeline = ({
                     className={`${getColorClasses(
                       stage.color,
                       isActive
-                    )} ${isCurrent(index) ? 'ring-2 ring-offset-2 ring-offset-black' + (stage.color === 'blue' ? ' ring-blue-500' : stage.color === 'yellow' ? ' ring-amber-500' : stage.color === 'orange' ? ' ring-orange-500' : ' ring-gray-400') : ''}`}
+                    )} ${isCurrent(index) ? 'ring-2 ring-offset-2 ring-offset-neutral-950' + (stage.color === 'blue' ? ' ring-blue-500' : stage.color === 'yellow' ? ' ring-amber-500' : stage.color === 'orange' ? ' ring-orange-500' : ' ring-gray-400') : ''}`}
                   >
                     <Icon className="w-5 h-5" />
                   </div>
-                  <div className={`mt-2 text-xs font-semibold whitespace-nowrap ${getTextColor(stage.color, isActive)}`}>
+                  <div className={`mt-3 text-xs font-semibold whitespace-nowrap ${getTextColor(stage.color, isActive)}`}>
                     {stage.label}
                   </div>
                   <div className="text-[10px] text-gray-500 mt-1 whitespace-nowrap">
@@ -146,13 +146,12 @@ export const OrderStatusPipeline = ({
 
                 {/* Arrow to next stage */}
                 {index < stages.length - 1 && (
-                  <div className="mx-1 md:mx-3">
+                  <div className="mx-1 md:mx-3 mt-0">
                     <ArrowRight
-                      className={`w-4 h-4 ${
-                        index < currentStageIndex
+                      className={`w-4 h-4 ${index < currentStageIndex
                           ? 'text-green-500'
                           : 'text-gray-700'
-                      }`}
+                        }`}
                     />
                   </div>
                 )}
@@ -166,26 +165,24 @@ export const OrderStatusPipeline = ({
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
         <div className="bg-neutral-900/60 border border-white/10 rounded-xl p-3">
           <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Order Status</div>
-          <div className={`text-sm font-bold mt-1 ${
-            orderStatus === 'pending' ? 'text-gray-400' :
-            orderStatus === 'payment_received' ? 'text-blue-400' :
-            orderStatus === 'verified' ? 'text-amber-400' :
-            orderStatus === 'processing' ? 'text-orange-400' :
-            orderStatus === 'fulfilled' ? 'text-purple-400' :
-            'text-green-400'
-          }`}>
+          <div className={`text-sm font-bold mt-1 ${orderStatus === 'pending' ? 'text-gray-400' :
+              orderStatus === 'payment_received' ? 'text-blue-400' :
+                orderStatus === 'verified' ? 'text-amber-400' :
+                  orderStatus === 'processing' ? 'text-orange-400' :
+                    orderStatus === 'fulfilled' ? 'text-purple-400' :
+                      'text-green-400'
+            }`}>
             {orderStatus.replace(/_/g, ' ').toUpperCase()}
           </div>
         </div>
 
         <div className="bg-neutral-900/60 border border-white/10 rounded-xl p-3">
           <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Payment Status</div>
-          <div className={`text-sm font-bold mt-1 ${
-            paymentStatus === 'pending' ? 'text-gray-400' :
-            paymentStatus === 'completed' ? 'text-green-400' :
-            paymentStatus === 'released' ? 'text-blue-400' :
-            'text-amber-400'
-          }`}>
+          <div className={`text-sm font-bold mt-1 ${paymentStatus === 'pending' ? 'text-gray-400' :
+              paymentStatus === 'completed' ? 'text-green-400' :
+                paymentStatus === 'released' ? 'text-blue-400' :
+                  'text-amber-400'
+            }`}>
             {paymentStatus.replace(/_/g, ' ').toUpperCase()}
           </div>
         </div>
@@ -193,12 +190,11 @@ export const OrderStatusPipeline = ({
         {printfulStatus && (
           <div className="bg-neutral-900/60 border border-white/10 rounded-xl p-3">
             <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Printful Status</div>
-            <div className={`text-sm font-bold mt-1 ${
-              printfulStatus === 'processing' ? 'text-orange-400' :
-              printfulStatus === 'shipped' ? 'text-purple-400' :
-              printfulStatus === 'delivered' ? 'text-green-400' :
-              'text-gray-400'
-            }`}>
+            <div className={`text-sm font-bold mt-1 ${printfulStatus === 'processing' ? 'text-orange-400' :
+                printfulStatus === 'shipped' ? 'text-purple-400' :
+                  printfulStatus === 'delivered' ? 'text-green-400' :
+                    'text-gray-400'
+              }`}>
               {printfulStatus.toUpperCase()}
             </div>
           </div>

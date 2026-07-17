@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/select";
 import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
+import { CATEGORIES_MAP } from "@/config/categories";
 
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition } from "./utils";
 import DesignCanvasTab from "./DesignCanvasTab";
@@ -2114,16 +2115,15 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       onValueChange={(val) => handleInputChange("category", val)}
                     >
                       <SelectTrigger className={`w-full h-[46px] px-4 bg-black/60 rounded-xl text-sm text-white ${formErrors.category ? "border-red-500/50 bg-red-500/5" : "border-white/10"}`}>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue key={productForm.category || "placeholder"} placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="placeholder" disabled>Select category</SelectItem>
-                        <SelectItem value="apparel">Apparel</SelectItem>
-                        <SelectItem value="accessories">Accessories</SelectItem>
-                        <SelectItem value="home-living">Home & Living</SelectItem>
-                        <SelectItem value="stationery">Stationery</SelectItem>
-                        <SelectItem value="bags">Bags</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        {CATEGORIES_MAP.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.title}>
+                            {cat.title}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     {formErrors.category && <p className="text-xs text-red-400 mt-1">{formErrors.category}</p>}
@@ -2357,11 +2357,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         <button
                           key={preset}
                           onClick={() => handleCreatorPresetClick(preset)}
-                          className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
-                            creatorMarkup === preset
+                          className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${creatorMarkup === preset
                               ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)]'
                               : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200'
-                          }`}
+                            }`}
                         >
                           {preset}%
                         </button>

@@ -216,6 +216,14 @@ export default function CreatorCatalogPage() {
       JSON.stringify(printfulProduct)
     );
 
+    // Store the source category so canvas can auto-select it in Marketplace Category dropdown
+    if (selectedCategory) {
+      localStorage.setItem('sourceCatalogCategory', JSON.stringify({
+        id: selectedCategory.id,
+        title: selectedCategory.title
+      }));
+    }
+
     // Navigate to design canvas workflow with 4 steps
     router.push(`/dashboard/creator/canvas?blueprintId=${printfulProduct.id}`);
   };

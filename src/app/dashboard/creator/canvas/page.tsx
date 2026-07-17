@@ -227,12 +227,22 @@ function CanvasContent() {
               setProductForm(parsedForm);
               console.log(`📝 Loaded saved product form for product ${blueprintId}`);
             } else {
+              // Read source category from catalog navigation for auto-selection
+              let sourceCategoryTitle = '';
+              try {
+                const savedSourceCat = localStorage.getItem('sourceCatalogCategory');
+                if (savedSourceCat) {
+                  const sourceCat = JSON.parse(savedSourceCat);
+                  sourceCategoryTitle = sourceCat.title || '';
+                }
+              } catch (e) { /* ignore parse errors */ }
+
               // Initialize with default Printful product data
               setProductForm({
                 name: `Custom ${product.title || product.model}`,
                 description: product.description || '',
                 markupPercentage: '30',
-                category: product.type_name || product.type || '',
+                category: sourceCategoryTitle || product.type_name || product.type || '',
                 tags: []
               });
             }
@@ -277,11 +287,21 @@ function CanvasContent() {
           setSelectedProduct(product);
         }
 
+        // Read source category from catalog navigation for auto-selection
+        let sourceCategoryTitle = '';
+        try {
+          const savedSourceCat = localStorage.getItem('sourceCatalogCategory');
+          if (savedSourceCat) {
+            const sourceCat = JSON.parse(savedSourceCat);
+            sourceCategoryTitle = sourceCat.title || '';
+          }
+        } catch (e) { /* ignore parse errors */ }
+
         setProductForm({
           name: `Custom ${product.title || product.model}`,
           description: product.description || "",
           markupPercentage: "30",
-          category: product.type_name || product.type,
+          category: sourceCategoryTitle || product.type_name || product.type,
           tags: []
         });
       }

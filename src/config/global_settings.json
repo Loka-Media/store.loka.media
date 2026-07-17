@@ -1,4 +1,23 @@
 {
-  "globalMarkup": 35,
-  "categoryMarkup": {}
+  "globalMarkup": 3,
+  "categoryMarkup": {
+    "Men": 35,
+    "Women": 35,
+    "Kids": 35,
+    "Tank Tops": 35,
+    "Hoodies": 35,
+    "Sweatshirts": 35,
+    "Long Sleeves": 35,
+    "T-Shirts": 35,
+    "Sportswear": 35,
+    "Phone Cases": 35,
+    "Bags": 35,
+    "Stickers": 35,
+    "Posters": 35,
+    "Blankets": 35,
+    "Canvas": 37,
+    "Drinkware": 35,
+    "Mugs": 35,
+    "Pillows": 35
+  }
 }
