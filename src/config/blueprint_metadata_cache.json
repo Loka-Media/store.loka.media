@@ -12275,6 +12275,15 @@
     "colorsCount": 8,
     "providersCount": 5
   },
+  "5156": {
+    "title": "Matte Sling",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 1,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
   "5158": {
     "title": "Matte Crossbody",
     "providerId": 99,
@@ -12283,6 +12292,15 @@
     "sizesCount": 8,
     "colorsCount": 18,
     "providersCount": 8
+  },
+  "5159": {
+    "title": "Matte Dual-Compartment Crossbody",
+    "providerId": 217,
+    "price": "15.50",
+    "premiumPrice": "11.94",
+    "sizesCount": 1,
+    "colorsCount": 4,
+    "providersCount": 1
   },
   "5164": {
     "title": "Flexfit 110 Mesh Cap",

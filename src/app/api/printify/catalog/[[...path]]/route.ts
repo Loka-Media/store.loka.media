@@ -436,7 +436,11 @@ export async function GET(
           premiumPrice: metadata.premiumPrice,
           sizesCount: metadata.sizesCount,
           colorsCount: metadata.colorsCount,
-          providersCount: metadata.providersCount
+          providersCount: metadata.providersCount,
+          // categoryIds is derived from blueprint_categories.json (the authoritative mapping).
+          // Printify's API has no gender/category field, so this mapping is the single source of truth.
+          // The frontend uses this to implement gender-aware subcategory filtering.
+          categoryIds: getBlueprintCategoryIds(bp.id, bp.title),
         });
       }
 

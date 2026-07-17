@@ -79,6 +79,12 @@ interface PrintfulProduct {
   colorsCount?: number;
   sizesCount?: number;
   providersCount?: number;
+  /**
+   * Category IDs this blueprint belongs to, from blueprint_categories.json.
+   * Used by subcategory match() functions for gender-aware filtering.
+   * e.g. [1] = Men only, [2] = Women only, [1,2] = Unisex, [3] = Kids, etc.
+   */
+  categoryIds?: number[];
 }
 
 
@@ -661,8 +667,16 @@ function SubcategorySelection({ category, products, loading, onSelectSubcategory
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {availableSubcategories.map((subcat: any) => {
-            // Dynamically search for first matching product in the list to use as thumbnail cover
-            const matchingProduct = products.find((p: any) => subcat.match(p));
+            // Pick the best thumbnail image for this subcategory card.
+            // Prefer category-exclusive products (e.g. Men's-only items in Men's subcategories)
+            // over unisex products, because exclusive products are far more likely to have
+            // gender-appropriate model photos in Printify's blueprint image library.
+            // Unisex products (categoryIds=[1,2]) often show female models even when browsing Men.
+            const matchingProducts = products.filter((p: any) => subcat.match(p));
+            const exclusiveProduct = matchingProducts.find(
+              (p: any) => Array.isArray(p.categoryIds) && p.categoryIds.length === 1
+            );
+            const matchingProduct = exclusiveProduct || matchingProducts[0];
             const coverImage = matchingProduct?.image || '/placeholder-product.png';
 
             return (
