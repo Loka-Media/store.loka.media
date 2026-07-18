@@ -7,6 +7,7 @@
 export const CATEGORIES_MAP = [
   { id: 1, title: "Men" },
   { id: 2, title: "Women" },
+  { id: 8, title: "Unisex" },
   { id: 3, title: "Kids" },
   { id: 4, title: "Accessories" },
   { id: 5, title: "Home & Living" },
@@ -287,6 +288,106 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
       title: "Outerwear",
       match: (bp) => {
         if (!inCategory(bp, 2)) return false;
+        return isOuterwear(bp.title.toLowerCase());
+      }
+    },
+  ],
+
+  // ──────────────────────────────────────────────────────────
+  // 8 — UNISEX
+  // Every match() checks inCategory(bp, 8).
+  // ──────────────────────────────────────────────────────────
+  8: [
+    {
+      id: "unisex-new-arrivals",
+      title: "New Arrivals",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        return bp.id > 400;
+      }
+    },
+    {
+      id: "unisex-bestsellers",
+      title: "Bestsellers",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        const BESTSELLER_IDS = new Set([5, 6, 12, 36, 49, 77, 78, 145, 175, 439, 440, 706]);
+        return BESTSELLER_IDS.has(bp.id);
+      }
+    },
+    {
+      id: "unisex-sweatshirts",
+      title: "Sweatshirts",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        const t = bp.title.toLowerCase();
+        return isSweatshirt(t) && !isHoodie(t);
+      }
+    },
+    {
+      id: "unisex-hoodies",
+      title: "Hoodies",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        return isHoodie(bp.title.toLowerCase());
+      }
+    },
+    {
+      id: "unisex-t-shirts",
+      title: "T-Shirts",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        const t = bp.title.toLowerCase();
+        return isTShirt(t) && !isLongSleeve(t);
+      }
+    },
+    {
+      id: "unisex-long-sleeves",
+      title: "Long Sleeves",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        return isLongSleeve(bp.title.toLowerCase());
+      }
+    },
+    {
+      id: "unisex-tank-tops",
+      title: "Tank Tops",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        return isTankTop(bp.title.toLowerCase());
+      }
+    },
+    {
+      id: "unisex-sportswear",
+      title: "Sportswear",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        const t = bp.title.toLowerCase();
+        return isSportswear(t) && !isTShirt(t) && !isHoodie(t) && !isSweatshirt(t);
+      }
+    },
+    {
+      id: "unisex-bottoms",
+      title: "Bottoms",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        const t = bp.title.toLowerCase();
+        return isBottoms(t) && !isSwimwear(t);
+      }
+    },
+    {
+      id: "unisex-swimwear",
+      title: "Swimwear",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
+        return isSwimwear(bp.title.toLowerCase());
+      }
+    },
+    {
+      id: "unisex-outerwear",
+      title: "Outerwear",
+      match: (bp) => {
+        if (!inCategory(bp, 8)) return false;
         return isOuterwear(bp.title.toLowerCase());
       }
     },

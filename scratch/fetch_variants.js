@@ -2,16 +2,23 @@ const PRINTIFY_API_KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzN2Q0Y
 
 async function run() {
   const blueprintId = 36;
-  const res = await fetch(`https://api.printify.com/v1/catalog/blueprints/${blueprintId}/print_providers.json`, {
+  const providerId = 217; // Fulfill Engine
+  const res = await fetch(`https://api.printify.com/v1/catalog/blueprints/${blueprintId}/print_providers/${providerId}/shipping.json`, {
     headers: { Authorization: `Bearer ${PRINTIFY_API_KEY}` }
   });
   if (res.ok) {
-    const providers = await res.json();
-    for (const p of providers) {
-      console.log(`Provider ID: ${p.id}, Title: ${p.title}`);
-    }
+    const data = await res.json();
+    const clean = {
+      handling_time: data.handling_time,
+      profiles: data.profiles.map(p => ({
+        countries: p.countries,
+        first_item: p.first_item,
+        additional_items: p.additional_items
+      }))
+    };
+    console.log('Fulfill Engine Shipping Profiles:', JSON.stringify(clean, null, 2));
   } else {
-    console.log('Failed to fetch providers:', res.status);
+    console.log('Failed to fetch:', res.status);
   }
 }
 run();

@@ -24,60 +24,103 @@ const STATIC_FALLBACK_IMAGES: Record<number, string> = {
   4: "https://images.printify.com/66d824496c2346293e0162c3",
   5: "https://images.printify.com/66c44156f0147a606a0fc682",
   6: "https://images.printify.com/66c42e5361b2691da8085442",
-  7: "https://images.printify.com/66d710c18803b780c6023c7f"
+  7: "https://images.printify.com/66d710c18803b780c6023c7f",
+  8: "https://images.printify.com/66d82988a65761e5f9096537"
 };
 
 function getBlueprintCategoryIds(blueprintId: number, title: string): number[] {
   // Check static mapping first for maximum accuracy matching official Printify catalog
   const idStr = String(blueprintId);
   if (idStr in blueprintCategories) {
-    return (blueprintCategories as Record<string, number[]>)[idStr];
+    const rawIds = (blueprintCategories as Record<string, number[]>)[idStr];
+    if (rawIds.includes(1) && rawIds.includes(2)) {
+      return [8]; // Unisex Category ID
+    }
+    return rawIds;
   }
 
   // Dynamic fallback for newly added blueprints
   const t = title.toLowerCase();
 
-  // 1. Kids & Baby (highest priority to avoid matching kid/youth tees to Men/Women clothing)
+  // 1. Pets (highest priority to prevent pet apparel from matching human clothing)
+  if (
+    t.includes('pet') ||
+    t.includes('dog') ||
+    t.includes('cat') ||
+    t.includes('doggie') ||
+    t.includes('pup') ||
+    t.includes('puppy') ||
+    t.includes('kitten') ||
+    t.includes('canine') ||
+    t.includes('animal') ||
+    t.includes('collar') ||
+    t.includes('leash') ||
+    t.includes('harness') ||
+    t.includes('pet bowl') ||
+    t.includes('pet bed') ||
+    t.includes('frisbee')
+  ) {
+    return [5]; // Home & Living
+  }
+
+  // 2. Kids & Baby (highest priority to avoid matching kid/youth tees to Men/Women clothing)
   if (t.includes('kid') || t.includes('youth') || t.includes('toddler') || t.includes('baby') || t.includes('infant') || t.includes('creeper') || t.includes('bodysuit')) {
     return [3];
   }
 
-  // 2. Shoes & Socks
+  // 3. Shoes & Socks
   if (t.includes('shoe') || t.includes('sneaker') || t.includes('boot') || t.includes('slipper') || t.includes('sock') || t.includes('socks')) {
     return [7];
   }
 
-  // 3. Mugs & Drinkware
+  // 4. Mugs & Drinkware
   if (t.includes('mug') || t.includes('tumbler') || t.includes('bottle') || t.includes('drink') || t.includes('cup') || t.includes('glass') || t.includes('flask') || t.includes('pint')) {
     return [6];
   }
 
-  // 4. Specifically Women's Clothing
+  // 5. Specifically Women's Clothing
   if (t.includes('women') || t.includes('lady') || t.includes('ladies') || t.includes('girl') || t.includes('flowy') || t.includes('racerback') || t.includes('boyfriend tee for women') || t.includes('maternity') || t.includes('skirt') || t.includes('dress') || t.includes('swimwear') || t.includes('bikini')) {
     return [2];
   }
 
-  // 5. Specifically Men's Clothing
+  // 6. Specifically Men's Clothing
   if (t.includes("men's") || t.includes("mens") || t.includes("men tee") || t.includes("men short") || t.includes("men pants") || t.includes("men jacket")) {
     return [1];
   }
 
-  // 6. Unisex Apparel (goes into BOTH Men & Women categories)
+  // 7. Unisex Apparel (previously returned [1, 2], now returns [8])
   if (t.includes('unisex') || t.includes('tee') || t.includes('t-shirt') || t.includes('t shirt') || t.includes('hoodie') || t.includes('sweatshirt') || t.includes('sweater') || t.includes('pullover') || t.includes('tank') || t.includes('windbreaker') || t.includes('jacket') || t.includes('pant') || t.includes('jogger') || t.includes('shorts') || t.includes('bottoms')) {
-    return [1, 2];
+    return [8];
   }
 
-  // 7. Home & Living
-  if (t.includes('poster') || t.includes('canvas') || t.includes('blanket') || t.includes('pillow') || t.includes('frame') || t.includes('towel') || t.includes('rug') || t.includes('candle') || t.includes('ornament') || t.includes('clock') || t.includes('calendar') || t.includes('tapestry') || t.includes('wall art') || t.includes('mat') || t.includes('shower curtain') || t.includes('duvet') || t.includes('stocking') || t.includes('coaster') || t.includes('apron') || t.includes('pet')) {
+  // 8. Home & Living
+  if (t.includes('poster') || t.includes('canvas') || t.includes('blanket') || t.includes('pillow') || t.includes('frame') || t.includes('towel') || t.includes('rug') || t.includes('candle') || t.includes('ornament') || t.includes('clock') || t.includes('calendar') || t.includes('tapestry') || t.includes('wall art') || t.includes('mat') || t.includes('shower curtain') || t.includes('duvet') || t.includes('stocking') || t.includes('coaster') || t.includes('apron')) {
     return [5];
   }
 
-  // 8. Accessories
+  // 9. Accessories
   if (t.includes('bag') || t.includes('backpack') || t.includes('tote') || t.includes('pouch') || t.includes('wallet') || t.includes('purse') || t.includes('phone case') || t.includes('case') || t.includes('charger') || t.includes('mouse pad') || t.includes('mousepad') || t.includes('skin') || t.includes('sleeve') || t.includes('notebook') || t.includes('journal') || t.includes('sticker') || t.includes('decal') || t.includes('card') || t.includes('pen') || t.includes('pencil') || t.includes('hat') || t.includes('cap') || t.includes('beanie') || t.includes('bandana') || t.includes('scarf') || t.includes('scrunchie') || t.includes('keyring') || t.includes('keychain') || t.includes('pin') || t.includes('patch')) {
     return [4];
   }
 
   return [];
+}
+
+/**
+ * Returns the index of the image to display in the catalog grid based on requested category.
+ * - If browsing Men (categoryId 1): use male model index (1) for blueprints where index 0 is female.
+ * - If browsing Women (categoryId 2): use female model index (1) for blueprints where index 0 is male.
+ */
+function getGenderSwappedImageIndex(blueprintId: number, categoryId: number): number {
+  const femaleIndex0Ids = new Set([39, 500]); // Bella+Canvas Unisex Jersey Tank, AS Colour Unisex Barnard Tank
+  const maleIndex0Ids = new Set([5, 6, 12, 36, 49, 77, 706]); // T-shirts/Sweatshirts/Hoodies where index 0 is male
+
+  if (categoryId === 1) {
+    if (femaleIndex0Ids.has(blueprintId)) return 1; // Swap to male model image
+  } else if (categoryId === 2) {
+    if (maleIndex0Ids.has(blueprintId)) return 1; // Swap to female model image
+  }
+  return 0; // Default index 0
 }
 
 const COLOR_MAP: Record<string, string> = {
@@ -423,12 +466,16 @@ export async function GET(
       const transformed = [];
       for (const bp of filtered) {
         const metadata = await resolveBlueprintMetadata(bp.id);
+        const catIds = getBlueprintCategoryIds(bp.id, bp.title);
+        const imgIndex = getGenderSwappedImageIndex(bp.id, categoryId);
+        const defaultImage = (bp.images && bp.images[imgIndex]) || bp.images?.[0] || '/placeholder-product.png';
+
         transformed.push({
           id: bp.id,
           title: bp.title,
           brand: bp.brand,
           model: bp.model,
-          image: bp.images?.[0] || '/placeholder-product.png',
+          image: defaultImage,
           type_name: bp.brand || 'Apparel',
           variant_count: bp.variant_count || (metadata.sizesCount * metadata.colorsCount),
           is_discontinued: false,
@@ -440,7 +487,7 @@ export async function GET(
           // categoryIds is derived from blueprint_categories.json (the authoritative mapping).
           // Printify's API has no gender/category field, so this mapping is the single source of truth.
           // The frontend uses this to implement gender-aware subcategory filtering.
-          categoryIds: getBlueprintCategoryIds(bp.id, bp.title),
+          categoryIds: catIds,
         });
       }
 
