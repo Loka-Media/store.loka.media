@@ -113,25 +113,42 @@ export function useCreatorDashboard() {
   };
 
   const fetchDashboardData = async () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+    if (!token && !user) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      
-      // Build parameters
+
+      // Build parameters for products request
       const params: any = {
         limit: 1000,
-        offset: 0
+        offset: 0,
       };
-      if (user?.role === "admin") {
+      if (user?.role === "admin" && selectedCreatorId !== "all") {
         params.creatorId = selectedCreatorId;
       }
 
-      // Fetch products and commission summary in parallel
-      const [productsResponse, summaryResponse] = await Promise.all([
+      // Build parameters for commissions summary request
+      const summaryParams: any = {};
+      if (user?.role === "admin" && selectedCreatorId !== "all") {
+        summaryParams.creatorId = selectedCreatorId;
+      }
+
+      // Fetch products and commission summary safely using Promise.allSettled
+      const [productsResult, summaryResult] = await Promise.allSettled([
         productAPI.getCreatorProducts(params),
-        api.get("/api/creator/commissions/summary", { params: { creatorId: selectedCreatorId } })
+        api.get("/api/creator/commissions/summary", { params: summaryParams }),
       ]);
 
-      const fetchedProducts = productsResponse.products || [];
+      let fetchedProducts: CreatorProduct[] = [];
+      if (productsResult.status === "fulfilled") {
+        fetchedProducts = productsResult.value?.products || [];
+      } else {
+        console.error("Failed to fetch creator products:", productsResult.reason);
+      }
       setProducts(fetchedProducts);
 
       // Calculate products stats
@@ -151,12 +168,14 @@ export function useCreatorDashboard() {
       let totalSales = 0;
       let revenue = 0;
 
-      if (summaryResponse.data && summaryResponse.data.data) {
-        const commissions = summaryResponse.data.data.commissions || {};
-        Object.keys(commissions).forEach(status => {
+      if (summaryResult.status === "fulfilled" && summaryResult.value?.data?.data) {
+        const commissions = summaryResult.value.data.data.commissions || {};
+        Object.keys(commissions).forEach((status) => {
           totalSales += parseInt(commissions[status].count || 0);
           revenue += parseFloat(commissions[status].totalAmount || 0);
         });
+      } else if (summaryResult.status === "rejected") {
+        console.warn("Failed to fetch commission summary:", summaryResult.reason);
       }
 
       setStats({
@@ -165,9 +184,13 @@ export function useCreatorDashboard() {
         totalSales,
         revenue: parseFloat(revenue.toFixed(2)),
       });
+
+      // Only toast error if both endpoints fail
+      if (productsResult.status === "rejected" && summaryResult.status === "rejected") {
+        toast.error("Failed to load dashboard statistics");
+      }
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
-      toast.error("Failed to load dashboard statistics");
     } finally {
       setLoading(false);
     }
