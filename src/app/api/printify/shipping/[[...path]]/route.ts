@@ -92,6 +92,153 @@ export async function GET(request: NextRequest) {
 
 const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '');
 
+async function calculateDynamicRates(lineItems: any[], countryCode: string): Promise<{ totalCents: number; itemized: any[] }> {
+  const calculatedItems: any[] = [];
+
+  for (const item of lineItems) {
+    let blueprintId = item.blueprint_id;
+    let printProviderId = item.print_provider_id;
+    let printifyVariantId = item.variant_id;
+
+    if (!blueprintId || !printProviderId) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/products/${item.product_id}`);
+        if (res.ok) {
+          const productData = await res.json();
+          blueprintId = productData.printify_blueprint_id;
+          printProviderId = productData.printify_print_provider_id;
+          
+          if (productData.variants) {
+            const matchedVariant = productData.variants.find((v: any) => 
+              v.id == item.variant_id || v.printify_variant_id == item.variant_id
+            );
+            if (matchedVariant) {
+              printifyVariantId = matchedVariant.printify_variant_id || item.variant_id;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to fetch product for shipping rate calculation:', e);
+      }
+    }
+
+    if (blueprintId && printProviderId) {
+      try {
+        console.log(`Fetching shipping profiles for blueprint: ${blueprintId}, provider: ${printProviderId}`);
+        const shippingData = await printifyCatalogAPI.getShippingProfiles(Number(blueprintId), Number(printProviderId));
+        const profiles = (shippingData as any).profiles || [];
+        
+        let matchingProfiles = profiles.filter((p: any) => 
+          p.variant_ids && p.variant_ids.includes(Number(printifyVariantId))
+        );
+        
+        if (matchingProfiles.length === 0) {
+          matchingProfiles = profiles;
+        }
+
+        let matchedProfile = matchingProfiles.find((p: any) => 
+          p.countries && p.countries.some((c: string) => c.toUpperCase() === countryCode.toUpperCase())
+        );
+
+        if (!matchedProfile) {
+          matchedProfile = matchingProfiles.find((p: any) => 
+            p.countries && p.countries.some((c: string) => c.toUpperCase() === 'REST_OF_THE_WORLD')
+          );
+        }
+
+        if (!matchedProfile) {
+          matchedProfile = matchingProfiles[0];
+        }
+
+        if (matchedProfile) {
+          calculatedItems.push({
+            print_provider_id: Number(printProviderId),
+            blueprint_id: Number(blueprintId),
+            quantity: Number(item.quantity || 1),
+            first_item: matchedProfile.first_item.cost,
+            additional_items: matchedProfile.additional_items.cost,
+            variant_id: Number(printifyVariantId)
+          });
+        } else {
+          calculatedItems.push({
+            print_provider_id: Number(printProviderId),
+            blueprint_id: Number(blueprintId),
+            quantity: Number(item.quantity || 1),
+            first_item: 599,
+            additional_items: 200,
+            variant_id: Number(printifyVariantId)
+          });
+        }
+      } catch (err: any) {
+        console.error(`Failed to fetch shipping profile for blueprint ${blueprintId}, provider ${printProviderId}:`, err.message);
+        calculatedItems.push({
+          print_provider_id: Number(printProviderId) || 0,
+          blueprint_id: Number(blueprintId) || 0,
+          quantity: Number(item.quantity || 1),
+          first_item: 599,
+          additional_items: 200,
+          variant_id: Number(printifyVariantId)
+        });
+      }
+    } else {
+      calculatedItems.push({
+        print_provider_id: 0,
+        blueprint_id: 0,
+        quantity: Number(item.quantity || 1),
+        first_item: 599,
+        additional_items: 200,
+        variant_id: Number(printifyVariantId)
+      });
+    }
+  }
+
+  if (calculatedItems.length === 0) {
+    return { totalCents: 599, itemized: [] };
+  }
+
+  const providerGroups: Record<number, any[]> = {};
+  calculatedItems.forEach(item => {
+    const providerId = item.print_provider_id;
+    if (!providerGroups[providerId]) {
+      providerGroups[providerId] = [];
+    }
+    providerGroups[providerId].push(item);
+  });
+
+  let totalShippingCents = 0;
+
+  for (const providerId of Object.keys(providerGroups)) {
+    const itemsInGroup = providerGroups[Number(providerId)];
+    
+    let maxFirstItemIndex = 0;
+    for (let i = 1; i < itemsInGroup.length; i++) {
+      if (itemsInGroup[i].first_item > itemsInGroup[maxFirstItemIndex].first_item) {
+        maxFirstItemIndex = i;
+      }
+    }
+
+    totalShippingCents += itemsInGroup[maxFirstItemIndex].first_item;
+    totalShippingCents += (itemsInGroup[maxFirstItemIndex].quantity - 1) * itemsInGroup[maxFirstItemIndex].additional_items;
+
+    for (let i = 0; i < itemsInGroup.length; i++) {
+      if (i !== maxFirstItemIndex) {
+        totalShippingCents += itemsInGroup[i].quantity * itemsInGroup[i].additional_items;
+      }
+    }
+  }
+
+  return {
+    totalCents: totalShippingCents,
+    itemized: calculatedItems.map(x => ({
+      variant_id: x.variant_id,
+      blueprint_id: x.blueprint_id,
+      print_provider_id: x.print_provider_id,
+      first_item: x.first_item,
+      additional_items: x.additional_items
+    }))
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -206,7 +353,7 @@ export async function POST(request: NextRequest) {
     );
 
     // POST /api/printify/shipping/rates → calculate shipping
-    let rates;
+    let rates: any;
     if (!printifyPayload.line_items || printifyPayload.line_items.length === 0) {
       console.log('Bypassing Printify API call as there are no Printify items in the request.');
       rates = {
@@ -224,36 +371,23 @@ export async function POST(request: NextRequest) {
       };
     } else {
       try {
-        rates = await printifyShippingAPI.calculateShipping(printifyPayload);
-
-        console.log(
-          '✅ SHIPPING RESPONSE',
-          JSON.stringify(rates, null, 2)
-        );
+        const countryCode = printifyPayload.address_to?.country || 'US';
+        console.log(`Calculating dynamic shipping rates using blueprint profiles for country: ${countryCode}`);
+        const resultObj = await calculateDynamicRates(printifyPayload.line_items, countryCode);
+        rates = {
+          standard: resultObj.totalCents,
+          itemized: resultObj.itemized
+        };
+        console.log(`✅ Calculated dynamic shipping total: ${resultObj.totalCents} cents ($${(resultObj.totalCents/100).toFixed(2)})`);
       } catch (error: any) {
         console.error(
-          '❌ SHIPPING ERROR',
-          error.response?.data || error.message
+          '❌ DYNAMIC SHIPPING CALCULATION ERROR',
+          error.message
         );
-
-        if (error.message && (error.message.toLowerCase().includes('not found') || error.message.includes('404'))) {
-          console.warn('Printify shipping calculation failed with Not Found. Returning mock flat rate shipping.');
-          rates = {
-            standard: [
-              {
-                id: 'mock_standard',
-                title: 'Standard Shipping',
-                carrier: 'Generic',
-                rate: 599, // $5.99
-                minDeliveryDays: 3,
-                maxDeliveryDays: 7,
-                currency: 'USD'
-              }
-            ]
-          };
-        } else {
-          throw error;
-        }
+        rates = {
+          standard: 599, // $5.99 fallback
+          itemized: []
+        };
       }
     }
 
@@ -271,6 +405,7 @@ export async function POST(request: NextRequest) {
           minDeliveryDays: 3,
           maxDeliveryDays: 7,
           currency: 'USD',
+          itemized: rates.itemized || []
         });
       } else if (Array.isArray(rates.standard)) {
         rates.standard.forEach((rate: any) => {

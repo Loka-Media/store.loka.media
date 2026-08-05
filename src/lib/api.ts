@@ -129,6 +129,9 @@ export interface CartItem {
   total_price: number;
   shopify_variant_id?: string;
   source?: string;
+  printify_blueprint_id?: number | null;
+  printify_print_provider_id?: number | null;
+  printify_variant_id?: number | null;
 }
 
 export interface CartSummary {
@@ -473,7 +476,7 @@ export const checkoutAPI = {
 
   // Get order details
   getOrderDetails: async (orderId: string | number) => {
-    const response = await api.get(`/api/checkout/orders/${orderId}`);
+    const response = await api.get(`/api/unified-checkout/order/${orderId}`);
     return response.data;
   },
 
@@ -499,13 +502,39 @@ export const userAPI = {
   },
 };
 
-// Helper functions
 export const formatPrice = (price: number | string): string => {
   const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(numPrice);
+  if (isNaN(numPrice)) return '';
+
+  let currency = 'USD';
+  let rates: Record<string, number> = { USD: 1 };
+
+  if (typeof window !== 'undefined') {
+    currency = localStorage.getItem('user_currency') || 'USD';
+    try {
+      const storedRates = localStorage.getItem('currency_rates');
+      if (storedRates) {
+        rates = JSON.parse(storedRates);
+      }
+    } catch (e) {
+      console.warn('Failed to parse currency_rates from localStorage');
+    }
+  }
+
+  const conversionRate = rates[currency] || 1;
+  const converted = numPrice * conversionRate;
+
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency,
+    }).format(converted);
+  } catch (e) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(numPrice);
+  }
 };
 
 export const formatDate = (dateString: string): string => {

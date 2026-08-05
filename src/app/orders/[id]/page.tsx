@@ -57,13 +57,45 @@ export default function OrderPage({ params }: OrderPageProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [order, setOrder] = useState<OrderDetails | null>(null);
+  const [fulfillment, setFulfillment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchOrderDetails = useCallback(async () => {
     try {
       setLoading(true);
       const response = await checkoutAPI.getOrderDetails(id);
-      setOrder(response);
+      
+      if (response && response.order) {
+        // Map OrderStatusDTO fields to local snake_case OrderDetails format
+        const mappedOrder: OrderDetails = {
+          id: response.order.id,
+          order_number: response.order.orderNumber,
+          status: response.order.status,
+          total_amount: parseFloat(response.order.total || '0'),
+          shipping_address: response.order.shippingAddress || {},
+          payment_status: response.order.paymentStatus,
+          payment_method: response.order.orderType === 'printify' ? 'Printify' : response.order.orderType,
+          created_at: response.order.createdAt,
+          updated_at: response.order.updatedAt,
+          items: (response.order.items || []).map((item: any) => ({
+            id: item.id,
+            product_name: item.product_name,
+            thumbnail_url: item.product_image || item.image_url,
+            size: item.size,
+            color: item.color,
+            image_url: item.product_image || item.image_url,
+            creator_name: item.creator_name || 'Loka Creator',
+            quantity: item.quantity,
+            unit_price: parseFloat(item.unit_price || '0'),
+            total_price: parseFloat(item.total_price || '0')
+          }))
+        };
+        setOrder(mappedOrder);
+        setFulfillment(response.fulfillment);
+      } else {
+        // Fallback to direct mapping for backward compatibility
+        setOrder(response);
+      }
     } catch (error) {
       console.error('Failed to fetch order details:', error);
       toast.error('Failed to load order details');
@@ -232,6 +264,76 @@ export default function OrderPage({ params }: OrderPageProps) {
               ))}
             </div>
           </div>
+
+          {/* Tracking Details */}
+          {fulfillment && (
+            <div className="bg-white shadow-sm rounded-lg p-6 border border-emerald-500/20">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Truck className="w-5 h-5 text-emerald-500" />
+                Fulfillment & Live Tracking
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+                  <div>
+                    <span className="text-xs text-gray-500 uppercase tracking-wider block">Fulfillment Partner</span>
+                    <span className="text-sm font-semibold text-gray-800 capitalize">
+                      {fulfillment.fulfillment_type || 'Printify'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-500 uppercase tracking-wider block">Fulfillment Status</span>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800`}>
+                      {fulfillment.status || 'Fulfilled'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Printify Shipments Tracking */}
+                {(() => {
+                  const data = typeof fulfillment.fulfillment_data === 'string' 
+                    ? JSON.parse(fulfillment.fulfillment_data) 
+                    : fulfillment.fulfillment_data;
+                  const shipments = data?.shipments || [];
+
+                  if (shipments.length === 0) {
+                    return (
+                      <p className="text-sm text-gray-500 italic">
+                        Order is sent to print provider. Tracking details will show here once shipped.
+                      </p>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      {shipments.map((shipment: any, idx: number) => (
+                        <div key={idx} className="bg-neutral-50 p-4 rounded-xl border border-gray-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div>
+                            <span className="text-xs text-gray-500 block font-medium">Carrier</span>
+                            <span className="text-sm font-bold text-gray-800">{shipment.carrier || 'Standard Shipping'}</span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-gray-500 block font-medium">Tracking Number</span>
+                            <span className="text-sm font-semibold text-gray-700">{shipment.number}</span>
+                          </div>
+                          {shipment.url && (
+                            <a
+                              href={shipment.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
+                            >
+                              Track Package
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
 
           {/* Shipping Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -71,7 +71,7 @@ export function calculateSellingPrice(
         }
       }
 
-      if (matchedVal !== undefined) {
+      if (matchedVal !== undefined && matchedVal !== 0) {
         markupRate = matchedVal;
       }
     }
@@ -83,8 +83,8 @@ export function calculateSellingPrice(
   // Calculate selling price
   const sellingPrice = parsedCost * (1 + markupRate / 100);
   
-  // Round to nearest cents/decimals
-  return Math.round(sellingPrice * 100) / 100;
+  // Round to nearest .99 (X.99 pricing)
+  return Math.ceil(sellingPrice) - 0.01;
 }
 
 /**
@@ -99,53 +99,36 @@ export function getProductPriceRange(
 ): { minPrice: number; maxPrice: number } {
   if (!product) return { minPrice: 0, maxPrice: 0 };
 
-  // Determine category name
-  const categoryName = typeof categoryOrMarkup === 'string' ? categoryOrMarkup : resolveProductCategoryName(product);
-
-  // 1. Gather all variant base costs
-  let costs: number[] = [];
-
+  // 1. Gather all variant retail prices if available
   if (product.variants && product.variants.length > 0) {
-    costs = product.variants
-      .map((v: any) => {
-        // Use variant.cost directly if available (it is in dollars)
-        if (v.cost !== undefined && v.cost !== null && !isNaN(parseFloat(v.cost))) {
-          return parseFloat(v.cost);
-        }
-        // Fallback to variant.price
-        if (v.price !== undefined && v.price !== null && !isNaN(parseFloat(v.price))) {
-          return parseFloat(v.price) / 1.35;
-        }
-        return 0;
-      })
-      .filter((c: number) => c > 0);
-  }
-
-  // 2. Fallback to product-level base price if no variants have valid costs
-  if (costs.length === 0) {
-    const fallbackBase = parseFloat(product.base_price || product.price || '0');
-    // If the base price has the premium indicator, or if we need to convert
-    const baseCost = product.premiumPrice 
-      ? parseFloat(product.premiumPrice) 
-      : (product.source === 'printify' || product.product_source === 'printify' ? calculatePremiumPrice(fallbackBase) : fallbackBase);
+    const prices = product.variants
+      .map((v: any) => parseFloat(v.price))
+      .filter((p: number) => !isNaN(p) && p > 0);
     
-    costs = [baseCost];
+    if (prices.length > 0) {
+      return {
+        minPrice: Math.min(...prices),
+        maxPrice: Math.max(...prices)
+      };
+    }
   }
 
-  const minCost = Math.min(...costs);
-  const maxCost = Math.max(...costs);
-
+  // 2. Fallback to product-level base price
+  const fallbackPrice = parseFloat(product.base_price || product.price || '0');
+  
   if (typeof categoryOrMarkup === 'number') {
     return {
-      minPrice: calculateSellingPrice(minCost, categoryOrMarkup),
-      maxPrice: calculateSellingPrice(maxCost, categoryOrMarkup),
+      minPrice: calculateSellingPrice(fallbackPrice, categoryOrMarkup),
+      maxPrice: calculateSellingPrice(fallbackPrice, categoryOrMarkup),
     };
   }
 
+  const categoryName = typeof categoryOrMarkup === 'string' ? categoryOrMarkup : resolveProductCategoryName(product);
   const markupRateInput = categoryOrMarkup !== undefined ? categoryOrMarkup : categoryName;
+  
   return {
-    minPrice: calculateSellingPrice(minCost, markupRateInput, categoryMarkups, globalMarkup),
-    maxPrice: calculateSellingPrice(maxCost, markupRateInput, categoryMarkups, globalMarkup),
+    minPrice: calculateSellingPrice(fallbackPrice, markupRateInput, categoryMarkups, globalMarkup),
+    maxPrice: calculateSellingPrice(fallbackPrice, markupRateInput, categoryMarkups, globalMarkup),
   };
 }
 

@@ -299,16 +299,28 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
 
               <div>
                 <label className="block text-sm font-medium text-white/90 mb-2">
-                  Printful Base Cost <span className="text-white/50 text-xs">(Wholesale Price)</span>
+                  Printify Base Price (PBC) <span className="text-white/50 text-xs">(Standard wholesale catalog cost)</span>
                 </label>
                 <input
                   type="text"
                   value={`$${parseFloat(formData.basePrice || '0').toFixed(2)}`}
                   readOnly
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white/70 cursor-not-allowed"
-                  title="This is the wholesale cost from Printful and cannot be edited"
+                  title="This is the standard wholesale catalog cost from Printify"
                 />
-                <p className="mt-1 text-xs text-white/50">This is the cost from Printful (cannot be changed)</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/90 mb-2">
+                  Printify Premium Pricing (PPP) <span className="text-white/50 text-xs">(23% discount wholesale cost)</span>
+                </label>
+                <input
+                  type="text"
+                  value={`$${(parseFloat(formData.basePrice || '0') * 0.77).toFixed(2)}`}
+                  readOnly
+                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white/70 cursor-not-allowed"
+                  title="This is the discounted Printify Premium cost"
+                />
               </div>
 
               <div>
@@ -562,7 +574,8 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   <thead>
                     <tr className="text-left border-b border-white/20">
                       <th className="pb-2 sm:pb-3 text-white/70 font-medium">Variant</th>
-                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Base Cost</th>
+                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">PBC (Base)</th>
+                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">PPP (Premium)</th>
                       <th className="pb-2 sm:pb-3 text-white/70 font-medium">Selling Price</th>
                       <th className="pb-2 sm:pb-3 text-white/70 font-medium">Profit</th>
                     </tr>
@@ -570,6 +583,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   <tbody>
                     {product.variants.map((variant) => {
                       const baseCost = typeof variant.base_cost === 'string' ? parseFloat(variant.base_cost) : variant.base_cost || 0;
+                      const pppCost = baseCost * 0.77;
                       const markupVal = parseFloat(formData.markupPercentage) || 0;
                       const sellingPrice = baseCost * (1 + markupVal / 100);
                       const profit = sellingPrice - baseCost;
@@ -578,6 +592,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                         <tr key={variant.id} className="border-b border-white/10">
                           <td className="py-2 sm:py-3 text-white">{variant.title}</td>
                           <td className="py-2 sm:py-3 text-white/60">${baseCost.toFixed(2)}</td>
+                          <td className="py-2 sm:py-3 text-white/60">${pppCost.toFixed(2)}</td>
                           <td className="py-2 sm:py-3 text-white font-medium">${sellingPrice.toFixed(2)}</td>
                           <td className="py-2 sm:py-3 text-green-400 font-medium">${profit.toFixed(2)}</td>
                         </tr>

@@ -616,6 +616,8 @@ export default function UnifiedCheckoutPage() {
               availabilityCheck={inventoryCheck.lastCheck}
               onCheckAvailability={handleCheckAvailability}
               checkingAvailability={inventoryCheck.checking}
+              countryCode={checkoutState.customerInfo.country || 'US'}
+              isFetchingShippingRates={checkoutState.isFetchingShippingRates}
             />
           </div>
         </div>

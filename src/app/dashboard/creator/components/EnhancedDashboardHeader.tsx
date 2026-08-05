@@ -63,14 +63,13 @@ export function EnhancedDashboardHeader({
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0">
-          <button
-            onClick={handleShare}
-            className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg font-bold text-white hover:bg-white/20 transition-all duration-300 text-sm sm:text-base cursor-pointer animate-share-flicker"
-            title="Share your creator profile"
+          <Link
+            href="/dashboard/creator/orders"
+            className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-bold text-black transition-all duration-300 text-sm sm:text-base shadow-lg shadow-orange-500/20"
           >
-            <Share2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-            {copied ? "Copied!" : "Share"}
-          </button>
+            <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            Orders
+          </Link>
           <Link
             href="/dashboard/creator/products"
             className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg font-bold text-white hover:bg-white/20 transition-all duration-300 text-sm sm:text-base"

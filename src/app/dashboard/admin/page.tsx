@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Store, Users, Package, ShoppingCart, Settings } from 'lucide-react';
+import { Store, Users, Package, ShoppingCart, Settings, DollarSign, Wallet } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 
 export default function AdminDashboard() {
@@ -30,6 +30,22 @@ export default function AdminDashboard() {
       href: '/dashboard/admin/settings/pricing',
       color: 'bg-orange-500',
       stats: 'Pricing & Markup'
+    },
+    {
+      title: 'Creator Earnings & Revenue',
+      description: 'Monitor individual creator sales, revenue breakdown, and Stripe Connect status',
+      icon: DollarSign,
+      href: '/dashboard/admin/earnings',
+      color: 'bg-green-600',
+      stats: 'Creator earnings list'
+    },
+    {
+      title: 'Payouts & Withdrawals',
+      description: 'Review and approve creator withdrawal requests and settle payments',
+      icon: Wallet,
+      href: '/dashboard/admin/payouts',
+      color: 'bg-amber-500',
+      stats: 'Withdrawal requests'
     }
   ];
 

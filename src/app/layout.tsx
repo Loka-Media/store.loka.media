@@ -6,6 +6,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { GuestCartProvider } from "@/contexts/GuestCartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { GlobalMarkupProvider } from "@/contexts/GlobalMarkupContext";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { Toaster } from "react-hot-toast";
 import Navigation from "@/components/Navigation";
 import StickyHeader from "@/components/StickyHeader";
@@ -28,6 +29,11 @@ export const metadata: Metadata = {
   authors: [{ name: "Loka Media" }],
   creator: "Loka Media",
   publisher: "Loka Media",
+  icons: {
+    icon: "/dollar-favicon.png",
+    shortcut: "/dollar-favicon.png",
+    apple: "/dollar-favicon.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -64,19 +70,21 @@ export default function RootLayout({
         <SmoothScroll />
         <AuthProvider>
           <GlobalMarkupProvider>
-            {/* <CartProvider> - Disabled to prevent duplicate API calls */}
-            <GuestCartProvider>
-              <WishlistProvider>
-                <Navigation />
-                {/* <StickyHeader /> */}
-                <div className="pt-16">
-                  {children}
-                  <Footer />
-                </div>
-                <Toaster position="top-right" />
-              </WishlistProvider>
-            </GuestCartProvider>
-            {/* </CartProvider> */}
+            <CurrencyProvider>
+              {/* <CartProvider> - Disabled to prevent duplicate API calls */}
+              <GuestCartProvider>
+                <WishlistProvider>
+                  <Navigation />
+                  {/* <StickyHeader /> */}
+                  <div className="pt-16">
+                    {children}
+                    <Footer />
+                  </div>
+                  <Toaster position="top-right" />
+                </WishlistProvider>
+              </GuestCartProvider>
+              {/* </CartProvider> */}
+            </CurrencyProvider>
           </GlobalMarkupProvider>
         </AuthProvider>
       </body>

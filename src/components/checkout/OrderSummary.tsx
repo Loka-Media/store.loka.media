@@ -1,4 +1,7 @@
-import { Package, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Package, CheckCircle, AlertCircle, RefreshCw, Truck, Info } from 'lucide-react';
+import { getShippingCountries } from '@/lib/location-utils';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface CartItem {
   id: number;
@@ -9,6 +12,8 @@ interface CartItem {
   total_price: string;
   printful_variant_id?: string;
   source?: string;
+  printify_variant_id?: number | string | null;
+  variant_id?: number | string | null;
 }
 
 interface ShippingRate {
@@ -38,6 +43,8 @@ interface OrderSummaryProps {
   availabilityCheck?: AvailabilityCheck | null;
   onCheckAvailability?: () => void;
   checkingAvailability?: boolean;
+  countryCode: string;
+  isFetchingShippingRates?: boolean;
 }
 
 export const OrderSummary = ({
@@ -54,7 +61,10 @@ export const OrderSummary = ({
   availabilityCheck = null,
   onCheckAvailability,
   checkingAvailability = false,
+  countryCode,
+  isFetchingShippingRates = false,
 }: OrderSummaryProps) => {
+  const { formatPrice } = useCurrency();
   const subtotalAmount = parseFloat(summary.subtotal.replace("$", ""));
   // Use actual tax if available, otherwise estimate at 8%
   const tax = taxAmount > 0 ? taxAmount : subtotalAmount * 0.08;
@@ -82,7 +92,7 @@ export const OrderSummary = ({
                 {item.size} • {item.color || "Default"} • Qty: {item.quantity}
               </p>
             </div>
-            <p className="font-bold text-white">${item.total_price}</p>
+            <p className="font-bold text-white">{formatPrice(item.total_price)}</p>
           </div>
         ))}
       </div>
@@ -90,9 +100,17 @@ export const OrderSummary = ({
       <div className="mt-6 space-y-3">
         <div className="flex justify-between text-sm">
           <p className="text-gray-400 font-medium">Subtotal</p>
-          <p className="text-white font-bold">{summary.subtotal}</p>
+          <p className="text-white font-bold">{formatPrice(subtotalAmount)}</p>
         </div>
-        {shippingRates && shippingRates.length > 0 ? (
+        {isFetchingShippingRates ? (
+          <div className="text-sm">
+            <p className="text-gray-400 font-medium mb-2">Shipping Method</p>
+            <div className="flex justify-between items-center p-3 border border-orange-500/30 bg-orange-500/5 rounded-lg">
+              <p className="text-white font-medium">Calculating Shipping...</p>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent" />
+            </div>
+          </div>
+        ) : shippingRates && shippingRates.length > 0 ? (
           <div className="text-sm">
             <p className="text-gray-400 font-medium mb-2">Shipping Method</p>
             <div className="space-y-2">
@@ -100,7 +118,7 @@ export const OrderSummary = ({
                 <div
                   key={rate.id}
                   className={`flex justify-between items-center p-3 border rounded-lg cursor-pointer transition-all duration-300 ${
-                    selectedShippingRate.id === rate.id
+                    selectedShippingRate?.id === rate.id
                       ? "border-orange-500 bg-orange-500/10"
                       : "border-gray-700 hover:bg-gray-800/50"
                   }`}
@@ -108,8 +126,7 @@ export const OrderSummary = ({
                 >
                   <p className="text-white font-medium">{rate.name}</p>
                   <p className="text-white font-bold">
-                    ${parseFloat(rate.rate.toString()).toFixed(2)}{" "}
-                    {rate.currency}
+                    {formatPrice(rate.rate)}
                   </p>
                 </div>
               ))}
@@ -118,7 +135,7 @@ export const OrderSummary = ({
         ) : (
           <div className="flex justify-between text-sm">
             <p className="text-gray-400 font-medium">Shipping</p>
-            <p className="text-white font-bold">${shippingCost.toFixed(2)}</p>
+            <p className="text-white font-bold">{formatPrice(shippingCost)}</p>
           </div>
         )}
         <div className="flex justify-between text-sm">
@@ -126,11 +143,11 @@ export const OrderSummary = ({
             Estimated Tax
             <span className="text-xs block text-gray-500">Final tax calculated at checkout</span>
           </p>
-          <p className="text-white font-bold">${tax.toFixed(2)}</p>
+          <p className="text-white font-bold">{formatPrice(tax)}</p>
         </div>
         <div className="border-t border-gray-800 pt-3 mt-3 flex justify-between font-bold">
           <p className="text-white">Estimated Total</p>
-          <p className="text-orange-400 text-lg">${calculateTotal().toFixed(2)}</p>
+          <p className="text-orange-400 text-lg">{formatPrice(calculateTotal())}</p>
         </div>
       </div>
 
@@ -188,6 +205,45 @@ export const OrderSummary = ({
                 </>
               )}
             </button>
+          )}
+        </div>
+      )}
+
+      {items.some(item => item.source === 'printify' || (item as any).printify_blueprint_id) && (
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mt-6 space-y-3">
+          <div className="flex items-center space-x-2 text-white">
+            <Truck className="w-4 h-4 text-orange-400" />
+            <span className="text-sm font-bold">Standard Shipping Rates to {countryCode || 'US'}</span>
+          </div>
+
+          {isFetchingShippingRates ? (
+            <div className="flex items-center space-x-2 text-gray-400 text-xs py-1">
+              <div className="animate-spin rounded-full h-3 w-3 border border-orange-500 border-t-transparent" />
+              <span>Calculating itemized rates...</span>
+            </div>
+          ) : (
+            <div className="space-y-2 text-xs text-gray-300">
+              {items
+                .filter(item => item.source === 'printify' || (item as any).printify_blueprint_id)
+                .map(item => {
+                  const variantId = Number((item as any).printify_variant_id || item.printful_variant_id || item.variant_id);
+                  const est = selectedShippingRate?.itemized?.find((r: any) => Number(r.variant_id) === variantId);
+                  
+                  return (
+                    <div key={item.id} className="bg-black/40 border border-white/5 p-2 rounded-lg space-y-1">
+                      <p className="font-bold text-white text-[11px] truncate">{item.product_name}</p>
+                      <div className="flex justify-between text-[10px] text-gray-400 font-medium">
+                        <span>First Item: {est ? `$${(est.first_item / 100).toFixed(2)} USD` : 'Not available'}</span>
+                        <span>Additional: {est ? `$${(est.additional_items / 100).toFixed(2)} USD` : 'Not available'}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              <div className="flex items-center space-x-1.5 text-[10px] text-gray-400 mt-1">
+                <Info className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
+                <span>Multiple quantities or items from same print provider are grouped automatically.</span>
+              </div>
+            </div>
           )}
         </div>
       )}

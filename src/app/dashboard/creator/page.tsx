@@ -4,6 +4,7 @@ import { useCreatorDashboard } from "./hooks/useCreatorDashboard";
 import { EnhancedDashboardHeader } from "./components/EnhancedDashboardHeader";
 import { EnhancedStatsCards } from "./components/EnhancedStatsCards";
 import { EnhancedQuickActions } from "./components/EnhancedQuickActions";
+import { EnhancedAnalyticsSection } from "./components/EnhancedAnalyticsSection";
 import { EnhancedProductsSection } from "./components/EnhancedProductsSection";
 import Navigation from "@/components/Navigation";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
@@ -55,6 +56,7 @@ export default function CreatorDashboard() {
           <div className="mt-12">
             <EnhancedStatsCards stats={stats} />
             <EnhancedQuickActions />
+            <EnhancedAnalyticsSection selectedCreatorId={selectedCreatorId} stats={stats} />
             <EnhancedProductsSection products={products} loading={loading} onDelete={deleteProduct} />
           </div>
         </div>

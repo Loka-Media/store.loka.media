@@ -21,7 +21,7 @@ export function DashboardHeader({ connection, onConnectPrintful }: DashboardHead
           <div className="mb-4 sm:mb-0">
             <h1 className="text-3xl font-extrabold text-white tracking-tight">Creator Dashboard</h1>
             <p className="mt-1 text-base text-gray-400">
-              Manage your products, integrations, and sales performance.
+              Manage your products, integrations, and sales performance. 
             </p>
           </div>
 

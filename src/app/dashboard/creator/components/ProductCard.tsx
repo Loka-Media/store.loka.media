@@ -12,6 +12,7 @@ import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { productAPI } from '@/lib/api';
 import { Switch } from "@/components/ui/switch";
 import { createProductSlug } from '@/lib/utils';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface CreatorProduct {
   id: number;
@@ -29,6 +30,7 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
   const [newStatus, setNewStatus] = useState<boolean | null>(null);
 
   const router = useRouter();
+  const { formatPrice } = useCurrency();
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -69,12 +71,6 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
 
   const handleCardClick = () => {
     router.push(`/products/${createProductSlug(product.name, product.id)}`);

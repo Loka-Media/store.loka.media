@@ -129,12 +129,17 @@ async function buildPrintifyProductPayload(
 
   // Build variant pricing (Printify prices are in cents)
   // Printify API requires ALL variants of the blueprint/provider to be sent.
-  // We set is_enabled: false for the ones not selected.
+  // Markup is applied on top of Loka base cost (Premium base * 1.35).
   const variantPayload = allVariants.map((v: any) => {
     const isSelected = selectedVariantIds.includes(Number(v.id));
     const priceVal = typeof v.price === 'string' ? parseFloat(v.price) * 100 : v.price;
     const baseCents: number = typeof priceVal === 'number' && !isNaN(priceVal) ? priceVal : 1500;
-    const retailCents = Math.round(baseCents * (1 + markupPercent / 100));
+    
+    // Apply 23% Premium discount (0.77) + 35% Loka Platform markup (1.35) + Creator Markup
+    const premiumBaseCents = baseCents * 0.77;
+    const lokaBaseCents = premiumBaseCents * 1.35;
+    const retailCents = Math.round(lokaBaseCents * (1 + markupPercent / 100));
+    
     return { 
       id: Number(v.id), 
       price: retailCents, 
@@ -152,7 +157,7 @@ async function buildPrintifyProductPayload(
       selectedVariantIds.forEach((id: number) => {
         const existing = variantPayload.find((v: any) => v.id === Number(id));
         if (existing) existing.is_enabled = true;
-        else variantPayload.push({ id: Number(id), price: Math.round(1500 * (1 + markupPercent / 100)), is_enabled: true });
+        else variantPayload.push({ id: Number(id), price: Math.round(1500 * 0.77 * 1.35 * (1 + markupPercent / 100)), is_enabled: true });
         if (!activeVariantIds.includes(Number(id))) activeVariantIds.push(Number(id));
       });
     } else {
@@ -369,30 +374,26 @@ export async function POST(request: NextRequest) {
             console.log('[Printify Sync] Product created/updated on Printify:', printifyProductId);
 
             // Printify generates mockups asynchronously.
-            // If we already have mockups from a preview, NO NEED to poll again!
-            const maxAttempts = isPreview ? 10 : (mockupUrls && mockupUrls.length > 0 ? 0 : 10);
-            if (maxAttempts > 0) {
-              console.log('[Printify Sync] Waiting for Printify to generate mockups...');
-              let attempts = 0;
-              while (attempts < maxAttempts) {
-                try {
-                  const checkProduct = await printifyProductsAPI.getProduct(printifyProductId);
-                  if (checkProduct.images && checkProduct.images.length > 0 && checkProduct.images.some(img => img.src)) {
-                    created.images = checkProduct.images;
-                    console.log(`[Printify Sync] Mockups generated after ${attempts * 0.8} seconds!`);
-                    break;
-                  }
-                } catch (e) {
-                  // Ignore fetch errors during polling
+            // Poll Printify API to get the generated product mockups (including human/model images)
+            const maxAttempts = 10;
+            console.log('[Printify Sync] Waiting for Printify to generate mockups...');
+            let attempts = 0;
+            while (attempts < maxAttempts) {
+              try {
+                const checkProduct = await printifyProductsAPI.getProduct(printifyProductId);
+                if (checkProduct.images && checkProduct.images.length > 0 && checkProduct.images.some(img => img.src)) {
+                  created.images = checkProduct.images;
+                  console.log(`[Printify Sync] Mockups generated after ${attempts * 0.8} seconds! (${checkProduct.images.length} images)`);
+                  break;
                 }
-                await new Promise(resolve => setTimeout(resolve, 800)); // 0.8 sec interval
-                attempts++;
+              } catch (e) {
+                // Ignore fetch errors during polling
               }
-              if (!created?.images || created.images.length === 0) {
-                console.warn('[Printify Sync] Mockups not ready within polling period.');
-              }
-            } else {
-              console.log('[Printify Sync] Using existing mockups from preview, skipping polling.');
+              await new Promise(resolve => setTimeout(resolve, 800)); // 0.8 sec interval
+              attempts++;
+            }
+            if (!created?.images || created.images.length === 0) {
+              console.warn('[Printify Sync] Mockups not ready within polling period.');
             }
 
 // Only publish to Printify shop channel if it is NOT a preview request
@@ -442,21 +443,29 @@ if (!isPreview) {
       // ── Step B: Save to backend DB (non-fatal) ────────────────────────────
       let backendSaved = false;
       try {
+        let printifyMockupUrls: string[] = [];
+        let printifyMockupObjects: any[] = [];
+
+        if (created && created.images && Array.isArray(created.images) && created.images.length > 0) {
+          const transformed = transformProductForStorefront(created);
+          if (transformed.mockups && transformed.mockups.length > 0) {
+            printifyMockupUrls = transformed.mockups.map(m => m.src).filter(Boolean);
+            printifyMockupObjects = transformed.mockups;
+          }
+        }
+
         const cleanedMockupUrls = (mockupUrls || []).map((url: any) => {
           return typeof url === 'string' ? url : url?.url || url?.src || '';
         }).filter(Boolean);
 
-        let finalMockupUrls = cleanedMockupUrls.length > 0 ? cleanedMockupUrls : ['/placeholder-product.png'];
-        let finalMockupObjects = (mockupUrls && mockupUrls.length > 0) ? mockupUrls : finalMockupUrls;
+        // Always prefer Printify's official generated mockups (which place human/model images FIRST)
+        let finalMockupUrls = printifyMockupUrls.length > 0
+          ? printifyMockupUrls
+          : (cleanedMockupUrls.length > 0 ? cleanedMockupUrls : ['/placeholder-product.png']);
 
-        // Merge Printify images if available and no URLs yet
-        if (created && created.images && Array.isArray(created.images) && cleanedMockupUrls.length === 0) {
-          const printifyImages = created.images.map((img: any) => img.src).filter(Boolean);
-          if (printifyImages.length > 0) {
-            finalMockupUrls = printifyImages;
-            finalMockupObjects = created.images;
-          }
-        }
+        let finalMockupObjects = printifyMockupObjects.length > 0
+          ? printifyMockupObjects
+          : ((mockupUrls && mockupUrls.length > 0) ? mockupUrls : finalMockupUrls);
 
         const updatedProductData = {
           ...productData,

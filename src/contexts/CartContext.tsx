@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { cartAPI, CartItem, CartSummary } from '@/lib/api';
 import { useAuth } from './AuthContext';
 
@@ -26,6 +26,60 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     shipping: '0.00',
     total: '0.00'
   });
+  const [shippingCost, setShippingCost] = useState<number>(0);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      setShippingCost(0);
+      return;
+    }
+    
+    let isMounted = true;
+    const fetchShipping = async () => {
+      try {
+        const payload = {
+          address_to: { country: 'US' }, // Default to US for cart estimates
+          items: items.map(item => ({
+            product_id: item.product_id,
+            variant_id: item.variant_id,
+            quantity: item.quantity,
+            source: item.source || 'printify',
+            blueprint_id: item.printify_blueprint_id,
+            print_provider_id: item.printify_print_provider_id,
+            printify_variant_id: item.printify_variant_id
+          }))
+        };
+        const response = await fetch('/api/printify/shipping/rates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (response.ok && isMounted) {
+          const data = await response.json();
+          const rate = data.result?.[0]?.rate;
+          if (rate !== undefined) {
+            setShippingCost(parseFloat(rate));
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch shipping rate for cart:', e);
+      }
+    };
+    
+    fetchShipping();
+    return () => { isMounted = false; };
+  }, [items]);
+
+  const combinedSummary = useMemo(() => {
+    const subtotalNum = parseFloat(summary.subtotal || '0');
+    const totalNum = subtotalNum + shippingCost;
+    return {
+      ...summary,
+      shipping: shippingCost.toFixed(2),
+      total: totalNum.toFixed(2)
+    };
+  }, [summary, shippingCost]);
+
   const [loading, setLoading] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const { isAuthenticated, user } = useAuth();
@@ -213,7 +267,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     <CartContext.Provider
       value={{
         items,
-        summary,
+        summary: combinedSummary,
         loading,
         cartCount,
         addToCart,

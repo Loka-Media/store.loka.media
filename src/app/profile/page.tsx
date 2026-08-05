@@ -516,9 +516,7 @@ export default function ProfilePage() {
                             <p className="text-xs sm:text-sm text-white/60 mt-1">
                               {formatDate(order.created_at)} • {order.item_count} item(s)
                             </p>
-                            <p className="text-xs sm:text-sm text-white/60">
-                              {order.payment_method.toUpperCase()}
-                            </p>
+                  
                           </div>
                         </div>
 

@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: true,
     domains: [
       'files.cdn.printful.com',
       'printful-upload.s3-accelerate.amazonaws.com',

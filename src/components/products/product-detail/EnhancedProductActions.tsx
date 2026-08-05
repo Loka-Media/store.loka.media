@@ -32,7 +32,24 @@ export function EnhancedProductActions({
   };
 
   return (
-    <div className="space-y-2 sm:space-y-3 md:space-y-4">
+    <div className="space-y-3 sm:space-y-4">
+      {/* Stock Availability Indicator */}
+      {selectedVariant && (
+        <div className="text-xs sm:text-sm font-medium pt-1">
+          {isVariantAvailable ? (
+            <span className="text-emerald-400 inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              In Stock (Ready to Print)
+            </span>
+          ) : (
+            <span className="text-rose-400 inline-flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-full">
+              <span className="h-2 w-2 rounded-full bg-rose-400" />
+              Out of Stock (Currently Unavailable)
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Quantity Selector */}
       <div className="space-y-1.5">
         <label className="block text-xs sm:text-sm font-medium text-white">

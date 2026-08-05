@@ -14,6 +14,7 @@ import { productAPI } from '@/lib/api';
 import { Switch } from "@/components/ui/switch";
 import { createProductSlug } from '@/lib/utils';
 import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface CreatorProduct {
   id: number;
@@ -32,17 +33,11 @@ interface CreatorProduct {
 
 export default function EnhancedProductCard({ product, onDelete }: { product: CreatorProduct, onDelete: (productId: number) => void }) {
   const router = useRouter();
-  const { globalMarkup } = useGlobalMarkup();
+  const { formatPrice } = useCurrency();
   
-  // Calculate dynamic selling price range
-  const baseMarkup = product.markup_percentage !== undefined ? product.markup_percentage : 35;
-  const baseCostMin = product.base_price !== undefined ? parseFloat(String(product.base_price)) : product.min_price / (1 + baseMarkup / 100);
-  const baseCostMax = product.base_price !== undefined && product.max_price === product.min_price
-    ? parseFloat(String(product.base_price))
-    : product.max_price / (1 + baseMarkup / 100);
-
-  const minSellingPrice = baseCostMin * (1 + globalMarkup / 100);
-  const maxSellingPrice = baseCostMax * (1 + globalMarkup / 100);
+  // Stored pricing in DB contains the final selling price
+  const minSellingPrice = product.min_price;
+  const maxSellingPrice = product.max_price;
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
@@ -80,12 +75,6 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
 
   return (
     <>

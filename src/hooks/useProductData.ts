@@ -30,6 +30,8 @@ export interface ProductDetails {
   created_at: string;
   variants: ProductVariant[];
   source?: string;
+  printify_blueprint_id?: number | null;
+  printify_print_provider_id?: number | null;
 }
 
 export const useProductData = (slug: string) => {
@@ -87,6 +89,47 @@ export const useProductData = (slug: string) => {
       }
 
       setProduct(response);
+
+      // Trigger background real-time sync for Printify products
+      if (response && response.source === 'printify') {
+        const printifyProdId = response.printify_id || response.printify_product_id;
+        // Verify printifyProdId is a valid 24-character hexadecimal MongoDB ObjectId
+        if (printifyProdId && /^[0-9a-fA-F]{24}$/.test(String(printifyProdId))) {
+          fetch(`/api/printify/products/${printifyProdId}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data?.success && data?.data?.variants) {
+                const printifyVariants = data.data.variants;
+                const availabilityMap = new Map<number, boolean>();
+                printifyVariants.forEach((pv: any) => {
+                  availabilityMap.set(Number(pv.id), pv.isAvailable ?? pv.is_available);
+                });
+
+                setProduct(prevProduct => {
+                  if (!prevProduct) return null;
+                  const updatedVariants = prevProduct.variants.map(v => {
+                    const printifyId = v.printify_variant_id || v.id;
+                    const isAvailable = availabilityMap.get(Number(printifyId));
+                    return {
+                      ...v,
+                      available_for_sale: isAvailable !== undefined ? isAvailable : v.available_for_sale
+                    };
+                  });
+                  return {
+                    ...prevProduct,
+                    variants: updatedVariants
+                  };
+                });
+                console.log(`[Real-time Stock Sync] Synced ${printifyVariants.length} variants from Printify`);
+              }
+            })
+            .catch(err => {
+              console.error('Failed to sync real-time availability from Printify:', err);
+            });
+        } else {
+          console.warn(`[Real-time Stock Sync] Skipped background fetch: printify_id is missing or invalid (${printifyProdId})`);
+        }
+      }
 
       if (!parsedSlug && response.name) {
         const correctSlug = createProductSlug(response.name, response.id);

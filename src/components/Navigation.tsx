@@ -15,6 +15,7 @@ import {
   User,
 } from "lucide-react";
 import Image from "next/image";
+import { useCurrency, availableCurrencies } from "@/contexts/CurrencyContext";
 
 const StartSellingButton = () => (
   <svg
@@ -38,6 +39,10 @@ export default function Navigation() {
   const { cartCount } = useGuestCart();
   const { wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { currency, setCurrency } = useCurrency();
+  const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+
+  const activeCurrency = availableCurrencies.find(c => c.code === currency) || availableCurrencies[0];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 pb-4 bg-[#050505]/60 backdrop-blur-md border-b border-white/5 transition-all duration-300">
@@ -214,6 +219,57 @@ export default function Navigation() {
                     </Link>
                   </>
                 )}
+
+                {/* Separator */}
+                <div
+                  className="h-8 w-px mx-2"
+                  style={{ background: "var(--nav-border-light)" }}
+                ></div>
+
+                {/* Currency Selector Dropdown */}
+                <div className="relative flex items-center">
+                  <button
+                    onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
+                    className="flex items-center space-x-1 text-white text-sm font-semibold hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
+                    style={{ color: "var(--nav-text)" }}
+                  >
+                    <span className="text-[14px] font-bold text-orange-400 leading-none">{activeCurrency.symbol}</span>
+                    <span className="uppercase text-[13px]">{activeCurrency.code}</span>
+                    <svg
+                      className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isCurrencyOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {isCurrencyOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setIsCurrencyOpen(false)} />
+                      <div className="absolute right-0 top-full mt-3 w-48 bg-[#1a1a1a]/95 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {availableCurrencies.map((item) => (
+                          <button
+                            key={item.code}
+                            onClick={() => {
+                              setCurrency(item.code);
+                              setIsCurrencyOpen(false);
+                            }}
+                            className={`w-full flex items-center space-x-3.5 px-4 py-2.5 text-left text-sm font-medium transition-colors hover:bg-white/5 cursor-pointer ${
+                              currency === item.code ? 'text-orange-500 bg-white/5' : 'text-white/80 hover:text-white'
+                            }`}
+                          >
+                            <span className="text-[14px] font-bold text-orange-400 w-5 text-center leading-none">{item.symbol}</span>
+                            <div className="flex flex-col">
+                              <span className="text-[13px] leading-tight font-semibold">{item.code}</span>
+                              <span className="text-[10px] text-gray-400">{item.name}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -416,6 +472,27 @@ export default function Navigation() {
               </div>
             </>
           )}
+
+          {/* Mobile Currency Selector */}
+          <div className="border-t pt-3 mt-3" style={{ borderColor: "var(--nav-border-light)" }}>
+            <span className="text-xs text-gray-400 block mb-2 font-medium px-4">Select Currency</span>
+            <div className="grid grid-cols-3 gap-2 px-4">
+              {availableCurrencies.map((item) => (
+                <button
+                  key={item.code}
+                  onClick={() => setCurrency(item.code)}
+                  className={`flex items-center justify-center space-x-1 py-2 px-3 rounded-lg border text-[11px] font-semibold transition-colors cursor-pointer ${
+                    currency === item.code
+                      ? 'border-orange-500 text-orange-500 bg-orange-500/10'
+                      : 'border-white/10 text-white/70 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <span className="text-[12px] font-bold text-orange-400">{item.symbol}</span>
+                  <span>{item.code}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </nav>

@@ -13,7 +13,7 @@ export const ImageWithFallback = ({ src, fallbackSrc = '/placeholder-product.png
       setImgSrc(fallbackSrc);
     }
   };
-  return <Image src={imgSrc} onError={handleError} {...rest} />;
+  return <Image src={imgSrc} onError={handleError} unoptimized={true} {...rest} />;
 };
 
 export default ImageWithFallback;

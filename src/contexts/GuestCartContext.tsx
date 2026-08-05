@@ -27,10 +27,12 @@ interface GuestCartItem {
   printful_catalog_variant_id?: string;
   printful_availability_regions?: string[];
   availability_regions?: string[];
-  printify_product_id?: string | number;
-  printify_variant_id?: string | number;
-  blueprint_id?: string | number;
-  print_provider_id?: string | number;
+  printify_product_id?: string | number | null;
+  printify_variant_id?: string | number | null;
+  blueprint_id?: string | number | null;
+  print_provider_id?: string | number | null;
+  printify_blueprint_id?: string | number | null;
+  printify_print_provider_id?: string | number | null;
 }
 
 interface GuestCartContextType {
@@ -75,19 +77,62 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
     });
   }, [items, calculateSellingPrice]);
 
+  const [shippingCost, setShippingCost] = useState<number>(0);
+
+  useEffect(() => {
+    if (processedItems.length === 0) {
+      setShippingCost(0);
+      return;
+    }
+    
+    let isMounted = true;
+    const fetchShipping = async () => {
+      try {
+        const payload = {
+          address_to: { country: 'US' }, // Default to US for cart estimates
+          items: processedItems.map(item => ({
+            product_id: item.product_id,
+            variant_id: item.variant_id,
+            quantity: item.quantity,
+            source: item.source || 'printify',
+            blueprint_id: item.printify_blueprint_id,
+            print_provider_id: item.printify_print_provider_id,
+            printify_variant_id: item.printify_variant_id
+          }))
+        };
+        const response = await fetch('/api/printify/shipping/rates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (response.ok && isMounted) {
+          const data = await response.json();
+          const rate = data.result?.[0]?.rate;
+          if (rate !== undefined) {
+            setShippingCost(parseFloat(rate));
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch shipping rate for cart:', e);
+      }
+    };
+    
+    fetchShipping();
+    return () => { isMounted = false; };
+  }, [processedItems]);
+
   const processedSummary = useMemo(() => {
     const subtotal = processedItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
     const totalItems = processedItems.reduce((sum, item) => sum + item.quantity, 0);
-    const shipping = processedItems.length > 0 ? 5.99 : 0;
-    const total = subtotal + shipping;
+    const total = subtotal + shippingCost;
 
     return {
       itemCount: totalItems,
       subtotal: subtotal.toFixed(2),
-      shipping: shipping.toFixed(2),
+      shipping: shippingCost.toFixed(2),
       total: total.toFixed(2)
     };
-  }, [processedItems]);
+  }, [processedItems, shippingCost]);
 
   // Ensure we're on the client side
   useEffect(() => {
@@ -166,16 +211,15 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
   const calculateSummary = useCallback((cartItems: GuestCartItem[]): CartSummary => {
     const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    const shipping = cartItems.length > 0 ? 5.99 : 0;
-    const total = subtotal + shipping;
+    const total = subtotal + shippingCost;
 
     return {
       itemCount: totalItems,
       subtotal: subtotal.toFixed(2),
-      shipping: shipping.toFixed(2),
+      shipping: shippingCost.toFixed(2),
       total: total.toFixed(2)
     };
-  }, []);
+  }, [shippingCost]);
 
   const fetchCartCount = useCallback(async () => {
     try {

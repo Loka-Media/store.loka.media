@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { formatPrice } from '@/lib/api';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ProductInfoProps {
   productName: string;
@@ -19,6 +19,7 @@ export function ProductInfo({
   basePrice,
   selectedVariantPrice,
 }: ProductInfoProps) {
+  const { formatPrice } = useCurrency();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const canTruncate = description.length > TRUNCATE_LENGTH;
   const displayPrice = selectedVariantPrice ?? basePrice;

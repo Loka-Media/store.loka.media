@@ -85,12 +85,41 @@ export class ShopifyService {
     return shopPattern.test(shopDomain) && shopDomain.length >= 3 && shopDomain.length <= 60;
   }
 
-  static formatShopifyPrice(price: string | number): string {
+  static formatShopifyPrice(price: string | number, currency?: string): string {
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(numPrice);
+    if (isNaN(numPrice)) return '';
+
+    let activeCurrency = currency;
+    let rates: Record<string, number> = { USD: 1 };
+
+    if (typeof window !== 'undefined') {
+      if (!activeCurrency) {
+        activeCurrency = localStorage.getItem('user_currency') || 'USD';
+      }
+      try {
+        const storedRates = localStorage.getItem('currency_rates');
+        if (storedRates) {
+          rates = JSON.parse(storedRates);
+        }
+      } catch (e) {}
+    }
+
+    if (!activeCurrency) activeCurrency = 'USD';
+
+    const conversionRate = rates[activeCurrency] || 1;
+    const converted = numPrice * conversionRate;
+
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: activeCurrency,
+      }).format(converted);
+    } catch (e) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(numPrice);
+    }
   }
 
   static getProductImageUrl(product: ShopifyProduct, size: 'small' | 'medium' | 'large' = 'medium'): string {

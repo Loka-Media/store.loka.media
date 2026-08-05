@@ -29,6 +29,13 @@ export function EnhancedQuickActions() {
       iconColor: "text-blue-400",
     },
     {
+      href: "/dashboard/creator/orders",
+      icon: TotalProductsIcon,
+      title: "Orders",
+      description: "Manage & track orders",
+      iconColor: "text-emerald-400",
+    },
+    {
       href: "/dashboard/creator/earnings",
       icon: EarningsIcon,
       title: "Earnings",
@@ -55,7 +62,7 @@ export function EnhancedQuickActions() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6">
         {actions.map((action, index) => (
           <Link href={action.href} key={index}>
             <div className="gradient-border-white-bottom relative h-[170px] p-5 group hover:shadow-[0_10px_30px_rgba(255,255,255,0.1)] transition-all duration-300 cursor-pointer">

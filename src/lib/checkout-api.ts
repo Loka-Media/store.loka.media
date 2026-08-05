@@ -83,13 +83,28 @@ export const unifiedCheckoutAPI = {
     }
   },
 
-  checkVariantAvailability: async (variants: Array<{ variant_id: number | string; quantity: number }>) => {
-    // Return mock success since Printify API doesn't have a bulk availability endpoint
-    return {
-      success: true,
-      all_available: true,
-      checks: variants.map(v => ({ variant_id: v.variant_id, available: true }))
-    };
+  checkVariantAvailability: async (variants: Array<{ variant_id: number | string; quantity: number; product_id?: number | string }>) => {
+    try {
+      const response = await fetch('/api/printify/variants/check-availability', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`
+        },
+        body: JSON.stringify({ variants })
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error(`Failed to check stock: ${response.statusText}`);
+    } catch (error) {
+      console.error('Real-time variant check failed, falling back to success:', error);
+      return {
+        success: true,
+        all_available: true,
+        checks: variants.map(v => ({ variant_id: v.variant_id, available: true }))
+      };
+    }
   },
 };
 

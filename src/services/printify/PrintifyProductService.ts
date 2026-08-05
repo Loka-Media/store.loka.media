@@ -137,8 +137,33 @@ function transformVariants(
 }
 
 // ============================================================
-// MOCKUP TRANSFORMATION
-// ============================================================
+function isHumanOrLifestyleImage(img: PrintifyProductImage): boolean {
+  const pos = (img.position || '').toLowerCase();
+  const src = (img.src || '').toLowerCase();
+  const keywords = ['other', 'lifestyle', 'model', 'person', 'human', 'context', 'man', 'woman', 'girl', 'boy', 'fit'];
+  return keywords.some(kw => pos.includes(kw) || src.includes(kw));
+}
+
+function getImagePriority(img: PrintifyProductImage): number {
+  const isDefault = Boolean(img.is_default || img.is_selected_for_publishing);
+  const isHuman = isHumanOrLifestyleImage(img);
+
+  // 0: Default image AND human/model image
+  if (isDefault && isHuman) return 0;
+  // 1: Human/model image (even if not marked is_default)
+  if (isHuman) return 1;
+  // 2: Default image (flat or other)
+  if (isDefault) return 2;
+
+  // Standard positions
+  const pos = (img.position || '').toLowerCase();
+  if (pos === 'front') return 3;
+  if (pos === 'back') return 4;
+  if (pos === 'left_sleeve' || pos === 'right_sleeve') return 5;
+  if (pos.includes('label')) return 6;
+
+  return 7;
+}
 
 function transformMockups(images: PrintifyProductImage[]): StorefrontMockup[] {
   // Filter out duplicate image sources
@@ -150,13 +175,11 @@ function transformMockups(images: PrintifyProductImage[]): StorefrontMockup[] {
     return true;
   });
 
-  // Sort by position order, then default status
+  // Sort by priority (Human/Lifestyle & Default images FIRST)
   const sorted = [...uniqueImages].sort((a, b) => {
-    const aOrder = POSITION_ORDER.indexOf(a.position);
-    const bOrder = POSITION_ORDER.indexOf(b.position);
-    if (aOrder !== bOrder) return (aOrder === -1 ? 999 : aOrder) - (bOrder === -1 ? 999 : bOrder);
-    // Default images first within same position
-    if (a.is_default !== b.is_default) return a.is_default ? -1 : 1;
+    const aPriority = getImagePriority(a);
+    const bPriority = getImagePriority(b);
+    if (aPriority !== bPriority) return aPriority - bPriority;
     return 0;
   });
 

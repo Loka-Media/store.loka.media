@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGuestCart } from '@/contexts/GuestCartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatPrice } from '@/lib/api';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -15,6 +15,7 @@ import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal
 export default function CartPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { formatPrice } = useCurrency();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   // Use GuestCart for both authenticated and guest users (handles both cases)

@@ -37,13 +37,16 @@ export async function POST(
       console.log('[Printify Webhook Received]', payload.type, payload.resource?.id);
 
       // Forward to backend for order/fulfillment status updates
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003').replace(/\/$/, '');
       try {
-        await fetch(`${backendUrl}/api/printify/webhooks/receive`, {
+        const response = await fetch(`${backendUrl}/api/printify/webhooks/receive`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
+        if (!response.ok) {
+          console.error(`[Printify Webhook] Backend returned status ${response.status}`);
+        }
       } catch (forwardError) {
         console.error('[Printify Webhook] Failed to forward to backend:', forwardError);
         // Don't fail the webhook response even if forwarding fails

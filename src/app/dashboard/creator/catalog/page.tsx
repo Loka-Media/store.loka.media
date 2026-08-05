@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Search, Package, Plus, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { SUBCATEGORIES_CONFIG } from "@/config/categories";
@@ -438,17 +439,20 @@ function PrintfulProductCard({
   onCreateProduct: (product: PrintfulProduct) => void;
 }) {
   const { calculateSellingPrice } = useGlobalMarkup();
-  const baseCost = parseFloat(product.premiumPrice || (parseFloat(product.price || '0') * 0.77).toFixed(2));
-  const sellingPrice = calculateSellingPrice(baseCost).toFixed(2);
+  const { formatPrice } = useCurrency();
+  const pbcPrice = parseFloat(product.price || '0').toFixed(2);
+  const pppPrice = parseFloat(product.premiumPrice || (parseFloat(product.price || '0') * 0.77).toFixed(2)).toFixed(2);
+  const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), product.title).toFixed(2);
 
   return (
     <div className="gradient-border-white-bottom rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,133,27,0.2)] hover:translate-y-[-4px] transition-all duration-300 flex flex-col">
       {/* Image Section with Brand and Buttons */}
       <div className="aspect-square relative overflow-hidden rounded-t-2xl">
-        <Image
+        <ImageWithFallback
           src={product.image || "/placeholder-product.png"}
           alt={product.title || product.model}
           fill
+          unoptimized={true}
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           className="object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
         />
@@ -494,8 +498,14 @@ function PrintfulProductCard({
 
         {/* Pricing Info */}
         <div className="flex flex-col gap-1 mt-1 border-t border-white/5 pt-2">
-          <span className="text-sm sm:text-base font-extrabold text-white">
-            From USD {sellingPrice}
+          {/* <span className="text-sm sm:text-base font-extrabold text-white">
+            From USD {pbcPrice}
+          </span> */}
+          {/* <span className="text-xs font-semibold text-gray-400">
+            From USD {pppPrice} with Printify Premium
+          </span> */}
+          <span className="font-bold text-orange-400 text-normal">
+            From {formatPrice(lokaPrice)}
           </span>
         </div>
       </div>

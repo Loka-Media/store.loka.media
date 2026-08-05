@@ -117,7 +117,10 @@ export function useCreatorDashboard() {
       setLoading(true);
       
       // Build parameters
-      const params: any = {};
+      const params: any = {
+        limit: 1000,
+        offset: 0
+      };
       if (user?.role === "admin") {
         params.creatorId = selectedCreatorId;
       }

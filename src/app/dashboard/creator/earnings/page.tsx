@@ -325,7 +325,7 @@ function EarningsPageContent() {
             </div>
             <p className="text-sm font-medium text-gray-400 mb-1">Pending Verification</p>
             <p className="text-3xl font-extrabold text-white mb-2">${pendingBal.toFixed(2)}</p>
-            <p className="text-xs text-gray-500">In 7-day holding return window</p>
+            <p className="text-xs text-gray-500">Held until order completion (min. 7 days)</p>
           </div>
 
           {/* Lifetime Withdrawn */}
@@ -588,7 +588,7 @@ function EarningsPageContent() {
                         <strong>Retail Price:</strong> The final customer-facing selling price, controlled by your markup percentage.
                       </li>
                       <li>
-                        <strong>Your Commission:</strong> You earn the full difference between the Customer Retail Price and the Loka Wholesale Cost. Earnings clear to Available Balance after the return period (7 days) passes.
+                        <strong>Your Commission:</strong> You earn the full difference between the Customer Retail Price and the Loka Wholesale Cost. Earnings clear to Available Balance after the order is completed (minimum 7 days return period).
                       </li>
                     </ul>
                   </div>

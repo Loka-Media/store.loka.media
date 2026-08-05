@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { formatPrice } from '@/lib/api';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { Package } from 'lucide-react';
 import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 
@@ -27,13 +27,12 @@ export function EnhancedProductInfo({
   creatorName,
 }: EnhancedProductInfoProps) {
   const { calculateSellingPrice } = useGlobalMarkup();
+  const { formatPrice } = useCurrency();
   
-  // Calculate retail price dynamically
-  const cost = selectedVariantCost !== undefined && selectedVariantCost !== null && selectedVariantCost > 0
-    ? selectedVariantCost
-    : (selectedVariantPrice ? selectedVariantPrice / 1.35 : basePrice);
-    
-  const displayPrice = calculateSellingPrice(cost, category);
+  // Stored pricing in DB already contains the final retail price
+  const displayPrice = selectedVariantPrice !== undefined && selectedVariantPrice !== null && selectedVariantPrice > 0
+    ? selectedVariantPrice
+    : basePrice;
 
   return (
     <div className="space-y-2 sm:space-y-3 md:space-y-4">

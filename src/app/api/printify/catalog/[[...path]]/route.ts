@@ -99,11 +99,12 @@ function getBlueprintCategoryIds(blueprintId: number, title: string): number[] {
   }
 
   // 9. Accessories
-  if (t.includes('bag') || t.includes('backpack') || t.includes('tote') || t.includes('pouch') || t.includes('wallet') || t.includes('purse') || t.includes('phone case') || t.includes('case') || t.includes('charger') || t.includes('mouse pad') || t.includes('mousepad') || t.includes('skin') || t.includes('sleeve') || t.includes('notebook') || t.includes('journal') || t.includes('sticker') || t.includes('decal') || t.includes('card') || t.includes('pen') || t.includes('pencil') || t.includes('hat') || t.includes('cap') || t.includes('beanie') || t.includes('bandana') || t.includes('scarf') || t.includes('scrunchie') || t.includes('keyring') || t.includes('keychain') || t.includes('pin') || t.includes('patch')) {
+  if (t.includes('bag') || t.includes('backpack') || t.includes('tote') || t.includes('pouch') || t.includes('wallet') || t.includes('purse') || t.includes('phone case') || t.includes('case') || t.includes('charger') || t.includes('mouse pad') || t.includes('mousepad') || t.includes('skin') || t.includes('sleeve') || t.includes('notebook') || t.includes('journal') || t.includes('sticker') || t.includes('decal') || t.includes('card') || t.includes('pen') || t.includes('pencil') || t.includes('hat') || t.includes('cap') || t.includes('beanie') || t.includes('bandana') || t.includes('scarf') || t.includes('scrunchie') || t.includes('keyring') || t.includes('keychain') || t.includes('pin') || t.includes('patch') || t.includes('jewelry') || t.includes('necklace') || t.includes('bracelet') || t.includes('ring') || t.includes('pendant') || t.includes('earring') || t.includes('charm') || t.includes('book') || t.includes('underwear') || t.includes('boxer') || t.includes('brief') || t.includes('mask') || t.includes('game') || t.includes('puzzle')) {
     return [4];
   }
 
-  return [];
+  // Default fallback if unknown blueprint type: map to Accessories (category 4) so it's never lost
+  return [4];
 }
 
 /**

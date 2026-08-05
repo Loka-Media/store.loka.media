@@ -16,7 +16,8 @@ import {
   Table,
   ArrowUpDown,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { OrderCard } from '@/components/admin/OrderCard';
@@ -115,6 +116,7 @@ interface Order {
   metadata?: unknown;
   vendor_payment_amount?: string;
   admin_fee?: string;
+  fulfillment?: any;
 }
 
 interface ReleasePaymentResponse {
@@ -269,6 +271,25 @@ export default function AdminOrdersPage() {
     loadDashboardData();
   }, [isAuthenticated, user, router]);
 
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+
+  const confirmCancelOrder = async () => {
+    if (!orderToCancel) return;
+    try {
+      setLoading(true);
+      await api.post(`/api/admin/orders/${orderToCancel.id}/cancel`);
+      toast.success(`Order ${orderToCancel.order_number} cancelled successfully!`);
+      setShowOrderModal(false);
+      setOrderToCancel(null);
+      loadDashboardData();
+    } catch (error: any) {
+      console.error('Cancel order error:', error);
+      toast.error(error.response?.data?.error || 'Failed to cancel order');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Persist viewMode to localStorage
   useEffect(() => {
     localStorage.setItem('adminOrdersViewMode', viewMode);
@@ -418,7 +439,7 @@ export default function AdminOrdersPage() {
   const handleOrderClick = async (order: Order) => {
     try {
       const orderDetails = await adminAPI.getOrderDetails(order.id.toString());
-      setSelectedOrder({ ...order, ...orderDetails.order });
+      setSelectedOrder({ ...order, ...orderDetails.order, fulfillment: orderDetails.fulfillment });
       setShowOrderModal(true);
     } catch (error: unknown) {
       console.error('Failed to load order details:', error);
@@ -820,16 +841,31 @@ export default function AdminOrdersPage() {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOrderClick(order);
-                                }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                                View
-                              </button>
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOrderClick(order);
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  View
+                                </button>
+                                {order.order_status !== 'cancelled' && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setOrderToCancel(order);
+                                    }}
+                                    disabled={loading}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-500/20 transition-all disabled:opacity-50"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                    Cancel
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -989,6 +1025,68 @@ export default function AdminOrdersPage() {
                         </div>
                       </div>
                     )}
+
+                    {/* Fulfillment & Tracking Details */}
+                    {selectedOrder.fulfillment && (
+                      <div className="bg-neutral-950/50 border border-white/5 rounded-2xl p-5">
+                        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Fulfillment Details</h4>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2">
+                            <span className="text-gray-400">Type</span>
+                            <span className="font-semibold text-white capitalize">{selectedOrder.fulfillment.fulfillment_type || 'Printify'}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2">
+                            <span className="text-gray-400">Status</span>
+                            <span className="inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 capitalize">
+                              {selectedOrder.fulfillment.status || 'fulfilled'}
+                            </span>
+                          </div>
+
+                          {/* Shipments parsing */}
+                          {(() => {
+                            const data = typeof selectedOrder.fulfillment.fulfillment_data === 'string'
+                              ? JSON.parse(selectedOrder.fulfillment.fulfillment_data)
+                              : selectedOrder.fulfillment.fulfillment_data;
+                            const shipments = data?.shipments || [];
+
+                            if (shipments.length === 0) {
+                              return (
+                                <p className="text-xs text-gray-500 italic mt-2">
+                                  No shipments recorded yet.
+                                </p>
+                              );
+                            }
+
+                            return (
+                              <div className="space-y-3 pt-2">
+                                {shipments.map((shipment: any, idx: number) => (
+                                  <div key={idx} className="bg-black/40 border border-white/5 rounded-xl p-3 space-y-2">
+                                    <div className="flex justify-between text-xs">
+                                      <span className="text-gray-500">Carrier:</span>
+                                      <span className="font-semibold text-white">{shipment.carrier || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                      <span className="text-gray-500">Tracking:</span>
+                                      <span className="font-semibold text-orange-400 selection:bg-orange-500/20">{shipment.number || 'N/A'}</span>
+                                    </div>
+                                    {shipment.url && (
+                                      <a
+                                        href={shipment.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full mt-2 inline-flex items-center justify-center py-2 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-lg transition-all"
+                                      >
+                                        Track Shipment
+                                      </a>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Right Column - Order Items */}
@@ -1076,7 +1174,20 @@ export default function AdminOrdersPage() {
 
               {/* Modal Footer */}
               <div className="sticky bottom-0 bg-neutral-900/95 backdrop-blur-xl border-t border-white/10 px-8 py-4">
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-between">
+                  {selectedOrder.order_status !== 'cancelled' ? (
+                    <button
+                      onClick={() => setOrderToCancel(selectedOrder)}
+                      disabled={loading}
+                      className="px-4 py-2.5 text-sm font-semibold text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {loading ? 'Cancelling...' : 'Cancel Order'}
+                    </button>
+                  ) : (
+                    <span className="text-xs text-red-400 font-semibold px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-lg">
+                      Order Cancelled
+                    </span>
+                  )}
                   <button
                     onClick={() => setShowOrderModal(false)}
                     className="px-5 py-2.5 text-sm font-medium text-white bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all"
@@ -1196,6 +1307,45 @@ export default function AdminOrdersPage() {
             isOpen={showCommissionModal}
             onClose={() => setShowCommissionModal(false)}
           />
+        )}
+
+        {/* ─── Custom Cancel Confirmation Modal ─── */}
+        {orderToCancel && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+            <div className="bg-neutral-900 border border-white/10 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0 text-red-400">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Cancel Order?</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Order <span className="font-mono font-semibold text-gray-200">{orderToCancel.order_number}</span>
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-300 leading-relaxed">
+                Are you sure you want to cancel this order? This action cannot be undone and will update commission tracking records.
+              </p>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+                <button
+                  onClick={() => setOrderToCancel(null)}
+                  className="px-4 py-2.5 text-sm font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all"
+                >
+                  Keep Order
+                </button>
+                <button
+                  onClick={confirmCancelOrder}
+                  disabled={loading}
+                  className="px-4 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-lg shadow-red-600/20 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {loading ? 'Cancelling...' : 'Yes, Cancel Order'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
