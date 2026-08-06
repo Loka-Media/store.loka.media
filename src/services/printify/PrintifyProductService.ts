@@ -144,7 +144,17 @@ function isHumanOrLifestyleImage(img: PrintifyProductImage): boolean {
   return keywords.some(kw => pos.includes(kw) || src.includes(kw));
 }
 
+function isSizeTableImage(img: PrintifyProductImage): boolean {
+  const pos = (img.position || '').toLowerCase();
+  const src = (img.src || '').toLowerCase();
+  const keywords = ['size', 'measurement', 'dimension', 'table', 'chart', 'guide'];
+  return keywords.some(kw => pos.includes(kw) || src.includes(kw));
+}
+
 function getImagePriority(img: PrintifyProductImage): number {
+  // 999: Size table / measurement chart images MUST ALWAYS BE LAST
+  if (isSizeTableImage(img)) return 999;
+
   const isDefault = Boolean(img.is_default || img.is_selected_for_publishing);
   const isHuman = isHumanOrLifestyleImage(img);
 
