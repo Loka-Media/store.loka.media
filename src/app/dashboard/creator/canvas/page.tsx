@@ -169,20 +169,37 @@ function CanvasContent() {
 
             // Compute printFiles from Printify variant placeholders
             if (availableVariants.length > 0) {
+              // Pre-select all available variants by default so placements and canvas load instantly
+              setSelectedVariants(availableVariants.map((v: any) => v.id));
+
               const variant_printfiles = availableVariants.map((v: any) => {
                 const placements: Record<string, number> = {};
-                v.placeholders?.forEach((p: any) => {
-                  const pos = p.position === 'left_sleeve' ? 'left' : p.position === 'right_sleeve' ? 'right' : p.position;
+                const placeholders = (v.placeholders && v.placeholders.length > 0)
+                  ? v.placeholders
+                  : [{ position: 'front', width: 4000, height: 4000 }];
+
+                placeholders.forEach((p: any) => {
+                  const rawPos = (p.position || 'front').toLowerCase();
+                  const pos = rawPos === 'left_sleeve' ? 'left' : rawPos === 'right_sleeve' ? 'right' : rawPos;
                   if (pos === 'left') {
                     placements['left'] = v.id * 10 + 3;
                     placements['sleeve_left'] = v.id * 10 + 3;
+                    placements['left_sleeve'] = v.id * 10 + 3;
                   } else if (pos === 'right') {
                     placements['right'] = v.id * 10 + 4;
                     placements['sleeve_right'] = v.id * 10 + 4;
+                    placements['right_sleeve'] = v.id * 10 + 4;
                   } else {
-                    placements[pos] = v.id * 10 + (pos === 'front' ? 1 : pos === 'back' ? 2 : 5);
+                    const code = pos.includes('front') ? 1 : pos.includes('back') ? 2 : 5;
+                    placements[pos] = v.id * 10 + code;
+                    placements['front'] = placements['front'] || (v.id * 10 + code);
                   }
                 });
+
+                if (Object.keys(placements).length === 0) {
+                  placements['front'] = v.id * 10 + 1;
+                }
+
                 return {
                   variant_id: v.id,
                   placements
@@ -191,18 +208,31 @@ function CanvasContent() {
 
               const printfiles: any[] = [];
               availableVariants.forEach((v: any) => {
-                v.placeholders?.forEach((p: any) => {
-                  const pos = p.position === 'left_sleeve' ? 'left' : p.position === 'right_sleeve' ? 'right' : p.position;
-                  const printfile_id = v.id * 10 + (pos === 'front' ? 1 : pos === 'back' ? 2 : pos === 'left' ? 3 : pos === 'right' ? 4 : 5);
+                const placeholders = (v.placeholders && v.placeholders.length > 0)
+                  ? v.placeholders
+                  : [{ position: 'front', width: 4000, height: 4000 }];
+
+                placeholders.forEach((p: any) => {
+                  const rawPos = (p.position || 'front').toLowerCase();
+                  const pos = rawPos === 'left_sleeve' ? 'left' : rawPos === 'right_sleeve' ? 'right' : rawPos;
+                  const printfile_id = v.id * 10 + (pos.includes('front') ? 1 : pos.includes('back') ? 2 : pos === 'left' ? 3 : pos === 'right' ? 4 : 5);
                   if (!printfiles.some(pf => pf.printfile_id === printfile_id)) {
                     printfiles.push({
                       printfile_id,
-                      width: p.width,
-                      height: p.height
+                      width: p.width || 4000,
+                      height: p.height || 4000
                     });
                   }
                 });
               });
+
+              if (printfiles.length === 0) {
+                printfiles.push({
+                  printfile_id: 1,
+                  width: 4000,
+                  height: 4000
+                });
+              }
 
               const computedPrintFiles = {
                 variant_printfiles,

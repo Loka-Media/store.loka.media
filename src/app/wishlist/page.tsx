@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatPrice, productAPI } from "@/lib/api";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { productAPI } from "@/lib/api";
 import { Heart, ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,6 +17,7 @@ export default function WishlistPage() {
   const { items, loading, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useGuestCart();
   const { isAuthenticated } = useAuth();
+  const { formatPrice } = useCurrency();
   const router = useRouter();
 
   useEffect(() => {

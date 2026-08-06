@@ -66,6 +66,7 @@ export const OrderSummary = ({
 }: OrderSummaryProps) => {
   const { formatPrice } = useCurrency();
   const subtotalAmount = parseFloat(summary.subtotal.replace("$", ""));
+  const platformFee = subtotalAmount * 0.049;
   // Use actual tax if available, otherwise estimate at 8%
   const tax = taxAmount > 0 ? taxAmount : subtotalAmount * 0.08;
 
@@ -101,6 +102,13 @@ export const OrderSummary = ({
         <div className="flex justify-between text-sm">
           <p className="text-gray-400 font-medium">Subtotal</p>
           <p className="text-white font-bold">{formatPrice(subtotalAmount)}</p>
+        </div>
+        <div className="flex justify-between text-sm">
+          <p className="text-gray-400 font-medium">
+            Platform Fee
+            <span className="text-xs block text-gray-500">Convenience fee (4.9%)</span>
+          </p>
+          <p className="text-white font-bold">{formatPrice(platformFee)}</p>
         </div>
         {isFetchingShippingRates ? (
           <div className="text-sm">

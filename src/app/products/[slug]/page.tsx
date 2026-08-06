@@ -7,6 +7,7 @@ import { useVariantSelection } from '@/hooks/useVariantSelection';
 import { useProductWishlist } from '@/hooks/useProductWishlist';
 import { useProductCart } from '@/hooks/useProductCart';
 import { useLocationLookup } from '@/hooks/useLocationLookup';
+import { getValidImageUrl } from '@/lib/utils';
 
 import { EnhancedProductImageGallery } from '@/components/products/product-detail/EnhancedProductImageGallery';
 import { EnhancedProductInfo, EnhancedProductDescription } from '@/components/products/product-detail/EnhancedProductInfo';
@@ -55,14 +56,29 @@ export default function ProductPage({ params }: ProductPageProps) {
     return <ProductNotFound />;
   }
 
-  const extractImageUrl = (img: any) => {
-    if (typeof img === 'string') return img;
-    return img?.src || img?.url || '';
+  const extractImageUrl = (img: any): string => {
+    if (!img) return '';
+    if (typeof img === 'string') {
+      const trimmed = img.trim();
+      if (!trimmed || trimmed === '/placeholder-product.svg') return '';
+      if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          return extractImageUrl(Array.isArray(parsed) ? parsed[0] : parsed);
+        } catch {
+          return '';
+        }
+      }
+      return trimmed;
+    }
+    return img?.permanent_url || img?.src || img?.url || img?.image_url || img?.preview_url || img?.file_url || '';
   };
 
-  const rawImages = product.images && product.images.length > 0
+  const rawImages = (product.images && product.images.length > 0)
     ? product.images
-    : [product.thumbnail_url || '/placeholder-product.svg'];
+    : (product.mockups && product.mockups.length > 0)
+    ? product.mockups
+    : [product.thumbnail_url || getValidImageUrl(product)];
 
   const selectedColor = selectedVariant ? getVariantColorAndSize(selectedVariant).color : undefined;
 

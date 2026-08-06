@@ -2,11 +2,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatPrice, ExtendedProduct } from "@/lib/api";
-import { createProductSlug } from "@/lib/utils";
+import { ExtendedProduct } from "@/lib/api";
+import { createProductSlug, getValidImageUrl } from "@/lib/utils";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Heart, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -22,6 +23,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { addToWishlist, removeFromWishlist, items: wishlistItems } = useWishlist();
   const { isAuthenticated } = useAuth();
   const { getProductPriceRange } = useGlobalMarkup();
+  const { formatPrice } = useCurrency();
 
   const { minPrice, maxPrice } = getProductPriceRange(product);
 
@@ -34,10 +36,7 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   }, [isAuthenticated, product.id, wishlistItems]);
 
-  const imageUrl =
-    product.thumbnail_url ||
-    product.images?.[0] ||
-    "/placeholder-product.svg";
+  const imageUrl = getValidImageUrl(product);
 
   return (
     <Link href={`/products/${createProductSlug(product.name, product.id)}`}>

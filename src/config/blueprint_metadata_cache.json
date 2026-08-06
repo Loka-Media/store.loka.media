@@ -6434,6 +6434,15 @@
     "colorsCount": 13,
     "providersCount": 3
   },
+  "1340": {
+    "title": "Maars Maker Skinny Matte Tumbler, 20oz",
+    "providerId": 261,
+    "price": "7.70",
+    "premiumPrice": "5.93",
+    "sizesCount": 1,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
   "1346": {
     "title": "Doormat",
     "providerId": 99,
@@ -12221,6 +12230,69 @@
     "colorsCount": 12,
     "providersCount": 2
   },
+  "3194": {
+    "title": "Tall Select Snag-Proof Tactical Polo",
+    "providerId": 217,
+    "price": "10.50",
+    "premiumPrice": "8.09",
+    "sizesCount": 5,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3195": {
+    "title": "Tall Select Lightweight Snag-Proof Polo",
+    "providerId": 217,
+    "price": "17.00",
+    "premiumPrice": "13.09",
+    "sizesCount": 5,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "3196": {
+    "title": "Industrial Snag-Proof Pique Polo",
+    "providerId": 217,
+    "price": "14.25",
+    "premiumPrice": "10.97",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3197": {
+    "title": "Women's Select Snag-Proof Polo",
+    "providerId": 217,
+    "price": "11.50",
+    "premiumPrice": "8.86",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3198": {
+    "title": "Women's Select Snag-Proof Tactical Polo",
+    "providerId": 217,
+    "price": "18.00",
+    "premiumPrice": "13.86",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3199": {
+    "title": "Workwear Pro Polo",
+    "providerId": 217,
+    "price": "15.25",
+    "premiumPrice": "11.74",
+    "sizesCount": 10,
+    "colorsCount": 10,
+    "providersCount": 1
+  },
+  "3200": {
+    "title": "Industrial Snag-Proof Pique Pocket Polo",
+    "providerId": 217,
+    "price": "12.50",
+    "premiumPrice": "9.63",
+    "sizesCount": 10,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
   "3204": {
     "title": "Dri-Power Pocket Sport Shirt",
     "providerId": 99,
@@ -12248,6 +12320,15 @@
     "colorsCount": 12,
     "providersCount": 2
   },
+  "3319": {
+    "title": "Women's Dri-Mesh V-Neck Polo",
+    "providerId": 217,
+    "price": "15.25",
+    "premiumPrice": "11.74",
+    "sizesCount": 8,
+    "colorsCount": 10,
+    "providersCount": 1
+  },
   "3321": {
     "title": "Women's PosiCharge Re-Compete Polo",
     "providerId": 99,
@@ -12256,6 +12337,15 @@
     "sizesCount": 7,
     "colorsCount": 36,
     "providersCount": 5
+  },
+  "3322": {
+    "title": "Women's UV Micropique Polo",
+    "providerId": 217,
+    "price": "16.25",
+    "premiumPrice": "12.51",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
   },
   "3323": {
     "title": "Women's Heather Contender Polo",
@@ -12266,6 +12356,15 @@
     "colorsCount": 38,
     "providersCount": 7
   },
+  "3326": {
+    "title": "Club Colorblock Polo",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 8,
+    "colorsCount": 9,
+    "providersCount": 1
+  },
   "3328": {
     "title": "PosiCharge Strive Polo",
     "providerId": 99,
@@ -12274,6 +12373,33 @@
     "sizesCount": 8,
     "colorsCount": 8,
     "providersCount": 5
+  },
+  "3329": {
+    "title": "PosiCharge RacerMesh Long Sleeve Polo",
+    "providerId": 217,
+    "price": "15.50",
+    "premiumPrice": "11.94",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
+  },
+  "3330": {
+    "title": "Tricolor Shoulder Micropique Sport-Wick Polo",
+    "providerId": 217,
+    "price": "12.00",
+    "premiumPrice": "9.24",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3331": {
+    "title": "PosiCharge Micro-Mesh Colorblock Polo",
+    "providerId": 217,
+    "price": "9.25",
+    "premiumPrice": "7.12",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
   },
   "3372": {
     "title": "Combed Ring Spun Pique Polo",
@@ -12311,6 +12437,15 @@
     "colorsCount": 9,
     "providersCount": 6
   },
+  "3400": {
+    "title": "Women's Versa Polo",
+    "providerId": 217,
+    "price": "12.25",
+    "premiumPrice": "9.43",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
   "3403": {
     "title": "Competitor United Polo",
     "providerId": 99,
@@ -12320,6 +12455,60 @@
     "colorsCount": 13,
     "providersCount": 3
   },
+  "3404": {
+    "title": "Endeavor Polo",
+    "providerId": 217,
+    "price": "10.50",
+    "premiumPrice": "8.09",
+    "sizesCount": 8,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "3405": {
+    "title": "Versa Polo",
+    "providerId": 217,
+    "price": "17.00",
+    "premiumPrice": "13.09",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3406": {
+    "title": "PosiCharge Electric Heather Polo",
+    "providerId": 217,
+    "price": "14.25",
+    "premiumPrice": "10.97",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
+  "3407": {
+    "title": "Sideline Polo",
+    "providerId": 217,
+    "price": "11.50",
+    "premiumPrice": "8.86",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3410": {
+    "title": "PosiCharge RacerMesh Raglan Heather Block Polo",
+    "providerId": 217,
+    "price": "12.50",
+    "premiumPrice": "9.63",
+    "sizesCount": 8,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "3411": {
+    "title": "PosiCharge RacerMesh Pocket Polo",
+    "providerId": 217,
+    "price": "9.00",
+    "premiumPrice": "6.93",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
   "3413": {
     "title": "Colorblock Micropique Sport-Wick Polo",
     "providerId": 99,
@@ -12328,6 +12517,42 @@
     "sizesCount": 9,
     "colorsCount": 23,
     "providersCount": 6
+  },
+  "3415": {
+    "title": "Ombre Heather Polo",
+    "providerId": 217,
+    "price": "17.25",
+    "premiumPrice": "13.28",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3416": {
+    "title": "PosiCharge Micro-Mesh Polo",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 8,
+    "colorsCount": 10,
+    "providersCount": 1
+  },
+  "3417": {
+    "title": "PosiCharge Active Textured Polo",
+    "providerId": 217,
+    "price": "11.00",
+    "premiumPrice": "8.47",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
+  },
+  "3418": {
+    "title": "UV Micropique Colorblock Polo",
+    "providerId": 217,
+    "price": "18.25",
+    "premiumPrice": "14.05",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
   },
   "3421": {
     "title": "Women's Organic CVC Fleece Full-Zip Hoodie",
@@ -12408,6 +12633,15 @@
     "premiumPrice": "27.61",
     "sizesCount": 8,
     "colorsCount": 3,
+    "providersCount": 1
+  },
+  "3451": {
+    "title": "12-Oz. Tough Fleece Job Shirt",
+    "providerId": 217,
+    "price": "9.23",
+    "premiumPrice": "7.11",
+    "sizesCount": 10,
+    "colorsCount": 2,
     "providersCount": 1
   },
   "3478": {
@@ -12626,6 +12860,78 @@
     "colorsCount": 9,
     "providersCount": 1
   },
+  "3686": {
+    "title": "Women's Sport-Wick Varsity Fleece Full-Zip Hooded Jacket",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3688": {
+    "title": "Women's Triumph Cowl Neck Pullover",
+    "providerId": 217,
+    "price": "25.35",
+    "premiumPrice": "19.52",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3689": {
+    "title": "Women's PosiCharge Tri-Blend Wicking Fleece Full-Zip Hooded Jacket",
+    "providerId": 217,
+    "price": "15.50",
+    "premiumPrice": "11.94",
+    "sizesCount": 8,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "3690": {
+    "title": "Women's PosiCharge Tri-Blend Wicking Fleece Hooded Pullover",
+    "providerId": 217,
+    "price": "23.00",
+    "premiumPrice": "17.71",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3692": {
+    "title": "Women's PosiCharge Tri-Blend Wicking Long Sleeve Hoodie",
+    "providerId": 217,
+    "price": "36.86",
+    "premiumPrice": "28.38",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3693": {
+    "title": "Women's Sport-Wick Flex Fleece Full-Zip",
+    "providerId": 217,
+    "price": "13.00",
+    "premiumPrice": "10.01",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3696": {
+    "title": "Women's Sport-Wick Stretch Contrast 1/4-Zip Pullover",
+    "providerId": 217,
+    "price": "25.00",
+    "premiumPrice": "19.25",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3697": {
+    "title": "Women's Sport-Wick Textured 1/4-Zip Pullover",
+    "providerId": 217,
+    "price": "18.35",
+    "premiumPrice": "14.13",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
   "3702": {
     "title": "Sport-Wick Varsity Fleece Full-Zip Hooded Jacket",
     "providerId": 217,
@@ -12788,6 +13094,15 @@
     "colorsCount": 4,
     "providersCount": 1
   },
+  "3730": {
+    "title": "Sport-Wick Flex Fleece Full-Zip",
+    "providerId": 217,
+    "price": "12.25",
+    "premiumPrice": "9.43",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
   "3731": {
     "title": "Sport-Wick Flex Fleece Pullover Hoodie",
     "providerId": 217,
@@ -12804,6 +13119,15 @@
     "premiumPrice": "14.13",
     "sizesCount": 8,
     "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3734": {
+    "title": "Exchange 1.5 Long Sleeve 1/2-Zip",
+    "providerId": 217,
+    "price": "10.50",
+    "premiumPrice": "8.09",
+    "sizesCount": 8,
+    "colorsCount": 4,
     "providersCount": 1
   },
   "3735": {
@@ -12842,6 +13166,15 @@
     "colorsCount": 10,
     "providersCount": 1
   },
+  "3740": {
+    "title": "Drive Fleece Hooded Full-Zip",
+    "providerId": 217,
+    "price": "12.50",
+    "premiumPrice": "9.63",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
   "3741": {
     "title": "Drive Fleece 1/4-Zip Pullover",
     "providerId": 217,
@@ -12849,6 +13182,15 @@
     "premiumPrice": "20.02",
     "sizesCount": 8,
     "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3742": {
+    "title": "Drive Fleece Crewneck",
+    "providerId": 217,
+    "price": "16.25",
+    "premiumPrice": "12.51",
+    "sizesCount": 8,
+    "colorsCount": 4,
     "providersCount": 1
   },
   "3744": {
@@ -13130,6 +13472,15 @@
     "colorsCount": 4,
     "providersCount": 1
   },
+  "4011": {
+    "title": "Women's Long Sleeve Twill Overshirt",
+    "providerId": 217,
+    "price": "9.00",
+    "premiumPrice": "6.93",
+    "sizesCount": 8,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
   "4012": {
     "title": "Women's Stretch Crepe 3/4-Sleeve Blouse",
     "providerId": 217,
@@ -13137,6 +13488,15 @@
     "premiumPrice": "12.51",
     "sizesCount": 8,
     "colorsCount": 7,
+    "providersCount": 1
+  },
+  "4015": {
+    "title": "Women's Long Sleeve Value Denim Shirt",
+    "providerId": 217,
+    "price": "13.23",
+    "premiumPrice": "10.19",
+    "sizesCount": 8,
+    "colorsCount": 2,
     "providersCount": 1
   },
   "4017": {
@@ -13202,6 +13562,15 @@
     "colorsCount": 8,
     "providersCount": 1
   },
+  "4026": {
+    "title": "Women's Short Sleeve SuperPro Twill Shirt",
+    "providerId": 217,
+    "price": "8.00",
+    "premiumPrice": "6.16",
+    "sizesCount": 8,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
   "4027": {
     "title": "Women's Long Sleeve Carefree Poplin Shirt",
     "providerId": 217,
@@ -13227,6 +13596,15 @@
     "premiumPrice": "7.32",
     "sizesCount": 8,
     "colorsCount": 4,
+    "providersCount": 1
+  },
+  "4033": {
+    "title": "Women's Short Sleeve SuperPro React Twill Shirt",
+    "providerId": 217,
+    "price": "11.23",
+    "premiumPrice": "8.65",
+    "sizesCount": 8,
+    "colorsCount": 12,
     "providersCount": 1
   },
   "4034": {
@@ -13335,6 +13713,33 @@
     "premiumPrice": "7.11",
     "sizesCount": 5,
     "colorsCount": 14,
+    "providersCount": 1
+  },
+  "4052": {
+    "title": "Tall Long Sleeve Denim Shirt",
+    "providerId": 217,
+    "price": "14.46",
+    "premiumPrice": "11.13",
+    "sizesCount": 5,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "4053": {
+    "title": "Tall Long Sleeve Twill Shirt",
+    "providerId": 217,
+    "price": "7.00",
+    "premiumPrice": "5.39",
+    "sizesCount": 5,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "4055": {
+    "title": "Tall Crosshatch Easy Care Shirt",
+    "providerId": 217,
+    "price": "9.46",
+    "premiumPrice": "7.28",
+    "sizesCount": 5,
+    "colorsCount": 3,
     "providersCount": 1
   },
   "4056": {

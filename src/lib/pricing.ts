@@ -93,16 +93,41 @@ export function calculateSellingPrice(
  */
 export function getProductPriceRange(
   product: any, 
-  categoryOrMarkup: string | number | undefined, 
+  categoryOrMarkup?: string | number | undefined, 
   categoryMarkups?: Record<string, number>, 
   globalMarkup?: number
 ): { minPrice: number; maxPrice: number } {
   if (!product) return { minPrice: 0, maxPrice: 0 };
 
-  // 1. Gather all variant retail prices if available
-  if (product.variants && product.variants.length > 0) {
+  // 1. Check direct retail prices calculated by backend API / Database
+  const directMin = parseFloat(
+    product.min_price ?? 
+    product.minPrice ?? 
+    product.price_range?.min ?? 
+    product.price ?? 
+    product.retail_price ?? 
+    0
+  );
+  const directMax = parseFloat(
+    product.max_price ?? 
+    product.maxPrice ?? 
+    product.price_range?.max ?? 
+    product.price ?? 
+    product.retail_price ?? 
+    directMin
+  );
+
+  if (!isNaN(directMin) && directMin > 0) {
+    return {
+      minPrice: directMin,
+      maxPrice: !isNaN(directMax) && directMax > 0 ? directMax : directMin
+    };
+  }
+
+  // 2. Gather variant retail prices if available
+  if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
     const prices = product.variants
-      .map((v: any) => parseFloat(v.price))
+      .map((v: any) => parseFloat(v.price || v.retail_price || v.cost || 0))
       .filter((p: number) => !isNaN(p) && p > 0);
     
     if (prices.length > 0) {
@@ -113,23 +138,27 @@ export function getProductPriceRange(
     }
   }
 
-  // 2. Fallback to product-level base price
-  const fallbackPrice = parseFloat(product.base_price || product.price || '0');
-  
-  if (typeof categoryOrMarkup === 'number') {
-    return {
-      minPrice: calculateSellingPrice(fallbackPrice, categoryOrMarkup),
-      maxPrice: calculateSellingPrice(fallbackPrice, categoryOrMarkup),
-    };
+  // 3. Fallback to calculating selling price from base cost & markup
+  const baseCost = parseFloat(product.base_price || product.basePrice || product.min_base_cost || product.cost || '0');
+  const creatorMarkup = parseFloat(product.markup_percentage || product.markupPercentage || '0');
+
+  if (!isNaN(baseCost) && baseCost > 0) {
+    if (!isNaN(creatorMarkup) && creatorMarkup > 0) {
+      const creatorPrice = Math.ceil(baseCost * (1 + creatorMarkup / 100)) - 0.01;
+      return { minPrice: creatorPrice, maxPrice: creatorPrice };
+    }
+
+    if (typeof categoryOrMarkup === 'number') {
+      const calculated = calculateSellingPrice(baseCost, categoryOrMarkup);
+      return { minPrice: calculated, maxPrice: calculated };
+    }
+    const categoryName = typeof categoryOrMarkup === 'string' ? categoryOrMarkup : resolveProductCategoryName(product);
+    const markupRateInput = categoryOrMarkup !== undefined ? categoryOrMarkup : categoryName;
+    const calculated = calculateSellingPrice(baseCost, markupRateInput, categoryMarkups, globalMarkup);
+    return { minPrice: calculated, maxPrice: calculated };
   }
 
-  const categoryName = typeof categoryOrMarkup === 'string' ? categoryOrMarkup : resolveProductCategoryName(product);
-  const markupRateInput = categoryOrMarkup !== undefined ? categoryOrMarkup : categoryName;
-  
-  return {
-    minPrice: calculateSellingPrice(fallbackPrice, markupRateInput, categoryMarkups, globalMarkup),
-    maxPrice: calculateSellingPrice(fallbackPrice, markupRateInput, categoryMarkups, globalMarkup),
-  };
+  return { minPrice: 0, maxPrice: 0 };
 }
 
 /**

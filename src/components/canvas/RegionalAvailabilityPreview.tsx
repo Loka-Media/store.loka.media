@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Globe, Check, X, AlertTriangle, RefreshCw, Eye, Info } from 'lucide-react';
+import { Globe, Check, X, AlertTriangle, RefreshCw, Eye, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { printifyAPI } from '@/lib/api';
 import { getUniqueRegionsFromProfiles, RegionalMapping, REST_OF_WORLD_CODE } from '@/lib/shipping-utils';
 
@@ -25,6 +25,7 @@ interface RegionalAvailabilityPreviewProps {
   selectedProduct: ProductData | null;
   selectedVariants: number[];
   className?: string;
+  defaultOpen?: boolean;
 }
 
 interface RegionalData {
@@ -45,12 +46,14 @@ interface RegionalData {
 export function RegionalAvailabilityPreview({
   selectedProduct,
   selectedVariants,
-  className = ''
+  className = '',
+  defaultOpen = false
 }: RegionalAvailabilityPreviewProps) {
   const [regionalData, setRegionalData] = useState<RegionalData>({});
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showRowTooltip, setShowRowTooltip] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   // Fetch regional availability data when variants change
   useEffect(() => {
@@ -217,154 +220,180 @@ export function RegionalAvailabilityPreview({
   );
 
   return (
-    <div className={`bg-black/40 rounded-2xl p-6 border border-gray-800 backdrop-blur-sm ${className}`}>
-      <div className="flex items-center justify-between mb-4">
+    <div className={`bg-black/40 rounded-2xl border border-gray-800 backdrop-blur-sm overflow-hidden transition-all duration-300 ${className}`}>
+      {/* Accordion Header - Clickable & Collapsible (Default Closed) */}
+      <div
+        className="flex items-center justify-between p-4 sm:p-5 cursor-pointer select-none hover:bg-white/[0.03] transition-colors"
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
-            <Globe className="w-4 h-4 text-white" />
+          <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex-shrink-0 shadow-lg shadow-blue-500/10">
+            <Globe className="w-5 h-5 text-white" />
           </div>
-          <h3 className="text-lg font-bold text-white">Regional Availability</h3>
+          <div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h3 className="text-base sm:text-lg font-bold text-white">Regional Availability</h3>
+              {availableRegions.length > 0 && (
+                <span className="text-xs font-bold text-green-400 bg-green-900/40 border border-green-500/30 px-2.5 py-0.5 rounded-full">
+                  {availableRegions.length}/{regionCodes.length} Regions
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 font-medium mt-0.5">
+              Your product will be available in <strong className="text-white">{availableRegions.length}</strong> out of {regionCodes.length} regions
+            </p>
+          </div>
         </div>
+
         <div className="flex items-center gap-3">
           {loading && <RefreshCw className="w-4 h-4 text-orange-500 animate-spin" />}
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="text-sm text-gray-300 hover:text-orange-400 flex items-center gap-2 px-3 py-1 rounded-lg bg-gray-800 hover:bg-gray-700 transition-all duration-200 font-medium"
-          >
-            <Eye className="w-4 h-4" />
-            {expanded ? 'Less' : 'Details'}
-          </button>
+          <div className="p-2 rounded-xl bg-gray-800/80 text-gray-300 border border-gray-700/50 hover:bg-gray-700 transition-colors">
+            {isOpen ? <ChevronUp className="w-5 h-5 text-gray-300" /> : <ChevronDown className="w-5 h-5 text-gray-300" />}
+          </div>
         </div>
       </div>
 
-      {/* Summary */}
-      <div className="mb-6">
-        <p className="text-gray-300 mb-4 font-medium">
-          Your product will be available in <strong className="text-white">{availableRegions.length}</strong> out of {regionCodes.length} regions
-        </p>
+      {/* Accordion Body */}
+      {isOpen && (
+        <div className="p-4 sm:p-6 pt-0 border-t border-gray-800/80 animate-fadeIn">
+          {/* Details toggle */}
+          <div className="flex justify-end my-4">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+              className="text-xs text-gray-300 hover:text-orange-400 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-700 transition-all font-medium cursor-pointer"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              {expanded ? 'Hide Variant Details' : 'View Variant Details'}
+            </button>
+          </div>
 
-        <div className="flex flex-wrap gap-3">
-          {regionCodes.map(code => {
-            const data = regionalData[code];
-            const isAvailable = data && data.available_variants > 0;
-            const isRestOfWorld = data.mapping.isRestOfWorld;
-
-            return (
-              <div
-                key={code}
-                className={`relative flex items-center gap-4 px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${isAvailable
-                  ? 'bg-green-900/30 border border-green-500/30 hover:bg-green-900/40'
-                  : 'bg-gray-800/50 border border-gray-700/50 hover:bg-gray-800/70'
-                  }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-white whitespace-nowrap" title={data.mapping.name}>
-                    {data.mapping.name}
-                  </span>
-                  {isRestOfWorld && (
-                    <div
-                      className="relative cursor-help"
-                      onMouseEnter={() => setShowRowTooltip(true)}
-                      onMouseLeave={() => setShowRowTooltip(false)}
-                    >
-                      <Info className="w-4 h-4 text-blue-400" />
-                      {showRowTooltip && (
-                        <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-gray-900 border border-gray-700 rounded-lg text-xs font-normal text-gray-300 shadow-xl">
-                          <p className="mb-2">
-                            <strong>"Rest of World"</strong> includes over 150+ international destinations supported by Printify.
-                          </p>
-                          <p className="text-gray-400 mb-1">Popular destinations include:</p>
-                          <ul className="list-disc pl-4 grid grid-cols-2 gap-x-2 text-gray-400">
-                            <li>Germany</li>
-                            <li>France</li>
-                            <li>Italy</li>
-                            <li>Spain</li>
-                            <li>Brazil</li>
-                            <li>Japan</li>
-                            <li>New Zealand</li>
-                            <li>Mexico</li>
-                            <li>South Africa</li>
-                          </ul>
-                          <p className="mt-2 text-[10px] text-gray-500 italic">
-                            *Excludes specific restricted countries (e.g., Cuba, Iran, North Korea, Syria).
-                          </p>
-                          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-900 border-b border-r border-gray-700 transform rotate-45"></div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {isAvailable ? (
-                    <>
-                      <Check className="w-4 h-4 text-green-400" />
-                      <span className="text-green-400 font-bold">
-                        {data.availability_percentage}%
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <X className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-500 font-bold">0%</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Detailed breakdown when expanded */}
-      {expanded && (
-        <div className="space-y-4 pt-4 border-t border-gray-800">
-          <h4 className="text-base font-bold text-white">Variant Details</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {regionCodes.map(code => {
+          {/* Region Badges */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            {regionCodes.map((code) => {
               const data = regionalData[code];
-              if (!data || data.available_variants === 0) return null;
+              const isAvailable = data && data.available_variants > 0;
+              const isRestOfWorld = data.mapping.isRestOfWorld;
 
               return (
-                <div key={code} className="bg-black/60 rounded-2xl p-4 border border-gray-700">
-                  <h5 className="text-sm font-bold text-white mb-3">
-                    {data.mapping.name}
-                    <span className="text-gray-400 ml-1">({data.available_variants}/{data.total_variants} variants)</span>
-                  </h5>
-                  <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                    {data.variant_details
-                      .filter(variant => variant.available)
-                      .map(variant => (
-                        <div key={variant.id} className="text-sm text-gray-300 flex items-center gap-3 font-medium">
-                          <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
-                          <span className="truncate">{variant.size} - {variant.color}</span>
-                        </div>
-                      ))}
+                <div
+                  key={code}
+                  className={`relative flex items-center gap-4 px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${
+                    isAvailable
+                      ? 'bg-green-900/30 border border-green-500/30 hover:bg-green-900/40'
+                      : 'bg-gray-800/50 border border-gray-700/50 hover:bg-gray-800/70'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-white whitespace-nowrap" title={data.mapping.name}>
+                      {data.mapping.name}
+                    </span>
+                    {isRestOfWorld && (
+                      <div
+                        className="relative cursor-help"
+                        onMouseEnter={() => setShowRowTooltip(true)}
+                        onMouseLeave={() => setShowRowTooltip(false)}
+                      >
+                        <Info className="w-4 h-4 text-blue-400" />
+                        {showRowTooltip && (
+                          <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-gray-900 border border-gray-700 rounded-lg text-xs font-normal text-gray-300 shadow-xl">
+                            <p className="mb-2">
+                              <strong>"Rest of World"</strong> includes over 150+ international destinations supported by Printify.
+                            </p>
+                            <p className="text-gray-400 mb-1">Popular destinations include:</p>
+                            <ul className="list-disc pl-4 grid grid-cols-2 gap-x-2 text-gray-400">
+                              <li>Germany</li>
+                              <li>France</li>
+                              <li>Italy</li>
+                              <li>Spain</li>
+                              <li>Brazil</li>
+                              <li>Japan</li>
+                              <li>New Zealand</li>
+                              <li>Mexico</li>
+                              <li>South Africa</li>
+                            </ul>
+                            <p className="mt-2 text-[10px] text-gray-500 italic">
+                              *Excludes specific restricted countries (e.g., Cuba, Iran, North Korea, Syria).
+                            </p>
+                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-900 border-b border-r border-gray-700 transform rotate-45"></div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {isAvailable ? (
+                      <>
+                        <Check className="w-4 h-4 text-green-400" />
+                        <span className="text-green-400 font-bold">
+                          {data.availability_percentage}%
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <X className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-500 font-bold">0%</span>
+                      </>
+                    )}
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
-      )}
 
-      {/* Recommendations */}
-      {availableRegions.length > 0 && (
-        <div className="mt-6 p-4 bg-blue-900/20 rounded-2xl border border-blue-500/30">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-xl flex-shrink-0">
-              <AlertTriangle className="w-4 h-4 text-blue-400" />
+          {/* Detailed breakdown when expanded */}
+          {expanded && (
+            <div className="space-y-4 pt-4 border-t border-gray-800 mb-6">
+              <h4 className="text-base font-bold text-white">Variant Details</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {regionCodes.map((code) => {
+                  const data = regionalData[code];
+                  if (!data || data.available_variants === 0) return null;
+
+                  return (
+                    <div key={code} className="bg-black/60 rounded-2xl p-4 border border-gray-700">
+                      <h5 className="text-sm font-bold text-white mb-3">
+                        {data.mapping.name}
+                        <span className="text-gray-400 ml-1">({data.available_variants}/{data.total_variants} variants)</span>
+                      </h5>
+                      <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                        {data.variant_details
+                          .filter((variant) => variant.available)
+                          .map((variant) => (
+                            <div key={variant.id} className="text-sm text-gray-300 flex items-center gap-3 font-medium">
+                              <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
+                              <span className="truncate">{variant.size} - {variant.color}</span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="text-sm">
-              <p className="font-bold text-blue-300 mb-2">Availability Summary</p>
-              <p className="text-gray-300 font-medium">
-                Your customers will be able to purchase this product in: <strong className="text-white">
-                  {availableRegions.map(code =>
-                    regionalData[code].mapping.name
-                  ).join(', ')}
-                </strong>
-              </p>
+          )}
+
+          {/* Recommendations */}
+          {availableRegions.length > 0 && (
+            <div className="p-4 bg-blue-900/20 rounded-2xl border border-blue-500/30">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-blue-500/20 rounded-xl flex-shrink-0">
+                  <AlertTriangle className="w-4 h-4 text-blue-400" />
+                </div>
+                <div className="text-sm">
+                  <p className="font-bold text-blue-300 mb-2">Availability Summary</p>
+                  <p className="text-gray-300 font-medium">
+                    Your customers will be able to purchase this product in:{" "}
+                    <strong className="text-white">
+                      {availableRegions.map((code) => regionalData[code].mapping.name).join(", ")}
+                    </strong>
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>

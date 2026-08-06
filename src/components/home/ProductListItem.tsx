@@ -4,7 +4,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Heart, User, Tag, Globe } from "lucide-react";
-import { ExtendedProduct, formatPrice } from "@/lib/api";
+import { ExtendedProduct } from "@/lib/api";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { getProductPriceRange } from "@/lib/pricing";
 import { createProductSlug } from "@/lib/utils";
 import toast from "react-hot-toast";
 
@@ -19,6 +21,8 @@ export function ProductListItem({
   isAuthenticated,
   onAddToWishlist,
 }: ProductListItemProps) {
+  const { formatPrice } = useCurrency();
+  const { minPrice, maxPrice } = getProductPriceRange(product);
   const imageUrl =
     product.thumbnail_url || product.images?.[0] || "/placeholder-product.svg";
 
@@ -147,19 +151,10 @@ export function ProductListItem({
 
             <div className="md:text-right mt-4 md:mt-0 md:ml-6 flex flex-col items-start md:items-end">
               <div className="text-2xl font-bold text-white">
-                {formatPrice(
-                  parseFloat(
-                    product.price_range?.min
-                      ? product.price_range.min.toString()
-                      : product.base_price?.toString() || "0"
-                  )
-                )}
-                {product.price_range?.min &&
-                  product.price_range?.max &&
-                  parseFloat(product.price_range.max.toString()) >
-                    parseFloat(product.price_range.min.toString()) && (
+                {formatPrice(minPrice)}
+                {maxPrice > minPrice && (
                   <span className="text-lg text-gray-500 block">
-                    - {formatPrice(parseFloat(product.price_range.max.toString()))}
+                    - {formatPrice(maxPrice)}
                   </span>
                 )}
               </div>

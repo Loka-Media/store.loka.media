@@ -4,9 +4,9 @@ export interface PrintFile {
   printfile_id: number;
   width: number;
   height: number;
-  dpi: number;
-  fill_mode: string;
-  can_rotate: boolean;
+  dpi?: number;
+  fill_mode?: string;
+  can_rotate?: boolean;
 }
 
 export interface PrintFilesData {

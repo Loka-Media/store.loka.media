@@ -2,12 +2,13 @@
 "use client";
 
 import { useState } from "react";
-import { productAPI, formatPrice, ExtendedProduct } from "@/lib/api";
+import { productAPI, ExtendedProduct } from "@/lib/api";
 import { createProductSlug } from "@/lib/utils";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import {
   Heart,
   Star,
@@ -29,6 +30,7 @@ interface ProductListItemProps {
 
 export function ProductListItem({ product }: ProductListItemProps) {
   const { getProductPriceRange, calculateSellingPrice } = useGlobalMarkup();
+  const { formatPrice } = useCurrency();
   const { minPrice, maxPrice } = getProductPriceRange(product);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [inventoryStatus, setInventoryStatus] = useState<{

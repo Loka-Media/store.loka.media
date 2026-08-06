@@ -11,10 +11,12 @@ import {
   Eye,
   Zap,
 } from "lucide-react";
-import { ExtendedProduct, formatPrice } from "@/lib/api";
-import { createProductSlug } from "@/lib/utils";
+import { ExtendedProduct } from "@/lib/api";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { getProductPriceRange } from "@/lib/pricing";
+import { createProductSlug, getValidImageUrl } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ProductCardProps {
   product: ExtendedProduct;
@@ -31,8 +33,9 @@ export function ProductCard({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const imageUrl =
-    product.thumbnail_url || product.images?.[0] || "/placeholder-product.svg";
+  const { formatPrice } = useCurrency();
+  const { minPrice, maxPrice } = getProductPriceRange(product);
+  const imageUrl = getValidImageUrl(product);
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -161,31 +164,15 @@ export function ProductCard({
           <div className="flex items-center space-x-2">
             {isOnSale && (
               <span className="text-sm text-gray-500 line-through">
-                $
-                {(
-                  parseFloat(
-                    product.price_range?.min
-                      ? product.price_range.min.toString()
-                      : product.base_price?.toString() || "0"
-                  ) * (1 + discountPercentage / 100)
-                ).toFixed(2)}
+                {formatPrice(minPrice * (1 + discountPercentage / 100))}
               </span>
             )}
             <span className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              {formatPrice(
-                parseFloat(
-                  product.price_range?.min
-                    ? product.price_range.min.toString()
-                    : product.base_price?.toString() || "0"
-                )
-              )}
+              {formatPrice(minPrice)}
             </span>
-            {product.price_range?.min &&
-              product.price_range?.max &&
-              parseFloat(product.price_range.max.toString()) >
-                parseFloat(product.price_range.min.toString()) && (
+            {maxPrice > minPrice && (
               <span className="text-sm text-gray-400">
-                - {formatPrice(parseFloat(product.price_range.max.toString()))}
+                - {formatPrice(maxPrice)}
               </span>
             )}
           </div>

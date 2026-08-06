@@ -147,12 +147,28 @@ export const getActivePrintFile = (
   selectedVariants: number[],
   activePlacement: string
 ): PrintFile | null => {
-  if (!printFiles || !activePlacement) return null;
+  if (!printFiles) return null;
+
+  const DEFAULT_FALLBACK_PRINTFILE: PrintFile = {
+    printfile_id: 1,
+    width: 4000,
+    height: 4000,
+    dpi: 300,
+    fill_mode: "fit",
+    can_rotate: true,
+  };
 
   // Add safety checks for arrays
   if (!Array.isArray(printFiles.variant_printfiles) || !Array.isArray(printFiles.printfiles)) {
     console.warn("Invalid printFiles structure - missing variant_printfiles or printfiles arrays");
-    return null;
+    if (Array.isArray(printFiles?.printfiles) && printFiles.printfiles.length > 0) {
+      return printFiles.printfiles[0];
+    }
+    return DEFAULT_FALLBACK_PRINTFILE;
+  }
+
+  if (printFiles.printfiles.length === 0) {
+    return DEFAULT_FALLBACK_PRINTFILE;
   }
 
   // 1. Try to find matching variant printfile
@@ -169,18 +185,23 @@ export const getActivePrintFile = (
   }
 
   if (!variantPrintFile || !variantPrintFile.placements) {
-    return null;
+    return printFiles.printfiles[0] || DEFAULT_FALLBACK_PRINTFILE;
   }
 
-  // Map placements (UI can be sleeve_left/left/left_sleeve, API is usually left_sleeve)
-  let printFileId = variantPrintFile.placements[activePlacement];
+  // Map placements (UI can be sleeve_left/left/left_sleeve/front/back etc.)
+  const cleanPlacement = (activePlacement || "front").toLowerCase();
+  let printFileId = variantPrintFile.placements[activePlacement] || variantPrintFile.placements[cleanPlacement];
+
   if (!printFileId) {
-    const cleanPlacement = activePlacement.toLowerCase();
     let keysToTry: string[] = [];
     if (cleanPlacement === "left" || cleanPlacement === "sleeve_left" || cleanPlacement === "left_sleeve") {
-      keysToTry = ["left_sleeve", "sleeve_left", "left"];
+      keysToTry = ["left_sleeve", "sleeve_left", "left", "left_arm"];
     } else if (cleanPlacement === "right" || cleanPlacement === "sleeve_right" || cleanPlacement === "right_sleeve") {
-      keysToTry = ["right_sleeve", "sleeve_right", "right"];
+      keysToTry = ["right_sleeve", "sleeve_right", "right", "right_arm"];
+    } else if (cleanPlacement === "front") {
+      keysToTry = ["front", "front_print", "front_chest", "chest", "default", "all_over", "print", "legs"];
+    } else if (cleanPlacement === "back") {
+      keysToTry = ["back", "back_print", "back_chest"];
     }
     
     for (const key of keysToTry) {
@@ -191,9 +212,20 @@ export const getActivePrintFile = (
     }
   }
 
-  if (!printFileId) return null;
+  // Fallback: If still no printFileId found for specific placement key, take the FIRST available placement from variantPrintFile.placements
+  if (!printFileId) {
+    const availablePlacementKeys = Object.keys(variantPrintFile.placements);
+    if (availablePlacementKeys.length > 0) {
+      printFileId = variantPrintFile.placements[availablePlacementKeys[0]];
+    }
+  }
 
-  return printFiles.printfiles.find((pf) => pf && pf.printfile_id === printFileId) || null;
+  if (!printFileId) {
+    return printFiles.printfiles[0] || DEFAULT_FALLBACK_PRINTFILE;
+  }
+
+  const found = printFiles.printfiles.find((pf) => pf && pf.printfile_id === printFileId);
+  return found || printFiles.printfiles[0] || { ...DEFAULT_FALLBACK_PRINTFILE, printfile_id: printFileId };
 };
 
 export const isEmbroideryProduct = (product: Product, selectedTechnique: string): boolean => {

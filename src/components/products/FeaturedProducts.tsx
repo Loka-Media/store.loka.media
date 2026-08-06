@@ -1,17 +1,50 @@
-import { ExtendedProduct, formatPrice } from "@/lib/api";
+'use client';
+import { ExtendedProduct } from "@/lib/api";
 import { Star, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import GradientTitle from "@/components/ui/GradientTitle";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { getValidImageUrl } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
 interface FeaturedProductsProps {
   products: ExtendedProduct[];
 }
 
+function FeaturedProductCard({ product }: { product: ExtendedProduct }) {
+  const imageUrl = getValidImageUrl(product);
+
+  return (
+    <div className="relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
+      {imageUrl && !imageUrl.includes('placeholder') ? (
+        <Image
+          src={imageUrl}
+          alt={product.name}
+          fill
+          unoptimized
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Sparkles className="w-16 h-16 text-gray-700" />
+        </div>
+      )}
+      {/* Featured Badge */}
+      <div className="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 z-10">
+        <div className="bg-yellow-400 border border-yellow-500 px-1.5 sm:px-2 py-0.5 rounded text-[8px] sm:text-[10px] md:text-[11px] lg:text-xs font-extrabold text-black leading-none">
+          FEATURED
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function FeaturedProducts({ products }: FeaturedProductsProps) {
   const { getProductPriceRange } = useGlobalMarkup();
-  // Take first 4 products as featured
+  const { formatPrice } = useCurrency();
   const featuredProducts = products.slice(0, 4);
 
   if (featuredProducts.length === 0) {
@@ -21,12 +54,10 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
   return (
     <div className="bg-gradient-to-br from-gray-950 via-black to-gray-950 border-y border-white/10 py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
         <div className="mb-6 sm:mb-10">
           <GradientTitle text="Featured Products" size="sm" className="sm:!text-2xl md:!text-3xl lg:!text-4xl" />
         </div>
 
-        {/* Featured Products Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {featuredProducts.map((product) => {
             const { minPrice, maxPrice } = getProductPriceRange(product);
@@ -42,45 +73,15 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                   backgroundClip: 'padding-box, border-box',
                 }}
               >
-                {/* Product Image */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
-                  {product.thumbnail_url ? (
-                    <Image
-                      src={product.thumbnail_url}
-                      alt={product.name}
-                      fill
-                      unoptimized
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Sparkles className="w-16 h-16 text-gray-700" />
-                    </div>
-                  )}
+                <FeaturedProductCard product={product} />
 
-                  {/* Featured Badge - Top Right */}
-                  <div className="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 z-10">
-                    <div className="bg-yellow-400 border border-yellow-500 px-1.5 sm:px-2 py-0.5 rounded text-[8px] sm:text-[10px] md:text-[11px] lg:text-xs font-extrabold text-black leading-none">
-                      FEATURED
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Content Section - Below Image */}
                 <div className="bg-black px-3 py-2.5 flex flex-col h-full">
-                  {/* Creator Name */}
                   <p className="text-xs text-gray-400 font-semibold mb-1 text-center">
                     by {product.creator?.name || product.creator_name || 'Unknown'}
                   </p>
-
-                  {/* Product Title */}
                   <div className="font-normal text-center text-sm text-white mb-auto line-clamp-2 group-hover:text-orange-400 transition-colors tracking-tight">
                     {product.name}
                   </div>
-
-                  {/* Price */}
                   <div className="flex items-center justify-between pt-1.5">
                     <span className="text-sm text-center font-extrabold text-cyan-400 tracking-tight">
                       {formatPrice(minPrice)}
@@ -98,4 +99,3 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
     </div>
   );
 }
-

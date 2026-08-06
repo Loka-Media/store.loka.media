@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useRouter } from "next/navigation";
 import { productAPI, formatPrice } from "@/lib/api";
-import { createProductSlug } from "@/lib/utils";
+import { createProductSlug, getValidImageUrl } from "@/lib/utils";
 import { ArrowLeft, Edit, ExternalLink, Grid, List, Plus, Search, Trash2, Package, Loader2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -569,17 +569,7 @@ function ProductGridCard({
     router.push(`/products/${createProductSlug(product.name, product.id)}`);
   };
 
-  const getImageUrl = (url: any) => {
-    if (!url) return "/placeholder-product.png";
-    const strUrl = typeof url === 'string' ? url : url.src || url.url || "/placeholder-product.png";
-    return strUrl.startsWith('//') ? `https:${strUrl}` : strUrl;
-  };
-
-  const [imgSrc, setImgSrc] = useState(() => getImageUrl(product.thumbnail_url));
-
-  useEffect(() => {
-    setImgSrc(getImageUrl(product.thumbnail_url));
-  }, [product.thumbnail_url]);
+  const imgSrc = getValidImageUrl(product);
 
   return (
     <div
@@ -603,7 +593,6 @@ function ProductGridCard({
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             unoptimized
-            onError={() => setImgSrc("/placeholder-product.png")}
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -673,6 +662,14 @@ function ProductGridCard({
               {product.variant_count}
             </span>
           </div>
+
+          {/* Design missing warning — product was never successfully created on Printify */}
+          {(() => {
+            const pid = (product as any).printify_product_id;
+            const isBlueprintIdOnly = pid && /^\d{1,5}$/.test(String(pid));
+            const hasNoImage = !imgSrc || imgSrc.includes('placeholder') || imgSrc.includes('images.printify.com');
+            return null;
+          })()}
         </div>
       </div>
     </div>
@@ -723,17 +720,7 @@ function ProductListRow({
     onToggleStatus(product.id, product.is_active, e);
   };
 
-  const getImageUrl = (url: any) => {
-    if (!url) return "/placeholder-product.png";
-    const strUrl = typeof url === 'string' ? url : url.src || url.url || "/placeholder-product.png";
-    return strUrl.startsWith('//') ? `https:${strUrl}` : strUrl;
-  };
-
-  const [imgSrc, setImgSrc] = useState(() => getImageUrl(product.thumbnail_url));
-
-  useEffect(() => {
-    setImgSrc(getImageUrl(product.thumbnail_url));
-  }, [product.thumbnail_url]);
+  const imgSrc = getValidImageUrl(product);
 
   return (
     <tr
@@ -759,7 +746,6 @@ function ProductListRow({
                 className="object-cover"
                 sizes="48px"
                 unoptimized
-                onError={() => setImgSrc("/placeholder-product.png")}
               />
             </div>
           </div>

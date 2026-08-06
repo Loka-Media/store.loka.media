@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useCallback, Suspense, useRef } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 import { TrendingUp, Zap, Heart, X } from "lucide-react";
@@ -155,35 +155,32 @@ function ProductsContent() {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Search Input Debounce - Only update filters after user stops typing
+  // Search Input Debounce - Update URL parameter in background while filtering UI in real-time
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      if (searchInput !== filters.search) {
-        const newFilters = { ...filters, search: searchInput };
-        setFilters(newFilters);
+      const params = new URLSearchParams();
+      if (filters.category) params.set("category", filters.category);
+      if (searchInput) params.set("search", searchInput);
+      if (filters.creator) params.set("creator", filters.creator);
+      if (filters.source && filters.source !== "all")
+        params.set("source", filters.source);
+      if (filters.minPrice) params.set("minPrice", filters.minPrice.toString());
+      if (filters.maxPrice) params.set("maxPrice", filters.maxPrice.toString());
 
-        const params = new URLSearchParams();
-        if (newFilters.category) params.set("category", newFilters.category);
-        if (searchInput) params.set("search", searchInput);
-        if (newFilters.creator) params.set("creator", newFilters.creator);
-        if (newFilters.source && newFilters.source !== "all")
-          params.set("source", newFilters.source);
-
-        const newUrl = searchInput || newFilters.category || newFilters.creator ? `/products?${params.toString()}` : '/products';
-        router.replace(newUrl, { scroll: false });
-      }
-    }, 500);
+      const newUrl = searchInput || filters.category || filters.creator ? `/products?${params.toString()}` : '/products';
+      router.replace(newUrl, { scroll: false });
+    }, 300);
 
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [searchInput, filters, router]);
+  }, [searchInput, filters.category, filters.creator, filters.source, filters.minPrice, filters.maxPrice, router]);
 
   // 2. URL Sync
   useEffect(() => {
@@ -220,46 +217,126 @@ function ProductsContent() {
   // 3. Reset pagination offset when filters change
   useEffect(() => {
     setPagination((prev) => ({ ...prev, offset: 0 }));
-  }, [filters]);
+  }, [searchInput, filters]);
 
-  // 4. Local client-side filtering, sorting, and pagination logic
-  const filteredProducts = products.filter((product) => {
-    if (filters.category && product.category !== filters.category) {
-      return false;
-    }
-    if (filters.search) {
-      const query = filters.search.toLowerCase();
-      const nameMatch = product.name?.toLowerCase().includes(query);
-      const descMatch = product.description?.toLowerCase().includes(query);
-      const categoryMatch = product.category?.toLowerCase().includes(query);
-      if (!nameMatch && !descMatch && !categoryMatch) {
-        return false;
+  const cleanCat = (str: string) => str.toLowerCase().trim().replace(/[-_&]/g, ' ');
+
+  // Compute accurate category counts from actual products list so count in (N) matches grid EXACTLY
+  const displayCategories = useMemo(() => {
+    if (!products || products.length === 0) return categories;
+
+    const counts: Record<string, { category: string; count: number }> = {};
+    products.forEach((p) => {
+      const cat = p.category?.trim();
+      if (!cat) return;
+      const key = cleanCat(cat);
+      if (!counts[key]) {
+        counts[key] = { category: cat, count: 0 };
       }
-    }
+      counts[key].count += 1;
+    });
 
+    const list = Object.values(counts).map((item) => ({
+      category: item.category,
+      product_count: item.count,
+    }));
+
+    return list.sort((a, b) => b.product_count - a.product_count);
+  }, [products, categories]);
+
+  // 4. Instant client-side character-by-character priority search filtering
+  const query = searchInput.toLowerCase().trim();
+
+  // Step A: Basic category, creator dropdown & source filtering
+  let pool = products.filter((product) => {
+    if (filters.category) {
+      const targetCat = cleanCat(filters.category);
+      const prodCat = cleanCat(product.category || "");
+      if (prodCat !== targetCat) return false;
+    }
+    if (filters.source && filters.source !== "all" && product.source !== filters.source) return false;
     if (filters.creator) {
       const creatorFilter = String(filters.creator).toLowerCase().trim();
-      
-      const isIdMatch = product.creator_id && String(product.creator_id) === creatorFilter;
-      const isUserIdMatch = (product as any).user_id && String((product as any).user_id) === creatorFilter;
-      const isNameMatch = product.creator_name && product.creator_name.toLowerCase().includes(creatorFilter);
-      const isUsernameMatch = product.creator_username && product.creator_username.toLowerCase().includes(creatorFilter);
-      
       const creatorObj = product.creator as any;
-      const isObjIdMatch = creatorObj?.id && String(creatorObj.id) === creatorFilter;
-      const isObjNameMatch = creatorObj?.name && creatorObj.name.toLowerCase().includes(creatorFilter);
-      const isObjUsernameMatch = creatorObj?.username && creatorObj.username.toLowerCase().includes(creatorFilter);
+      const creatorName = String(product.creator_name || creatorObj?.name || "").toLowerCase().trim();
+      const creatorUsername = String(product.creator_username || creatorObj?.username || "").toLowerCase().trim();
+      const creatorId = String(product.creator_id || (product as any).user_id || creatorObj?.id || "").toLowerCase().trim();
 
-      if (!isIdMatch && !isUserIdMatch && !isNameMatch && !isUsernameMatch && !isObjIdMatch && !isObjNameMatch && !isObjUsernameMatch) {
-        return false;
+      const isMatch =
+        creatorName === creatorFilter ||
+        creatorUsername === creatorFilter ||
+        creatorId === creatorFilter ||
+        creatorName.includes(creatorFilter) ||
+        creatorUsername.includes(creatorFilter);
+
+      if (!isMatch) return false;
+    }
+
+    // Filter strictly by Tag tab (Trending, New, Popular) if selected
+    if (activeView === "trending" || activeView === "new" || activeView === "popular") {
+      const targetTag = activeView.toLowerCase();
+      const hasMatchingTag = products.some((p) => {
+        const rawTags = (p as any).tags;
+        const tagsList: string[] = Array.isArray(rawTags)
+          ? rawTags
+          : typeof rawTags === "string"
+          ? (rawTags as string).split(",")
+          : [];
+        return tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
+      });
+
+      if (hasMatchingTag) {
+        const rawTags = (product as any).tags;
+        const tagsList: string[] = Array.isArray(rawTags)
+          ? rawTags
+          : typeof rawTags === "string"
+          ? (rawTags as string).split(",")
+          : [];
+        const matchesTag = tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
+        if (!matchesTag) return false;
       }
     }
 
-    if (filters.source && filters.source !== "all" && product.source !== filters.source) {
-      return false;
-    }
     return true;
   });
+
+  // Step B: Multi-level Priority Search Query Matching
+  if (query) {
+    // Pass 1: High-priority matching (Creator Name/Username, Product Title, Category, Tags)
+    const primaryMatches = pool.filter((product) => {
+      const creatorObj = product.creator as any;
+      const creatorName = String(product.creator_name || creatorObj?.name || "").toLowerCase();
+      const creatorUsername = String(product.creator_username || creatorObj?.username || "").toLowerCase();
+      const creatorMatch = creatorName.includes(query) || creatorUsername.includes(query);
+
+      const productName = String(product.name || (product as any).title || "").toLowerCase();
+      const nameMatch = productName.includes(query);
+
+      const categoryMatch = String(product.category || "").toLowerCase().includes(query);
+
+      const rawTags = (product as any).tags;
+      const tagsList: string[] = Array.isArray(rawTags)
+        ? rawTags
+        : typeof rawTags === "string"
+        ? (rawTags as string).split(",")
+        : [];
+      const tagMatch = tagsList.some((t) => String(t).toLowerCase().trim().includes(query));
+
+      return creatorMatch || nameMatch || categoryMatch || tagMatch;
+    });
+
+    if (primaryMatches.length > 0) {
+      // Primary matches found! Use ONLY primary matches (prevents generic description body false positives)
+      pool = primaryMatches;
+    } else {
+      // Pass 2: Low-priority fallback matching (Description body search ONLY if zero primary matches exist)
+      pool = pool.filter((product) => {
+        return String(product.description || "").toLowerCase().includes(query);
+      });
+    }
+  }
+
+  const filteredProducts = pool;
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (filters.sortBy === "created_at") {
@@ -382,7 +459,7 @@ function ProductsContent() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder="Search by title, tag, category, creator..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -399,7 +476,13 @@ function ProductsContent() {
                 <div className="relative">
                   <select
                     value={filters.category}
-                    onChange={(e) => handleFilterChange("category", e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val && searchInput) {
+                        setSearchInput("");
+                      }
+                      handleFilterChange("category", val);
+                    }}
                     className={`w-full px-4 py-3 h-12 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm appearance-none cursor-pointer ${filters.category ? "border-blue-400 focus:border-blue-400" : "hover:border-orange-400 focus:border-orange-400"}`}
                     style={{
                       backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
@@ -408,7 +491,7 @@ function ProductsContent() {
                     }}
                   >
                     <option value="">All Types</option>
-                    {categories.map((cat) => (
+                    {displayCategories.map((cat: { category: string; product_count: number }) => (
                       <option key={cat.category} value={cat.category}>
                         {cat.category} ({cat.product_count})
                       </option>
@@ -570,7 +653,7 @@ function ProductsContent() {
         </div>
       </div>
 
-      {!loading && paginatedProducts.length > 0 && filters.category === "" && (
+      {!loading && paginatedProducts.length > 0 && filters.category === "" && (!searchInput || !searchInput.trim()) && (
         <FeaturedProducts products={paginatedProducts} />
       )}
 

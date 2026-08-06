@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatPrice, formatDate, checkoutAPI, addressAPI, Address } from '@/lib/api';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { formatDate, checkoutAPI, addressAPI, Address } from '@/lib/api';
 import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus, ChevronDown, ChevronUp, LogOut, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -41,6 +42,7 @@ interface Order {
 
 export default function ProfilePage() {
   const { user, isAuthenticated } = useAuth();
+  const { formatPrice } = useCurrency();
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);

@@ -151,6 +151,8 @@ export const useCheckoutState = () => {
   const calculateTotal = (subtotal: string) => {
     const subtotalAmount = parseFloat(subtotal.replace("$", ""));
 
+    const platformFee = subtotalAmount * 0.049;
+
     const shipping =
       selectedShippingRate && selectedShippingRate.rate
         ? parseFloat(String(selectedShippingRate.rate)) // Ensure it's a string before parsing
@@ -160,7 +162,7 @@ export const useCheckoutState = () => {
     // Note: Final tax will be calculated by backend when order is created
     const tax = taxAmount > 0 ? taxAmount : subtotalAmount * 0.08;
 
-    return subtotalAmount + shipping + tax;
+    return subtotalAmount + platformFee + shipping + tax;
   };
 
   const resetCheckoutState = () => {
