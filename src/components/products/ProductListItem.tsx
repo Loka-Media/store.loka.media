@@ -90,7 +90,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
     // Check if user is authenticated, redirect to login if not
     if (!isAuthenticated) {
       toast.error("Please login to add items to cart");
-      router.push("/auth/login");
+      router.push("/auth/login?redirect=/cart");
       return;
     }
 

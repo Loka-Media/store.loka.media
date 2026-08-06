@@ -140,7 +140,7 @@ export default function CartPage() {
           <p className="text-gray-400 font-medium mb-8">Please log in to access your cart and complete your purchase.</p>
           <div className="flex flex-col gap-3">
             <Button
-              onClick={() => router.push('/auth/login')}
+              onClick={() => router.push('/auth/login?redirect=/cart')}
               variant="primary"
               className="w-full"
             >

@@ -248,6 +248,36 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, items, isClient]);
 
+  // Merge guest cart items into authenticated user cart upon login
+  const syncGuestCartToAuthenticatedCart = useCallback(async () => {
+    if (!isAuthenticated || typeof window === 'undefined') return;
+
+    try {
+      const savedGuestCart = localStorage.getItem('guestCart');
+      if (!savedGuestCart) return;
+
+      const parsed = JSON.parse(savedGuestCart);
+      const guestItems: GuestCartItem[] = parsed.items || [];
+
+      if (guestItems.length > 0) {
+        console.log(`[Cart Sync] Merging ${guestItems.length} guest cart items into user account...`);
+        for (const gItem of guestItems) {
+          if (gItem.variant_id) {
+            try {
+              await cartAPI.addToCart(gItem.variant_id, gItem.quantity);
+            } catch (err) {
+              console.warn(`[Cart Sync] Failed to add variant ${gItem.variant_id} to DB cart:`, err);
+            }
+          }
+        }
+        // Clear guest cart from localStorage after successful merge
+        localStorage.removeItem('guestCart');
+      }
+    } catch (err) {
+      console.error('[Cart Sync] Error merging guest cart:', err);
+    }
+  }, [isAuthenticated]);
+
   // Debounced refresh function to prevent excessive API calls
   const debouncedRefreshCart = useCallback(async (forceRefresh: boolean = false) => {
     const now = Date.now();
@@ -302,24 +332,18 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
   // Load cart data on mount and when auth status changes (optimized)
   useEffect(() => {
     if (!isClient) return; // Wait for client-side hydration
-    
-    if (!isInitialized.current) {
-      isInitialized.current = true;
-      // Initial load
+
+    const initializeCart = async () => {
       if (isAuthenticated && user) {
-        debouncedRefreshCart(true); // This will update cart count automatically
+        await syncGuestCartToAuthenticatedCart();
+        await debouncedRefreshCart(true);
       } else {
-        loadGuestCart(); // This will update cart count automatically
+        loadGuestCart();
       }
-    } else {
-      // Auth status changed after initialization
-      if (isAuthenticated && user) {
-        debouncedRefreshCart(true); // This will update cart count automatically
-      } else {
-        loadGuestCart(); // This will update cart count automatically
-      }
-    }
-  }, [isAuthenticated, user, isClient, loadGuestCart, debouncedRefreshCart]);
+    };
+
+    initializeCart();
+  }, [isAuthenticated, user, isClient, syncGuestCartToAuthenticatedCart, loadGuestCart, debouncedRefreshCart]);
 
   // Removed visibility change handler to reduce unnecessary API calls
 

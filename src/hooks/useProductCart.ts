@@ -14,14 +14,12 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
   const router = useRouter();
 
   const handleAddToCart = useCallback(async (quantity: number) => {
-    // Check if user is authenticated, redirect to login if not
-    if (!isAuthenticated) {
-      toast.error('Please login to add items to cart');
-      router.push('/auth/login');
-      return;
-    }
-
     if (!selectedVariant || !product) {
+      if (!isAuthenticated) {
+        toast.error('Please login to add items to cart');
+        router.push('/auth/login?redirect=/cart');
+        return;
+      }
       toast.error('Please select a variant');
       return;
     }
@@ -57,16 +55,18 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
           localStorage.setItem(`product_variant_${selectedVariant.id}`, JSON.stringify(variantCacheData));
         } catch (error) {
           console.warn('Failed to cache variant data:', error);
-          toast.error('Failed to prepare product data. Please try again.');
-          return;
         }
-
-        // Small delay to ensure localStorage write completes
-        await new Promise(resolve => setTimeout(resolve, 10));
       }
 
-      // Use unified GuestCart for both authenticated and guest users
+      // Add to GuestCart
       const success = await addToCart(selectedVariant.id, quantity);
+
+      // Check if user is authenticated, redirect to login page with redirect=/cart
+      if (!isAuthenticated) {
+        toast.success(`${product.name} added! Please sign in to view your cart.`);
+        router.push('/auth/login?redirect=/cart');
+        return;
+      }
 
       if (success) {
         toast.success(`${product.name} added to cart!`);
@@ -77,7 +77,7 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
       console.error('Failed to add to cart:', error);
       toast.error('Failed to add to cart. Please try again.');
     }
-  }, [selectedVariant, product, addToCart]);
+  }, [selectedVariant, product, addToCart, isAuthenticated, calculateSellingPrice, router]);
 
   return {
     handleAddToCart

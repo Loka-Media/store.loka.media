@@ -21,16 +21,19 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const { login, user, loading: authLoading } = useAuth();
 
-  // Redirect if user is already logged in
+  // Redirect if user is already logged in or has a target redirect URL
   useEffect(() => {
     if (!authLoading && user) {
-      if (user.role === 'creator') {
+      const targetUrl = searchParams.get("redirect") || searchParams.get("returnUrl");
+      if (targetUrl) {
+        router.push(targetUrl);
+      } else if (user.role === 'creator') {
         router.push('/dashboard/creator');
       } else {
         router.push('/products');
       }
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, searchParams]);
 
   const {
     register,
@@ -45,8 +48,8 @@ function LoginPageContent() {
     try {
       const success = await login(data.email, data.password);
       if (success) {
-        const returnUrl = searchParams.get("returnUrl") || "/dashboard";
-        router.push(returnUrl);
+        const targetUrl = searchParams.get("redirect") || searchParams.get("returnUrl") || (user?.role === 'creator' ? '/dashboard/creator' : '/products');
+        router.push(targetUrl);
       }
     } catch (error: unknown) {
       if (requiresEmailVerification(error)) {
