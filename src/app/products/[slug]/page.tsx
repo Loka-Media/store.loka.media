@@ -347,6 +347,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         isOpen={isSizeGuideOpen}
         onClose={() => setIsSizeGuideOpen(false)}
         productName={product.name}
+        category={product.category}
         sizeGuideImageUrl={sizeGuideImageUrl}
         availableSizes={getAvailableSizes()}
       />

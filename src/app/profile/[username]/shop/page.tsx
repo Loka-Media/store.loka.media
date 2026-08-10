@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useCallback, Suspense, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 import { TrendingUp, Zap, Heart, ChevronLeft, ChevronRight } from "lucide-react";
@@ -46,7 +46,7 @@ function CreatorShopContent() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [activeView, setActiveView] = useState<ViewType>("trending");
+  const [activeView, setActiveView] = useState<ViewType | null>(null);
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const [showScrollArrows, setShowScrollArrows] = useState(false);
 
@@ -278,17 +278,22 @@ function CreatorShopContent() {
 
   const clearFilters = useCallback(() => {
     handleFilterChange("category", "");
+    setActiveView(null);
   }, []);
 
   const handleViewChange = (view: ViewType) => {
-    setActiveView(view);
-    const sortConfig = {
-      trending: { sortBy: "created_at", sortOrder: "DESC" },
-      new: { sortBy: "created_at", sortOrder: "DESC" },
-      popular: { sortBy: "base_price", sortOrder: "DESC" },
-    };
-    const newSort = sortConfig[view];
-    setFilters((prev) => ({ ...prev, ...newSort }));
+    if (activeView === view) {
+      setActiveView(null);
+    } else {
+      setActiveView(view);
+      const sortConfig = {
+        trending: { sortBy: "created_at", sortOrder: "DESC" },
+        new: { sortBy: "created_at", sortOrder: "DESC" },
+        popular: { sortBy: "base_price", sortOrder: "DESC" },
+      };
+      const newSort = sortConfig[view];
+      setFilters((prev) => ({ ...prev, ...newSort }));
+    }
   };
 
   const scrollCategories = (direction: "left" | "right") => {
@@ -300,6 +305,38 @@ function CreatorShopContent() {
       });
     }
   };
+
+  const displayProducts = useMemo(() => {
+    if (!products || products.length === 0) return [];
+
+    if (activeView === "trending" || activeView === "new" || activeView === "popular") {
+      const targetTag = activeView.toLowerCase();
+      
+      const taggedProducts = products.filter((p) => {
+        const rawTags = (p as any).tags;
+        const tagsList: string[] = Array.isArray(rawTags)
+          ? rawTags
+          : typeof rawTags === "string"
+          ? (rawTags as string).split(",")
+          : [];
+        return tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
+      });
+
+      if (taggedProducts.length > 0) {
+        return taggedProducts;
+      }
+
+      // Fallback: If no products have this explicit tag in DB, sort products so page never shows 0 products unexpectedly
+      const sorted = [...products];
+      if (activeView === "new" || activeView === "trending") {
+        return sorted.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+      } else if (activeView === "popular") {
+        return sorted.sort((a: any, b: any) => parseFloat(String(b.base_price || 0)) - parseFloat(String(a.base_price || 0)));
+      }
+    }
+
+    return products;
+  }, [products, activeView]);
 
   if (!creator && !loading) {
     return (
@@ -456,11 +493,11 @@ function CreatorShopContent() {
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 products-section-animate">
         {loading ? (
           <ProductsLoading message="Discovering creator's products..." />
-        ) : products.length === 0 ? (
+        ) : displayProducts.length === 0 ? (
           <NoProductsFound clearFilters={clearFilters} />
         ) : (
           <>
-            <ProductsGrid products={products} />
+            <ProductsGrid products={displayProducts} />
 
             <ProductsPagination
               hasNext={pagination.hasNext}

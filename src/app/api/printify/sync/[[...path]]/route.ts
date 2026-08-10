@@ -153,21 +153,89 @@ async function buildPrintifyProductPayload(
   // Extract ALL variant IDs from variantPayload so print_areas has 100% of variant IDs
   const allVariantIds = variantPayload.map((v: any) => v.id);
 
+  // Gather all valid placeholder positions from catalog variants or blueprint print_areas
+  const validPositionsMap = new Map<string, string>();
+  allVariants.forEach((v: any) => {
+    if (Array.isArray(v.placeholders)) {
+      v.placeholders.forEach((p: any) => {
+        if (p.position) validPositionsMap.set(p.position.toLowerCase(), p.position);
+      });
+    }
+  });
+
+  if (bp?.print_areas && Array.isArray(bp.print_areas)) {
+    bp.print_areas.forEach((pa: any) => {
+      if (Array.isArray(pa.placeholders)) {
+        pa.placeholders.forEach((p: any) => {
+          if (p.position) validPositionsMap.set(p.position.toLowerCase(), p.position);
+        });
+      }
+    });
+  }
+
+  // Fallback: If validPositionsMap is empty, attempt fetching blueprint print_areas directly
+  if (validPositionsMap.size === 0 && blueprintId) {
+    try {
+      const bpDetails: any = await printifyCatalogAPI.getBlueprint(blueprintId);
+      if (bpDetails && Array.isArray(bpDetails.print_areas)) {
+        bpDetails.print_areas.forEach((pa: any) => {
+          if (Array.isArray(pa.placeholders)) {
+            pa.placeholders.forEach((p: any) => {
+              if (p.position) validPositionsMap.set(p.position.toLowerCase(), p.position);
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('[Printify Payload Builder] Failed to fetch blueprint print_areas fallback:', e);
+    }
+  }
+
+  const validPositionsList = Array.from(validPositionsMap.values());
+  console.log(`[Printify Payload Builder] Valid placeholder positions for blueprint ${blueprintId}:`, validPositionsList);
+
+  const getValidPlacement = (requestedPlacement: string): string => {
+    if (validPositionsList.length === 0) return requestedPlacement;
+
+    const clean = (requestedPlacement || 'front').toLowerCase().trim();
+
+    // 1. Direct match (case-insensitive)
+    if (validPositionsMap.has(clean)) {
+      return validPositionsMap.get(clean)!;
+    }
+
+    // 2. Common alias & position mappings for Printify catalog types
+    if (clean === 'sleeve_left' || clean === 'left') {
+      if (validPositionsMap.has('left_sleeve')) return validPositionsMap.get('left_sleeve')!;
+    }
+    if (clean === 'sleeve_right' || clean === 'right') {
+      if (validPositionsMap.has('right_sleeve')) return validPositionsMap.get('right_sleeve')!;
+    }
+    if (clean === 'front') {
+      if (validPositionsMap.has('other')) return validPositionsMap.get('other')!;
+      if (validPositionsMap.has('outside')) return validPositionsMap.get('outside')!;
+      if (validPositionsMap.has('default')) return validPositionsMap.get('default')!;
+    }
+    if (clean === 'back') {
+      if (validPositionsMap.has('other')) return validPositionsMap.get('other')!;
+      if (validPositionsMap.has('outside')) return validPositionsMap.get('outside')!;
+      if (validPositionsMap.has('inside')) return validPositionsMap.get('inside')!;
+    }
+
+    // 3. Fallback to first available valid position for this blueprint
+    return validPositionsList[0];
+  };
+
   // Build print areas from uploaded design files
   const printAreas: any[] = [];
   if (Array.isArray(designFiles) && designFiles.length > 0) {
     // Group by placement, normalizing names for Printify compatibility
     const byPlacement: Record<string, any[]> = {};
     for (const df of designFiles) {
-      let placement: string =
+      let rawPlacement: string =
         df.placement ?? df.position ?? df.print_area ?? 'front';
       
-      const cleanPlacement = placement.toLowerCase();
-      if (cleanPlacement === 'sleeve_left' || cleanPlacement === 'left') {
-        placement = 'left_sleeve';
-      } else if (cleanPlacement === 'sleeve_right' || cleanPlacement === 'right') {
-        placement = 'right_sleeve';
-      }
+      const placement = getValidPlacement(rawPlacement);
 
       (byPlacement[placement] = byPlacement[placement] ?? []).push(df);
     }

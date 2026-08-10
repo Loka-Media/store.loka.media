@@ -275,26 +275,14 @@ function ProductsContent() {
     // Filter strictly by Tag tab (Trending, New, Popular) if selected
     if (activeView === "trending" || activeView === "new" || activeView === "popular") {
       const targetTag = activeView.toLowerCase();
-      const hasMatchingTag = products.some((p) => {
-        const rawTags = (p as any).tags;
-        const tagsList: string[] = Array.isArray(rawTags)
-          ? rawTags
-          : typeof rawTags === "string"
-          ? (rawTags as string).split(",")
-          : [];
-        return tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
-      });
-
-      if (hasMatchingTag) {
-        const rawTags = (product as any).tags;
-        const tagsList: string[] = Array.isArray(rawTags)
-          ? rawTags
-          : typeof rawTags === "string"
-          ? (rawTags as string).split(",")
-          : [];
-        const matchesTag = tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
-        if (!matchesTag) return false;
-      }
+      const rawTags = (product as any).tags;
+      const tagsList: string[] = Array.isArray(rawTags)
+        ? rawTags
+        : typeof rawTags === "string"
+        ? (rawTags as string).split(",")
+        : [];
+      const matchesTag = tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
+      if (!matchesTag) return false;
     }
 
     return true;

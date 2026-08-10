@@ -12356,6 +12356,15 @@
     "colorsCount": 38,
     "providersCount": 7
   },
+  "3324": {
+    "title": "Classic Long Sleeve Rugby Polo",
+    "providerId": 217,
+    "price": "10.00",
+    "premiumPrice": "7.70",
+    "sizesCount": 8,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
   "3326": {
     "title": "Club Colorblock Polo",
     "providerId": 217,
@@ -14893,6 +14902,15 @@
     "sizesCount": 6,
     "colorsCount": 10,
     "providersCount": 7
+  },
+  "5585": {
+    "title": "Beach Towel",
+    "providerId": 217,
+    "price": "17.50",
+    "premiumPrice": "13.47",
+    "sizesCount": 1,
+    "colorsCount": 1,
+    "providersCount": 1
   },
   "5592": {
     "title": "Garment Washed Trucker",

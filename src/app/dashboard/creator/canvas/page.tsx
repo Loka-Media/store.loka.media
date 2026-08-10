@@ -714,6 +714,7 @@ function CanvasContent() {
         name: formDataToUse.name.trim(),
         description: formDataToUse.description.trim(),
         category: formDataToUse.category,
+        tags: (formDataToUse.tags && formDataToUse.tags.length > 0) ? formDataToUse.tags : ['New'],
         markupPercentage: parseFloat(formDataToUse.markupPercentage),
         variants: selectedVariants,
         base_product: selectedProduct
