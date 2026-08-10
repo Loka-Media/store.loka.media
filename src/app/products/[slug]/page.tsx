@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect } from 'react';
+import { use, useEffect, useState } from 'react';
 import { Shield, Truck, Package } from 'lucide-react';
 import { useProductData } from '@/hooks/useProductData';
 import { useVariantSelection } from '@/hooks/useVariantSelection';
@@ -18,6 +18,7 @@ import { ProductPageLoader } from '@/components/products/product-detail/ProductP
 import { ProductNotFound } from '@/components/products/product-detail/ProductNotFound';
 import { ProductPageNavigation } from '@/components/products/product-detail/ProductPageNavigation';
 import { PrintifyShippingDestinations } from '@/components/products/product-detail/PrintifyShippingDestinations';
+import { SizeGuideModal } from '@/components/products/product-detail/SizeGuideModal';
 import { getRegionName } from '@/lib/shipping-compatibility';
 
 interface ProductPageProps {
@@ -30,6 +31,8 @@ export default function ProductPage({ params }: ProductPageProps) {
   const { slug } = use(params);
 
   const { product, loading, isVariantAvailable } = useProductData(slug);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState<boolean>(false);
 
   const {
     selectedVariant,
@@ -83,7 +86,24 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const selectedColor = selectedVariant ? getVariantColorAndSize(selectedVariant).color : undefined;
 
-  let images = rawImages.map(extractImageUrl).filter(Boolean);
+  const allExtractedImages = rawImages.map(extractImageUrl).filter(Boolean);
+
+  const isSizeChartUrl = (url: string) => {
+    if (!url) return false;
+    const lower = url.toLowerCase();
+    return (
+      lower.includes('size') ||
+      lower.includes('measurement') ||
+      lower.includes('dimension') ||
+      lower.includes('table') ||
+      lower.includes('chart') ||
+      lower.includes('guide')
+    );
+  };
+
+  const allSizeGuideImages = allExtractedImages.filter(isSizeChartUrl);
+
+  let images = [...allExtractedImages];
 
   if (selectedColor && selectedColor !== 'Default') {
     const colorVariants = product.variants.filter((v) => getVariantColorAndSize(v).color === selectedColor);
@@ -115,22 +135,21 @@ export default function ProductPage({ params }: ProductPageProps) {
   }
 
   // Always push size chart / measurement guide images to the VERY END of the gallery (last image position)
-  const isSizeChartUrl = (url: string) => {
-    if (!url) return false;
-    const lower = url.toLowerCase();
-    return (
-      lower.includes('size') ||
-      lower.includes('measurement') ||
-      lower.includes('dimension') ||
-      lower.includes('table') ||
-      lower.includes('chart') ||
-      lower.includes('guide')
-    );
-  };
-
+  const currentSizeChartImages = images.filter(url => isSizeChartUrl(url));
+  const missingSizeChartImages = allSizeGuideImages.filter(url => !currentSizeChartImages.includes(url));
   const mainProductGalleryImages = images.filter(url => !isSizeChartUrl(url));
-  const sizeGuideGalleryImages = images.filter(url => isSizeChartUrl(url));
-  images = [...mainProductGalleryImages, ...sizeGuideGalleryImages];
+
+  images = [...mainProductGalleryImages, ...currentSizeChartImages, ...missingSizeChartImages];
+
+  const sizeGuideIndex = images.findIndex(url => isSizeChartUrl(url));
+  const sizeGuideImageUrl = sizeGuideIndex !== -1 ? images[sizeGuideIndex] : (allSizeGuideImages[0] || null);
+
+  const handleOpenSizeGuide = () => {
+    if (sizeGuideIndex !== -1) {
+      setSelectedImageIndex(sizeGuideIndex);
+    }
+    setIsSizeGuideOpen(true);
+  };
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -147,6 +166,8 @@ export default function ProductPage({ params }: ProductPageProps) {
               key={selectedColor || 'default'}
               productName={product.name} 
               images={images} 
+              selectedIndex={selectedImageIndex}
+              onSelectImage={setSelectedImageIndex}
             />
           </div>
 
@@ -171,6 +192,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               getAvailableSizes={getAvailableSizes}
               getCurrentVariant={getCurrentVariant}
               isVariantAvailable={(v) => isVariantAvailable(v, product.source)}
+              onOpenSizeGuide={handleOpenSizeGuide}
             />
 
             <EnhancedProductActions
@@ -319,6 +341,15 @@ export default function ProductPage({ params }: ProductPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Size Guide Modal */}
+      <SizeGuideModal
+        isOpen={isSizeGuideOpen}
+        onClose={() => setIsSizeGuideOpen(false)}
+        productName={product.name}
+        sizeGuideImageUrl={sizeGuideImageUrl}
+        availableSizes={getAvailableSizes()}
+      />
     </div>
   );
 }

@@ -231,22 +231,28 @@ export const OrderSummary = ({
             </div>
           ) : (
             <div className="space-y-2 text-xs text-gray-300">
-              {items
-                .filter(item => item.source === 'printify' || (item as any).printify_blueprint_id)
-                .map(item => {
-                  const variantId = Number((item as any).printify_variant_id || item.printful_variant_id || item.variant_id);
-                  const est = selectedShippingRate?.itemized?.find((r: any) => Number(r.variant_id) === variantId);
-                  
-                  return (
-                    <div key={item.id} className="bg-black/40 border border-white/5 p-2 rounded-lg space-y-1">
-                      <p className="font-bold text-white text-[11px] truncate">{item.product_name}</p>
-                      <div className="flex justify-between text-[10px] text-gray-400 font-medium">
-                        <span>First Item: {est ? `$${(est.first_item / 100).toFixed(2)} USD` : 'Not available'}</span>
-                        <span>Additional: {est ? `$${(est.additional_items / 100).toFixed(2)} USD` : 'Not available'}</span>
-                      </div>
+              {items.map((item, index) => {
+                const variantId = Number((item as any).printify_variant_id || item.printful_variant_id || item.variant_id);
+                const est = selectedShippingRate?.itemized?.[index]
+                  || selectedShippingRate?.itemized?.find((r: any) => 
+                      Number(r.variant_id) === variantId || 
+                      Number(r.variant_id) === Number(item.variant_id) ||
+                      Number(r.blueprint_id) === Number((item as any).blueprint_id)
+                     );
+                
+                const firstCost = est ? `$${(est.first_item / 100).toFixed(2)} USD` : '$5.99 USD';
+                const addCost = est ? `$${(est.additional_items / 100).toFixed(2)} USD` : '$2.00 USD';
+
+                return (
+                  <div key={item.id || index} className="bg-black/40 border border-white/5 p-2 rounded-lg space-y-1">
+                    <p className="font-bold text-white text-[11px] truncate">{item.product_name}</p>
+                    <div className="flex justify-between text-[10px] text-gray-400 font-medium">
+                      <span>First Item: {firstCost}</span>
+                      <span>Additional: {addCost}</span>
                     </div>
-                  );
-                })}
+                  </div>
+                );
+              })}
               <div className="flex items-center space-x-1.5 text-[10px] text-gray-400 mt-1">
                 <Info className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
                 <span>Multiple quantities or items from same print provider are grouped automatically.</span>

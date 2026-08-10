@@ -152,29 +152,37 @@ export const ShippingAddressForm = ({
                   </div>
                 )}
               </div>
-              {availableStates.length > 0 && (
               <div>
-                <select
-                  value={customerInfo.state}
-                  onChange={(e) => updateCustomerInfo({ state: e.target.value })}
-                  className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500"
-                  disabled={!customerInfo.country || availableStates.length === 0}
-                >
-                  <option value="">{customerInfo.country ? 'Select State/Province *' : 'Select Country First'}</option>
-                  {availableStates.map(state => (
-                    <option key={state.code} value={state.code}>
-                      {state.name} ({state.code})
-                    </option>
-                  ))}
-                </select>
-                {['US', 'CA', 'AU', 'JP'].includes(customerInfo.country) && !customerInfo.state && (
+                {availableStates.length > 0 ? (
+                  <select
+                    value={customerInfo.state}
+                    onChange={(e) => updateCustomerInfo({ state: e.target.value })}
+                    className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500"
+                    disabled={!customerInfo.country}
+                  >
+                    <option value="">{customerInfo.country ? 'Select State/Province *' : 'Select Country First'}</option>
+                    {availableStates.map(state => (
+                      <option key={state.code} value={state.code}>
+                        {state.name} ({state.code})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder="State / Province / Region *"
+                    value={customerInfo.state}
+                    onChange={(e) => updateCustomerInfo({ state: e.target.value })}
+                    className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                )}
+                {customerInfo.country && !customerInfo.state && (
                   <p className="text-xs text-red-400 mt-1">✱ State/Province is required for {customerInfo.country}</p>
                 )}
                 {!customerInfo.country && (
                   <p className="text-xs text-orange-400 mt-1">✱ Select country first</p>
                 )}
               </div>
-              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">

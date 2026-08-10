@@ -507,13 +507,13 @@ export default function AddressesPage() {
                     )}
                   </div>
 
-                  {locationLookup.availableStates.length > 0 && (
-                    <div>
+                  <div>
+                    {locationLookup.availableStates.length > 0 ? (
                       <select
                         value={addressForm.state}
                         onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
                         className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                        disabled={!addressForm.country || locationLookup.availableStates.length === 0}
+                        disabled={!addressForm.country}
                         required
                       >
                         <option value="">{addressForm.country ? 'Select State/Province *' : 'Select Country First'}</option>
@@ -523,11 +523,20 @@ export default function AddressesPage() {
                           </option>
                         ))}
                       </select>
-                      {!addressForm.country && (
-                        <p className="text-xs text-orange-400 mt-1">✱ Select country first</p>
-                      )}
-                    </div>
-                  )}
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder="State / Province / Region *"
+                        value={addressForm.state}
+                        onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
+                        className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                        required
+                      />
+                    )}
+                    {!addressForm.country && (
+                      <p className="text-xs text-orange-400 mt-1">✱ Select country first</p>
+                    )}
+                  </div>
 
                   <div className="relative">
                     <input

@@ -8,10 +8,33 @@ import toast from 'react-hot-toast';
 interface EnhancedProductImageGalleryProps {
   productName: string;
   images: string[];
+  selectedIndex?: number;
+  onSelectImage?: (index: number) => void;
 }
 
-export function EnhancedProductImageGallery({ productName, images }: EnhancedProductImageGalleryProps) {
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+export function EnhancedProductImageGallery({
+  productName,
+  images,
+  selectedIndex,
+  onSelectImage,
+}: EnhancedProductImageGalleryProps) {
+  const [internalSelectedIndex, setInternalSelectedIndex] = useState(0);
+  const selectedImageIndex = selectedIndex !== undefined ? selectedIndex : internalSelectedIndex;
+
+  const handleSelectIndex = (index: number) => {
+    if (onSelectImage) {
+      onSelectImage(index);
+    }
+    setInternalSelectedIndex(index);
+    scrollSelectedThumbnailIntoView(index);
+  };
+
+  useEffect(() => {
+    if (selectedIndex !== undefined) {
+      scrollSelectedThumbnailIntoView(selectedIndex);
+    }
+  }, [selectedIndex]);
+
   const [isZoomed, setIsZoomed] = useState(false);
   const [showFullscreen, setShowFullscreen] = useState(false);
   const thumbnailContainerRef = useRef<HTMLDivElement>(null);
@@ -73,19 +96,13 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
   };
 
   const prevImage = () => {
-    setSelectedImageIndex((prev) => {
-      const nextIndex = prev === 0 ? images.length - 1 : prev - 1;
-      scrollSelectedThumbnailIntoView(nextIndex);
-      return nextIndex;
-    });
+    const nextIndex = selectedImageIndex === 0 ? images.length - 1 : selectedImageIndex - 1;
+    handleSelectIndex(nextIndex);
   };
 
   const nextImage = () => {
-    setSelectedImageIndex((prev) => {
-      const nextIndex = prev === images.length - 1 ? 0 : prev + 1;
-      scrollSelectedThumbnailIntoView(nextIndex);
-      return nextIndex;
-    });
+    const nextIndex = selectedImageIndex === images.length - 1 ? 0 : selectedImageIndex + 1;
+    handleSelectIndex(nextIndex);
   };
 
   return (
@@ -165,10 +182,7 @@ export function EnhancedProductImageGallery({ productName, images }: EnhancedPro
                   <button
                     key={index}
                     data-thumb-index={index}
-                    onClick={() => {
-                      setSelectedImageIndex(index);
-                      scrollSelectedThumbnailIntoView(index);
-                    }}
+                    onClick={() => handleSelectIndex(index)}
                     className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border transition-all ${
                       selectedImageIndex === index
                         ? 'border-white/40 ring-2 ring-white/20'

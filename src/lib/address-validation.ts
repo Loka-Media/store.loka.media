@@ -25,15 +25,12 @@ export const validateShippingAddress = (
     errors.push({ field: 'country', message: 'Country is required' });
   }
 
-  // Required for US, CA, AU, JP: State
-  const countriesRequiringState = ['US', 'CA', 'AU', 'JP'];
-  if (customerInfo.country && countriesRequiringState.includes(customerInfo.country)) {
-    if (!customerInfo.state) {
-      errors.push({
-        field: 'state',
-        message: `State/Province is required for ${customerInfo.country}`
-      });
-    }
+  // Required: State for all countries
+  if (customerInfo.country && !customerInfo.state) {
+    errors.push({
+      field: 'state',
+      message: `State/Province is required for ${customerInfo.country}`
+    });
   }
 
   // Phone validation (optional based on context)
@@ -126,14 +123,5 @@ export const getErrorMessage = (errors: ValidationError[]): string => {
  * Check if address has minimum required fields for shipping rates
  */
 export const canFetchShippingRates = (customerInfo: CustomerInfo): boolean => {
-  // Minimum requirements: country and state (for required countries)
-  if (!customerInfo.country) return false;
-
-  const countriesRequiringState = ['US', 'CA', 'AU', 'JP'];
-  if (countriesRequiringState.includes(customerInfo.country) && !customerInfo.state) {
-    return false;
-  }
-
-  // Should have at least city and ZIP for meaningful rates
-  return !!(customerInfo.city && customerInfo.zip);
+  return !!customerInfo.country;
 };

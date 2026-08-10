@@ -39,8 +39,24 @@ const SUPPORTED_COUNTRIES = [
       { code: 'QC', name: 'Quebec' }, { code: 'SK', name: 'Saskatchewan' },
     ]
   },
-  { code: 'GB', name: 'United Kingdom', region: 'europe', states: [] },
-  { code: 'DE', name: 'Germany', region: 'europe', states: [] },
+  {
+    code: 'GB', name: 'United Kingdom', region: 'europe', states: [
+      { code: 'ENG', name: 'England' }, { code: 'SCT', name: 'Scotland' },
+      { code: 'WLS', name: 'Wales' }, { code: 'NIR', name: 'Northern Ireland' }
+    ]
+  },
+  {
+    code: 'DE', name: 'Germany', region: 'europe', states: [
+      { code: 'BW', name: 'Baden-Württemberg' }, { code: 'BY', name: 'Bavaria' },
+      { code: 'BE', name: 'Berlin' }, { code: 'BB', name: 'Brandenburg' },
+      { code: 'HB', name: 'Bremen' }, { code: 'HH', name: 'Hamburg' },
+      { code: 'HE', name: 'Hesse' }, { code: 'NI', name: 'Lower Saxony' },
+      { code: 'MV', name: 'Mecklenburg-Vorpommern' }, { code: 'NW', name: 'North Rhine-Westphalia' },
+      { code: 'RP', name: 'Rhineland-Palatinate' }, { code: 'SL', name: 'Saarland' },
+      { code: 'SN', name: 'Saxony' }, { code: 'ST', name: 'Saxony-Anhalt' },
+      { code: 'SH', name: 'Schleswig-Holstein' }, { code: 'TH', name: 'Thuringia' }
+    ]
+  },
   { code: 'FR', name: 'France', region: 'europe', states: [] },
   { code: 'IT', name: 'Italy', region: 'europe', states: [] },
   { code: 'ES', name: 'Spain', region: 'europe', states: [] },
@@ -50,7 +66,15 @@ const SUPPORTED_COUNTRIES = [
   { code: 'NO', name: 'Norway', region: 'europe', states: [] },
   { code: 'DK', name: 'Denmark', region: 'europe', states: [] },
   { code: 'FI', name: 'Finland', region: 'europe', states: [] },
-  { code: 'AT', name: 'Austria', region: 'europe', states: [] },
+  {
+    code: 'AT', name: 'Austria', region: 'europe', states: [
+      { code: 'B', name: 'Burgenland' }, { code: 'K', name: 'Carinthia' },
+      { code: 'NÖ', name: 'Lower Austria' }, { code: 'OÖ', name: 'Upper Austria' },
+      { code: 'S', name: 'Salzburg' }, { code: 'St', name: 'Styria' },
+      { code: 'T', name: 'Tyrol' }, { code: 'V', name: 'Vorarlberg' },
+      { code: 'W', name: 'Vienna' }
+    ]
+  },
   { code: 'CH', name: 'Switzerland', region: 'europe', states: [] },
   { code: 'PL', name: 'Poland', region: 'europe', states: [] },
   { code: 'CZ', name: 'Czech Republic', region: 'europe', states: [] },
@@ -72,7 +96,30 @@ const SUPPORTED_COUNTRIES = [
   { code: 'JP', name: 'Japan', region: 'asia', states: [] },
   { code: 'SG', name: 'Singapore', region: 'asia', states: [] },
   { code: 'HK', name: 'Hong Kong', region: 'asia', states: [] },
-  { code: 'IN', name: 'India', region: 'asia', states: [] },
+  {
+    code: 'IN', name: 'India', region: 'asia', states: [
+      { code: 'AP', name: 'Andhra Pradesh' }, { code: 'AR', name: 'Arunachal Pradesh' },
+      { code: 'AS', name: 'Assam' }, { code: 'BR', name: 'Bihar' },
+      { code: 'CG', name: 'Chhattisgarh' }, { code: 'GA', name: 'Goa' },
+      { code: 'GJ', name: 'Gujarat' }, { code: 'HR', name: 'Haryana' },
+      { code: 'HP', name: 'Himachal Pradesh' }, { code: 'JH', name: 'Jharkhand' },
+      { code: 'KA', name: 'Karnataka' }, { code: 'KL', name: 'Kerala' },
+      { code: 'MP', name: 'Madhya Pradesh' }, { code: 'MH', name: 'Maharashtra' },
+      { code: 'MN', name: 'Manipur' }, { code: 'ML', name: 'Meghalaya' },
+      { code: 'MZ', name: 'Mizoram' }, { code: 'NL', name: 'Nagaland' },
+      { code: 'OR', name: 'Odisha' }, { code: 'PB', name: 'Punjab' },
+      { code: 'RJ', name: 'Rajasthan' }, { code: 'SK', name: 'Sikkim' },
+      { code: 'TN', name: 'Tamil Nadu' }, { code: 'TG', name: 'Telangana' },
+      { code: 'TR', name: 'Tripura' }, { code: 'UP', name: 'Uttar Pradesh' },
+      { code: 'UK', name: 'Uttarakhand' }, { code: 'WB', name: 'West Bengal' },
+      { code: 'AN', name: 'Andaman and Nicobar Islands' },
+      { code: 'CH', name: 'Chandigarh' },
+      { code: 'DN', name: 'Dadra and Nagar Haveli and Daman and Diu' },
+      { code: 'DL', name: 'Delhi' }, { code: 'JK', name: 'Jammu and Kashmir' },
+      { code: 'LA', name: 'Ladakh' }, { code: 'LD', name: 'Lakshadweep' },
+      { code: 'PY', name: 'Puducherry' }
+    ]
+  },
   { code: 'BR', name: 'Brazil', region: 'south_america', states: [] },
   { code: 'MX', name: 'Mexico', region: 'north_america', states: [] },
   { code: 'AR', name: 'Argentina', region: 'south_america', states: [] },
@@ -96,24 +143,33 @@ async function calculateDynamicRates(lineItems: any[], countryCode: string): Pro
   const calculatedItems: any[] = [];
 
   for (const item of lineItems) {
-    let blueprintId = item.blueprint_id;
-    let printProviderId = item.print_provider_id;
-    let printifyVariantId = item.variant_id;
+    let blueprintId = item.blueprint_id || item.printify_blueprint_id;
+    let printProviderId = item.print_provider_id || item.printify_print_provider_id;
+    let printifyVariantId = item.printify_variant_id || item.variant_id;
 
     if (!blueprintId || !printProviderId) {
       try {
         const res = await fetch(`${BACKEND_URL}/api/products/${item.product_id}`);
         if (res.ok) {
           const productData = await res.json();
-          blueprintId = productData.printify_blueprint_id;
-          printProviderId = productData.printify_print_provider_id;
+          blueprintId = productData.printify_blueprint_id
+            || productData.blueprint_id
+            || (typeof productData.printify_product_id === 'number' ? productData.printify_product_id : null)
+            || (typeof productData.printify_product_id === 'string' && /^\d{1,5}$/.test(productData.printify_product_id) ? parseInt(productData.printify_product_id) : null)
+            || blueprintId
+            || 15;
+
+          printProviderId = productData.printify_print_provider_id
+            || productData.print_provider_id
+            || printProviderId
+            || 61;
           
-          if (productData.variants) {
+          if (productData.variants && Array.isArray(productData.variants)) {
             const matchedVariant = productData.variants.find((v: any) => 
               v.id == item.variant_id || v.printify_variant_id == item.variant_id
             );
             if (matchedVariant) {
-              printifyVariantId = matchedVariant.printify_variant_id || item.variant_id;
+              printifyVariantId = matchedVariant.printify_variant_id || matchedVariant.id || item.variant_id;
             }
           }
         }
@@ -122,72 +178,67 @@ async function calculateDynamicRates(lineItems: any[], countryCode: string): Pro
       }
     }
 
-    if (blueprintId && printProviderId) {
-      try {
-        console.log(`Fetching shipping profiles for blueprint: ${blueprintId}, provider: ${printProviderId}`);
-        const shippingData = await printifyCatalogAPI.getShippingProfiles(Number(blueprintId), Number(printProviderId));
-        const profiles = (shippingData as any).profiles || [];
-        
-        let matchingProfiles = profiles.filter((p: any) => 
-          p.variant_ids && p.variant_ids.includes(Number(printifyVariantId))
+    if (!blueprintId) blueprintId = 15;
+    if (!printProviderId) printProviderId = 61;
+
+    try {
+      console.log(`[Shipping Rate] Fetching Printify profiles for blueprint: ${blueprintId}, provider: ${printProviderId}, country: ${countryCode}`);
+      const shippingData = await printifyCatalogAPI.getShippingProfiles(Number(blueprintId), Number(printProviderId));
+      const profiles = (shippingData as any).profiles || [];
+      
+      let matchingProfiles = profiles.filter((p: any) => 
+        p.variant_ids && p.variant_ids.includes(Number(printifyVariantId))
+      );
+      
+      if (matchingProfiles.length === 0) {
+        matchingProfiles = profiles;
+      }
+
+      let matchedProfile = matchingProfiles.find((p: any) => 
+        p.countries && p.countries.some((c: string) => c.toUpperCase() === countryCode.toUpperCase())
+      );
+
+      if (!matchedProfile) {
+        matchedProfile = matchingProfiles.find((p: any) => 
+          p.countries && p.countries.some((c: string) => c.toUpperCase() === 'REST_OF_THE_WORLD')
         );
-        
-        if (matchingProfiles.length === 0) {
-          matchingProfiles = profiles;
-        }
+      }
 
-        let matchedProfile = matchingProfiles.find((p: any) => 
-          p.countries && p.countries.some((c: string) => c.toUpperCase() === countryCode.toUpperCase())
-        );
+      if (!matchedProfile && matchingProfiles.length > 0) {
+        matchedProfile = matchingProfiles[0];
+      }
 
-        if (!matchedProfile) {
-          matchedProfile = matchingProfiles.find((p: any) => 
-            p.countries && p.countries.some((c: string) => c.toUpperCase() === 'REST_OF_THE_WORLD')
-          );
-        }
+      if (matchedProfile) {
+        const firstCost = typeof matchedProfile.first_item === 'object' ? matchedProfile.first_item.cost : Number(matchedProfile.first_item || 599);
+        const addCost = typeof matchedProfile.additional_items === 'object' ? matchedProfile.additional_items.cost : Number(matchedProfile.additional_items || 200);
 
-        if (!matchedProfile) {
-          matchedProfile = matchingProfiles[0];
-        }
-
-        if (matchedProfile) {
-          calculatedItems.push({
-            print_provider_id: Number(printProviderId),
-            blueprint_id: Number(blueprintId),
-            quantity: Number(item.quantity || 1),
-            first_item: matchedProfile.first_item.cost,
-            additional_items: matchedProfile.additional_items.cost,
-            variant_id: Number(printifyVariantId)
-          });
-        } else {
-          calculatedItems.push({
-            print_provider_id: Number(printProviderId),
-            blueprint_id: Number(blueprintId),
-            quantity: Number(item.quantity || 1),
-            first_item: 599,
-            additional_items: 200,
-            variant_id: Number(printifyVariantId)
-          });
-        }
-      } catch (err: any) {
-        console.error(`Failed to fetch shipping profile for blueprint ${blueprintId}, provider ${printProviderId}:`, err.message);
         calculatedItems.push({
-          print_provider_id: Number(printProviderId) || 0,
-          blueprint_id: Number(blueprintId) || 0,
+          print_provider_id: Number(printProviderId),
+          blueprint_id: Number(blueprintId),
+          quantity: Number(item.quantity || 1),
+          first_item: firstCost,
+          additional_items: addCost,
+          variant_id: Number(item.variant_id || printifyVariantId)
+        });
+      } else {
+        calculatedItems.push({
+          print_provider_id: Number(printProviderId),
+          blueprint_id: Number(blueprintId),
           quantity: Number(item.quantity || 1),
           first_item: 599,
           additional_items: 200,
-          variant_id: Number(printifyVariantId)
+          variant_id: Number(item.variant_id || printifyVariantId)
         });
       }
-    } else {
+    } catch (err: any) {
+      console.error(`Failed to fetch shipping profile for blueprint ${blueprintId}, provider ${printProviderId}:`, err.message);
       calculatedItems.push({
-        print_provider_id: 0,
-        blueprint_id: 0,
+        print_provider_id: Number(printProviderId) || 0,
+        blueprint_id: Number(blueprintId) || 0,
         quantity: Number(item.quantity || 1),
         first_item: 599,
         additional_items: 200,
-        variant_id: Number(printifyVariantId)
+        variant_id: Number(item.variant_id || printifyVariantId)
       });
     }
   }
@@ -269,31 +320,17 @@ export async function POST(request: NextRequest) {
       const line_items = [];
       for (const item of items) {
         const itemSource = item.source || 'printify';
-        if (itemSource !== 'printify') {
-          continue; // Skip non-Printify items (e.g. Printful, Shopify)
+        if (itemSource === 'printful') {
+          continue; // Skip Printful items (handled separately)
         }
 
-        if (item.blueprint_id && item.print_provider_id) {
-          line_items.push({
-            blueprint_id: Number(item.blueprint_id),
-            print_provider_id: Number(item.print_provider_id),
-            variant_id: Number(item.printify_variant_id || item.printful_variant_id || item.variant_id),
-            quantity: Number(item.quantity || 1),
-          });
-        } else if (item.printify_product_id) {
-          line_items.push({
-            product_id: String(item.printify_product_id),
-            variant_id: Number(item.printify_variant_id || item.printful_variant_id || item.variant_id),
-            quantity: Number(item.quantity || 1),
-          });
-        } else {
-          // If no Printify identifiers exist, pass the local IDs (which will fail cleanly as 404 rather than assuming wrong blueprints)
-          line_items.push({
-            product_id: String(item.product_id),
-            variant_id: Number(item.printify_variant_id || item.printful_variant_id || item.variant_id),
-            quantity: Number(item.quantity || 1),
-          });
-        }
+        line_items.push({
+          product_id: item.product_id || item.id,
+          variant_id: Number(item.printify_variant_id || item.variant_id || 0),
+          quantity: Number(item.quantity || 1),
+          blueprint_id: item.blueprint_id || item.printify_blueprint_id,
+          print_provider_id: item.print_provider_id || item.printify_print_provider_id,
+        });
       }
 
       printifyPayload = {
@@ -315,7 +352,7 @@ export async function POST(request: NextRequest) {
           const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/products/${item.product_id}`);
           if (res.ok) {
             const productData = await res.json();
-            if (productData.source === 'printful' || productData.source === 'shopify') {
+            if (productData.source === 'printful') {
               isPrintify = false;
             }
             printifyProductId = productData.printify_product_id || productData.printful_sync_product_id || productData.printful_product_id || productData.blueprint_id || item.product_id;
@@ -337,6 +374,8 @@ export async function POST(request: NextRequest) {
             product_id: String(printifyProductId),
             variant_id: Number(printifyVariantId),
             quantity: Number(item.quantity || 1),
+            blueprint_id: item.blueprint_id,
+            print_provider_id: item.print_provider_id
           });
         }
       }
@@ -355,19 +394,13 @@ export async function POST(request: NextRequest) {
     // POST /api/printify/shipping/rates → calculate shipping
     let rates: any;
     if (!printifyPayload.line_items || printifyPayload.line_items.length === 0) {
-      console.log('Bypassing Printify API call as there are no Printify items in the request.');
+      console.log('Calculating dynamic shipping rates for fallback items list...');
+      const fallbackItems = (body.items && body.items.length > 0) ? body.items : (body.line_items || []);
+      const countryCode = printifyPayload.address_to?.country || body.recipient?.country_code || 'US';
+      const resultObj = await calculateDynamicRates(fallbackItems, countryCode);
       rates = {
-        standard: [
-          {
-            id: 'mock_standard',
-            title: 'Standard Shipping',
-            carrier: 'Generic',
-            rate: 599, // $5.99
-            minDeliveryDays: 3,
-            maxDeliveryDays: 7,
-            currency: 'USD'
-          }
-        ]
+        standard: resultObj.totalCents,
+        itemized: resultObj.itemized
       };
     } else {
       try {

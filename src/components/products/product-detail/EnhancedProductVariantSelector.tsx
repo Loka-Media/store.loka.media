@@ -1,7 +1,7 @@
 'use client';
 
 import { ProductVariant } from '@/lib/api';
-import { Check, Info } from 'lucide-react';
+import { Check, Info, Ruler } from 'lucide-react';
 
 interface EnhancedProductVariantSelectorProps {
   variants: ProductVariant[];
@@ -12,6 +12,7 @@ interface EnhancedProductVariantSelectorProps {
   getAvailableSizes: (color?: string) => string[];
   getCurrentVariant: (color: string, size: string) => ProductVariant | undefined;
   isVariantAvailable: (variant: ProductVariant) => boolean;
+  onOpenSizeGuide?: () => void;
 }
 
 export function EnhancedProductVariantSelector({
@@ -23,6 +24,7 @@ export function EnhancedProductVariantSelector({
   getAvailableSizes,
   getCurrentVariant,
   isVariantAvailable,
+  onOpenSizeGuide,
 }: EnhancedProductVariantSelectorProps) {
   const uniqueColors = getUniqueColors();
   const selectedColor = selectedVariant ? getVariantColorAndSize(selectedVariant).color : undefined;
@@ -93,9 +95,16 @@ export function EnhancedProductVariantSelector({
               );
             })}
           </div>
-          <button className="text-blue-400 hover:text-blue-300 font-medium text-sm">
-            Sizes Guide
-          </button>
+          {onOpenSizeGuide && (
+            <button
+              type="button"
+              onClick={onOpenSizeGuide}
+              className="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors hover:underline flex items-center gap-1.5 cursor-pointer pt-1"
+            >
+              <Ruler className="w-4 h-4" />
+              Sizes Guide
+            </button>
+          )}
         </div>
       )}
     </div>

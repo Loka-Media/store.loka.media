@@ -119,25 +119,14 @@ export default function UnifiedCheckoutPage() {
       return;
     }
 
-    // If compatible, check if we have all required address fields
-    const countriesRequiringState = ['US', 'CA', 'AU', 'JP'];
-    const stateRequired = countriesRequiringState.includes(country);
-
-    const hasRequiredFields = address1 && city && zip && country &&
-      (!stateRequired || state);
-
-    if (hasRequiredFields) {
-      console.log('✅ All items compatible. Fetching shipping rates for:', { address1, city, state, zip, country });
+    if (country && items.length > 0) {
+      console.log('✅ Fetching shipping rates for country:', country);
       checkoutState.fetchShippingRates(items);
     }
   }, [
-    checkoutState.customerInfo.address1,
-    checkoutState.customerInfo.city,
-    checkoutState.customerInfo.state,
-    checkoutState.customerInfo.zip,
     checkoutState.customerInfo.country,
     items,
-    locationLookup.printfulCountries
+    checkoutState.fetchShippingRates
   ]);
 
   // Create wrapper functions for hooks
@@ -217,9 +206,8 @@ export default function UnifiedCheckoutPage() {
         return;
       }
 
-      // Validate state for countries that require it (US, CA, AU, JP)
-      const countriesRequiringState = ['US', 'CA', 'AU', 'JP'];
-      if (countriesRequiringState.includes(customerInfo.country) && !customerInfo.state) {
+      // Validate state for all countries
+      if (customerInfo.country && !customerInfo.state) {
         toast.error(`State/Province is required for ${customerInfo.country}`);
         setLoading(false);
         return;
