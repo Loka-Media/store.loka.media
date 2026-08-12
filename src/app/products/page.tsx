@@ -272,21 +272,33 @@ function ProductsContent() {
       if (!isMatch) return false;
     }
 
-    // Filter strictly by Tag tab (Trending, New, Popular) if selected
-    if (activeView === "trending" || activeView === "new" || activeView === "popular") {
-      const targetTag = activeView.toLowerCase();
+    if (filters.minPrice !== undefined && (parseFloat(String(product.base_price)) || 0) < filters.minPrice) {
+      return false;
+    }
+    if (filters.maxPrice !== undefined && (parseFloat(String(product.base_price)) || 0) > filters.maxPrice) {
+      return false;
+    }
+
+    return true;
+  });
+
+  // Step A2: Filter by Tag tab (Trending, New, Popular) if explicit tagged products exist; fallback to showing all products sorted if none have the tag
+  if (activeView === "trending" || activeView === "new" || activeView === "popular") {
+    const targetTag = activeView.toLowerCase();
+    const taggedProducts = pool.filter((product) => {
       const rawTags = (product as any).tags;
       const tagsList: string[] = Array.isArray(rawTags)
         ? rawTags
         : typeof rawTags === "string"
         ? (rawTags as string).split(",")
         : [];
-      const matchesTag = tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
-      if (!matchesTag) return false;
-    }
+      return tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
+    });
 
-    return true;
-  });
+    if (taggedProducts.length > 0) {
+      pool = taggedProducts;
+    }
+  }
 
   // Step B: Multi-level Priority Search Query Matching
   if (query) {
