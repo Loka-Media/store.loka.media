@@ -62,11 +62,15 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://api.fontshare.com" />
         <link
-          href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap"
+          href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700,800,900&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased font-clash">
+      <body className="antialiased font-satoshi">
         <SmoothScroll />
         <AuthProvider>
           <GlobalMarkupProvider>

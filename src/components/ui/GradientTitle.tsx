@@ -31,8 +31,9 @@ export default function GradientTitle({
 
   return (
     <div
-      className={`font-extrabold tracking-tight leading-[1.1] ${sizeMap[size]} ${className}`}
+      className={`font-clash font-extrabold tracking-tight leading-[1.1] ${sizeMap[size]} ${className}`}
       style={{
+        fontFamily: "'Clash Display', var(--font-inter), sans-serif",
         backgroundImage: 'linear-gradient(273.09deg, #9E4719 0.41%, #FFFFFF 100%)',
         backgroundClip: 'text',
         WebkitBackgroundClip: 'text',
