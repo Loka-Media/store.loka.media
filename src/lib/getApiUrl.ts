@@ -5,11 +5,11 @@
 export const getApiUrl = (): string => {
   // In browser environment
   if (typeof window !== 'undefined') {
-    return (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/').replace(/\/$/, '');
+    return (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
   }
 
   // On server side
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media';
   return apiUrl.replace(/\/$/, '');
 };
 
