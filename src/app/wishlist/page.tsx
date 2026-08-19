@@ -12,6 +12,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import GradientTitle from "@/components/ui/GradientTitle";
+import { Button } from "@/components/ui/button";
 
 export default function WishlistPage() {
   const { items, loading, removeFromWishlist, clearWishlist } = useWishlist();
@@ -19,12 +20,6 @@ export default function WishlistPage() {
   const { isAuthenticated } = useAuth();
   const { formatPrice } = useCurrency();
   const router = useRouter();
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-    }
-  }, [isAuthenticated, router]);
 
   const [/* handleAddToCart */] = [async (productId: number) => {
     try {
@@ -71,19 +66,30 @@ export default function WishlistPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <Heart className="mx-auto h-12 w-12 text-white/40" />
-          <h3 className="mt-2 text-sm font-medium text-white">
-            Please login to view your wishlist
-          </h3>
-          <div className="mt-6">
-            <Link
-              href="/auth/login"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors"
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl inline-flex items-center justify-center mb-6">
+            <Heart className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">Sign In to Continue</h2>
+          <p className="text-gray-400 font-medium mb-8">
+            Please log in to access your wishlist and view your saved items.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Button
+              onClick={() => router.push('/auth/login?redirect=/wishlist')}
+              variant="primary"
+              className="w-full"
             >
               Sign In
-            </Link>
+            </Button>
+            <Button
+              onClick={() => router.push('/products')}
+              variant="secondary"
+              className="w-full"
+            >
+              Continue Shopping
+            </Button>
           </div>
         </div>
       </div>
