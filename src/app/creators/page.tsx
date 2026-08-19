@@ -7,15 +7,25 @@ import { User, Package, ChevronRight } from "lucide-react";
 import GradientTitle from "@/components/ui/GradientTitle";
 import CreativeLoader from "@/components/CreativeLoader";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 interface Creator {
   id: number;
   name: string;
   username: string;
   product_count: number;
   profile_img?: string | null;
+  profileImg?: string | null;
+  profile_image?: string | null;
+  profileImage?: string | null;
+  avatar_url?: string | null;
+  avatarUrl?: string | null;
+  avatar?: string | null;
+  image?: string | null;
 }
 
 export default function CreatorsPage() {
+  const { user } = useAuth();
   const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -111,6 +121,22 @@ export default function CreatorsPage() {
               // Deterministically generate a mock follower count so stats look populated
               const followers = ((creator.id * 63 + 120) % 850) + 140;
 
+              // Check all property aliases and fallback to logged-in user if matching
+              const creatorImage =
+                creator.profile_img ||
+                creator.profileImg ||
+                creator.profile_image ||
+                creator.profileImage ||
+                creator.avatar_url ||
+                creator.avatarUrl ||
+                creator.avatar ||
+                creator.image ||
+                (user &&
+                 (user.username?.toLowerCase() === creator.username?.toLowerCase() ||
+                  user.name?.toLowerCase() === creator.name?.toLowerCase())
+                  ? user.profileImg
+                  : null);
+
               return (
                 <Link
                   key={creator.id}
@@ -122,9 +148,9 @@ export default function CreatorsPage() {
                     
                     {/* Top Section: Photo Cover / Placeholder */}
                     <div className="relative flex-1 w-full overflow-hidden">
-                      {creator.profile_img ? (
+                      {creatorImage ? (
                         <img
-                          src={creator.profile_img}
+                          src={creatorImage}
                           alt={creator.name}
                           className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
                         />

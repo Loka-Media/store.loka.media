@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGuestCart } from "@/contexts/GuestCartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import {
   ShoppingBag,
   Menu,
@@ -18,6 +19,7 @@ import GlassSurface from "./GlassSurface";
 export default function StickyHeader() {
   const { user, logout, isAuthenticated } = useAuth();
   const { cartCount } = useGuestCart();
+  const { wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -146,6 +148,18 @@ export default function StickyHeader() {
                 ) : (
                   <>
                     <Link
+                      href="/wishlist"
+                      className="text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center relative"
+                    >
+                      <Heart className="w-4 h-4 mr-2" />
+                      Wishlist
+                      {wishlistCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                          {wishlistCount > 99 ? "99+" : wishlistCount}
+                        </span>
+                      )}
+                    </Link>
+                    <Link
                       href="/cart"
                       className="text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center relative"
                     >
@@ -271,6 +285,19 @@ export default function StickyHeader() {
                 </>
               ) : (
                 <>
+                  <Link
+                    href="/wishlist"
+                    className="text-gray-300 hover:text-white hover:bg-white/10 flex items-center px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 relative"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Heart className="w-5 h-5 mr-3" />
+                    Wishlist
+                    {wishlistCount > 0 && (
+                      <span className="ml-auto bg-accent text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+                        {wishlistCount > 99 ? "99+" : wishlistCount}
+                      </span>
+                    )}
+                  </Link>
                   <Link
                     href="/cart"
                     className="text-gray-300 hover:text-white hover:bg-white/10 flex items-center px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 relative"

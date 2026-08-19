@@ -168,7 +168,15 @@ function CreatorShopContent() {
         setCreator({
           name: matchingCreator.name,
           username: matchingCreator.username,
-          profileImg: matchingCreator.profile_img,
+          profileImg:
+            matchingCreator.profile_img ||
+            matchingCreator.profileImg ||
+            matchingCreator.profile_image ||
+            matchingCreator.profileImage ||
+            matchingCreator.avatar_url ||
+            matchingCreator.avatarUrl ||
+            matchingCreator.avatar ||
+            matchingCreator.image,
         });
       } else {
         // Fallback: query backend directly for a product to see if we can extract creator details
