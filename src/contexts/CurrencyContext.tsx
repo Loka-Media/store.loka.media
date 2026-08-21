@@ -16,8 +16,11 @@ interface CurrencyContextType {
   currency: string;
   loading: boolean;
   formatPrice: (price: number | string) => string;
+  convertPrice: (price: number | string) => number;
   setCurrency: (currency: string) => void;
   baseCurrency: string;
+  selectedCurrency: { code: string; name: string; flag: string; symbol: string };
+  currencySymbol: string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -27,6 +30,38 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [baseCurrency, setBaseCurrency] = useState<string>('USD');
   const [rates, setRates] = useState<Record<string, number>>({ USD: 1 });
   const [loading, setLoading] = useState<boolean>(true);
+
+  const selectedCurrency = availableCurrencies.find(c => c.code === currency) || availableCurrencies[0];
+  const currencySymbol = selectedCurrency.symbol;
+
+  const convertPrice = (price: number | string): number => {
+    const num = typeof price === 'string' ? parseFloat(price) : price;
+    if (isNaN(num)) return 0;
+
+    let rate = rates[currency];
+    if (!rate && typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('currency_rates');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed[currency]) rate = parsed[currency];
+        }
+      } catch (e) {}
+    }
+    if (!rate) {
+      const fallbacks: Record<string, number> = {
+        INR: 91.9,
+        EUR: 0.92,
+        GBP: 0.79,
+        CAD: 1.36,
+        AUD: 1.52,
+        USD: 1,
+      };
+      rate = fallbacks[currency] || 1;
+    }
+
+    return num * rate;
+  };
 
   const mapCountryToCurrency = (countryCode: string): string => {
     const code = countryCode.toUpperCase();
@@ -142,7 +177,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <CurrencyContext.Provider value={{ currency, loading, formatPrice, setCurrency, baseCurrency }}>
+    <CurrencyContext.Provider value={{ currency, loading, formatPrice, convertPrice, setCurrency, baseCurrency, selectedCurrency, currencySymbol }}>
       {children}
     </CurrencyContext.Provider>
   );

@@ -14,6 +14,8 @@ import { ProductsPagination } from "@/components/products/ProductsPagination";
 import { NoProductsFound } from "@/components/products/NoProductsFound";
 import { ProductsLoading } from "@/components/products/ProductsLoading";
 import CreativeLoader from "@/components/CreativeLoader";
+import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 export default function ProductsPage() {
   return (
@@ -34,6 +36,8 @@ export default function ProductsPage() {
 function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { getProductPriceRange } = useGlobalMarkup();
+  const { selectedCurrency, convertPrice } = useCurrency();
 
   // Refs to track initialization and prevent strict mode double-fetching
   const isStaticDataFetched = useRef(false);
@@ -52,6 +56,12 @@ function ProductsContent() {
   const [activeView, setActiveView] = useState<ViewType>("trending");
   const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false);
+  const [minPriceInput, setMinPriceInput] = useState(() =>
+    searchParams.get("minPrice") || ""
+  );
+  const [maxPriceInput, setMaxPriceInput] = useState(() =>
+    searchParams.get("maxPrice") || ""
+  );
 
   const [filters, setFilters] = useState(() => ({
     category: searchParams.get("category") || "",
@@ -63,6 +73,21 @@ function ProductsContent() {
     minPrice: searchParams.get("minPrice") ? parseFloat(searchParams.get("minPrice")!) : undefined,
     maxPrice: searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined,
   }));
+
+  // Debounce local price input state changes to prevent focus loss & router stutter while typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const minNum = minPriceInput.trim() !== "" ? parseFloat(minPriceInput) : undefined;
+      const maxNum = maxPriceInput.trim() !== "" ? parseFloat(maxPriceInput) : undefined;
+
+      setFilters((prev) => {
+        if (prev.minPrice === minNum && prev.maxPrice === maxNum) return prev;
+        return { ...prev, minPrice: minNum, maxPrice: maxNum };
+      });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [minPriceInput, maxPriceInput]);
 
   const [pagination, setPagination] = useState({
     total: 0,
@@ -280,11 +305,16 @@ function ProductsContent() {
       if (!isMatch) return false;
     }
 
-    if (filters.minPrice !== undefined && (parseFloat(String(product.base_price)) || 0) < filters.minPrice) {
-      return false;
-    }
-    if (filters.maxPrice !== undefined && (parseFloat(String(product.base_price)) || 0) > filters.maxPrice) {
-      return false;
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+      const { minPrice: baseMinSellingPrice } = getProductPriceRange(product);
+      const displayPrice = convertPrice(baseMinSellingPrice);
+
+      if (filters.minPrice !== undefined && displayPrice < filters.minPrice) {
+        return false;
+      }
+      if (filters.maxPrice !== undefined && displayPrice > filters.maxPrice) {
+        return false;
+      }
     }
 
     return true;
@@ -402,8 +432,10 @@ function ProductsContent() {
       maxPrice: undefined as number | undefined,
     };
 
-    // Reset search input state
+    // Reset search input state & price input states
     setSearchInput("");
+    setMinPriceInput("");
+    setMaxPriceInput("");
 
     // Clear the URL first to avoid sync issues
     router.replace('/products', { scroll: false });
@@ -607,8 +639,8 @@ function ProductsContent() {
                   className="w-full lg:w-auto px-4 py-3 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm font-semibold hover:border-orange-400 hover:bg-gray-800 transition-all"
                 >
                   {filters.minPrice !== undefined || filters.maxPrice !== undefined
-                    ? `$${filters.minPrice ?? 0} - $${filters.maxPrice ?? "Any"}`
-                    : "$ Price Range"}
+                    ? `${selectedCurrency.symbol}${filters.minPrice ?? 0} - ${filters.maxPrice !== undefined ? `${selectedCurrency.symbol}${filters.maxPrice}` : "Any"}`
+                    : `${selectedCurrency.symbol} Price Range`}
                 </button>
               </div>
             </div>
@@ -617,26 +649,16 @@ function ProductsContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl border border-white/10 bg-gray-950/90">
                 <input
                   type="number"
-                  placeholder="Min Price"
-                  value={filters.minPrice ?? ""}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "minPrice",
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
+                  placeholder={`Min Price (${selectedCurrency.symbol})`}
+                  value={minPriceInput}
+                  onChange={(e) => setMinPriceInput(e.target.value)}
                   className="w-full px-4 py-3 rounded-2xl border border-white/20 bg-black text-white text-sm placeholder-white/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
                 />
                 <input
                   type="number"
-                  placeholder="Max Price"
-                  value={filters.maxPrice ?? ""}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "maxPrice",
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
+                  placeholder={`Max Price (${selectedCurrency.symbol})`}
+                  value={maxPriceInput}
+                  onChange={(e) => setMaxPriceInput(e.target.value)}
                   className="w-full px-4 py-3 rounded-2xl border border-white/20 bg-black text-white text-sm placeholder-white/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
                 />
               </div>
@@ -661,7 +683,7 @@ function ProductsContent() {
         </div>
       </div>
 
-      {!loading && paginatedProducts.length > 0 && filters.category === "" && (!searchInput || !searchInput.trim()) && (
+      {!loading && paginatedProducts.length > 0 && filters.category === "" && (!searchInput || !searchInput.trim()) && !filters.creator && filters.minPrice === undefined && filters.maxPrice === undefined && (
         <FeaturedProducts products={paginatedProducts} />
       )}
 
