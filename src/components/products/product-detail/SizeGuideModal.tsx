@@ -286,11 +286,16 @@ export function SizeGuideModal({
 
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.classList.add('overflow-hidden');
       window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+      document.body.classList.remove('overflow-hidden');
     }
 
     return () => {
       document.body.style.overflow = '';
+      document.body.classList.remove('overflow-hidden');
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -305,9 +310,16 @@ export function SizeGuideModal({
   const rows = generateDynamicRows(categoryType, availableSizes);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-fade-in">
+    <div
+      data-lenis-prevent
+      onWheel={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-fade-in"
+      onClick={onClose}
+    >
       {/* Modal Container */}
       <div 
+        data-lenis-prevent
         className="relative w-full max-w-4xl max-h-[90vh] bg-zinc-950 border border-white/15 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
