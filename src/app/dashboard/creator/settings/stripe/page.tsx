@@ -76,6 +76,17 @@ function PayoutSettingsPageContent() {
     fetchBankDetails();
   }, []);
 
+  useEffect(() => {
+    if (isEditing || showRemoveConfirm) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isEditing, showRemoveConfirm]);
+
   const fetchBankDetails = async () => {
     try {
       setLoading(true);
@@ -331,8 +342,35 @@ function PayoutSettingsPageContent() {
 
         {/* FORM MODAL - Show when editing */}
         {isEditing ? (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-900 rounded-lg border border-gray-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
+            <style>{`
+              .modal-scrollbar-5px::-webkit-scrollbar {
+                width: 5px !important;
+              }
+              .modal-scrollbar-5px::-webkit-scrollbar-track {
+                background: #111827 !important;
+                border-radius: 4px;
+              }
+              .modal-scrollbar-5px::-webkit-scrollbar-thumb {
+                background: #FF6D1F !important;
+                border-radius: 4px;
+              }
+              .modal-scrollbar-5px::-webkit-scrollbar-thumb:hover {
+                background: #FF7A1A !important;
+              }
+              .modal-scrollbar-5px {
+                scrollbar-width: thin !important;
+                scrollbar-color: #FF6D1F #111827 !important;
+              }
+            `}</style>
+            <div
+              data-lenis-prevent
+              className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-scrollbar-5px shadow-2xl"
+            >
               {/* Modal Header */}
               <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex items-center justify-between">
                 <div className="text-xl font-bold text-white">
