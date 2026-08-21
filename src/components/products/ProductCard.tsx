@@ -11,6 +11,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { Heart, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface ProductCardProps {
@@ -18,6 +19,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const { addToWishlist, removeFromWishlist, items: wishlistItems } = useWishlist();
@@ -169,7 +171,8 @@ export function ProductCard({ product }: ProductCardProps) {
                 e.preventDefault();
                 e.stopPropagation();
                 if (!isAuthenticated) {
-                  toast.error("Please login to add items to wishlist");
+                  toast.success("Please sign in to manage your wishlist");
+                  router.push('/auth/login?redirect=/wishlist');
                   return;
                 }
 

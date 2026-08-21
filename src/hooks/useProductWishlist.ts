@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProductDetails } from './useProductData';
@@ -9,6 +10,7 @@ export const useProductWishlist = (product: ProductDetails | null) => {
   const [isLoading, setIsLoading] = useState(false);
   const { addToWishlist, removeFromWishlist, isInWishlist, items: wishlistItems } = useWishlist();
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   // Use cached data from context instead of making individual API calls
   useEffect(() => {
@@ -23,7 +25,8 @@ export const useProductWishlist = (product: ProductDetails | null) => {
   const handleWishlistToggle = useCallback(async () => {
     if (!product) return;
     if (!isAuthenticated) {
-      toast.error('Please login to manage wishlist');
+      toast.success('Please sign in to manage your wishlist');
+      router.push('/auth/login?redirect=/wishlist');
       return;
     }
 
@@ -41,7 +44,7 @@ export const useProductWishlist = (product: ProductDetails | null) => {
     } finally {
       setIsLoading(false);
     }
-  }, [product, isAuthenticated, isWishlisted, removeFromWishlist, addToWishlist]);
+  }, [product, isAuthenticated, isWishlisted, removeFromWishlist, addToWishlist, router]);
 
   return {
     isWishlisted,

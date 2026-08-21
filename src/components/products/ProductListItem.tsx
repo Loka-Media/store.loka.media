@@ -365,7 +365,8 @@ export function ProductListItem({ product }: ProductListItemProps) {
                   title="Add to wishlist"
                   onClick={() => {
                     if (!isAuthenticated) {
-                      toast.error("Please login to add items to wishlist");
+                      toast.success("Please sign in to manage your wishlist");
+                      router.push('/auth/login?redirect=/wishlist');
                       return;
                     }
                     setIsWishlisted(!isWishlisted);
