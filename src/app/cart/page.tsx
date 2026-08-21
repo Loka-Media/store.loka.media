@@ -203,31 +203,41 @@ export default function CartPage() {
                 <div className="px-4 py-6 sm:px-6">
                   <div className="flow-root">
                     <ul className="-my-6 divide-y divide-gray-800">
-                      {items.map((item) => (
-                        <li key={item.id} className="py-6 flex">
-                          <div className="flex-shrink-0 w-24 h-24 border border-gray-700 rounded-lg overflow-hidden bg-gray-900">
-                            <Image
-                              src={item.image_url || item.thumbnail_url || '/placeholder-product.svg'}
-                              alt={item.product_name}
-                              width={96}
-                              height={96}
-                              className="w-full h-full object-cover"
-                              unoptimized={true}
-                              onError={(e) => {
-                                e.currentTarget.src = '/placeholder-product.svg';
-                              }}
-                            />
-                          </div>
+                      {items.map((item) => {
+                        const productHref = `/products/${(item as any).product_slug || (item as any).slug || item.product_id}`;
+                        return (
+                          <li key={item.id} className="py-6 flex">
+                            <Link
+                              href={productHref}
+                              className="flex-shrink-0 w-24 h-24 border border-gray-700 rounded-lg overflow-hidden bg-gray-900 group hover:border-orange-500 transition-colors"
+                            >
+                              <Image
+                                src={item.image_url || item.thumbnail_url || '/placeholder-product.svg'}
+                                alt={item.product_name}
+                                width={96}
+                                height={96}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                unoptimized={true}
+                                onError={(e) => {
+                                  e.currentTarget.src = '/placeholder-product.svg';
+                                }}
+                              />
+                            </Link>
 
-                          <div className="ml-4 flex-1 flex flex-col">
-                            <div>
-                              <div className="flex justify-between text-base font-bold text-white">
-                                <span>{item.product_name}</span>
-                                <p className="ml-4 text-orange-400">{formatPrice(item.total_price)}</p>
-                              </div>
-                              <p className="mt-1 text-sm text-gray-400 font-medium">
-                                by {item.creator_name}
-                              </p>
+                            <div className="ml-4 flex-1 flex flex-col">
+                              <div>
+                                <div className="flex justify-between text-base font-bold text-white">
+                                  <Link
+                                    href={productHref}
+                                    className="hover:text-orange-400 transition-colors hover:underline cursor-pointer"
+                                  >
+                                    {item.product_name}
+                                  </Link>
+                                  <p className="ml-4 text-orange-400">{formatPrice(item.total_price)}</p>
+                                </div>
+                                <p className="mt-1 text-sm text-gray-400 font-medium">
+                                  by {item.creator_name}
+                                </p>
                               <div className="mt-2 text-sm text-gray-400 font-medium flex items-center space-x-4">
                                 <span>Size: {item.size}</span>
                                 <span className="flex items-center">
@@ -279,7 +289,8 @@ export default function CartPage() {
                             </div>
                           </div>
                         </li>
-                      ))}
+                      );
+                    })}
                     </ul>
                   </div>
                 </div>
