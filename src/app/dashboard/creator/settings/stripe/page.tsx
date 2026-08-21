@@ -372,7 +372,7 @@ function PayoutSettingsPageContent() {
               className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-scrollbar-5px shadow-2xl"
             >
               {/* Modal Header */}
-              <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex items-center justify-between">
+              <div className="sticky top-0 z-30 bg-gray-900 border-b border-gray-700 p-6 flex items-center justify-between">
                 <div className="text-xl font-bold text-white">
                   {hasDetails ? 'Edit Bank Details' : 'Link Bank Account'}
                 </div>
@@ -396,34 +396,57 @@ function PayoutSettingsPageContent() {
               <span className="w-5 h-5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-xs font-bold text-white">1</span>
               Account Type
             </div>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="relative">
+            <div className="flex gap-6 items-center">
+              <label className="flex items-center gap-3 cursor-pointer group select-none">
+                <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
                   <input
                     type="radio"
+                    name="account_type_choice"
                     checked={!isBusiness}
                     onChange={() => setIsBusiness(false)}
-                    className="w-4 h-4 cursor-pointer"
+                    className="sr-only"
                   />
-                  {!isBusiness && (
-                    <div className="absolute inset-0 border-2 border-orange-400 rounded-full pointer-events-none -m-1"></div>
-                  )}
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 transition-all flex items-center justify-center ${
+                      !isBusiness
+                        ? "border-orange-500 bg-orange-500/10 shadow-[0_0_10px_rgba(255,109,31,0.4)]"
+                        : "border-gray-600 bg-gray-900 group-hover:border-gray-400"
+                    }`}
+                  >
+                    {!isBusiness && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm" />
+                    )}
+                  </div>
                 </div>
-                <span className="text-gray-300 group-hover:text-orange-400 transition-colors">Personal Account</span>
+                <span className={`text-sm font-medium transition-colors ${!isBusiness ? "text-white font-semibold" : "text-gray-300 group-hover:text-white"}`}>
+                  Personal Account
+                </span>
               </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="relative">
+
+              <label className="flex items-center gap-3 cursor-pointer group select-none">
+                <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
                   <input
                     type="radio"
+                    name="account_type_choice"
                     checked={isBusiness}
                     onChange={() => setIsBusiness(true)}
-                    className="w-4 h-4 cursor-pointer"
+                    className="sr-only"
                   />
-                  {isBusiness && (
-                    <div className="absolute inset-0 border-2 border-orange-400 rounded-full pointer-events-none -m-1"></div>
-                  )}
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 transition-all flex items-center justify-center ${
+                      isBusiness
+                        ? "border-orange-500 bg-orange-500/10 shadow-[0_0_10px_rgba(255,109,31,0.4)]"
+                        : "border-gray-600 bg-gray-900 group-hover:border-gray-400"
+                    }`}
+                  >
+                    {isBusiness && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm" />
+                    )}
+                  </div>
                 </div>
-                <span className="text-gray-300 group-hover:text-orange-400 transition-colors">Business Account</span>
+                <span className={`text-sm font-medium transition-colors ${isBusiness ? "text-white font-semibold" : "text-gray-300 group-hover:text-white"}`}>
+                  Business Account
+                </span>
               </label>
             </div>
           </div>
