@@ -110,6 +110,83 @@ function PayoutSettingsPageContent() {
     }
   };
 
+  const COUNTRY_TO_CURRENCY_MAP: Record<string, string> = {
+    IN: 'INR',
+    US: 'USD',
+    CA: 'CAD',
+    GB: 'GBP',
+    AU: 'AUD',
+    DE: 'EUR',
+    FR: 'EUR',
+    ES: 'EUR',
+    IT: 'EUR',
+    NL: 'EUR',
+    BE: 'EUR',
+    AT: 'EUR',
+    IE: 'EUR',
+    JP: 'JPY',
+    MX: 'MXN',
+    BR: 'BRL',
+  };
+
+  const CURRENCY_TO_COUNTRY_MAP: Record<string, string> = {
+    INR: 'IN',
+    USD: 'US',
+    CAD: 'CA',
+    GBP: 'GB',
+    AUD: 'AU',
+    EUR: 'DE',
+    JPY: 'JP',
+    MXN: 'MX',
+    BRL: 'BR',
+  };
+
+  const handleBankCountryChange = (countryCode: string) => {
+    const targetCurrency = COUNTRY_TO_CURRENCY_MAP[countryCode] || 'USD';
+    const countryNames: Record<string, string> = {
+      IN: 'India',
+      US: 'United States',
+      CA: 'Canada',
+      GB: 'United Kingdom',
+      AU: 'Australia',
+      DE: 'Germany',
+      FR: 'France',
+      JP: 'Japan',
+      MX: 'Mexico',
+      BR: 'Brazil',
+    };
+
+    setBankDetails((prev) => ({
+      ...prev,
+      bank_country: countryCode,
+      currency: targetCurrency,
+      account_holder_country: countryNames[countryCode] || prev.account_holder_country || countryCode,
+    }));
+  };
+
+  const handleCurrencyChange = (currencyCode: string) => {
+    const targetCountry = CURRENCY_TO_COUNTRY_MAP[currencyCode] || 'US';
+    const countryNames: Record<string, string> = {
+      IN: 'India',
+      US: 'United States',
+      CA: 'Canada',
+      GB: 'United Kingdom',
+      AU: 'Australia',
+      DE: 'Germany',
+      FR: 'France',
+      JP: 'Japan',
+      MX: 'Mexico',
+      BR: 'Brazil',
+    };
+
+    setBankDetails((prev) => ({
+      ...prev,
+      currency: currencyCode,
+      bank_country: targetCountry,
+      account_holder_country: countryNames[targetCountry] || prev.account_holder_country,
+    }));
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setBankDetails(prev => ({
@@ -606,7 +683,7 @@ function PayoutSettingsPageContent() {
                 <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">Bank Country *</label>
                 <Select
                   value={bankDetails.bank_country || "US"}
-                  onValueChange={(val) => setBankDetails(prev => ({ ...prev, bank_country: val }))}
+                  onValueChange={handleBankCountryChange}
                 >
                   <SelectTrigger className="w-full h-[46px] bg-gray-900 border-gray-600 rounded-lg text-white">
                     <SelectValue placeholder="Select Country" />
@@ -629,7 +706,7 @@ function PayoutSettingsPageContent() {
                 <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">Currency *</label>
                 <Select
                   value={bankDetails.currency || "USD"}
-                  onValueChange={(val) => setBankDetails(prev => ({ ...prev, currency: val }))}
+                  onValueChange={handleCurrencyChange}
                 >
                   <SelectTrigger className="w-full h-[46px] bg-gray-900 border-gray-600 rounded-lg text-white">
                     <SelectValue placeholder="Select Currency" />
