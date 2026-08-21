@@ -12329,6 +12329,69 @@
     "colorsCount": 17,
     "providersCount": 1
   },
+  "3270": {
+    "title": "Dimension Knit Dress Shirt",
+    "providerId": 217,
+    "price": "12.00",
+    "premiumPrice": "9.24",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3285": {
+    "title": "Women's Silk Touch Performance Long Sleeve Polo",
+    "providerId": 217,
+    "price": "17.00",
+    "premiumPrice": "13.09",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3288": {
+    "title": "Women's Silk Touch 3/4-Sleeve Polo",
+    "providerId": 217,
+    "price": "18.00",
+    "premiumPrice": "13.86",
+    "sizesCount": 1,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "3290": {
+    "title": "Women's Dry Zone UV Micro-Mesh Sleeveless Polo",
+    "providerId": 217,
+    "price": "12.50",
+    "premiumPrice": "9.63",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3292": {
+    "title": "Women's Wearever Signature Pique Long Sleeve Polo",
+    "providerId": 217,
+    "price": "16.25",
+    "premiumPrice": "12.51",
+    "sizesCount": 8,
+    "colorsCount": 9,
+    "providersCount": 1
+  },
+  "3293": {
+    "title": "Women's Performance Staff Polo",
+    "providerId": 217,
+    "price": "13.50",
+    "premiumPrice": "10.39",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
+  },
+  "3294": {
+    "title": "Women's Heathered Silk Touch Performance Polo",
+    "providerId": 217,
+    "price": "10.00",
+    "premiumPrice": "7.70",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
   "3297": {
     "title": "Women's C-FREE Snag-Proof Polo",
     "providerId": 99,
@@ -12337,6 +12400,15 @@
     "sizesCount": 7,
     "colorsCount": 12,
     "providersCount": 2
+  },
+  "3298": {
+    "title": "Women's C-FREE Cotton Blend Pique Polo",
+    "providerId": 217,
+    "price": "18.25",
+    "premiumPrice": "14.05",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
   },
   "3319": {
     "title": "Women's Dri-Mesh V-Neck Polo",
@@ -13400,6 +13472,15 @@
     "colorsCount": 36,
     "providersCount": 5
   },
+  "3932": {
+    "title": "Women's NRG Fitness Pant",
+    "providerId": 217,
+    "price": "16.50",
+    "premiumPrice": "12.71",
+    "sizesCount": 8,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
   "3933": {
     "title": "Women's Dri-Mesh Pro Polo",
     "providerId": 217,
@@ -13418,6 +13499,15 @@
     "colorsCount": 21,
     "providersCount": 4
   },
+  "3938": {
+    "title": "Women's PosiCharge Sport-Wick Heather Fleece Hooded Pullover",
+    "providerId": 217,
+    "price": "27.70",
+    "premiumPrice": "21.33",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
   "3941": {
     "title": "Women's PosiCharge RacerMesh V-Neck Tee",
     "providerId": 99,
@@ -13427,6 +13517,33 @@
     "colorsCount": 26,
     "providersCount": 2
   },
+  "3943": {
+    "title": "Women's PosiCharge Draft Crop Tee",
+    "providerId": 217,
+    "price": "13.23",
+    "premiumPrice": "10.19",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3944": {
+    "title": "Women's Club Colorblock Polo",
+    "providerId": 217,
+    "price": "10.50",
+    "premiumPrice": "8.09",
+    "sizesCount": 8,
+    "colorsCount": 9,
+    "providersCount": 1
+  },
+  "3947": {
+    "title": "Women's Repeat Swift Short",
+    "providerId": 217,
+    "price": "11.50",
+    "premiumPrice": "8.86",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
   "3949": {
     "title": "Women's Repeat Skort",
     "providerId": 99,
@@ -13435,6 +13552,60 @@
     "sizesCount": 5,
     "colorsCount": 34,
     "providersCount": 3
+  },
+  "3951": {
+    "title": "Women's Sideline Polo",
+    "providerId": 217,
+    "price": "9.00",
+    "premiumPrice": "6.93",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3953": {
+    "title": "Women's PosiCharge Electric Heather Polo",
+    "providerId": 217,
+    "price": "13.50",
+    "premiumPrice": "10.39",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
+  },
+  "3954": {
+    "title": "Women's Halftime Notch Neck Tee",
+    "providerId": 217,
+    "price": "8.00",
+    "premiumPrice": "6.16",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3955": {
+    "title": "Women's Colorblock Micropique Sport-Wick Polo",
+    "providerId": 217,
+    "price": "17.25",
+    "premiumPrice": "13.28",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3956": {
+    "title": "Women's PosiCharge Micro-Mesh Polo",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 8,
+    "colorsCount": 9,
+    "providersCount": 1
+  },
+  "3957": {
+    "title": "Women's PosiCharge Micro-Mesh Colorblock Polo",
+    "providerId": 217,
+    "price": "11.00",
+    "premiumPrice": "8.47",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
   },
   "3958": {
     "title": "Women's PosiCharge Active Textured Polo",
@@ -13450,6 +13621,15 @@
     "providerId": 217,
     "price": "15.50",
     "premiumPrice": "11.94",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3961": {
+    "title": "Women's Sport-Wick Stretch 1/2-Zip Hoodie",
+    "providerId": 217,
+    "price": "24.43",
+    "premiumPrice": "18.81",
     "sizesCount": 8,
     "colorsCount": 5,
     "providersCount": 1
@@ -13895,6 +14075,42 @@
     "colorsCount": 39,
     "providersCount": 8
   },
+  "4106": {
+    "title": "Women's Travel Pant",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
+  "4109": {
+    "title": "Women's PosiCharge Electric Heather Colorblock 1/4-Zip Pullover",
+    "providerId": 217,
+    "price": "22.70",
+    "premiumPrice": "17.48",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "4110": {
+    "title": "Women's Club Sleeveless V-Neck",
+    "providerId": 217,
+    "price": "12.00",
+    "premiumPrice": "9.24",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
+  "4111": {
+    "title": "Women's Interval 3' Short",
+    "providerId": 217,
+    "price": "9.25",
+    "premiumPrice": "7.12",
+    "sizesCount": 8,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
   "4112": {
     "title": "Women's Exchange 1.5 Long Sleeve 1/2-Zip",
     "providerId": 217,
@@ -13902,6 +14118,15 @@
     "premiumPrice": "12.71",
     "sizesCount": 8,
     "colorsCount": 5,
+    "providersCount": 1
+  },
+  "4114": {
+    "title": "Women's NRG Fitness Jacket",
+    "providerId": 217,
+    "price": "10.25",
+    "premiumPrice": "7.89",
+    "sizesCount": 8,
+    "colorsCount": 1,
     "providersCount": 1
   },
   "4116": {
@@ -14057,6 +14282,24 @@
     "colorsCount": 8,
     "providersCount": 1
   },
+  "4410": {
+    "title": "Women's Colorblock Hooded Raglan Jacket",
+    "providerId": 217,
+    "price": "12.00",
+    "premiumPrice": "9.24",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
+  },
+  "4413": {
+    "title": "Women's Hooded Soft Shell Jacket",
+    "providerId": 217,
+    "price": "13.00",
+    "premiumPrice": "10.01",
+    "sizesCount": 8,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
   "4469": {
     "title": "Tall Duck Cloth Hooded Work Jacket",
     "providerId": 217,
@@ -14138,6 +14381,15 @@
     "colorsCount": 10,
     "providersCount": 1
   },
+  "4519": {
+    "title": "Women's Workwear Pro Polo",
+    "providerId": 217,
+    "price": "15.25",
+    "premiumPrice": "11.74",
+    "sizesCount": 8,
+    "colorsCount": 9,
+    "providersCount": 1
+  },
   "4560": {
     "title": "ANSI 107 Class 3 Mesh Tee",
     "providerId": 217,
@@ -14199,6 +14451,24 @@
     "premiumPrice": "7.32",
     "sizesCount": 7,
     "colorsCount": 5,
+    "providersCount": 1
+  },
+  "4604": {
+    "title": "Women's Cadence Short",
+    "providerId": 217,
+    "price": "10.50",
+    "premiumPrice": "8.09",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
+  "4605": {
+    "title": "Women's Club 5' Short",
+    "providerId": 217,
+    "price": "17.00",
+    "premiumPrice": "13.09",
+    "sizesCount": 8,
+    "colorsCount": 13,
     "providersCount": 1
   },
   "4606": {
@@ -15099,6 +15369,15 @@
     "premiumPrice": "24.97",
     "sizesCount": 7,
     "colorsCount": 30,
+    "providersCount": 1
+  },
+  "5502": {
+    "title": "Women's Tank Top",
+    "providerId": 217,
+    "price": "16.00",
+    "premiumPrice": "12.32",
+    "sizesCount": 7,
+    "colorsCount": 7,
     "providersCount": 1
   },
   "5504": {
@@ -16180,6 +16459,15 @@
     "sizesCount": 5,
     "colorsCount": 38,
     "providersCount": 7
+  },
+  "6405": {
+    "title": "Women's Flowy High-Neck Tank",
+    "providerId": 217,
+    "price": "17.00",
+    "premiumPrice": "13.09",
+    "sizesCount": 1,
+    "colorsCount": 1,
+    "providersCount": 1
   },
   "6453": {
     "title": "Women's Pom Pom Long Sleeve Jersey T-Shirt",

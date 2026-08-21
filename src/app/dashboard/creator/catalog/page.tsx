@@ -316,10 +316,10 @@ function CategorySelection({ categories, onSelectCategory }: any) {
 function CategoryCard({ category, onSelect }: any) {
   return (
     <div
-      className="gradient-border-white-bottom rounded-lg overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,133,27,0.2)] hover:translate-y-[-4px] transition-all duration-300 cursor-pointer"
+      className="bg-black border border-white/15 hover:border-orange-500/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,109,31,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 cursor-pointer"
       onClick={() => onSelect(category)}
     >
-      <div className="aspect-square relative overflow-hidden">
+      <div className="aspect-square relative overflow-hidden bg-black">
         {/* Image with fallback */}
         <ImageWithFallback
           src={category.image_url || category.image || '/placeholder-product.png'}
@@ -331,7 +331,7 @@ function CategoryCard({ category, onSelect }: any) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
-      <div className="p-2 sm:p-3">
+      <div className="p-3 sm:p-4 bg-black border-t border-white/10">
         <span className="font-bold text-white text-sm sm:text-lg text-center group-hover:text-orange-400 transition-colors block">
           {category.title}
         </span>
@@ -445,9 +445,9 @@ function PrintfulProductCard({
   const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), product.title).toFixed(2);
 
   return (
-    <div className="gradient-border-white-bottom rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,133,27,0.2)] hover:translate-y-[-4px] transition-all duration-300 flex flex-col">
+    <div className="bg-black border border-white/15 hover:border-orange-500/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,109,31,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 flex flex-col">
       {/* Image Section with Brand and Buttons */}
-      <div className="aspect-square relative overflow-hidden rounded-t-2xl">
+      <div className="aspect-square relative overflow-hidden rounded-t-2xl bg-black">
         <ImageWithFallback
           src={product.image || "/placeholder-product.png"}
           alt={product.title || product.model}
@@ -476,7 +476,7 @@ function PrintfulProductCard({
       </div>
 
       {/* Info Section - Bottom */}
-      <div className="p-3 sm:p-4 flex flex-col gap-2.5 flex-grow text-center">
+      <div className="p-3 sm:p-4 flex flex-col gap-2.5 flex-grow text-center bg-black border-t border-white/10">
         {/* Product Type Label */}
         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
           {product.type_name || product.type}
@@ -687,10 +687,10 @@ function SubcategorySelection({ category, products, loading, onSelectSubcategory
             return (
               <div
                 key={subcat.id}
-                className="gradient-border-white-bottom rounded-lg overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,133,27,0.2)] hover:translate-y-[-4px] transition-all duration-300 cursor-pointer"
+                className="bg-black border border-white/15 hover:border-orange-500/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,109,31,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 cursor-pointer"
                 onClick={() => onSelectSubcategory(subcat)}
               >
-                <div className="aspect-square relative overflow-hidden">
+                <div className="aspect-square relative overflow-hidden bg-black">
                   <ImageWithFallback
                     src={coverImage}
                     alt={subcat.title}
@@ -701,7 +701,7 @@ function SubcategorySelection({ category, products, loading, onSelectSubcategory
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <div className="p-2 sm:p-3">
+                <div className="p-3 sm:p-4 bg-black border-t border-white/10">
                   <span className="font-bold text-white text-sm sm:text-lg text-center group-hover:text-orange-400 transition-colors block">
                     {subcat.title}
                   </span>
