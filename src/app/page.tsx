@@ -12,25 +12,23 @@ import { CustomizableShopsSection } from "@/components/home/CustomizableShopsSec
 export default function Home() {
   const { isAuthenticated, loading: authLoading, user } = useAuth();
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="relative">
-        <HeroSection isAuthenticated={isAuthenticated} user={user} />
-        <QualityProductsSection />
-        <CustomizableShopsSection />
-        <MakeAndSellSection />
-        <HowItWorksSection />
-        <TestimonialSection />
-        <FAQSection />
-      </div>
+      {authLoading ? (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-accent"></div>
+        </div>
+      ) : (
+        <div className="relative">
+          <HeroSection isAuthenticated={isAuthenticated} user={user} />
+          <QualityProductsSection />
+          <CustomizableShopsSection />
+          <MakeAndSellSection />
+          <HowItWorksSection />
+          <TestimonialSection />
+          <FAQSection />
+        </div>
+      )}
     </div>
   );
 }

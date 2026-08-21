@@ -6,8 +6,15 @@ import { Button } from "@/components/ui/button";
 import { GradientText } from "@/components/ui/GradientText";
 import Image from "next/image";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 export function MakeAndSellSection() {
+  const { isAuthenticated, user } = useAuth();
   const [isHovered, setIsHovered] = useState(false);
+
+  const startNowHref = isAuthenticated
+    ? (user?.role === 'creator' || user?.role === 'admin' ? "/dashboard/creator/catalog" : "/dashboard")
+    : "/auth/login?redirect=/dashboard/creator/catalog";
 
   return (
     <section className="relative py-[35px] px-4 sm:py-[35px] sm:px-6 md:py-24 lg:px-8 bg-black overflow-hidden border-y border-white/10">
@@ -83,7 +90,7 @@ export function MakeAndSellSection() {
 
         {/* Buttons - Centered Below */}
         <div className="flex flex-row gap-3 sm:gap-6 md:gap-8 justify-center items-center">
-          <Button variant="primary" href="/dashboard/creator/catalog">
+          <Button variant="primary" href={startNowHref}>
             Start Now
           </Button>
           <Button variant="secondary" href="/products">

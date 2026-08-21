@@ -11,12 +11,12 @@ export interface RouteConfig {
 
 // Centralized access control configuration
 export const ACCESS_CONTROL_CONFIG: Record<string, RouteConfig> = {
-  // Products page - restricted to creators and admin by default
+  // Products page - public marketplace for all users
   "/products": {
     path: "/products",
-    allowedRoles: ["creator", "admin"],
-    requiresAuth: true,
-    bypassEnabled: true, // Set to true to allow public access
+    allowedRoles: ["user", "creator", "admin"],
+    requiresAuth: false,
+    bypassEnabled: true,
     redirectTo: "/auth/login",
   },
 

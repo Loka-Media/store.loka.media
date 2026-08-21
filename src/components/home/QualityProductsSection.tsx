@@ -12,7 +12,14 @@ import 'swiper/css/effect-cards';
 
 
 
+import { useAuth } from "@/contexts/AuthContext";
+import { productAPI } from "@/lib/api";
+
 export function QualityProductsSection() {
+  const { user, isAuthenticated } = useAuth();
+  const [hasAddedProducts, setHasAddedProducts] = useState<boolean>(false);
+  const [checkingProducts, setCheckingProducts] = useState<boolean>(true);
+
   const [expandedSection, setExpandedSection] = useState<string | null>(
     "create"
   );
@@ -21,6 +28,48 @@ export function QualityProductsSection() {
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    async function checkUserProducts() {
+      if (isAuthenticated) {
+        try {
+          setCheckingProducts(true);
+          let count = 0;
+          try {
+            const response = await productAPI.getCreatorProducts({ limit: 1, offset: 0 });
+            count = response?.pagination?.total ?? response?.products?.length ?? 0;
+          } catch (e) {
+            // fallback
+          }
+
+          if (count === 0 && user?.username) {
+            try {
+              const res2 = await productAPI.getProducts({ creator: user.username, limit: 1, offset: 0 });
+              count = res2?.pagination?.total ?? res2?.products?.length ?? 0;
+            } catch (e) {}
+          }
+
+          if (isMounted) {
+            setHasAddedProducts(count > 0);
+          }
+        } catch (err) {
+          if (isMounted) setHasAddedProducts(false);
+        } finally {
+          if (isMounted) setCheckingProducts(false);
+        }
+      } else {
+        if (isMounted) {
+          setHasAddedProducts(false);
+          setCheckingProducts(false);
+        }
+      }
+    }
+    checkUserProducts();
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, user]);
 
   return (
     <section
@@ -128,9 +177,11 @@ export function QualityProductsSection() {
                   <p className="text-white/90 text-base sm:text-lg leading-relaxed mb-4 sm:mb-5 font-medium">
                     From apparel to makeup to your own product lines, we've teamed up with top brands and manufacturers to bring your ideas to life. No minimums required.
                   </p>
-                  <Button variant="primary" href="/dashboard/creator/catalog">
-                    Create your first product
-                  </Button>
+                  {!checkingProducts && !hasAddedProducts && (
+                    <Button variant="primary" href="/dashboard/creator/catalog">
+                      Create your first product
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
