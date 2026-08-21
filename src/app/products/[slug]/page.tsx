@@ -105,6 +105,30 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   let images = [...allExtractedImages];
 
+  // Re-order images so that printed design / artwork mockups appear FIRST as primary image
+  if (images.length > 1) {
+    images.sort((a, b) => {
+      const aLower = a.toLowerCase();
+      const bLower = b.toLowerCase();
+
+      const aHasDesign = aLower.includes('design') || aLower.includes('printify') || aLower.includes('preview') || aLower.includes('mockup');
+      const bHasDesign = bLower.includes('design') || bLower.includes('printify') || bLower.includes('preview') || bLower.includes('mockup');
+
+      const aIsBlank = aLower.includes('blank') || aLower.includes('flat_') || aLower.includes('camera_1_front.jpg');
+      const bIsBlank = bLower.includes('blank') || bLower.includes('flat_') || bLower.includes('camera_1_front.jpg');
+
+      let aScore = 0;
+      let bScore = 0;
+
+      if (aHasDesign) aScore += 10;
+      if (bHasDesign) bScore += 10;
+      if (aIsBlank) aScore -= 20;
+      if (bIsBlank) bScore -= 20;
+
+      return bScore - aScore;
+    });
+  }
+
   if (selectedColor && selectedColor !== 'Default') {
     const colorVariants = product.variants.filter((v) => getVariantColorAndSize(v).color === selectedColor);
     const colorVariantIds = new Set(

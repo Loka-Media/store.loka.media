@@ -241,7 +241,19 @@ export const productAPI = {
   // Get creators
   getCreators: async () => {
     const response = await api.get("/api/products/creators");
-    return response.data;
+    const data = response.data;
+    if (data && Array.isArray(data.creators)) {
+      data.creators = data.creators.filter((c: any) => {
+        if (c.status === 'deleted' || c.status === 'inactive' || c.is_active === false || c.deleted === true) {
+          return false;
+        }
+        if (typeof c.product_count === 'number' && c.product_count <= 0) {
+          return false;
+        }
+        return true;
+      });
+    }
+    return data;
   },
 
   // Creator: Create product

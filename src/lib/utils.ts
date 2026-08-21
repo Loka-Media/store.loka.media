@@ -61,68 +61,101 @@ const STATIC_BLUEPRINT_IMAGES: Record<number, string> = {
 export function getValidImageUrl(product: any): string {
   if (!product) return "/placeholder-product.svg";
 
-  const extractUrl = (item: any): string | null => {
-    if (!item) return null;
+  const candidateUrls: string[] = [];
+
+  const extractAndPush = (item: any) => {
+    if (!item) return;
     if (typeof item === "string") {
       const trimmed = item.trim();
-      if (!trimmed || trimmed.includes("placeholder-product") || trimmed.includes("placeholder")) return null;
+      if (!trimmed) return;
       if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
         try {
           const parsed = JSON.parse(trimmed);
-          return extractUrl(Array.isArray(parsed) ? parsed[0] : parsed);
+          if (Array.isArray(parsed)) {
+            parsed.forEach(extractAndPush);
+          } else {
+            extractAndPush(parsed);
+          }
         } catch {
-          return null;
+          return;
         }
+      } else if (!trimmed.includes("placeholder-product") && !trimmed.includes("placeholder")) {
+        candidateUrls.push(trimmed);
       }
-      return trimmed;
-    }
-    if (typeof item === "object") {
-      return (
+    } else if (typeof item === "object") {
+      const url =
         item.permanent_url ||
         item.src ||
         item.url ||
         item.image_url ||
         item.preview_url ||
-        item.file_url ||
-        null
-      );
+        item.file_url;
+      if (url && typeof url === "string") {
+        extractAndPush(url);
+      }
     }
-    return null;
   };
 
-  const fromThumb = extractUrl(product.thumbnail_url);
-  if (fromThumb) return fromThumb;
+  // 1. Collect from thumbnail_url / thumbnailUrl
+  extractAndPush(product.thumbnail_url);
+  extractAndPush(product.thumbnailUrl);
 
-  if (Array.isArray(product.images) && product.images.length > 0) {
-    for (const img of product.images) {
-      const u = extractUrl(img);
-      if (u) return u;
-    }
-  } else if (typeof product.images === "string") {
-    const fromImagesStr = extractUrl(product.images);
-    if (fromImagesStr) return fromImagesStr;
+  // 2. Collect from images
+  if (Array.isArray(product.images)) {
+    product.images.forEach(extractAndPush);
+  } else if (product.images) {
+    extractAndPush(product.images);
   }
 
-  if (Array.isArray(product.mockups) && product.mockups.length > 0) {
-    for (const mockup of product.mockups) {
-      const u = extractUrl(mockup);
-      if (u) return u;
-    }
+  // 3. Collect from mockups
+  if (Array.isArray(product.mockups)) {
+    product.mockups.forEach(extractAndPush);
+  } else if (product.mockups) {
+    extractAndPush(product.mockups);
   }
 
-  if (Array.isArray(product.variants) && product.variants.length > 0) {
-    for (const v of product.variants) {
-      const u = extractUrl(v?.image_url || v?.image || v?.src || v?.url);
-      if (u) return u;
-    }
+  // 4. Collect from variants
+  if (Array.isArray(product.variants)) {
+    product.variants.forEach((v: any) => {
+      extractAndPush(v?.image_url || v?.image || v?.src || v?.url);
+    });
   }
 
-  const directImage = extractUrl(product.image_url || product.image || product.preview_url);
-  if (directImage) return directImage;
+  // 5. Collect direct image
+  extractAndPush(product.image_url || product.image || product.preview_url);
 
+  // 6. Base product fallback
   if (product.base_product) {
-    const baseImg = extractUrl(product.base_product.thumbnail_url || product.base_product.images?.[0]);
-    if (baseImg) return baseImg;
+    extractAndPush(product.base_product.thumbnail_url || product.base_product.images?.[0]);
+  }
+
+  // Deduplicate candidate URLs
+  const uniqueUrls = Array.from(new Set(candidateUrls)).filter(Boolean);
+
+  if (uniqueUrls.length > 0) {
+    // Sort unique URLs so that images WITH printed designs / artwork or generated mockups come FIRST
+    uniqueUrls.sort((a, b) => {
+      const aLower = a.toLowerCase();
+      const bLower = b.toLowerCase();
+
+      const aHasDesign = aLower.includes('design') || aLower.includes('printify') || aLower.includes('preview') || aLower.includes('mockup');
+      const bHasDesign = bLower.includes('design') || bLower.includes('printify') || bLower.includes('preview') || bLower.includes('mockup');
+
+      const aIsBlank = aLower.includes('blank') || aLower.includes('flat_') || aLower.includes('camera_1_front.jpg');
+      const bIsBlank = bLower.includes('blank') || bLower.includes('flat_') || bLower.includes('camera_1_front.jpg');
+
+      let aScore = 0;
+      let bScore = 0;
+
+      if (aHasDesign) aScore += 10;
+      if (bHasDesign) bScore += 10;
+      if (aIsBlank) aScore -= 20;
+      if (bIsBlank) bScore -= 20;
+
+      return bScore - aScore;
+    });
+
+    return uniqueUrls[0];
   }
 
   const bpId = Number(

@@ -75,6 +75,44 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
     }
   };
 
+  const productTags = (() => {
+    let raw: any =
+      (product as any).tags ||
+      (product as any).tag ||
+      (product as any).tags_list ||
+      (product as any).product_data?.tags ||
+      (product as any).productData?.tags ||
+      (product as any).details?.tags ||
+      (product as any).base_product?.tags;
+
+    let list: string[] = [];
+    if (Array.isArray(raw)) {
+      list = raw;
+    } else if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) list = parsed;
+        else list = raw.split(',').map((t: string) => t.trim());
+      } catch (e) {
+        list = raw.split(',').map((t: string) => t.trim());
+      }
+    }
+    return list.filter(Boolean);
+  })();
+
+  const getTagBadgeConfig = (tag: string) => {
+    const normalized = tag.toLowerCase().trim();
+    if (normalized.includes('trending')) {
+      return { label: 'Trending', icon: '📈', className: 'bg-purple-600/90 text-white border-purple-400/50 shadow-purple-500/30' };
+    }
+    if (normalized.includes('new')) {
+      return { label: 'New', icon: '✨', className: 'bg-blue-600/90 text-white border-blue-400/50 shadow-blue-500/30' };
+    }
+    if (normalized.includes('popular')) {
+      return { label: 'Popular', icon: '🔥', className: 'bg-red-600/90 text-white border-red-400/50 shadow-red-500/30' };
+    }
+    return { label: tag, icon: '🏷️', className: 'bg-gray-800/90 text-white border-gray-600/50' };
+  };
 
   return (
     <>
@@ -92,6 +130,23 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
       >
         {/* Image Container */}
         <div className="w-full relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
+          {/* Tag Badges */}
+          {productTags.length > 0 && (
+            <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 z-10 flex flex-wrap gap-1 max-w-[70%]">
+              {productTags.slice(0, 2).map((tag, idx) => {
+                const config = getTagBadgeConfig(tag);
+                return (
+                  <span
+                    key={idx}
+                    className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold border backdrop-blur-md shadow-md ${config.className}`}
+                  >
+                    <span className="mr-1 text-[11px]">{config.icon}</span>
+                    <span>{config.label}</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
           <Image
             src={(() => {
               let url = product.thumbnail_url;

@@ -236,7 +236,7 @@ function LoginPageContent() {
                 <div>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-black" />
+                      <Mail className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                       {...register("email")}
@@ -257,7 +257,7 @@ function LoginPageContent() {
                 <div>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-black" />
+                      <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                       {...register("password")}
@@ -269,7 +269,7 @@ function LoginPageContent() {
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                       <button
                         type="button"
-                        className="text-black hover:text-orange-500 focus:outline-none transition-colors p-1"
+                        className="text-gray-400 hover:text-orange-400 focus:outline-none transition-colors p-1"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (

@@ -525,11 +525,36 @@ if (!isPreview) {
           ? [dfImg]
           : ['/placeholder-product.svg'];
 
+        // Sort finalMockupUrls so printed design / artwork mockups appear FIRST as thumbnail_url
+        if (finalMockupUrls.length > 1) {
+          finalMockupUrls.sort((a, b) => {
+            const aLower = a.toLowerCase();
+            const bLower = b.toLowerCase();
+            const aHasDesign = aLower.includes('design') || aLower.includes('printify') || aLower.includes('preview') || aLower.includes('mockup');
+            const bHasDesign = bLower.includes('design') || bLower.includes('printify') || bLower.includes('preview') || bLower.includes('mockup');
+            const aIsBlank = aLower.includes('blank') || aLower.includes('flat_') || aLower.includes('camera_1_front.jpg');
+            const bIsBlank = bLower.includes('blank') || bLower.includes('flat_') || bLower.includes('camera_1_front.jpg');
+            let aScore = 0;
+            let bScore = 0;
+            if (aHasDesign) aScore += 10;
+            if (bHasDesign) bScore += 10;
+            if (aIsBlank) aScore -= 20;
+            if (bIsBlank) bScore -= 20;
+            return bScore - aScore;
+          });
+        }
+
         let finalMockupObjects = (mockupUrls && Array.isArray(mockupUrls) && mockupUrls.length > 0)
           ? mockupUrls
           : printifyMockupObjects.length > 0
           ? printifyMockupObjects
           : finalMockupUrls;
+
+        const tagsArray = (productData?.tags && Array.isArray(productData.tags) && productData.tags.length > 0)
+          ? productData.tags
+          : typeof productData?.tags === 'string'
+          ? [productData.tags]
+          : ['Popular'];
 
         const updatedProductData = {
           ...productData,
@@ -538,6 +563,9 @@ if (!isPreview) {
           thumbnail_url: finalMockupUrls[0],
           thumbnailUrl: finalMockupUrls[0],
           images: finalMockupUrls,
+          tags: tagsArray,
+          tag: tagsArray[0],
+          tags_list: tagsArray,
         };
 
         if (created) {

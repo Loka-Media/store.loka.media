@@ -122,6 +122,11 @@ function CreatorShopContent() {
         // Strict client-side filter to ensure only products belonging to this creator are shown
         const rawProducts: ExtendedProduct[] = response.products || [];
         const creatorProducts = rawProducts.filter((product: ExtendedProduct) => {
+          // Exclude deleted or inactive products
+          if (product.status === 'deleted' || product.is_active === false || (product as any).deleted === true) {
+            return false;
+          }
+
           const normSlug = creatorSlug.toLowerCase().trim();
           const prodUsername = (product.creator_username || product.creator?.username || "").toLowerCase().trim();
           const prodName = (product.creator_name || product.creator?.name || "").replace(/\s+/g, "").toLowerCase().trim();

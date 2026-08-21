@@ -35,34 +35,6 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Redirect legacy /products?creator=... requests to /shop/[creatorSlug]
-  useEffect(() => {
-    const creatorParam = searchParams.get("creator");
-    if (creatorParam) {
-      const redirectLegacyCreator = async () => {
-        try {
-          const response = await productAPI.getCreators();
-          const list = response.creators || [];
-          const matchingCreator = list.find(
-            (c: any) =>
-              c.name.toLowerCase() === creatorParam.toLowerCase() ||
-              c.username.toLowerCase() === creatorParam.toLowerCase()
-          );
-          if (matchingCreator) {
-            router.replace(`/shop/${matchingCreator.username}`);
-          } else {
-            const slug = creatorParam.replace(/\s+/g, "");
-            router.replace(`/shop/${slug}`);
-          }
-        } catch (error) {
-          const slug = creatorParam.replace(/\s+/g, "");
-          router.replace(`/shop/${slug}`);
-        }
-      };
-      redirectLegacyCreator();
-    }
-  }, [searchParams, router]);
-
   // Refs to track initialization and prevent strict mode double-fetching
   const isStaticDataFetched = useRef(false);
   const lastFetchedFiltersRef = useRef<string | null>(null);
@@ -244,11 +216,47 @@ function ProductsContent() {
     return list.sort((a, b) => b.product_count - a.product_count);
   }, [products, categories]);
 
+  // Compute accurate creator list dynamically from active products list
+  const displayCreators = useMemo(() => {
+    if (!products || products.length === 0) return creators;
+
+    const creatorMap: Record<string, { id: number; name: string; username: string; product_count: number }> = {};
+
+    products.forEach((p) => {
+      // Exclude deleted or inactive products
+      if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return;
+
+      const cObj = p.creator as any;
+      const username = (p.creator_username || cObj?.username || '').trim();
+      const name = (p.creator_name || cObj?.name || 'Unknown').trim();
+      const id = p.creator_id || (p as any).user_id || cObj?.id || 0;
+
+      const key = (username || name).toLowerCase();
+      if (!key) return;
+
+      if (!creatorMap[key]) {
+        creatorMap[key] = {
+          id: typeof id === 'number' ? id : parseInt(String(id)) || Math.random(),
+          name: name,
+          username: username,
+          product_count: 0,
+        };
+      }
+      creatorMap[key].product_count += 1;
+    });
+
+    const list = Object.values(creatorMap).filter(c => c.product_count > 0);
+    return list.sort((a, b) => b.product_count - a.product_count);
+  }, [products, creators]);
+
   // 4. Instant client-side character-by-character priority search filtering
   const query = searchInput.toLowerCase().trim();
 
   // Step A: Basic category, creator dropdown & source filtering
   let pool = products.filter((product) => {
+    // Filter out deleted or inactive products
+    if (product.status === 'deleted' || product.is_active === false || (product as any).deleted === true) return false;
+
     if (filters.category) {
       const targetCat = cleanCat(filters.category);
       const prodCat = cleanCat(product.category || "");
@@ -263,11 +271,11 @@ function ProductsContent() {
       const creatorId = String(product.creator_id || (product as any).user_id || creatorObj?.id || "").toLowerCase().trim();
 
       const isMatch =
-        creatorName === creatorFilter ||
         creatorUsername === creatorFilter ||
+        creatorName === creatorFilter ||
         creatorId === creatorFilter ||
-        creatorName.includes(creatorFilter) ||
-        creatorUsername.includes(creatorFilter);
+        creatorUsername.replace(/\s+/g, '') === creatorFilter.replace(/\s+/g, '') ||
+        creatorName.replace(/\s+/g, '') === creatorFilter.replace(/\s+/g, '');
 
       if (!isMatch) return false;
     }
@@ -511,8 +519,8 @@ function ProductsContent() {
                     }}
                   >
                     <option value="">All Creators</option>
-                    {creators.map((creator) => (
-                      <option key={creator.id} value={creator.name}>
+                    {displayCreators.map((creator) => (
+                      <option key={creator.id || creator.username || creator.name} value={creator.username || creator.name}>
                         {creator.name} ({creator.product_count})
                       </option>
                     ))}

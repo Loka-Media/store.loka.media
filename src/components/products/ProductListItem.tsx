@@ -50,6 +50,46 @@ export function ProductListItem({ product }: ProductListItemProps) {
     product.images?.[0] ||
     "/placeholder-product.svg";
 
+  // Helper to extract and format tags
+  const productTags = (() => {
+    let raw: any =
+      product.tags ||
+      (product as any).tag ||
+      (product as any).tags_list ||
+      (product as any).product_data?.tags ||
+      (product as any).productData?.tags ||
+      (product as any).details?.tags ||
+      (product as any).base_product?.tags;
+
+    let list: string[] = [];
+    if (Array.isArray(raw)) {
+      list = raw;
+    } else if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) list = parsed;
+        else list = raw.split(',').map((t: string) => t.trim());
+      } catch (e) {
+        list = raw.split(',').map((t: string) => t.trim());
+      }
+    }
+    return list.filter(Boolean);
+  })();
+
+  const getTagBadgeConfig = (tag: string) => {
+    const normalized = tag.toLowerCase().trim();
+    if (normalized.includes('trending')) {
+      return { label: 'Trending', icon: '📈', className: 'bg-purple-600/90 text-white border-purple-400/50 shadow-purple-500/30' };
+    }
+    if (normalized.includes('new')) {
+      return { label: 'New', icon: '✨', className: 'bg-blue-600/90 text-white border-blue-400/50 shadow-blue-500/30' };
+    }
+    if (normalized.includes('popular')) {
+      return { label: 'Popular', icon: '🔥', className: 'bg-red-600/90 text-white border-red-400/50 shadow-red-500/30' };
+    }
+    return { label: tag, icon: '🏷️', className: 'bg-gray-800/90 text-white border-gray-600/50' };
+  };
+
   // Check inventory status
   const checkInventoryStatus = async () => {
     if (inventoryStatus.loading || inventoryStatus.totalCount > 0) return;
@@ -170,8 +210,24 @@ export function ProductListItem({ product }: ProductListItemProps) {
           className="relative w-full md:w-48 flex-shrink-0"
           style={{ aspectRatio: '4/3' }}
         >
-          {/* Sale badge removed - no fake discounts */}
           <div className="w-full h-full relative overflow-hidden">
+            {/* Top Right Tag Badge */}
+            {productTags.length > 0 && (
+              <div className="absolute top-2 right-2 z-10 flex flex-wrap gap-1 justify-end max-w-[85%]">
+                {productTags.slice(0, 2).map((tag, idx) => {
+                  const config = getTagBadgeConfig(tag);
+                  return (
+                    <span
+                      key={idx}
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border backdrop-blur-md shadow-md ${config.className}`}
+                    >
+                      <span className="mr-1 text-[10px]">{config.icon}</span>
+                      <span>{config.label}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
             <Image
               src={imageUrl}
               alt={product.name}

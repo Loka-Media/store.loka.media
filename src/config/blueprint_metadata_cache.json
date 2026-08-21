@@ -11789,6 +11789,15 @@
     "colorsCount": 21,
     "providersCount": 4
   },
+  "3097": {
+    "title": "Cotton Muscle Tank",
+    "providerId": 74,
+    "price": "11.25",
+    "premiumPrice": "8.66",
+    "sizesCount": 6,
+    "colorsCount": 9,
+    "providersCount": 1
+  },
   "3104": {
     "title": "Heavyweight Tee",
     "providerId": 99,
@@ -13886,6 +13895,15 @@
     "colorsCount": 5,
     "providersCount": 1
   },
+  "4116": {
+    "title": "Wind Pant",
+    "providerId": 217,
+    "price": "14.00",
+    "premiumPrice": "10.78",
+    "sizesCount": 8,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
   "4118": {
     "title": "Competitor United Crew",
     "providerId": 99,
@@ -13894,6 +13912,33 @@
     "sizesCount": 6,
     "colorsCount": 28,
     "providersCount": 4
+  },
+  "4121": {
+    "title": "PosiCharge Compression 1/2-Sleeve Tee",
+    "providerId": 217,
+    "price": "7.46",
+    "premiumPrice": "5.74",
+    "sizesCount": 8,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4122": {
+    "title": "PosiCharge Compression Long Sleeve Tee",
+    "providerId": 217,
+    "price": "8.00",
+    "premiumPrice": "6.16",
+    "sizesCount": 8,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4123": {
+    "title": "PosiCharge Compression Sleeveless Tee",
+    "providerId": 217,
+    "price": "13.23",
+    "premiumPrice": "10.19",
+    "sizesCount": 8,
+    "colorsCount": 2,
+    "providersCount": 1
   },
   "4124": {
     "title": "PosiCharge Tough Mesh Full-Button Jersey",
@@ -13913,6 +13958,33 @@
     "colorsCount": 6,
     "providersCount": 3
   },
+  "4133": {
+    "title": "Club 1/4-Zip Pullover",
+    "providerId": 217,
+    "price": "18.70",
+    "premiumPrice": "14.40",
+    "sizesCount": 8,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "4135": {
+    "title": "PosiCharge Reversible Mesh Tank",
+    "providerId": 217,
+    "price": "17.25",
+    "premiumPrice": "13.28",
+    "sizesCount": 8,
+    "colorsCount": 14,
+    "providersCount": 1
+  },
+  "4140": {
+    "title": "Sport-Wick Textured 1/4-Zip Pullover",
+    "providerId": 217,
+    "price": "21.00",
+    "premiumPrice": "16.17",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
   "4162": {
     "title": "Cooling Performance 7' Short",
     "providerId": 217,
@@ -13920,6 +13992,69 @@
     "premiumPrice": "12.51",
     "sizesCount": 6,
     "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4196": {
+    "title": "ANSI 107 Class 3 Rain Jacket",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 4,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "4197": {
+    "title": "ANSI 107 Class 3 Economy Waterproof Insulated Bomber Jacket",
+    "providerId": 217,
+    "price": "11.00",
+    "premiumPrice": "8.47",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4198": {
+    "title": "Duck Bonded Soft Shell Jacket",
+    "providerId": 217,
+    "price": "18.25",
+    "premiumPrice": "14.05",
+    "sizesCount": 8,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "4203": {
+    "title": "Tall Duck Cloth Work Jacket",
+    "providerId": 217,
+    "price": "13.00",
+    "premiumPrice": "10.01",
+    "sizesCount": 5,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "4397": {
+    "title": "Repeat 1/2-Zip Long Sleeve Hooded Jacket",
+    "providerId": 217,
+    "price": "11.50",
+    "premiumPrice": "8.86",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
+  "4402": {
+    "title": "Insulated Varsity Jacket",
+    "providerId": 217,
+    "price": "16.25",
+    "premiumPrice": "12.51",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
+  },
+  "4469": {
+    "title": "Tall Duck Cloth Hooded Work Jacket",
+    "providerId": 217,
+    "price": "15.50",
+    "premiumPrice": "11.94",
+    "sizesCount": 5,
+    "colorsCount": 3,
     "providersCount": 1
   },
   "4481": {
@@ -13939,6 +14074,87 @@
     "sizesCount": 7,
     "colorsCount": 10,
     "providersCount": 7
+  },
+  "4504": {
+    "title": "ANSI 107 Class 3 Mesh Long Sleeve Tee",
+    "providerId": 217,
+    "price": "10.23",
+    "premiumPrice": "7.88",
+    "sizesCount": 8,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4505": {
+    "title": "ANSI 107 Class 2 Segmented Tape Tee",
+    "providerId": 217,
+    "price": "7.46",
+    "premiumPrice": "5.74",
+    "sizesCount": 7,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4506": {
+    "title": "ANSI 107 Class 3 Long Sleeve Segmented Tape Hooded Tee",
+    "providerId": 217,
+    "price": "8.00",
+    "premiumPrice": "6.16",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4507": {
+    "title": "ANSI 107 Class 3 Short Sleeve Snag-Resistant Reflective T-Shirt",
+    "providerId": 217,
+    "price": "9.23",
+    "premiumPrice": "7.11",
+    "sizesCount": 8,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4516": {
+    "title": "Workwear Pro Long Sleeve Hooded Tee",
+    "providerId": 217,
+    "price": "14.23",
+    "premiumPrice": "10.96",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "4518": {
+    "title": "Workwear Pro Short Sleeve Pocket Tee",
+    "providerId": 217,
+    "price": "12.00",
+    "premiumPrice": "9.24",
+    "sizesCount": 8,
+    "colorsCount": 10,
+    "providersCount": 1
+  },
+  "4560": {
+    "title": "ANSI 107 Class 3 Mesh Tee",
+    "providerId": 217,
+    "price": "10.00",
+    "premiumPrice": "7.70",
+    "sizesCount": 7,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4561": {
+    "title": "Enhanced Visibility Segmented Tape Tee",
+    "providerId": 217,
+    "price": "11.23",
+    "premiumPrice": "8.65",
+    "sizesCount": 8,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4567": {
+    "title": "ANSI 107 Class 3 Heavy-Duty Fleece Pullover Hoodie",
+    "providerId": 217,
+    "price": "26.43",
+    "premiumPrice": "20.35",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
   },
   "4583": {
     "title": "Sprint 7' Mesh Short",
@@ -13974,6 +14190,33 @@
     "premiumPrice": "7.32",
     "sizesCount": 7,
     "colorsCount": 5,
+    "providersCount": 1
+  },
+  "4606": {
+    "title": "Repeat Pant",
+    "providerId": 217,
+    "price": "14.25",
+    "premiumPrice": "10.97",
+    "sizesCount": 8,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "4608": {
+    "title": "Sport-Wick Stretch Jogger",
+    "providerId": 217,
+    "price": "18.00",
+    "premiumPrice": "13.86",
+    "sizesCount": 8,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "4612": {
+    "title": "Open Bottom Sweatpant",
+    "providerId": 217,
+    "price": "16.25",
+    "premiumPrice": "12.51",
+    "sizesCount": 8,
+    "colorsCount": 3,
     "providersCount": 1
   },
   "4628": {
@@ -14847,6 +15090,42 @@
     "premiumPrice": "24.97",
     "sizesCount": 7,
     "colorsCount": 30,
+    "providersCount": 1
+  },
+  "5504": {
+    "title": "Men's Polyester V-Neck T-Shirt",
+    "providerId": 217,
+    "price": "10.46",
+    "premiumPrice": "8.05",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
+  },
+  "5505": {
+    "title": "Men's Hoodie",
+    "providerId": 217,
+    "price": "32.00",
+    "premiumPrice": "24.64",
+    "sizesCount": 5,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "5506": {
+    "title": "Men's Polyester Tank Top",
+    "providerId": 217,
+    "price": "14.25",
+    "premiumPrice": "10.97",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
+  "5508": {
+    "title": "Men's Polyester Tank Top",
+    "providerId": 217,
+    "price": "18.00",
+    "premiumPrice": "13.86",
+    "sizesCount": 8,
+    "colorsCount": 7,
     "providersCount": 1
   },
   "5513": {
@@ -18114,6 +18393,15 @@
     "premiumPrice": "5.70",
     "sizesCount": 1,
     "colorsCount": 14,
+    "providersCount": 1
+  },
+  "10732": {
+    "title": "Men's Staple Stone Wash Tee",
+    "providerId": 217,
+    "price": "10.23",
+    "premiumPrice": "7.88",
+    "sizesCount": 6,
+    "colorsCount": 5,
     "providersCount": 1
   }
 }
