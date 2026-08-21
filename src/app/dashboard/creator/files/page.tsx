@@ -58,7 +58,35 @@ function FilesPageContent() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('files_view_mode');
+      if (saved === 'grid' || saved === 'list') return saved;
+    }
+    return 'grid';
+  });
+
+  const handleViewModeChange = (mode: 'grid' | 'list') => {
+    setViewModeState(mode);
+    localStorage.setItem('files_view_mode', mode);
+  };
+
+  const downloadImageFile = (fileUrl: string, filename: string) => {
+    if (!fileUrl) {
+      toast.error('File URL is not available');
+      return;
+    }
+    const cleanFilename = filename || 'design-file';
+    toast.success(`Downloading ${cleanFilename}...`);
+    const downloadEndpoint = `/api/download?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(cleanFilename)}`;
+    const link = document.createElement('a');
+    link.href = downloadEndpoint;
+    link.download = cleanFilename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const [filters, setFilters] = useState({
     search: '',
     type: '',
@@ -456,13 +484,15 @@ function FilesPageContent() {
               {/* View Mode */}
               <div className="flex border border-white/20 rounded-lg overflow-hidden">
                 <button
-                  onClick={() => setViewMode('grid')}
+                  type="button"
+                  onClick={() => handleViewModeChange('grid')}
                   className={`p-2 sm:p-3 transition-all font-bold text-sm ${viewMode === 'grid' ? 'bg-white/20 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
                 >
                   <Grid className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => setViewMode('list')}
+                  type="button"
+                  onClick={() => handleViewModeChange('list')}
                   className={`p-2 sm:p-3 transition-all font-bold text-sm ${viewMode === 'list' ? 'bg-white/20 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
                 >
                   <List className="w-4 h-4" />
@@ -516,6 +546,7 @@ function FilesPageContent() {
               <FileGridItem
                 key={file.id}
                 file={file}
+                onDownload={() => downloadImageFile(file.url, file.filename)}
                 onDelete={() => confirmDeleteFile(file.id)}
               />
             ))}
@@ -548,6 +579,7 @@ function FilesPageContent() {
                     <FileListItem
                       key={file.id}
                       file={file}
+                      onDownload={() => downloadImageFile(file.url, file.filename)}
                       onDelete={() => confirmDeleteFile(file.id)}
                     />
                   ))}
@@ -572,9 +604,11 @@ function FilesPageContent() {
 
 function FileGridItem({
   file,
+  onDownload,
   onDelete
 }: {
   file: UploadedFile;
+  onDownload: () => void;
   onDelete: () => void;
 }) {
   const getFileIcon = (file: UploadedFile) => {
@@ -619,11 +653,20 @@ function FileGridItem({
               <Eye className="w-5 h-5 text-white" />
             </a>
             <button
+              type="button"
+              onClick={onDownload}
+              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white cursor-pointer"
+              title="Download file"
+            >
+              <Download className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
               onClick={onDelete}
-              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors"
+              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors text-red-400 cursor-pointer"
               title="Delete file"
             >
-              <Trash2 className="w-5 h-5 text-red-400" />
+              <Trash2 className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -647,11 +690,20 @@ function FileGridItem({
               <Eye className="w-5 h-5 text-white" />
             </a>
             <button
+              type="button"
+              onClick={onDownload}
+              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white cursor-pointer"
+              title="Download file"
+            >
+              <Download className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
               onClick={onDelete}
-              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors"
+              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors text-red-400 cursor-pointer"
               title="Delete file"
             >
-              <Trash2 className="w-5 h-5 text-red-400" />
+              <Trash2 className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -660,18 +712,49 @@ function FileGridItem({
       <p className="text-xs sm:text-sm font-medium text-white truncate" title={file.filename}>
         {file.filename}
       </p>
-      <p className="text-xs text-white/60 mt-1">
-        {formatFileSize(file.size)}
-      </p>
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10">
+        <span className="text-xs text-white/60 font-medium">
+          {formatFileSize(file.size)}
+        </span>
+        <div className="flex items-center gap-1.5">
+          <a
+            href={file.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1.5 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+            title="View image"
+          >
+            <Eye className="w-4 h-4" />
+          </a>
+          <button
+            type="button"
+            onClick={onDownload}
+            className="p-1.5 rounded-md text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 transition-colors cursor-pointer"
+            title="Download file"
+          >
+            <Download className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="p-1.5 rounded-md text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors cursor-pointer"
+            title="Delete file"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
 function FileListItem({
   file,
+  onDownload,
   onDelete
 }: {
   file: UploadedFile;
+  onDownload: () => void;
   onDelete: () => void;
 }) {
   const getFileIcon = (file: UploadedFile) => {
@@ -739,25 +822,29 @@ function FileListItem({
         {formatDate(file.created)}
       </td>
       <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
-        <div className="flex space-x-3">
+        <div className="flex space-x-3 items-center">
           <a
             href={file.url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-white/50 hover:text-white/80 transition-colors"
+            title="View file"
           >
             <Eye className="w-4 h-4" />
           </a>
-          <a
-            href={file.url}
-            download={file.filename}
-            className="text-white/50 hover:text-white/80 transition-colors"
+          <button
+            type="button"
+            onClick={onDownload}
+            className="text-white/50 hover:text-white/80 transition-colors cursor-pointer"
+            title="Download file"
           >
             <Download className="w-4 h-4" />
-          </a>
+          </button>
           <button
+            type="button"
             onClick={onDelete}
-            className="text-white/50 hover:text-red-400 transition-colors"
+            className="text-white/50 hover:text-red-400 transition-colors cursor-pointer"
+            title="Delete file"
           >
             <Trash2 className="w-4 h-4" />
           </button>

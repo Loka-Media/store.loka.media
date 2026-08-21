@@ -34,8 +34,54 @@ export default function CreatorsPage() {
   const fetchCreators = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await productAPI.getCreators();
-      setCreators(response.creators || []);
+      const [creatorsRes, productsRes] = await Promise.all([
+        productAPI.getCreators().catch(() => ({ creators: [] })),
+        productAPI.getProducts({ limit: 1000 }).catch(() => ({ products: [] })),
+      ]);
+
+      const rawCreators = creatorsRes.creators || [];
+      const rawProducts = productsRes.products || [];
+
+      // Calculate real active product counts per creator
+      const productCountsMap: Record<string, number> = {};
+
+      rawProducts.forEach((p: any) => {
+        if (p.status === 'deleted' || p.is_active === false || p.deleted === true) return;
+        const cObj = p.creator as any;
+        const username = (p.creator_username || cObj?.username || '').toLowerCase().trim();
+        const name = (p.creator_name || cObj?.name || '').toLowerCase().trim();
+        const nameNoSpaces = name.replace(/\s+/g, '');
+        const id = String(p.creator_id || cObj?.id || '');
+
+        if (username) productCountsMap[username] = (productCountsMap[username] || 0) + 1;
+        if (name) productCountsMap[name] = (productCountsMap[name] || 0) + 1;
+        if (nameNoSpaces && nameNoSpaces !== name) productCountsMap[nameNoSpaces] = (productCountsMap[nameNoSpaces] || 0) + 1;
+        if (id && id !== '0') productCountsMap[id] = (productCountsMap[id] || 0) + 1;
+      });
+
+      const updatedCreators = rawCreators
+        .map((c: any) => {
+          const u = (c.username || '').toLowerCase().trim();
+          const n = (c.name || '').toLowerCase().trim();
+          const nNoSpaces = n.replace(/\s+/g, '');
+          const id = String(c.id || '');
+
+          const count =
+            productCountsMap[u] ||
+            productCountsMap[n] ||
+            productCountsMap[nNoSpaces] ||
+            productCountsMap[id] ||
+            c.product_count ||
+            0;
+
+          return {
+            ...c,
+            product_count: count,
+          };
+        })
+        .filter((c: any) => c.product_count > 0 && c.status !== 'deleted' && c.is_active !== false);
+
+      setCreators(updatedCreators);
     } catch (error) {
       console.error("Failed to fetch creators:", error);
     } finally {
