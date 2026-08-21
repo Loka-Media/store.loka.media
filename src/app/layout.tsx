@@ -60,6 +60,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if (typeof window !== 'undefined' && 'scrollRestoration' in history) { history.scrollRestoration = 'manual'; }`,
+          }}
+        />
         <link rel="preconnect" href="https://api.fontshare.com" />
         <link
           href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700,800,900&display=swap"
