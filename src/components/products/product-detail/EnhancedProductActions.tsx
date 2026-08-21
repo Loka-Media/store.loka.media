@@ -58,8 +58,15 @@ export function EnhancedProductActions({
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-white/10 border border-white/20 rounded-full overflow-hidden">
             <button
+              type="button"
+              disabled={quantity <= 1}
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="p-1.5 text-white hover:bg-white/20 transition-colors"
+              className={`p-1.5 text-white transition-colors ${
+                quantity <= 1
+                  ? "opacity-30 cursor-not-allowed"
+                  : "hover:bg-white/20 cursor-pointer"
+              }`}
+              aria-label="Decrease quantity"
             >
               <Minus className="w-4 h-4" />
             </button>
