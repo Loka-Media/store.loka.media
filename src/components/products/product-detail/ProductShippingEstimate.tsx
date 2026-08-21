@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Truck, Info } from 'lucide-react';
 import { getShippingCountries } from '@/lib/location-utils';
 
+import { useCurrency } from '@/contexts/CurrencyContext';
+
 interface ProductShippingEstimateProps {
   blueprintId: number | string | null;
   printProviderId: number | string | null;
@@ -15,6 +17,7 @@ export function ProductShippingEstimate({
   printProviderId,
   printifyVariantId
 }: ProductShippingEstimateProps) {
+  const { formatPrice } = useCurrency();
   const [countries, setCountries] = useState<any[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>('US');
   const [shippingProfiles, setShippingProfiles] = useState<any[]>([]);
@@ -138,23 +141,23 @@ export function ProductShippingEstimate({
           <span>Calculating shipping rates...</span>
         </div>
       ) : estimate ? (
-        <div className="space-y-1 sm:space-y-1.5 text-xs text-gray-300">
+        <div className="space-y-1.5 text-xs text-gray-300">
           <div className="flex justify-between items-center bg-white/5 p-2 rounded-lg">
-            <span>First Item:</span>
-            <span className="font-bold text-white">${estimate.first.toFixed(2)} USD</span>
+            <span>1st Unit Rate:</span>
+            <span className="font-bold text-white">{formatPrice(estimate.first)}</span>
           </div>
           <div className="flex justify-between items-center bg-white/5 p-2 rounded-lg">
-            <span>Additional Items:</span>
-            <span className="font-bold text-white">${estimate.additional.toFixed(2)} USD</span>
+            <span>Extra Units Rate:</span>
+            <span className="font-bold text-orange-400">+{formatPrice(estimate.additional)} / extra pc</span>
           </div>
-          <div className="flex items-center space-x-1 text-[10px] text-gray-400 mt-1">
-            <Info className="w-3 h-3 text-orange-400 flex-shrink-0" />
-            <span>Multiple items ship combined from the same print provider.</span>
+          <div className="flex items-start space-x-1 text-[10px] text-gray-400 mt-1 leading-snug">
+            <Info className="w-3 h-3 text-orange-400 flex-shrink-0 mt-0.5" />
+            <span>Additional quantities of this item added to your cart ship at a discounted rate.</span>
           </div>
         </div>
       ) : (
         <div className="text-xs text-gray-400 py-1">
-          Standard flat rate shipping: $5.99 USD
+          Standard flat rate shipping: {formatPrice(5.99)}
         </div>
       )}
     </div>

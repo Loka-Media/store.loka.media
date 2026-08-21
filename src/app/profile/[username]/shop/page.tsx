@@ -105,6 +105,8 @@ function CreatorShopContent() {
           sortBy: customFilters.sortBy,
           sortOrder: customFilters.sortOrder,
           creator: username, // Always filter by creator username
+          username: username,
+          creator_username: username,
           isActive: true, // Only show active products on the shop page
         };
 
@@ -117,13 +119,53 @@ function CreatorShopContent() {
 
         const response = await productAPI.getProducts(cleanFilters);
 
+        // Strict client-side filter to ensure only products belonging to this creator are shown
+        const rawProducts: ExtendedProduct[] = response.products || [];
+        const creatorProducts = rawProducts.filter((product: ExtendedProduct) => {
+          const normSlug = username.toLowerCase().trim();
+          const prodUsername = (product.creator_username || product.creator?.username || "").toLowerCase().trim();
+          const prodName = (product.creator_name || product.creator?.name || "").replace(/\s+/g, "").toLowerCase().trim();
+          const prodId = String(product.creator_id || (product.creator as any)?.id || "");
+
+          // Direct match against username
+          if (prodUsername && prodUsername === normSlug) return true;
+          if (prodName && prodName === normSlug) return true;
+          if (prodId && prodId === normSlug) return true;
+
+          const normSlugNoSpaces = normSlug.replace(/\s+/g, "");
+          if (prodUsername && prodUsername.replace(/\s+/g, "") === normSlugNoSpaces) return true;
+          if (prodName && prodName === normSlugNoSpaces) return true;
+
+          // Match against loaded creator object
+          if (creator) {
+            const cUsername = (creator.username || "").toLowerCase().trim();
+            const cName = (creator.name || "").replace(/\s+/g, "").toLowerCase().trim();
+            const cId = String(creator.id || creator.creator_id || "");
+
+            if (cUsername && prodUsername === cUsername) return true;
+            if (cName && prodName === cName) return true;
+            if (cId && prodId && prodId === cId) return true;
+          }
+
+          // If product has explicit creator details that don't match, reject it
+          if (prodUsername || prodName || (prodId && prodId !== "undefined" && prodId !== "null" && prodId !== "0")) {
+            return false;
+          }
+
+          return true;
+        });
+
         if (appendMode) {
-          setProducts((prev) => [...prev, ...response.products]);
+          setProducts((prev) => [...prev, ...creatorProducts]);
         } else {
-          setProducts(response.products);
+          setProducts(creatorProducts);
         }
 
-        setPagination((prev) => ({ ...prev, ...response.pagination }));
+        setPagination((prev) => ({
+          ...prev,
+          ...response.pagination,
+          total: creatorProducts.length > 0 ? creatorProducts.length : (response.pagination?.total || 0),
+        }));
 
         // Minimal console log as requested - only logging the total time
         console.log(`API [Creator Products]: ${(performance.now() - startTime).toFixed(2)}ms`);
@@ -138,7 +180,7 @@ function CreatorShopContent() {
         }
       }
     },
-    [username]
+    [username, creator]
   );
 
   const fetchCategories = useCallback(async () => {

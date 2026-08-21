@@ -30,7 +30,7 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
-    console.error(`[API ERROR] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+    console.warn(`[API ERROR] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
       status: error.response?.status,
       data: error.response?.data,
       payload: error.config?.data

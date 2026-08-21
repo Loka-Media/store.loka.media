@@ -799,8 +799,12 @@ export const shopifyAPI = {
 
   // Shop Information
   getShopInfo: async () => {
-    const response = await api.get("/api/shopify/shop");
-    return response.data;
+    try {
+      const response = await api.get("/api/shopify/shop");
+      return response.data;
+    } catch {
+      return null;
+    }
   },
 
   // Products

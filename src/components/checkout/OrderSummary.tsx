@@ -219,9 +219,14 @@ export const OrderSummary = ({
 
       {items.some(item => item.source === 'printify' || (item as any).printify_blueprint_id) && (
         <div className="bg-white/5 border border-white/10 rounded-xl p-4 mt-6 space-y-3">
-          <div className="flex items-center space-x-2 text-white">
-            <Truck className="w-4 h-4 text-orange-400" />
-            <span className="text-sm font-bold">Standard Shipping Rates to {countryCode || 'US'}</span>
+          <div>
+            <div className="flex items-center space-x-2 text-white">
+              <Truck className="w-4 h-4 text-orange-400" />
+              <span className="text-sm font-bold">Shipping Rate Structure ({countryCode || 'US'})</span>
+            </div>
+            <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
+              Base rate applies to the 1st unit; additional units of the same item get a discounted add-on rate.
+            </p>
           </div>
 
           {isFetchingShippingRates ? (
@@ -240,22 +245,50 @@ export const OrderSummary = ({
                       Number(r.blueprint_id) === Number((item as any).blueprint_id)
                      );
                 
-                const firstCost = est ? `$${(est.first_item / 100).toFixed(2)} USD` : '$5.99 USD';
-                const addCost = est ? `$${(est.additional_items / 100).toFixed(2)} USD` : '$2.00 USD';
+                const rawFirst = est ? est.first_item / 100 : 5.99;
+                const rawAdd = est ? est.additional_items / 100 : 2.00;
+
+                const firstCostFormatted = formatPrice(rawFirst);
+                const addCostFormatted = formatPrice(rawAdd);
+
+                const qty = item.quantity || 1;
+                const itemTotalShippingUSD = rawFirst + (qty - 1) * rawAdd;
+                const itemTotalShippingFormatted = formatPrice(itemTotalShippingUSD);
 
                 return (
-                  <div key={item.id || index} className="bg-black/40 border border-white/5 p-2 rounded-lg space-y-1">
-                    <p className="font-bold text-white text-[11px] truncate">{item.product_name}</p>
-                    <div className="flex justify-between text-[10px] text-gray-400 font-medium">
-                      <span>First Item: {firstCost}</span>
-                      <span>Additional: {addCost}</span>
+                  <div key={item.id || index} className="bg-black/40 border border-white/10 p-2.5 rounded-lg space-y-1.5">
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="font-bold text-white truncate max-w-[200px]">{item.product_name}</span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                        Qty: {qty}
+                      </span>
                     </div>
+
+                    {qty > 1 ? (
+                      <div className="pt-1 border-t border-white/5 space-y-0.5">
+                        <div className="flex justify-between text-[11px] font-medium text-gray-200">
+                          <span>Est. Shipping ({qty} units):</span>
+                          <span className="font-bold text-orange-400">{itemTotalShippingFormatted}</span>
+                        </div>
+                        <p className="text-[10px] text-gray-400">
+                          Breakdown: 1st unit = {firstCostFormatted} • {qty - 1} extra {qty - 1 === 1 ? 'unit' : 'units'} = +{formatPrice((qty - 1) * rawAdd)} ({addCostFormatted}/each)
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between text-[10px] text-gray-300 font-medium pt-0.5">
+                        <span>1st Unit Rate: <strong className="text-white">{firstCostFormatted}</strong></span>
+                        <span className="text-gray-400">Extra Units: <strong className="text-gray-300">+{addCostFormatted} each</strong></span>
+                      </div>
+                    )}
                   </div>
                 );
               })}
-              <div className="flex items-center space-x-1.5 text-[10px] text-gray-400 mt-1">
-                <Info className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
-                <span>Multiple quantities or items from same print provider are grouped automatically.</span>
+
+              <div className="flex items-start space-x-1.5 text-[10px] text-gray-400 mt-2 bg-orange-500/5 border border-orange-500/10 p-2 rounded-lg">
+                <Info className="w-3.5 h-3.5 text-orange-400 flex-shrink-0 mt-0.5" />
+                <span>
+                  <strong>Why a discount on extra units?</strong> Print providers charge a lower shipping fee for additional quantities of the same item shipped in the same package.
+                </span>
               </div>
             </div>
           )}
