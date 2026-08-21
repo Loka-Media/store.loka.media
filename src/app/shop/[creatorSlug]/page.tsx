@@ -98,15 +98,12 @@ function CreatorShopContent() {
           setLoading(true);
         }
 
-        // Clean up filters - only send non-empty values
+        // Clean up filters - retrieve full product pool for precise creator matching
         const cleanFilters: any = {
-          limit: customPagination.limit,
-          offset: customPagination.offset,
+          limit: 1000,
+          offset: 0,
           sortBy: customFilters.sortBy,
           sortOrder: customFilters.sortOrder,
-          creator: creatorSlug, // Always filter by creator slug/username
-          username: creatorSlug,
-          creator_username: creatorSlug,
           isActive: true, // Only show active products on the shop page
         };
 
@@ -117,7 +114,43 @@ function CreatorShopContent() {
         if (customFilters.minPrice) cleanFilters.minPrice = customFilters.minPrice;
         if (customFilters.maxPrice) cleanFilters.maxPrice = customFilters.maxPrice;
 
-        const response = await productAPI.getProducts(cleanFilters);
+        const [response, creatorsRes] = await Promise.all([
+          productAPI.getProducts(cleanFilters),
+          productAPI.getCreators().catch(() => ({ creators: [] }))
+        ]);
+
+        const creatorsList = creatorsRes.creators || [];
+        const matchingCreator = creatorsList.find(
+          (c: any) =>
+            (c.username && c.username.toLowerCase() === creatorSlug.toLowerCase()) ||
+            (c.name && c.name.replace(/\s+/g, "").toLowerCase() === creatorSlug.toLowerCase()) ||
+            (c.id && String(c.id) === creatorSlug)
+        );
+
+        if (matchingCreator && !creator) {
+          setCreator({
+            id: matchingCreator.id,
+            name: matchingCreator.name,
+            username: matchingCreator.username,
+            product_count: matchingCreator.product_count,
+            profileImg:
+              matchingCreator.profile_img ||
+              matchingCreator.profileImg ||
+              matchingCreator.profile_image ||
+              matchingCreator.profileImage ||
+              matchingCreator.avatar_url ||
+              matchingCreator.avatarUrl ||
+              matchingCreator.avatar ||
+              matchingCreator.image,
+          });
+        }
+
+        const normSlug = creatorSlug.toLowerCase().trim();
+        const normSlugNoSpaces = normSlug.replace(/\s+/g, "");
+        const mUsername = (matchingCreator?.username || creator?.username || "").toLowerCase().trim();
+        const mName = (matchingCreator?.name || creator?.name || "").toLowerCase().trim();
+        const mNameNoSpaces = mName.replace(/\s+/g, "");
+        const mId = String(matchingCreator?.id || creator?.id || "");
 
         // Strict client-side filter to ensure only products belonging to this creator are shown
         const rawProducts: ExtendedProduct[] = response.products || [];
@@ -127,37 +160,42 @@ function CreatorShopContent() {
             return false;
           }
 
-          const normSlug = creatorSlug.toLowerCase().trim();
           const prodUsername = (product.creator_username || product.creator?.username || "").toLowerCase().trim();
-          const prodName = (product.creator_name || product.creator?.name || "").replace(/\s+/g, "").toLowerCase().trim();
+          const prodName = (product.creator_name || product.creator?.name || "").toLowerCase().trim();
+          const prodNameNoSpaces = prodName.replace(/\s+/g, "");
           const prodId = String(product.creator_id || (product.creator as any)?.id || "");
 
-          // Direct match against creatorSlug
-          if (prodUsername && prodUsername === normSlug) return true;
-          if (prodName && prodName === normSlug) return true;
-          if (prodId && prodId === normSlug) return true;
-
-          const normSlugNoSpaces = normSlug.replace(/\s+/g, "");
-          if (prodUsername && prodUsername.replace(/\s+/g, "") === normSlugNoSpaces) return true;
-          if (prodName && prodName === normSlugNoSpaces) return true;
-
-          // Match against loaded creator object
-          if (creator) {
-            const cUsername = (creator.username || "").toLowerCase().trim();
-            const cName = (creator.name || "").replace(/\s+/g, "").toLowerCase().trim();
-            const cId = String(creator.id || creator.creator_id || "");
-
-            if (cUsername && prodUsername === cUsername) return true;
-            if (cName && prodName === cName) return true;
-            if (cId && prodId && prodId === cId) return true;
+          // Match against slug, username, name, or id
+          if (prodUsername) {
+            if (
+              prodUsername === normSlug ||
+              prodUsername.replace(/\s+/g, "") === normSlugNoSpaces ||
+              (mUsername && prodUsername === mUsername) ||
+              (mNameNoSpaces && prodUsername === mNameNoSpaces)
+            ) {
+              return true;
+            }
           }
 
-          // If product has explicit creator details that don't match, reject it
-          if (prodUsername || prodName || (prodId && prodId !== "undefined" && prodId !== "null" && prodId !== "0")) {
-            return false;
+          if (prodName) {
+            if (
+              prodName === normSlug ||
+              prodNameNoSpaces === normSlugNoSpaces ||
+              (mName && prodName === mName) ||
+              (mNameNoSpaces && prodNameNoSpaces === mNameNoSpaces) ||
+              (mUsername && prodNameNoSpaces === mUsername)
+            ) {
+              return true;
+            }
           }
 
-          return true;
+          if (prodId && prodId !== "0" && prodId !== "undefined" && prodId !== "null") {
+            if (prodId === normSlug || (mId && prodId === mId)) {
+              return true;
+            }
+          }
+
+          return false;
         });
 
         if (appendMode) {
@@ -168,8 +206,9 @@ function CreatorShopContent() {
 
         setPagination((prev) => ({
           ...prev,
-          ...response.pagination,
-          total: creatorProducts.length > 0 ? creatorProducts.length : (response.pagination?.total || 0),
+          total: creatorProducts.length,
+          limit: customPagination.limit,
+          offset: customPagination.offset,
         }));
 
         console.log(`API [Creator Products]: ${(performance.now() - startTime).toFixed(2)}ms`);
@@ -202,19 +241,21 @@ function CreatorShopContent() {
     try {
       const start = performance.now();
       
-      // Try to find matching creator in creators list to get official name and username
       const creatorsRes = await productAPI.getCreators();
       const list = creatorsRes.creators || [];
       const matchingCreator = list.find(
         (c: any) =>
-          c.username.toLowerCase() === creatorSlug.toLowerCase() ||
-          c.name.replace(/\s+/g, "").toLowerCase() === creatorSlug.toLowerCase()
+          (c.username && c.username.toLowerCase() === creatorSlug.toLowerCase()) ||
+          (c.name && c.name.replace(/\s+/g, "").toLowerCase() === creatorSlug.toLowerCase()) ||
+          (c.id && String(c.id) === creatorSlug)
       );
 
       if (matchingCreator) {
         setCreator({
+          id: matchingCreator.id,
           name: matchingCreator.name,
           username: matchingCreator.username,
+          product_count: matchingCreator.product_count,
           profileImg:
             matchingCreator.profile_img ||
             matchingCreator.profileImg ||
@@ -226,16 +267,15 @@ function CreatorShopContent() {
             matchingCreator.image,
         });
       } else {
-        // Fallback: query backend directly for a product to see if we can extract creator details
         const response = await productAPI.getProducts({ creator: creatorSlug, limit: 1, offset: 0 });
         if (response.products.length > 0 && response.products[0].creator) {
           const creatorInfo = {
+            id: response.products[0].creator.id || response.products[0].creator_id,
             name: response.products[0].creator.name || response.products[0].creator_name,
             username: response.products[0].creator.username || creatorSlug,
           };
           setCreator(creatorInfo);
         } else {
-          // Default fallback using slug
           setCreator({
             name: creatorSlug,
             username: creatorSlug,
