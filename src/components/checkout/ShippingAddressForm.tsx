@@ -1,7 +1,10 @@
-import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, Save, Check } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Address, CustomerInfo, PrintfulCountry, PrintfulState } from '@/lib/checkout-types';
 import { SavedAddressList } from './SavedAddressList';
 import { getZipCodeConfig } from '@/lib/location-utils';
+import { addressAPI } from '@/lib/api';
 
 interface ShippingAddressFormProps {
   isLoggedInUser: boolean;
@@ -20,6 +23,7 @@ interface ShippingAddressFormProps {
   availableStates: PrintfulState[];
   isLoadingLocation: boolean;
   handleZipCodeChange: (zipCode: string) => void;
+  onReloadAddresses?: () => Promise<any>;
 }
 
 export const ShippingAddressForm = ({
@@ -38,8 +42,48 @@ export const ShippingAddressForm = ({
   printfulCountries,
   availableStates,
   isLoadingLocation,
-  handleZipCodeChange
+  handleZipCodeChange,
+  onReloadAddresses
 }: ShippingAddressFormProps) => {
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
+
+  const handleDirectSaveAddress = async () => {
+    if (!customerInfo.address1?.trim() || !customerInfo.city?.trim() || !customerInfo.zip?.trim() || !customerInfo.country?.trim()) {
+      toast.error("Please fill in all required address fields (*)");
+      return;
+    }
+    if (customerInfo.country && !customerInfo.state?.trim()) {
+      toast.error(`State/Province is required for ${customerInfo.country}`);
+      return;
+    }
+
+    try {
+      setIsSavingAddress(true);
+      await addressAPI.createAddress({
+        name: customerInfo.name || 'Default Shipping Address',
+        address1: customerInfo.address1.trim(),
+        address2: customerInfo.address2?.trim() || '',
+        city: customerInfo.city.trim(),
+        state: customerInfo.state.trim(),
+        zip: customerInfo.zip.trim(),
+        country: customerInfo.country.trim(),
+        phone: customerInfo.phone || '',
+        address_type: 'shipping',
+        is_default: savedAddresses.length === 0
+      });
+
+      toast.success("Address saved successfully to your database account!");
+
+      if (onReloadAddresses) {
+        await onReloadAddresses();
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.response?.data?.error || 'Failed to save address';
+      toast.error(msg);
+    } finally {
+      setIsSavingAddress(false);
+    }
+  };
   return (
     <div className="gradient-border-white-top rounded-xl overflow-hidden p-6 sm:p-8">
       <div className="flex items-center justify-between mb-6">
@@ -239,6 +283,33 @@ export const ShippingAddressForm = ({
                 )}
               </div>
             </div>
+
+            {isLoggedInUser && (
+              <div className="mt-5 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <p className="text-xs text-gray-400">
+                  Save this address to your account for faster future checkouts.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleDirectSaveAddress}
+                  disabled={isSavingAddress}
+                  className="inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-lg text-xs transition-all shadow-md hover:shadow-orange-500/20 disabled:opacity-50 flex-shrink-0"
+                >
+                  {isSavingAddress ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent mr-2" />
+                      <span>Saving to Account...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      <span>Save Address to Profile</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

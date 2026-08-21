@@ -552,6 +552,7 @@ export default function UnifiedCheckoutPage() {
               availableStates={locationLookup.availableStates}
               isLoadingLocation={locationLookup.isLoadingLocation}
               handleZipCodeChange={handleZipCodeChange}
+              onReloadAddresses={() => addressManagement.loadUserAddresses()}
             />
           </div>
 

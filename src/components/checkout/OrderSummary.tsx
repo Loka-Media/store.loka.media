@@ -236,53 +236,98 @@ export const OrderSummary = ({
             </div>
           ) : (
             <div className="space-y-2 text-xs text-gray-300">
-              {items.map((item, index) => {
-                const variantId = Number((item as any).printify_variant_id || item.printful_variant_id || item.variant_id);
-                const est = selectedShippingRate?.itemized?.[index]
-                  || selectedShippingRate?.itemized?.find((r: any) => 
-                      Number(r.variant_id) === variantId || 
-                      Number(r.variant_id) === Number(item.variant_id) ||
-                      Number(r.blueprint_id) === Number((item as any).blueprint_id)
-                     );
-                
-                const rawFirst = est ? est.first_item / 100 : 5.99;
-                const rawAdd = est ? est.additional_items / 100 : 2.00;
+              {(() => {
+                // 1. Build initial rate details for each item
+                const rawItems = items.map((item, index) => {
+                  const variantId = Number((item as any).printify_variant_id || item.printful_variant_id || item.variant_id);
+                  const est = selectedShippingRate?.itemized?.[index]
+                    || selectedShippingRate?.itemized?.find((r: any) => 
+                        Number(r.variant_id) === variantId || 
+                        Number(r.variant_id) === Number(item.variant_id) ||
+                        Number(r.blueprint_id) === Number((item as any).blueprint_id)
+                       );
+                  
+                  const rawFirst = est ? est.first_item / 100 : 5.99;
+                  const rawAdd = est ? est.additional_items / 100 : 2.00;
+                  const providerId = est?.print_provider_id || (item as any).print_provider_id || (item as any).printify_print_provider_id || 61;
 
-                const firstCostFormatted = formatPrice(rawFirst);
-                const addCostFormatted = formatPrice(rawAdd);
+                  return {
+                    item,
+                    index,
+                    rawFirst,
+                    rawAdd,
+                    providerId,
+                    qty: item.quantity || 1
+                  };
+                });
 
-                const qty = item.quantity || 1;
-                const itemTotalShippingUSD = rawFirst + (qty - 1) * rawAdd;
-                const itemTotalShippingFormatted = formatPrice(itemTotalShippingUSD);
+                // 2. Group by Print Provider to calculate combined package rates
+                const providerGroups: Record<number, number[]> = {};
+                rawItems.forEach((entry, i) => {
+                  if (!providerGroups[entry.providerId]) providerGroups[entry.providerId] = [];
+                  providerGroups[entry.providerId].push(i);
+                });
 
-                return (
-                  <div key={item.id || index} className="bg-black/40 border border-white/10 p-2.5 rounded-lg space-y-1.5">
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="font-bold text-white truncate max-w-[200px]">{item.product_name}</span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                        Qty: {qty}
-                      </span>
-                    </div>
+                // 3. Determine primary item per provider group (item with highest 1st unit rate)
+                return rawItems.map((entry) => {
+                  const groupIndices = providerGroups[entry.providerId] || [entry.index];
+                  
+                  let maxFirstIdx = groupIndices[0];
+                  for (const gIdx of groupIndices) {
+                    if (rawItems[gIdx].rawFirst > rawItems[maxFirstIdx].rawFirst) {
+                      maxFirstIdx = gIdx;
+                    }
+                  }
 
-                    {qty > 1 ? (
+                  const isPrimaryInGroup = entry.index === maxFirstIdx;
+                  const hasCombinedDiscount = groupIndices.length > 1 && !isPrimaryInGroup;
+
+                  // Actual shipping cost charged for this item in combined package
+                  let actualItemShippingUSD = 0;
+                  if (isPrimaryInGroup) {
+                    actualItemShippingUSD = entry.rawFirst + (entry.qty - 1) * entry.rawAdd;
+                  } else {
+                    // Secondary item in same package: ALL units get discounted add-on rate
+                    actualItemShippingUSD = entry.qty * entry.rawAdd;
+                  }
+
+                  const firstCostFormatted = formatPrice(entry.rawFirst);
+                  const addCostFormatted = formatPrice(entry.rawAdd);
+                  const totalFormatted = formatPrice(actualItemShippingUSD);
+
+                  return (
+                    <div key={entry.item.id || entry.index} className="bg-black/40 border border-white/10 p-2.5 rounded-lg space-y-1.5">
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="font-bold text-white truncate max-w-[200px]">{entry.item.product_name}</span>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                          Qty: {entry.qty}
+                        </span>
+                      </div>
+
                       <div className="pt-1 border-t border-white/5 space-y-0.5">
                         <div className="flex justify-between text-[11px] font-medium text-gray-200">
-                          <span>Est. Shipping ({qty} units):</span>
-                          <span className="font-bold text-orange-400">{itemTotalShippingFormatted}</span>
+                          <span>Est. Shipping Cost:</span>
+                          <span className="font-bold text-orange-400">{totalFormatted}</span>
                         </div>
-                        <p className="text-[10px] text-gray-400">
-                          Breakdown: 1st unit = {firstCostFormatted} • {qty - 1} extra {qty - 1 === 1 ? 'unit' : 'units'} = +{formatPrice((qty - 1) * rawAdd)} ({addCostFormatted}/each)
-                        </p>
+
+                        {hasCombinedDiscount ? (
+                          <p className="text-[10px] text-green-400">
+                            ✓ Combined Package Rate (shipped with primary item): {entry.qty} {entry.qty === 1 ? 'unit' : 'units'} @ +{addCostFormatted}/each
+                          </p>
+                        ) : entry.qty > 1 ? (
+                          <p className="text-[10px] text-gray-400">
+                            Breakdown: 1st unit = {firstCostFormatted} • {entry.qty - 1} extra = +{formatPrice((entry.qty - 1) * entry.rawAdd)} ({addCostFormatted}/each)
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-gray-400">
+                            Primary 1st unit rate: {firstCostFormatted}
+                          </p>
+                        )}
                       </div>
-                    ) : (
-                      <div className="flex justify-between text-[10px] text-gray-300 font-medium pt-0.5">
-                        <span>1st Unit Rate: <strong className="text-white">{firstCostFormatted}</strong></span>
-                        <span className="text-gray-400">Extra Units: <strong className="text-gray-300">+{addCostFormatted} each</strong></span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                    </div>
+                  );
+                });
+              })()}
 
               <div className="flex items-start space-x-1.5 text-[10px] text-gray-400 mt-2 bg-orange-500/5 border border-orange-500/10 p-2 rounded-lg">
                 <Info className="w-3.5 h-3.5 text-orange-400 flex-shrink-0 mt-0.5" />
