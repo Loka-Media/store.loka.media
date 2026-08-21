@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getBankCodeConfig } from '@/lib/bankCodeConfig';
 
 interface BankDetails {
   id?: number;
@@ -151,6 +152,21 @@ function PayoutSettingsPageContent() {
       toast.error('Email is required');
       return false;
     }
+
+    // Country-specific bank code validation
+    const currentConfig = getBankCodeConfig(bankDetails.bank_country);
+    const bankCodeVal = (bankDetails.routing_number || '').trim();
+
+    if (!bankCodeVal) {
+      toast.error(`Please enter your ${currentConfig.fieldLabel}`);
+      return false;
+    }
+
+    if (currentConfig.validationRule && !currentConfig.validationRule.test(bankCodeVal)) {
+      toast.error(currentConfig.errorMessage);
+      return false;
+    }
+
     if (!bankDetails.account_number.trim()) {
       toast.error('Account number is required');
       return false;
@@ -645,66 +661,90 @@ function PayoutSettingsPageContent() {
               />
             </div>
 
-            {!isInternational ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide flex items-center justify-between">
-                    <span>Routing Number *</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowSensitiveFields(!showSensitiveFields)}
-                      className="text-gray-400 hover:text-orange-400 transition-colors"
-                    >
-                      {showSensitiveFields ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                    </button>
-                  </label>
-                  <input
-                    type={showSensitiveFields ? 'text' : 'password'}
-                    name="routing_number"
-                    value={bankDetails.routing_number}
-                    onChange={handleChange}
-                    className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono"
-                    placeholder="000000000"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">Account Number *</label>
-                  <input
-                    type={showSensitiveFields ? 'text' : 'password'}
-                    name="account_number"
-                    value={bankDetails.account_number}
-                    onChange={handleChange}
-                    className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono"
-                    placeholder="•••••••••••••••••"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">IBAN</label>
-                  <input
-                    type="text"
-                    name="iban"
-                    value={bankDetails.iban || ''}
-                    onChange={handleChange}
-                    className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono"
-                    placeholder="DE89370400440532013000"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">SWIFT Code</label>
-                  <input
-                    type="text"
-                    name="swift_code"
-                    value={bankDetails.swift_code || ''}
-                    onChange={handleChange}
-                    className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono"
-                    placeholder="DEUTDEDBBER"
-                  />
-                </div>
-              </div>
-            )}
+            {(() => {
+              const currentBankConfig = getBankCodeConfig(bankDetails.bank_country);
+              return (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Dynamic Country-Specific Bank Code Field */}
+                    <div>
+                      <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide flex items-center justify-between">
+                        <span>{currentBankConfig.fieldLabel} *</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowSensitiveFields(!showSensitiveFields)}
+                          className="text-gray-400 hover:text-orange-400 transition-colors"
+                          title={showSensitiveFields ? "Hide sensitive details" : "Show sensitive details"}
+                        >
+                          {showSensitiveFields ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </button>
+                      </label>
+                      <input
+                        type={showSensitiveFields ? 'text' : 'password'}
+                        id="bank_routing_code_input"
+                        name="routing_number"
+                        value={bankDetails.routing_number}
+                        onChange={handleChange}
+                        maxLength={currentBankConfig.maxLength}
+                        inputMode={currentBankConfig.inputMode}
+                        autoComplete="off"
+                        className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
+                        placeholder={currentBankConfig.placeholder}
+                      />
+                      {/* Country & Code Type Indicator Badge */}
+                      <div className="mt-2 text-xs font-semibold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-md inline-flex items-center gap-1.5">
+                        <span>{currentBankConfig.badgeDisplay}</span>
+                      </div>
+                    </div>
+
+                    {/* Account Number Field */}
+                    <div>
+                      <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">Account Number *</label>
+                      <input
+                        type={showSensitiveFields ? 'text' : 'password'}
+                        id="bank_account_number_input"
+                        name="account_number"
+                        value={bankDetails.account_number}
+                        onChange={handleChange}
+                        autoComplete="off"
+                        className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
+                        placeholder="•••••••••••••••••"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Optional International Fields (IBAN / SWIFT Code) */}
+                  {isInternational && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                      <div>
+                        <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">IBAN (International Account)</label>
+                        <input
+                          type="text"
+                          name="iban"
+                          value={bankDetails.iban || ''}
+                          onChange={handleChange}
+                          autoComplete="off"
+                          className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
+                          placeholder="e.g. DE89370400440532013000"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">SWIFT / BIC Code</label>
+                        <input
+                          type="text"
+                          name="swift_code"
+                          value={bankDetails.swift_code || ''}
+                          onChange={handleChange}
+                          autoComplete="off"
+                          className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
+                          placeholder="e.g. DEUTDEDBBER"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             <div>
               <label className="block text-xs font-semibold text-orange-400 mb-2 uppercase tracking-wide">Account Type *</label>
