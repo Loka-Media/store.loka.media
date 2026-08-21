@@ -85,8 +85,10 @@ const cleanDescription = (text?: string): string => {
   if (!text) return "";
   // Strip HTML tags
   let clean = text.replace(/<[^>]*>?/gm, '');
-  // Decode common HTML entities
+  // Decode common HTML entities and clean Printify formatting artifact
   clean = clean
+    .replace(/\.\.\:/g, '. ')
+    .replace(/\.\:/g, ': ')
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
@@ -687,6 +689,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [activeColor, setActiveColor] = useState<string>("");
+  const [isDescExpanded, setIsDescExpanded] = useState<boolean>(false);
 
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -1529,8 +1532,43 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
                   {selectedProduct?.title || selectedProduct?.name}
                 </h2>
-                <div className="text-xs sm:text-sm text-gray-400 font-medium line-clamp-3 break-words overflow-hidden text-ellipsis">
-                  {cleanDescription(selectedProduct?.description) || "High-quality custom creator merchandise product. Select colors and sizes, add designs on print areas, and preview your premium storefront ready mockup."}
+                <div className="space-y-1 pt-1">
+                  {(() => {
+                    const fullDesc = cleanDescription(selectedProduct?.description) || "High-quality custom creator merchandise product. Select colors and sizes, add designs on print areas, and preview your premium storefront ready mockup.";
+                    const isLongText = fullDesc.length > 120;
+
+                    return (
+                      <>
+                        <p
+                          className={`text-xs sm:text-sm text-gray-300 font-medium leading-relaxed break-words ${
+                            !isDescExpanded && isLongText ? "line-clamp-3" : ""
+                          }`}
+                          title={fullDesc}
+                        >
+                          {fullDesc}
+                        </p>
+                        {isLongText && (
+                          <button
+                            type="button"
+                            onClick={() => setIsDescExpanded(!isDescExpanded)}
+                            className="text-xs font-semibold text-[#FF6D1F] hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
+                          >
+                            {isDescExpanded ? (
+                              <>
+                                <span>Show Less</span>
+                                <ChevronUp className="w-3.5 h-3.5" />
+                              </>
+                            ) : (
+                              <>
+                                <span>Read More</span>
+                                <ChevronDown className="w-3.5 h-3.5" />
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
                 <div className="flex flex-wrap gap-4 pt-2 text-xs text-gray-500">
                   <div>Type: <span className="text-white">{selectedProduct?.type_name || "Apparel"}</span></div>
@@ -1678,12 +1716,17 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               setSelectedSizes([...selectedSizes, size]);
                             }
                           }}
-                          className={`border-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 ${isSelected
+                          className={`border-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${isSelected
                             ? "border-[#FF6D1F] bg-[#FF6D1F]/10 text-white font-bold"
                             : "border-white/10 bg-white/5 text-gray-300 hover:border-white/35"
                             }`}
                         >
-                          {size}{sizeFinalPrice > 0 ? ` ($${sizeFinalPrice.toFixed(2)})` : ""}
+                          <span>{size}{sizeFinalPrice > 0 ? ` ($${sizeFinalPrice.toFixed(2)})` : ""}</span>
+                          {isSelected && (
+                            <span className="bg-white/90 p-0.5 rounded-full flex-shrink-0">
+                              <Check className="w-3 h-3 text-black" />
+                            </span>
+                          )}
                         </button>
                       );
                     })}
