@@ -5,6 +5,13 @@ import { useState, useEffect, useCallback, Suspense, useRef, useMemo } from "rea
 import { useRouter, useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 import { TrendingUp, Zap, Heart, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { ProductsHero } from "@/components/products/ProductsHero";
 import { FeaturedProducts } from "@/components/products/FeaturedProducts";
@@ -514,49 +521,67 @@ function ProductsContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="relative">
-                  <select
-                    value={filters.category}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val && searchInput) {
+                  <Select
+                    value={filters.category || "all"}
+                    onValueChange={(val) => {
+                      const valueToSet = val === "all" ? "" : val;
+                      if (valueToSet && searchInput) {
                         setSearchInput("");
                       }
-                      handleFilterChange("category", val);
-                    }}
-                    className={`w-full px-4 py-3 h-12 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm appearance-none cursor-pointer ${filters.category ? "border-blue-400 focus:border-blue-400" : "hover:border-orange-400 focus:border-orange-400"}`}
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 16px center',
+                      handleFilterChange("category", valueToSet);
                     }}
                   >
-                    <option value="">All Types</option>
-                    {displayCategories.map((cat: { category: string; product_count: number }) => (
-                      <option key={cat.category} value={cat.category}>
-                        {cat.category} ({cat.product_count})
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger
+                      className={`w-full px-4 py-3 h-12 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm transition-all ${
+                        filters.category ? "border-blue-400 focus:border-blue-400" : "hover:border-orange-400 focus:border-orange-400"
+                      }`}
+                    >
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-950/95 border border-white/20 rounded-2xl text-white shadow-2xl backdrop-blur-xl max-h-72">
+                      <SelectItem value="all" className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3">
+                        All Types
+                      </SelectItem>
+                      {displayCategories.map((cat: { category: string; product_count: number }) => (
+                        <SelectItem
+                          key={cat.category}
+                          value={cat.category}
+                          className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3"
+                        >
+                          {cat.category} ({cat.product_count})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="relative">
-                  <select
-                    value={filters.creator}
-                    onChange={(e) => handleFilterChange("creator", e.target.value)}
-                    className={`w-full px-4 py-3 h-12 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm appearance-none cursor-pointer ${filters.creator ? "border-blue-400 focus:border-blue-400" : "hover:border-orange-400 focus:border-orange-400"}`}
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 16px center',
-                    }}
+                  <Select
+                    value={filters.creator || "all"}
+                    onValueChange={(val) => handleFilterChange("creator", val === "all" ? "" : val)}
                   >
-                    <option value="">All Creators</option>
-                    {displayCreators.map((creator) => (
-                      <option key={creator.id || creator.username || creator.name} value={creator.username || creator.name}>
-                        {creator.name} ({creator.product_count})
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger
+                      className={`w-full px-4 py-3 h-12 rounded-2xl border border-white/20 bg-gradient-to-br from-gray-900 to-black text-white text-sm transition-all ${
+                        filters.creator ? "border-blue-400 focus:border-blue-400" : "hover:border-orange-400 focus:border-orange-400"
+                      }`}
+                    >
+                      <SelectValue placeholder="All Creators" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-950/95 border border-white/20 rounded-2xl text-white shadow-2xl backdrop-blur-xl max-h-72">
+                      <SelectItem value="all" className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3">
+                        All Creators
+                      </SelectItem>
+                      {displayCreators.map((creator) => (
+                        <SelectItem
+                          key={creator.id || creator.username || creator.name}
+                          value={creator.username || creator.name}
+                          className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3"
+                        >
+                          {creator.name} ({creator.product_count})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -710,48 +735,7 @@ function ProductsContent() {
         )}
       </div>
 
-      <style jsx global>{`
-        select {
-          max-height: 300px;
-          scrollbar-width: thin;
-          scrollbar-color: #ff6347 #1f2937;
-        }
 
-        select::-webkit-scrollbar {
-          width: 8px;
-        }
-
-        select::-webkit-scrollbar-track {
-          background: #1f2937;
-        }
-
-        select::-webkit-scrollbar-thumb {
-          background: linear-gradient(180deg, #ff6347 0%, #ff7359 100%);
-          border-radius: 4px;
-        }
-
-        select::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(180deg, #ff7359 0%, #ff8369 100%);
-          box-shadow: 0 0 10px rgba(255, 99, 71, 0.4);
-        }
-
-        option {
-          background-color: #1f2937;
-          color: #ffffff;
-          padding: 8px 12px;
-        }
-
-        option:hover {
-          background-color: #374151;
-          color: #fbbf24;
-        }
-
-        option:checked {
-          background: linear-gradient(#ff6347, #ff6347);
-          background-color: #ff6347 !important;
-          color: white;
-        }
-      `}</style>
     </div>
   );
 }

@@ -6,17 +6,55 @@ export const useVariantSelection = (product: ProductDetails | null, isVariantAva
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
 
   const getVariantColorAndSize = useCallback((variant: ProductVariant) => {
-    if (variant.color && variant.size) {
-      return { color: variant.color, size: variant.size };
-    } else if (variant.title?.includes(' - ')) {
-      const parts = variant.title.split(' - ');
-      return { size: parts[0] || 'Default', color: parts[1] || 'Default' };
-    } else if (variant.title?.includes(' / ')) {
-      const parts = variant.title.split(' / ');
-      return { color: parts[0] || 'Default', size: parts[1] || 'Default' };
-    } else {
-      return { color: 'Default', size: 'Default' };
+    let color = (variant.color || '').trim();
+    let size = (variant.size || '').trim();
+
+    if (color && size) {
+      return { color, size };
     }
+
+    const title = (variant.title || '').trim();
+    if (title) {
+      const separator = title.includes(' / ') ? ' / ' : title.includes(' - ') ? ' - ' : null;
+      if (separator) {
+        const parts = title.split(separator).map(p => p.trim());
+        if (parts.length >= 2) {
+          const knownSizes = new Set(['xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl', '5xl', 'small', 'medium', 'large', 'x-large', '2x-large', '3x-large', 'one size', 'os', 'default']);
+          const part0Lower = parts[0].toLowerCase();
+          const part1Lower = parts[1].toLowerCase();
+
+          const isPart0Size = knownSizes.has(part0Lower) || /^\d+(\.\d+)?\s*(oz|in|cm|mm|g|ml)?$/i.test(part0Lower);
+          const isPart1Size = knownSizes.has(part1Lower) || /^\d+(\.\d+)?\s*(oz|in|cm|mm|g|ml)?$/i.test(part1Lower);
+
+          if (isPart0Size && !isPart1Size) {
+            if (!size) size = parts[0];
+            if (!color) color = parts[1];
+          } else if (isPart1Size && !isPart0Size) {
+            if (!color) color = parts[0];
+            if (!size) size = parts[1];
+          } else {
+            if (!color) color = parts[0];
+            if (!size) size = parts[1];
+          }
+        }
+      } else {
+        if (!color && !size) {
+          const knownSizes = new Set(['xs', 's', 'm', 'l', 'xl', '2xl', '3xl', '4xl', '5xl', 'one size', 'default']);
+          if (knownSizes.has(title.toLowerCase())) {
+            size = title;
+            color = 'Default';
+          } else {
+            color = title;
+            size = 'Default';
+          }
+        }
+      }
+    }
+
+    return {
+      color: color || 'Default',
+      size: size || 'Default'
+    };
   }, []);
 
   const getColorCode = useCallback((colorName: string, colorCode?: string) => {

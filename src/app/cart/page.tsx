@@ -163,33 +163,35 @@ export default function CartPage() {
     <div className="min-h-screen bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 pt-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 pt-2 sm:pt-3">
           <div>
             <GradientTitle text="Shopping Cart" size="sm" />
-            <p className="text-gray-400 font-medium mt-2">
+            <p className="text-gray-400 font-medium text-xs sm:text-sm mt-1 sm:mt-2">
               {summary.itemCount} {summary.itemCount === 1 ? 'item' : 'items'} in your cart
             </p>
           </div>
-          <Link
-            href="/products"
-            className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-900 hover:bg-gray-800 hover:border-gray-600 transition-all duration-300"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Continue Shopping
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/products"
+              className="inline-flex items-center px-4 py-2.5 sm:px-5 sm:py-2.5 border border-white/20 text-xs sm:text-sm font-semibold rounded-xl text-white bg-black hover:bg-gray-900 transition-all shadow-md shrink-0"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              Continue Shopping
+            </Link>
+          </div>
         </div>
 
         {items.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="text-center py-16 px-4">
             <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl inline-flex items-center justify-center mb-6">
               <ShoppingBag className="h-8 w-8 text-white" />
             </div>
-            <span className="mt-4 text-lg sm:text-xl font-bold text-white block">Your cart is empty</span>
-            <p className="mt-2 text-gray-400 font-medium">Start adding some products to your cart!</p>
-            <div className="mt-8">
+            <span className="text-lg sm:text-xl font-bold text-white block">Your cart is empty</span>
+            <p className="mt-2 text-sm sm:text-base text-gray-400 font-medium">Start adding some products to your cart!</p>
+            <div className="mt-6 sm:mt-8">
               <Link
                 href="/products"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all duration-300"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg"
               >
                 Start Shopping
               </Link>
@@ -199,23 +201,23 @@ export default function CartPage() {
           <div className="lg:grid lg:grid-cols-12 lg:gap-x-8">
             {/* Cart Items */}
             <div className="lg:col-span-7">
-              <div className="gradient-border-white-top rounded-xl overflow-hidden">
-                <div className="px-4 py-6 sm:px-6">
+              <div className="gradient-border-white-top rounded-2xl overflow-hidden bg-gray-950/60 border border-white/10">
+                <div className="p-4 sm:p-6">
                   <div className="flow-root">
-                    <ul className="-my-6 divide-y divide-gray-800">
+                    <ul className="divide-y divide-gray-800/80">
                       {items.map((item) => {
                         const productHref = `/products/${(item as any).product_slug || (item as any).slug || item.product_id}`;
                         return (
-                          <li key={item.id} className="py-6 flex">
+                          <li key={item.id} className="py-4 sm:py-6 flex items-start gap-3 sm:gap-5">
+                            {/* Image */}
                             <Link
                               href={productHref}
-                              className="flex-shrink-0 w-24 h-24 border border-gray-700 rounded-lg overflow-hidden bg-gray-900 group hover:border-orange-500 transition-colors"
+                              className="flex-shrink-0 w-20 h-20 sm:w-28 sm:h-28 border border-white/10 rounded-xl overflow-hidden bg-gray-900 group hover:border-orange-500/50 transition-colors relative"
                             >
                               <Image
                                 src={item.image_url || item.thumbnail_url || '/placeholder-product.svg'}
                                 alt={item.product_name}
-                                width={96}
-                                height={96}
+                                fill
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 unoptimized={true}
                                 onError={(e) => {
@@ -224,85 +226,93 @@ export default function CartPage() {
                               />
                             </Link>
 
-                            <div className="ml-4 flex-1 flex flex-col">
+                            {/* Content */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch">
                               <div>
-                                <div className="flex justify-between text-base font-bold text-white">
+                                <div className="flex items-start justify-between gap-2">
                                   <Link
                                     href={productHref}
-                                    className="hover:text-orange-400 transition-colors hover:underline cursor-pointer"
+                                    className="text-sm sm:text-base font-bold text-white hover:text-orange-400 transition-colors line-clamp-2 leading-snug"
                                   >
                                     {item.product_name}
                                   </Link>
-                                  <p className="ml-4 text-orange-400">{formatPrice(item.total_price)}</p>
+                                  <p className="text-sm sm:text-base text-orange-400 font-extrabold shrink-0">
+                                    {formatPrice(item.total_price)}
+                                  </p>
                                 </div>
-                                <p className="mt-1 text-sm text-gray-400 font-medium">
+                                
+                                <p className="mt-0.5 text-xs sm:text-sm text-gray-400 font-medium truncate">
                                   by {item.creator_name}
                                 </p>
-                              <div className="mt-2 text-sm text-gray-400 font-medium flex items-center space-x-4">
-                                <span>Size: {item.size}</span>
-                                <span className="flex items-center">
-                                  Color:
-                                  <span
-                                    className="ml-2 w-4 h-4 rounded-full border border-gray-600"
-                                    style={{ backgroundColor: getColorCode(item.color, item.color_code) }}
-                                  ></span>
-                                  <span className="ml-1">{item.color || 'Default'}</span>
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex-1 flex items-end justify-between text-sm">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-gray-400 font-medium">Qty:</span>
-                                <div className="flex items-center border border-gray-700 rounded-lg bg-gray-900">
-                                  <button
-                                    type="button"
-                                    className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
-                                    onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                                    disabled={item.quantity <= 1 || updatingItems.has(item.id)}
-                                  >
-                                    <Minus className="h-4 w-4" />
-                                  </button>
-                                  <span className="px-3 py-1 text-white font-medium min-w-[2.5rem] text-center">
-                                    {updatingItems.has(item.id) ? '...' : item.quantity}
+
+                                {/* Size & Color Info */}
+                                <div className="mt-1.5 text-xs text-gray-400 font-medium flex flex-wrap items-center gap-x-3 gap-y-1">
+                                  {item.size && <span>Size: <strong className="text-white/90">{item.size}</strong></span>}
+                                  <span className="flex items-center gap-1">
+                                    Color:
+                                    <span
+                                      className="w-3.5 h-3.5 rounded-full border border-gray-600 inline-block"
+                                      style={{ backgroundColor: getColorCode(item.color, item.color_code) }}
+                                    ></span>
+                                    <strong className="text-white/90">{item.color || 'Default'}</strong>
                                   </span>
-                                  <button
-                                    type="button"
-                                    className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
-                                    onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                                    disabled={item.quantity >= 10 || updatingItems.has(item.id)}
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                  </button>
                                 </div>
                               </div>
 
-                              <div className="flex">
+                              {/* Quantity & Delete Controls */}
+                              <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-gray-800/60">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-gray-400 font-medium">Qty:</span>
+                                  <div className="flex items-center border border-white/15 rounded-xl bg-gray-900/90 overflow-hidden">
+                                    <button
+                                      type="button"
+                                      className="p-1 sm:p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-40"
+                                      onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                      disabled={item.quantity <= 1 || updatingItems.has(item.id)}
+                                    >
+                                      <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    </button>
+                                    <span className="px-2.5 py-0.5 text-xs sm:text-sm text-white font-bold min-w-[2rem] text-center">
+                                      {updatingItems.has(item.id) ? '...' : item.quantity}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      className="p-1 sm:p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-40"
+                                      onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                      disabled={item.quantity >= 10 || updatingItems.has(item.id)}
+                                    >
+                                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    </button>
+                                  </div>
+                                </div>
+
                                 <button
                                   type="button"
-                                  className="font-medium text-red-500 hover:text-red-400 transition-colors disabled:opacity-50"
+                                  className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all disabled:opacity-40"
                                   onClick={() => handleRemoveItem(item.id, item.product_name)}
                                   disabled={updatingItems.has(item.id)}
+                                  title="Remove item"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </button>
                               </div>
                             </div>
-                          </div>
-                        </li>
-                      );
-                    })}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 </div>
 
                 {/* Clear Cart Button */}
                 {items.length > 0 && (
-                  <div className="border-t border-gray-800 px-4 py-6 sm:px-6">
+                  <div className="border-t border-gray-800 px-4 py-4 sm:px-6 flex justify-end">
                     <button
                       type="button"
-                      className="text-sm text-red-500 hover:text-red-400 font-medium transition-colors"
+                      className="text-xs sm:text-sm text-red-400 hover:text-red-300 font-semibold transition-colors flex items-center gap-1.5"
                       onClick={() => setClearCartConfirmOpen(true)}
                     >
+                      <Trash2 className="w-3.5 h-3.5" />
                       Clear Cart
                     </button>
                   </div>
@@ -311,32 +321,32 @@ export default function CartPage() {
             </div>
 
             {/* Order Summary */}
-            <div className="mt-8 lg:mt-0 lg:col-span-5">
-              <div className="gradient-border-white-top rounded-xl overflow-hidden p-6 sm:p-8">
+            <div className="mt-6 lg:mt-0 lg:col-span-5">
+              <div className="gradient-border-white-top rounded-2xl overflow-hidden p-5 sm:p-8 bg-gray-950/60 border border-white/10 shadow-xl">
                 <span className="text-lg sm:text-xl font-bold text-white block">Order Summary</span>
 
-                <div className="mt-6 space-y-4">
+                <div className="mt-5 space-y-3.5">
                   <div className="flex items-center justify-between">
-                    <dt className="text-sm font-medium text-gray-400">Subtotal</dt>
-                    <dd className="text-sm font-bold text-white">{formatPrice(summary.subtotal)}</dd>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-400">Subtotal</dt>
+                    <dd className="text-xs sm:text-sm font-bold text-white">{formatPrice(summary.subtotal)}</dd>
                   </div>
-                  <div className="border-t border-gray-800 pt-4 flex items-center justify-between">
-                    <dt className="text-base font-bold text-white">Order total</dt>
-                    <dd className="text-base font-bold text-orange-400">{formatPrice(summary.subtotal)}</dd>
+                  <div className="border-t border-gray-800/80 pt-3.5 flex items-center justify-between">
+                    <dt className="text-sm sm:text-base font-bold text-white">Order total</dt>
+                    <dd className="text-base sm:text-lg font-extrabold text-orange-400">{formatPrice(summary.subtotal)}</dd>
                   </div>
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-6 sm:mt-8">
                   <Link
                     href="/checkout-unified"
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border border-transparent rounded-lg shadow-lg py-3 px-4 text-base font-bold text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border border-transparent rounded-xl shadow-lg py-3.5 px-4 text-sm sm:text-base font-bold text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
                   >
                     Proceed to Checkout
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </div>
 
-                <div className="mt-6 flex justify-center text-sm text-center text-gray-400 font-medium">
+                <div className="mt-4 sm:mt-6 flex justify-center text-xs sm:text-sm text-center text-gray-400 font-medium">
                   <p>
                     or{' '}
                     <Link

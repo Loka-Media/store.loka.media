@@ -84,22 +84,22 @@ export function EnhancedProductActions({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-2 sm:gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 pt-2">
         {/* Add to Bag Button */}
         <Button
           onClick={handleAddToCart}
           disabled={!selectedVariant || !isVariantAvailable || isAdding}
           variant="primary"
-          className="flex-1 flex items-center justify-center gap-1.5 !px-2 !py-1.5 sm:!px-3 sm:!py-2 !text-xs sm:!text-sm"
+          className="flex-1 flex items-center justify-center gap-2 h-12 sm:h-14 !px-6 !py-3 text-sm sm:text-base font-bold shadow-lg hover:shadow-[0_8px_25px_rgba(255,109,31,0.4)] transition-all rounded-full"
         >
           {isAdding ? (
             <>
-              <div className="animate-spin rounded-full h-3 w-3 border-2 border-black border-t-transparent" />
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
               Adding...
             </>
           ) : (
             <>
-              <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
               Add to Bag
             </>
           )}
@@ -110,18 +110,18 @@ export function EnhancedProductActions({
           onClick={onWishlistToggle}
           disabled={isWishlistLoading}
           variant="secondary"
-          className={`flex-1 flex items-center justify-center gap-1.5 !px-2 !py-1.5 sm:!px-3 sm:!py-2 !text-xs sm:!text-sm transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 h-12 sm:h-14 !px-6 !py-3 text-sm sm:text-base font-bold transition-all rounded-full ${
             isWishlisted && !isWishlistLoading ? '!bg-orange-500/20 !border-orange-500 !text-orange-400' : ''
           }`}
         >
           {isWishlistLoading ? (
             <>
-              <div className="animate-spin rounded-full h-3 w-3 border-2 border-current border-t-transparent" />
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
               <span>Loading...</span>
             </>
           ) : (
             <>
-              <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+              <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isWishlisted ? 'fill-current' : ''}`} />
               {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
             </>
           )}

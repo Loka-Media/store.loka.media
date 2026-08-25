@@ -11,6 +11,13 @@ import GradientTitle from '@/components/ui/GradientTitle';
 import { useLocationLookup } from '@/hooks/useLocationLookup';
 import { PrintfulCountry, PrintfulState } from '@/lib/checkout-types';
 import { validateZipCode } from '@/lib/location-utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // Normalize state names to state codes
 const normalizeStateName = (state: string | null | undefined): string => {
@@ -300,10 +307,10 @@ export default function AddressesPage() {
     <div className="min-h-[90vh] bg-black text-white">
       <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 mt-6 sm:mt-8 max-w-4xl">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 sm:mb-8">
-          <div className="flex-1">
+        <div className="flex items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div>
             <GradientTitle text="My Addresses" size="sm" />
-            <p className="text-gray-400 mt-2 text-sm sm:text-base">
+            <p className="text-gray-400 mt-1 sm:mt-2 text-xs sm:text-sm font-medium">
               Manage your shipping and billing addresses ({addresses.length}/6 used)
             </p>
           </div>
@@ -316,15 +323,15 @@ export default function AddressesPage() {
               setShowAddressForm(true);
             }}
             disabled={addresses.length >= 6}
-            className={`inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 flex-shrink-0 whitespace-nowrap ${
+            className={`inline-flex items-center px-3.5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 shrink-0 shadow-md ${
               addresses.length >= 6
                 ? 'text-gray-500 bg-gray-800 cursor-not-allowed'
-                : 'text-white bg-orange-500 hover:bg-orange-600'
+                : 'text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
             }`}
           >
-            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-            <span className="hidden sm:inline">Add Address</span>
-            <span className="sm:hidden">Add</span>
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline sm:inline">Add Address</span>
+            <span className="xs:hidden sm:hidden">Add</span>
             {addresses.length >= 6 ? ' (Limit)' : ''}
           </button>
         </div>
@@ -334,10 +341,17 @@ export default function AddressesPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
           </div>
         ) : addresses.length === 0 ? (
-          <div className="text-center py-16">
-            <MapPin className="mx-auto h-16 w-16 text-gray-600" />
-            <h3 className="mt-4 text-xl font-semibold text-white">No addresses found</h3>
-            <p className="mt-2 text-gray-400">Add your first address to get started</p>
+          <div className="text-center py-12 sm:py-16 px-4 bg-gradient-to-br from-gray-900/60 via-gray-950 to-black border border-white/10 rounded-2xl shadow-xl">
+            <MapPin className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-gray-500" />
+            <h3 className="mt-4 text-lg sm:text-xl font-bold text-white">No addresses found</h3>
+            <p className="mt-2 text-xs sm:text-sm text-gray-400 font-medium">Add your first address to get started</p>
+            <button
+              onClick={() => setShowAddressForm(true)}
+              className="mt-6 inline-flex items-center px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-xl transition-all shadow-lg"
+            >
+              <Plus className="w-4 h-4 mr-1.5" />
+              Add First Address
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -404,35 +418,36 @@ export default function AddressesPage() {
         {isFormVisible && (
           <div
             data-lenis-prevent
-            className={`fixed inset-0 bg-black/40 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-3 sm:p-4 transition-all duration-200 ${
+            className={`fixed inset-0 bg-black/80 backdrop-blur-md overflow-y-auto h-full w-full z-[100] flex items-start sm:items-center justify-center p-3 sm:p-6 py-6 sm:py-8 transition-all duration-200 ${
               isFormAnimating ? 'opacity-100' : 'opacity-0'
             }`}
             onClick={resetForm}
           >
             <div
               data-lenis-prevent
-              className={`w-full max-w-2xl sm:max-w-4xl mx-auto p-4 sm:p-6 border border-gray-700/50 rounded-lg bg-gray-900 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto transform transition-all duration-200 ${
+              className={`relative w-full max-w-2xl sm:max-w-3xl mx-auto my-auto p-4 sm:p-6 border border-white/15 rounded-2xl bg-gray-950 max-h-[85vh] overflow-y-auto transform transition-all duration-200 shadow-2xl ${
                 isFormAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
               }`}
               onClick={(e) => e.stopPropagation()}
             >
+              {/* Top Right Close Button */}
+              <button
+                type="button"
+                onClick={resetForm}
+                className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 z-10 cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
               <form onSubmit={handleSubmit}>
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-                  <div className="flex-1">
-                    <h3 className="text-xl sm:text-2xl font-bold text-white">
-                      {editingAddress ? 'Edit Address' : 'Add New Address'}
-                    </h3>
-                    <p className="text-gray-400 text-xs sm:text-sm mt-1">
-                      {editingAddress ? 'Update your address information' : 'Add a new shipping or billing address'}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="p-2 text-gray-400 hover:text-gray-300 hover:bg-gray-800 rounded-full transition-all duration-200 flex-shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                <div className="pr-8 mb-4 sm:mb-6">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white">
+                    {editingAddress ? 'Edit Address' : 'Add New Address'}
+                  </h3>
+                  <p className="text-gray-400 text-xs sm:text-sm mt-1">
+                    {editingAddress ? 'Update your address information' : 'Add a new shipping or billing address'}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -441,7 +456,7 @@ export default function AddressesPage() {
                     placeholder="Full Name *"
                     value={addressForm.name}
                     onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                     required
                   />
 
@@ -455,7 +470,7 @@ export default function AddressesPage() {
                       const validatedValue = value.replace(/[^0-9+\s\-()]/g, '');
                       setAddressForm({ ...addressForm, phone: validatedValue });
                     }}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                     required
                   />
                   {addressForm.phone && (
@@ -479,7 +494,7 @@ export default function AddressesPage() {
                     placeholder="Address Line 1 *"
                     value={addressForm.address1}
                     onChange={(e) => setAddressForm({ ...addressForm, address1: e.target.value })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                     required
                   />
 
@@ -488,7 +503,7 @@ export default function AddressesPage() {
                     placeholder="Address Line 2 (Optional)"
                     value={addressForm.address2}
                     onChange={(e) => setAddressForm({ ...addressForm, address2: e.target.value })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                   />
 
                   <div className="relative">
@@ -497,7 +512,7 @@ export default function AddressesPage() {
                       placeholder="City *"
                       value={addressForm.city}
                       onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                      className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                      className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                       required
                     />
                     {locationLookup.isLoadingLocation && (
@@ -509,27 +524,29 @@ export default function AddressesPage() {
 
                   <div>
                     {locationLookup.availableStates.length > 0 ? (
-                      <select
+                      <Select
                         value={addressForm.state}
-                        onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
-                        className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                        onValueChange={(val) => setAddressForm(prev => ({ ...prev, state: val }))}
                         disabled={!addressForm.country}
-                        required
                       >
-                        <option value="">{addressForm.country ? 'Select State/Province *' : 'Select Country First'}</option>
-                        {locationLookup.availableStates.map(state => (
-                          <option key={state.code} value={state.code}>
-                            {state.name} ({state.code})
-                          </option>
-                        ))}
-                      </select>
+                        <SelectTrigger className="w-full p-3 h-12 bg-gray-800 border border-gray-700 rounded-xl text-white text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                          <SelectValue placeholder={addressForm.country ? 'Select State/Province *' : 'Select Country First'} />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-950/95 border border-white/20 rounded-2xl text-white shadow-2xl backdrop-blur-xl max-h-60 z-[120]">
+                          {locationLookup.availableStates.map(state => (
+                            <SelectItem key={state.code} value={state.code} className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3">
+                              {state.name} ({state.code})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     ) : (
                       <input
                         type="text"
                         placeholder="State / Province / Region *"
                         value={addressForm.state}
                         onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
-                        className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                        className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                         required
                       />
                     )}
@@ -567,7 +584,7 @@ export default function AddressesPage() {
                         addressForm.country === 'JP' ? 8 :
                         50
                       }
-                      className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                      className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                       required
                     />
                     {locationLookup.isLoadingLocation && (
@@ -589,47 +606,53 @@ export default function AddressesPage() {
                   </div>
 
                   <div>
-                    <select
+                    <Select
                       value={addressForm.country}
-                      onChange={(e) => {
-                        setAddressForm({ ...addressForm, country: e.target.value, state: '' });
+                      onValueChange={(val) => {
+                        setAddressForm(prev => ({ ...prev, country: val, state: '' }));
                         locationLookup.updateAvailableStates(
-                          e.target.value,
+                          val,
                           '',
                           (updates) => setAddressForm(prev => ({ ...prev, ...updates }))
                         );
                       }}
-                      className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                      required
                     >
-                      <option value="">Select Country *</option>
-                      {locationLookup.printfulCountries.length > 0 ? (
-                        locationLookup.printfulCountries.map(country => (
-                          <option key={country.code} value={country.code}>
-                            {country.name}
-                          </option>
-                        ))
-                      ) : (
-                        <>
-                          <option value="US">United States</option>
-                          <option value="CA">Canada</option>
-                        </>
-                      )}
-                    </select>
+                      <SelectTrigger className="w-full p-3 h-12 bg-gray-800 border border-gray-700 rounded-xl text-white text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                        <SelectValue placeholder="Select Country *" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-950/95 border border-white/20 rounded-2xl text-white shadow-2xl backdrop-blur-xl max-h-60 z-[120]">
+                        {locationLookup.printfulCountries.length > 0 ? (
+                          locationLookup.printfulCountries.map(country => (
+                            <SelectItem key={country.code} value={country.code} className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3">
+                              {country.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <>
+                            <SelectItem value="US" className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3">United States</SelectItem>
+                            <SelectItem value="CA" className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3">Canada</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
                     {!addressForm.country && (
                       <p className="text-xs text-orange-400 mt-1">✱ Required to validate address</p>
                     )}
                   </div>
 
-                  <select
+                  <Select
                     value={addressForm.address_type}
-                    onChange={(e) => setAddressForm({ ...addressForm, address_type: e.target.value as 'shipping' | 'billing' | 'both' })}
-                    className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                    onValueChange={(val) => setAddressForm(prev => ({ ...prev, address_type: val as 'shipping' | 'billing' | 'both' }))}
                   >
-                    <option value="shipping">Shipping</option>
-                    <option value="billing">Billing</option>
-                    <option value="both">Both Shipping & Billing</option>
-                  </select>
+                    <SelectTrigger className="w-full p-3 h-12 bg-gray-800 border border-gray-700 rounded-xl text-white text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                      <SelectValue placeholder="Select Address Type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-950/95 border border-white/20 rounded-2xl text-white shadow-2xl backdrop-blur-xl max-h-60 z-[120]">
+                      <SelectItem value="shipping" className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3">Shipping</SelectItem>
+                      <SelectItem value="billing" className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3">Billing</SelectItem>
+                      <SelectItem value="both" className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3">Both Shipping & Billing</SelectItem>
+                    </SelectContent>
+                  </Select>
                   
                   <div className="md:col-span-2">
                     <label className="flex items-center p-3 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-all duration-200 cursor-pointer group">

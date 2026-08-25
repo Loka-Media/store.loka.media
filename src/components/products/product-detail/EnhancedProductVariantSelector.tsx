@@ -43,16 +43,27 @@ export function EnhancedProductVariantSelector({
               return (
                 <button
                   key={colorName}
+                  type="button"
                   onClick={() => {
                     const currentSize = selectedVariant ? getVariantColorAndSize(selectedVariant).size : availableSizes[0];
-                    const newVariant = getCurrentVariant(colorName, currentSize);
-                    if (newVariant) onVariantChange(newVariant);
+                    let newVariant = getCurrentVariant(colorName, currentSize);
+                    if (!newVariant) {
+                      // Fallback 1: First available in-stock variant for this color
+                      newVariant = variants.find(v => getVariantColorAndSize(v).color === colorName && isVariantAvailable(v));
+                    }
+                    if (!newVariant) {
+                      // Fallback 2: Any variant for this color
+                      newVariant = variants.find(v => getVariantColorAndSize(v).color === colorName);
+                    }
+                    if (newVariant) {
+                      onVariantChange(newVariant);
+                    }
                   }}
                   title={colorName}
-                  className={`py-2 px-6 rounded-full font-medium text-sm transition-all ${
+                  className={`py-2 px-6 rounded-full font-medium text-sm transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-white text-black border border-white'
-                      : 'bg-transparent text-white border border-white/30 hover:border-white/50'
+                      ? 'bg-white text-black border border-white font-bold shadow-md'
+                      : 'bg-transparent text-white border border-white/30 hover:border-white/60'
                   }`}
                 >
                   {colorName}
@@ -69,24 +80,28 @@ export function EnhancedProductVariantSelector({
           <div className="text-sm font-medium text-white">Select Sizes</div>
           <div className="flex flex-wrap gap-3">
             {availableSizes.map((size) => {
-              const variant = getCurrentVariant(selectedColor || uniqueColors[0]?.[0], size);
+              let variant = getCurrentVariant(selectedColor || uniqueColors[0]?.[0], size);
+              if (!variant) {
+                variant = variants.find(v => getVariantColorAndSize(v).size === size);
+              }
               const isAvailable = variant ? isVariantAvailable(variant) : false;
               const isSelected = selectedSize === size;
 
               return (
                 <button
                   key={size}
+                  type="button"
                   onClick={() => {
-                    if (variant && isAvailable) {
+                    if (variant) {
                       onVariantChange(variant);
                     }
                   }}
-                  disabled={!isAvailable}
-                  className={`py-2 px-6 rounded-full font-medium text-sm transition-all ${
+                  disabled={!isAvailable && !variant}
+                  className={`py-2 px-6 rounded-full font-medium text-sm transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-white text-black border border-white'
+                      ? 'bg-white text-black border border-white font-bold shadow-md'
                       : isAvailable
-                      ? 'bg-transparent text-white border border-white/30 hover:border-white/50'
+                      ? 'bg-transparent text-white border border-white/30 hover:border-white/60'
                       : 'text-gray-500 border border-white/10 cursor-not-allowed opacity-40'
                   }`}
                 >
