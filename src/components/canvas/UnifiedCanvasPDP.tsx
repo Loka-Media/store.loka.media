@@ -938,8 +938,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             console.warn("Background removal produced a data URL, but upload response did not include a remote file URL.", uploadResponse);
           }
         } catch (uploadError) {
-          console.error("Background removed but upload failed:", uploadError);
-          toast.error("Background removed locally, but upload failed. Please try again.");
+          console.warn("Background removed locally, using local high-res data URL:", uploadError);
         }
       }
 
