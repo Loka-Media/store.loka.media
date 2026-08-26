@@ -225,12 +225,52 @@ function ProductsContent() {
 
   const cleanCat = (str: string) => str.toLowerCase().trim().replace(/[-_&]/g, ' ');
 
-  // Compute accurate category counts from actual products list so count in (N) matches grid EXACTLY
+  // Helper for resilient creator matching
+  const isCreatorMatch = (product: any, filterValue: string) => {
+    if (!filterValue || filterValue === "all") return true;
+    const creatorObj = product.creator as any;
+    const creatorName = String(product.creator_name || creatorObj?.name || "").toLowerCase().trim();
+    const creatorUsername = String(product.creator_username || creatorObj?.username || "").toLowerCase().trim();
+    const creatorId = String(product.creator_id || (product as any).user_id || creatorObj?.id || "").toLowerCase().trim();
+    const target = String(filterValue).toLowerCase().trim();
+
+    if (creatorUsername === target || creatorName === target || creatorId === target) return true;
+
+    // Normalize by stripping non-alphanumeric (removes trailing underscores, dashes, spaces)
+    const cleanTarget = target.replace(/[^a-z0-9]/g, '');
+    const cleanUsername = creatorUsername.replace(/[^a-z0-9]/g, '');
+    const cleanName = creatorName.replace(/[^a-z0-9]/g, '');
+
+    if (cleanTarget && (cleanUsername === cleanTarget || cleanName === cleanTarget)) return true;
+
+    return false;
+  };
+
+  // Helper for category matching
+  const isCategoryMatch = (product: any, filterValue: string) => {
+    if (!filterValue || filterValue === "all") return true;
+    return cleanCat(product.category || "") === cleanCat(filterValue);
+  };
+
+  // Compute accurate category counts from actual products list
   const displayCategories = useMemo(() => {
     if (!products || products.length === 0) return categories;
 
+    // If a creator is actively selected, compute categories for that creator so user sees relevant categories & counts
+    let sourceProducts = products.filter((p) => {
+      if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
+      return true;
+    });
+
+    if (filters.creator) {
+      const creatorOnlyProducts = sourceProducts.filter(p => isCreatorMatch(p, filters.creator));
+      if (creatorOnlyProducts.length > 0) {
+        sourceProducts = creatorOnlyProducts;
+      }
+    }
+
     const counts: Record<string, { category: string; count: number }> = {};
-    products.forEach((p) => {
+    sourceProducts.forEach((p) => {
       const cat = p.category?.trim();
       if (!cat) return;
       const key = cleanCat(cat);
@@ -246,18 +286,25 @@ function ProductsContent() {
     }));
 
     return list.sort((a, b) => b.product_count - a.product_count);
-  }, [products, categories]);
+  }, [products, categories, filters.creator]);
 
-  // Compute accurate creator list dynamically from active products list
+  // Compute accurate creator list dynamically from active products list (scoped to active category if selected)
   const displayCreators = useMemo(() => {
     if (!products || products.length === 0) return creators;
 
+    // Filter by active category if selected so counts match the chosen category!
+    let sourceProducts = products.filter((p) => {
+      if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
+      return true;
+    });
+
+    if (filters.category) {
+      sourceProducts = sourceProducts.filter(p => isCategoryMatch(p, filters.category));
+    }
+
     const creatorMap: Record<string, { id: number; name: string; username: string; product_count: number }> = {};
 
-    products.forEach((p) => {
-      // Exclude deleted or inactive products
-      if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return;
-
+    sourceProducts.forEach((p) => {
       const cObj = p.creator as any;
       const username = (p.creator_username || cObj?.username || '').trim();
       const name = (p.creator_name || cObj?.name || 'Unknown').trim();
@@ -279,7 +326,31 @@ function ProductsContent() {
 
     const list = Object.values(creatorMap).filter(c => c.product_count > 0);
     return list.sort((a, b) => b.product_count - a.product_count);
-  }, [products, creators]);
+  }, [products, creators, filters.category]);
+
+  // Auto-resolve conflicting URL parameters (e.g. Category=Hat & Creator=Sneh where creator has 0 hats)
+  useEffect(() => {
+    if (products.length > 0 && filters.creator && filters.category) {
+      const matchBoth = products.some((p) => {
+        if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
+        return isCreatorMatch(p, filters.creator) && isCategoryMatch(p, filters.category);
+      });
+      if (!matchBoth) {
+        const matchCreator = products.some((p) => {
+          if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
+          return isCreatorMatch(p, filters.creator);
+        });
+        if (matchCreator) {
+          // Gracefully reset category to "" so that the creator's products are displayed immediately!
+          setFilters(prev => {
+            const updated = { ...prev, category: "" };
+            updateURL(updated);
+            return updated;
+          });
+        }
+      }
+    }
+  }, [products, filters.creator, filters.category]);
 
   // 4. Instant client-side character-by-character priority search filtering
   const query = searchInput.toLowerCase().trim();
@@ -290,26 +361,11 @@ function ProductsContent() {
     if (product.status === 'deleted' || product.is_active === false || (product as any).deleted === true) return false;
 
     if (filters.category) {
-      const targetCat = cleanCat(filters.category);
-      const prodCat = cleanCat(product.category || "");
-      if (prodCat !== targetCat) return false;
+      if (!isCategoryMatch(product, filters.category)) return false;
     }
     if (filters.source && filters.source !== "all" && product.source !== filters.source) return false;
     if (filters.creator) {
-      const creatorFilter = String(filters.creator).toLowerCase().trim();
-      const creatorObj = product.creator as any;
-      const creatorName = String(product.creator_name || creatorObj?.name || "").toLowerCase().trim();
-      const creatorUsername = String(product.creator_username || creatorObj?.username || "").toLowerCase().trim();
-      const creatorId = String(product.creator_id || (product as any).user_id || creatorObj?.id || "").toLowerCase().trim();
-
-      const isMatch =
-        creatorUsername === creatorFilter ||
-        creatorName === creatorFilter ||
-        creatorId === creatorFilter ||
-        creatorUsername.replace(/\s+/g, '') === creatorFilter.replace(/\s+/g, '') ||
-        creatorName.replace(/\s+/g, '') === creatorFilter.replace(/\s+/g, '');
-
-      if (!isMatch) return false;
+      if (!isCreatorMatch(product, filters.creator)) return false;
     }
 
     if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
@@ -326,24 +382,6 @@ function ProductsContent() {
 
     return true;
   });
-
-  // Step A2: Filter by Tag tab (Trending, New, Popular) if explicit tagged products exist; fallback to showing all products sorted if none have the tag
-  if (activeView === "trending" || activeView === "new" || activeView === "popular") {
-    const targetTag = activeView.toLowerCase();
-    const taggedProducts = pool.filter((product) => {
-      const rawTags = (product as any).tags;
-      const tagsList: string[] = Array.isArray(rawTags)
-        ? rawTags
-        : typeof rawTags === "string"
-        ? (rawTags as string).split(",")
-        : [];
-      return tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
-    });
-
-    if (taggedProducts.length > 0) {
-      pool = taggedProducts;
-    }
-  }
 
   // Step B: Multi-level Priority Search Query Matching
   if (query) {
@@ -416,7 +454,41 @@ function ProductsContent() {
   };
 
   const handleFilterChange = (key: string, value: string | number | undefined) => {
-    const newFilters = { ...filters, [key]: value };
+    let newCategory = filters.category;
+    let newCreator = filters.creator;
+
+    if (key === "creator") {
+      newCreator = String(value || "");
+      // If user picks a creator and that creator has 0 products in current category, reset category to ""
+      if (newCreator && newCategory) {
+        const creatorHasCategory = products.some((p) => {
+          if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
+          return isCreatorMatch(p, newCreator) && isCategoryMatch(p, newCategory);
+        });
+        if (!creatorHasCategory) {
+          newCategory = "";
+        }
+      }
+    } else if (key === "category") {
+      newCategory = String(value || "");
+      // If user picks a category and active creator has 0 products in that category, reset creator to ""
+      if (newCategory && newCreator) {
+        const categoryHasCreator = products.some((p) => {
+          if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
+          return isCreatorMatch(p, newCreator) && isCategoryMatch(p, newCategory);
+        });
+        if (!categoryHasCreator) {
+          newCreator = "";
+        }
+      }
+    }
+
+    const newFilters = {
+      ...filters,
+      [key]: value,
+      category: newCategory,
+      creator: newCreator,
+    };
     setFilters(newFilters);
     updateURL(newFilters);
   };
