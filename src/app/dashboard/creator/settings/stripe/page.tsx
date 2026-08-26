@@ -425,7 +425,33 @@ function PayoutSettingsPageContent() {
               Connect your bank account to start receiving payouts for your creator earnings.
             </p>
             <button
-              onClick={() => setIsEditing(true)}
+              onClick={() => {
+                if (!hasDetails) {
+                  setBankDetails({
+                    account_holder_name: '',
+                    account_holder_email: '',
+                    account_number: '',
+                    routing_number: '',
+                    swift_code: '',
+                    iban: '',
+                    account_type: 'checking',
+                    bank_name: '',
+                    bank_country: 'US',
+                    account_holder_dob: '',
+                    account_holder_address: '',
+                    account_holder_city: '',
+                    account_holder_state: '',
+                    account_holder_zip: '',
+                    account_holder_country: '',
+                    tax_id_type: 'ssn',
+                    tax_id: '',
+                    business_name: '',
+                    is_business: false,
+                    currency: 'USD',
+                  });
+                }
+                setIsEditing(true);
+              }}
               className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-orange-500/20"
             >
               Link Bank Account
@@ -559,8 +585,9 @@ function PayoutSettingsPageContent() {
                   name="business_name"
                   value={bankDetails.business_name || ''}
                   onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
-                  placeholder="Your business name"
+                  autoComplete="off"
+                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                  placeholder=""
                 />
               </div>
             )}
@@ -573,8 +600,9 @@ function PayoutSettingsPageContent() {
                   name="account_holder_name"
                   value={bankDetails.account_holder_name}
                   onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
-                  placeholder="John Doe"
+                  autoComplete="off"
+                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -584,8 +612,9 @@ function PayoutSettingsPageContent() {
                   name="account_holder_email"
                   value={bankDetails.account_holder_email}
                   onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
-                  placeholder="john@example.com"
+                  autoComplete="off"
+                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                  placeholder=""
                 />
               </div>
             </div>
@@ -608,8 +637,9 @@ function PayoutSettingsPageContent() {
                   name="account_holder_country"
                   value={bankDetails.account_holder_country}
                   onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
-                  placeholder="United States"
+                  autoComplete="off"
+                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                  placeholder=""
                 />
               </div>
             </div>
@@ -629,8 +659,9 @@ function PayoutSettingsPageContent() {
                 name="account_holder_address"
                 value={bankDetails.account_holder_address}
                 onChange={handleChange}
-                className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
-                placeholder="123 Main Street"
+                autoComplete="off"
+                className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                placeholder=""
               />
             </div>
 
@@ -642,8 +673,9 @@ function PayoutSettingsPageContent() {
                   name="account_holder_city"
                   value={bankDetails.account_holder_city}
                   onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
-                  placeholder="New York"
+                  autoComplete="off"
+                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -653,8 +685,9 @@ function PayoutSettingsPageContent() {
                   name="account_holder_state"
                   value={bankDetails.account_holder_state}
                   onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
-                  placeholder="NY"
+                  autoComplete="off"
+                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                  placeholder=""
                 />
               </div>
               <div>
@@ -664,8 +697,9 @@ function PayoutSettingsPageContent() {
                   name="account_holder_zip"
                   value={bankDetails.account_holder_zip}
                   onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
-                  placeholder="10001"
+                  autoComplete="off"
+                  className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                  placeholder=""
                 />
               </div>
             </div>
@@ -733,8 +767,9 @@ function PayoutSettingsPageContent() {
                 name="bank_name"
                 value={bankDetails.bank_name}
                 onChange={handleChange}
-                className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
-                placeholder="Chase Bank, Bank of America, etc."
+                autoComplete="off"
+                className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all"
+                placeholder=""
               />
             </div>
 
@@ -764,9 +799,11 @@ function PayoutSettingsPageContent() {
                         onChange={handleChange}
                         maxLength={currentBankConfig.maxLength}
                         inputMode={currentBankConfig.inputMode}
-                        autoComplete="off"
-                        className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
-                        placeholder={currentBankConfig.placeholder}
+                        autoComplete="new-password"
+                        data-lpignore="true"
+                        data-form-type="other"
+                        className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
+                        placeholder=""
                       />
                       {/* Country & Code Type Indicator Badge */}
                       <div className="mt-2 text-xs font-semibold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-md inline-flex items-center gap-1.5">
@@ -783,9 +820,11 @@ function PayoutSettingsPageContent() {
                         name="account_number"
                         value={bankDetails.account_number}
                         onChange={handleChange}
-                        autoComplete="off"
-                        className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
-                        placeholder="•••••••••••••••••"
+                        autoComplete="new-password"
+                        data-lpignore="true"
+                        data-form-type="other"
+                        className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -801,8 +840,8 @@ function PayoutSettingsPageContent() {
                           value={bankDetails.iban || ''}
                           onChange={handleChange}
                           autoComplete="off"
-                          className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
-                          placeholder="e.g. DE89370400440532013000"
+                          className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
+                          placeholder=""
                         />
                       </div>
                       <div>
@@ -813,8 +852,8 @@ function PayoutSettingsPageContent() {
                           value={bankDetails.swift_code || ''}
                           onChange={handleChange}
                           autoComplete="off"
-                          className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
-                          placeholder="e.g. DEUTDEDBBER"
+                          className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono text-sm"
+                          placeholder=""
                         />
                       </div>
                     </div>
@@ -880,8 +919,11 @@ function PayoutSettingsPageContent() {
                 name="tax_id"
                 value={bankDetails.tax_id}
                 onChange={handleChange}
-                className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono"
-                placeholder={bankDetails.tax_id_type === 'ssn' ? '•••-••-••••' : 'XX-XXXXXXX'}
+                autoComplete="new-password"
+                data-lpignore="true"
+                data-form-type="other"
+                className="w-full bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all font-mono"
+                placeholder=""
               />
             </div>
           </div>
