@@ -41,6 +41,19 @@ export const unifiedCheckoutAPI = {
         customError.isInventoryError = true;
         throw customError;
       }
+      if (error.response?.data) {
+        const resData = error.response.data;
+        let msg = resData.message || resData.error;
+        if (resData.details && Array.isArray(resData.details)) {
+          const detailMsgs = resData.details.map((d: any) => d.msg || `${d.path}: ${d.message}`).filter(Boolean).join('. ');
+          if (detailMsgs) msg = detailMsgs;
+        }
+        if (msg) {
+          const customError: any = new Error(msg);
+          customError.response = error.response;
+          throw customError;
+        }
+      }
       throw error;
     }
   },
@@ -78,6 +91,19 @@ export const unifiedCheckoutAPI = {
         customError.unavailable_items = error.response.data.unavailable_items;
         customError.isInventoryError = true;
         throw customError;
+      }
+      if (error.response?.data) {
+        const resData = error.response.data;
+        let msg = resData.message || resData.error;
+        if (resData.details && Array.isArray(resData.details)) {
+          const detailMsgs = resData.details.map((d: any) => d.msg || `${d.path}: ${d.message}`).filter(Boolean).join('. ');
+          if (detailMsgs) msg = detailMsgs;
+        }
+        if (msg) {
+          const customError: any = new Error(msg);
+          customError.response = error.response;
+          throw customError;
+        }
       }
       throw error;
     }

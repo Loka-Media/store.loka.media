@@ -50,10 +50,10 @@ export const validateShippingAddress = (
   }
 
   // Recommended fields for accurate shipping rates
-  if (!customerInfo.address1) {
+  if (!customerInfo.address1 || customerInfo.address1.trim().length < 5) {
     errors.push({
       field: 'address1',
-      message: 'Street address is required for accurate shipping rates'
+      message: 'Street address (Line 1) must be at least 5 characters long'
     });
   }
 

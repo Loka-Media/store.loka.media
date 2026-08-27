@@ -198,6 +198,12 @@ export default function UnifiedCheckoutPage() {
         return;
       }
 
+      if (customerInfo.address1.trim().length < 5) {
+        toast.error("Address Line 1 is invalid. Please enter a complete street address (at least 5 characters).");
+        setLoading(false);
+        return;
+      }
+
       // Validate phone number
       const phoneDigits = customerInfo.phone.replace(/\D/g, '');
       if (phoneDigits.length < 7) {

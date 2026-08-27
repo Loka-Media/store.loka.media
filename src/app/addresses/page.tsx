@@ -181,6 +181,11 @@ export default function AddressesPage() {
       return;
     }
 
+    if (addressForm.address1.trim().length < 5) {
+      toast.error("Address Line 1 must be at least 5 characters long (e.g. 123 Main Street)");
+      return;
+    }
+
     // Validate state for countries that require it
     const countriesRequiringState = ['US', 'CA', 'AU', 'JP'];
     if (countriesRequiringState.includes(addressForm.country) && !addressForm.state) {

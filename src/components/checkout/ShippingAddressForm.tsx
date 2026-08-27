@@ -52,6 +52,10 @@ export const ShippingAddressForm = ({
       toast.error("Please fill in all required address fields (*)");
       return;
     }
+    if (customerInfo.address1.trim().length < 5) {
+      toast.error("Address Line 1 must be at least 5 characters long (e.g. 123 Main Street)");
+      return;
+    }
     if (customerInfo.country && !customerInfo.state?.trim()) {
       toast.error(`State/Province is required for ${customerInfo.country}`);
       return;
