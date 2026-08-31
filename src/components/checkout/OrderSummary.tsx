@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Package, CheckCircle, AlertCircle, RefreshCw, Truck, Info } from 'lucide-react';
-import { getShippingCountries } from '@/lib/location-utils';
+import { Package, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface CartItem {
@@ -66,7 +64,7 @@ export const OrderSummary = ({
 }: OrderSummaryProps) => {
   const { formatPrice } = useCurrency();
   const subtotalAmount = parseFloat(summary.subtotal.replace("$", ""));
-  const platformFee = subtotalAmount * 0.049;
+  const platformFee = subtotalAmount * 0.05;
   // Use actual tax if available, otherwise estimate at 8%
   const tax = taxAmount > 0 ? taxAmount : subtotalAmount * 0.08;
 
@@ -100,19 +98,12 @@ export const OrderSummary = ({
 
       <div className="mt-6 space-y-3">
         <div className="flex justify-between text-sm">
-          <p className="text-gray-400 font-medium">Subtotal</p>
+          <p className="text-gray-400 font-medium">Product Price</p>
           <p className="text-white font-bold">{formatPrice(subtotalAmount)}</p>
-        </div>
-        <div className="flex justify-between text-sm">
-          <p className="text-gray-400 font-medium">
-            Platform Fee
-            <span className="text-xs block text-gray-500">Convenience fee (4.9%)</span>
-          </p>
-          <p className="text-white font-bold">{formatPrice(platformFee)}</p>
         </div>
         {isFetchingShippingRates ? (
           <div className="text-sm">
-            <p className="text-gray-400 font-medium mb-2">Shipping Method</p>
+            <p className="text-gray-400 font-medium mb-2">Shipping</p>
             <div className="flex justify-between items-center p-3 border border-orange-500/30 bg-orange-500/5 rounded-lg">
               <p className="text-white font-medium">Calculating Shipping...</p>
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent" />
@@ -120,7 +111,7 @@ export const OrderSummary = ({
           </div>
         ) : shippingRates && shippingRates.length > 0 ? (
           <div className="text-sm">
-            <p className="text-gray-400 font-medium mb-2">Shipping Method</p>
+            <p className="text-gray-400 font-medium mb-2">Shipping</p>
             <div className="space-y-2">
               {shippingRates.map((rate) => (
                 <div
@@ -147,14 +138,15 @@ export const OrderSummary = ({
           </div>
         )}
         <div className="flex justify-between text-sm">
-          <p className="text-gray-400 font-medium">
-            Estimated Tax
-            <span className="text-xs block text-gray-500">Final tax calculated at checkout</span>
-          </p>
+          <p className="text-gray-400 font-medium">Taxes</p>
           <p className="text-white font-bold">{formatPrice(tax)}</p>
         </div>
+        <div className="flex justify-between text-sm">
+          <p className="text-gray-400 font-medium">Platform Fee (5 %)</p>
+          <p className="text-white font-bold">{formatPrice(platformFee)}</p>
+        </div>
         <div className="border-t border-gray-800 pt-3 mt-3 flex justify-between font-bold">
-          <p className="text-white">Estimated Total</p>
+          <p className="text-white">Order Total Paid by Customer</p>
           <p className="text-orange-400 text-lg">{formatPrice(calculateTotal())}</p>
         </div>
       </div>
@@ -213,129 +205,6 @@ export const OrderSummary = ({
                 </>
               )}
             </button>
-          )}
-        </div>
-      )}
-
-      {items.some(item => item.source === 'printify' || (item as any).printify_blueprint_id) && (
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mt-6 space-y-3">
-          <div>
-            <div className="flex items-center space-x-2 text-white">
-              <Truck className="w-4 h-4 text-orange-400" />
-              <span className="text-sm font-bold">Shipping Rate Structure ({countryCode || 'US'})</span>
-            </div>
-            <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
-              Base rate applies to the 1st unit; additional units of the same item get a discounted add-on rate.
-            </p>
-          </div>
-
-          {isFetchingShippingRates ? (
-            <div className="flex items-center space-x-2 text-gray-400 text-xs py-1">
-              <div className="animate-spin rounded-full h-3 w-3 border border-orange-500 border-t-transparent" />
-              <span>Calculating itemized rates...</span>
-            </div>
-          ) : (
-            <div className="space-y-2 text-xs text-gray-300">
-              {(() => {
-                // 1. Build initial rate details for each item
-                const rawItems = items.map((item, index) => {
-                  const variantId = Number((item as any).printify_variant_id || item.printful_variant_id || item.variant_id);
-                  const est = selectedShippingRate?.itemized?.[index]
-                    || selectedShippingRate?.itemized?.find((r: any) => 
-                        Number(r.variant_id) === variantId || 
-                        Number(r.variant_id) === Number(item.variant_id) ||
-                        Number(r.blueprint_id) === Number((item as any).blueprint_id)
-                       );
-                  
-                  const rawFirst = est ? est.first_item / 100 : 5.99;
-                  const rawAdd = est ? est.additional_items / 100 : 2.00;
-                  const providerId = est?.print_provider_id || (item as any).print_provider_id || (item as any).printify_print_provider_id || 61;
-
-                  return {
-                    item,
-                    index,
-                    rawFirst,
-                    rawAdd,
-                    providerId,
-                    qty: item.quantity || 1
-                  };
-                });
-
-                // 2. Group by Print Provider to calculate combined package rates
-                const providerGroups: Record<number, number[]> = {};
-                rawItems.forEach((entry, i) => {
-                  if (!providerGroups[entry.providerId]) providerGroups[entry.providerId] = [];
-                  providerGroups[entry.providerId].push(i);
-                });
-
-                // 3. Determine primary item per provider group (item with highest 1st unit rate)
-                return rawItems.map((entry) => {
-                  const groupIndices = providerGroups[entry.providerId] || [entry.index];
-                  
-                  let maxFirstIdx = groupIndices[0];
-                  for (const gIdx of groupIndices) {
-                    if (rawItems[gIdx].rawFirst > rawItems[maxFirstIdx].rawFirst) {
-                      maxFirstIdx = gIdx;
-                    }
-                  }
-
-                  const isPrimaryInGroup = entry.index === maxFirstIdx;
-                  const hasCombinedDiscount = groupIndices.length > 1 && !isPrimaryInGroup;
-
-                  // Actual shipping cost charged for this item in combined package
-                  let actualItemShippingUSD = 0;
-                  if (isPrimaryInGroup) {
-                    actualItemShippingUSD = entry.rawFirst + (entry.qty - 1) * entry.rawAdd;
-                  } else {
-                    // Secondary item in same package: ALL units get discounted add-on rate
-                    actualItemShippingUSD = entry.qty * entry.rawAdd;
-                  }
-
-                  const firstCostFormatted = formatPrice(entry.rawFirst);
-                  const addCostFormatted = formatPrice(entry.rawAdd);
-                  const totalFormatted = formatPrice(actualItemShippingUSD);
-
-                  return (
-                    <div key={entry.item.id || entry.index} className="bg-black/40 border border-white/10 p-2.5 rounded-lg space-y-1.5">
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="font-bold text-white truncate max-w-[200px]">{entry.item.product_name}</span>
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 border border-orange-500/30">
-                          Qty: {entry.qty}
-                        </span>
-                      </div>
-
-                      <div className="pt-1 border-t border-white/5 space-y-0.5">
-                        <div className="flex justify-between text-[11px] font-medium text-gray-200">
-                          <span>Est. Shipping Cost:</span>
-                          <span className="font-bold text-orange-400">{totalFormatted}</span>
-                        </div>
-
-                        {hasCombinedDiscount ? (
-                          <p className="text-[10px] text-green-400">
-                            ✓ Combined Package Rate (shipped with primary item): {entry.qty} {entry.qty === 1 ? 'unit' : 'units'} @ +{addCostFormatted}/each
-                          </p>
-                        ) : entry.qty > 1 ? (
-                          <p className="text-[10px] text-gray-400">
-                            Breakdown: 1st unit = {firstCostFormatted} • {entry.qty - 1} extra = +{formatPrice((entry.qty - 1) * entry.rawAdd)} ({addCostFormatted}/each)
-                          </p>
-                        ) : (
-                          <p className="text-[10px] text-gray-400">
-                            Primary 1st unit rate: {firstCostFormatted}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                });
-              })()}
-
-              <div className="flex items-start space-x-1.5 text-[10px] text-gray-400 mt-2 bg-orange-500/5 border border-orange-500/10 p-2 rounded-lg">
-                <Info className="w-3.5 h-3.5 text-orange-400 flex-shrink-0 mt-0.5" />
-                <span>
-                  <strong>Why a discount on extra units?</strong> Print providers charge a lower shipping fee for additional quantities of the same item shipped in the same package.
-                </span>
-              </div>
-            </div>
           )}
         </div>
       )}

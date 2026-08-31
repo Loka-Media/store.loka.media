@@ -151,7 +151,7 @@ export const useCheckoutState = () => {
   const calculateTotal = (subtotal: string) => {
     const subtotalAmount = parseFloat(subtotal.replace("$", ""));
 
-    const platformFee = subtotalAmount * 0.049;
+    const platformFee = subtotalAmount * 0.05;
 
     const shipping =
       selectedShippingRate && selectedShippingRate.rate
