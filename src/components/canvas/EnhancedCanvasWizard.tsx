@@ -356,7 +356,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
         toast.success(
           `✅ Fixed ${fixedCount} aspect ratio issue${
             fixedCount > 1 ? "s" : ""
-          }! All designs are now Printful compatible.`,
+          }! All designs are now print compliant.`,
           {
             duration: 4000,
           }

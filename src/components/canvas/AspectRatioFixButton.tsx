@@ -77,7 +77,7 @@ const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
       // Show summary toast
       if (fixedCount > 0) {
         toast.success(
-          `Fixed ${fixedCount} design${fixedCount !== 1 ? 's' : ''} for Printful compatibility!`
+          `Fixed ${fixedCount} design${fixedCount !== 1 ? 's' : ''} for print compatibility!`
         );
       } else if (skippedCount > 0) {
         toast.success('All designs already have correct aspect ratios! 🎉');
@@ -103,7 +103,7 @@ const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
         <div className="bg-gray-900 text-white text-xs rounded-lg px-2 sm:px-3 py-1 sm:py-2 whitespace-nowrap shadow-lg border border-gray-700">
           <div className="font-semibold text-xs">Auto-fix</div>
           <div className="text-gray-300 mt-0.5 hidden sm:block text-xs">
-            Automatically adjusts design dimensions to match Printful&apos;s
+            Automatically adjusts design dimensions to match print area&apos;s
             compliance requirements
           </div>
           <div className="text-blue-300 text-xs mt-0.5 font-mono">

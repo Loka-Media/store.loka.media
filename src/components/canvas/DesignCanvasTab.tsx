@@ -128,7 +128,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                   2
                 )}%. Must fix to: ${correctedDimensions.width.toFixed(
                   0
-                )}x${correctedDimensions.height.toFixed(0)}px for Printful compliance`,
+                )}x${correctedDimensions.height.toFixed(0)}px for print compliance`,
               };
             } else if (isValid) {
               return {
@@ -136,7 +136,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                 placement: design.placement,
                 message: `✅ GOOD: ${design.placement} - Aspect ratio variance ${percentDifference.toFixed(
                   2
-                )}% (within tolerance). Printful compatible!`,
+                )}% (within tolerance). Print compliant!`,
               };
             }
           }
@@ -404,14 +404,14 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                                   2
                                 )}%. Must fix to: ${result.correctedDimensions?.width.toFixed(
                                   0
-                                )}x${result.correctedDimensions?.height.toFixed(0)}px for Printful compliance`,
+                                )}x${result.correctedDimensions?.height.toFixed(0)}px for print compliance`,
                               };
                             } else {
                               return {
                                 designId: designsForPlacement[index].id,
                                 message: `✅ GOOD: Aspect ratio variance ${result.percentDifference.toFixed(
                                   2
-                                )}% (within tolerance). Printful compatible!`,
+                                )}% (within tolerance). Print compliant!`,
                               };
                             }
                           }
@@ -470,27 +470,28 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     const placement = placementMatch ? placementMatch[1].trim() : 'Design';
 
                     return (
-                      <div key={issue.designId}>
+                      <div key={issue.designId} className="relative">
                         <button
                           onClick={() => setExpandedIssueId(isExpanded ? null : issue.designId)}
-                          className="w-full group relative flex items-center gap-2 px-2 py-1 hover:bg-orange-500/20 rounded transition-colors text-left"
+                          className="w-full group flex items-center gap-2 px-2.5 py-1.5 hover:bg-orange-500/20 rounded-lg transition-colors text-left border border-transparent hover:border-orange-500/30"
                         >
-                          <div className="text-orange-400">•</div>
-                          <div className="text-xs text-orange-300 truncate flex-1">{placement}</div>
-                          <div className="text-xs font-mono text-orange-500 bg-orange-500/20 px-2 py-0.5 rounded whitespace-nowrap">
+                          <div className="text-orange-400 font-bold">•</div>
+                          <div className="text-xs font-medium text-orange-300 truncate flex-1">{placement}</div>
+                          <div className="text-xs font-mono text-orange-400 bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 rounded whitespace-nowrap">
                             {percent}%
                           </div>
+
                           {/* Desktop Tooltip */}
-                          <div className="absolute left-0 right-0 top-full mt-1 hidden sm:group-hover:block pointer-events-none z-50">
-                            <div className="bg-gray-900 text-orange-200 text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg border border-orange-500/30 text-center">
+                          <div className="absolute left-0 top-full mt-1 hidden sm:group-hover:block pointer-events-none z-50 w-full max-w-sm">
+                            <div className="bg-gray-950/95 backdrop-blur-md text-orange-200 text-xs rounded-lg p-2.5 shadow-2xl border border-orange-500/40 whitespace-normal break-words leading-relaxed">
                               {issue.message}
                             </div>
                           </div>
                         </button>
 
-                        {/* Mobile Expandable Tooltip */}
+                        {/* Expandable Tooltip on Click */}
                         {isExpanded && (
-                          <div className="sm:hidden mt-1 bg-gray-900 border border-orange-500/30 rounded px-2 py-1 text-orange-200 text-xs">
+                          <div className="mt-1 bg-gray-950/90 border border-orange-500/30 rounded-lg p-2.5 text-orange-200 text-xs whitespace-normal break-words leading-relaxed">
                             {issue.message}
                           </div>
                         )}
@@ -523,27 +524,28 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       const placement = placementMatch ? placementMatch[1].trim() : 'Design';
 
                       return (
-                        <div key={result.designId}>
+                        <div key={result.designId} className="relative">
                           <button
                             onClick={() => setExpandedIssueId(isExpanded ? null : result.designId)}
-                            className="w-full group relative flex items-center gap-2 px-2 py-1 hover:bg-emerald-500/20 rounded transition-colors text-left"
+                            className="w-full group flex items-center gap-2 px-2.5 py-1.5 hover:bg-emerald-500/20 rounded-lg transition-colors text-left border border-transparent hover:border-emerald-500/30"
                           >
-                            <div className="text-emerald-400">✓</div>
-                            <div className="text-xs text-emerald-300 truncate flex-1">{placement}</div>
-                            <div className="text-xs font-mono text-emerald-500 bg-emerald-500/20 px-2 py-0.5 rounded whitespace-nowrap">
+                            <div className="text-emerald-400 font-bold">✓</div>
+                            <div className="text-xs font-medium text-emerald-300 truncate flex-1">{placement}</div>
+                            <div className="text-xs font-mono text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded whitespace-nowrap">
                               {percent}%
                             </div>
+
                             {/* Desktop Tooltip */}
-                            <div className="absolute left-0 right-0 top-full mt-1 hidden sm:group-hover:block pointer-events-none z-50">
-                              <div className="bg-gray-900 text-emerald-200 text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg border border-emerald-500/30 text-center">
+                            <div className="absolute left-0 top-full mt-1 hidden sm:group-hover:block pointer-events-none z-50 w-full max-w-sm">
+                              <div className="bg-gray-950/95 backdrop-blur-md text-emerald-200 text-xs rounded-lg p-2.5 shadow-2xl border border-emerald-500/40 whitespace-normal break-words leading-relaxed">
                                 {result.message}
                               </div>
                             </div>
                           </button>
 
-                          {/* Mobile Expandable Tooltip */}
+                          {/* Expandable Tooltip on Click */}
                           {isExpanded && (
-                            <div className="sm:hidden mt-1 bg-gray-900 border border-emerald-500/30 rounded px-2 py-1 text-emerald-200 text-xs">
+                            <div className="mt-1 bg-gray-950/90 border border-emerald-500/30 rounded-lg p-2.5 text-emerald-200 text-xs whitespace-normal break-words leading-relaxed">
                               {result.message}
                             </div>
                           )}
