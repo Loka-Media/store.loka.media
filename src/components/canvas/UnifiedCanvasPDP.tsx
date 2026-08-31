@@ -2454,11 +2454,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       <span className="text-3xl font-extrabold text-orange-400 tabular-nums block">
                         {effectiveMarkup}%
                       </span>
-                      {minMarkup > 0 && (
-                        <span className="text-[10px] text-yellow-500 font-semibold block mt-0.5 animate-pulse">
-                          Minimum Required Markup: {minMarkup}% (ensures your profit stays above $0.00 after all applicable fees and charges)
-                        </span>
-                      )}
                     </div>
                   </div>
 
@@ -2476,61 +2471,63 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="space-y-2">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Quick Presets</span>
                     <div className="flex flex-wrap gap-1.5">
-                      {CREATOR_MARKUP_PRESETS.map((preset) => {
-                        const isDisabled = preset < minMarkup;
-                        const effectivePresetVal = getEffectivePresetMarkup(preset);
-                        return (
-                          <button
-                            key={preset}
-                            disabled={isDisabled}
-                            onClick={() => handleCreatorPresetClick(preset)}
-                            className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all ${
-                              isDisabled
-                                ? 'bg-gray-950/40 text-gray-600 border-white/5 cursor-not-allowed opacity-35'
-                                : creatorMarkup === preset
-                                ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)] cursor-pointer'
-                                : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200 cursor-pointer'
-                            }`}
-                          >
-                            {effectivePresetVal}%
-                          </button>
-                        );
-                      })}
+                      {(() => {
+                        const seenValues = new Set<number>();
+                        return CREATOR_MARKUP_PRESETS.map((preset) => {
+                          const isDisabled = preset < minMarkup;
+                          const effectivePresetVal = getEffectivePresetMarkup(preset);
+
+                          if (seenValues.has(effectivePresetVal)) {
+                            return null;
+                          }
+                          seenValues.add(effectivePresetVal);
+
+                          const isActive = creatorMarkup === preset || effectiveMarkup === effectivePresetVal;
+
+                          return (
+                            <button
+                              key={preset}
+                              disabled={isDisabled}
+                              onClick={() => handleCreatorPresetClick(preset)}
+                              className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all ${
+                                isDisabled
+                                  ? 'bg-gray-950/40 text-gray-600 border-white/5 cursor-not-allowed opacity-35'
+                                  : isActive
+                                  ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)] cursor-pointer'
+                                  : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200 cursor-pointer'
+                              }`}
+                            >
+                              {effectivePresetVal}%
+                            </button>
+                          );
+                        });
+                      })()}
                     </div>
                   </div>
                 </div>
 
                 {/* Pricing Summary & Clean Creator Breakdown */}
-                <div className="mt-4 bg-black/60 border border-white/5 p-4 rounded-2xl space-y-3 text-[11px] backdrop-blur-md">
-                  <div className="flex justify-between items-center pb-2 border-b border-white/5">
-                    <span className="text-gray-400 font-medium">Creator Price:</span>
-                    <span className="font-extrabold text-white text-xs">
-                      {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
+                <div className="mt-4 bg-black/60 border border-white/5 p-4 rounded-2xl space-y-2.5 text-[11px] backdrop-blur-md">
+                  <div className="flex justify-between items-center text-gray-400 font-medium">
+                    <span>Loka Base Cost</span>
+                    <span className="text-orange-400 font-semibold">
+                      {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} - $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
 
-                  <div className="space-y-2 pt-1">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Loka Base Cost:</span>
-                      <span className="text-orange-400 font-semibold">
-                        {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} - $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Stripe Fee (2.9% + $0.30):</span>
-                      <span className="text-gray-300">
-                        {hasPriceRange ? `$${stripeFeeVal.toFixed(2)} - $${stripeFeeMaxVal.toFixed(2)}` : `$${stripeFeeVal.toFixed(2)}`}
-                      </span>
-                    </div>
+                  <div className="flex justify-between items-center text-gray-400 font-medium">
+                    <span>+ Creator Markup ({effectiveMarkup}%)</span>
+                    <span className="text-green-400 font-semibold">
+                      +{hasPriceRange 
+                        ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}` 
+                        : `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)}`}
+                    </span>
                   </div>
 
-                  <div className="flex justify-between items-center pt-2 border-t border-white/5 mt-1">
-                    <div className="flex flex-col">
-                      <span className="text-gray-400 font-semibold">Creator Markup ({effectiveMarkup}%):</span>
-                      <span className="text-[9px] text-gray-500">Calculated as Creator Price - Loka Base Cost - Stripe Fee</span>
-                    </div>
-                    <span className="font-black text-green-400 text-xs">
-                      +${creatorProfit.toFixed(2)}
+                  <div className="flex justify-between items-center pt-2.5 border-t border-white/10 mt-1 font-extrabold text-white text-xs">
+                    <span>= Product Price</span>
+                    <span className="text-white text-sm">
+                      {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
                 </div>
