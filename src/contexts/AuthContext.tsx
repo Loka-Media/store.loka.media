@@ -88,6 +88,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       await authAPI.register(registrationData);
 
+      // Trigger pending approval notification email via Resend
+      if (data.creatorUrl) {
+        try {
+          fetch('/api/notifications/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: data.email,
+              name: data.name,
+              type: 'pending_approval',
+            }),
+          }).catch((e) => console.error('Failed to trigger pending approval email:', e));
+        } catch (e) {
+          console.error('Email trigger error:', e);
+        }
+      }
+
       const message = data.creatorUrl
         ? 'Registration successful! Your creator application has been submitted for review. Please check your email for OTP verification.'
         : 'Registration successful! Please check your email for OTP verification.';

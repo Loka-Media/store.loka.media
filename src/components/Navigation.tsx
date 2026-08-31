@@ -85,15 +85,26 @@ export default function Navigation() {
 
                 {isAuthenticated ? (
                   <>
-                    {user?.role === "creator" && (
+                    {user?.role === "creator" || user?.creatorStatus === "approved" ? (
                       <Link
                         href="/dashboard/creator"
-                        className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
+                        className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center gap-1.5"
                         style={{ color: "var(--nav-text)" }}
                       >
-                        Creator Hub
+                        <span>Creator Hub</span>
+                        <span className="text-[10px] bg-green-500/20 text-green-400 border border-green-500/30 px-1.5 py-0.5 rounded-full font-extrabold">2/2 ✓</span>
                       </Link>
-                    )}
+                    ) : user?.creatorStatus === "pending" ? (
+                      <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-yellow-300">
+                        <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+                        <span>Login as creator (1/2): Waiting for approval</span>
+                      </div>
+                    ) : user?.creatorStatus === "rejected" ? (
+                      <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-red-300">
+                        <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
+                        <span>Creator Application: Rejected</span>
+                      </div>
+                    ) : null}
 
                     {user?.role === "admin" && (
                       <Link
@@ -156,17 +167,57 @@ export default function Navigation() {
                       style={{ background: "var(--nav-border-light)" }}
                     ></div>
 
-                    {/* User section */}
-                    <Link
-                      href="/profile"
-                      className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
-                      style={{ color: "var(--nav-text)" }}
-                    >
-                      <User className="w-5 h-5" />
-                      <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
-                        Profile
-                      </span>
-                    </Link>
+                    {/* User section with Status Tooltip */}
+                    <div className="relative group">
+                      <Link
+                        href="/profile"
+                        className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                        style={{ color: "var(--nav-text)" }}
+                      >
+                        <div className="relative">
+                          <User className="w-5 h-5" />
+                          {user?.creatorStatus === "pending" && (
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border border-black" />
+                          )}
+                          {(user?.role === "creator" || user?.creatorStatus === "approved") && (
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green-400 border border-black" />
+                          )}
+                        </div>
+                      </Link>
+
+                      {/* Detailed Hover Status Dropdown */}
+                      <div className="absolute top-full mt-3 right-0 w-64 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-xs rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl p-3 space-y-2">
+                        <div className="font-bold text-sm text-white truncate">{user?.name || user?.email}</div>
+                        {user?.creatorStatus === "pending" && (
+                          <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 space-y-1">
+                            <div className="font-bold text-yellow-300 flex justify-between items-center">
+                              <span>Login as creator</span>
+                              <span className="text-[10px] bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded font-mono font-bold">1/2</span>
+                            </div>
+                            <div className="text-[11px] text-yellow-400 font-semibold flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                              Waiting for approval
+                            </div>
+                            <div className="text-[10px] text-gray-400">Admin review in progress. Creator Hub will unlock upon approval.</div>
+                          </div>
+                        )}
+                        {(user?.role === "creator" || user?.creatorStatus === "approved") && (
+                          <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-200 space-y-1">
+                            <div className="font-bold text-green-300 flex justify-between items-center">
+                              <span>Creator Hub</span>
+                              <span className="text-[10px] bg-green-400/20 text-green-300 px-1.5 py-0.5 rounded font-mono font-bold">2/2 ✓</span>
+                            </div>
+                            <div className="text-[11px] text-green-400 font-semibold">✅ Approved & Active</div>
+                          </div>
+                        )}
+                        {user?.creatorStatus === "rejected" && (
+                          <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200 space-y-1">
+                            <div className="font-bold text-red-300">Creator Application</div>
+                            <div className="text-[11px] text-red-400 font-semibold">❌ Rejected</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
                     <button
                       onClick={logout}
@@ -339,16 +390,32 @@ export default function Navigation() {
 
           {isAuthenticated ? (
             <>
-              {user?.role === "creator" && (
+              {user?.role === "creator" || user?.creatorStatus === "approved" ? (
                 <Link
                   href="/dashboard/creator"
-                  className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                  className="text-white font-medium flex items-center justify-between px-4 py-2 rounded-lg hover:opacity-80 transition-opacity bg-green-500/10 border border-green-500/20"
                   style={{ color: "var(--nav-text)" }}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Creator Hub
+                  <span>Creator Hub</span>
+                  <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">2/2 Approved ✓</span>
                 </Link>
-              )}
+              ) : user?.creatorStatus === "pending" ? (
+                <div className="px-4 py-2.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs font-semibold space-y-1">
+                  <div className="flex justify-between items-center font-bold">
+                    <span>Login as creator</span>
+                    <span className="bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded text-[10px]">1/2</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-yellow-400 text-[11px]">
+                    <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                    Waiting for approval
+                  </div>
+                </div>
+              ) : user?.creatorStatus === "rejected" ? (
+                <div className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold">
+                  Creator Application: Rejected
+                </div>
+              ) : null}
 
               {user?.role === "admin" && (
                 <Link

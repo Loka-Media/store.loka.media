@@ -43,9 +43,24 @@ export default function CreatorRequestsPage() {
 
   const handleApprove = async (requestId: number) => {
     setProcessing({ requestId, action: 'approve' });
+    const targetRequest = requests.find((r) => r.id === requestId);
     try {
       await adminAPI.approveCreatorRequest(requestId);
       toast.success('Creator request approved successfully');
+
+      // Trigger approval email notification via Resend
+      if (targetRequest?.email) {
+        fetch('/api/notifications/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: targetRequest.email,
+            name: targetRequest.name,
+            type: 'approved',
+          }),
+        }).catch((e) => console.error('Failed to send approval email:', e));
+      }
+
       fetchRequests();
     } catch (error) {
       console.error('Failed to approve request:', error);
@@ -57,9 +72,24 @@ export default function CreatorRequestsPage() {
 
   const handleReject = async (requestId: number) => {
     setProcessing({ requestId, action: 'reject' });
+    const targetRequest = requests.find((r) => r.id === requestId);
     try {
       await adminAPI.rejectCreatorRequest(requestId);
       toast.success('Creator request rejected');
+
+      // Trigger rejection email notification via Resend
+      if (targetRequest?.email) {
+        fetch('/api/notifications/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: targetRequest.email,
+            name: targetRequest.name,
+            type: 'rejected',
+          }),
+        }).catch((e) => console.error('Failed to send rejection email:', e));
+      }
+
       fetchRequests();
     } catch (error) {
       console.error('Failed to reject request:', error);
