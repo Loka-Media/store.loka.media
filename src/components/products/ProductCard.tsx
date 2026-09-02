@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { ExtendedProduct } from "@/lib/api";
 import { createProductSlug, getValidImageUrl } from "@/lib/utils";
-import { useWishlist } from "@/contexts/WishlistContext";
+import { useWishlist, addPendingWishlistItem } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -171,7 +171,8 @@ export function ProductCard({ product }: ProductCardProps) {
                 e.preventDefault();
                 e.stopPropagation();
                 if (!isAuthenticated) {
-                  toast.success("Please sign in to manage your wishlist");
+                  addPendingWishlistItem(product.id);
+                  toast.success("Product saved! Please sign in to view your wishlist");
                   router.push('/auth/login?redirect=/wishlist');
                   return;
                 }

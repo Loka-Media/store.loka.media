@@ -43,6 +43,20 @@ interface WishlistContextType {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
+export const addPendingWishlistItem = (productId: number) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem('pending_wishlist');
+    const list: number[] = raw ? JSON.parse(raw) : [];
+    if (!list.includes(productId)) {
+      list.push(productId);
+      localStorage.setItem('pending_wishlist', JSON.stringify(list));
+    }
+  } catch (e) {
+    console.error('Error saving pending wishlist item:', e);
+  }
+};
+
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -85,15 +99,43 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated]);
 
+  // Auto-sync guest/pending wishlist items once authenticated
+  const syncPendingWishlist = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem('pending_wishlist');
+      if (!raw) return;
+
+      const list: number[] = JSON.parse(raw);
+      if (Array.isArray(list) && list.length > 0) {
+        localStorage.removeItem('pending_wishlist');
+        for (const pid of list) {
+          try {
+            await wishlistAPI.addToWishlist(pid);
+          } catch (err) {
+            console.error(`Failed to sync pending wishlist item ${pid}:`, err);
+          }
+        }
+        await refreshWishlist(true);
+        toast.success('Saved item to your wishlist!');
+      }
+    } catch (e) {
+      console.error('Error syncing pending wishlist items:', e);
+      localStorage.removeItem('pending_wishlist');
+    }
+  }, [refreshWishlist]);
+
   useEffect(() => {
     if (isAuthenticated && user) {
-      refreshWishlist(true);
+      syncPendingWishlist().then(() => {
+        refreshWishlist(true);
+      });
     } else {
       setItems([]);
       setWishlistCount(0);
       lastFetchTimeRef.current = 0;
     }
-  }, [isAuthenticated, user, refreshWishlist]);
+  }, [isAuthenticated, user, refreshWishlist, syncPendingWishlist]);
 
   useEffect(() => {
     let visibilityTimeout: NodeJS.Timeout;
@@ -117,8 +159,9 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   const addToWishlist = async (productId: number): Promise<boolean> => {
     if (!isAuthenticated) {
-      toast.error('Please login to add items to wishlist');
-      return false;
+      addPendingWishlistItem(productId);
+      toast.success('Item saved! Please sign in to view your wishlist.');
+      return true;
     }
 
     try {

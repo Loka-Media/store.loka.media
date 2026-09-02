@@ -5,7 +5,7 @@ import { useState } from "react";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 import { createProductSlug } from "@/lib/utils";
 import { useGuestCart } from "@/contexts/GuestCartContext";
-import { useWishlist } from "@/contexts/WishlistContext";
+import { useWishlist, addPendingWishlistItem } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -365,7 +365,8 @@ export function ProductListItem({ product }: ProductListItemProps) {
                   title="Add to wishlist"
                   onClick={() => {
                     if (!isAuthenticated) {
-                      toast.success("Please sign in to manage your wishlist");
+                      addPendingWishlistItem(product.id);
+                      toast.success("Product saved! Please sign in to view your wishlist");
                       router.push('/auth/login?redirect=/wishlist');
                       return;
                     }

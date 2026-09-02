@@ -31,11 +31,11 @@ function LoginPageContent() {
     if (!authLoading && user) {
       const targetUrl = searchParams.get("redirect") || searchParams.get("returnUrl");
       if (targetUrl) {
-        router.push(targetUrl);
+        router.replace(targetUrl);
       } else if (user.role === 'creator') {
-        router.push('/dashboard/creator');
+        router.replace('/dashboard/creator');
       } else {
-        router.push('/products');
+        router.replace('/products');
       }
     }
   }, [user, authLoading, router, searchParams]);
@@ -54,11 +54,11 @@ function LoginPageContent() {
       const success = await login(data.email, data.password);
       if (success) {
         const targetUrl = searchParams.get("redirect") || searchParams.get("returnUrl") || (user?.role === 'creator' ? '/dashboard/creator' : '/products');
-        router.push(targetUrl);
+        router.replace(targetUrl);
       }
     } catch (error: unknown) {
       if (requiresEmailVerification(error)) {
-        router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
+        router.replace(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
       }
     } finally {
       setLoading(false);

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlist, addPendingWishlistItem } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProductDetails } from './useProductData';
 import toast from 'react-hot-toast';
@@ -25,7 +25,8 @@ export const useProductWishlist = (product: ProductDetails | null) => {
   const handleWishlistToggle = useCallback(async () => {
     if (!product) return;
     if (!isAuthenticated) {
-      toast.success('Please sign in to manage your wishlist');
+      addPendingWishlistItem(product.id);
+      toast.success('Product saved! Please sign in to view your wishlist');
       router.push('/auth/login?redirect=/wishlist');
       return;
     }

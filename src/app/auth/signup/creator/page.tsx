@@ -24,9 +24,9 @@ function CreatorSignupContent() {
   useEffect(() => {
     if (!authLoading && user) {
       if (user.role === 'creator') {
-        router.push('/dashboard/creator');
+        router.replace('/dashboard/creator');
       } else {
-        router.push('/products');
+        router.replace('/products');
       }
     }
   }, [user, authLoading, router]);
