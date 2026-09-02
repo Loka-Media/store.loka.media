@@ -11645,6 +11645,15 @@
     "colorsCount": 10,
     "providersCount": 1
   },
+  "3066": {
+    "title": "Women's Perfect Tri Midi Long Sleeve Tee",
+    "providerId": 217,
+    "price": "12.00",
+    "premiumPrice": "9.24",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
   "3067": {
     "title": "Women's Perfect Tri Relaxed Tank",
     "providerId": 217,
@@ -12328,6 +12337,24 @@
     "sizesCount": 4,
     "colorsCount": 24,
     "providersCount": 7
+  },
+  "3208": {
+    "title": "Women's Stretch Pique Polo",
+    "providerId": 217,
+    "price": "18.25",
+    "premiumPrice": "14.05",
+    "sizesCount": 8,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "3210": {
+    "title": "Women's Stretch Jersey Polo",
+    "providerId": 217,
+    "price": "12.00",
+    "premiumPrice": "9.24",
+    "sizesCount": 8,
+    "colorsCount": 8,
+    "providersCount": 1
   },
   "3250": {
     "title": "Tall Core Blend Jersey Knit Polo",
@@ -15386,6 +15413,15 @@
     "price": "16.00",
     "premiumPrice": "12.32",
     "sizesCount": 7,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
+  "5503": {
+    "title": "Women's Recycled Trousers",
+    "providerId": 217,
+    "price": "13.25",
+    "premiumPrice": "10.20",
+    "sizesCount": 8,
     "colorsCount": 7,
     "providersCount": 1
   },
@@ -18715,6 +18751,456 @@
     "providerId": 217,
     "price": "10.23",
     "premiumPrice": "7.88",
+    "sizesCount": 6,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "10752": {
+    "title": "Women's Organic Rib Tank",
+    "providerId": 217,
+    "price": "16.00",
+    "premiumPrice": "12.32",
+    "sizesCount": 5,
+    "colorsCount": 9,
+    "providersCount": 1
+  },
+  "10754": {
+    "title": "Women's Active Bike Shorts",
+    "providerId": 217,
+    "price": "10.50",
+    "premiumPrice": "8.09",
+    "sizesCount": 6,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10758": {
+    "title": "Women's Mali L-S Tee",
+    "providerId": 217,
+    "price": "8.00",
+    "premiumPrice": "6.16",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10759": {
+    "title": "Women's Maple Organic Tee",
+    "providerId": 217,
+    "price": "9.23",
+    "premiumPrice": "7.11",
+    "sizesCount": 5,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10761": {
+    "title": "Women's Heavy Faded Tee",
+    "providerId": 217,
+    "price": "11.00",
+    "premiumPrice": "8.47",
+    "sizesCount": 6,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "10768": {
+    "title": "Women's Heavy Faded Tank",
+    "providerId": 217,
+    "price": "18.25",
+    "premiumPrice": "14.05",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10771": {
+    "title": "Women's Martina Tee",
+    "providerId": 217,
+    "price": "13.23",
+    "premiumPrice": "10.19",
+    "sizesCount": 6,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
+  "10774": {
+    "title": "Women's Maple Faded Tee",
+    "providerId": 217,
+    "price": "8.23",
+    "premiumPrice": "6.34",
+    "sizesCount": 5,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10775": {
+    "title": "Women's Stone Wash Heavy Crop",
+    "providerId": 217,
+    "price": "17.50",
+    "premiumPrice": "13.47",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10777": {
+    "title": "Women's Classic Crop Tee",
+    "providerId": 217,
+    "price": "7.23",
+    "premiumPrice": "5.57",
+    "sizesCount": 6,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "10783": {
+    "title": "Women's Heavy Tee",
+    "providerId": 217,
+    "price": "9.23",
+    "premiumPrice": "7.11",
+    "sizesCount": 5,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "10784": {
+    "title": "Women's Relax Faded Hood",
+    "providerId": 217,
+    "price": "10.50",
+    "premiumPrice": "8.09",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10787": {
+    "title": "Women's Maple Curve L-S Tee",
+    "providerId": 217,
+    "price": "9.46",
+    "premiumPrice": "7.28",
+    "sizesCount": 6,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "10795": {
+    "title": "Women's Classic Tee",
+    "providerId": 217,
+    "price": "13.23",
+    "premiumPrice": "10.19",
+    "sizesCount": 7,
+    "colorsCount": 12,
+    "providersCount": 1
+  },
+  "10807": {
+    "title": "Women's Maple Active Blend Tee",
+    "providerId": 217,
+    "price": "9.23",
+    "premiumPrice": "7.11",
+    "sizesCount": 6,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10810": {
+    "title": "Women's Access Cap",
+    "providerId": 217,
+    "price": "12.25",
+    "premiumPrice": "9.43",
+    "sizesCount": 1,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10821": {
+    "title": "Women's Martina Tank",
+    "providerId": 217,
+    "price": "9.00",
+    "premiumPrice": "6.93",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10822": {
+    "title": "Women's Organic Rib Crop Tank",
+    "providerId": 217,
+    "price": "16.25",
+    "premiumPrice": "12.51",
+    "sizesCount": 5,
+    "colorsCount": 10,
+    "providersCount": 1
+  },
+  "10832": {
+    "title": "Women's Maple Curve Tee",
+    "providerId": 217,
+    "price": "10.46",
+    "premiumPrice": "8.05",
+    "sizesCount": 6,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "10837": {
+    "title": "Women's Martina Crop Tee",
+    "providerId": 217,
+    "price": "11.23",
+    "premiumPrice": "8.65",
+    "sizesCount": 6,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "10838": {
+    "title": "Women's Martina Crop Tank",
+    "providerId": 217,
+    "price": "18.50",
+    "premiumPrice": "14.25",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10841": {
+    "title": "Women's Relax Zip Hood",
+    "providerId": 217,
+    "price": "9.50",
+    "premiumPrice": "7.32",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10847": {
+    "title": "Women's Active Mid Leggings",
+    "providerId": 217,
+    "price": "11.50",
+    "premiumPrice": "8.86",
+    "sizesCount": 6,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10850": {
+    "title": "Women's Active Shorts",
+    "providerId": 217,
+    "price": "12.50",
+    "premiumPrice": "9.63",
+    "sizesCount": 5,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10852": {
+    "title": "Women's Heavy Hood",
+    "providerId": 217,
+    "price": "16.25",
+    "premiumPrice": "12.51",
+    "sizesCount": 5,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10853": {
+    "title": "Women's Relax Faded Half Zip",
+    "providerId": 217,
+    "price": "13.50",
+    "premiumPrice": "10.39",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10875": {
+    "title": "Women's Relax Crop Crew",
+    "providerId": 217,
+    "price": "17.00",
+    "premiumPrice": "13.09",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10879": {
+    "title": "Women's Active Bra Top",
+    "providerId": 217,
+    "price": "15.25",
+    "premiumPrice": "11.74",
+    "sizesCount": 6,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10893": {
+    "title": "Women's Maple V Neck Tee",
+    "providerId": 217,
+    "price": "11.00",
+    "premiumPrice": "8.47",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10894": {
+    "title": "Women's Martina V Neck Tee",
+    "providerId": 217,
+    "price": "12.23",
+    "premiumPrice": "9.42",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10895": {
+    "title": "Women's Relax Faded Crew",
+    "providerId": 217,
+    "price": "17.50",
+    "premiumPrice": "13.47",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10896": {
+    "title": "Women's Active Seamless Leggings",
+    "providerId": 217,
+    "price": "14.00",
+    "premiumPrice": "10.78",
+    "sizesCount": 6,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10897": {
+    "title": "Women's Relax Faded Zip Hood",
+    "providerId": 217,
+    "price": "11.25",
+    "premiumPrice": "8.66",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10899": {
+    "title": "Women's Classic Minus Tee [-2\"]",
+    "providerId": 217,
+    "price": "13.00",
+    "premiumPrice": "10.01",
+    "sizesCount": 6,
+    "colorsCount": 9,
+    "providersCount": 1
+  },
+  "10901": {
+    "title": "Women's Heavy Crew",
+    "providerId": 217,
+    "price": "9.50",
+    "premiumPrice": "7.32",
+    "sizesCount": 5,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10906": {
+    "title": "Women's Classic L-S Tee",
+    "providerId": 217,
+    "price": "8.23",
+    "premiumPrice": "6.34",
+    "sizesCount": 7,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "10908": {
+    "title": "Women's Maple L-S Tee",
+    "providerId": 217,
+    "price": "10.00",
+    "premiumPrice": "7.70",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10910": {
+    "title": "Women's Active Leggings",
+    "providerId": 217,
+    "price": "12.50",
+    "premiumPrice": "9.63",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10912": {
+    "title": "Women's Maple Tank",
+    "providerId": 217,
+    "price": "16.25",
+    "premiumPrice": "12.51",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10918": {
+    "title": "Women's Mali Racerback",
+    "providerId": 217,
+    "price": "18.25",
+    "premiumPrice": "14.05",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10920": {
+    "title": "Women's Bucket Hat",
+    "providerId": 217,
+    "price": "12.00",
+    "premiumPrice": "9.24",
+    "sizesCount": 1,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10944": {
+    "title": "Women's Relax Crew",
+    "providerId": 217,
+    "price": "10.00",
+    "premiumPrice": "7.70",
+    "sizesCount": 6,
+    "colorsCount": 10,
+    "providersCount": 1
+  },
+  "10954": {
+    "title": "Women's Basic Tee",
+    "providerId": 217,
+    "price": "8.23",
+    "premiumPrice": "6.34",
+    "sizesCount": 7,
+    "colorsCount": 8,
+    "providersCount": 1
+  },
+  "10959": {
+    "title": "Women's Maple Minus Tee [-3\"]",
+    "providerId": 217,
+    "price": "9.00",
+    "premiumPrice": "6.93",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10973": {
+    "title": "Women's Maple Ringer Tee",
+    "providerId": 217,
+    "price": "7.46",
+    "premiumPrice": "5.74",
+    "sizesCount": 5,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10976": {
+    "title": "Women's Stone Wash Heavy Tee",
+    "providerId": 217,
+    "price": "14.46",
+    "premiumPrice": "11.13",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10993": {
+    "title": "Women's Stencil Half Zip Crew",
+    "providerId": 217,
+    "price": "13.25",
+    "premiumPrice": "10.20",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "11000": {
+    "title": "Women's Active Crop Tank",
+    "providerId": 217,
+    "price": "12.50",
+    "premiumPrice": "9.63",
+    "sizesCount": 5,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "11006": {
+    "title": "Women's Amy Polo",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 5,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "11016": {
+    "title": "Women's Box Tee",
+    "providerId": 217,
+    "price": "14.00",
+    "premiumPrice": "10.78",
     "sizesCount": 6,
     "colorsCount": 5,
     "providersCount": 1
