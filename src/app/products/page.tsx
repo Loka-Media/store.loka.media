@@ -422,16 +422,28 @@ function ProductsContent() {
   const filteredProducts = pool;
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
+    // Helper to get effective converted display selling price for accurate price sorting
+    const getEffectivePrice = (product: ExtendedProduct) => {
+      const { minPrice: baseMinSellingPrice } = getProductPriceRange(product);
+      return convertPrice(baseMinSellingPrice);
+    };
+
+    const isPriceFilterActive = filters.minPrice !== undefined || filters.maxPrice !== undefined;
+    const isPriceSort = filters.sortBy === "base_price" || filters.sortBy === "price" || isPriceFilterActive;
+
+    if (isPriceSort && filters.sortBy !== "created_at_override") {
+      const priceA = getEffectivePrice(a);
+      const priceB = getEffectivePrice(b);
+      const direction = filters.sortOrder === "DESC" ? -1 : 1;
+      return (priceA - priceB) * direction;
+    }
+
     if (filters.sortBy === "created_at") {
       const dateA = new Date(a.created_at || 0).getTime();
       const dateB = new Date(b.created_at || 0).getTime();
       return filters.sortOrder === "DESC" ? dateB - dateA : dateA - dateB;
     }
-    if (filters.sortBy === "base_price") {
-      const priceA = parseFloat(String(a.base_price)) || 0;
-      const priceB = parseFloat(String(b.base_price)) || 0;
-      return filters.sortOrder === "DESC" ? priceB - priceA : priceA - priceB;
-    }
+
     return 0;
   });
 
@@ -743,21 +755,57 @@ function ProductsContent() {
             </div>
 
             {isPriceRangeOpen && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl border border-white/10 bg-gray-950/90">
-                <input
-                  type="number"
-                  placeholder={`Min Price (${selectedCurrency.symbol})`}
-                  value={minPriceInput}
-                  onChange={(e) => setMinPriceInput(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-white/20 bg-black text-white text-sm placeholder-white/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-                />
-                <input
-                  type="number"
-                  placeholder={`Max Price (${selectedCurrency.symbol})`}
-                  value={maxPriceInput}
-                  onChange={(e) => setMaxPriceInput(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-white/20 bg-black text-white text-sm placeholder-white/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-                />
+              <div className="p-4 rounded-2xl border border-white/10 bg-gray-950/90 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    type="number"
+                    placeholder={`Min Price (${selectedCurrency.symbol})`}
+                    value={minPriceInput}
+                    onChange={(e) => setMinPriceInput(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-white/20 bg-black text-white text-sm placeholder-white/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+                  />
+                  <input
+                    type="number"
+                    placeholder={`Max Price (${selectedCurrency.symbol})`}
+                    value={maxPriceInput}
+                    onChange={(e) => setMaxPriceInput(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-white/20 bg-black text-white text-sm placeholder-white/50 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10">
+                  <span className="text-xs text-white/70 font-semibold">Price Order:</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleFilterChange("sortBy", "base_price");
+                        handleFilterChange("sortOrder", "ASC");
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        filters.sortOrder !== "DESC"
+                          ? "bg-orange-500 text-white shadow-md ring-1 ring-white/20"
+                          : "bg-white/10 text-white/60 hover:text-white hover:bg-white/20"
+                      }`}
+                    >
+                      Low → High (Ascending)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleFilterChange("sortBy", "base_price");
+                        handleFilterChange("sortOrder", "DESC");
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        filters.sortOrder === "DESC"
+                          ? "bg-orange-500 text-white shadow-md ring-1 ring-white/20"
+                          : "bg-white/10 text-white/60 hover:text-white hover:bg-white/20"
+                      }`}
+                    >
+                      High → Low (Descending)
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
