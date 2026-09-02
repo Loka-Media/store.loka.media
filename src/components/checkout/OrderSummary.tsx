@@ -146,7 +146,7 @@ export const OrderSummary = ({
           <p className="text-white font-bold">{formatPrice(platformFee)}</p>
         </div>
         <div className="border-t border-gray-800 pt-3 mt-3 flex justify-between font-bold">
-          <p className="text-white">Order Total Paid by Customer</p>
+          <p className="text-white">Amount to Pay</p>
           <p className="text-orange-400 text-lg">{formatPrice(calculateTotal())}</p>
         </div>
       </div>

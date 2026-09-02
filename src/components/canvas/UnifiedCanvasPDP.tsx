@@ -2516,7 +2516,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex justify-between items-center text-gray-400 font-medium">
-                    <span>+ Creator Markup ({effectiveMarkup}%)</span>
+                    <span>Creator Markup ({effectiveMarkup}%)</span>
                     <span className="text-green-400 font-semibold">
                       +{hasPriceRange 
                         ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}` 
@@ -2525,7 +2525,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex justify-between items-center pt-2.5 border-t border-white/10 mt-1 font-extrabold text-white text-xs">
-                    <span>= Product Price</span>
+                    <span>Product Price</span>
                     <span className="text-white text-sm">
                       {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
                     </span>
