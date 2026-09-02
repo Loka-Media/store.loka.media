@@ -7,7 +7,11 @@ import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 import { ProductDetails } from './useProductData';
 import toast from 'react-hot-toast';
 
-export const useProductCart = (product: ProductDetails | null, selectedVariant: ProductVariant | null) => {
+export const useProductCart = (
+  product: ProductDetails | null,
+  selectedVariant: ProductVariant | null,
+  activeColorImage?: string
+) => {
   const { addToCart } = useGuestCart();
   const { isAuthenticated } = useAuth();
   const { calculateSellingPrice } = useGlobalMarkup();
@@ -28,7 +32,41 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
 
     try {
       const vCost = selectedVariant.cost || (selectedVariant.price ? parseFloat(String(selectedVariant.price)) / 1.35 : parseFloat(product.base_price?.toString() || '20.00'));
-      // Cache variant data for guest cart before adding to cart
+      
+      // Determine the exact image for the selected variant/color
+      const getResolvedColorImage = (): string => {
+        if (activeColorImage && !activeColorImage.includes('placeholder')) {
+          return activeColorImage;
+        }
+        if (selectedVariant?.image_url && !selectedVariant.image_url.includes('placeholder')) {
+          return selectedVariant.image_url;
+        }
+
+        const vColor = (selectedVariant?.color || selectedVariant?.title?.split(' / ')[0] || '').toLowerCase().trim();
+        if (vColor && vColor !== 'default' && product?.mockups && product.mockups.length > 0) {
+          const matchingVariants = (product.variants || []).filter(v => {
+            const c = (v.color || v.title?.split(' / ')[0] || '').toLowerCase().trim();
+            return c === vColor;
+          });
+          const matchingIds = new Set(matchingVariants.flatMap(v => [v.id, (v as any).printify_variant_id].filter(Boolean)));
+          
+          const mockupMatch = product.mockups.find(m => {
+            const ids = m.variant_ids || [];
+            return ids.some((id: number) => matchingIds.has(id));
+          });
+
+          if (mockupMatch) {
+            const url = (mockupMatch as any).permanent_url || (mockupMatch as any).url || (mockupMatch as any).src || (mockupMatch as any).image_url;
+            if (url) return url;
+          }
+        }
+
+        return product?.thumbnail_url || (Array.isArray(product?.images) ? product.images[0] : '') || '';
+      };
+
+      const resolvedColorImage = getResolvedColorImage();
+
+      // Cache variant data for cart before adding to cart
       const variantCacheData = {
         product_id: product.id,
         product_name: product.name,
@@ -37,8 +75,8 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
         size: selectedVariant.size || selectedVariant.title?.split(' / ')[1] || 'One Size',
         color: selectedVariant.color || selectedVariant.title?.split(' / ')[0] || 'Default',
         color_code: selectedVariant.color_code || '#808080',
-        image_url: selectedVariant.image_url || product.thumbnail_url || product.images?.[0],
-        thumbnail_url: product.thumbnail_url || product.images?.[0],
+        image_url: resolvedColorImage,
+        thumbnail_url: resolvedColorImage,
         creator_name: product.creator?.name || product.creator_name || 'Unknown',
         source: product.source || 'unknown',
         shopify_variant_id: selectedVariant.shopify_variant_id,
@@ -49,7 +87,7 @@ export const useProductCart = (product: ProductDetails | null, selectedVariant: 
         print_provider_id: (product as any).print_provider_id
       };
 
-      // Store in localStorage for guest cart
+      // Store in localStorage for cart image resolution
       if (typeof window !== 'undefined') {
         try {
           localStorage.setItem(`product_variant_${selectedVariant.id}`, JSON.stringify(variantCacheData));

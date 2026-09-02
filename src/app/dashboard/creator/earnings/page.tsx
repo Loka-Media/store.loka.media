@@ -574,25 +574,7 @@ function EarningsPageContent() {
                   </div>
                 </button>
 
-                {showCommissionInfo && (
-                  <div className="bg-gray-950 border border-gray-800 rounded-xl p-5 animate-in fade-in duration-300">
-                    <h4 className="font-bold text-white mb-2 text-sm">Earnings Calculations Breakdown:</h4>
-                    <ul className="text-xs text-gray-400 space-y-2 list-disc list-inside">
-                      <li>
-                        <strong>Supplier Cost:</strong> The base wholesale cost of the product + shipping.
-                      </li>
-                      <li>
-                        <strong>Wholesale Price:</strong> The wholesale base cost displayed to you. It includes Loka's 35% platform markup.
-                      </li>
-                      <li>
-                        <strong>Retail Price:</strong> The final customer-facing selling price, controlled by your markup percentage.
-                      </li>
-                      <li>
-                        <strong>Your Commission:</strong> You earn the full difference between the Customer Retail Price and the Loka Wholesale Cost. Earnings clear to Available Balance after the order is completed (minimum 7 days return period).
-                      </li>
-                    </ul>
-                  </div>
-                )}
+
 
                 {/* Printify Orders (white-labeled) */}
                 {printifyOrders.length > 0 ? (

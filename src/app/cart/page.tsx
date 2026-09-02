@@ -207,6 +207,21 @@ export default function CartPage() {
                     <ul className="divide-y divide-gray-800/80">
                       {items.map((item) => {
                         const productHref = `/products/${(item as any).product_slug || (item as any).slug || item.product_id}`;
+                        const itemImageSrc = (() => {
+                          if (typeof window !== 'undefined') {
+                            try {
+                              const cached = localStorage.getItem(`product_variant_${item.variant_id}`);
+                              if (cached) {
+                                const parsed = JSON.parse(cached);
+                                if (parsed.image_url && !parsed.image_url.includes('placeholder')) {
+                                  return parsed.image_url;
+                                }
+                              }
+                            } catch {}
+                          }
+                          return item.image_url || item.thumbnail_url || '/placeholder-product.svg';
+                        })();
+
                         return (
                           <li key={item.id} className="py-4 sm:py-6 flex items-start gap-3 sm:gap-5">
                             {/* Image */}
@@ -215,7 +230,7 @@ export default function CartPage() {
                               className="flex-shrink-0 w-20 h-20 sm:w-28 sm:h-28 border border-white/10 rounded-xl overflow-hidden bg-gray-900 group hover:border-orange-500/50 transition-colors relative"
                             >
                               <Image
-                                src={item.image_url || item.thumbnail_url || '/placeholder-product.svg'}
+                                src={itemImageSrc}
                                 alt={item.product_name}
                                 fill
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

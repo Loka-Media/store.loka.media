@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { Shield, Truck, Package } from 'lucide-react';
 import { useProductData } from '@/hooks/useProductData';
 import { useVariantSelection } from '@/hooks/useVariantSelection';
@@ -45,8 +45,53 @@ export default function ProductPage({ params }: ProductPageProps) {
   } = useVariantSelection(product, isVariantAvailable);
 
   const { isWishlisted, isLoading: isWishlistLoading, handleWishlistToggle } = useProductWishlist(product);
-  const { handleAddToCart } = useProductCart(product, selectedVariant);
   const locationLookup = useLocationLookup();
+
+  // Resolve the active color-specific image for the selected variant (used by cart)
+  const activeColorImage = useMemo(() => {
+    if (!product || !selectedVariant) return '';
+
+    const selectedColor = getVariantColorAndSize(selectedVariant).color;
+
+    // Helper to extract URL from various image shapes
+    const extractUrl = (img: unknown): string => {
+      if (!img) return '';
+      if (typeof img === 'string') return img.trim();
+      const o = img as Record<string, string>;
+      return o.permanent_url || o.src || o.url || o.image_url || o.preview_url || '';
+    };
+
+    const isSizeChart = (url: string) => {
+      const lower = url.toLowerCase();
+      return lower.includes('size') || lower.includes('measurement') || lower.includes('chart') || lower.includes('guide');
+    };
+
+    if (selectedColor && selectedColor !== 'Default' && product.mockups && product.mockups.length > 0) {
+      const colorVariants = (product.variants || []).filter(
+        (v) => getVariantColorAndSize(v).color === selectedColor
+      );
+      const colorVariantIds = new Set(
+        colorVariants.flatMap((v) => [v.id, (v as any).printify_variant_id].filter(Boolean))
+      );
+
+      const matching = product.mockups.filter((m) => {
+        const mIds = m.variant_ids || [];
+        if (!mIds.length || (m as any).isCustomUpload || (m as any).placement === 'custom') return true;
+        return mIds.some((id: number) => colorVariantIds.has(id));
+      });
+
+      const colorUrls = matching.map(extractUrl).filter((u) => u && !isSizeChart(u) && !u.includes('placeholder'));
+      if (colorUrls.length > 0) return colorUrls[0];
+    }
+
+    // Fallback: variant image_url or product thumbnail
+    const variantImg = extractUrl(selectedVariant.image_url);
+    if (variantImg && !variantImg.includes('placeholder')) return variantImg;
+
+    return product.thumbnail_url || '';
+  }, [product, selectedVariant, getVariantColorAndSize]);
+
+  const { handleAddToCart } = useProductCart(product, selectedVariant, activeColorImage);
 
   useEffect(() => {
     initializeSelectedVariant();
@@ -193,6 +238,10 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const sizeGuideIndex = images.findIndex(url => isSizeChartUrl(url));
   const sizeGuideImageUrl = sizeGuideIndex !== -1 ? images[sizeGuideIndex] : (allSizeGuideImages[0] || null);
+
+  // The first non-size-chart image is the color-specific primary image shown to user (for gallery display)
+  const activeDisplayImage = mainProductGalleryImages[0] || images[0] || product.thumbnail_url || '';
+  void activeDisplayImage; // activeColorImage for cart is computed at top via useMemo
 
   const handleOpenSizeGuide = () => {
     if (sizeGuideIndex !== -1) {

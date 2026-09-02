@@ -302,12 +302,30 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       try {
         setLoading(true);
         const response = await cartAPI.getCart();
-        const guestCartItems: GuestCartItem[] = response.items.map((item: CartItem) => ({
-          ...item,
-          price: String(item.price),
-          total_price: String(item.total_price),
-          cost: (item as any).cost || parseFloat(String(item.price)) / 1.35
-        }));
+        const guestCartItems: GuestCartItem[] = response.items.map((item: CartItem) => {
+          let resolvedImage = item.image_url || item.thumbnail_url;
+          if (typeof window !== 'undefined') {
+            try {
+              const cached = localStorage.getItem(`product_variant_${item.variant_id}`);
+              if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed.image_url && !parsed.image_url.includes('placeholder')) {
+                  resolvedImage = parsed.image_url;
+                }
+              }
+            } catch (e) {
+              console.warn('Error reading cached variant image:', e);
+            }
+          }
+          return {
+            ...item,
+            image_url: resolvedImage,
+            thumbnail_url: resolvedImage,
+            price: String(item.price),
+            total_price: String(item.total_price),
+            cost: (item as any).cost || parseFloat(String(item.price)) / 1.35
+          };
+        });
         setItems(guestCartItems);
         setSummary(response.summary);
         const actualCount = guestCartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -362,6 +380,21 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       try {
         await cartAPI.addToCart(variantId, quantity);
         await refreshCart();
+        // Patch the freshly fetched items with color-specific cached images
+        if (typeof window !== 'undefined') {
+          setItems(prev => prev.map(item => {
+            try {
+              const cached = localStorage.getItem(`product_variant_${item.variant_id}`);
+              if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed.image_url && !parsed.image_url.includes('placeholder')) {
+                  return { ...item, image_url: parsed.image_url, thumbnail_url: parsed.image_url };
+                }
+              }
+            } catch {}
+            return item;
+          }));
+        }
         return true;
       } catch (error: unknown) {
         console.error('Failed to add to cart:', error);
