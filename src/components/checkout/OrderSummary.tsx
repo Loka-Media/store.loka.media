@@ -98,7 +98,7 @@ export const OrderSummary = ({
 
       <div className="mt-6 space-y-3">
         <div className="flex justify-between text-sm">
-          <p className="text-gray-400 font-medium">Product Price</p>
+          <p className="text-gray-400 font-medium">Cart Price</p>
           <p className="text-white font-bold">{formatPrice(subtotalAmount)}</p>
         </div>
         {isFetchingShippingRates ? (
