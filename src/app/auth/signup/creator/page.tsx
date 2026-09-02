@@ -10,7 +10,7 @@ import GradientTitle from "@/components/ui/GradientTitle";
 import { GradientText } from "@/components/ui/GradientText";
 import StartShape from "@/components/ui/StartShape";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, User, Mail, Phone, Lock, Link as LinkIcon, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, User, Mail, Phone, Lock, Link as LinkIcon, AlertCircle, ShoppingBag, Sparkles } from "lucide-react";
 import { creatorRegisterSchema, CreatorRegisterFormData } from "@/lib/validators/auth";
 
 function CreatorSignupContent() {
@@ -210,6 +210,21 @@ function CreatorSignupContent() {
               }}
             />
             <div className="relative z-10">
+              {/* Account Type Selector Tabs */}
+              <div className="flex items-center p-1 bg-[#121212] border border-white/15 rounded-xl mb-4 sm:mb-6 shadow-inner">
+                <Link
+                  href="/auth/signup/customer"
+                  className="flex-1 py-2 sm:py-2.5 px-3 rounded-lg text-xs sm:text-sm font-extrabold transition-all text-center flex items-center justify-center gap-2 text-white/60 hover:text-white hover:bg-white/5 cursor-pointer"
+                >
+                  <ShoppingBag className="w-4 h-4 text-emerald-400" />
+                  <span>Join as Customer</span>
+                </Link>
+                <div className="flex-1 py-2 sm:py-2.5 px-3 rounded-lg text-xs sm:text-sm font-extrabold transition-all text-center flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg ring-1 ring-white/20">
+                  <Sparkles className="w-4 h-4 text-white" />
+                  <span>Join as Creator</span>
+                </div>
+              </div>
+
               {/* Header */}
               <div className="mb-4 sm:mb-6 lg:mb-8">
                 <GradientTitle text="Join as a Creator" size="sm" />

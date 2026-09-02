@@ -178,7 +178,7 @@ export default function StickyHeader() {
                       Sign In
                     </Link>
                     <Link
-                      href="/auth/signup/creator"
+                      href="/auth/signup"
                       className="bg-accent hover:bg-accent/90 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300"
                     >
                       Sign Up
@@ -319,7 +319,7 @@ export default function StickyHeader() {
                     Sign In
                   </Link>
                   <Link
-                    href="/auth/signup/creator"
+                    href="/auth/signup"
                     className="bg-accent hover:bg-accent/90 text-white block px-4 py-3 rounded-lg text-base font-bold transition-all duration-300 mt-2"
                     onClick={() => setIsMenuOpen(false)}
                   >

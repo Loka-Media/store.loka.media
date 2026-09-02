@@ -11,6 +11,7 @@ interface RegisterData {
   phone: string;
   password: string;
   confirmPassword: string;
+  role?: string;
   creatorUrl?: string;
 }
 
@@ -83,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: data.email,
         phone: data.phone,
         password: data.password,
+        role: data.role || (data.creatorUrl ? 'creator' : 'customer'),
         ...(data.creatorUrl && { creatorUrl: data.creatorUrl })
       };
 
@@ -111,12 +113,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       toast.success(message);
       return true;
-    } catch (error: unknown) {
-      const message = (error && typeof error === 'object' && 'response' in error &&
-        error.response && typeof error.response === 'object' && 'data' in error.response &&
-        error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data &&
-        typeof error.response.data.error === 'string') ? error.response.data.error : 'Registration failed';
-      toast.error(message);
+    } catch (error: any) {
+      const serverMessage = error?.response?.data?.error || 
+                            error?.response?.data?.message || 
+                            error?.response?.data?.details?.[0]?.msg ||
+                            (typeof error?.response?.data === 'string' ? error.response.data : null) ||
+                            'Registration failed. Email or Phone number may already be registered.';
+      toast.error(serverMessage);
       return false;
     }
   };

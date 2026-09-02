@@ -95,6 +95,7 @@ export interface RegisterData {
   email: string;
   phone: string;
   password: string;
+  role?: string;
   creatorUrl?: string;
 }
 
