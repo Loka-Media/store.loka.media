@@ -78,7 +78,9 @@ export default function ProductPage({ params }: ProductPageProps) {
     return img?.permanent_url || img?.src || img?.url || img?.image_url || img?.preview_url || img?.file_url || '';
   };
 
-  const rawImages = (product.images && product.images.length > 0)
+  const hasSavedImages = Array.isArray(product.images) && product.images.length > 0;
+
+  const rawImages = hasSavedImages
     ? product.images
     : (product.mockups && product.mockups.length > 0)
     ? product.mockups
@@ -105,8 +107,8 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   let images = [...allExtractedImages];
 
-  // Re-order images so that printed design / artwork mockups appear FIRST as primary image
-  if (images.length > 1) {
+  // ONLY auto-sort if the product DOES NOT have saved product.images array set by creator
+  if (!hasSavedImages && images.length > 1) {
     images.sort((a, b) => {
       const aLower = a.toLowerCase();
       const bLower = b.toLowerCase();
@@ -139,20 +141,44 @@ export default function ProductPage({ params }: ProductPageProps) {
     if (product.mockups && product.mockups.length > 0) {
       const filteredMockups = product.mockups.filter(mockup => {
         const mockVariantIds = mockup.variant_ids || [];
+        // CRITICAL FIX: Custom uploaded images and general mockups (with no variant_ids restriction) MUST be included for all colors!
+        if (!mockVariantIds || mockVariantIds.length === 0 || (mockup as any).isCustomUpload || (mockup as any).placement === 'custom') {
+          return true;
+        }
         return mockVariantIds.some(id => colorVariantIds.has(id));
       });
       if (filteredMockups.length > 0) {
-        images = filteredMockups.map(m => m.permanent_url);
+        const filteredUrls = filteredMockups.map(m => extractImageUrl(m)).filter(Boolean);
+        if (hasSavedImages) {
+          // Retain all saved product.images that match the selected color PLUS all custom/general uploaded photos!
+          const filteredSet = new Set(filteredUrls);
+          const matchingSaved = allExtractedImages.filter(url => {
+            if (filteredSet.has(url)) return true;
+            // Check if this URL is a custom upload or general photo not tied to a specific color
+            const isTiedToOtherColor = product.mockups?.some(m => {
+              const mUrl = extractImageUrl(m);
+              const mIds = m.variant_ids || [];
+              return mUrl === url && mIds.length > 0 && !mIds.some(id => colorVariantIds.has(id));
+            });
+            return !isTiedToOtherColor;
+          });
+          images = matchingSaved.length > 0 ? matchingSaved : allExtractedImages;
+        } else {
+          images = filteredUrls;
+        }
       }
+    } else if (hasSavedImages) {
+      // 2. If no mockup metadata, retain allExtractedImages so custom photos are never dropped
+      images = [...allExtractedImages];
     } else {
-      // 2. Try to filter using variant image_url
+      // 3. Try to filter using variant image_url
       const variantImages = colorVariants.map(v => v.image_url).filter(Boolean) as string[];
       if (variantImages.length > 0) {
         const matchedImages = images.filter(img => variantImages.some(vImg => vImg.includes(img) || img.includes(vImg)));
         if (matchedImages.length > 0) {
           images = matchedImages;
         } else {
-          images = Array.from(new Set(variantImages));
+          images = Array.from(new Set([...variantImages, ...images]));
         }
       }
     }

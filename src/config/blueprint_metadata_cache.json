@@ -10898,6 +10898,15 @@
     "colorsCount": 14,
     "providersCount": 4
   },
+  "2848": {
+    "title": "Long Sleeve T-Shirt",
+    "providerId": 52,
+    "price": "14.23",
+    "premiumPrice": "10.96",
+    "sizesCount": 4,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
   "2856": {
     "title": "Women's Performance Tank",
     "providerId": 99,
@@ -12030,6 +12039,15 @@
     "premiumPrice": "12.51",
     "sizesCount": 7,
     "colorsCount": 5,
+    "providersCount": 1
+  },
+  "3145": {
+    "title": "Performance Tee",
+    "providerId": 217,
+    "price": "7.23",
+    "premiumPrice": "5.57",
+    "sizesCount": 8,
+    "colorsCount": 1,
     "providersCount": 1
   },
   "3146": {
@@ -14246,6 +14264,15 @@
     "colorsCount": 14,
     "providersCount": 1
   },
+  "4138": {
+    "title": "Travel Full-Zip Jacket",
+    "providerId": 217,
+    "price": "18.25",
+    "premiumPrice": "14.05",
+    "sizesCount": 8,
+    "colorsCount": 7,
+    "providersCount": 1
+  },
   "4140": {
     "title": "Sport-Wick Textured 1/4-Zip Pullover",
     "providerId": 217,
@@ -14451,6 +14478,15 @@
     "premiumPrice": "20.35",
     "sizesCount": 6,
     "colorsCount": 2,
+    "providersCount": 1
+  },
+  "4571": {
+    "title": "ANSI 107 Class 3 Soft Shell Jacket",
+    "providerId": 217,
+    "price": "9.50",
+    "premiumPrice": "7.32",
+    "sizesCount": 5,
+    "colorsCount": 1,
     "providersCount": 1
   },
   "4583": {
@@ -16946,6 +16982,15 @@
     "colorsCount": 30,
     "providersCount": 6
   },
+  "6816": {
+    "title": "Unisex T-Shirt",
+    "providerId": 217,
+    "price": "14.00",
+    "premiumPrice": "10.78",
+    "sizesCount": 6,
+    "colorsCount": 11,
+    "providersCount": 1
+  },
   "6817": {
     "title": "Unisex Long Sleeve Performance T-Shirt",
     "providerId": 99,
@@ -18755,6 +18800,42 @@
     "colorsCount": 5,
     "providersCount": 1
   },
+  "10742": {
+    "title": "Staple Curve Tank",
+    "providerId": 217,
+    "price": "16.50",
+    "premiumPrice": "12.71",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10745": {
+    "title": "Staple L-S Tee",
+    "providerId": 217,
+    "price": "7.46",
+    "premiumPrice": "5.74",
+    "sizesCount": 8,
+    "colorsCount": 13,
+    "providersCount": 1
+  },
+  "10749": {
+    "title": "Block Safety Tee",
+    "providerId": 217,
+    "price": "7.00",
+    "premiumPrice": "5.39",
+    "sizesCount": 8,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10751": {
+    "title": "Surplus Track Pants",
+    "providerId": 217,
+    "price": "9.50",
+    "premiumPrice": "7.32",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
   "10752": {
     "title": "Women's Organic Rib Tank",
     "providerId": 217,
@@ -18771,6 +18852,15 @@
     "premiumPrice": "8.09",
     "sizesCount": 6,
     "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10756": {
+    "title": "Classic Pocket Tee",
+    "providerId": 217,
+    "price": "10.23",
+    "premiumPrice": "7.88",
+    "sizesCount": 6,
+    "colorsCount": 6,
     "providersCount": 1
   },
   "10758": {
@@ -18798,6 +18888,15 @@
     "premiumPrice": "8.47",
     "sizesCount": 6,
     "colorsCount": 5,
+    "providersCount": 1
+  },
+  "10763": {
+    "title": "Stadium Shorts 20\"",
+    "providerId": 217,
+    "price": "13.50",
+    "premiumPrice": "10.39",
+    "sizesCount": 5,
+    "colorsCount": 3,
     "providersCount": 1
   },
   "10768": {
@@ -18863,6 +18962,15 @@
     "colorsCount": 2,
     "providersCount": 1
   },
+  "10785": {
+    "title": "Bomber Jacket",
+    "providerId": 217,
+    "price": "17.00",
+    "premiumPrice": "13.09",
+    "sizesCount": 4,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
   "10787": {
     "title": "Women's Maple Curve L-S Tee",
     "providerId": 217,
@@ -18872,6 +18980,24 @@
     "colorsCount": 4,
     "providersCount": 1
   },
+  "10790": {
+    "title": "College Bomber Jacket",
+    "providerId": 217,
+    "price": "12.50",
+    "premiumPrice": "9.63",
+    "sizesCount": 3,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10792": {
+    "title": "Section Zip Jacket",
+    "providerId": 217,
+    "price": "16.25",
+    "premiumPrice": "12.51",
+    "sizesCount": 7,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
   "10795": {
     "title": "Women's Classic Tee",
     "providerId": 217,
@@ -18879,6 +19005,60 @@
     "premiumPrice": "10.19",
     "sizesCount": 7,
     "colorsCount": 12,
+    "providersCount": 1
+  },
+  "10796": {
+    "title": "Active Shorts 18\"",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10797": {
+    "title": "Canvas Hooded Jacket",
+    "providerId": 217,
+    "price": "26.50",
+    "premiumPrice": "20.41",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10800": {
+    "title": "Classic L-S Tee",
+    "providerId": 217,
+    "price": "14.00",
+    "premiumPrice": "10.78",
+    "sizesCount": 8,
+    "colorsCount": 15,
+    "providersCount": 1
+  },
+  "10801": {
+    "title": "Work Jacket",
+    "providerId": 217,
+    "price": "9.25",
+    "premiumPrice": "7.12",
+    "sizesCount": 3,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10804": {
+    "title": "Relax Track Pants",
+    "providerId": 217,
+    "price": "10.25",
+    "premiumPrice": "7.89",
+    "sizesCount": 6,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "10806": {
+    "title": "Canvas Heavy Jacket",
+    "providerId": 217,
+    "price": "19.50",
+    "premiumPrice": "15.02",
+    "sizesCount": 6,
+    "colorsCount": 2,
     "providersCount": 1
   },
   "10807": {
@@ -18897,6 +19077,24 @@
     "premiumPrice": "9.43",
     "sizesCount": 1,
     "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10818": {
+    "title": "Relax Track Shorts 18\"",
+    "providerId": 217,
+    "price": "18.00",
+    "premiumPrice": "13.86",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10820": {
+    "title": "Staple Camo Tee",
+    "providerId": 217,
+    "price": "14.46",
+    "premiumPrice": "11.13",
+    "sizesCount": 6,
+    "colorsCount": 2,
     "providersCount": 1
   },
   "10821": {
@@ -18926,6 +19124,33 @@
     "colorsCount": 4,
     "providersCount": 1
   },
+  "10834": {
+    "title": "Classic Tank",
+    "providerId": 217,
+    "price": "10.25",
+    "premiumPrice": "7.89",
+    "sizesCount": 6,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "10835": {
+    "title": "Staple Tear Out Tee",
+    "providerId": 217,
+    "price": "9.46",
+    "premiumPrice": "7.28",
+    "sizesCount": 7,
+    "colorsCount": 13,
+    "providersCount": 1
+  },
+  "10836": {
+    "title": "Block Safety L-S Tee",
+    "providerId": 217,
+    "price": "10.00",
+    "premiumPrice": "7.70",
+    "sizesCount": 8,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
   "10837": {
     "title": "Women's Martina Crop Tee",
     "providerId": 217,
@@ -18953,6 +19178,15 @@
     "colorsCount": 2,
     "providersCount": 1
   },
+  "10843": {
+    "title": "General L-S Tee",
+    "providerId": 217,
+    "price": "13.23",
+    "premiumPrice": "10.19",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
   "10847": {
     "title": "Women's Active Mid Leggings",
     "providerId": 217,
@@ -18962,12 +19196,30 @@
     "colorsCount": 1,
     "providersCount": 1
   },
+  "10848": {
+    "title": "Canvas Chore Jacket",
+    "providerId": 217,
+    "price": "33.50",
+    "premiumPrice": "25.80",
+    "sizesCount": 4,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
   "10850": {
     "title": "Women's Active Shorts",
     "providerId": 217,
     "price": "12.50",
     "premiumPrice": "9.63",
     "sizesCount": 5,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10851": {
+    "title": "Raglan Tee",
+    "providerId": 217,
+    "price": "9.00",
+    "premiumPrice": "6.93",
+    "sizesCount": 3,
     "colorsCount": 1,
     "providersCount": 1
   },
@@ -18989,6 +19241,60 @@
     "colorsCount": 2,
     "providersCount": 1
   },
+  "10856": {
+    "title": "Staple Tank",
+    "providerId": 217,
+    "price": "14.50",
+    "premiumPrice": "11.17",
+    "sizesCount": 6,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10858": {
+    "title": "Relax Faded Track Shorts 18\"",
+    "providerId": 217,
+    "price": "18.25",
+    "premiumPrice": "14.05",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10862": {
+    "title": "Heavy L-S Tee",
+    "providerId": 217,
+    "price": "12.46",
+    "premiumPrice": "9.59",
+    "sizesCount": 6,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "10863": {
+    "title": "Felt Bomber Jacket",
+    "providerId": 217,
+    "price": "13.00",
+    "premiumPrice": "10.01",
+    "sizesCount": 6,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10864": {
+    "title": "Staple Active Tee",
+    "providerId": 217,
+    "price": "10.23",
+    "premiumPrice": "7.88",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10866": {
+    "title": "Relax Cuffless Track Pants",
+    "providerId": 217,
+    "price": "14.00",
+    "premiumPrice": "10.78",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
   "10875": {
     "title": "Women's Relax Crop Crew",
     "providerId": 217,
@@ -18998,6 +19304,15 @@
     "colorsCount": 2,
     "providersCount": 1
   },
+  "10876": {
+    "title": "Staple Minus Tee [-2\"]",
+    "providerId": 217,
+    "price": "14.23",
+    "premiumPrice": "10.96",
+    "sizesCount": 7,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
   "10879": {
     "title": "Women's Active Bra Top",
     "providerId": 217,
@@ -19005,6 +19320,24 @@
     "premiumPrice": "11.74",
     "sizesCount": 6,
     "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10881": {
+    "title": "Classic Plus Tee [+2\"]",
+    "providerId": 217,
+    "price": "7.00",
+    "premiumPrice": "5.39",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10890": {
+    "title": "Classic Pocket L-S Tee",
+    "providerId": 217,
+    "price": "12.00",
+    "premiumPrice": "9.24",
+    "sizesCount": 5,
+    "colorsCount": 2,
     "providersCount": 1
   },
   "10893": {
@@ -19052,6 +19385,15 @@
     "colorsCount": 2,
     "providersCount": 1
   },
+  "10898": {
+    "title": "Staple Plus Tee [+2\"]",
+    "providerId": 217,
+    "price": "8.46",
+    "premiumPrice": "6.51",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
   "10899": {
     "title": "Women's Classic Minus Tee [-2\"]",
     "providerId": 217,
@@ -19067,6 +19409,15 @@
     "price": "9.50",
     "premiumPrice": "7.32",
     "sizesCount": 5,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10902": {
+    "title": "Canvas Bomber Hood Jacket",
+    "providerId": 217,
+    "price": "31.50",
+    "premiumPrice": "24.25",
+    "sizesCount": 7,
     "colorsCount": 2,
     "providersCount": 1
   },
@@ -19097,6 +19448,15 @@
     "colorsCount": 2,
     "providersCount": 1
   },
+  "10911": {
+    "title": "Court Shorts 20\"",
+    "providerId": 217,
+    "price": "9.00",
+    "premiumPrice": "6.93",
+    "sizesCount": 5,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
   "10912": {
     "title": "Women's Maple Tank",
     "providerId": 217,
@@ -19124,6 +19484,51 @@
     "colorsCount": 3,
     "providersCount": 1
   },
+  "10922": {
+    "title": "Classic Oversized Tee",
+    "providerId": 217,
+    "price": "8.46",
+    "premiumPrice": "6.51",
+    "sizesCount": 6,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
+  "10923": {
+    "title": "Staple Organic L-S Tee",
+    "providerId": 217,
+    "price": "13.00",
+    "premiumPrice": "10.01",
+    "sizesCount": 7,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10929": {
+    "title": "Service Jacket",
+    "providerId": 217,
+    "price": "15.00",
+    "premiumPrice": "11.55",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10930": {
+    "title": "Staple Active Blend Tee",
+    "providerId": 217,
+    "price": "8.23",
+    "premiumPrice": "6.34",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10934": {
+    "title": "Block L-S Tee",
+    "providerId": 217,
+    "price": "8.46",
+    "premiumPrice": "6.51",
+    "sizesCount": 6,
+    "colorsCount": 6,
+    "providersCount": 1
+  },
   "10944": {
     "title": "Women's Relax Crew",
     "providerId": 217,
@@ -19131,6 +19536,42 @@
     "premiumPrice": "7.70",
     "sizesCount": 6,
     "colorsCount": 10,
+    "providersCount": 1
+  },
+  "10945": {
+    "title": "Staple Heather Tee",
+    "providerId": 217,
+    "price": "7.23",
+    "premiumPrice": "5.57",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10946": {
+    "title": "Classic Minus Tee [-2\"]",
+    "providerId": 217,
+    "price": "12.46",
+    "premiumPrice": "9.59",
+    "sizesCount": 7,
+    "colorsCount": 8,
+    "providersCount": 1
+  },
+  "10950": {
+    "title": "Block Oversized Tee",
+    "providerId": 217,
+    "price": "8.00",
+    "premiumPrice": "6.16",
+    "sizesCount": 6,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
+  "10951": {
+    "title": "Boxer Shorts",
+    "providerId": 217,
+    "price": "9.25",
+    "premiumPrice": "7.12",
+    "sizesCount": 5,
+    "colorsCount": 2,
     "providersCount": 1
   },
   "10954": {
@@ -19151,6 +19592,42 @@
     "colorsCount": 2,
     "providersCount": 1
   },
+  "10961": {
+    "title": "Active Training Shorts 19\"",
+    "providerId": 217,
+    "price": "9.50",
+    "premiumPrice": "7.32",
+    "sizesCount": 5,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10963": {
+    "title": "Staple Stripe Tee",
+    "providerId": 217,
+    "price": "13.23",
+    "premiumPrice": "10.19",
+    "sizesCount": 6,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "10965": {
+    "title": "Classic Organic Tee",
+    "providerId": 217,
+    "price": "11.00",
+    "premiumPrice": "8.47",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10967": {
+    "title": "Heavy Faded Minus Tee [-2\"]",
+    "providerId": 217,
+    "price": "13.46",
+    "premiumPrice": "10.36",
+    "sizesCount": 6,
+    "colorsCount": 4,
+    "providersCount": 1
+  },
   "10973": {
     "title": "Women's Maple Ringer Tee",
     "providerId": 217,
@@ -19167,6 +19644,42 @@
     "premiumPrice": "11.13",
     "sizesCount": 6,
     "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10979": {
+    "title": "Stone Wash Heavy Tee",
+    "providerId": 217,
+    "price": "9.46",
+    "premiumPrice": "7.28",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 1
+  },
+  "10987": {
+    "title": "Swim Shorts 17\"",
+    "providerId": 217,
+    "price": "11.25",
+    "premiumPrice": "8.66",
+    "sizesCount": 5,
+    "colorsCount": 5,
+    "providersCount": 1
+  },
+  "10988": {
+    "title": "Active Pro Shorts 18\"",
+    "providerId": 217,
+    "price": "18.50",
+    "premiumPrice": "14.25",
+    "sizesCount": 6,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
+  "10990": {
+    "title": "Staple Curve Tee",
+    "providerId": 217,
+    "price": "12.23",
+    "premiumPrice": "9.42",
+    "sizesCount": 6,
+    "colorsCount": 4,
     "providersCount": 1
   },
   "10993": {
@@ -19187,6 +19700,15 @@
     "colorsCount": 1,
     "providersCount": 1
   },
+  "11003": {
+    "title": "Coach Jacket",
+    "providerId": 217,
+    "price": "13.50",
+    "premiumPrice": "10.39",
+    "sizesCount": 6,
+    "colorsCount": 1,
+    "providersCount": 1
+  },
   "11006": {
     "title": "Women's Amy Polo",
     "providerId": 217,
@@ -19203,6 +19725,24 @@
     "premiumPrice": "10.78",
     "sizesCount": 6,
     "colorsCount": 5,
+    "providersCount": 1
+  },
+  "11023": {
+    "title": "Box L S Tee",
+    "providerId": 217,
+    "price": "13.23",
+    "premiumPrice": "10.19",
+    "sizesCount": 5,
+    "colorsCount": 2,
+    "providersCount": 1
+  },
+  "11033": {
+    "title": "Unisex B-Core Pocketed 7\" Shorts",
+    "providerId": 217,
+    "price": "13.50",
+    "premiumPrice": "10.39",
+    "sizesCount": 7,
+    "colorsCount": 9,
     "providersCount": 1
   }
 }

@@ -137,16 +137,16 @@ async function buildPrintifyProductPayload(
     const isSelected = selectedVariantIds.length === 0 || selectedVariantIds.includes(vId);
     const priceVal = typeof v.price === 'string' ? parseFloat(v.price) * 100 : v.price;
     const baseCents: number = typeof priceVal === 'number' && !isNaN(priceVal) ? priceVal : 1500;
-    
+
     // Apply 23% Premium discount (0.77) + 35% Loka Platform markup (1.35) + Creator Markup
     const premiumBaseCents = baseCents * 0.77;
     const lokaBaseCents = premiumBaseCents * 1.35;
     const retailCents = Math.round(lokaBaseCents * (1 + markupPercent / 100));
-    
-    return { 
-      id: vId, 
-      price: retailCents, 
-      is_enabled: isSelected 
+
+    return {
+      id: vId,
+      price: retailCents,
+      is_enabled: isSelected
     };
   });
 
@@ -234,7 +234,7 @@ async function buildPrintifyProductPayload(
     for (const df of designFiles) {
       let rawPlacement: string =
         df.placement ?? df.position ?? df.print_area ?? 'front';
-      
+
       const placement = getValidPlacement(rawPlacement);
 
       (byPlacement[placement] = byPlacement[placement] ?? []).push(df);
@@ -441,27 +441,27 @@ export async function POST(request: NextRequest) {
               console.warn('[Printify Sync] Mockups not ready within polling period.');
             }
 
-// Only publish to Printify shop channel if it is NOT a preview request
-if (!isPreview) {
-  // Fire-and-forget publish to reduce latency
-  (async () => {
-    try {
-      await printifyProductsAPI.publishProduct(printifyProductId);
-      console.log('[Printify Sync] Product published to shop. Waiting 2 seconds for state registration...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      await printifyProductsAPI.setPublishingSucceeded(printifyProductId);
-      console.log('[Printify Sync] Product publishing succeeded set.');
-    } catch (pubErr) {
-      console.warn('[Printify Sync] Shop publish/success step failed (non-fatal):', pubErr);
-      try {
-        const errMsg = (pubErr as any).message || '';
-        if (typeof errMsg === 'string' && (errMsg.includes('code":8254') || (errMsg.includes('Shop') && errMsg.includes('not connected')))) {
-          console.warn('[Printify Sync] Shop not connected to sales channel – skipping publish step.');
-        }
-      } catch (_) {}
-    }
-  })();
-}
+            // Only publish to Printify shop channel if it is NOT a preview request
+            if (!isPreview) {
+              // Fire-and-forget publish to reduce latency
+              (async () => {
+                try {
+                  await printifyProductsAPI.publishProduct(printifyProductId);
+                  console.log('[Printify Sync] Product published to shop. Waiting 2 seconds for state registration...');
+                  await new Promise(resolve => setTimeout(resolve, 2000));
+                  await printifyProductsAPI.setPublishingSucceeded(printifyProductId);
+                  console.log('[Printify Sync] Product publishing succeeded set.');
+                } catch (pubErr) {
+                  console.warn('[Printify Sync] Shop publish/success step failed (non-fatal):', pubErr);
+                  try {
+                    const errMsg = (pubErr as any).message || '';
+                    if (typeof errMsg === 'string' && (errMsg.includes('code":8254') || (errMsg.includes('Shop') && errMsg.includes('not connected')))) {
+                      console.warn('[Printify Sync] Shop not connected to sales channel – skipping publish step.');
+                    }
+                  } catch (_) { }
+                }
+              })();
+            }
           }
         } else {
           console.warn('[Printify Sync] Skipping Printify creation/update — insufficient data in productData.base_product');
@@ -520,13 +520,14 @@ if (!isPreview) {
         let finalMockupUrls = customMockupUrls.length > 0
           ? customMockupUrls
           : bpImg
-          ? [bpImg]
-          : dfImg
-          ? [dfImg]
-          : ['/placeholder-product.svg'];
+            ? [bpImg]
+            : dfImg
+              ? [dfImg]
+              : ['/placeholder-product.svg'];
 
-        // Sort finalMockupUrls so printed design / artwork mockups appear FIRST as thumbnail_url
-        if (finalMockupUrls.length > 1) {
+        // CRITICAL FIX: Only auto-sort finalMockupUrls if the creator DID NOT provide an explicit mockup order list.
+        // If the creator explicitly set an image order, preserve their exact sequence without re-sorting.
+        if (cleanedMockupUrls.length === 0 && finalMockupUrls.length > 1) {
           finalMockupUrls.sort((a, b) => {
             const aLower = a.toLowerCase();
             const bLower = b.toLowerCase();
@@ -547,14 +548,14 @@ if (!isPreview) {
         let finalMockupObjects = (mockupUrls && Array.isArray(mockupUrls) && mockupUrls.length > 0)
           ? mockupUrls
           : printifyMockupObjects.length > 0
-          ? printifyMockupObjects
-          : finalMockupUrls;
+            ? printifyMockupObjects
+            : finalMockupUrls;
 
         const tagsArray = (productData?.tags && Array.isArray(productData.tags) && productData.tags.length > 0)
           ? productData.tags
           : typeof productData?.tags === 'string'
-          ? [productData.tags]
-          : ['Popular'];
+            ? [productData.tags]
+            : ['Popular'];
 
         const updatedProductData = {
           ...productData,
@@ -602,25 +603,25 @@ if (!isPreview) {
         logToFile(`[Printify Sync] Backend save encountered exception: ${backendErr?.message || String(backendErr)}`);
       }
 
-        // ── Step C: Always return success so UI flow completes ─────────────
-        // Ensure UI gets valid image URLs even if DB save failed
-        const responsePayload: any = {
-          success: true,
-          marketplace_ready: true,
-          printify_product_id: printifyProductId,
-          backend_saved: backendSaved,
-          message: printifyProductId
-            ? `Product published to Printify (ID: ${printifyProductId})`
-            : 'Product sync completed',
-          ...(printifyError ? { printify_warning: printifyError } : {}),
-        };
-        // If backend save failed, guarantee placeholder images are present
-        if (!backendSaved) {
-          responsePayload['images'] = ['/placeholder-product.png'];
-          responsePayload['thumbnail_url'] = '/placeholder-product.png';
-          responsePayload['thumbnailUrl'] = '/placeholder-product.png';
-        }
-        return NextResponse.json(responsePayload);
+      // ── Step C: Always return success so UI flow completes ─────────────
+      // Ensure UI gets valid image URLs even if DB save failed
+      const responsePayload: any = {
+        success: true,
+        marketplace_ready: true,
+        printify_product_id: printifyProductId,
+        backend_saved: backendSaved,
+        message: printifyProductId
+          ? `Product published to Printify (ID: ${printifyProductId})`
+          : 'Product sync completed',
+        ...(printifyError ? { printify_warning: printifyError } : {}),
+      };
+      // If backend save failed, guarantee placeholder images are present
+      if (!backendSaved) {
+        responsePayload['images'] = ['/placeholder-product.png'];
+        responsePayload['thumbnail_url'] = '/placeholder-product.png';
+        responsePayload['thumbnailUrl'] = '/placeholder-product.png';
+      }
+      return NextResponse.json(responsePayload);
     }
 
     return NextResponse.json({ error: 'Invalid sync endpoint' }, { status: 400 });

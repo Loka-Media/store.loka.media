@@ -822,6 +822,7 @@ function CanvasContent() {
             onGeneratePreview={debouncedGeneratePreview}
             isGeneratingPreview={isGeneratingMockup}
             mockupUrls={mockupUrls}
+            setMockupUrls={setMockupUrls}
             mockupStatus={mockupStatus}
             onPrintFilesLoaded={handlePrintFilesLoaded}
             onRefreshFiles={fetchUploadedFiles}

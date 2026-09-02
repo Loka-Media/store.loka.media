@@ -29,6 +29,9 @@ import {
   ChevronRight,
   RotateCw,
   Percent,
+  Star,
+  GripVertical,
+  UploadCloud,
 } from "lucide-react";
 import { Slider } from "@mui/material";
 import toast from "react-hot-toast";
@@ -62,6 +65,7 @@ interface UnifiedCanvasPDPProps {
   onGeneratePreview: (updatedDesignFiles?: any[], advancedOptions?: any) => Promise<void>;
   isGeneratingPreview: boolean;
   mockupUrls: any[];
+  setMockupUrls?: React.Dispatch<React.SetStateAction<any[]>>;
   mockupStatus: string;
   onPrintFilesLoaded: (printFiles: any) => void;
   onRefreshFiles: (page?: number) => void;
@@ -657,6 +661,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   onGeneratePreview,
   isGeneratingPreview,
   mockupUrls,
+  setMockupUrls,
   mockupStatus,
   onPrintFilesLoaded,
   onRefreshFiles,
@@ -1469,9 +1474,168 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Track viewer modes (360 interactive vs grid of all mockups)
   const [mockupViewMode, setMockupViewMode] = useState<"360" | "grid">("360");
+  const [isUploadingCustomImage, setIsUploadingCustomImage] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const customFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper to obtain active mockup list or initialize from catalog images
+  const getEffectiveMockups = useCallback(() => {
+    if (mockupUrls && mockupUrls.length > 0) return mockupUrls;
+    const rawImages = selectedProduct?.images || (selectedProduct?.image ? [selectedProduct.image] : []);
+    if (rawImages.length === 0) return [];
+    return rawImages.map((url: string, index: number) => {
+      let placement = "front";
+      if (index === 2 || url.toLowerCase().includes("back") || url.toLowerCase().includes("reverse")) {
+        placement = "back";
+      } else if (url.toLowerCase().includes("left") || url.toLowerCase().includes("sleeve_left")) {
+        placement = "sleeve_left";
+      } else if (url.toLowerCase().includes("right") || url.toLowerCase().includes("sleeve_right")) {
+        placement = "sleeve_right";
+      } else if (index > 0) {
+        placement = `other_${index}`;
+      }
+
+      let title = "Front View";
+      if (placement === "back") title = "Back View";
+      else if (placement === "sleeve_left") title = "Left Sleeve";
+      else if (placement === "sleeve_right") title = "Right Sleeve";
+      else if (placement.startsWith("other_")) title = `Angle View ${index}`;
+
+      return {
+        url,
+        placement,
+        title,
+        variant_ids: []
+      };
+    });
+  }, [mockupUrls, selectedProduct]);
+
+  // Reordering helpers
+  const handleMoveImage = (fromIndex: number, toIndex: number) => {
+    const current = getEffectiveMockups();
+    if (fromIndex < 0 || fromIndex >= current.length || toIndex < 0 || toIndex >= current.length) return;
+    const updated = [...current];
+    const [movedItem] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, movedItem);
+    if (setMockupUrls) {
+      setMockupUrls(updated);
+    }
+    toast.success("Image order updated!", { id: "image-reorder" });
+  };
+
+  const handleSetAsCover = (index: number) => {
+    if (index === 0) return;
+    handleMoveImage(index, 0);
+    toast.success("Set as main cover image!");
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const current = getEffectiveMockups();
+    if (current.length <= 1) {
+      toast.error("Product must have at least 1 image.");
+      return;
+    }
+    const updated = current.filter((_: any, i: number) => i !== index);
+    if (setMockupUrls) {
+      setMockupUrls(updated);
+    }
+    toast.success("Image removed.");
+  };
+
+  // Custom Image Upload Handler
+  const handleCustomImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingCustomImage(true);
+    const toastId = toast.loading(`Uploading ${files.length} custom image(s)...`);
+
+    try {
+      const currentList = getEffectiveMockups();
+      const newItems: any[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        const localDataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+
+        let finalUrl = localDataUrl;
+        try {
+          const uploadRes = await printifyAPI.uploadFileDirectly(file);
+          const remoteUrl = uploadRes?.src || uploadRes?.preview_url || uploadRes?.url || uploadRes?.data?.src || uploadRes?.data?.preview_url;
+          if (remoteUrl) {
+            finalUrl = remoteUrl;
+          }
+        } catch (err) {
+          console.warn("Direct image upload warning, using local preview:", err);
+        }
+
+        newItems.push({
+          url: finalUrl,
+          title: file.name.replace(/\.[^/.]+$/, "") || `Custom Image ${currentList.length + i + 1}`,
+          placement: "custom",
+          isCustomUpload: true,
+          variant_ids: [],
+          id: `custom_${Date.now()}_${i}`
+        });
+      }
+
+      const updated = [...currentList, ...newItems];
+      if (setMockupUrls) {
+        setMockupUrls(updated);
+      }
+      toast.success(`${files.length} custom image(s) uploaded!`, { id: toastId });
+    } catch (err: any) {
+      console.error("Custom image upload error:", err);
+      toast.error("Failed to upload image.", { id: toastId });
+    } finally {
+      setIsUploadingCustomImage(false);
+      if (customFileInputRef.current) {
+        customFileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // HTML5 Drag and Drop handlers for Image Reordering
+  const handleImageDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  };
+
+  const handleImageDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleImageDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== dropIndex) {
+      handleMoveImage(draggedIndex, dropIndex);
+    }
+    setDraggedIndex(null);
+  };
+
+  const handleImageDragEnd = () => {
+    setDraggedIndex(null);
+  };
 
   return (
     <div className="bg-[#050505] min-h-screen text-white relative pt-[30px] md:pt-[40px]">
+      {/* Hidden input for custom image uploads */}
+      <input
+        type="file"
+        ref={customFileInputRef}
+        accept="image/*"
+        multiple
+        onChange={handleCustomImageUpload}
+        className="hidden"
+      />
+
       {/* Sticky Header with Product Info & Continue Button - offset by navbar height + 10px spacing */}
       <div className="sticky top-[90px] md:top-[98px] z-40 bg-black/80 backdrop-blur-md border-b border-white/10 py-3 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
@@ -1484,10 +1648,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             </p>
           </div>
           <div className="flex-shrink-0 flex items-center gap-2">
-            <div title={mockupStatus !== 'Mockups loaded successfully!' ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
+            <div title={mockupStatus !== 'Mockups loaded successfully!' && mockupUrls.length === 0 ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
               <Button
                 onClick={handlePublishSubmit}
-                disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || mockupStatus !== 'Mockups loaded successfully!'}
+                disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || (mockupUrls.length === 0 && mockupStatus !== 'Mockups loaded successfully!')}
                 className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 {isPublishing ? (
@@ -2021,13 +2185,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
                 )}
 
-                {/* Tab selector for 360° interactive vs grid of mockups */}
-                {mockupUrls && mockupUrls.length > 0 && !isGeneratingPreview && (
-                  <div className="flex border border-white/10 rounded-xl p-1 bg-black/40 w-fit">
+                {/* Image Mode & Upload Bar */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-black/40 p-2 rounded-2xl border border-white/10">
+                  <div className="flex border border-white/10 rounded-xl p-1 bg-black/60">
                     <button
                       type="button"
                       onClick={() => setMockupViewMode("360")}
-                      className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${mockupViewMode === "360"
+                      className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${mockupViewMode === "360"
                         ? "bg-[#FF6D1F] text-white"
                         : "text-gray-400 hover:text-white"
                         }`}
@@ -2038,22 +2202,42 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <button
                       type="button"
                       onClick={() => setMockupViewMode("grid")}
-                      className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${mockupViewMode === "grid"
+                      className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${mockupViewMode === "grid"
                         ? "bg-[#FF6D1F] text-white"
                         : "text-gray-400 hover:text-white"
                         }`}
                     >
                       <Palette className="w-3.5 h-3.5" />
-                      Grid View
+                      Grid & Reorder
                     </button>
                   </div>
-                )}
+
+                  {/* Upload Custom Image Button */}
+                  <Button
+                    type="button"
+                    onClick={() => customFileInputRef.current?.click()}
+                    disabled={isUploadingCustomImage}
+                    className="bg-gradient-to-r from-[#FF6D1F] to-orange-600 hover:from-orange-600 hover:to-[#FF6D1F] text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-[0_0_15px_rgba(255,109,31,0.25)] flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    {isUploadingCustomImage ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-4 h-4" />
+                        <span>Upload Custom Photo</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
 
                 <div className="w-full">
                   {isGeneratingPreview ? (
                     // Mockup Grid Loading State Skeletons
-                    <div className="grid grid-cols-2 gap-4">
-                      {Array.from({ length: 4 }).map((_, i) => (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      {Array.from({ length: 3 }).map((_, i) => (
                         <div
                           key={i}
                           className="aspect-square bg-gray-800/40 rounded-2xl border border-white/5 animate-pulse flex flex-col items-center justify-center gap-2"
@@ -2063,11 +2247,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         </div>
                       ))}
                     </div>
-                  ) : (mockupUrls && mockupUrls.length > 0) || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
+                  ) : getEffectiveMockups().length > 0 ? (
                     mockupViewMode === "360" ? (
                       <div className="max-w-md mx-auto">
                         <Product360Viewer
-                          mockupUrls={mockupUrls}
+                          mockupUrls={getEffectiveMockups()}
                           images={selectedProduct?.images || []}
                           defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
                           productName={selectedProduct?.title || selectedProduct?.name}
@@ -2078,92 +2262,139 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         />
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-4">
-                        {((mockupUrls && mockupUrls.length > 0) ? mockupUrls : (selectedProduct?.images || []).map((url: string, index: number) => {
-                          let placement = "front";
-                          if (index === 2 || url.toLowerCase().includes("back") || url.toLowerCase().includes("reverse")) {
-                            placement = "back";
-                          } else if (url.toLowerCase().includes("left") || url.toLowerCase().includes("sleeve_left")) {
-                            placement = "sleeve_left";
-                          } else if (url.toLowerCase().includes("right") || url.toLowerCase().includes("sleeve_right")) {
-                            placement = "sleeve_right";
-                          } else if (index > 0) {
-                            placement = `other_${index}`;
-                          }
+                      <div className="space-y-4">
+                        {/* Notice Banner */}
+                        <div className="bg-orange-500/10 border border-orange-500/30 p-3 rounded-xl flex items-center justify-between text-xs text-orange-300">
+                          <div className="flex items-center gap-2">
+                            <Star className="w-4 h-4 text-orange-400 fill-orange-400 flex-shrink-0" />
+                            <span>
+                              Image <strong>#1 (★ COVER)</strong> will publish as main product thumbnail. Drag cards or use arrows to change order.
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-gray-400 font-mono flex-shrink-0 ml-2">
+                            {getEffectiveMockups().length} image(s)
+                          </span>
+                        </div>
 
-                          let title = "Front View";
-                          if (placement === "back") title = "Back View";
-                          else if (placement === "sleeve_left") title = "Left Sleeve";
-                          else if (placement === "sleeve_right") title = "Right Sleeve";
-                          else if (placement.startsWith("other_")) title = `Angle View ${index}`;
+                        {/* Interactive Image Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {getEffectiveMockups().map((m: any, index: number) => {
+                            const isCover = index === 0;
+                            const isBlueprint = !mockupUrls || mockupUrls.length === 0;
+                            const design = isBlueprint ? designFiles.find(d => d.placement === m.placement) : null;
+                            const effectivePlacement = design ? design.placement : (m.placement || "front");
 
-                          return {
-                            url,
-                            placement,
-                            title,
-                          };
-                        })).map((m: any, index: number) => {
-                          const isBlueprint = !mockupUrls || mockupUrls.length === 0;
-
-                          // Find overlay design if we don't have generated mockups
-                          const design = isBlueprint ? designFiles.find(d => d.placement === m.placement) : null;
-                          const effectivePlacement = design ? design.placement : (m.placement || "front");
-
-                          const MOCKUP_PRINT_AREAS: Record<string, { width: number; height: number; top: number; left: number }> = {
-                            front: { width: 33, height: 45, top: 24, left: 33.5 },
-                            back: { width: 33, height: 45, top: 22, left: 33.5 },
-                            left: { width: 15, height: 15, top: 32, left: 42.5 },
-                            right: { width: 15, height: 15, top: 32, left: 42.5 },
-                            sleeve_left: { width: 15, height: 15, top: 32, left: 42.5 },
-                            sleeve_right: { width: 15, height: 15, top: 32, left: 42.5 },
-                          };
-                          const area = MOCKUP_PRINT_AREAS[effectivePlacement] || MOCKUP_PRINT_AREAS.front;
-
-                          let designStyle: React.CSSProperties = {};
-                          if (design && design.position) {
-                            const w = (design.position.width / design.position.area_width) * 100;
-                            const h = (design.position.height / design.position.area_height) * 100;
-                            const t = (design.position.top / design.position.area_height) * 100;
-                            const l = (design.position.left / design.position.area_width) * 100;
-                            designStyle = {
-                              width: `${w}%`,
-                              height: `${h}%`,
-                              top: `${t}%`,
-                              left: `${l}%`,
-                              position: "absolute",
-                            };
-                          }
-                          return (
-                            <div
-                              key={index}
-                              className={`border border-white/10 rounded-2xl overflow-hidden hover:shadow-[0_10px_30px_rgba(255,109,31,0.1)] transition-all duration-300 relative aspect-square p-6 ${isBlueprint ? "bg-[#f4f4f5]" : "bg-black/40"
+                            return (
+                              <div
+                                key={m.id || m.url || index}
+                                draggable
+                                onDragStart={(e) => handleImageDragStart(e, index)}
+                                onDragOver={(e) => handleImageDragOver(e, index)}
+                                onDrop={(e) => handleImageDrop(e, index)}
+                                onDragEnd={handleImageDragEnd}
+                                className={`border rounded-2xl overflow-hidden transition-all duration-300 relative aspect-square p-3.5 flex flex-col justify-between group ${
+                                  draggedIndex === index
+                                    ? "opacity-40 border-dashed border-orange-500 bg-orange-500/10"
+                                    : isCover
+                                    ? "border-orange-500/70 bg-gradient-to-b from-orange-950/30 via-gray-900/80 to-black/60 shadow-[0_0_25px_rgba(255,109,31,0.2)]"
+                                    : "border-white/10 bg-black/50 hover:border-white/20"
                                 }`}
-                            >
-                              {isBlueprint ? (
-                                <div className="relative w-full h-full flex items-center justify-center">
+                              >
+                                {/* Top Bar: Badge & Action Controls */}
+                                <div className="flex items-center justify-between gap-1 z-20">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                                      isCover
+                                        ? "bg-[#FF6D1F] text-white flex items-center gap-1 shadow-sm"
+                                        : "bg-black/80 text-gray-300 border border-white/10"
+                                    }`}>
+                                      {isCover ? <>★ COVER</> : `#${index + 1}`}
+                                    </span>
+                                    {m.isCustomUpload && (
+                                      <span className="text-[9px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded">
+                                        Custom
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  <div className="flex items-center gap-1 bg-black/80 backdrop-blur-md p-1 rounded-lg border border-white/10">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMoveImage(index, index - 1)}
+                                      disabled={index === 0}
+                                      title="Move Left / Earlier"
+                                      className="p-1 text-gray-400 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 rounded transition"
+                                    >
+                                      <ChevronLeft className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMoveImage(index, index + 1)}
+                                      disabled={index === getEffectiveMockups().length - 1}
+                                      title="Move Right / Later"
+                                      className="p-1 text-gray-400 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 rounded transition"
+                                    >
+                                      <ChevronRight className="w-3.5 h-3.5" />
+                                    </button>
+                                    {!isCover && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSetAsCover(index)}
+                                        title="Set as Primary Cover Image"
+                                        className="p-1 text-amber-400 hover:text-amber-300 hover:bg-amber-500/20 rounded transition text-[10px] font-bold flex items-center gap-0.5 px-1.5"
+                                      >
+                                        <Star className="w-3 h-3 fill-amber-400" />
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveImage(index)}
+                                      title="Delete Image"
+                                      className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded transition"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Image Preview Container */}
+                                <div className="relative w-full h-full flex items-center justify-center my-1 overflow-hidden cursor-grab active:cursor-grabbing">
                                   <img
                                     src={m.url}
-                                    alt={m.title || `Catalog Image ${index + 1}`}
-                                    className="w-full h-full object-contain pointer-events-none"
+                                    alt={m.title || `Mockup ${index + 1}`}
+                                    className="w-full h-full object-contain pointer-events-none transition-transform duration-300 group-hover:scale-105"
                                   />
                                 </div>
-                              ) : (
-                                <img src={m.url} alt={m.title || `Mockup ${index + 1}`} className="w-full h-full object-contain pointer-events-none" />
-                              )}
 
-                              <div className="absolute bottom-0 inset-x-0 bg-gray-900/80 p-2 text-center text-[10px] sm:text-xs text-gray-400 border-t border-white/5 z-20">
-                                {m.title || "Product View"}
+                                {/* Bottom Info Bar */}
+                                <div className="flex items-center justify-between bg-gray-900/90 backdrop-blur-md p-1.5 px-2.5 rounded-xl border border-white/5 text-[11px] text-gray-300 z-20">
+                                  <span className="truncate max-w-[130px] font-medium">{m.title || `View ${index + 1}`}</span>
+                                  <div className="flex items-center gap-1 text-gray-500 cursor-grab" title="Drag to reorder">
+                                    <GripVertical className="w-3.5 h-3.5 text-gray-400" />
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
                       </div>
                     )
                   ) : (
-                    <div className="py-12 text-center bg-black/20 rounded-2xl border border-white/5">
-                      <ScanEye className="w-10 h-10 text-gray-600 mx-auto mb-2" />
-                      <p className="text-sm text-gray-400">No previews generated yet</p>
-                      <p className="text-xs text-gray-500 mt-1">Select variants and add a design to preview</p>
+                    <div className="py-12 text-center bg-black/20 rounded-2xl border border-white/5 space-y-3">
+                      <ScanEye className="w-10 h-10 text-gray-600 mx-auto" />
+                      <div>
+                        <p className="text-sm text-gray-400 font-medium">No previews or custom photos added yet</p>
+                        <p className="text-xs text-gray-500 mt-1">Generate mockups or upload custom product images</p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => customFileInputRef.current?.click()}
+                        className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-xl"
+                      >
+                        <UploadCloud className="w-4 h-4 mr-1.5" />
+                        Upload Custom Photo
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -2583,10 +2814,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             </div>
           </div>
         </div>
-        <div title={mockupStatus !== 'Mockups loaded successfully!' ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
+        <div title={mockupStatus !== 'Mockups loaded successfully!' && mockupUrls.length === 0 ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
           <Button
             onClick={handlePublishSubmit}
-            disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || mockupStatus !== 'Mockups loaded successfully!'}
+            disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || (mockupUrls.length === 0 && mockupStatus !== 'Mockups loaded successfully!')}
             className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPublishing ? "Publishing..." : "Publish Product"}
