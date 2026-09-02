@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { productAPI } from '@/lib/api';
-import { ArrowLeft, Save, Eye, X, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { productAPI, printifyAPI } from '@/lib/api';
+import { ArrowLeft, Save, Eye, X, Plus, ChevronLeft, ChevronRight, Trash2, Star, GripVertical, UploadCloud, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
@@ -81,6 +81,124 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
   const [newTag, setNewTag] = useState('');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [carouselScroll, setCarouselScroll] = useState(0);
+  const [isUploadingCustomImage, setIsUploadingCustomImage] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Reorder helper
+  const handleMoveImage = (fromIndex: number, toIndex: number) => {
+    if (fromIndex < 0 || fromIndex >= formData.images.length || toIndex < 0 || toIndex >= formData.images.length) return;
+    const updated = [...formData.images];
+    const [movedItem] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, movedItem);
+
+    setFormData(prev => ({ ...prev, images: updated, thumbnailUrl: updated[0] }));
+    if (selectedImageIndex === fromIndex) {
+      setSelectedImageIndex(toIndex);
+    }
+    toast.success("Image order updated!", { id: "edit-reorder-toast" });
+  };
+
+  // Set Cover Image (#1) helper
+  const handleSetAsCover = (index: number) => {
+    if (index === 0) return;
+    handleMoveImage(index, 0);
+    setSelectedImageIndex(0);
+    toast.success("Set as main cover thumbnail!");
+  };
+
+  // Delete image helper
+  const handleRemoveImage = (indexToRemove: number) => {
+    if (formData.images.length <= 1) {
+      toast.error("Product must have at least 1 image.");
+      return;
+    }
+    const updated = formData.images.filter((_, i) => i !== indexToRemove);
+    setFormData(prev => ({
+      ...prev,
+      images: updated,
+      thumbnailUrl: updated[0] || ''
+    }));
+    if (selectedImageIndex >= updated.length) {
+      setSelectedImageIndex(Math.max(0, updated.length - 1));
+    }
+    toast.success("Image removed.");
+  };
+
+  // Custom image upload handler
+  const handleCustomImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingCustomImage(true);
+    const toastId = toast.loading(`Uploading ${files.length} custom image(s)...`);
+
+    try {
+      const newUrls: string[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        const localDataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+
+        let finalUrl = localDataUrl;
+        try {
+          const uploadRes = await printifyAPI.uploadFileDirectly(file);
+          const remoteUrl = uploadRes?.src || uploadRes?.preview_url || uploadRes?.url || uploadRes?.data?.src || uploadRes?.data?.preview_url;
+          if (remoteUrl) {
+            finalUrl = remoteUrl;
+          }
+        } catch (err) {
+          console.warn("Direct image upload warning, using local preview:", err);
+        }
+        newUrls.push(finalUrl);
+      }
+
+      const updated = [...formData.images, ...newUrls];
+      setFormData(prev => ({
+        ...prev,
+        images: updated,
+        thumbnailUrl: updated[0]
+      }));
+      toast.success(`${files.length} custom image(s) uploaded!`, { id: toastId });
+    } catch (err) {
+      console.error("Custom image upload error:", err);
+      toast.error("Failed to upload image.", { id: toastId });
+    } finally {
+      setIsUploadingCustomImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // HTML5 Drag and Drop handlers for Image Reordering
+  const handleImageDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  };
+
+  const handleImageDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleImageDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== dropIndex) {
+      handleMoveImage(draggedIndex, dropIndex);
+    }
+    setDraggedIndex(null);
+  };
+
+  const handleImageDragEnd = () => {
+    setDraggedIndex(null);
+  };
 
   useEffect(() => {
     params.then((resolvedParams) => {
@@ -176,8 +294,15 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
       return;
     }
 
+    if (!formData.images || formData.images.length === 0) {
+      toast.error("Product must have at least 1 image.");
+      return;
+    }
+
     try {
       setSaving(true);
+
+      const mainCoverUrl = formData.images[0] || formData.thumbnailUrl;
 
       const updateData = {
         name: formData.name.trim(),
@@ -185,7 +310,8 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
         markupPercentage: markupValue,
         category: formData.category.trim(),
         tags: formData.tags,
-        thumbnailUrl: formData.thumbnailUrl,
+        thumbnailUrl: mainCoverUrl,
+        thumbnail_url: mainCoverUrl,
         images: formData.images,
         status: formData.isActive ? 'active' : 'inactive',
         is_active: formData.isActive,
@@ -464,102 +590,193 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
           </div>
 
           {/* Product Images */}
-          <div className="bg-white/5 rounded-lg sm:rounded-xl shadow-xl p-3 sm:p-4 md:p-6 border border-white/10 backdrop-blur-sm">
-            <div className="text-base sm:text-lg md:text-xl font-bold text-white mb-3 sm:mb-6">Product Images</div>
+          <div className="bg-white/5 rounded-lg sm:rounded-xl shadow-xl p-3 sm:p-4 md:p-6 border border-white/10 backdrop-blur-sm space-y-4 sm:space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <div className="text-base sm:text-lg md:text-xl font-bold text-white">Product Gallery & Reorder</div>
+                <p className="text-xs text-white/60 mt-0.5">
+                  Upload new photos, drag cards or use arrows to change sequence. <strong>Image #1 (★ COVER)</strong> is the storefront main thumbnail.
+                </p>
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                multiple
+                onChange={handleCustomImageUpload}
+                className="hidden"
+              />
+
+              {/* Upload Custom Image Button */}
+              <Button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingCustomImage}
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {isUploadingCustomImage ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud className="w-4 h-4" />
+                    <span>Upload Custom Photo</span>
+                  </>
+                )}
+              </Button>
+            </div>
 
             {formData.images.length > 0 ? (
-              <div className="space-y-3 sm:space-y-4">
-                {/* Main Image */}
-                <div className="relative">
-                  <div className="aspect-square overflow-hidden rounded-xl bg-white/5 border border-white/10 relative">
-                    <Image
-                      src={formData.images[selectedImageIndex]}
-                      alt="Selected product image"
-                      width={600}
-                      height={600}
-                      className="w-full h-full object-cover"
-                      unoptimized
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder-product.svg';
-                      }}
-                    />
+              <div className="space-y-6">
+                {/* Main Preview Container */}
+                <div className="relative max-w-md mx-auto aspect-square overflow-hidden rounded-2xl bg-black/60 border border-white/15 p-4 flex items-center justify-center">
+                  <Image
+                    src={formData.images[selectedImageIndex] || formData.images[0]}
+                    alt="Selected product image"
+                    width={600}
+                    height={600}
+                    className="w-full h-full object-contain"
+                    unoptimized
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder-product.svg';
+                    }}
+                  />
 
-                    {/* Image Counter */}
-                    {formData.images.length > 1 && (
-                      <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-lg">
-                        <span className="text-white font-medium text-xs sm:text-sm">
-                          {selectedImageIndex + 1} / {formData.images.length}
-                        </span>
-                      </div>
-                    )}
+                  {/* Badge on main preview */}
+                  <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg flex items-center gap-1.5">
+                    <span className="text-xs font-extrabold text-orange-400">
+                      {selectedImageIndex === 0 ? "★ COVER THUMBNAIL (#1)" : `IMAGE #${selectedImageIndex + 1}`}
+                    </span>
+                  </div>
+
+                  {/* Counter */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md border border-white/20 px-3 py-1 rounded-lg">
+                    <span className="text-white/80 font-mono text-xs">
+                      {selectedImageIndex + 1} / {formData.images.length}
+                    </span>
                   </div>
                 </div>
 
-                {/* Thumbnail Carousel */}
-                {formData.images.length > 1 && (
-                  <div className="relative group">
-                    <div className="overflow-x-auto scrollbar-hide" data-carousel-container>
-                      <div className="flex gap-2 sm:gap-3 pb-2">
-                        {formData.images.map((image, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => setSelectedImageIndex(index)}
-                            className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden border transition-all ${
-                              selectedImageIndex === index
-                                ? 'border-white/40 ring-2 ring-white/20'
-                                : 'border-white/10 hover:border-white/20'
-                            }`}
-                          >
+                {/* Reorderable Thumbnails Grid */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-xs text-white/70">
+                    <span className="font-semibold">All Product Images ({formData.images.length})</span>
+                    <span className="text-[11px] text-white/40">Drag images or use arrow controls</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {formData.images.map((image, index) => {
+                      const isCover = index === 0;
+                      const isSelected = selectedImageIndex === index;
+
+                      return (
+                        <div
+                          key={index}
+                          draggable
+                          onDragStart={(e) => handleImageDragStart(e, index)}
+                          onDragOver={(e) => handleImageDragOver(e, index)}
+                          onDrop={(e) => handleImageDrop(e, index)}
+                          onDragEnd={handleImageDragEnd}
+                          onClick={() => setSelectedImageIndex(index)}
+                          className={`group relative rounded-xl border p-2 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
+                            draggedIndex === index
+                              ? "opacity-40 border-dashed border-orange-500 bg-orange-500/10"
+                              : isSelected
+                              ? "border-orange-500 bg-orange-500/10 ring-2 ring-orange-500/30"
+                              : isCover
+                              ? "border-amber-500/60 bg-white/5"
+                              : "border-white/10 bg-black/40 hover:border-white/20"
+                          }`}
+                        >
+                          {/* Header Controls */}
+                          <div className="flex items-center justify-between gap-1 mb-2 z-10">
+                            <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
+                              isCover ? "bg-orange-500 text-white" : "bg-white/10 text-white/70"
+                            }`}>
+                              {isCover ? "★ COVER" : `#${index + 1}`}
+                            </span>
+
+                            <div className="flex items-center gap-0.5 bg-black/80 rounded-lg p-0.5 border border-white/10">
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); handleMoveImage(index, index - 1); }}
+                                disabled={index === 0}
+                                title="Move Earlier"
+                                className="p-1 text-white/50 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 rounded"
+                              >
+                                <ChevronLeft className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); handleMoveImage(index, index + 1); }}
+                                disabled={index === formData.images.length - 1}
+                                title="Move Later"
+                                className="p-1 text-white/50 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 rounded"
+                              >
+                                <ChevronRight className="w-3 h-3" />
+                              </button>
+                              {!isCover && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); handleSetAsCover(index); }}
+                                  title="Set as Main Cover (#1)"
+                                  className="p-1 text-amber-400 hover:text-amber-300 hover:bg-amber-500/20 rounded"
+                                >
+                                  <Star className="w-3 h-3 fill-amber-400" />
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }}
+                                title="Delete Image"
+                                className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Thumbnail Image */}
+                          <div className="aspect-square relative overflow-hidden rounded-lg bg-black/40 flex items-center justify-center">
                             <Image
                               src={image}
                               alt={`Product view ${index + 1}`}
-                              width={100}
-                              height={100}
-                              className="w-full h-full object-cover"
+                              width={150}
+                              height={150}
+                              className="w-full h-full object-contain pointer-events-none transition-transform group-hover:scale-105"
                               unoptimized
                               onError={(e) => {
                                 e.currentTarget.src = '/placeholder-product.svg';
                               }}
                             />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                          </div>
 
-                    {/* Left Arrow */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const container = document.querySelector('[data-carousel-container]');
-                        if (container) {
-                          container.scrollBy({ left: -100, behavior: 'smooth' });
-                        }
-                      }}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-
-                    {/* Right Arrow */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const container = document.querySelector('[data-carousel-container]');
-                        if (container) {
-                          container.scrollBy({ left: 100, behavior: 'smooth' });
-                        }
-                      }}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-white/20 border border-white/20 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                          {/* Footer Drag Handle */}
+                          <div className="flex items-center justify-between text-[10px] text-white/40 mt-1.5 px-1">
+                            <span className="truncate">View {index + 1}</span>
+                            <GripVertical className="w-3 h-3 text-white/40 cursor-grab" />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
+                </div>
               </div>
             ) : (
-              <div className="p-8 text-center bg-white/5 rounded-lg border border-white/10">
-                <p className="text-white/60 mb-3">No product images available</p>
+              <div className="p-8 text-center bg-white/5 rounded-xl border border-white/10 space-y-3">
+                <p className="text-white/60">No product images available</p>
+                <Button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-4 py-2 rounded-xl"
+                >
+                  <UploadCloud className="w-4 h-4 mr-1.5" />
+                  Upload Custom Photo
+                </Button>
               </div>
             )}
           </div>
