@@ -410,13 +410,89 @@ function CreatorShopContent() {
     );
   }
 
+  const cleanCat = (str: string) => str.toLowerCase().trim().replace(/[-_&]/g, ' ');
+
+  // Helper for resilient category matching
+  const isCategoryMatch = (product: any, filterValue: string) => {
+    if (!filterValue || filterValue === "all" || filterValue === "") return true;
+    const target = cleanCat(filterValue);
+    const prodCat = cleanCat(product.category || "");
+    
+    // Direct match
+    if (prodCat === target) return true;
+
+    // Specific gender/target rules to prevent cross-contamination (e.g. Men vs Women)
+    if (target === "men") {
+      if (prodCat.includes("women") || prodCat.includes("woman")) return false;
+      return prodCat.includes("men") || prodCat.includes("man") || prodCat.startsWith("men");
+    }
+
+    if (target === "women") {
+      return prodCat.includes("women") || prodCat.includes("woman") || prodCat.includes("womens");
+    }
+
+    if (target === "kids") {
+      return prodCat.includes("kid") || prodCat.includes("child") || prodCat.includes("youth") || prodCat.includes("baby") || prodCat.includes("toddler");
+    }
+
+    if (target === "unisex") {
+      return prodCat.includes("unisex");
+    }
+
+    // Exact or substring match on product category or tags
+    if (prodCat.includes(target) || target.includes(prodCat)) return true;
+
+    const rawTags = (product as any).tags;
+    const tagsList: string[] = Array.isArray(rawTags)
+      ? rawTags
+      : typeof rawTags === "string"
+      ? (rawTags as string).split(",")
+      : [];
+    return tagsList.some((t) => cleanCat(String(t)).includes(target));
+  };
+
+  // Compute categories dynamically from creator's active products
+  const displayCategories = useMemo(() => {
+    if (!products || products.length === 0) return categories;
+
+    const counts: Record<string, { category: string; count: number }> = {};
+    products.forEach((p) => {
+      if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return;
+      const cat = p.category?.trim();
+      if (!cat) return;
+      const key = cleanCat(cat);
+      if (!counts[key]) {
+        counts[key] = { category: cat, count: 0 };
+      }
+      counts[key].count += 1;
+    });
+
+    const list = Object.values(counts).map((item) => ({
+      category: item.category,
+      product_count: item.count,
+    }));
+
+    if (list.length > 0) {
+      return list.sort((a, b) => b.product_count - a.product_count);
+    }
+    return categories;
+  }, [products, categories]);
+
   const displayProducts = useMemo(() => {
     if (!products || products.length === 0) return [];
 
+    // Step 1: Filter strictly by selected category
+    let pool = products.filter((p) => {
+      if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
+      if (filters.category && !isCategoryMatch(p, filters.category)) return false;
+      return true;
+    });
+
+    // Step 2: Handle activeView (trending, new, popular)
     if (activeView === "trending" || activeView === "new" || activeView === "popular") {
       const targetTag = activeView.toLowerCase();
       
-      const taggedProducts = products.filter((p) => {
+      const taggedProducts = pool.filter((p) => {
         const rawTags = (p as any).tags;
         const tagsList: string[] = Array.isArray(rawTags)
           ? rawTags
@@ -431,7 +507,7 @@ function CreatorShopContent() {
       }
 
       // Fallback: If no products have this explicit tag in DB, sort products so page never shows 0 products unexpectedly
-      const sorted = [...products];
+      const sorted = [...pool];
       if (activeView === "new" || activeView === "trending") {
         return sorted.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
       } else if (activeView === "popular") {
@@ -439,8 +515,8 @@ function CreatorShopContent() {
       }
     }
 
-    return products;
-  }, [products, activeView]);
+    return pool;
+  }, [products, filters.category, activeView]);
 
   return (
     <div className="bg-black text-white min-h-screen pt-12 sm:pt-16">
@@ -514,17 +590,17 @@ function CreatorShopContent() {
                 >
                   All
                 </button>
-                {categories.map((cat) => (
+                {displayCategories.map((cat) => (
                   <button
                     key={cat.category}
                     onClick={() => handleFilterChange("category", cat.category)}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold border transition-all flex-shrink-0 whitespace-nowrap ${
-                      filters.category === cat.category
-                        ? "bg-orange-500 text-white border-orange-500"
+                    className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold border transition-all flex-shrink-0 whitespace-nowrap cursor-pointer ${
+                      cleanCat(filters.category) === cleanCat(cat.category)
+                        ? "bg-orange-500 text-white border-orange-500 shadow-md"
                         : "border-white/30 text-white/80 hover:border-white/60"
                     }`}
                   >
-                    {cat.category}
+                    {cat.category} ({cat.product_count})
                   </button>
                 ))}
               </div>

@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: data.email,
         phone: data.phone,
         password: data.password,
-        role: data.role || (data.creatorUrl ? 'creator' : 'customer'),
+        role: data.role === 'customer' ? 'user' : (data.role || (data.creatorUrl ? 'creator' : 'user')),
         ...(data.creatorUrl && { creatorUrl: data.creatorUrl })
       };
 
@@ -114,12 +114,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.success(message);
       return true;
     } catch (error: any) {
-      const serverMessage = error?.response?.data?.error || 
-                            error?.response?.data?.message || 
-                            error?.response?.data?.details?.[0]?.msg ||
-                            (typeof error?.response?.data === 'string' ? error.response.data : null) ||
-                            'Registration failed. Email or Phone number may already be registered.';
-      toast.error(serverMessage);
+      const data = error?.response?.data;
+      let serverMessage = '';
+
+      // 1. Check array details (express-validator / zod)
+      if (data && Array.isArray(data.details) && data.details.length > 0) {
+        const msgs = data.details.map((d: any) => {
+          if (typeof d === 'string') return d;
+          const field = d.path || d.param || d.field;
+          const msg = d.msg || d.message;
+          if (field && msg) {
+            const cleanField = field.charAt(0).toUpperCase() + field.slice(1);
+            return `${cleanField}: ${msg}`;
+          }
+          return msg || d?.error || null;
+        }).filter(Boolean);
+
+        if (msgs.length > 0) serverMessage = msgs.join(' | ');
+      }
+
+      // 2. Check array errors
+      if (!serverMessage && data && Array.isArray(data.errors) && data.errors.length > 0) {
+        const msgs = data.errors.map((d: any) => {
+          if (typeof d === 'string') return d;
+          const field = d.path || d.param || d.field;
+          const msg = d.msg || d.message;
+          if (field && msg) {
+            const cleanField = field.charAt(0).toUpperCase() + field.slice(1);
+            return `${cleanField}: ${msg}`;
+          }
+          return msg || d?.error || null;
+        }).filter(Boolean);
+
+        if (msgs.length > 0) serverMessage = msgs.join(' | ');
+      }
+
+      // 3. Check string details
+      if (!serverMessage && typeof data?.details === 'string' && data.details.trim()) {
+        serverMessage = data.details;
+      }
+
+      // 4. Check specific message field (skip generic "Validation failed")
+      if (!serverMessage && typeof data?.message === 'string' && data.message.trim() && data.message !== 'Validation failed') {
+        serverMessage = data.message;
+      }
+
+      // 5. Check specific error field (skip generic "Validation failed")
+      if (!serverMessage && typeof data?.error === 'string' && data.error.trim() && data.error !== 'Validation failed') {
+        serverMessage = data.error;
+      }
+
+      // 6. Check raw response string
+      if (!serverMessage && typeof data === 'string' && data.trim()) {
+        serverMessage = data;
+      }
+
+      // 7. Fallback
+      if (!serverMessage) {
+        serverMessage = 'Registration failed. Email or Phone number may already be registered.';
+      }
+
+      toast.error(serverMessage, { duration: 6000 });
       return false;
     }
   };

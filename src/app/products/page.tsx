@@ -248,8 +248,41 @@ function ProductsContent() {
 
   // Helper for category matching
   const isCategoryMatch = (product: any, filterValue: string) => {
-    if (!filterValue || filterValue === "all") return true;
-    return cleanCat(product.category || "") === cleanCat(filterValue);
+    if (!filterValue || filterValue === "all" || filterValue === "") return true;
+    const target = cleanCat(filterValue);
+    const prodCat = cleanCat(product.category || "");
+    
+    // Direct match
+    if (prodCat === target) return true;
+
+    // Specific gender/target rules to prevent cross-contamination (e.g. Men vs Women)
+    if (target === "men") {
+      if (prodCat.includes("women") || prodCat.includes("woman")) return false;
+      return prodCat.includes("men") || prodCat.includes("man") || prodCat.startsWith("men");
+    }
+
+    if (target === "women") {
+      return prodCat.includes("women") || prodCat.includes("woman") || prodCat.includes("womens");
+    }
+
+    if (target === "kids") {
+      return prodCat.includes("kid") || prodCat.includes("child") || prodCat.includes("youth") || prodCat.includes("baby") || prodCat.includes("toddler");
+    }
+
+    if (target === "unisex") {
+      return prodCat.includes("unisex");
+    }
+
+    // Exact or substring match on product category or tags
+    if (prodCat.includes(target) || target.includes(prodCat)) return true;
+
+    const rawTags = (product as any).tags;
+    const tagsList: string[] = Array.isArray(rawTags)
+      ? rawTags
+      : typeof rawTags === "string"
+      ? (rawTags as string).split(",")
+      : [];
+    return tagsList.some((t) => cleanCat(String(t)).includes(target));
   };
 
   // Compute accurate category counts from actual products list
