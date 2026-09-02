@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useRouter } from "next/navigation";
-import { productAPI, formatPrice } from "@/lib/api";
+import { productAPI } from "@/lib/api";
 import { createProductSlug, getValidImageUrl } from "@/lib/utils";
 import { ArrowLeft, Edit, ExternalLink, Grid, List, Plus, Search, Trash2, Package, Loader2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -538,16 +539,10 @@ function ProductGridCard({
   onToggleStatus: (id: number, currentStatus: boolean, e?: React.MouseEvent) => void;
 }) {
   const router = useRouter();
-  const { globalMarkup } = useGlobalMarkup();
+  const { getProductPriceRange } = useGlobalMarkup();
+  const { formatPrice } = useCurrency();
 
-  const baseMarkup = (product as any).markup_percentage !== undefined ? (product as any).markup_percentage : 35;
-  const baseCostMin = (product as any).base_price !== undefined ? parseFloat(String((product as any).base_price)) : product.min_price / (1 + baseMarkup / 100);
-  const baseCostMax = (product as any).base_price !== undefined && product.max_price === product.min_price
-    ? parseFloat(String((product as any).base_price))
-    : product.max_price / (1 + baseMarkup / 100);
-
-  const minSellingPrice = baseCostMin * (1 + globalMarkup / 100);
-  const maxSellingPrice = baseCostMax * (1 + globalMarkup / 100);
+  const { minPrice: minSellingPrice, maxPrice: maxSellingPrice } = getProductPriceRange(product);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -685,16 +680,10 @@ function ProductListRow({
   onDelete: (id: number) => void;
   onToggleStatus: (id: number, currentStatus: boolean, e?: React.MouseEvent) => void;
 }) {
-  const { globalMarkup } = useGlobalMarkup();
+  const { getProductPriceRange } = useGlobalMarkup();
+  const { formatPrice } = useCurrency();
 
-  const baseMarkup = (product as any).markup_percentage !== undefined ? (product as any).markup_percentage : 35;
-  const baseCostMin = (product as any).base_price !== undefined ? parseFloat(String((product as any).base_price)) : product.min_price / (1 + baseMarkup / 100);
-  const baseCostMax = (product as any).base_price !== undefined && product.max_price === product.min_price
-    ? parseFloat(String((product as any).base_price))
-    : product.max_price / (1 + baseMarkup / 100);
-
-  const minSellingPrice = baseCostMin * (1 + globalMarkup / 100);
-  const maxSellingPrice = baseCostMax * (1 + globalMarkup / 100);
+  const { minPrice: minSellingPrice, maxPrice: maxSellingPrice } = getProductPriceRange(product);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {

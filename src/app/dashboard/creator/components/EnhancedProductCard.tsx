@@ -33,11 +33,10 @@ interface CreatorProduct {
 
 export default function EnhancedProductCard({ product, onDelete }: { product: CreatorProduct, onDelete: (productId: number) => void }) {
   const router = useRouter();
+  const { getProductPriceRange } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
   
-  // Stored pricing in DB contains the final selling price
-  const minSellingPrice = product.min_price;
-  const maxSellingPrice = product.max_price;
+  const { minPrice: minSellingPrice, maxPrice: maxSellingPrice } = getProductPriceRange(product);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
