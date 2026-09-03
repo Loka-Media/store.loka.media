@@ -142,9 +142,41 @@ function EarningsPageContent() {
     fetchEarningsData();
   }, []);
 
+  const fetchSavedBankDetails = async () => {
+    try {
+      let bankData = null;
+      try {
+        const localBankRes = await fetch('/api/creator/payout/bank-details');
+        if (localBankRes.ok) {
+          const json = await localBankRes.json();
+          bankData = json?.data;
+        }
+      } catch (e) {
+        console.warn('Local bank details fetch failed, trying backend...', e);
+      }
+
+      if (!bankData) {
+        const bankRes = await api.get('/api/creator/payout/bank-details');
+        bankData = bankRes.data?.data;
+      }
+
+      if (bankData) {
+        if (bankData.bank_name) setBankName(bankData.bank_name);
+        if (bankData.account_holder_name) setAccountHolderName(bankData.account_holder_name);
+        if (bankData.routing_number) setRoutingNumber(bankData.routing_number);
+        if (bankData.account_number) setAccountNumber(bankData.account_number);
+      }
+    } catch (e) {
+      // Ignored if no bank details saved yet
+    }
+  };
+
   const fetchEarningsData = async () => {
     try {
       setLoading(true);
+
+      // Fetch saved bank details for pre-filling withdrawal form
+      await fetchSavedBankDetails();
 
       // Fetch wallet balance
       const walletRes = await api.get('/api/creator/wallet');
@@ -200,15 +232,30 @@ function EarningsPageContent() {
 
   const handleLinkStripe = async () => {
     try {
-      const res = await api.get('/api/creator/stripe/auth-url');
-      if (res.data?.authUrl) {
-        window.location.href = res.data.authUrl;
+      let authUrl = null;
+      try {
+        const localRes = await fetch('/api/creator/stripe/auth-url');
+        const localData = await localRes.json();
+        if (localData?.authUrl) {
+          authUrl = localData.authUrl;
+        }
+      } catch (e) {
+        console.warn('Local Stripe route failed, trying backend...', e);
+      }
+
+      if (!authUrl) {
+        const res = await api.get('/api/creator/stripe/auth-url');
+        authUrl = res.data?.authUrl;
+      }
+
+      if (authUrl) {
+        window.location.href = authUrl;
       } else {
         toast.error('Could not generate Stripe Connect onboarding URL');
       }
     } catch (error: any) {
       console.error('Stripe connect error:', error);
-      toast.error(error.response?.data?.error || 'Failed to initiate Stripe Connect');
+      toast.error(error.response?.data?.error || error.message || 'Failed to initiate Stripe Connect');
     }
   };
 
@@ -294,7 +341,10 @@ function EarningsPageContent() {
             <p className="text-gray-400">Manage your earnings, view balance ledger, and withdraw funds</p>
           </div>
           <button
-            onClick={() => setIsWithdrawModalOpen(true)}
+            onClick={async () => {
+              await fetchSavedBankDetails();
+              setIsWithdrawModalOpen(true);
+            }}
             disabled={availableBal <= 0}
             className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-bold shadow-[0_4px_20px_rgba(249,115,22,0.3)] hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none"
           >
@@ -700,7 +750,7 @@ function EarningsPageContent() {
                       <span className="text-sm">Bank Transfer</span>
                     </button>
                     
-                    <button
+                    {/* <button
                       type="button"
                       onClick={() => setPayoutMethod('stripe_connect')}
                       className={`p-4 border rounded-xl flex flex-col items-center justify-center gap-2 font-bold transition-all ${
@@ -711,7 +761,7 @@ function EarningsPageContent() {
                     >
                       <Building className="w-5 h-5" />
                       <span className="text-sm">Stripe Connect</span>
-                    </button>
+                    </button> */}
                   </div>
                 </div>
 

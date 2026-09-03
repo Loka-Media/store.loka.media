@@ -497,16 +497,16 @@ function PrintfulProductCard({
         </div>
 
         {/* Pricing Info */}
-        <div className="flex flex-col gap-1 mt-1 border-t border-white/5 pt-2">
-          {/* <span className="text-sm sm:text-base font-extrabold text-white">
-            From USD {pbcPrice}
-          </span> */}
-          {/* <span className="text-xs font-semibold text-gray-400">
-            From USD {pppPrice} with Printify Premium
-          </span> */}
-          <span className="font-bold text-orange-400 text-normal">
-            From {formatPrice(lokaPrice)}
-          </span>
+        <div className="flex flex-col gap-1.5 mt-1 border-t border-white/10 pt-2 text-left">
+          <div className="flex items-center justify-between">
+       
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-400 font-medium">Selling Price:</span>
+            <span className="font-extrabold text-orange-400 text-sm">
+              From {formatPrice(lokaPrice)}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -523,6 +523,8 @@ function ProductDetailsModal({
   onClose: () => void;
   onCreateProduct: (product: PrintfulProduct) => void;
 }) {
+  const { calculateSellingPrice } = useGlobalMarkup();
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
       <div className="gradient-border-white-top rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto bg-gray-900">
@@ -588,6 +590,18 @@ function ProductDetailsModal({
                       <span className="text-white">
                         {product.variant_count}
                       </span>
+                    </div>
+                    <div className="flex justify-between items-center border-t border-white/10 pt-2">
+                      <span className="text-gray-400">Standard Catalog Price (PBC):</span>{" "}
+                      <span className="text-gray-400 line-through font-semibold">${parseFloat(product.price || '0').toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg">
+                      <span className="text-emerald-300 font-bold">Printify Premium Price (PPP):</span>{" "}
+                      <span className="text-emerald-400 font-extrabold text-base">${parseFloat(product.premiumPrice || (parseFloat(product.price || '0') * 0.77).toFixed(2)).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-gray-400">Estimated Retail Price:</span>{" "}
+                      <span className="text-orange-400 font-extrabold text-base">${calculateSellingPrice(parseFloat(product.premiumPrice || (parseFloat(product.price || '0') * 0.77).toFixed(2)), product.title).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

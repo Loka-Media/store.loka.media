@@ -161,13 +161,20 @@ function getColorCode(colorName: string): string {
 const BLUEPRINT_PRICE_DEFAULTS: Record<number, { price: number; premium: number; sizes: number; colors: number; providers: number }> = {
   6: { price: 7.39, premium: 5.69, sizes: 8, colors: 65, providers: 12 },    // Gildan 5000 Unisex Heavy Cotton Tee
   12: { price: 8.11, premium: 6.24, sizes: 8, colors: 54, providers: 14 },   // Bella+Canvas 3001 Unisex Jersey Short Sleeve Tee
-  706: { price: 12.39, premium: 9.54, sizes: 6, colors: 58, providers: 12 }, // Comfort Colors 1717 Unisex Garment Dyed Tee
-  5: { price: 8.84, premium: 6.81, sizes: 7, colors: 32, providers: 9 },     // Next Level 3600 Unisex Cotton Crew Tee
   36: { price: 8.95, premium: 6.89, sizes: 8, colors: 36, providers: 7 },    // Gildan 2000 Unisex Ultra Cotton Tee
+  49: { price: 14.87, premium: 11.45, sizes: 8, colors: 38, providers: 17 }, // Gildan 18000 Unisex Heavy Blend Sweatshirt
+  5: { price: 8.84, premium: 6.81, sizes: 7, colors: 32, providers: 9 },     // Next Level 3600 Unisex Cotton Crew Tee
   77: { price: 15.54, premium: 11.97, sizes: 6, colors: 41, providers: 11 }, // Gildan 18500 Unisex Heavy Blend Hoodie
-  78: { price: 12.01, premium: 9.25, sizes: 6, colors: 38, providers: 10 },  // Gildan 18000 Unisex Heavy Blend Sweatshirt
+  78: { price: 14.87, premium: 11.45, sizes: 8, colors: 38, providers: 17 }, // Gildan 18000 (legacy mapping)
   10: { price: 9.12, premium: 7.02, sizes: 5, colors: 28, providers: 6 },    // Bella+Canvas 8800 Flowy Racerback Tank
   18: { price: 7.42, premium: 5.71, sizes: 6, colors: 24, providers: 5 },    // Next Level 1533 Ideal Racerback Tank
+  706: { price: 12.39, premium: 9.54, sizes: 6, colors: 58, providers: 12 }, // Comfort Colors 1717 Unisex Garment Dyed Tee
+  1296: { price: 31.00, premium: 23.85, sizes: 6, colors: 20, providers: 5 }, // Comfort Colors 1566 Garment Dyed Sweatshirt
+  1405: { price: 28.44, premium: 21.90, sizes: 6, colors: 14, providers: 2 }, // Comfort Colors 1466 Lightweight Sweatshirt
+  1436: { price: 19.44, premium: 14.97, sizes: 7, colors: 16, providers: 4 }, // Gildan SF000 Midweight Sweatshirt
+  1485: { price: 36.35, premium: 27.99, sizes: 7, colors: 20, providers: 3 }, // Men's Crewneck Sweatshirt (AOP)
+  1700: { price: 40.25, premium: 30.99, sizes: 6, colors: 25, providers: 8 }, // Men's Long Sleeve Sweatshirt (AOP)
+  1928: { price: 29.86, premium: 22.99, sizes: 6, colors: 8, providers: 5 },  // Men's Champion Crewneck Sweatshirt
 };
 
 function getFallbackMetadata(blueprintId: number, title: string) {
@@ -463,34 +470,33 @@ export async function GET(
         );
       }
 
-      // Transform to match the PrintfulProduct structure expected by frontend
-      const transformed = [];
-      for (const bp of filtered) {
-        const metadata = await resolveBlueprintMetadata(bp.id);
+      // Transform to match the PrintfulProduct structure expected by frontend (Blazing Fast O(1) Lookup)
+      const fileCache = loadFileCache();
+      const transformed = filtered.map((bp) => {
+        const metadata = fileCache[bp.id] || getFallbackMetadata(bp.id, bp.title);
         const catIds = getBlueprintCategoryIds(bp.id, bp.title);
         const imgIndex = getGenderSwappedImageIndex(bp.id, categoryId);
         const defaultImage = (bp.images && bp.images[imgIndex]) || bp.images?.[0] || '/placeholder-product.png';
+        const priceVal = metadata.price !== undefined ? metadata.price : 9.99;
+        const premiumVal = metadata.premiumPrice || metadata.premium || (typeof priceVal === 'number' ? priceVal * 0.77 : parseFloat(priceVal) * 0.77);
 
-        transformed.push({
+        return {
           id: bp.id,
           title: bp.title,
           brand: bp.brand,
           model: bp.model,
           image: defaultImage,
           type_name: bp.brand || 'Apparel',
-          variant_count: bp.variant_count || (metadata.sizesCount * metadata.colorsCount),
+          variant_count: bp.variant_count || ((metadata.sizesCount || metadata.sizes || 4) * (metadata.colorsCount || metadata.colors || 5)),
           is_discontinued: false,
-          price: metadata.price,
-          premiumPrice: metadata.premiumPrice,
-          sizesCount: metadata.sizesCount,
-          colorsCount: metadata.colorsCount,
-          providersCount: metadata.providersCount,
-          // categoryIds is derived from blueprint_categories.json (the authoritative mapping).
-          // Printify's API has no gender/category field, so this mapping is the single source of truth.
-          // The frontend uses this to implement gender-aware subcategory filtering.
+          price: typeof priceVal === 'number' ? priceVal.toFixed(2) : String(priceVal),
+          premiumPrice: typeof premiumVal === 'number' ? premiumVal.toFixed(2) : String(premiumVal),
+          sizesCount: metadata.sizesCount || metadata.sizes || 4,
+          colorsCount: metadata.colorsCount || metadata.colors || 5,
+          providersCount: metadata.providersCount || metadata.providers || 2,
           categoryIds: catIds,
-        });
-      }
+        };
+      });
 
       return NextResponse.json({ success: true, result: transformed });
     }

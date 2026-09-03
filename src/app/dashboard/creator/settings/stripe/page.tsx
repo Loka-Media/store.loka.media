@@ -91,10 +91,25 @@ function PayoutSettingsPageContent() {
   const fetchBankDetails = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/creator/payout/bank-details');
-      if (response.data?.data) {
-        setBankDetails(response.data.data);
-        setIsBusiness(response.data.data.is_business);
+      let data = null;
+      try {
+        const localRes = await fetch('/api/creator/payout/bank-details');
+        if (localRes.ok) {
+          const json = await localRes.json();
+          data = json?.data;
+        }
+      } catch (e) {
+        console.warn('Local bank details fetch failed, trying backend...', e);
+      }
+
+      if (!data) {
+        const response = await api.get('/api/creator/payout/bank-details');
+        data = response.data?.data;
+      }
+
+      if (data) {
+        setBankDetails(data);
+        setIsBusiness(data.is_business);
         setHasDetails(true);
       } else {
         setHasDetails(false);
@@ -209,8 +224,26 @@ function PayoutSettingsPageContent() {
         is_business: isBusiness,
       };
 
-      await api.post('/api/creator/payout/bank-details', payload);
+      let saved = false;
+      try {
+        const localRes = await fetch('/api/creator/payout/bank-details', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (localRes.ok) {
+          saved = true;
+        }
+      } catch (e) {
+        console.warn('Local bank details save failed, trying backend...', e);
+      }
+
+      if (!saved) {
+        await api.post('/api/creator/payout/bank-details', payload);
+      }
+
       toast.success('Bank details saved successfully');
+      setIsEditing(false);
       await fetchBankDetails();
     } catch (error: any) {
       console.error('Error saving bank details:', error);
@@ -278,7 +311,20 @@ function PayoutSettingsPageContent() {
   const handleRemoveBankDetails = async () => {
     try {
       setIsRemoving(true);
-      await api.delete('/api/creator/payout/bank-details');
+      let removed = false;
+      try {
+        const localRes = await fetch('/api/creator/payout/bank-details', { method: 'DELETE' });
+        if (localRes.ok) {
+          removed = true;
+        }
+      } catch (e) {
+        console.warn('Local bank details remove failed, trying backend...', e);
+      }
+
+      if (!removed) {
+        await api.delete('/api/creator/payout/bank-details');
+      }
+
       toast.success('Bank details removed successfully');
       setShowRemoveConfirm(false);
       setHasDetails(false);

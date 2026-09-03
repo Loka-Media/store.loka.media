@@ -1,0 +1,27 @@
+{
+  "default": {
+    "account_holder_name": "Harsh Patel 789",
+    "account_holder_email": "harsh.creator@example.com",
+    "account_number": "123456789012",
+    "routing_number": "111000025",
+    "swift_code": "",
+    "iban": "",
+    "account_type": "checking",
+    "bank_name": "Chase Bank",
+    "bank_country": "US",
+    "account_holder_dob": "2002-08-09",
+    "account_holder_address": "123 Main Street, Suite 400",
+    "account_holder_city": "New York",
+    "account_holder_state": "NY",
+    "account_holder_zip": "10001",
+    "account_holder_country": "United States",
+    "tax_id_type": "ssn",
+    "tax_id": "000-00-0000",
+    "business_name": "",
+    "is_business": false,
+    "currency": "USD",
+    "id": 1788433594869,
+    "created_at": "2026-09-03T11:06:34.874Z",
+    "verified_at": "2026-09-03T11:06:34.874Z"
+  }
+}
