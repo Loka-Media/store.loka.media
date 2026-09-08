@@ -67,7 +67,7 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
       if (paymentIntent && paymentIntent.status === 'succeeded') {
         // Confirm payment on the backend
         await confirmStripePayment(paymentIntent.id, orderData.orderNumber);
-        
+
         onPaymentSuccess();
         toast.success('Payment successful! Order placed.');
       }
