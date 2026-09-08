@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface CheckoutCompleteProps {
   orderData: { orderNumber: string } | null;
@@ -11,6 +12,7 @@ export const CheckoutComplete = ({
   wantsToSignup, 
   calculateTotal 
 }: CheckoutCompleteProps) => {
+  const { formatPrice } = useCurrency();
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="text-center bg-gray-900 border border-gray-800 shadow-sm rounded-lg p-8 max-w-md">
@@ -29,7 +31,7 @@ export const CheckoutComplete = ({
         {orderData && (
           <div className="bg-gray-800 rounded-lg p-4 mb-6 text-left">
             <p className="text-gray-300"><strong className="text-white">Order Number:</strong> {orderData.orderNumber}</p>
-            <p className="text-gray-300"><strong className="text-white">Total:</strong> ${calculateTotal().toFixed(2)}</p>
+            <p className="text-gray-300"><strong className="text-white">Total:</strong> {formatPrice(calculateTotal())}</p>
             <p className="text-gray-300"><strong className="text-white">Status:</strong> Payment Received</p>
           </div>
         )}

@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { getApiUrl } from '@/lib/getApiUrl';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -28,6 +29,7 @@ interface StripePaymentFormProps {
 function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoading }: Omit<StripePaymentFormProps, 'clientSecret'>) {
   const stripe = useStripe();
   const elements = useElements();
+  const { formatPrice } = useCurrency();
 
   const confirmStripePayment = async (paymentIntentId: string, orderNumber: string) => {
     const API_BASE_URL = getApiUrl();
@@ -102,7 +104,7 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
             </div>
             <h2 className="text-xl font-bold text-white">Secure Payment</h2>
             <p className="text-gray-400 text-sm font-medium mt-2">Order #{orderData.orderNumber}</p>
-            <p className="text-4xl font-bold text-orange-400 mt-4">${totalAmount.toFixed(2)}</p>
+            <p className="text-4xl font-bold text-orange-400 mt-4">{formatPrice(totalAmount)}</p>
           </div>
 
           {/* Payment Form */}
@@ -129,7 +131,7 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
                   Processing...
                 </span>
               ) : (
-                `Pay $${totalAmount.toFixed(2)}`
+                `Pay ${formatPrice(totalAmount)}`
               )}
             </button>
 
