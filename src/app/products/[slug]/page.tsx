@@ -313,8 +313,8 @@ export default function ProductPage({ params }: ProductPageProps) {
         <div className="gradient-border-white-bottom p-3 sm:p-4 md:p-6 lg:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
             {/* BOTTOM LEFT - Feature Cards */}
-            <div className="gradient-border-white-top p-3 sm:p-4 md:p-6 lg:p-8">
-              <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+            <div className="gradient-border-white-top p-3 sm:p-4 md:p-6 lg:p-8 flex items-center justify-center">
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 w-full">
                 <FeatureCard
                   iconSvg={
                     <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -361,52 +361,6 @@ export default function ProductPage({ params }: ProductPageProps) {
                   color="orange"
                   title="Fast Shipping"
                   subtitle="5-7 business days"
-                />
-                <FeatureCard
-                  iconSvg={
-                    <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                      <path opacity="0.956" fillRule="evenodd" clipRule="evenodd" d="M33.2578 0.0703125C33.5132 1.61096 33.6303 3.2047 33.6094 4.85156C33.7265 4.96875 33.8438 5.08594 33.9609 5.20312C43.8206 5.94944 52.0002 10.0041 58.5 17.3672C65.8301 26.7358 67.9395 37.1888 64.8281 48.7266C60.7354 60.9289 52.415 68.4523 39.8672 71.2969C28.1429 73.1856 18.182 69.8809 9.98438 61.3828C8.33286 59.4499 6.90318 57.3639 5.69531 55.125C5.71875 55.0547 5.74218 54.9844 5.76562 54.9141C10.965 63.3195 18.4884 68.2647 28.3359 69.75C41.6211 70.9712 51.6289 65.8852 58.3594 54.4922C63.3078 44.821 63.1204 35.2585 57.7969 25.8047C52.2803 17.3489 44.4521 12.802 34.3125 12.1641C33.9753 12.2285 33.741 12.416 33.6094 12.7266C33.5858 14.1352 33.5154 15.5415 33.3984 16.9453C28.9911 14.1794 24.6317 11.3435 20.3203 8.4375C24.6659 5.68008 28.9783 2.89102 33.2578 0.0703125Z" fill="url(#paint0_linear_1353_2193)"/>
-                      <path opacity="0.959" fillRule="evenodd" clipRule="evenodd" d="M31.8516 21.8672C33.8584 22.9177 35.8272 24.0427 37.7578 25.2422C31.7197 28.7653 25.6493 32.2341 19.5469 35.6484C17.6393 34.5891 15.7409 33.5109 13.8516 32.4141C19.8605 28.8948 25.8604 25.3792 31.8516 21.8672Z" fill="url(#paint1_linear_1353_2193)"/>
-                      <path opacity="0.945" fillRule="evenodd" clipRule="evenodd" d="M39.0234 26.0859C40.3671 26.7112 41.6796 27.4143 42.9609 28.1953C43.1484 28.2891 43.1484 28.3828 42.9609 28.4766C36.9609 31.8984 30.961 35.3204 24.9609 38.7422C23.6721 38.0277 22.4065 37.2776 21.1641 36.4922C27.1197 33.0196 33.0728 29.5508 39.0234 26.0859Z" fill="url(#paint2_linear_1353_2193)"/>
-                      <path opacity="0.958" fillRule="evenodd" clipRule="evenodd" d="M44.3672 29.1797C44.721 29.2155 45.0492 29.3328 45.3516 29.5312C46.8755 30.4574 48.4224 31.348 49.9922 32.2031C50.1796 32.3438 50.1796 32.4844 49.9922 32.625C44.1328 35.9532 38.2735 39.2812 32.4141 42.6094C32.2266 42.7032 32.039 42.7032 31.8516 42.6094C30.0703 41.5782 28.2891 40.5468 26.5078 39.5156C32.4697 36.0665 38.423 32.6212 44.3672 29.1797Z" fill="url(#paint3_linear_1353_2193)"/>
-                      <path opacity="0.982" fillRule="evenodd" clipRule="evenodd" d="M13.1504 33.6797C15.0792 34.7027 16.9776 35.7809 18.8457 36.9141C18.8925 39.1641 18.9395 41.4141 18.9863 43.6641C19.5114 44.1495 20.0973 44.5479 20.7441 44.8594C22.0324 45.5268 23.298 46.2299 24.541 46.9688C24.9882 47.1144 25.3398 46.9973 25.5957 46.6172C25.6425 44.6484 25.6895 42.6797 25.7363 40.7109C27.6343 41.7535 29.5093 42.8317 31.3613 43.9453C31.4551 51.0234 31.4551 58.1016 31.3613 65.1797C25.3264 61.7288 19.303 58.26 13.291 54.7734C13.1504 47.7428 13.1035 40.7115 13.1504 33.6797Z" fill="url(#paint4_linear_1353_2193)"/>
-                      <path opacity="0.976" fillRule="evenodd" clipRule="evenodd" d="M50.6953 33.6797C50.8828 37.1237 50.9766 40.6159 50.9766 44.1562C50.9531 47.6484 50.9298 51.1407 50.9063 54.6328C44.9293 58.137 38.9293 61.6058 32.9063 65.0391C32.8125 58.0078 32.8125 50.9766 32.9063 43.9453C38.8596 40.5426 44.7894 37.1208 50.6953 33.6797Z" fill="url(#paint5_linear_1353_2193)"/>
-                      <path opacity="0.914" fillRule="evenodd" clipRule="evenodd" d="M20.3222 37.7578C21.6149 38.4396 22.9039 39.1427 24.1894 39.8672C24.2597 41.601 24.2832 43.3353 24.2597 45.0703C22.9855 44.4565 21.7198 43.8002 20.4628 43.1016C20.3223 41.3228 20.2755 39.5415 20.3222 37.7578Z" fill="url(#paint6_linear_1353_2193)"/>
-                      <defs>
-                        <linearGradient id="paint0_linear_1353_2193" x1="35.9571" y1="0.0703125" x2="35.9571" y2="71.812" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#5EC900"/>
-                          <stop offset="1" stopColor="#224801"/>
-                        </linearGradient>
-                        <linearGradient id="paint1_linear_1353_2193" x1="25.8047" y1="21.8672" x2="25.8047" y2="35.6484" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#5EC900"/>
-                          <stop offset="1" stopColor="#224801"/>
-                        </linearGradient>
-                        <linearGradient id="paint2_linear_1353_2193" x1="32.1328" y1="26.0859" x2="32.1328" y2="38.7422" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#5EC900"/>
-                          <stop offset="1" stopColor="#224801"/>
-                        </linearGradient>
-                        <linearGradient id="paint3_linear_1353_2193" x1="38.3203" y1="29.1797" x2="38.3203" y2="42.6797" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#5EC900"/>
-                          <stop offset="1" stopColor="#224801"/>
-                        </linearGradient>
-                        <linearGradient id="paint4_linear_1353_2193" x1="22.2822" y1="33.6797" x2="22.2822" y2="65.1797" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#5EC900"/>
-                          <stop offset="1" stopColor="#224801"/>
-                        </linearGradient>
-                        <linearGradient id="paint5_linear_1353_2193" x1="41.9063" y1="33.6797" x2="41.9063" y2="65.0391" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#5EC900"/>
-                          <stop offset="1" stopColor="#224801"/>
-                        </linearGradient>
-                        <linearGradient id="paint6_linear_1353_2193" x1="22.2866" y1="37.7578" x2="22.2866" y2="45.0703" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#5EC900"/>
-                          <stop offset="1" stopColor="#224801"/>
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                  }
-                  color="green"
-                  title="Easy Returns"
-                  subtitle="30-day guarantee"
                 />
               </div>
             </div>

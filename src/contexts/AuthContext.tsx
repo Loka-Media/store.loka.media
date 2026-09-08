@@ -194,10 +194,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await authAPI.logout();
+      // Clear the legacy shared storage key so the next user won't see this user's files
+      localStorage.removeItem('uploaded_printify_images');
       setUser(null);
       toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
+      localStorage.removeItem('uploaded_printify_images');
       setUser(null);
     }
   };

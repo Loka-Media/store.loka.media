@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/select";
 import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { CATEGORIES_MAP } from "@/config/categories";
 
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition } from "./utils";
@@ -675,6 +676,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   isFetchingFiles = false,
 }) => {
   const { globalMarkup, categoryMarkup, calculateSellingPrice } = useGlobalMarkup();
+  const { user } = useAuth();
   // Mobile accordion state
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     variants: true,
@@ -1260,15 +1262,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       }
 
       if (uploadedList.length > 0) {
-        const saved = localStorage.getItem("uploaded_printify_images");
+        const userId = user?.id;
+        const userStorageKey = userId ? `uploaded_printify_images_${userId}` : "uploaded_printify_images";
+        const saved = localStorage.getItem(userStorageKey) || localStorage.getItem("uploaded_printify_images");
         const existing = saved ? JSON.parse(saved) : [];
         const merged = [...existing];
-        uploadedList.forEach((newFile) => {
-          if (!merged.some((f: any) => f.id === newFile.id)) {
-            merged.unshift(newFile);
+        uploadedList.forEach((newFile: any) => {
+          const item = { ...newFile, userId };
+          if (!merged.some((f: any) => String(f.id) === String(item.id))) {
+            merged.unshift(item);
           }
         });
-        localStorage.setItem("uploaded_printify_images", JSON.stringify(merged));
+        localStorage.setItem(userStorageKey, JSON.stringify(merged));
       }
 
       toast.success("Files uploaded successfully!", { id: toastId });

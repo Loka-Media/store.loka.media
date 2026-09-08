@@ -110,11 +110,22 @@ function FilesPageContent() {
     return mimeMap[ext] || 'application/octet-stream';
   };
 
-  const fetchFiles = useCallback(async () => {
+  // NOTE: We ONLY use user-scoped localStorage here.
+  // There is no fallback to the shared 'uploaded_printify_images' key so that one creator
+  // cannot see another creator's design files.
+  const fetchFiles = useCallback(() => {
     try {
       setLoading(true);
-      const saved = localStorage.getItem("uploaded_printify_images");
-      const filesFromLS = saved ? JSON.parse(saved) : [];
+      const userId = user?.id;
+      if (!userId) {
+        setFiles([]);
+        return;
+      }
+
+      const userStorageKey = `uploaded_printify_images_${userId}`;
+      const saved = localStorage.getItem(userStorageKey);
+      const filesFromLS: any[] = saved ? JSON.parse(saved) : [];
+
       const processedFiles = filesFromLS.map((file: any) => ({
         id: file.id,
         filename: file.filename || file.file_name || "Unknown File",
@@ -127,7 +138,8 @@ function FilesPageContent() {
         created: file.created || Math.floor(Date.now() / 1000),
         mime_type: getMimeType(file.filename || file.file_name || ""),
         width: file.width,
-        height: file.height
+        height: file.height,
+        userId: file.userId || userId
       }));
       setFiles(processedFiles);
     } catch (error) {
@@ -136,7 +148,7 @@ function FilesPageContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     if (user?.role !== 'creator' && user?.role !== 'admin') {
@@ -248,14 +260,17 @@ function FilesPageContent() {
       const successfulUploads = uploadedFilesResult.filter(Boolean) as UploadedFile[];
 
       if (successfulUploads.length > 0) {
-        setFiles(prev => [...successfulUploads, ...prev]);
+        const userId = user?.id;
+        const uploadsWithUserId = successfulUploads.map(f => ({ ...f, userId }));
+        setFiles(prev => [...uploadsWithUserId, ...prev]);
         setHasNewUpload(true);
 
-        // Save new uploads to localStorage
-        const saved = localStorage.getItem("uploaded_printify_images");
+        // Save new uploads to user-scoped localStorage
+        const userStorageKey = userId ? `uploaded_printify_images_${userId}` : "uploaded_printify_images";
+        const saved = localStorage.getItem(userStorageKey) || localStorage.getItem("uploaded_printify_images");
         const existing = saved ? JSON.parse(saved) : [];
         const merged = [...existing];
-        successfulUploads.forEach((newFile) => {
+        uploadsWithUserId.forEach((newFile) => {
           const lsFile = {
             id: newFile.id,
             filename: newFile.filename,
@@ -264,13 +279,14 @@ function FilesPageContent() {
             width: newFile.width,
             height: newFile.height,
             size: newFile.size,
-            created: newFile.created
+            created: newFile.created,
+            userId
           };
-          if (!merged.some((f: any) => f.id === lsFile.id)) {
+          if (!merged.some((f: any) => String(f.id) === String(lsFile.id))) {
             merged.unshift(lsFile);
           }
         });
-        localStorage.setItem("uploaded_printify_images", JSON.stringify(merged));
+        localStorage.setItem(userStorageKey, JSON.stringify(merged));
       }
 
     } catch (error) {
@@ -317,12 +333,14 @@ function FilesPageContent() {
       // Update state
       setFiles(prev => prev.filter(f => f.id !== deleteState.fileId));
       
-      // Update localStorage
-      const saved = localStorage.getItem("uploaded_printify_images");
+      // Update user-scoped localStorage
+      const userId = user?.id;
+      const userStorageKey = userId ? `uploaded_printify_images_${userId}` : "uploaded_printify_images";
+      const saved = localStorage.getItem(userStorageKey);
       if (saved) {
         const existing = JSON.parse(saved);
-        const filtered = existing.filter((f: any) => f.id !== deleteState.fileId);
-        localStorage.setItem("uploaded_printify_images", JSON.stringify(filtered));
+        const filtered = existing.filter((f: any) => String(f.id) !== String(deleteState.fileId));
+        localStorage.setItem(userStorageKey, JSON.stringify(filtered));
       }
       
       toast.success('File deleted successfully');

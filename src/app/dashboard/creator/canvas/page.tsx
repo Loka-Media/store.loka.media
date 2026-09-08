@@ -344,35 +344,35 @@ function CanvasContent() {
     }
   }, [blueprintId, isInitialized, router]);
 
-  const fetchUploadedFiles = useCallback(async (page: number = 1) => {
+  // NOTE: We do NOT call Printify API here.
+  // Printify API returns ALL images for the entire Printify account regardless of which user uploaded them.
+  // So we ONLY use user-scoped localStorage (`uploaded_printify_images_{userId}`) to isolate each creator's files.
+  const fetchUploadedFiles = useCallback((page: number = 1) => {
+    setIsFetchingFiles(true);
     try {
-      setIsFetchingFiles(true);
-      const res = await printifyAPI.getImages({ limit: 12, page });
-      // API typically returns data inside data, e.g. { data: { current_page, last_page, data: [...] } }
-      const imagesData = res?.data || res;
-      if (imagesData && Array.isArray(imagesData.data)) {
-        setUploadedFiles(imagesData.data);
-        setCurrentPage(imagesData.current_page || page);
-        setTotalPages(imagesData.last_page || Math.ceil(imagesData.total / 12) || 1);
-        // Save first page to local storage as fallback
-        if (page === 1) {
-          localStorage.setItem("uploaded_printify_images", JSON.stringify(imagesData.data));
-        }
-      } else {
-        throw new Error("Invalid API response format");
+      const userId = user?.id;
+      if (!userId) {
+        setUploadedFiles([]);
+        setTotalPages(1);
+        setCurrentPage(1);
+        return;
       }
-    } catch (error) {
-      console.error("Failed to fetch files from API, using fallback:", error);
-      const saved = localStorage.getItem("uploaded_printify_images");
-      const files = saved ? JSON.parse(saved) : [];
-      // Quick local pagination fallback
-      setUploadedFiles(files.slice((page - 1) * 12, page * 12));
-      setTotalPages(Math.ceil(files.length / 12) || 1);
+
+      const userStorageKey = `uploaded_printify_images_${userId}`;
+      const saved = localStorage.getItem(userStorageKey);
+      const userFiles: any[] = saved ? JSON.parse(saved) : [];
+
+      const paginated = userFiles.slice((page - 1) * 12, page * 12);
+      setUploadedFiles(paginated);
       setCurrentPage(page);
+      setTotalPages(Math.ceil(userFiles.length / 12) || 1);
+    } catch (error) {
+      console.error("Failed to load user files:", error);
+      setUploadedFiles([]);
     } finally {
       setIsFetchingFiles(false);
     }
-  }, []);
+  }, [user?.id]);
 
 
   const handleNextStep = () => {

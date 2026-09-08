@@ -773,7 +773,7 @@ export const printifyAPI = {
     const query = new URLSearchParams();
     if (params?.limit) query.set('limit', String(params.limit));
     if (params?.page) query.set('page', String(params.page));
-    const qs = query.toString() ? `?${query.toString()}` : '';
+    const qs = query.toString();
     return printifyProxyRequest("GET", `/api/printify/uploads${qs ? `?${qs}` : ''}`);
   },
 
