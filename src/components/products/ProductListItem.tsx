@@ -150,12 +150,16 @@ export function ProductListItem({ product }: ProductListItemProps) {
 
         // Cache variant data for guest cart before adding to cart
         const selectedVariant = availableVariants[0];
-        const vCost = selectedVariant.cost || (selectedVariant.price ? parseFloat(selectedVariant.price) / 1.35 : parseFloat(product.base_price?.toString() || '20.00'));
+        const vPrice = selectedVariant.price !== undefined && selectedVariant.price !== null && !isNaN(parseFloat(String(selectedVariant.price))) && parseFloat(String(selectedVariant.price)) > 0
+          ? parseFloat(String(selectedVariant.price))
+          : (product.base_price ? parseFloat(String(product.base_price)) : 0);
+        const vCost = selectedVariant.cost || (vPrice > 0 ? vPrice / 1.35 : 20.00);
+        const finalPrice = vPrice > 0 ? vPrice : calculateSellingPrice(vCost);
         const variantCacheData = {
           product_id: product.id,
           product_name: product.name,
           cost: vCost,
-          price: calculateSellingPrice(vCost).toString(),
+          price: finalPrice.toFixed(2),
           size: selectedVariant.size || selectedVariant.title?.split(' / ')[1] || 'One Size',
           color: selectedVariant.color || selectedVariant.title?.split(' / ')[0] || 'Default',
           color_code: selectedVariant.color_code || '#808080',

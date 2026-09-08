@@ -34,10 +34,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const selectedCurrency = availableCurrencies.find(c => c.code === currency) || availableCurrencies[0];
   const currencySymbol = selectedCurrency.symbol;
 
-  const convertPrice = (price: number | string): number => {
-    const num = typeof price === 'string' ? parseFloat(price) : price;
-    if (isNaN(num)) return 0;
-
+  const getExchangeRate = (): number => {
     let rate = rates[currency];
     if (!rate && typeof window !== 'undefined') {
       try {
@@ -59,8 +56,19 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       };
       rate = fallbacks[currency] || 1;
     }
+    return rate;
+  };
 
-    return num * rate;
+  const convertPrice = (price: number | string): number => {
+    const num = typeof price === 'string' ? parseFloat(price) : price;
+    if (isNaN(num)) return 0;
+    if (num <= 0) return 0;
+
+    const rate = getExchangeRate();
+    const converted = num * rate;
+
+    // Always round off to .99 after conversion
+    return Math.floor(converted) + 0.99;
   };
 
   const mapCountryToCurrency = (countryCode: string): string => {
@@ -157,22 +165,41 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const formatPrice = (price: number | string) => {
     const num = typeof price === 'string' ? parseFloat(price) : price;
     if (isNaN(num)) return '';
+    if (num <= 0) {
+      try {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: currency,
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(0);
+      } catch (e) {
+        return `${currencySymbol}0.00`;
+      }
+    }
 
-    // Convert price from base currency to target currency using rates
-    const conversionRate = rates[currency] || 1;
-    const converted = num * conversionRate;
+    // Convert price from base currency to target currency using exchange rates
+    const rate = getExchangeRate();
+    const converted = num * rate;
+
+    // Always round off to end in .99 after conversion
+    const roundedPrice = Math.floor(converted) + 0.99;
 
     try {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: currency,
-      }).format(converted);
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(roundedPrice);
     } catch (e) {
       console.warn(`[Shopify Currency] Format error for: ${currency}, falling back to USD`);
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
-      }).format(num);
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(roundedPrice);
     }
   };
 

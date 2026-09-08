@@ -31,7 +31,11 @@ export const useProductCart = (
     console.log('🛒 Add to cart called for product:', product?.name, 'variant:', selectedVariant.id);
 
     try {
-      const vCost = selectedVariant.cost || (selectedVariant.price ? parseFloat(String(selectedVariant.price)) / 1.35 : parseFloat(product.base_price?.toString() || '20.00'));
+      const vPrice = selectedVariant.price !== undefined && selectedVariant.price !== null && !isNaN(parseFloat(String(selectedVariant.price))) && parseFloat(String(selectedVariant.price)) > 0
+        ? parseFloat(String(selectedVariant.price))
+        : (product.base_price ? parseFloat(String(product.base_price)) : 0);
+      const vCost = selectedVariant.cost || (vPrice > 0 ? vPrice / 1.35 : 20.00);
+      const finalSellingPrice = vPrice > 0 ? vPrice : calculateSellingPrice(vCost);
       
       // Determine the exact image for the selected variant/color
       const getResolvedColorImage = (): string => {
@@ -71,7 +75,7 @@ export const useProductCart = (
         product_id: product.id,
         product_name: product.name,
         cost: vCost,
-        price: calculateSellingPrice(vCost).toString(),
+        price: finalSellingPrice.toFixed(2),
         size: selectedVariant.size || selectedVariant.title?.split(' / ')[1] || 'One Size',
         color: selectedVariant.color || selectedVariant.title?.split(' / ')[0] || 'Default',
         color_code: selectedVariant.color_code || '#808080',

@@ -65,14 +65,21 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
 
   const processedItems = useMemo(() => {
     return items.map((item) => {
-      const itemCost = item.cost !== undefined && item.cost !== null && !isNaN(Number(item.cost))
-        ? Number(item.cost)
-        : (item.price ? parseFloat(item.price) / 1.35 : 20.00);
-      const dynamicPrice = calculateSellingPrice(itemCost);
+      // Prioritize the actual item/variant retail price already assigned to the product
+      const itemPrice = item.price !== undefined && item.price !== null && !isNaN(parseFloat(String(item.price))) && parseFloat(String(item.price)) > 0
+        ? parseFloat(String(item.price))
+        : null;
+
+      const finalPrice = itemPrice !== null
+        ? itemPrice
+        : (item.cost !== undefined && item.cost !== null && !isNaN(Number(item.cost))
+            ? calculateSellingPrice(Number(item.cost))
+            : 20.00);
+
       return {
         ...item,
-        price: dynamicPrice.toFixed(2),
-        total_price: (dynamicPrice * item.quantity).toFixed(2)
+        price: finalPrice.toFixed(2),
+        total_price: (finalPrice * item.quantity).toFixed(2)
       };
     });
   }, [items, calculateSellingPrice]);
