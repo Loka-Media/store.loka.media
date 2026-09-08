@@ -2,12 +2,12 @@
 /* disable-eslint */
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { Search, Package, Plus, ArrowLeft } from "lucide-react";
+import { Search, Package, Plus, ArrowLeft, X } from "lucide-react";
 import Image from "next/image";
 import { SUBCATEGORIES_CONFIG } from "@/config/categories";
 
@@ -195,23 +195,27 @@ export default function CreatorCatalogPage() {
     window.scrollTo(0, 0);
     setSelectedCategory(category);
     setSelectedSubcategory(null);
+    setFilters((prev) => ({ ...prev, search: "" }));
     fetchCatalog(category.id);
   };
 
   const handleSelectSubcategory = (subcat: any) => {
     window.scrollTo(0, 0);
     setSelectedSubcategory(subcat);
+    setFilters((prev) => ({ ...prev, search: "" }));
   };
 
   const handleBackToSubcategories = () => {
     window.scrollTo(0, 0);
     setSelectedSubcategory(null);
+    setFilters((prev) => ({ ...prev, search: "" }));
   };
 
   const handleBackToCategories = () => {
     window.scrollTo(0, 0);
     setSelectedCategory(null);
     setSelectedSubcategory(null);
+    setFilters((prev) => ({ ...prev, search: "" }));
     setProducts([]);
   };
 
@@ -260,7 +264,6 @@ export default function CreatorCatalogPage() {
               loading={loading}
               filters={filters}
               setFilters={setFilters}
-              fetchCatalog={() => fetchCatalog(selectedCategory.id)}
               handleCreateProduct={handleCreateProduct}
               setSelectedProduct={setSelectedProduct}
               onBackToCategories={handleBackToSubcategories}
@@ -345,11 +348,22 @@ function ProductView({
   loading,
   filters,
   setFilters,
-  fetchCatalog,
   handleCreateProduct,
   onBackToCategories,
   subcategoryTitle,
 }: any) {
+  // Client-side search filtering — no API call needed since products are already loaded
+  const filteredProducts = useMemo(() => {
+    const q = (filters.search || '').trim().toLowerCase();
+    if (!q) return products;
+    return products.filter((p: any) =>
+      (p.title || '').toLowerCase().includes(q) ||
+      (p.type_name || '').toLowerCase().includes(q) ||
+      (p.brand || '').toLowerCase().includes(q) ||
+      (p.model || '').toLowerCase().includes(q)
+    );
+  }, [products, filters.search]);
+
   return (
     <div className="flex flex-col gap-4 sm:gap-6 pt-4">
       {/* Filters Section */}
@@ -374,12 +388,22 @@ function ProductView({
                     ...prev,
                     search: e.target.value,
                   }));
-                  fetchCatalog();
+                  // No API call — filtering is done client-side via useMemo above
                 }}
-                className="w-full pl-8 pr-3 py-2 sm:py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:border-orange-500 focus:outline-none text-white placeholder-gray-400 font-normal transition-all text-xs sm:text-sm"
+                className="w-full pl-8 pr-9 py-2 sm:py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:border-orange-500 focus:outline-none text-white placeholder-gray-400 font-normal transition-all text-xs sm:text-sm"
                 placeholder="Search..."
               />
-              <Search className="absolute left-2.5 top-2.5 sm:top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+              <Search className="absolute left-2.5 top-2.5 sm:top-2.5 h-4 w-4 sm:h-5 sm:w-5 text-gray-400 pointer-events-none" />
+              {filters.search && (
+                <button
+                  type="button"
+                  onClick={() => setFilters((prev: any) => ({ ...prev, search: "" }))}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-1"
+                  title="Clear search"
+                >
+                  <X className="w-4 h-4 sm:w-4 sm:h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -395,7 +419,7 @@ function ProductView({
           </div>
           <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg px-3 py-1.5 self-start sm:self-auto">
             <span className="text-xs sm:text-sm font-normal text-orange-400">
-              {loading ? "Loading..." : `${products.length} products`}
+              {loading ? "Loading..." : `${filteredProducts.length} products`}
             </span>
           </div>
         </div>
@@ -403,7 +427,7 @@ function ProductView({
         {/* Product Grid */}
         {loading ? (
           <CreativeLoader variant="product" message="Loading products..." />
-        ) : products.length === 0 ? (
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-8 sm:py-12 gradient-border-white-top rounded-lg bg-gray-900">
             <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-3 sm:p-4 inline-block mb-3 sm:mb-4">
               <Package className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-orange-400" />
@@ -417,7 +441,7 @@ function ProductView({
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-            {products.map((product: PrintfulProduct) => (
+            {filteredProducts.map((product: PrintfulProduct) => (
               <PrintfulProductCard
                 key={product.id}
                 product={product}
