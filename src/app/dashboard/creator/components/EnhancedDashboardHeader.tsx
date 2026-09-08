@@ -1,10 +1,11 @@
 'use client';
 
-import { ExternalLink, Package, Share2, Copy, Check, Store } from 'lucide-react';
+import { ExternalLink, Package, Share2, Copy, Check, Store, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import GradientTitle from '@/components/ui/GradientTitle';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ConnectionStatus {
   connected: boolean;
@@ -22,6 +23,7 @@ export function EnhancedDashboardHeader({
   onConnectPrintful,
   creatorUsername = ""
 }: DashboardHeaderProps) {
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
 
   const slug = creatorUsername.trim().toLowerCase().replace(/\s+/g, '');
@@ -149,6 +151,32 @@ export function EnhancedDashboardHeader({
           </Link>
         </div>
       </div>
+
+      {/* Missing Profile Photo Prompt */}
+      {!user?.profileImg && (
+        <div className="mt-6 p-3.5 sm:p-4 rounded-xl bg-orange-500/10 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-500">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0">
+              <Camera className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-bold text-orange-300 flex items-center gap-1.5">
+                <span>Profile Photo Not Set</span>
+                <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping" />
+              </div>
+              <p className="text-xs text-gray-300 mt-0.5">
+                Your public shop will look more professional and attract more buyers with an official avatar photo.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/profile/edit"
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-black font-extrabold text-xs sm:text-sm rounded-lg transition-colors whitespace-nowrap shadow-md shadow-orange-500/20 flex-shrink-0"
+          >
+            Upload Photo →
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

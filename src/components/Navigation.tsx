@@ -17,6 +17,8 @@ import {
   Copy,
   Check,
   ExternalLink,
+  Camera,
+  Edit3,
 } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -236,12 +238,23 @@ export default function Navigation() {
                         style={{ color: "var(--nav-text)" }}
                       >
                         <div className="relative">
-                          <User className="w-5 h-5" />
+                          {user?.profileImg ? (
+                            <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20">
+                              <img src={user.profileImg} alt={user.name || "User"} className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <User className="w-5 h-5" />
+                          )}
                           {user?.creatorStatus === "pending" && (
                             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border border-black" />
                           )}
                           {(user?.role === "creator" || user?.creatorStatus === "approved") && (
-                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-green-400 border border-black" />
+                            <span 
+                              className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-black ${
+                                !user?.profileImg ? "bg-orange-500 animate-pulse" : "bg-green-400"
+                              }`} 
+                              title={!user?.profileImg ? "Profile photo missing" : "Creator active"}
+                            />
                           )}
                         </div>
                       </Link>
@@ -253,12 +266,62 @@ export default function Navigation() {
                           : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
                       }`}>
                         <div className="relative bg-[#1a1a1a]/95 backdrop-blur-md text-white text-xs rounded-xl border border-white/10 shadow-2xl p-3.5 space-y-2.5 before:content-[''] before:absolute before:-top-3 before:left-0 before:right-0 before:h-3">
-                          <div className="flex items-center justify-between">
-                            <div className="font-bold text-sm text-white truncate">{user?.name || user?.email}</div>
-                            {user?.username && (
-                              <span className="text-[11px] text-gray-400 font-mono">@{user.username}</span>
-                            )}
+                          {/* Top User Info with Avatar & Edit Profile */}
+                          <div className="flex items-center gap-3">
+                            <Link
+                              href="/profile/edit"
+                              className="relative w-9 h-9 rounded-full overflow-hidden bg-neutral-800 border border-white/20 flex items-center justify-center flex-shrink-0 group/avatar hover:border-orange-500 transition-colors"
+                              title={user?.profileImg ? "Change Profile Photo" : "Upload Profile Photo"}
+                            >
+                              {user?.profileImg ? (
+                                <img src={user.profileImg} alt={user.name || "User"} className="w-full h-full object-cover" />
+                              ) : (
+                                <User className="w-4 h-4 text-gray-400" />
+                              )}
+                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity">
+                                <Camera className="w-3.5 h-3.5 text-white" />
+                              </div>
+                            </Link>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="font-bold text-sm text-white truncate">{user?.name || user?.email}</div>
+                              {user?.username && (
+                                <span className="text-[11px] text-gray-400 font-mono">@{user.username}</span>
+                              )}
+                            </div>
+
+                            <Link
+                              href="/profile/edit"
+                              className="text-[11px] text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1 hover:underline flex-shrink-0"
+                            >
+                              <span>Edit</span>
+                              <Edit3 className="w-3 h-3" />
+                            </Link>
                           </div>
+
+                          {/* Missing Photo Prompt for Creators */}
+                          {(user?.role === "creator" || user?.creatorStatus === "approved") && !user?.profileImg && (
+                            <Link
+                              href="/profile/edit"
+                              className="p-2.5 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:bg-orange-500/25 transition-all flex items-center justify-between group/photo block cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400 flex-shrink-0">
+                                  <Camera className="w-3.5 h-3.5" />
+                                </div>
+                                <div className="text-left">
+                                  <div className="text-[11px] font-bold text-orange-300 flex items-center gap-1.5">
+                                    <span>Profile Photo Not Set</span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
+                                  </div>
+                                  <div className="text-[10px] text-gray-300">Upload a photo for your store profile</div>
+                                </div>
+                              </div>
+                              <span className="text-[10px] bg-orange-500 text-black font-extrabold px-2 py-1 rounded-md group-hover/photo:bg-orange-400 transition-colors flex-shrink-0">
+                                Upload →
+                              </span>
+                            </Link>
+                          )}
 
                           {user?.creatorStatus === "pending" && (
                             <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 space-y-1">
@@ -555,6 +618,31 @@ export default function Navigation() {
                         </button>
                       </div>
                     </div>
+                  )}
+
+                  {/* Missing Photo Alert on Mobile for Creators */}
+                  {!user?.profileImg && (
+                    <Link
+                      href="/profile/edit"
+                      className="p-3 rounded-xl bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:bg-orange-500/25 transition-all flex items-center justify-between"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 flex-shrink-0">
+                          <Camera className="w-4 h-4" />
+                        </div>
+                        <div className="text-left">
+                          <div className="text-xs font-bold text-orange-300 flex items-center gap-1.5">
+                            <span>Profile Photo Not Set</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
+                          </div>
+                          <div className="text-[11px] text-gray-300">Upload photo for your store</div>
+                        </div>
+                      </div>
+                      <span className="text-xs bg-orange-500 text-black font-extrabold px-2.5 py-1 rounded-md">
+                        Upload →
+                      </span>
+                    </Link>
                   )}
                 </>
               ) : user?.creatorStatus === "pending" ? (
