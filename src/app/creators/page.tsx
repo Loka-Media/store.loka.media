@@ -42,44 +42,100 @@ export default function CreatorsPage() {
       const rawCreators = creatorsRes.creators || [];
       const rawProducts = productsRes.products || [];
 
-      // Calculate real active product counts per creator
-      const productCountsMap: Record<string, number> = {};
+      // Unified Creators Map: key -> Creator
+      const creatorsMap = new Map<string, Creator>();
 
+      // 1. Add all from getCreators()
+      rawCreators.forEach((c: any) => {
+        if (c.status === 'deleted' || c.is_active === false || c.deleted === true) return;
+        const username = (c.username || '').trim();
+        const name = (c.name || username).trim();
+        const key = (username || name).toLowerCase().replace(/\s+/g, '');
+        if (!key) return;
+
+        creatorsMap.set(key, {
+          id: Number(c.id) || Math.floor(Math.random() * 10000),
+          name: name,
+          username: username || name.toLowerCase().replace(/\s+/g, ''),
+          product_count: 0, // will be counted accurately from active products
+          profile_img:
+            c.profile_img ||
+            c.profileImg ||
+            c.profile_image ||
+            c.profileImage ||
+            c.avatar_url ||
+            c.avatarUrl ||
+            c.avatar ||
+            c.image ||
+            null,
+        });
+      });
+
+      // 2. Discover creators from products (e.g. Janvi Keshwani, Vivek, etc.)
       rawProducts.forEach((p: any) => {
         if (p.status === 'deleted' || p.is_active === false || p.deleted === true) return;
         const cObj = p.creator as any;
-        const username = (p.creator_username || cObj?.username || '').toLowerCase().trim();
-        const name = (p.creator_name || cObj?.name || '').toLowerCase().trim();
-        const nameNoSpaces = name.replace(/\s+/g, '');
-        const id = String(p.creator_id || cObj?.id || '');
+        const name = (p.creator_name || cObj?.name || '').trim();
+        const username = (p.creator_username || cObj?.username || '').trim();
+        const key = (username || name).toLowerCase().replace(/\s+/g, '');
+        if (!key) return;
 
-        if (username) productCountsMap[username] = (productCountsMap[username] || 0) + 1;
-        if (name) productCountsMap[name] = (productCountsMap[name] || 0) + 1;
-        if (nameNoSpaces && nameNoSpaces !== name) productCountsMap[nameNoSpaces] = (productCountsMap[nameNoSpaces] || 0) + 1;
-        if (id && id !== '0') productCountsMap[id] = (productCountsMap[id] || 0) + 1;
+        const avatar =
+          p.creator_profile_img ||
+          cObj?.profile_img ||
+          cObj?.profileImg ||
+          cObj?.profile_image ||
+          cObj?.avatar_url ||
+          cObj?.image ||
+          null;
+
+        if (creatorsMap.has(key)) {
+          const existing = creatorsMap.get(key)!;
+          existing.product_count += 1;
+          if (!existing.profile_img && avatar) {
+            existing.profile_img = avatar;
+          }
+          if (!existing.name && name) existing.name = name;
+          if (!existing.username && username) existing.username = username;
+        } else {
+          creatorsMap.set(key, {
+            id: Number(p.creator_id || cObj?.id) || Math.floor(Math.random() * 10000),
+            name: name || username,
+            username: username || name.toLowerCase().replace(/\s+/g, ''),
+            product_count: 1,
+            profile_img: avatar,
+          });
+        }
       });
 
-      const updatedCreators = rawCreators
-        .map((c: any) => {
-          const u = (c.username || '').toLowerCase().trim();
-          const n = (c.name || '').toLowerCase().trim();
-          const nNoSpaces = n.replace(/\s+/g, '');
-          const id = String(c.id || '');
+      // 3. If currently logged in user is creator, ensure they are in the list too!
+      if (user && (user.role === 'creator' || user.creatorStatus === 'approved')) {
+        const uName = (user.name || '').trim();
+        const uUsername = (user.username || '').trim();
+        const userKey = (uUsername || uName).toLowerCase().replace(/\s+/g, '');
+        if (userKey) {
+          if (creatorsMap.has(userKey)) {
+            const existing = creatorsMap.get(userKey)!;
+            if (!existing.profile_img && user.profileImg) existing.profile_img = user.profileImg;
+          } else {
+            creatorsMap.set(userKey, {
+              id: user.id || Math.floor(Math.random() * 10000),
+              name: uName || uUsername,
+              username: uUsername || uName.toLowerCase().replace(/\s+/g, ''),
+              product_count: 0,
+              profile_img: user.profileImg || null,
+            });
+          }
+        }
+      }
 
-          const count =
-            productCountsMap[u] ||
-            productCountsMap[n] ||
-            productCountsMap[nNoSpaces] ||
-            productCountsMap[id] ||
-            c.product_count ||
-            0;
-
-          return {
-            ...c,
-            product_count: count,
-          };
-        })
-        .filter((c: any) => c.product_count > 0 && c.status !== 'deleted' && c.is_active !== false);
+      // Sort creators: creators with products first, then alphabetical
+      const updatedCreators = Array.from(creatorsMap.values()).sort((a, b) => {
+        if (b.product_count !== a.product_count) {
+          return b.product_count - a.product_count;
+        }
+        return a.name.localeCompare(b.name);
+      });
 
       setCreators(updatedCreators);
     } catch (error) {
@@ -87,17 +143,18 @@ export default function CreatorsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchCreators();
   }, [fetchCreators]);
 
   const filteredCreators = creators.filter((creator) => {
-    const query = searchQuery.toLowerCase();
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
     return (
-      creator.name.toLowerCase().includes(query) ||
-      creator.username.toLowerCase().includes(query)
+      (creator.name && creator.name.toLowerCase().includes(query)) ||
+      (creator.username && creator.username.toLowerCase().includes(query))
     );
   });
 

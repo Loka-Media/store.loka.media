@@ -247,9 +247,6 @@ export const productAPI = {
         if (c.status === 'deleted' || c.status === 'inactive' || c.is_active === false || c.deleted === true) {
           return false;
         }
-        if (typeof c.product_count === 'number' && c.product_count <= 0) {
-          return false;
-        }
         return true;
       });
     }
