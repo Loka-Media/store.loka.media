@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGuestCart } from "@/contexts/GuestCartContext";
@@ -13,8 +13,13 @@ import {
   Heart,
   MapPin,
   User,
+  Share2,
+  Copy,
+  Check,
+  ExternalLink,
 } from "lucide-react";
 import Image from "next/image";
+import toast from "react-hot-toast";
 import { useCurrency, availableCurrencies } from "@/contexts/CurrencyContext";
 
 const StartSellingButton = () => (
@@ -41,6 +46,58 @@ export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { currency, setCurrency } = useCurrency();
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+  const [copiedStoreLink, setCopiedStoreLink] = useState(false);
+  const [isProfileHovered, setIsProfileHovered] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleProfileMouseEnter = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setIsProfileHovered(true);
+  };
+
+  const handleProfileMouseLeave = () => {
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsProfileHovered(false);
+    }, 250);
+  };
+
+  const creatorSlug = user?.username || (user?.name ? user.name.toLowerCase().replace(/\s+/g, '') : '');
+  const publicStoreUrl = creatorSlug ? `https://shop.loka.media/shop/${creatorSlug}` : '';
+
+  const getStoreUrl = () => {
+    return publicStoreUrl;
+  };
+
+  const handleCopyStoreLink = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!publicStoreUrl) return;
+    try {
+      await navigator.clipboard.writeText(publicStoreUrl);
+      setCopiedStoreLink(true);
+      toast.success("Store link copied to clipboard!");
+      setTimeout(() => setCopiedStoreLink(false), 2000);
+    } catch (err) {
+      toast.error("Failed to copy link");
+    }
+  };
+
+  const handleShareStoreLink = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!publicStoreUrl) return;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: `${user?.name || "Creator"}'s Shop`,
+          text: `Check out my official store!`,
+          url: publicStoreUrl,
+        });
+      } catch (err) {
+        // Share cancelled or failed
+      }
+    } else {
+      handleCopyStoreLink();
+    }
+  };
 
   const activeCurrency = availableCurrencies.find(c => c.code === currency) || availableCurrencies[0];
 
@@ -168,7 +225,11 @@ export default function Navigation() {
                     ></div>
 
                     {/* User section with Status Tooltip */}
-                    <div className="relative group">
+                    <div 
+                      className="relative group"
+                      onMouseEnter={handleProfileMouseEnter}
+                      onMouseLeave={handleProfileMouseLeave}
+                    >
                       <Link
                         href="/profile"
                         className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
@@ -185,37 +246,91 @@ export default function Navigation() {
                         </div>
                       </Link>
 
-                      {/* Detailed Hover Status Dropdown */}
-                      <div className="absolute top-full mt-3 right-0 w-64 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-xs rounded-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl p-3 space-y-2">
-                        <div className="font-bold text-sm text-white truncate">{user?.name || user?.email}</div>
-                        {user?.creatorStatus === "pending" && (
-                          <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 space-y-1">
-                            <div className="font-bold text-yellow-300 flex justify-between items-center">
-                              <span>Login as creator</span>
-                              <span className="text-[10px] bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded font-mono font-bold">1/2</span>
-                            </div>
-                            <div className="text-[11px] text-yellow-400 font-semibold flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
-                              Waiting for approval
-                            </div>
-                            <div className="text-[10px] text-gray-400">Admin review in progress. Creator Hub will unlock upon approval.</div>
+                      {/* Detailed Hover Status Dropdown (Zero gap wrapper) */}
+                      <div className={`absolute top-full right-0 pt-2.5 w-80 sm:w-88 transition-all duration-200 z-50 ${
+                        isProfileHovered 
+                          ? "opacity-100 pointer-events-auto translate-y-0" 
+                          : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+                      }`}>
+                        <div className="relative bg-[#1a1a1a]/95 backdrop-blur-md text-white text-xs rounded-xl border border-white/10 shadow-2xl p-3.5 space-y-2.5 before:content-[''] before:absolute before:-top-3 before:left-0 before:right-0 before:h-3">
+                          <div className="flex items-center justify-between">
+                            <div className="font-bold text-sm text-white truncate">{user?.name || user?.email}</div>
+                            {user?.username && (
+                              <span className="text-[11px] text-gray-400 font-mono">@{user.username}</span>
+                            )}
                           </div>
-                        )}
-                        {(user?.role === "creator" || user?.creatorStatus === "approved") && (
-                          <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-200 space-y-1">
-                            <div className="font-bold text-green-300 flex justify-between items-center">
-                              <span>Creator Hub</span>
-                              <span className="text-[10px] bg-green-400/20 text-green-300 px-1.5 py-0.5 rounded font-mono font-bold">2/2 ✓</span>
+
+                          {user?.creatorStatus === "pending" && (
+                            <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 space-y-1">
+                              <div className="font-bold text-yellow-300 flex justify-between items-center">
+                                <span>Login as creator</span>
+                                <span className="text-[10px] bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded font-mono font-bold">1/2</span>
+                              </div>
+                              <div className="text-[11px] text-yellow-400 font-semibold flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                                Waiting for approval
+                              </div>
+                              <div className="text-[10px] text-gray-400">Admin review in progress. Creator Hub will unlock upon approval.</div>
                             </div>
-                            <div className="text-[11px] text-green-400 font-semibold">✅ Approved & Active</div>
-                          </div>
-                        )}
-                        {user?.creatorStatus === "rejected" && (
-                          <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200 space-y-1">
-                            <div className="font-bold text-red-300">Creator Application</div>
-                            <div className="text-[11px] text-red-400 font-semibold">❌ Rejected</div>
-                          </div>
-                        )}
+                          )}
+                          {(user?.role === "creator" || user?.creatorStatus === "approved") && (
+                            <div className="space-y-2">
+                              <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-200 space-y-1">
+                                <div className="font-bold text-green-300 flex justify-between items-center">
+                                  <span>Creator Hub</span>
+                                  <span className="text-[10px] bg-green-400/20 text-green-300 px-1.5 py-0.5 rounded font-mono font-bold">2/2 ✓</span>
+                                </div>
+                                <div className="text-[11px] text-green-400 font-semibold">✅ Approved & Active</div>
+                              </div>
+
+                              {/* Creator Store Link Section */}
+                              {creatorSlug && (
+                                <div className="p-2.5 rounded-lg bg-white/5 border border-white/10 space-y-2">
+                                  <div className="flex items-center justify-between text-[11px] font-semibold text-gray-300">
+                                    <span>My Store Link</span>
+                                    <Link
+                                      href={`/shop/${creatorSlug}`}
+                                      className="text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors"
+                                    >
+                                      Visit <ExternalLink className="w-3 h-3" />
+                                    </Link>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 bg-black/70 border border-white/10 rounded-md px-2.5 py-1.5 text-[11px]">
+                                    <span className="font-mono text-gray-300 truncate flex-1 select-all" title={publicStoreUrl}>
+                                      {publicStoreUrl}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={handleCopyStoreLink}
+                                      className="p-1 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer flex-shrink-0"
+                                      title="Copy Store Link"
+                                    >
+                                      {copiedStoreLink ? (
+                                        <Check className="w-3.5 h-3.5 text-green-400" />
+                                      ) : (
+                                        <Copy className="w-3.5 h-3.5" />
+                                      )}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={handleShareStoreLink}
+                                      className="p-1 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer flex-shrink-0"
+                                      title="Share Store Link"
+                                    >
+                                      <Share2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {user?.creatorStatus === "rejected" && (
+                            <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200 space-y-1">
+                              <div className="font-bold text-red-300">Creator Application</div>
+                              <div className="text-[11px] text-red-400 font-semibold">❌ Rejected</div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -391,15 +506,57 @@ export default function Navigation() {
           {isAuthenticated ? (
             <>
               {user?.role === "creator" || user?.creatorStatus === "approved" ? (
-                <Link
-                  href="/dashboard/creator"
-                  className="text-white font-medium flex items-center justify-between px-4 py-2 rounded-lg hover:opacity-80 transition-opacity bg-green-500/10 border border-green-500/20"
-                  style={{ color: "var(--nav-text)" }}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <span>Creator Hub</span>
-                  <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">2/2 Approved ✓</span>
-                </Link>
+                <>
+                  <Link
+                    href="/dashboard/creator"
+                    className="text-white font-medium flex items-center justify-between px-4 py-2 rounded-lg hover:opacity-80 transition-opacity bg-green-500/10 border border-green-500/20"
+                    style={{ color: "var(--nav-text)" }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span>Creator Hub</span>
+                    <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">2/2 Approved ✓</span>
+                  </Link>
+
+                  {creatorSlug && (
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-semibold text-gray-300">
+                        <span>My Store Link</span>
+                        <Link
+                          href={`/shop/${creatorSlug}`}
+                          className="text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors text-xs"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          Visit <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                      <div className="flex items-center gap-2 bg-black/80 border border-white/10 rounded-lg px-3 py-2 text-xs">
+                        <span className="font-mono text-gray-300 truncate flex-1 select-all" title={publicStoreUrl}>
+                          {publicStoreUrl}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleCopyStoreLink}
+                          className="p-1 rounded hover:bg-white/10 text-gray-300 hover:text-white transition-colors cursor-pointer flex-shrink-0"
+                          title="Copy Store Link"
+                        >
+                          {copiedStoreLink ? (
+                            <Check className="w-4 h-4 text-green-400" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleShareStoreLink}
+                          className="p-1 rounded hover:bg-white/10 text-gray-300 hover:text-white transition-colors cursor-pointer flex-shrink-0"
+                          title="Share Store Link"
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               ) : user?.creatorStatus === "pending" ? (
                 <div className="px-4 py-2.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs font-semibold space-y-1">
                   <div className="flex justify-between items-center font-bold">

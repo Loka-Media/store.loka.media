@@ -399,17 +399,6 @@ function CreatorShopContent() {
     }
   };
 
-  if (!creator && !loading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Creator Not Found</h2>
-          <p className="text-white/60">The creator you're looking for doesn't exist.</p>
-        </div>
-      </div>
-    );
-  }
-
   const cleanCat = (str: string) => str.toLowerCase().trim().replace(/[-_&]/g, ' ');
 
   // Helper for resilient category matching
@@ -517,6 +506,17 @@ function CreatorShopContent() {
 
     return pool;
   }, [products, filters.category, activeView]);
+
+  if (!creator && !loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Creator Not Found</h2>
+          <p className="text-white/60">The creator you're looking for doesn't exist.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-black text-white min-h-screen pt-12 sm:pt-16">
