@@ -616,7 +616,7 @@ function ProductGridCard({
               {product.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
             <Link
-              href={`/dashboard/creator/products/${product.id}/edit`}
+              href={`/dashboard/creator/canvas?productId=${product.id}`}
               className="p-2 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
               title="Edit product"
               onClick={handleEdit}
@@ -791,7 +791,7 @@ function ProductListRow({
             {product.is_active ? <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           </button>
           <Link
-            href={`/dashboard/creator/products/${product.id}/edit`}
+            href={`/dashboard/creator/canvas?productId=${product.id}`}
             className="p-1.5 sm:p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
             title="Edit"
             onClick={handleEdit}

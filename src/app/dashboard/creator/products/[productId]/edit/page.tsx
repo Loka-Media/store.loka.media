@@ -203,8 +203,11 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
   useEffect(() => {
     params.then((resolvedParams) => {
       setProductId(resolvedParams.productId);
+      if (resolvedParams.productId) {
+        router.replace(`/dashboard/creator/canvas?productId=${resolvedParams.productId}`);
+      }
     });
-  }, [params]);
+  }, [params, router]);
 
   useEffect(() => {
     if (!user || (user.role !== 'creator' && user.role !== 'admin')) {

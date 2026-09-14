@@ -189,7 +189,7 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
               <ExternalLink className="w-3 sm:w-4 h-3 sm:h-4" />
             </Link>
             <Link
-              href={`/dashboard/creator/products/${product.id}/edit`}
+              href={`/dashboard/creator/canvas?productId=${product.id}`}
               className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-blue-500 border border-white/20 text-white rounded-lg transition-all duration-300"
               title="Edit Product"
               onClick={(e) => e.stopPropagation()}

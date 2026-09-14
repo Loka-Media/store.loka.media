@@ -117,7 +117,7 @@ export default function ProductCard({ product, onDelete }: { product: CreatorPro
         {/* Action buttons overlay */}
         <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <Link
-            href={`/dashboard/creator/products/${product.id}/edit`}
+            href={`/dashboard/creator/canvas?productId=${product.id}`}
             className="p-2 bg-gray-900/80 text-orange-400 hover:text-white hover:bg-orange-600 rounded-lg transition-colors backdrop-blur-sm"
             title="Edit Product"
             onClick={handleEdit}

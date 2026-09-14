@@ -84,6 +84,7 @@ interface UnifiedCanvasPDPProps {
   currentPage?: number;
   totalPages?: number;
   isFetchingFiles?: boolean;
+  isEditing?: boolean;
 }
 
 const cleanDescription = (text?: string): string => {
@@ -674,6 +675,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   currentPage = 1,
   totalPages = 1,
   isFetchingFiles = false,
+  isEditing = false,
 }) => {
   const { globalMarkup, categoryMarkup, calculateSellingPrice } = useGlobalMarkup();
   const { user } = useAuth();
@@ -1390,11 +1392,12 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   // Validations checklist helper
   const validationSummary = useMemo(() => {
     const isBlueprint = !selectedProduct?.printify_id;
+    const hasExistingImages = isEditing && (mockupUrls?.length > 0 || (selectedProduct?.images && selectedProduct.images.length > 0));
     const checks = {
       variants: selectedVariants.length > 0,
-      designs: designFiles.length > 0,
+      designs: isEditing ? (designFiles.length > 0 || hasExistingImages) : designFiles.length > 0,
       aspectRatio: aspectRatioIssues.length === 0,
-      mockups: isBlueprint ? true : (mockupUrls && mockupUrls.length > 0),
+      mockups: (isBlueprint || isEditing) ? true : (mockupUrls && mockupUrls.length > 0),
       details: productForm.name.trim().length > 0 && productForm.description.trim().length >= 20 && !!productForm.category && !!productForm.tags && productForm.tags.length > 0,
     };
 
@@ -1410,7 +1413,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       ...checks,
       allValid: Object.values(blockingChecks).every(Boolean),
     };
-  }, [selectedVariants, designFiles, aspectRatioIssues, mockupUrls, productForm, selectedProduct]);
+  }, [selectedVariants, designFiles, aspectRatioIssues, mockupUrls, productForm, selectedProduct, isEditing]);
 
   // Publish submit action
   const handlePublishSubmit = async () => {
@@ -1656,16 +1659,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div title={mockupStatus !== 'Mockups loaded successfully!' && mockupUrls.length === 0 ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
               <Button
                 onClick={handlePublishSubmit}
-                disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || (mockupUrls.length === 0 && mockupStatus !== 'Mockups loaded successfully!')}
+                disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || (!isEditing && mockupUrls.length === 0 && mockupStatus !== 'Mockups loaded successfully!')}
                 className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 {isPublishing ? (
                   <div className="flex items-center gap-2 whitespace-nowrap">
                     <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                    <span>Publishing...</span>
+                    <span>{isEditing ? "Updating..." : "Publishing..."}</span>
                   </div>
                 ) : (
-                  "Publish Product"
+                  isEditing ? "Update Product" : "Publish Product"
                 )}
               </Button>
             </div>
@@ -1694,8 +1697,12 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               </div>
 
               <div className="flex-1 space-y-2">
-                <span className="text-[10px] sm:text-xs font-semibold bg-[#FF6D1F]/20 text-[#FF6D1F] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                  Base Catalog Item
+                <span className={`text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                  isEditing
+                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                    : "bg-[#FF6D1F]/20 text-[#FF6D1F]"
+                }`}>
+                  {isEditing ? "Editing Product" : "Base Catalog Item"}
                 </span>
                 <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
                   {selectedProduct?.title || selectedProduct?.name}
@@ -2778,10 +2785,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 {isPublishing ? (
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Publishing to Marketplace...</span>
+                    <span>{isEditing ? "Saving Changes to Database..." : "Publishing to Marketplace..."}</span>
                   </div>
                 ) : (
-                  "Save & Publish Live"
+                  isEditing ? "Save & Update Product" : "Save & Publish Live"
                 )}
               </Button>
             </div>
@@ -2807,7 +2814,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 bg-black/50">
             {mockupUrls && mockupUrls.length > 0 ? (
-              <img src={mockupUrls[0].url} alt="Mobile Preview" className="w-full h-full object-contain" />
+              <img src={mockupUrls[0].url || mockupUrls[0].src} alt="Mobile Preview" className="w-full h-full object-contain" />
             ) : (
               <ShoppingBag className="w-5 h-5 text-gray-500 m-2" />
             )}
@@ -2822,10 +2829,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
         <div title={mockupStatus !== 'Mockups loaded successfully!' && mockupUrls.length === 0 ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
           <Button
             onClick={handlePublishSubmit}
-            disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || (mockupUrls.length === 0 && mockupStatus !== 'Mockups loaded successfully!')}
+            disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || (!isEditing && mockupUrls.length === 0 && mockupStatus !== 'Mockups loaded successfully!')}
             className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPublishing ? "Publishing..." : "Publish Product"}
+            {isPublishing ? (isEditing ? "Updating..." : "Publishing...") : (isEditing ? "Update Product" : "Publish Product")}
           </Button>
         </div>
       </div>

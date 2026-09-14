@@ -8,7 +8,7 @@ import { AlertCircle, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { printifyAPI } from "@/lib/api";
+import { printifyAPI, productAPI } from "@/lib/api";
 import { mockupAPI } from "@/lib/MockupAPI";
 import { retryWithExponentialBackoff } from "@/lib/retryWithBackoff";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
@@ -69,7 +69,11 @@ function CanvasContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const blueprintId = searchParams.get("blueprintId") || searchParams.get("productId");
+  const urlBlueprintId = searchParams.get("blueprintId");
+  const urlProductId = searchParams.get("productId");
+  const blueprintId = urlBlueprintId;
+  const [isEditing, setIsEditing] = useState<boolean>(!!urlProductId);
+  const [editingProductId, setEditingProductId] = useState<string | null>(urlProductId);
 
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -109,27 +113,77 @@ function CanvasContent() {
     try {
       setLoading(true);
 
-      // Check if blueprintId is provided in URL
-      if (blueprintId) {
+      let effectiveBlueprintId = urlBlueprintId;
+      let existingProductData: any = null;
+
+      // Handle Edit Mode: Fetch existing creator product if productId is in URL
+      if (urlProductId) {
+        try {
+          console.log(`🔍 Fetching existing creator product ${urlProductId} for editing in canvas...`);
+          const res = await productAPI.getCreatorProduct(urlProductId);
+          existingProductData = res?.product || res;
+
+          if (existingProductData) {
+            setIsEditing(true);
+            setEditingProductId(urlProductId);
+
+            effectiveBlueprintId = existingProductData.printify_blueprint_id?.toString() ||
+                                   existingProductData.printify_product_id?.toString() ||
+                                   urlBlueprintId;
+
+            setProductForm({
+              name: existingProductData.name || "",
+              description: existingProductData.description || "",
+              markupPercentage: (existingProductData.markup_percentage || 30).toString(),
+              category: existingProductData.category || "",
+              tags: existingProductData.tags && existingProductData.tags.length > 0 ? existingProductData.tags : ["New"],
+            });
+
+            if (existingProductData.images && existingProductData.images.length > 0) {
+              const formattedMockups = existingProductData.images.map((img: string, idx: number) => ({
+                url: img,
+                src: img,
+                placement: idx === 0 ? "front" : idx === 1 ? "back" : "other",
+                variant_ids: [],
+                title: idx === 0 ? "Front View" : idx === 1 ? "Back View" : `View ${idx + 1}`,
+                option: idx === 0 ? "front" : idx === 1 ? "back" : "other",
+                option_group: "Printify Mockup",
+              }));
+              setMockupUrls(formattedMockups);
+              setMockupStatus("Mockups loaded successfully!");
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load existing product for editing:", err);
+          toast.error("Failed to load product details.");
+        }
+      }
+
+      // Check if blueprintId is provided or derived from product
+      if (effectiveBlueprintId) {
         try {
           // Fetch blueprint details
-          console.log(`🔍 Fetching blueprint details for ${blueprintId}...`);
+          console.log(`🔍 Fetching blueprint details for ${effectiveBlueprintId}...`);
           const detailed = await printifyAPI.getBlueprintDetails(
-            parseInt(blueprintId)
+            parseInt(effectiveBlueprintId)
           );
           const product = detailed?.data || detailed;
 
           // Call GET /v1/catalog/blueprints/{blueprint_id}/print_providers.json
-          console.log(`🔍 Fetching print providers dynamically for blueprint ${blueprintId}...`);
-          const providers = await printifyAPI.getBlueprintProviders(blueprintId);
+          console.log(`🔍 Fetching print providers dynamically for blueprint ${effectiveBlueprintId}...`);
+          const providers = await printifyAPI.getBlueprintProviders(effectiveBlueprintId);
           product.providers = providers;
 
-          // Select first print provider as default and fetch variants dynamically
-          const defaultProviderId = providers[0]?.id;
+          // Select print provider: if existing product has saved print provider and it exists in providers, use it
+          const savedProviderId = existingProductData?.printify_print_provider_id;
+          const defaultProviderId = (savedProviderId && providers.some((p: any) => p.id === savedProviderId))
+            ? savedProviderId
+            : providers[0]?.id;
+
           let variants = [];
           if (defaultProviderId) {
-            console.log(`🔍 Fetching variants dynamically for blueprint ${blueprintId} and print provider ${defaultProviderId}...`);
-            const variantsResponse = await printifyAPI.getBlueprintVariantsForProvider(blueprintId, defaultProviderId);
+            console.log(`🔍 Fetching variants dynamically for blueprint ${effectiveBlueprintId} and print provider ${defaultProviderId}...`);
+            const variantsResponse = await printifyAPI.getBlueprintVariantsForProvider(effectiveBlueprintId, defaultProviderId);
             const variantsData = variantsResponse?.data || variantsResponse;
             const rawVariants = variantsData?.variants || [];
             variants = rawVariants.map((v: any) => ({
@@ -169,8 +223,20 @@ function CanvasContent() {
 
             // Compute printFiles from Printify variant placeholders
             if (availableVariants.length > 0) {
-              // Pre-select all available variants by default so placements and canvas load instantly
-              setSelectedVariants(availableVariants.map((v: any) => v.id));
+              // Pre-select variants: if editing, match existing product variants!
+              if (existingProductData?.variants && existingProductData.variants.length > 0) {
+                const existingVariantPrintifyIds = existingProductData.variants.map((v: any) => v.printify_variant_id || v.id);
+                const matchedVariants = availableVariants.filter((v: any) =>
+                  existingVariantPrintifyIds.includes(v.id) || existingVariantPrintifyIds.includes(v.printify_variant_id)
+                );
+                if (matchedVariants.length > 0) {
+                  setSelectedVariants(matchedVariants.map((v: any) => v.id));
+                } else {
+                  setSelectedVariants(availableVariants.map((v: any) => v.id));
+                }
+              } else {
+                setSelectedVariants(availableVariants.map((v: any) => v.id));
+              }
 
               const variant_printfiles = availableVariants.map((v: any) => {
                 const placements: Record<string, number> = {};
@@ -242,39 +308,42 @@ function CanvasContent() {
               setPrintFiles(computedPrintFiles);
               console.log('computedPrintFiles from Printify placeholders:', computedPrintFiles);
             }
-            localStorage.setItem(
-              'selectedPrintifyProduct',
-              JSON.stringify(productWithVariants)
-            );
 
-            // Check if there's saved product form data for this product
-            const savedFormKey = `productForm_${blueprintId}`;
-            const savedForm = localStorage.getItem(savedFormKey);
+            if (!existingProductData) {
+              localStorage.setItem(
+                'selectedPrintifyProduct',
+                JSON.stringify(productWithVariants)
+              );
 
-            if (savedForm) {
-              // Use saved form data if it exists
-              const parsedForm = JSON.parse(savedForm);
-              setProductForm(parsedForm);
-              console.log(`📝 Loaded saved product form for product ${blueprintId}`);
-            } else {
-              // Read source category from catalog navigation for auto-selection
-              let sourceCategoryTitle = '';
-              try {
-                const savedSourceCat = localStorage.getItem('sourceCatalogCategory');
-                if (savedSourceCat) {
-                  const sourceCat = JSON.parse(savedSourceCat);
-                  sourceCategoryTitle = sourceCat.title || '';
-                }
-              } catch (e) { /* ignore parse errors */ }
+              // Check if there's saved product form data for this product
+              const savedFormKey = `productForm_${effectiveBlueprintId}`;
+              const savedForm = localStorage.getItem(savedFormKey);
 
-              // Initialize with default Printful product data
-              setProductForm({
-                name: `Custom ${product.title || product.model}`,
-                description: product.description || '',
-                markupPercentage: '30',
-                category: sourceCategoryTitle || product.type_name || product.type || '',
-                tags: []
-              });
+              if (savedForm) {
+                // Use saved form data if it exists
+                const parsedForm = JSON.parse(savedForm);
+                setProductForm(parsedForm);
+                console.log(`📝 Loaded saved product form for product ${effectiveBlueprintId}`);
+              } else {
+                // Read source category from catalog navigation for auto-selection
+                let sourceCategoryTitle = '';
+                try {
+                  const savedSourceCat = localStorage.getItem('sourceCatalogCategory');
+                  if (savedSourceCat) {
+                    const sourceCat = JSON.parse(savedSourceCat);
+                    sourceCategoryTitle = sourceCat.title || '';
+                  }
+                } catch (e) { /* ignore parse errors */ }
+
+                // Initialize with default Printful product data
+                setProductForm({
+                  name: `Custom ${product.title || product.model}`,
+                  description: product.description || '',
+                  markupPercentage: '30',
+                  category: sourceCategoryTitle || product.type_name || product.type || '',
+                  tags: []
+                });
+              }
             }
 
             setStep("unified-editor");
@@ -650,6 +719,55 @@ function CanvasContent() {
 
   // Handle going live to marketplace with product details
   const handleGoLiveToMarketplace = async (updatedProductForm?: typeof productForm) => {
+    const formDataToUse = updatedProductForm || productForm;
+
+    // Handle Edit Mode: Update existing product in database directly
+    if (isEditing && editingProductId) {
+      try {
+        setCreating(true);
+        toast.loading("Saving changes to database...", { id: "publishing-progress" });
+
+        const imagesList = (mockupUrls && mockupUrls.length > 0)
+          ? mockupUrls.map((m: any) => m.url || m.src || m.preview_url).filter(Boolean)
+          : (selectedProduct?.images || []);
+
+        const mainCoverUrl = imagesList[0] || selectedProduct?.thumbnail_url || selectedProduct?.thumbnailUrl || "";
+
+        const updateData: any = {
+          name: formDataToUse.name.trim(),
+          description: formDataToUse.description.trim(),
+          markupPercentage: parseFloat(formDataToUse.markupPercentage) || 30,
+          category: formDataToUse.category?.trim() || "",
+          tags: (formDataToUse.tags && formDataToUse.tags.length > 0) ? formDataToUse.tags : ['New'],
+          thumbnailUrl: mainCoverUrl,
+          thumbnail_url: mainCoverUrl,
+          images: imagesList,
+          status: 'active',
+          is_active: true,
+          isActive: true
+        };
+
+        console.log(`💾 Updating product ${editingProductId} in database:`, updateData);
+        await productAPI.updateProduct(editingProductId, updateData);
+
+        toast.dismiss("publishing-progress");
+        toast.success(`"${formDataToUse.name}" updated successfully!`, { duration: 4000 });
+
+        setTimeout(() => {
+          router.push("/dashboard/creator/products");
+        }, 1200);
+        return;
+      } catch (err: any) {
+        console.error("Failed to update product in database:", err);
+        toast.dismiss("publishing-progress");
+        const errMsg = err?.response?.data?.error || err?.response?.data?.message || "Failed to update product in database";
+        toast.error(errMsg, { duration: 6000 });
+        return;
+      } finally {
+        setCreating(false);
+      }
+    }
+
     const isBlueprint = !selectedProduct?.printify_id;
     if (!isBlueprint && (!mockupUrls || mockupUrls.length === 0)) {
       toast.error("No mockups available. Please generate mockups first.");
@@ -834,6 +952,7 @@ function CanvasContent() {
             currentPage={currentPage}
             totalPages={totalPages}
             isFetchingFiles={isFetchingFiles}
+            isEditing={isEditing}
           />
         )}
       </div>
