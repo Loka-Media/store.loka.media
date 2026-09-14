@@ -292,12 +292,12 @@ export default function UnifiedCheckoutPage() {
         }
 
         const authCartItems = items.map((item) => ({
-          product_id: String(item.printify_product_id || item.product_id),
-          variant_id: String(item.printify_variant_id || item.printful_variant_id || item.variant_id),
+          product_id: String(item.product_id),
+          variant_id: String(item.variant_id),
           printify_product_id: item.printify_product_id || undefined,
           printify_variant_id: item.printify_variant_id || item.printful_variant_id || undefined,
-          blueprint_id: item.blueprint_id || undefined,
-          print_provider_id: item.print_provider_id || undefined,
+          blueprint_id: item.blueprint_id || item.printify_blueprint_id || undefined,
+          print_provider_id: item.print_provider_id || item.printify_print_provider_id || undefined,
           product_name: item.product_name,
           price: String(item.price),
           quantity: item.quantity,
@@ -337,6 +337,8 @@ export default function UnifiedCheckoutPage() {
           },
           cartItems: authCartItems,
           customerNotes: "",
+          shippingCost: checkoutState.selectedShippingRate?.rate || 5.99,
+          shippingMethod: checkoutState.selectedShippingRate?.title || "Standard Shipping",
         }, token);
       } else {
         // Guest checkout or user wants to signup
@@ -359,12 +361,12 @@ export default function UnifiedCheckoutPage() {
           },
           cartItems: items.map((item) => {
             const mappedItem = {
-              product_id: String(item.printify_product_id || item.product_id),
-              variant_id: String(item.printify_variant_id || item.printful_variant_id || item.variant_id),
+              product_id: String(item.product_id),
+              variant_id: String(item.variant_id),
               printify_product_id: item.printify_product_id || undefined,
               printify_variant_id: item.printify_variant_id || item.printful_variant_id || undefined,
-              blueprint_id: item.blueprint_id || undefined,
-              print_provider_id: item.print_provider_id || undefined,
+              blueprint_id: item.blueprint_id || item.printify_blueprint_id || undefined,
+              print_provider_id: item.print_provider_id || item.printify_print_provider_id || undefined,
               product_name: item.product_name,
               price: String(item.price),
               quantity: item.quantity,
