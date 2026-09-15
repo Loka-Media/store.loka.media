@@ -149,27 +149,28 @@ async function calculateDynamicRates(lineItems: any[], countryCode: string): Pro
 
     if (!blueprintId || !printProviderId) {
       try {
-        const res = await fetch(`${BACKEND_URL}/api/products/${item.product_id}`);
-        if (res.ok) {
-          const productData = await res.json();
-          blueprintId = productData.printify_blueprint_id
-            || productData.blueprint_id
-            || (typeof productData.printify_product_id === 'number' ? productData.printify_product_id : null)
-            || (typeof productData.printify_product_id === 'string' && /^\d{1,5}$/.test(productData.printify_product_id) ? parseInt(productData.printify_product_id) : null)
-            || blueprintId
-            || 15;
+        const lookupId = item.db_product_id || (/^\d+$/.test(String(item.product_id)) ? item.product_id : null);
+        if (lookupId) {
+          const res = await fetch(`${BACKEND_URL}/api/products/${lookupId}`);
+          if (res.ok) {
+            const productData = await res.json();
+            blueprintId = productData.printify_blueprint_id
+              || productData.blueprint_id
+              || (typeof productData.printify_product_id === 'number' ? productData.printify_product_id : null)
+              || (typeof productData.printify_product_id === 'string' && /^\d{1,5}$/.test(productData.printify_product_id) ? parseInt(productData.printify_product_id) : null)
+              || blueprintId;
 
-          printProviderId = productData.printify_print_provider_id
-            || productData.print_provider_id
-            || printProviderId
-            || 61;
-          
-          if (productData.variants && Array.isArray(productData.variants)) {
-            const matchedVariant = productData.variants.find((v: any) => 
-              v.id == item.variant_id || v.printify_variant_id == item.variant_id
-            );
-            if (matchedVariant) {
-              printifyVariantId = matchedVariant.printify_variant_id || matchedVariant.id || item.variant_id;
+            printProviderId = productData.printify_print_provider_id
+              || productData.print_provider_id
+              || printProviderId;
+            
+            if (productData.variants && Array.isArray(productData.variants)) {
+              const matchedVariant = productData.variants.find((v: any) => 
+                v.id == item.variant_id || v.printify_variant_id == item.variant_id
+              );
+              if (matchedVariant) {
+                printifyVariantId = matchedVariant.printify_variant_id || matchedVariant.id || item.variant_id;
+              }
             }
           }
         }
@@ -343,39 +344,50 @@ export async function POST(request: NextRequest) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
       
       for (const item of body.line_items) {
-        let printifyProductId = item.product_id;
-        let printifyVariantId = item.variant_id;
+        let printifyProductId = item.printify_product_id || item.product_id;
+        let printifyVariantId = item.printify_variant_id || item.variant_id;
+        let blueprintId = item.blueprint_id || item.printify_blueprint_id;
+        let printProviderId = item.print_provider_id || item.printify_print_provider_id;
         let isPrintify = true;
         
-        // Before calculating shipping, fetch the actual product linked to the cart item.
-        try {
-          const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/products/${item.product_id}`);
-          if (res.ok) {
-            const productData = await res.json();
-            if (productData.source === 'printful') {
-              isPrintify = false;
-            }
-            printifyProductId = productData.printify_product_id || productData.printful_sync_product_id || productData.printful_product_id || productData.blueprint_id || item.product_id;
-            
-            // Find the correct variant if printify_variant_id is available
-            if (productData.variants) {
-              const matchedVariant = productData.variants.find((v: any) => v.id == item.variant_id);
-              if (matchedVariant) {
-                printifyVariantId = matchedVariant.printify_variant_id || matchedVariant.printful_variant_id || item.variant_id;
+        // Before calculating shipping, fetch the actual product linked to the cart item if blueprint or provider is missing
+        if (!blueprintId || !printProviderId || !printifyProductId || printifyProductId === item.product_id) {
+          try {
+            const rawId = item.product_id;
+            if (rawId && /^\d+$/.test(String(rawId))) {
+              const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/products/${rawId}`);
+              if (res.ok) {
+                const productData = await res.json();
+                if (productData.source === 'printful') {
+                  isPrintify = false;
+                }
+                printifyProductId = productData.printify_product_id || productData.printful_sync_product_id || productData.printful_product_id || productData.blueprint_id || printifyProductId;
+                blueprintId = productData.printify_blueprint_id || productData.blueprint_id || blueprintId;
+                printProviderId = productData.printify_print_provider_id || productData.print_provider_id || printProviderId;
+                
+                // Find the correct variant if printify_variant_id is available
+                if (productData.variants) {
+                  const matchedVariant = productData.variants.find((v: any) => v.id == item.variant_id || v.printify_variant_id == item.variant_id);
+                  if (matchedVariant) {
+                    printifyVariantId = matchedVariant.printify_variant_id || matchedVariant.printful_variant_id || printifyVariantId;
+                  }
+                }
               }
             }
+          } catch (e) {
+            console.warn('Failed to fetch product data from backend', e);
           }
-        } catch (e) {
-          console.warn('Failed to fetch product data from backend', e);
         }
 
         if (isPrintify) {
           line_items.push({
             product_id: String(printifyProductId),
+            db_product_id: item.product_id,
             variant_id: Number(printifyVariantId),
             quantity: Number(item.quantity || 1),
-            blueprint_id: item.blueprint_id,
-            print_provider_id: item.print_provider_id
+            blueprint_id: blueprintId ? Number(blueprintId) : undefined,
+            print_provider_id: printProviderId ? Number(printProviderId) : undefined,
+            printify_variant_id: printifyVariantId ? Number(printifyVariantId) : undefined,
           });
         }
       }
@@ -392,35 +404,67 @@ export async function POST(request: NextRequest) {
     );
 
     // POST /api/printify/shipping/rates → calculate shipping
-    let rates: any;
-    if (!printifyPayload.line_items || printifyPayload.line_items.length === 0) {
-      console.log('Calculating dynamic shipping rates for fallback items list...');
-      const fallbackItems = (body.items && body.items.length > 0) ? body.items : (body.line_items || []);
-      const countryCode = printifyPayload.address_to?.country || body.recipient?.country_code || 'US';
-      const resultObj = await calculateDynamicRates(fallbackItems, countryCode);
-      rates = {
-        standard: resultObj.totalCents,
-        itemized: resultObj.itemized
-      };
-    } else {
-      try {
-        const countryCode = printifyPayload.address_to?.country || 'US';
-        console.log(`Calculating dynamic shipping rates using blueprint profiles for country: ${countryCode}`);
-        const resultObj = await calculateDynamicRates(printifyPayload.line_items, countryCode);
+    let rates: any = null;
+
+    // 1. Try official Printify shop orders shipping calculation first if valid shop product IDs exist
+    try {
+      if (printifyPayload.address_to && printifyPayload.line_items && printifyPayload.line_items.length > 0) {
+        const validShopItems = printifyPayload.line_items.filter((li: any) =>
+          li.product_id && typeof li.product_id === 'string' && /^[0-9a-fA-F]{24}$/.test(li.product_id)
+        );
+
+        if (validShopItems.length === printifyPayload.line_items.length) {
+          console.log('🚚 [PRINTIFY] Calling official shop orders shipping API for:', validShopItems);
+          const printifyResponse: any = await printifyShippingAPI.calculateShipping({
+            address_to: printifyPayload.address_to,
+            line_items: validShopItems.map((li: any) => ({
+              product_id: li.product_id,
+              variant_id: Number(li.variant_id),
+              quantity: Number(li.quantity || 1),
+            })),
+          });
+
+          if (printifyResponse && (typeof printifyResponse.standard === 'number' || Array.isArray(printifyResponse.standard) || printifyResponse.express)) {
+            console.log('✅ [PRINTIFY] Official shipping calculation succeeded:', printifyResponse);
+            rates = printifyResponse;
+          }
+        }
+      }
+    } catch (printifyErr: any) {
+      console.warn('⚠️ [PRINTIFY] Official shop orders shipping API returned error, falling back to blueprint catalog profiles:', printifyErr.message);
+    }
+
+    // 2. Fallback to blueprint catalog shipping profiles if official shop calculation was not applicable
+    if (!rates) {
+      if (!printifyPayload.line_items || printifyPayload.line_items.length === 0) {
+        console.log('Calculating dynamic shipping rates for fallback items list...');
+        const fallbackItems = (body.items && body.items.length > 0) ? body.items : (body.line_items || []);
+        const countryCode = printifyPayload.address_to?.country || body.recipient?.country_code || 'US';
+        const resultObj = await calculateDynamicRates(fallbackItems, countryCode);
         rates = {
           standard: resultObj.totalCents,
           itemized: resultObj.itemized
         };
-        console.log(`✅ Calculated dynamic shipping total: ${resultObj.totalCents} cents ($${(resultObj.totalCents/100).toFixed(2)})`);
-      } catch (error: any) {
-        console.error(
-          '❌ DYNAMIC SHIPPING CALCULATION ERROR',
-          error.message
-        );
-        rates = {
-          standard: 599, // $5.99 fallback
-          itemized: []
-        };
+      } else {
+        try {
+          const countryCode = printifyPayload.address_to?.country || 'US';
+          console.log(`Calculating dynamic shipping rates using blueprint profiles for country: ${countryCode}`);
+          const resultObj = await calculateDynamicRates(printifyPayload.line_items, countryCode);
+          rates = {
+            standard: resultObj.totalCents,
+            itemized: resultObj.itemized
+          };
+          console.log(`✅ Calculated dynamic shipping total: ${resultObj.totalCents} cents ($${(resultObj.totalCents/100).toFixed(2)})`);
+        } catch (error: any) {
+          console.error(
+            '❌ DYNAMIC SHIPPING CALCULATION ERROR',
+            error.message
+          );
+          rates = {
+            standard: 599, // $5.99 fallback
+            itemized: []
+          };
+        }
       }
     }
 

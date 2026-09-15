@@ -60,13 +60,17 @@ export const useCheckoutState = () => {
       email: address.email || 'customer@example.com',
     };
 
-    // Map cart items to Printify format
+    // Map cart items to Printify format with full metadata
     const line_items = items.map((item) => {
-      const variantId = item.printful_catalog_variant_id || item.printful_variant_id || item.variant_id;
+      const variantId = item.printify_variant_id || item.printful_catalog_variant_id || item.printful_variant_id || item.variant_id;
       return {
         product_id: String(item.product_id || ''),
         variant_id: Number(variantId),
         quantity: Number(item.quantity || 1),
+        printify_product_id: item.printify_product_id || undefined,
+        printify_variant_id: item.printify_variant_id ? Number(item.printify_variant_id) : undefined,
+        blueprint_id: item.blueprint_id || item.printify_blueprint_id ? Number(item.blueprint_id || item.printify_blueprint_id) : undefined,
+        print_provider_id: item.print_provider_id || item.printify_print_provider_id ? Number(item.print_provider_id || item.printify_print_provider_id) : undefined,
       };
     });
 
@@ -97,7 +101,7 @@ export const useCheckoutState = () => {
           const errorMsg = getErrorMessage(validation.errors);
           toast.error(errorMsg);
         }
-        return false;
+        return null;
       }
 
       // Additional check for minimum requirements
@@ -105,7 +109,7 @@ export const useCheckoutState = () => {
         if (!silent) {
           toast.error('Please provide complete address information to calculate shipping rates');
         }
-        return false;
+        return null;
       }
 
       setIsFetchingShippingRates(true);
@@ -118,19 +122,20 @@ export const useCheckoutState = () => {
           }
           setShippingRates([]);
           setSelectedShippingRate(null);
-          return false;
+          return null;
         } else {
           setShippingRates(rates.result);
-          setSelectedShippingRate(rates.result[0]); // Auto-select the first rate
+          const firstRate = rates.result[0];
+          setSelectedShippingRate(firstRate); // Auto-select the first rate
           if (!silent) {
             toast.success(`Found ${rates.result.length} shipping option${rates.result.length > 1 ? 's' : ''}`);
           }
 
           // Extract tax from the shipping rate response
-          if (rates.result[0]?.tax) {
-            setTaxAmount(parseFloat(rates.result[0].tax));
+          if (firstRate?.tax) {
+            setTaxAmount(parseFloat(firstRate.tax));
           }
-          return true;
+          return firstRate;
         }
       } catch (error: any) {
         console.error("Failed to fetch shipping rates:", error);
@@ -140,7 +145,7 @@ export const useCheckoutState = () => {
         }
         setShippingRates([]);
         setSelectedShippingRate(null);
-        return false;
+        return null;
       } finally {
         setIsFetchingShippingRates(false);
       }
@@ -148,21 +153,22 @@ export const useCheckoutState = () => {
     [customerInfo]
   );
 
-  const calculateTotal = (subtotal: string) => {
+  const calculateTotal = (subtotal: string, overrideShippingRate?: any) => {
     const subtotalAmount = parseFloat(subtotal.replace("$", ""));
 
     const platformFee = subtotalAmount * 0.05;
 
+    const rateToUse = overrideShippingRate !== undefined ? overrideShippingRate : selectedShippingRate;
     const shipping =
-      selectedShippingRate && selectedShippingRate.rate
-        ? parseFloat(String(selectedShippingRate.rate)) // Ensure it's a string before parsing
+      rateToUse && rateToUse.rate
+        ? parseFloat(String(rateToUse.rate)) // Ensure it's a number before adding
         : 0;
 
-    // Use actual tax if available from Printful, otherwise estimate based on subtotal
+    // Use actual tax if available from Printful/Printify, otherwise estimate based on subtotal
     // Note: Final tax will be calculated by backend when order is created
     const tax = taxAmount > 0 ? taxAmount : subtotalAmount * 0.08;
 
-    return subtotalAmount + platformFee + shipping + tax;
+    return Math.round((subtotalAmount + platformFee + shipping + tax) * 100) / 100;
   };
 
   const resetCheckoutState = () => {

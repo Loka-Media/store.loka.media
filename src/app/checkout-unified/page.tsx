@@ -234,12 +234,14 @@ export default function UnifiedCheckoutPage() {
         return;
       }
 
-      if (checkoutState.shippingRates.length === 0 || !checkoutState.selectedShippingRate) {
-        const success = await checkoutState.fetchShippingRates(items, { silent: false });
-        if (!success) {
+      let activeShippingRate = checkoutState.selectedShippingRate;
+      if (checkoutState.shippingRates.length === 0 || !activeShippingRate) {
+        const fetchedRate = await checkoutState.fetchShippingRates(items, { silent: false });
+        if (!fetchedRate) {
           setLoading(false);
           return;
         }
+        activeShippingRate = fetchedRate;
       }
 
       // Save new address for logged-in users if they want to
@@ -267,8 +269,9 @@ export default function UnifiedCheckoutPage() {
       const random = Math.random().toString(36).substring(2, 8).toUpperCase();
       const orderNumber = `ORD-${timestamp}-${random}`;
 
-      // 2. Create payment intent first
-      const totalAmount = checkoutState.calculateTotal(summary.subtotal);
+      // 2. Create payment intent first using full total including shipping
+      const totalAmount = checkoutState.calculateTotal(summary.subtotal, activeShippingRate);
+      console.log('✅ [CHECKOUT] Creating payment intent for total:', totalAmount, 'with shipping rate:', activeShippingRate);
       console.log('✅ [CHECKOUT] Creating payment intent first...');
       const paymentIntentResult = await unifiedCheckoutAPI.createStripePaymentIntent(
         totalAmount,
@@ -337,8 +340,8 @@ export default function UnifiedCheckoutPage() {
           },
           cartItems: authCartItems,
           customerNotes: "",
-          shippingCost: checkoutState.selectedShippingRate?.rate || 5.99,
-          shippingMethod: checkoutState.selectedShippingRate?.title || "Standard Shipping",
+          shippingCost: activeShippingRate?.rate ? parseFloat(String(activeShippingRate.rate)) : (checkoutState.selectedShippingRate?.rate ? parseFloat(String(checkoutState.selectedShippingRate.rate)) : 0),
+          shippingMethod: activeShippingRate?.title || activeShippingRate?.name || checkoutState.selectedShippingRate?.title || "Standard Shipping",
         }, token);
       } else {
         // Guest checkout or user wants to signup
