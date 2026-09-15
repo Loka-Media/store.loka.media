@@ -67,8 +67,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const rate = getExchangeRate();
     const converted = num * rate;
 
-    // Always round off to .99 after conversion
-    return Math.floor(converted) + 0.99;
+    return Math.round(converted * 100) / 100;
   };
 
   const mapCountryToCurrency = (countryCode: string): string => {
@@ -182,8 +181,8 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const rate = getExchangeRate();
     const converted = num * rate;
 
-    // Always round off to end in .99 after conversion
-    const roundedPrice = Math.floor(converted) + 0.99;
+    // Standard rounding to 2 decimal places (do not force .99, which distorts exact order totals)
+    const roundedPrice = Math.round(converted * 100) / 100;
 
     try {
       return new Intl.NumberFormat('en-US', {
