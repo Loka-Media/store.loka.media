@@ -59,8 +59,8 @@ export const unifiedCheckoutAPI = {
   },
 
   createStripePaymentIntent: async (amount: number, orderNumber: string, customerEmail?: string) => {
-    const response = await guestApi.post('/api/unified-checkout/stripe/create-payment-intent', {
-      amount: amount.toFixed(2),
+    const response = await axios.post('/api/unified-checkout/stripe/create-payment-intent', {
+      amount: typeof amount === 'number' ? amount.toFixed(2) : amount,
       orderNumber,
       customerEmail,
     });
@@ -68,9 +68,14 @@ export const unifiedCheckoutAPI = {
   },
 
   confirmStripePayment: async (paymentIntentId: string, orderNumber: string) => {
-    const response = await guestApi.post('/api/unified-checkout/stripe/confirm-payment', {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const response = await axios.post('/api/unified-checkout/stripe/confirm-payment', {
       paymentIntentId,
       orderNumber,
+    }, {
+      headers: {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      }
     });
     return response.data;
   },

@@ -67,20 +67,47 @@ export default function ProfilePage() {
       setLoading(true);
       setError(null);
       const [ordersResponse, addressesResponse] = await Promise.all([
-        checkoutAPI.getUserOrders({ limit: 5 }),
+        checkoutAPI.getUserOrders({ limit: 50 }),
         addressAPI.getAddresses()
       ]);
 
-      console.log('📦 Fetched orders:', ordersResponse.orders);
-      // Log image URLs for debugging
-      ordersResponse.orders.forEach((order: Order, orderIndex: any) => {
-        order.order_items?.forEach((item, itemIndex) => {
-          console.log(`🖼️ Order ${orderIndex + 1}, Item ${itemIndex + 1} - Image URL:`, item.image_url);
-        });
-      });
+      console.log('📦 Raw orders response:', ordersResponse);
 
-      setOrders(ordersResponse.orders);
-      setAddresses(addressesResponse.addresses);
+      const rawOrders = Array.isArray(ordersResponse)
+        ? ordersResponse
+        : (ordersResponse?.orders || ordersResponse?.data || ordersResponse?.result || []);
+
+      const normalizedOrders: Order[] = rawOrders.map((order: any) => ({
+        id: order.id,
+        order_number: order.order_number || order.orderNumber || `ORD-${order.id}`,
+        status: order.status || 'pending',
+        total_amount: parseFloat(order.total_amount || order.totalAmount || order.total || '0'),
+        payment_status: order.payment_status || order.paymentStatus || 'pending',
+        payment_method: order.payment_method || order.paymentMethod || order.orderType || 'stripe',
+        created_at: order.created_at || order.createdAt || new Date().toISOString(),
+        item_count: order.item_count || (order.order_items || order.orderItems || order.items || []).length,
+        order_items: (order.order_items || order.orderItems || order.items || []).map((item: any) => ({
+          product_id: item.product_id || item.productId,
+          variant_id: item.variant_id || item.variantId,
+          product_name: item.product_name || item.productName || item.title || 'Product',
+          price: String(item.price || item.unit_price || item.unitPrice || '0'),
+          quantity: item.quantity || 1,
+          size: item.size,
+          color: item.color,
+          image_url: item.image_url || item.imageUrl || item.thumbnail_url || item.product_image,
+          total_price: String(item.total_price || item.totalPrice || '0')
+        })),
+        shipping_cost: parseFloat(order.shipping_cost || order.shippingCost || '0'),
+        tax_amount: parseFloat(order.tax_amount || order.taxAmount || '0'),
+        admin_fee: parseFloat(order.admin_fee || order.adminFee || '0'),
+        shipping_address: order.shipping_address || order.shippingAddress || {},
+        metadata: order.metadata || {}
+      }));
+
+      console.log('📦 Normalized orders:', normalizedOrders);
+
+      setOrders(normalizedOrders);
+      setAddresses(Array.isArray(addressesResponse) ? addressesResponse : (addressesResponse?.addresses || addressesResponse?.data || []));
     } catch (error) {
       console.error('Failed to fetch user data:', error);
       setError('Failed to load profile data. Please try again.');

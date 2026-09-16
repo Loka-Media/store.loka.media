@@ -733,10 +733,16 @@ function CanvasContent() {
 
         const mainCoverUrl = imagesList[0] || selectedProduct?.thumbnail_url || selectedProduct?.thumbnailUrl || "";
 
+        const finalPrice = (formDataToUse as any).price || (formDataToUse as any).base_price || 14.99;
         const updateData: any = {
           name: formDataToUse.name.trim(),
           description: formDataToUse.description.trim(),
           markupPercentage: parseFloat(formDataToUse.markupPercentage) || 30,
+          basePrice: finalPrice,
+          base_price: finalPrice,
+          price: finalPrice,
+          min_price: (formDataToUse as any).min_price || finalPrice,
+          max_price: (formDataToUse as any).max_price || finalPrice,
           category: formDataToUse.category?.trim() || "",
           tags: (formDataToUse.tags && formDataToUse.tags.length > 0) ? formDataToUse.tags : ['New'],
           thumbnailUrl: mainCoverUrl,
@@ -744,10 +750,30 @@ function CanvasContent() {
           images: imagesList,
           status: 'active',
           is_active: true,
-          isActive: true
+          isActive: true,
+          variantPrices: (formDataToUse as any).variantPrices || []
         };
 
         console.log(`💾 Updating product ${editingProductId} in database:`, updateData);
+
+        // Direct sync with internal API route to ensure PostgreSQL product and variants are updated to .99 price
+        try {
+          await fetch('/api/products/update', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`
+            },
+            body: JSON.stringify({
+              productId: editingProductId,
+              ...updateData
+            })
+          });
+        } catch (syncErr) {
+          console.warn('[Canvas] /api/products/update sync notice:', syncErr);
+        }
+
+        // Also call backend updateProduct API
         await productAPI.updateProduct(editingProductId, updateData);
 
         toast.dismiss("publishing-progress");
@@ -827,6 +853,7 @@ function CanvasContent() {
         console.warn("Final validation check failed, proceeding with caution:", validationError);
       }
 
+      const finalPublishPrice = (formDataToUse as any).price || (formDataToUse as any).base_price;
       const productData = {
         id: selectedProduct?.id,
         name: formDataToUse.name.trim(),
@@ -834,7 +861,13 @@ function CanvasContent() {
         category: formDataToUse.category,
         tags: (formDataToUse.tags && formDataToUse.tags.length > 0) ? formDataToUse.tags : ['New'],
         markupPercentage: parseFloat(formDataToUse.markupPercentage),
+        price: finalPublishPrice,
+        base_price: finalPublishPrice,
+        basePrice: finalPublishPrice,
+        min_price: (formDataToUse as any).min_price || finalPublishPrice,
+        max_price: (formDataToUse as any).max_price || finalPublishPrice,
         variants: selectedVariants,
+        variantPrices: (formDataToUse as any).variantPrices || [],
         base_product: selectedProduct
       };
 

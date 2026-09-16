@@ -17,6 +17,8 @@ interface EnhancedProductInfoProps {
 
 const TRUNCATE_LENGTH = 200;
 
+import { ensure99Pricing } from '@/lib/pricing-utils';
+
 export function EnhancedProductInfo({
   productName,
   description,
@@ -29,10 +31,11 @@ export function EnhancedProductInfo({
   const { calculateSellingPrice } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
   
-  // Stored pricing in DB already contains the final retail price
-  const displayPrice = selectedVariantPrice !== undefined && selectedVariantPrice !== null && selectedVariantPrice > 0
+  // Stored pricing in DB normalized to uniform .99 retail price (e.g. 14.00 -> 14.99)
+  const rawPrice = selectedVariantPrice !== undefined && selectedVariantPrice !== null && selectedVariantPrice > 0
     ? selectedVariantPrice
     : basePrice;
+  const displayPrice = ensure99Pricing(rawPrice);
 
   return (
     <div className="space-y-2 sm:space-y-3 md:space-y-4">

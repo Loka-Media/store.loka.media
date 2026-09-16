@@ -48,6 +48,7 @@ import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { CATEGORIES_MAP } from "@/config/categories";
+import { calculateFinalRetailPrice, calculateRetailPriceFromMarkup, ensure99Pricing } from "@/lib/pricing-utils";
 
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition } from "./utils";
 import DesignCanvasTab from "./DesignCanvasTab";
@@ -1131,12 +1132,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     }
   }, [minMarkup, creatorMarkup, setProductForm]);
 
-  // Apply creator markup on top of the platform price
+  // Apply creator markup on top of the platform price using unified pricing formula
   const creatorMarkupMultiplier = 1 + creatorMarkup / 100;
-  const rawMinSellingPrice = platformMinSellingPrice * creatorMarkupMultiplier;
-  const rawMaxSellingPrice = platformMaxSellingPrice * creatorMarkupMultiplier;
-  const minSellingPrice = Math.ceil(rawMinSellingPrice) - 0.01;
-  const maxSellingPrice = Math.ceil(rawMaxSellingPrice) - 0.01;
+  const minSellingPrice = calculateRetailPriceFromMarkup(platformMinSellingPrice, creatorMarkup);
+  const maxSellingPrice = calculateRetailPriceFromMarkup(platformMaxSellingPrice, creatorMarkup);
   const hasPriceRange = pricingRange.hasRange;
 
   // Detailed pricing breakdown values
@@ -1448,7 +1447,23 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
     const finalForm = {
       ...productForm,
-      markupPercentage: String(effectiveMarkup)
+      markupPercentage: String(effectiveMarkup),
+      price: minSellingPrice,
+      base_price: minSellingPrice,
+      selling_price: minSellingPrice,
+      min_price: minSellingPrice,
+      max_price: maxSellingPrice,
+      variantPrices: (selectedProduct?.variants || []).map((v: any) => {
+        const vCost = v.price ? parseFloat(v.price) * 0.77 : pricingRange.min;
+        const vPlatform = calculateSellingPrice(vCost);
+        const vSelling = calculateRetailPriceFromMarkup(vPlatform, creatorMarkup);
+        return {
+          id: v.id,
+          printify_variant_id: v.printify_variant_id || v.id,
+          price: vSelling,
+          cost: vCost
+        };
+      })
     };
     await onPublish(finalForm);
   };
@@ -1878,7 +1893,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         .filter((p: number) => p > 0);
                       const minBasePrice = sizePrices.length > 0 ? Math.min(...sizePrices) : 0;
                       const sizeFinalPrice = minBasePrice > 0 
-                        ? Math.round(calculateSellingPrice(minBasePrice * 0.77) * (1 + creatorMarkup / 100) * 100) / 100
+                        ? calculateRetailPriceFromMarkup(calculateSellingPrice(minBasePrice * 0.77), creatorMarkup)
                         : 0;
 
                       return (

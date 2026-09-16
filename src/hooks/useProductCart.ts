@@ -5,6 +5,7 @@ import { useGuestCart } from '@/contexts/GuestCartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 import { ProductDetails } from './useProductData';
+import { ensure99Pricing } from '@/lib/pricing-utils';
 import toast from 'react-hot-toast';
 
 export const useProductCart = (
@@ -18,13 +19,13 @@ export const useProductCart = (
   const router = useRouter();
 
   const handleAddToCart = useCallback(async (quantity: number) => {
-    if (!selectedVariant || !product) {
-      if (!isAuthenticated) {
-        toast.error('Please login to add items to cart');
-        router.push('/auth/login?redirect=/cart');
-        return;
-      }
+    if (!product || !selectedVariant) {
       toast.error('Please select a variant');
+      return;
+    }
+
+    if (!selectedVariant.available_for_sale) {
+      toast.error('This item is currently out of stock');
       return;
     }
 
@@ -35,7 +36,7 @@ export const useProductCart = (
         ? parseFloat(String(selectedVariant.price))
         : (product.base_price ? parseFloat(String(product.base_price)) : 0);
       const vCost = selectedVariant.cost || (vPrice > 0 ? vPrice / 1.35 : 20.00);
-      const finalSellingPrice = vPrice > 0 ? vPrice : calculateSellingPrice(vCost);
+      const finalSellingPrice = ensure99Pricing(vPrice > 0 ? vPrice : calculateSellingPrice(vCost));
       
       // Determine the exact image for the selected variant/color
       const getResolvedColorImage = (): string => {

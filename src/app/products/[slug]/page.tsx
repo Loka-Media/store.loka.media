@@ -8,6 +8,7 @@ import { useProductWishlist } from '@/hooks/useProductWishlist';
 import { useProductCart } from '@/hooks/useProductCart';
 import { useLocationLookup } from '@/hooks/useLocationLookup';
 import { getValidImageUrl } from '@/lib/utils';
+import { ensure99Pricing } from '@/lib/pricing-utils';
 
 import { EnhancedProductImageGallery } from '@/components/products/product-detail/EnhancedProductImageGallery';
 import { EnhancedProductInfo, EnhancedProductDescription } from '@/components/products/product-detail/EnhancedProductInfo';
@@ -275,9 +276,9 @@ export default function ProductPage({ params }: ProductPageProps) {
             <EnhancedProductInfo
               productName={product.name}
               description={product.description}
-              basePrice={product.base_price}
+              basePrice={product.base_price ? ensure99Pricing(product.base_price) : 14.99}
               selectedVariantCost={selectedVariant?.cost}
-              selectedVariantPrice={selectedVariant?.price}
+              selectedVariantPrice={selectedVariant?.price ? ensure99Pricing(selectedVariant.price) : undefined}
               category={product.category}
               creatorName={product.creator?.name || product.creator_name || 'Unknown'}
             />

@@ -138,10 +138,11 @@ async function buildPrintifyProductPayload(
     const priceVal = typeof v.price === 'string' ? parseFloat(v.price) * 100 : v.price;
     const baseCents: number = typeof priceVal === 'number' && !isNaN(priceVal) ? priceVal : 1500;
 
-    // Apply 23% Premium discount (0.77) + 35% Loka Platform markup (1.35) + Creator Markup
-    const premiumBaseCents = baseCents * 0.77;
-    const lokaBaseCents = premiumBaseCents * 1.35;
-    const retailCents = Math.round(lokaBaseCents * (1 + markupPercent / 100));
+    // Apply 23% Premium discount (0.77) + 35% Loka Platform markup (1.35) + Creator Markup with uniform .99 rule
+    const premiumBaseCost = (baseCents / 100) * 0.77;
+    const lokaBasePrice = Math.ceil(premiumBaseCost * 1.35) - 0.01;
+    const finalSellingPrice = Math.ceil(lokaBasePrice * (1 + markupPercent / 100)) - 0.01;
+    const retailCents = Math.round(finalSellingPrice * 100);
 
     return {
       id: vId,
@@ -557,10 +558,18 @@ export async function POST(request: NextRequest) {
             ? [productData.tags]
             : ['Popular'];
 
+        const defaultCalculatedPrice = created?.variants?.[0]?.price ? created.variants[0].price / 100 : 14.99;
+        const uniformPrice = productData?.price || productData?.base_price || productData?.basePrice || defaultCalculatedPrice;
+
         const updatedProductData = {
           ...productData,
           source: 'printify',
           ...(printifyProductId ? { printify_product_id: printifyProductId } : {}),
+          base_price: uniformPrice,
+          basePrice: uniformPrice,
+          price: uniformPrice,
+          min_price: productData?.min_price || uniformPrice,
+          max_price: productData?.max_price || uniformPrice,
           thumbnail_url: finalMockupUrls[0],
           thumbnailUrl: finalMockupUrls[0],
           images: finalMockupUrls,

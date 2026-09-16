@@ -87,6 +87,8 @@ export function calculateSellingPrice(
   return Math.ceil(sellingPrice) - 0.01;
 }
 
+import { ensure99Pricing } from './pricing-utils';
+
 /**
  * Get dynamic retail price range for a product.
  * Returns min and max selling prices calculated from variant base costs and markup rules.
@@ -118,9 +120,11 @@ export function getProductPriceRange(
   );
 
   if (!isNaN(directMin) && directMin > 0) {
+    const normMin = ensure99Pricing(directMin);
+    const normMax = !isNaN(directMax) && directMax > 0 ? ensure99Pricing(directMax) : normMin;
     return {
-      minPrice: directMin,
-      maxPrice: !isNaN(directMax) && directMax > 0 ? directMax : directMin
+      minPrice: normMin,
+      maxPrice: normMax
     };
   }
 
@@ -132,8 +136,8 @@ export function getProductPriceRange(
     
     if (prices.length > 0) {
       return {
-        minPrice: Math.min(...prices),
-        maxPrice: Math.max(...prices)
+        minPrice: ensure99Pricing(Math.min(...prices)),
+        maxPrice: ensure99Pricing(Math.max(...prices))
       };
     }
   }
@@ -145,17 +149,17 @@ export function getProductPriceRange(
   if (!isNaN(baseCost) && baseCost > 0) {
     if (!isNaN(creatorMarkup) && creatorMarkup > 0) {
       const creatorPrice = Math.ceil(baseCost * (1 + creatorMarkup / 100)) - 0.01;
-      return { minPrice: creatorPrice, maxPrice: creatorPrice };
+      return { minPrice: ensure99Pricing(creatorPrice), maxPrice: ensure99Pricing(creatorPrice) };
     }
 
     if (typeof categoryOrMarkup === 'number') {
       const calculated = calculateSellingPrice(baseCost, categoryOrMarkup);
-      return { minPrice: calculated, maxPrice: calculated };
+      return { minPrice: ensure99Pricing(calculated), maxPrice: ensure99Pricing(calculated) };
     }
     const categoryName = typeof categoryOrMarkup === 'string' ? categoryOrMarkup : resolveProductCategoryName(product);
     const markupRateInput = categoryOrMarkup !== undefined ? categoryOrMarkup : categoryName;
     const calculated = calculateSellingPrice(baseCost, markupRateInput, categoryMarkups, globalMarkup);
-    return { minPrice: calculated, maxPrice: calculated };
+    return { minPrice: ensure99Pricing(calculated), maxPrice: ensure99Pricing(calculated) };
   }
 
   return { minPrice: 0, maxPrice: 0 };
@@ -188,11 +192,11 @@ export function getVariantSellingPrice(
   }
 
   if (typeof categoryOrMarkup === 'number') {
-    return calculateSellingPrice(baseCost, categoryOrMarkup);
+    return ensure99Pricing(calculateSellingPrice(baseCost, categoryOrMarkup));
   }
 
   const markupRateInput = categoryOrMarkup !== undefined ? categoryOrMarkup : categoryName;
-  return calculateSellingPrice(baseCost, markupRateInput, categoryMarkups, globalMarkup);
+  return ensure99Pricing(calculateSellingPrice(baseCost, markupRateInput, categoryMarkups, globalMarkup));
 }
 
 /**

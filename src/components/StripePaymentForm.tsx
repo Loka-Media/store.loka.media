@@ -10,7 +10,8 @@ import GradientTitle from '@/components/ui/GradientTitle';
 import { getApiUrl } from '@/lib/getApiUrl';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8';
+const stripePromise = loadStripe(stripePublishableKey);
 
 interface OrderData {
   orderNumber: string;
@@ -30,12 +31,21 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
   const stripe = useStripe();
   const elements = useElements();
   const { formatPrice } = useCurrency();
+  const [elementReady, setElementReady] = React.useState(false);
+  const [elementError, setElementError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    console.log('💳 [PaymentForm] stripe loaded:', !!stripe, 'elements loaded:', !!elements);
+  }, [stripe, elements]);
 
   const confirmStripePayment = async (paymentIntentId: string, orderNumber: string) => {
-    const API_BASE_URL = getApiUrl();
-    const response = await fetch(`${API_BASE_URL}/api/unified-checkout/stripe/confirm-payment`, {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const response = await fetch('/api/unified-checkout/stripe/confirm-payment', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
       body: JSON.stringify({ paymentIntentId, orderNumber })
     });
     if (!response.ok) throw new Error('Failed to confirm Stripe payment');
@@ -111,10 +121,23 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Stripe Payment Element */}
             <div className="stripe-payment-element">
+              {elementError && (
+                <div className="p-3 mb-4 text-xs bg-red-500/20 border border-red-500/40 rounded-lg text-red-300">
+                  Failed to load payment options: {elementError}
+                </div>
+              )}
               <PaymentElement
                 options={{
                   layout: 'tabs',
                   paymentMethodOrder: ['card', 'link']
+                }}
+                onReady={() => {
+                  console.log('✅ [PaymentElement] Mounted & Ready!');
+                  setElementReady(true);
+                }}
+                onLoadError={(err: any) => {
+                  console.error('❌ [PaymentElement] Load error:', err);
+                  setElementError(err?.message || 'Failed to load Stripe Payment Element');
                 }}
               />
             </div>
@@ -170,6 +193,40 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
 
 // Main component that wraps PaymentForm with Elements
 export default function StripePaymentForm({ clientSecret, ...props }: StripePaymentFormProps) {
+  const [stripePromise, setStripePromise] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    async function initStripeKey() {
+      try {
+        const res = await fetch('/api/unified-checkout/stripe/config');
+        if (res.ok) {
+          const config = await res.json();
+          if (config.publishableKey) {
+            console.log('✅ [Stripe] Dynamically loaded matching publishableKey from local backend:', config.publishableKey);
+            setStripePromise(loadStripe(config.publishableKey));
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Could not fetch Stripe config from local backend, using fallback:', err);
+      }
+
+      const fallbackKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8';
+      console.log('🔑 [Stripe] Using fallback publishableKey:', fallbackKey);
+      setStripePromise(loadStripe(fallbackKey));
+    }
+
+    initStripeKey();
+  }, []);
+
+  if (!stripePromise) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
   const options = {
     clientSecret,
     appearance: {
