@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { productAPI, ExtendedProduct } from "@/lib/api";
-import { createProductSlug } from "@/lib/utils";
+import { createProductSlug, isVariantAvailable } from "@/lib/utils";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useWishlist, addPendingWishlistItem } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -99,8 +99,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
       const productData = await productAPI.getProduct(product.id);
       if (productData.variants && productData.variants.length > 0) {
         const availableVariants = productData.variants.filter(
-          (v: { inventory_available: boolean; in_stock: boolean }) =>
-            v.inventory_available !== false && v.in_stock !== false
+          (v: any) => isVariantAvailable(v, productData.source || product.product_source)
         );
         setInventoryStatus({
           isAvailable: availableVariants.length > 0,
@@ -139,8 +138,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
       if (productData.variants && productData.variants.length > 0) {
         // Check if any variants are available
         const availableVariants = productData.variants.filter(
-          (v: { inventory_available: boolean; in_stock: boolean }) =>
-            v.inventory_available !== false && v.in_stock !== false
+          (v: any) => isVariantAvailable(v, productData.source || product.product_source)
         );
 
         if (availableVariants.length === 0) {

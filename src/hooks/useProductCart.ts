@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 import { ProductDetails } from './useProductData';
 import { ensure99Pricing } from '@/lib/pricing-utils';
+import { isVariantAvailable } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 export const useProductCart = (
@@ -24,7 +25,7 @@ export const useProductCart = (
       return;
     }
 
-    if (!selectedVariant.available_for_sale) {
+    if (!isVariantAvailable(selectedVariant, product?.source)) {
       toast.error('This item is currently out of stock');
       return;
     }

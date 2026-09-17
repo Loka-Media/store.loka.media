@@ -171,3 +171,28 @@ export function getValidImageUrl(product: any): string {
 
   return "/placeholder-product.svg";
 }
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function isVariantAvailable(variant: any, source?: string): boolean {
+  if (!variant) return false;
+
+  const isPrintifyProduct = !!variant.printify_variant_id || source === 'printify';
+  const isPrintfulProduct = !!variant.printful_variant_id || source === 'printful';
+
+  if (isPrintifyProduct || isPrintfulProduct) {
+    return variant.available_for_sale !== false;
+  }
+
+  if (variant.available_for_sale !== undefined && variant.available_for_sale !== null) {
+    if (variant.inventory_quantity !== undefined && variant.inventory_quantity !== null) {
+      return Boolean(variant.available_for_sale && variant.inventory_quantity > 0);
+    }
+    return Boolean(variant.available_for_sale);
+  }
+
+  if (variant.stock_status) {
+    return variant.stock_status === 'in_stock';
+  }
+
+  return true;
+}

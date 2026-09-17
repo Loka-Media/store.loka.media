@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { cartAPI, CartItem, CartSummary } from '@/lib/api';
 import { useAuth } from './AuthContext';
+import { ensure99Pricing } from '@/lib/pricing-utils';
 
 interface CartContextType {
   items: CartItem[];
@@ -125,9 +126,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       const response = await cartAPI.getCart();
-      setItems(response.items);
-      setSummary(response.summary);
-      const actualCount = response.items.reduce((sum, item) => sum + item.quantity, 0);
+      const normItems = response.items.map((item) => {
+        const rawPrice = parseFloat(String(item.price)) || 0;
+        const normPrice = ensure99Pricing(rawPrice);
+        const normTotalPrice = normPrice * item.quantity;
+        return {
+          ...item,
+          price: normPrice,
+          total_price: normTotalPrice
+        };
+      });
+      const calcSubtotal = normItems.reduce((sum, i) => sum + i.total_price, 0);
+      setItems(normItems);
+      setSummary({
+        ...response.summary,
+        itemCount: normItems.reduce((sum, i) => sum + i.quantity, 0),
+        subtotal: calcSubtotal.toFixed(2),
+        total: calcSubtotal.toFixed(2)
+      });
+      const actualCount = normItems.reduce((sum, item) => sum + item.quantity, 0);
       setCartCount(response.summary?.itemCount || actualCount);
     } catch (error) {
       console.error('Failed to fetch cart:', error);

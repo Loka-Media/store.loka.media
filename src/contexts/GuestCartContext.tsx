@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { cartAPI, CartItem, CartSummary } from '@/lib/api';
 import { useAuth } from './AuthContext';
 import { useGlobalMarkup } from './GlobalMarkupContext';
+import { ensure99Pricing } from '@/lib/pricing-utils';
 import toast from 'react-hot-toast';
 
 interface GuestCartItem {
@@ -324,17 +325,29 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
               console.warn('Error reading cached variant image:', e);
             }
           }
+
+          const rawPrice = parseFloat(String(item.price)) || 0;
+          const normPrice = ensure99Pricing(rawPrice);
+          const normTotalPrice = normPrice * item.quantity;
+
           return {
             ...item,
             image_url: resolvedImage,
             thumbnail_url: resolvedImage,
-            price: String(item.price),
-            total_price: String(item.total_price),
-            cost: (item as any).cost || parseFloat(String(item.price)) / 1.35
+            price: normPrice.toFixed(2),
+            total_price: normTotalPrice.toFixed(2),
+            cost: (item as any).cost || normPrice / 1.35
           };
         });
+
+        const calculatedSubtotal = guestCartItems.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
         setItems(guestCartItems);
-        setSummary(response.summary);
+        setSummary({
+          ...response.summary,
+          itemCount: guestCartItems.reduce((sum, item) => sum + item.quantity, 0),
+          subtotal: calculatedSubtotal.toFixed(2),
+          total: calculatedSubtotal.toFixed(2)
+        });
         const actualCount = guestCartItems.reduce((sum, item) => sum + item.quantity, 0);
         setCartCount(response.summary?.itemCount || actualCount);
       } catch (error) {

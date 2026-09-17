@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { productAPI, ProductVariant } from '@/lib/api';
-import { parseProductSlug, createProductSlug } from '@/lib/utils';
+import { parseProductSlug, createProductSlug, isVariantAvailable as checkVariantAvailable } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 export interface ProductDetails {
@@ -42,18 +42,7 @@ export const useProductData = (slug: string) => {
   const hasInitialized = useRef<boolean>(false);
 
   const isVariantAvailable = useCallback((variant: ProductVariant, source?: string) => {
-    const isPrintifyProduct = !!variant.printify_variant_id || source === 'printify';
-    if (isPrintifyProduct) {
-      return variant.available_for_sale !== false;
-    }
-    
-    if (variant.available_for_sale !== undefined) {
-      return variant.available_for_sale && (variant.inventory_quantity || 0) > 0;
-    }
-    if (variant.stock_status) {
-      return variant.stock_status === 'in_stock';
-    }
-    return true;
+    return checkVariantAvailable(variant, source);
   }, []);
 
   const fetchProduct = useCallback(async () => {
