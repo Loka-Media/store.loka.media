@@ -226,9 +226,9 @@
   },
   "70": {
     "title": "Stainless Steel Travel Mug",
-    "providerId": 99,
-    "price": "7.55",
-    "premiumPrice": "5.81",
+    "providerId": 1,
+    "price": "15.29",
+    "premiumPrice": "11.77",
     "sizesCount": 8,
     "colorsCount": 5,
     "providersCount": 2
@@ -883,9 +883,9 @@
   },
   "380": {
     "title": "Christmas Stockings",
-    "providerId": 99,
-    "price": "12.50",
-    "premiumPrice": "9.63",
+    "providerId": 10,
+    "price": "13.11",
+    "premiumPrice": "10.09",
     "sizesCount": 6,
     "colorsCount": 35,
     "providersCount": 4
@@ -1099,9 +1099,9 @@
   },
   "439": {
     "title": "Three-Panel Fleece Hoodie",
-    "providerId": 27,
-    "price": "21.68",
-    "premiumPrice": "16.69",
+    "providerId": 99,
+    "price": "18.56",
+    "premiumPrice": "14.29",
     "sizesCount": 5,
     "colorsCount": 24,
     "providersCount": 7
@@ -1909,9 +1909,9 @@
   },
   "572": {
     "title": "Copper Vacuum Insulated Bottle, 22oz",
-    "providerId": 99,
-    "price": "16.50",
-    "premiumPrice": "12.71",
+    "providerId": 75,
+    "price": "19.05",
+    "premiumPrice": "14.67",
     "sizesCount": 6,
     "colorsCount": 17,
     "providersCount": 7
@@ -2125,9 +2125,9 @@
   },
   "604": {
     "title": "Vacuum Insulated Tumbler, 11oz",
-    "providerId": 99,
-    "price": "5.55",
-    "premiumPrice": "4.27",
+    "providerId": 75,
+    "price": "13.69",
+    "premiumPrice": "10.54",
     "sizesCount": 8,
     "colorsCount": 14,
     "providersCount": 4
@@ -2683,9 +2683,9 @@
   },
   "717": {
     "title": "Toddler Blanket",
-    "providerId": 99,
-    "price": "11.00",
-    "premiumPrice": "8.47",
+    "providerId": 41,
+    "price": "8.55",
+    "premiumPrice": "6.58",
     "sizesCount": 7,
     "colorsCount": 22,
     "providersCount": 5
@@ -2791,9 +2791,9 @@
   },
   "734": {
     "title": "Christmas Stocking",
-    "providerId": 99,
-    "price": "10.50",
-    "premiumPrice": "8.09",
+    "providerId": 59,
+    "price": "12.44",
+    "premiumPrice": "9.58",
     "sizesCount": 6,
     "colorsCount": 39,
     "providersCount": 8

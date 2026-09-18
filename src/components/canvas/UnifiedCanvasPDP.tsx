@@ -1094,8 +1094,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
         .filter((p: number) => p > 0);
       
       if (prices.length > 0) {
-        const minCost = Math.min(...prices) * 0.77;
-        const maxCost = Math.max(...prices) * 0.77;
+        const minCost = Math.min(...prices);
+        const maxCost = Math.max(...prices);
         return {
           min: minCost,
           max: maxCost,
@@ -1104,7 +1104,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       }
     }
 
-    const fallbackBase = parseFloat(selectedProduct.premiumPrice || (parseFloat(selectedProduct.price || '0') * 0.77).toFixed(2));
+    const fallbackBase = parseFloat(selectedProduct.premiumPrice || selectedProduct.price || '0');
     return { min: fallbackBase, max: fallbackBase, hasRange: false };
   }, [selectedProduct, selectedVariants]);
 
@@ -1435,7 +1435,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       min_price: minSellingPrice,
       max_price: maxSellingPrice,
       variantPrices: (selectedProduct?.variants || []).map((v: any) => {
-        const vCost = v.price ? parseFloat(v.price) * 0.77 : pricingRange.min;
+        const vCost = v.price ? parseFloat(v.price) : pricingRange.min;
         const vPlatform = calculateSellingPrice(vCost);
         const vSelling = calculateRetailPriceFromMarkup(vPlatform, creatorMarkup);
         return {
