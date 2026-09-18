@@ -534,22 +534,22 @@ export async function GET(
         // Fetch blueprint details to get its title
         const blueprint = await printifyCatalogAPI.getBlueprint(blueprintId).catch(() => ({ title: "Apparel" }));
         const fallback = getFallbackMetadata(blueprintId, blueprint.title);
-        
-        // Calculate dynamic provider-specific price based on global cached fallback
-        const providerPrice = fallback.price + (providerId % 3) * 0.45;
+        const fileCache = loadFileCache();
+        const metadata = fileCache[blueprintId] || fallback;
+        const baseCost = metadata.price !== undefined ? parseFloat(metadata.price) : fallback.price;
         
         // Map variants and inject correct price
         const mappedVariants = variants.map((v: any) => {
-          let baseCost = providerPrice;
+          let itemCost = baseCost;
           if (v.cost !== undefined) {
-            baseCost = v.cost / 100;
+            itemCost = v.cost / 100;
           } else if (v.price !== undefined) {
-            baseCost = v.price / 100;
+            itemCost = v.price / 100;
           }
           return {
             ...v,
-            price: baseCost.toFixed(2),
-            cost: v.cost !== undefined ? v.cost : Math.round(baseCost * 100)
+            price: itemCost.toFixed(2),
+            cost: v.cost !== undefined ? v.cost : Math.round(itemCost * 100)
           };
         });
 
@@ -589,8 +589,9 @@ export async function GET(
       try {
         const variantsData = await printifyCatalogAPI.getBlueprintVariants(blueprintId, providerId);
         const fallback = getFallbackMetadata(blueprintId, blueprint.title);
+        const baseCost = metadata.price !== undefined ? parseFloat(metadata.price) : fallback.price;
         variants = (variantsData.variants || []).map((v: any) => {
-          let basePrice = fallback.price;
+          let basePrice = baseCost;
           if (v.cost !== undefined) {
             basePrice = v.cost / 100;
           } else if (v.price !== undefined) {

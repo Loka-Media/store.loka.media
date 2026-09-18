@@ -727,16 +727,12 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   const handleCreatorMarkupChange = (_e: Event, val: number | number[]) => {
     const v = val as number;
-    if (v < minMarkup) return; // Prevent slider from sliding below minMarkup
+    if (v < 0) return;
     setCreatorMarkup(v);
     setProductForm((prev: any) => ({ ...prev, markupPercentage: String(v) }));
   };
 
   const handleCreatorPresetClick = (preset: number) => {
-    if (preset < minMarkup) {
-      toast.error(`Markup cannot be lower than ${minMarkup}% because it would result in zero or negative profit after all applicable fees and charges.`);
-      return;
-    }
     setCreatorMarkup(preset);
     setProductForm((prev: any) => ({ ...prev, markupPercentage: String(preset) }));
   };
@@ -1118,19 +1114,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Calculate dynamic minimum required markup to keep Net Creator Profit > $0.00 after Stripe fee
   const minMarkup = useMemo(() => {
-    if (!platformMinSellingPrice || isNaN(platformMinSellingPrice) || platformMinSellingPrice <= 0) return 1;
-    const requiredMinPrice = (platformMinSellingPrice + 0.31) / 0.971;
-    const requiredMarkup = ((requiredMinPrice / platformMinSellingPrice) - 1) * 100;
-    return Math.max(1, Math.ceil(requiredMarkup));
+    if (!platformMinSellingPrice || isNaN(platformMinSellingPrice) || platformMinSellingPrice <= 0) return 0;
+    return 0;
   }, [platformMinSellingPrice]);
-
-  // Sync / select default minimum markup if current markup is lower
-  useEffect(() => {
-    if (minMarkup > 0 && creatorMarkup < minMarkup) {
-      setCreatorMarkup(minMarkup);
-      setProductForm((prev: any) => ({ ...prev, markupPercentage: String(minMarkup) }));
-    }
-  }, [minMarkup, creatorMarkup, setProductForm]);
 
   // Apply creator markup on top of the platform price using unified pricing formula
   const creatorMarkupMultiplier = 1 + creatorMarkup / 100;
@@ -1435,11 +1421,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       return;
     }
 
-    if (creatorMarkup < minMarkup) {
-      toast.error(`Markup cannot be lower than ${minMarkup}% because it would result in zero or negative profit after all applicable fees and charges.`);
-      return;
-    }
-
     if (!validationSummary.allValid) {
       toast.error("Please complete variant selection, design positioning, and mockup previews before publishing");
       return;
@@ -1447,7 +1428,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
     const finalForm = {
       ...productForm,
-      markupPercentage: String(effectiveMarkup),
+      markupPercentage: String(creatorMarkup),
       price: minSellingPrice,
       base_price: minSellingPrice,
       selling_price: minSellingPrice,
@@ -2710,7 +2691,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <span className="text-xs font-semibold text-gray-400">Your Markup</span>
                     <div className="text-right">
                       <span className="text-3xl font-extrabold text-orange-400 tabular-nums block">
-                        {effectiveMarkup}%
+                        {creatorMarkup}%
                       </span>
                     </div>
                   </div>
@@ -2718,7 +2699,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="px-1">
                     <Slider
                       value={creatorMarkup}
-                      min={minMarkup}
+                      min={0}
                       max={100}
                       step={1}
                       onChange={handleCreatorMarkupChange}
@@ -2729,37 +2710,23 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="space-y-2">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Quick Presets</span>
                     <div className="flex flex-wrap gap-1.5">
-                      {(() => {
-                        const seenValues = new Set<number>();
-                        return CREATOR_MARKUP_PRESETS.map((preset) => {
-                          const isDisabled = preset < minMarkup;
-                          const effectivePresetVal = getEffectivePresetMarkup(preset);
+                      {CREATOR_MARKUP_PRESETS.map((preset) => {
+                        const isActive = creatorMarkup === preset;
 
-                          if (seenValues.has(effectivePresetVal)) {
-                            return null;
-                          }
-                          seenValues.add(effectivePresetVal);
-
-                          const isActive = creatorMarkup === preset || effectiveMarkup === effectivePresetVal;
-
-                          return (
-                            <button
-                              key={preset}
-                              disabled={isDisabled}
-                              onClick={() => handleCreatorPresetClick(preset)}
-                              className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all ${
-                                isDisabled
-                                  ? 'bg-gray-950/40 text-gray-600 border-white/5 cursor-not-allowed opacity-35'
-                                  : isActive
-                                  ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)] cursor-pointer'
-                                  : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200 cursor-pointer'
-                              }`}
-                            >
-                              {effectivePresetVal}%
-                            </button>
-                          );
-                        });
-                      })()}
+                        return (
+                          <button
+                            key={preset}
+                            onClick={() => handleCreatorPresetClick(preset)}
+                            className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all ${
+                              isActive
+                                ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)] cursor-pointer'
+                                : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200 cursor-pointer'
+                            }`}
+                          >
+                            {preset}%
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -2774,14 +2741,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex justify-between items-center text-gray-400 font-medium">
-                    <span>Loka Base Cost (+35%)</span>
+                    <span>Loka Base Cost (+{globalMarkup}%)</span>
                     <span className="text-orange-400 font-semibold">
                       {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} - $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-gray-400 font-medium">
-                    <span>Creator Markup ({effectiveMarkup}%)</span>
+                    <span>Creator Markup ({creatorMarkup}%)</span>
                     <span className="text-green-400 font-semibold">
                       +{hasPriceRange 
                         ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}` 
