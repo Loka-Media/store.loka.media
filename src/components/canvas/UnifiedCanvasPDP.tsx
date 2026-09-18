@@ -1874,7 +1874,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         .filter((p: number) => p > 0);
                       const minBasePrice = sizePrices.length > 0 ? Math.min(...sizePrices) : 0;
                       const sizeFinalPrice = minBasePrice > 0 
-                        ? calculateRetailPriceFromMarkup(calculateSellingPrice(minBasePrice * 0.77), creatorMarkup)
+                        ? calculateRetailPriceFromMarkup(calculateSellingPrice(minBasePrice), creatorMarkup)
                         : 0;
 
                       return (

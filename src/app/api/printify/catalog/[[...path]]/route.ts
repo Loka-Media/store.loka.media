@@ -589,7 +589,7 @@ export async function GET(
       try {
         const variantsData = await printifyCatalogAPI.getBlueprintVariants(blueprintId, providerId);
         const fallback = getFallbackMetadata(blueprintId, blueprint.title);
-        const baseCost = metadata.price !== undefined ? parseFloat(metadata.price) : fallback.price;
+        const baseCost = metadata.premiumPrice !== undefined ? parseFloat(metadata.premiumPrice) : (metadata.price !== undefined ? parseFloat(metadata.price) : fallback.price);
         variants = (variantsData.variants || []).map((v: any) => {
           let basePrice = baseCost;
           if (v.cost !== undefined) {

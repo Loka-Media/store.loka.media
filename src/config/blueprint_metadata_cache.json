@@ -10,9 +10,9 @@
   },
   "6": {
     "title": "Unisex Heavy Cotton Tee",
-    "providerId": 26,
-    "price": "6.66",
-    "premiumPrice": "5.13",
+    "providerId": 99,
+    "price": "8.65",
+    "premiumPrice": "6.66",
     "sizesCount": 8,
     "colorsCount": 65,
     "providersCount": 12
@@ -47,8 +47,8 @@
   "12": {
     "title": "Unisex Jersey Short Sleeve Tee",
     "providerId": 99,
-    "price": "8.11",
-    "premiumPrice": "6.24",
+    "price": "10.53",
+    "premiumPrice": "8.11",
     "sizesCount": 8,
     "colorsCount": 54,
     "providersCount": 14
@@ -83,8 +83,8 @@
   "26": {
     "title": "Men's Lightweight Fashion Tee",
     "providerId": 99,
-    "price": "8.46",
-    "premiumPrice": "6.51",
+    "price": "11.85",
+    "premiumPrice": "9.21",
     "sizesCount": 6,
     "colorsCount": 31,
     "providersCount": 7
@@ -263,8 +263,8 @@
   "77": {
     "title": "Unisex Heavy Blend Hoodie",
     "providerId": 99,
-    "price": "15.54",
-    "premiumPrice": "11.97",
+    "price": "20.18",
+    "premiumPrice": "15.54",
     "sizesCount": 6,
     "colorsCount": 41,
     "providersCount": 11
@@ -2126,11 +2126,11 @@
   "604": {
     "title": "Vacuum Insulated Tumbler, 11oz",
     "providerId": 75,
-    "price": "13.69",
-    "premiumPrice": "10.54",
-    "sizesCount": 8,
-    "colorsCount": 14,
-    "providersCount": 4
+    "price": "17.78",
+    "premiumPrice": "13.69",
+    "sizesCount": 1,
+    "colorsCount": 3,
+    "providersCount": 1
   },
   "605": {
     "title": "Organic Women's Classic T-Shirt",
@@ -2747,10 +2747,10 @@
   "727": {
     "title": "Scented Candle - Full Glass, 11oz",
     "providerId": 75,
-    "price": "21.46",
-    "premiumPrice": "16.52",
-    "sizesCount": 5,
-    "colorsCount": 32,
+    "price": "27.87",
+    "premiumPrice": "21.46",
+    "sizesCount": 1,
+    "colorsCount": 1,
     "providersCount": 1
   },
   "728": {
@@ -5222,11 +5222,11 @@
   "1131": {
     "title": "Frosted Glass Beer Mug",
     "providerId": 59,
-    "price": "17.80",
-    "premiumPrice": "13.71",
-    "sizesCount": 7,
-    "colorsCount": 16,
-    "providersCount": 6
+    "price": "23.12",
+    "premiumPrice": "17.80",
+    "sizesCount": 1,
+    "colorsCount": 1,
+    "providersCount": 1
   },
   "1132": {
     "title": "Women's Biker Shorts (AOP)",
