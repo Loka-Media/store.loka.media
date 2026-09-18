@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const cents = Math.round(parsedAmount * 100);
-    const secretKey = process.env.STRIPE_SECRET_KEY;
+    const secretKey = (process.env.STRIPE_SECRET_KEY || '').trim();
 
     const res = await axios.post(
       'https://api.stripe.com/v1/payment_intents',

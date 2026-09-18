@@ -101,6 +101,18 @@ export interface AuthenticatedCheckoutData {
   customerNotes: string;
   shippingCost?: number | string;
   shippingMethod?: string;
+  // Exact amounts from frontend calculation (matches what Stripe charged)
+  totalAmount?: number;
+  taxAmount?: number;
+  platformFee?: number;
+  // Store stripe-charged amounts in metadata for order history display
+  metadata?: {
+    stripeChargedTotal?: number;
+    stripeChargedShipping?: number;
+    stripeChargedTax?: number;
+    stripeChargedPlatformFee?: number;
+    [key: string]: any;
+  };
 }
 
 export interface Address {

@@ -77,36 +77,62 @@ export default function ProfilePage() {
         ? ordersResponse
         : (ordersResponse?.orders || ordersResponse?.data || ordersResponse?.result || []);
 
-      const normalizedOrders: Order[] = rawOrders.map((order: any) => ({
-        id: order.id,
-        order_number: order.order_number || order.orderNumber || `ORD-${order.id}`,
-        status: order.status || 'pending',
-        total_amount: parseFloat(order.total_amount || order.totalAmount || order.total || '0'),
-        payment_status: order.payment_status || order.paymentStatus || 'pending',
-        payment_method: order.payment_method || order.paymentMethod || order.orderType || 'stripe',
-        created_at: order.created_at || order.createdAt || new Date().toISOString(),
-        item_count: order.item_count || (order.order_items || order.orderItems || order.items || []).length,
-        order_items: (order.order_items || order.orderItems || order.items || []).map((item: any) => ({
-          product_id: item.product_id || item.productId,
-          variant_id: item.variant_id || item.variantId,
-          product_name: item.product_name || item.productName || item.title || 'Product',
-          price: String(item.price || item.unit_price || item.unitPrice || '0'),
-          quantity: item.quantity || 1,
-          size: item.size,
-          color: item.color,
-          image_url: item.image_url || item.imageUrl || item.thumbnail_url || item.product_image,
-          total_price: String(item.total_price || item.totalPrice || '0')
-        })),
-        shipping_cost: parseFloat(order.shipping_cost || order.shippingCost || '0'),
-        tax_amount: parseFloat(order.tax_amount || order.taxAmount || '0'),
-        admin_fee: parseFloat(order.admin_fee || order.adminFee || '0'),
-        shipping_address: order.shipping_address || order.shippingAddress || {},
-        metadata: order.metadata || {}
-      }));
+      const normalizedOrders: Order[] = rawOrders.map((order: any) => {
+        const meta = order.metadata || {};
+        // Use customer_payment_amount (actual Stripe charged) or metadata paymentDetails as primary source
+        const stripeAmountCents = meta.paymentDetails?.amount_received || meta.paymentDetails?.amount || 0;
+        const stripeTotal = stripeAmountCents > 0 ? stripeAmountCents / 100 : null;
+        const customerPaymentAmount = parseFloat(order.customer_payment_amount || order.customerPaymentAmount || '0');
+        const backendTotal = parseFloat(order.total_amount || order.totalAmount || order.total || '0');
+        // Priority: customer_payment_amount > Stripe payment_intent amount > backend total
+        const resolvedTotal = customerPaymentAmount > 0 ? customerPaymentAmount : (stripeTotal || backendTotal);
 
-      console.log('📦 Normalized orders:', normalizedOrders);
+        return {
+          id: order.id,
+          order_number: order.order_number || order.orderNumber || `ORD-${order.id}`,
+          status: order.order_status || order.status || 'pending',
+          total_amount: resolvedTotal,
+          payment_status: order.payment_status || order.paymentStatus || 'pending',
+          payment_method: order.payment_method || order.paymentMethod || order.orderType || 'stripe',
+          created_at: order.created_at || order.createdAt || new Date().toISOString(),
+          item_count: order.item_count || (order.order_items || order.orderItems || order.items || []).length,
+          order_items: (order.order_items || order.orderItems || order.items || []).map((item: any) => ({
+            product_id: item.product_id || item.productId,
+            variant_id: item.variant_id || item.variantId,
+            product_name: item.product_name || item.productName || item.title || 'Product',
+            price: String(item.price || item.unit_price || item.unitPrice || '0'),
+            quantity: item.quantity || 1,
+            size: item.size,
+            color: item.color,
+            image_url: item.image_url || item.imageUrl || item.thumbnail_url || item.product_image,
+            total_price: String(item.total_price || item.totalPrice || '0')
+          })),
+          shipping_cost: parseFloat(order.shipping_cost || order.shippingCost || '0'),
+          tax_amount: parseFloat(order.tax_amount || order.taxAmount || '0'),
+          admin_fee: parseFloat(order.admin_fee || order.adminFee || '0'),
+          shipping_address: order.shipping_address || order.shippingAddress || {},
+          metadata: meta
+        };
+      });
 
-      setOrders(normalizedOrders);
+      // Patch orders: if metadata has stripe-charged amounts, use those for display
+      const patchedOrders = normalizedOrders.map((order: any) => {
+        const meta = order.metadata || {};
+        if (meta.stripeChargedTotal) {
+          return {
+            ...order,
+            total_amount: parseFloat(meta.stripeChargedTotal) || order.total_amount,
+            shipping_cost: parseFloat(meta.stripeChargedShipping) || order.shipping_cost,
+            tax_amount: parseFloat(meta.stripeChargedTax) || order.tax_amount,
+            admin_fee: parseFloat(meta.stripeChargedPlatformFee) || order.admin_fee,
+          };
+        }
+        return order;
+      });
+
+      console.log('📦 Normalized orders:', patchedOrders);
+
+      setOrders(patchedOrders);
       setAddresses(Array.isArray(addressesResponse) ? addressesResponse : (addressesResponse?.addresses || addressesResponse?.data || []));
     } catch (error) {
       console.error('Failed to fetch user data:', error);

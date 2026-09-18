@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Payment intent ID is required' }, { status: 400 });
     }
 
-    const secretKey = process.env.STRIPE_SECRET_KEY;
+    const secretKey = (process.env.STRIPE_SECRET_KEY || '').trim();
     const authHeader = request.headers.get('authorization');
 
     // 1. Verify payment status directly with Stripe in test mode

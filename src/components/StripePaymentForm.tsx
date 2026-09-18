@@ -10,7 +10,7 @@ import GradientTitle from '@/components/ui/GradientTitle';
 import { getApiUrl } from '@/lib/getApiUrl';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
-const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8';
+const stripePublishableKey = (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8').trim();
 const stripePromise = loadStripe(stripePublishableKey);
 
 interface OrderData {
@@ -211,7 +211,7 @@ export default function StripePaymentForm({ clientSecret, ...props }: StripePaym
         console.warn('⚠️ Could not fetch Stripe config from local backend, using fallback:', err);
       }
 
-      const fallbackKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8';
+      const fallbackKey = (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8').trim();
       console.log('🔑 [Stripe] Using fallback publishableKey:', fallbackKey);
       setStripePromise(loadStripe(fallbackKey));
     }

@@ -315,6 +315,12 @@ export default function UnifiedCheckoutPage() {
           JSON.stringify(authCartItems, null, 2)
         );
 
+        // Compute exact breakdown to match what was charged via Stripe
+        const subtotalNum = parseFloat(summary.subtotal.replace('$', ''));
+        const shippingNum = activeShippingRate?.rate ? parseFloat(String(activeShippingRate.rate)) : (checkoutState.selectedShippingRate?.rate ? parseFloat(String(checkoutState.selectedShippingRate.rate)) : 0);
+        const platformFeeNum = Math.round(subtotalNum * 0.05 * 100) / 100;
+        const taxNum = checkoutState.taxAmount > 0 ? checkoutState.taxAmount : Math.round(subtotalNum * 0.08 * 100) / 100;
+
         orderResult = await unifiedCheckoutAPI.processAuthenticatedCheckout({
           orderNumber,
           paymentMethod: "stripe",
@@ -340,8 +346,19 @@ export default function UnifiedCheckoutPage() {
           },
           cartItems: authCartItems,
           customerNotes: "",
-          shippingCost: activeShippingRate?.rate ? parseFloat(String(activeShippingRate.rate)) : (checkoutState.selectedShippingRate?.rate ? parseFloat(String(checkoutState.selectedShippingRate.rate)) : 0),
+          shippingCost: shippingNum,
           shippingMethod: activeShippingRate?.title || activeShippingRate?.name || checkoutState.selectedShippingRate?.title || "Standard Shipping",
+          // Pass exact amounts that were charged via Stripe
+          totalAmount,
+          taxAmount: taxNum,
+          platformFee: platformFeeNum,
+          // Also store in metadata as a passthrough for order history display
+          metadata: {
+            stripeChargedTotal: totalAmount,
+            stripeChargedShipping: shippingNum,
+            stripeChargedTax: taxNum,
+            stripeChargedPlatformFee: platformFeeNum,
+          },
         }, token);
       } else {
         // Guest checkout or user wants to signup
