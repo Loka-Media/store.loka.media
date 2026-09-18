@@ -254,13 +254,14 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row justify-center items-center sm:items-start gap-2 sm:gap-4 w-full">
+          <div className="flex flex-col sm:flex-row justify-center items-center sm:items-start gap-2 sm:gap-4 w-full max-w-full overflow-hidden">
             {/* Canvas Container */}
             <div
-              className="gradient-border-white-bottom rounded-lg relative shadow-[0_10px_30px_rgba(255,133,27,0.2)] overflow-hidden flex-shrink-0"
+              className="gradient-border-white-bottom rounded-lg relative shadow-[0_10px_30px_rgba(255,133,27,0.2)] overflow-hidden max-w-full"
               style={{
                 width: `${canvasDims.width}px`,
                 height: `${canvasDims.height}px`,
+                maxWidth: "100%",
                 background: "linear-gradient(135deg, #1f2937 0%, #111827 100%)",
                 boxShadow:
                   "0 20px 40px rgba(255,133,27,0.1), inset 0 1px 0 rgba(255,133,27,0.05)",

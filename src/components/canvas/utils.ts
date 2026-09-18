@@ -40,36 +40,38 @@ export const getCanvasDimensions = (activePrintFile: PrintFile | null) => {
   const { width, height } = activePrintFile;
   const aspectRatio = width / height;
   
-  // IMPROVED: Dynamic canvas sizing based on actual print area from Printful API
-  const maxCanvasSize = 450; // Slightly larger for better visibility
+  // Maximum canvas bounding dimensions that fit within the editor card
+  const maxCanvasWidth = 460;
+  const maxCanvasHeight = 420;
   
-  let canvasWidth, canvasHeight;
+  let canvasWidth = maxCanvasWidth;
+  let canvasHeight = maxCanvasHeight;
   
-  if (aspectRatio > 1) {
-    // Landscape print area (wider than tall)
-    canvasWidth = maxCanvasSize;
-    canvasHeight = canvasWidth / aspectRatio;
+  if (aspectRatio >= 1) {
+    // Landscape print area (e.g. tumblers, mugs, wraps)
+    canvasWidth = maxCanvasWidth;
+    canvasHeight = Math.round(canvasWidth / aspectRatio);
+    
+    // Ensure minimal usable height
+    if (canvasHeight < 140) {
+      canvasHeight = 140;
+      canvasWidth = Math.min(maxCanvasWidth, Math.round(canvasHeight * aspectRatio));
+    }
   } else {
-    // Portrait or square print area (taller than wide or equal)
-    canvasHeight = maxCanvasSize;
-    canvasWidth = canvasHeight * aspectRatio;
-  }
-  
-  // Ensure reasonable minimum size for usability
-  const minSize = 300;
-  if (canvasWidth < minSize) {
-    canvasWidth = minSize;
-    canvasHeight = canvasWidth / aspectRatio;
-  }
-  if (canvasHeight < minSize) {
-    canvasHeight = minSize;
-    canvasWidth = canvasHeight * aspectRatio;
+    // Portrait print area (e.g. tees, hoodies, posters)
+    canvasHeight = maxCanvasHeight;
+    canvasWidth = Math.round(canvasHeight * aspectRatio);
+    
+    if (canvasWidth > maxCanvasWidth) {
+      canvasWidth = maxCanvasWidth;
+      canvasHeight = Math.round(canvasWidth / aspectRatio);
+    }
   }
   
   const printAreaInfo = `Print Area: ${width}×${height}px (${aspectRatio > 1 ? 'Landscape' : aspectRatio < 1 ? 'Portrait' : 'Square'})`;
   
   return {
-    width: Math.round(canvasWidth),
+    width: Math.min(maxCanvasWidth, Math.round(canvasWidth)),
     height: Math.round(canvasHeight),
     aspectRatio,
     printWidth: width,

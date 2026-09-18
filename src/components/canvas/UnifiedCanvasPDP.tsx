@@ -2098,7 +2098,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
             {openAccordions.editor && (
               <div className="space-y-6 pt-3 animate-fadeIn">
-                <div className="bg-black/80 rounded-2xl p-4 sm:p-6 border border-white/10 flex flex-col items-center justify-center">
+                <div className="bg-black/80 rounded-2xl p-4 sm:p-6 border border-white/10 flex flex-col items-center justify-center overflow-hidden w-full max-w-full">
                   <DesignCanvasTab
                     designFiles={designFiles}
                     setDesignFiles={setDesignFiles}
