@@ -445,10 +445,10 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                 </label>
                 <input
                   type="text"
-                  value={`$${(parseFloat(formData.basePrice || '0') * 0.77).toFixed(2)}`}
+                  value={`$${parseFloat((formData as any).cost || (formData as any).premiumPrice || formData.basePrice || '0').toFixed(2)}`}
                   readOnly
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white/70 cursor-not-allowed"
-                  title="This is the discounted Printify Premium cost"
+                  title="This is the Printify Premium cost"
                 />
               </div>
 
@@ -802,11 +802,11 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   </thead>
                   <tbody>
                     {product.variants.map((variant) => {
-                      const baseCost = typeof variant.base_cost === 'string' ? parseFloat(variant.base_cost) : variant.base_cost || 0;
-                      const pppCost = baseCost * 0.77;
+                      const baseCost = typeof variant.base_cost === 'string' ? parseFloat(variant.base_cost) : (variant.base_cost || 0);
+                      const pppCost = (variant as any).cost != null ? parseFloat((variant as any).cost) : ((variant as any).premiumPrice != null ? parseFloat((variant as any).premiumPrice) : baseCost);
                       const markupVal = parseFloat(formData.markupPercentage) || 0;
-                      const sellingPrice = baseCost * (1 + markupVal / 100);
-                      const profit = sellingPrice - baseCost;
+                      const sellingPrice = pppCost * (1 + markupVal / 100);
+                      const profit = sellingPrice - pppCost;
 
                       return (
                         <tr key={variant.id} className="border-b border-white/10">

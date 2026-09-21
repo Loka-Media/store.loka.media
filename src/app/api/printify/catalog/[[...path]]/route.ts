@@ -8,9 +8,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  printifyCatalogAPI,
-} from '@/services/printify/PrintifyClient';
+import { printifyCatalogAPI } from '@/services/printify/PrintifyClient';
+import { printifyPricingService } from '@/services/printify/PrintifyPricingService';
 import fs from 'fs';
 import path from 'path';
 import blueprintCategories from '@/config/blueprint_categories.json';
@@ -182,48 +181,14 @@ function getFallbackMetadata(blueprintId: number, title: string) {
     return BLUEPRINT_PRICE_DEFAULTS[blueprintId];
   }
   
-  const hash = (blueprintId * 17 + 23) % 100;
-  const t = title.toLowerCase();
-  let price = 9.99;
-  
-  if (t.includes('mug') || t.includes('tumbler') || t.includes('cup') || t.includes('drink')) {
-    price = 4.40 + (hash % 5) + (blueprintId % 3) * 0.15;
-  } else if (t.includes('poster') || t.includes('print')) {
-    price = 5.20 + (hash % 8) + (blueprintId % 3) * 0.25;
-  } else if (t.includes('canvas') || t.includes('wall art')) {
-    price = 14.50 + (hash % 20) + (blueprintId % 3) * 0.55;
-  } else if (t.includes('sticker') || t.includes('decal')) {
-    price = 1.80 + (hash % 2) * 0.40 + (blueprintId % 3) * 0.10;
-  } else if (t.includes('phone case') || t.includes('case')) {
-    price = 7.15 + (hash % 6) + (blueprintId % 3) * 0.20;
-  } else if (t.includes('sock') || t.includes('socks')) {
-    price = 8.50 + (hash % 4) + (blueprintId % 3) * 0.15;
-  } else if (t.includes('shoe') || t.includes('sneaker') || t.includes('boot') || t.includes('slipper')) {
-    price = 35.00 + (hash % 30) + (blueprintId % 3) * 0.95;
-  } else if (t.includes('hoodie')) {
-    price = 24.00 + (hash % 15) + (blueprintId % 3) * 0.43;
-  } else if (t.includes('sweatshirt') || t.includes('sweater') || t.includes('pullover')) {
-    price = 18.00 + (hash % 12) + (blueprintId % 3) * 0.35;
-  } else if (t.includes('tee') || t.includes('t-shirt') || t.includes('t shirt') || t.includes('shirt')) {
-    price = 7.00 + (hash % 8) + (blueprintId % 3) * 0.23;
-  } else {
-    price = 9.00 + (hash % 10) + (blueprintId % 3) * 0.25;
-  }
-  
-  // Specific overrides for user examples to match the official catalog exactly!
-  if (blueprintId === 326) price = 28.63; // Unisex Heavy Blend Full Zip Hooded Sweatshirt (Gildan 18600)
-  if (blueprintId === 415) price = 32.92; // Unisex Heavyweight Hooded Sweatshirt (IND4000)
-  if (blueprintId === 812) price = 37.28; // Unisex Garment-Dyed Hoodie (Comfort Colors 1567)
-  if (blueprintId === 915) price = 25.19; // Unisex College Hoodie (AWDIS JH001)
-
-  // Ensure deterministic, unique counts based on blueprintId
+  // Deterministic count defaults based on blueprintId
   const sizes = 4 + (blueprintId % 6);
   const colors = 5 + (blueprintId % 35);
   const providers = 2 + (blueprintId % 7);
   
   return {
-    price,
-    premium: parseFloat((price * 0.77).toFixed(2)),
+    price: 0,
+    premium: 0,
     sizes,
     colors,
     providers
@@ -259,88 +224,64 @@ function saveFileCache(cache: Record<number, any>) {
 const blueprintMetadataCache = new Map<number, any>();
 
 async function resolveBlueprintMetadata(blueprintId: number): Promise<any> {
-  const cache = loadFileCache();
-  if (cache[blueprintId]) {
-    return cache[blueprintId];
-  }
-
   try {
     const blueprint = await printifyCatalogAPI.getBlueprint(blueprintId);
     const providers = await printifyCatalogAPI.getPrintProviders(blueprintId).catch(() => []);
     const providersCount = providers.length;
-    
+    const defaultProviderId = providers[0]?.id || 0;
+
+    let liveCost: number | null = null;
+    if (defaultProviderId > 0) {
+      liveCost = await printifyPricingService.getProviderMinCost(blueprintId, defaultProviderId);
+    }
+    if (liveCost === null) {
+      liveCost = await printifyPricingService.getBlueprintMinCost(blueprintId);
+    }
+
     let sizesCount = 0;
     let colorsCount = 0;
-    let basePrice = 0;
-    let apiPrice: string | undefined = undefined;
-    let apiPremiumPrice: string | undefined = undefined;
-    let defaultProviderId = 0;
 
-    if (providersCount > 0) {
-      defaultProviderId = providers[0].id;
+    if (defaultProviderId > 0) {
       const variantsData = await printifyCatalogAPI.getBlueprintVariants(blueprintId, defaultProviderId).catch(() => ({ variants: [] }));
       const variants = variantsData.variants || [];
-      
       const sizes = new Set<string>();
       const colors = new Set<string>();
-      const costs: number[] = [];
-      const prices: number[] = [];
-      
+
       variants.forEach((v: any) => {
         if (v.options?.size) sizes.add(v.options.size);
         if (v.options?.color) colors.add(v.options.color);
-        
-        if (v.cost !== undefined) costs.push(v.cost);
-        if (v.price !== undefined) prices.push(v.price);
       });
-      
+
       sizesCount = sizes.size;
       colorsCount = colors.size;
-      
-      if (prices.length > 0) {
-        basePrice = Math.min(...prices) / 100;
-        apiPrice = basePrice.toFixed(2);
-        apiPremiumPrice = (basePrice * 0.77).toFixed(2);
-      } else if (costs.length > 0) {
-        basePrice = Math.min(...costs) / 100;
-        apiPrice = basePrice.toFixed(2);
-        apiPremiumPrice = (basePrice * 0.77).toFixed(2);
-      }
     }
-    
-    const fallback = getFallbackMetadata(blueprintId, blueprint.title);
-    
-    const finalPrice = basePrice > 0 ? basePrice.toFixed(2) : fallback.price.toFixed(2);
-    const finalPremiumPrice = basePrice > 0 ? (basePrice * 0.77).toFixed(2) : fallback.premium.toFixed(2);
 
-    const result = {
+    const fallback = getFallbackMetadata(blueprintId, blueprint.title);
+
+    const formattedPrice = liveCost !== null ? liveCost.toFixed(2) : null;
+    const formattedPremium = liveCost !== null ? liveCost.toFixed(2) : null;
+
+    return {
       title: blueprint.title,
       providerId: defaultProviderId,
-      apiPrice,
-      apiPremiumPrice,
-      price: finalPrice,
-      premiumPrice: finalPremiumPrice,
+      price: formattedPrice,
+      premiumPrice: formattedPremium,
       sizesCount: sizesCount > 0 ? sizesCount : fallback.sizes,
       colorsCount: colorsCount > 0 ? colorsCount : fallback.colors,
       providersCount: providersCount > 0 ? providersCount : fallback.providers
     };
-    
-    cache[blueprintId] = result;
-    saveFileCache(cache);
-    return result;
   } catch (error) {
     console.error(`[resolveBlueprintMetadata] Error for blueprint ${blueprintId}:`, error);
     const fallback = getFallbackMetadata(blueprintId, "Apparel");
-    const result = {
+    return {
       title: "Apparel",
       providerId: 0,
-      price: fallback.price.toFixed(2),
-      premiumPrice: fallback.premium.toFixed(2),
+      price: null,
+      premiumPrice: null,
       sizesCount: fallback.sizes,
       colorsCount: fallback.colors,
       providersCount: fallback.providers
     };
-    return result;
   }
 }
 
@@ -470,15 +411,27 @@ export async function GET(
         );
       }
 
-      // Transform to match the PrintfulProduct structure expected by frontend (Blazing Fast O(1) Lookup)
+      // Ensure pricing index is initialized
+      await printifyPricingService.initialize().catch(() => {});
+
       const fileCache = loadFileCache();
       const transformed = filtered.map((bp) => {
-        const metadata = fileCache[bp.id] || getFallbackMetadata(bp.id, bp.title);
+        const liveCost = printifyPricingService.getBlueprintMinCostSync(bp.id);
+        const fallback = fileCache[bp.id] || getFallbackMetadata(bp.id, bp.title);
         const catIds = getBlueprintCategoryIds(bp.id, bp.title);
         const imgIndex = getGenderSwappedImageIndex(bp.id, categoryId);
         const defaultImage = (bp.images && bp.images[imgIndex]) || bp.images?.[0] || '/placeholder-product.png';
-        const priceVal = metadata.price !== undefined ? metadata.price : 9.99;
-        const premiumVal = metadata.premiumPrice || metadata.premium || (typeof priceVal === 'number' ? priceVal * 0.77 : parseFloat(priceVal) * 0.77);
+        
+        let priceVal: string | number = 'N/A';
+        let premiumVal: string | number = 'N/A';
+
+        if (liveCost !== null && liveCost > 0) {
+          priceVal = liveCost.toFixed(2);
+          premiumVal = liveCost.toFixed(2);
+        } else if (fallback.price > 0 || fallback.premium > 0 || fallback.premiumPrice || fallback.cost) {
+          priceVal = fallback.price || fallback.premiumPrice || fallback.cost || 'N/A';
+          premiumVal = fallback.premiumPrice || fallback.cost || fallback.premium || priceVal;
+        }
 
         return {
           id: bp.id,
@@ -487,13 +440,13 @@ export async function GET(
           model: bp.model,
           image: defaultImage,
           type_name: bp.brand || 'Apparel',
-          variant_count: bp.variant_count || ((metadata.sizesCount || metadata.sizes || 4) * (metadata.colorsCount || metadata.colors || 5)),
+          variant_count: bp.variant_count || ((fallback.sizesCount || fallback.sizes || 4) * (fallback.colorsCount || fallback.colors || 5)),
           is_discontinued: false,
           price: typeof priceVal === 'number' ? priceVal.toFixed(2) : String(priceVal),
           premiumPrice: typeof premiumVal === 'number' ? premiumVal.toFixed(2) : String(premiumVal),
-          sizesCount: metadata.sizesCount || metadata.sizes || 4,
-          colorsCount: metadata.colorsCount || metadata.colors || 5,
-          providersCount: metadata.providersCount || metadata.providers || 2,
+          sizesCount: fallback.sizesCount || fallback.sizes || 4,
+          colorsCount: fallback.colorsCount || fallback.colors || 5,
+          providersCount: fallback.providersCount || fallback.providers || 2,
           categoryIds: catIds,
         };
       });
@@ -530,26 +483,31 @@ export async function GET(
         }
         const variantsData = await printifyCatalogAPI.getBlueprintVariants(blueprintId, providerId);
         const variants = variantsData.variants || [];
-        
-        // Fetch blueprint details to get its title
-        const blueprint = await printifyCatalogAPI.getBlueprint(blueprintId).catch(() => ({ title: "Apparel" }));
-        const fallback = getFallbackMetadata(blueprintId, blueprint.title);
+
+        await printifyPricingService.initialize().catch(() => {});
         const fileCache = loadFileCache();
-        const metadata = fileCache[blueprintId] || fallback;
-        const baseCost = metadata.price !== undefined ? parseFloat(metadata.price) : fallback.price;
-        
-        // Map variants and inject correct price
+        const fallbackCost = printifyPricingService.getProviderMinCostSync(blueprintId, providerId)
+          ?? printifyPricingService.getBlueprintMinCostSync(blueprintId)
+          ?? (fileCache[blueprintId]?.cost ? parseFloat(fileCache[blueprintId].cost) : null)
+          ?? (fileCache[blueprintId]?.price ? parseFloat(fileCache[blueprintId].price) : null);
+
         const mappedVariants = variants.map((v: any) => {
-          let itemCost = baseCost;
-          if (v.cost !== undefined) {
-            itemCost = v.cost / 100;
-          } else if (v.price !== undefined) {
-            itemCost = v.price / 100;
+          let itemCost = printifyPricingService.getVariantCostSync(blueprintId, providerId, v.id);
+          if (itemCost === null && fallbackCost !== null) {
+            itemCost = fallbackCost;
           }
+
+          const formattedCost = itemCost !== null ? itemCost.toFixed(2) : 'N/A';
           return {
             ...v,
-            price: itemCost.toFixed(2),
-            cost: v.cost !== undefined ? v.cost : Math.round(itemCost * 100)
+            color: v.options?.color || 'Default',
+            color_code: getColorCode(v.options?.color || ''),
+            size: v.options?.size || 'OS',
+            price: formattedCost,
+            cost: itemCost !== null ? Math.round(itemCost * 100) : null,
+            premiumPrice: formattedCost,
+            is_available: true,
+            placeholders: v.placeholders
           };
         });
 
@@ -571,7 +529,7 @@ export async function GET(
     }
 
     // GET /api/printify/catalog/:blueprintId
-    // Fetch base blueprint & providers in parallel
+    // Parallel fetch: Base blueprint & providers
     const [blueprint, providers] = await Promise.all([
       printifyCatalogAPI.getBlueprint(blueprintId),
       printifyCatalogAPI.getPrintProviders(blueprintId).catch(e => {
@@ -580,23 +538,34 @@ export async function GET(
       })
     ]);
 
-    const metadata = await resolveBlueprintMetadata(blueprintId);
-
-    // Choose the first print provider as default and fetch its variants
-    const providerId = providers[0]?.id || metadata.providerId;
+    const defaultProviderId = providers[0]?.id || 0;
     let variants: any[] = [];
-    if (providerId) {
+    const sizes = new Set<string>();
+    const colors = new Set<string>();
+
+    await printifyPricingService.initialize().catch(() => {});
+    const fileCache = loadFileCache();
+    const fallbackCost = printifyPricingService.getProviderMinCostSync(blueprintId, defaultProviderId)
+      ?? printifyPricingService.getBlueprintMinCostSync(blueprintId)
+      ?? (fileCache[blueprintId]?.cost ? parseFloat(fileCache[blueprintId].cost) : null)
+      ?? (fileCache[blueprintId]?.price ? parseFloat(fileCache[blueprintId].price) : null)
+      ?? (BLUEPRINT_PRICE_DEFAULTS[blueprintId]?.price ?? null);
+
+    if (defaultProviderId > 0) {
       try {
-        const variantsData = await printifyCatalogAPI.getBlueprintVariants(blueprintId, providerId);
-        const fallback = getFallbackMetadata(blueprintId, blueprint.title);
-        const baseCost = metadata.premiumPrice !== undefined ? parseFloat(metadata.premiumPrice) : (metadata.price !== undefined ? parseFloat(metadata.price) : fallback.price);
-        variants = (variantsData.variants || []).map((v: any) => {
-          let basePrice = baseCost;
-          if (v.cost !== undefined) {
-            basePrice = v.cost / 100;
-          } else if (v.price !== undefined) {
-            basePrice = v.price / 100;
+        const variantsData = await printifyCatalogAPI.getBlueprintVariants(blueprintId, defaultProviderId);
+        const rawVariants = variantsData.variants || [];
+
+        variants = rawVariants.map((v: any) => {
+          if (v.options?.size) sizes.add(v.options.size);
+          if (v.options?.color) colors.add(v.options.color);
+
+          let itemCost = printifyPricingService.getVariantCostSync(blueprintId, defaultProviderId, v.id);
+          if (itemCost === null && fallbackCost !== null) {
+            itemCost = fallbackCost;
           }
+
+          const formattedCost = itemCost !== null ? itemCost.toFixed(2) : 'N/A';
           return {
             id: v.id,
             title: v.title,
@@ -604,29 +573,48 @@ export async function GET(
             color_code: getColorCode(v.options?.color || ''),
             size: v.options?.size || 'OS',
             image: blueprint.images?.[0] || '/placeholder-product.png',
-            price: basePrice.toFixed(2),
+            cost: formattedCost,
+            price: formattedCost,
+            premiumPrice: formattedCost,
             is_available: true,
             placeholders: v.placeholders
           };
         });
       } catch (e) {
-        console.warn(`Failed to fetch variants for blueprint ${blueprintId} and provider ${providerId}:`, e);
+        console.warn(`Failed to fetch variants for blueprint ${blueprintId} and provider ${defaultProviderId}:`, e);
       }
     }
+
+    const cachedMeta = fileCache[blueprintId] || getFallbackMetadata(blueprintId, blueprint.title);
+    const sizesCount = sizes.size > 0 ? sizes.size : (cachedMeta.sizesCount || cachedMeta.sizes || 4);
+    const colorsCount = colors.size > 0 ? colors.size : (cachedMeta.colorsCount || cachedMeta.colors || 5);
+    const providersCount = providers.length > 0 ? providers.length : (cachedMeta.providersCount || cachedMeta.providers || 1);
+    
+    const validVariantCosts = variants
+      .map((v: any) => parseFloat(v.cost))
+      .filter((c: number) => !isNaN(c) && c > 0);
+    const minVariantCost = validVariantCosts.length > 0 ? Math.min(...validVariantCosts) : null;
+    const formattedPrice = minVariantCost !== null
+      ? minVariantCost.toFixed(2)
+      : (fallbackCost !== null ? fallbackCost.toFixed(2) : (cachedMeta.price ? String(cachedMeta.price) : 'N/A'));
 
     const mergedBlueprint = {
       ...blueprint,
       image: blueprint.images?.[0] || '/placeholder-product.png',
       type_name: blueprint.brand || 'Apparel',
-      price: metadata.price,
-      premiumPrice: metadata.premiumPrice,
+      price: formattedPrice,
+      premiumPrice: formattedPrice,
+      cost: formattedPrice,
+      sizesCount,
+      colorsCount,
+      providersCount,
       variants,
       providers,
-      print_provider_id: providerId,
-      printProviderId: providerId
+      print_provider_id: defaultProviderId,
+      printProviderId: defaultProviderId
     };
 
-    // Cache the blueprint details
+    // Cache the blueprint details (TTL: 30 minutes)
     blueprintCache.set(blueprintId, { data: mergedBlueprint, timestamp: Date.now() });
 
     return NextResponse.json({ success: true, data: mergedBlueprint });

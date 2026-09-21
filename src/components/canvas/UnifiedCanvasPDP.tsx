@@ -1090,7 +1090,20 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
     if (sourceVariants.length > 0) {
       const prices = sourceVariants
-        .map((v: any) => parseFloat(v.price || '0'))
+        .map((v: any) => {
+          let val = 0;
+          if (v.cost != null && !isNaN(parseFloat(v.cost)) && parseFloat(v.cost) > 0) {
+            const num = parseFloat(v.cost);
+            val = num > 100 ? num / 100 : num;
+          } else if (v.premiumPrice != null && !isNaN(parseFloat(v.premiumPrice)) && parseFloat(v.premiumPrice) > 0) {
+            const num = parseFloat(v.premiumPrice);
+            val = num > 100 ? num / 100 : num;
+          } else if (v.price != null && !isNaN(parseFloat(v.price)) && parseFloat(v.price) > 0) {
+            const num = parseFloat(v.price);
+            val = num > 100 ? num / 100 : num;
+          }
+          return val;
+        })
         .filter((p: number) => p > 0);
       
       if (prices.length > 0) {
@@ -1104,7 +1117,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       }
     }
 
-    const fallbackBase = parseFloat(selectedProduct.premiumPrice || selectedProduct.price || '0');
+    const rawFallback = parseFloat(selectedProduct.premiumPrice || selectedProduct.cost || selectedProduct.price || '0');
+    const fallbackBase = rawFallback > 100 ? rawFallback / 100 : rawFallback;
     return { min: fallbackBase, max: fallbackBase, hasRange: false };
   }, [selectedProduct, selectedVariants]);
 

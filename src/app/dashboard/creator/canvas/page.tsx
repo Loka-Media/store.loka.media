@@ -169,38 +169,103 @@ function CanvasContent() {
           );
           const product = detailed?.data || detailed;
 
-          // Call GET /v1/catalog/blueprints/{blueprint_id}/print_providers.json
-          console.log(`🔍 Fetching print providers dynamically for blueprint ${effectiveBlueprintId}...`);
-          const providers = await printifyAPI.getBlueprintProviders(effectiveBlueprintId);
-          product.providers = providers;
+          let providers = product.providers || [];
+          if (!providers || providers.length === 0) {
+            console.log(`🔍 Fetching print providers for blueprint ${effectiveBlueprintId}...`);
+            providers = await printifyAPI.getBlueprintProviders(effectiveBlueprintId);
+            product.providers = providers;
+          }
 
           // Select print provider: if existing product has saved print provider and it exists in providers, use it
           const savedProviderId = existingProductData?.printify_print_provider_id;
           const defaultProviderId = (savedProviderId && providers.some((p: any) => p.id === savedProviderId))
             ? savedProviderId
-            : providers[0]?.id;
+            : (product.print_provider_id || product.printProviderId || providers[0]?.id);
 
-          let variants = [];
-          if (defaultProviderId) {
-            console.log(`🔍 Fetching variants dynamically for blueprint ${effectiveBlueprintId} and print provider ${defaultProviderId}...`);
+          product.print_provider_id = defaultProviderId;
+          product.printProviderId = defaultProviderId;
+
+          let variants: any[] = [];
+
+          // Fast-path: If getBlueprintDetails already provided variants for this provider, use them!
+          if (product.variants && product.variants.length > 0 && (!savedProviderId || savedProviderId === product.print_provider_id)) {
+            variants = product.variants;
+          } else if (defaultProviderId) {
             const variantsResponse = await printifyAPI.getBlueprintVariantsForProvider(effectiveBlueprintId, defaultProviderId);
             const variantsData = variantsResponse?.data || variantsResponse;
             const rawVariants = variantsData?.variants || [];
-            variants = rawVariants.map((v: any) => ({
-              id: v.id,
-              title: v.title,
-              color: v.options?.color || 'Default',
-              color_code: getColorCode(v.options?.color || ''),
-              size: v.options?.size || 'OS',
-              image: product.images?.[0] || '/placeholder-product.png',
-              price: v.price || '15.00',
-              is_available: true,
-              placeholders: v.placeholders
-            }));
-            
-            product.print_provider_id = defaultProviderId;
-            product.printProviderId = defaultProviderId;
+
+            variants = rawVariants.map((v: any) => {
+              const costVal = (product.cost || 'N/A');
+              return {
+                id: v.id,
+                title: v.title,
+                color: v.options?.color || 'Default',
+                color_code: getColorCode(v.options?.color || ''),
+                size: v.options?.size || 'OS',
+                image: product.images?.[0] || '/placeholder-product.png',
+                cost: costVal,
+                price: costVal,
+                premiumPrice: costVal,
+                is_available: true,
+                placeholders: v.placeholders
+              };
+            });
           }
+
+          // Fetch dedicated live pricing for blueprint + provider
+          let livePricingData: any = null;
+          if (effectiveBlueprintId && defaultProviderId) {
+            try {
+              const pricingRes = await fetch(`/api/printify/pricing/provider?blueprintId=${effectiveBlueprintId}&providerId=${defaultProviderId}`);
+              if (pricingRes.ok) {
+                livePricingData = await pricingRes.json();
+                console.log(`[initializeCanvas] Live pricing loaded for bp ${effectiveBlueprintId} / prov ${defaultProviderId}:`, {
+                  minCost: livePricingData?.minCost,
+                  maxCost: livePricingData?.maxCost,
+                  variantsCount: livePricingData?.variants?.length
+                });
+              }
+            } catch (err) {
+              console.warn("Failed to fetch initial live pricing:", err);
+            }
+          }
+
+          const liveCostMap: Record<number, number> = {};
+          if (livePricingData?.variants && Array.isArray(livePricingData.variants)) {
+            for (const v of livePricingData.variants) {
+              if (v.cost != null && v.cost > 0) {
+                liveCostMap[v.variantId] = v.cost;
+              }
+            }
+          }
+
+          // Apply live pricing to variants
+          if (Object.keys(liveCostMap).length > 0) {
+            variants = variants.map((v: any) => {
+              if (liveCostMap[v.id] != null) {
+                const c = liveCostMap[v.id].toFixed(2);
+                return {
+                  ...v,
+                  cost: c,
+                  price: c,
+                  premiumPrice: c
+                };
+              }
+              return v;
+            });
+          }
+
+          const allVariantCosts = variants
+            .map((v: any) => parseFloat(v.cost))
+            .filter((c: number) => !isNaN(c) && c > 0);
+          const initialMinCost = livePricingData?.minCost != null
+            ? parseFloat(livePricingData.minCost).toFixed(2)
+            : (allVariantCosts.length > 0 ? Math.min(...allVariantCosts).toFixed(2) : product.cost);
+
+          product.cost = initialMinCost;
+          product.price = initialMinCost;
+          product.premiumPrice = initialMinCost;
 
           if (product) {
             console.log(`🔍 Processing ${variants?.length || 0} blueprint variants...`);
@@ -523,21 +588,80 @@ function CanvasContent() {
       setLoading(true);
       const toastId = toast.loading("Switching print provider and loading variants...");
       
-      const response = await printifyAPI.getBlueprintVariantsForProvider(selectedProduct.id, providerId);
-      const variantsData = response?.data || response;
-      
+      // Fetch variant structure AND live pricing in parallel
+      const [variantsResponse, pricingResponse] = await Promise.all([
+        printifyAPI.getBlueprintVariantsForProvider(selectedProduct.id, providerId),
+        // New dedicated pricing endpoint: returns per-variant costs via shop index or draft approach
+        fetch(`/api/printify/pricing/provider?blueprintId=${selectedProduct.id}&providerId=${providerId}`)
+          .then(r => r.json())
+          .catch(() => null),
+      ]);
+
+      const variantsData = variantsResponse?.data || variantsResponse;
       const rawVariants = variantsData?.variants || [];
-      const updatedVariants = rawVariants.map((v: any) => ({
-        id: v.id,
-        title: v.title,
-        color: v.options?.color || 'Default',
-        color_code: getColorCode(v.options?.color || ''),
-        size: v.options?.size || 'OS',
-        image: selectedProduct.images?.[0] || '/placeholder-product.png',
-        price: v.price || '15.00',
-        is_available: true,
-        placeholders: v.placeholders
-      }));
+
+      // Build a variantId -> cost map from the pricing API response
+      const variantCostFromPricingAPI: Record<number, number> = {};
+      let pricingSource = 'catalog_api';
+      if (pricingResponse?.success && pricingResponse.variants?.length > 0) {
+        pricingSource = pricingResponse.source || 'pricing_api';
+        for (const v of pricingResponse.variants) {
+          if (v.cost != null && v.cost > 0) {
+            variantCostFromPricingAPI[v.variantId] = v.cost;
+          }
+        }
+      }
+
+      console.log(`[handleProviderChange] Provider ${providerId}: pricing source=${pricingSource}, variants with cost=${Object.keys(variantCostFromPricingAPI).length}`);
+
+      const updatedVariants = rawVariants.map((v: any) => {
+        // Priority: pricing API -> variant's own cost field -> premiumPrice/price
+        let costDollars: number | null = null;
+
+        if (variantCostFromPricingAPI[v.id] != null) {
+          costDollars = variantCostFromPricingAPI[v.id];
+        } else if (v.cost != null) {
+          const num = typeof v.cost === 'string' ? parseFloat(v.cost) : v.cost;
+          if (!isNaN(num) && num > 0) {
+            costDollars = num > 100 ? num / 100 : num;
+          }
+        } else if (v.premiumPrice != null && v.premiumPrice !== 'N/A') {
+          const num = parseFloat(v.premiumPrice);
+          if (!isNaN(num) && num > 0) {
+            costDollars = num > 100 ? num / 100 : num;
+          }
+        } else if (v.price != null && v.price !== 'N/A') {
+          const num = parseFloat(v.price);
+          if (!isNaN(num) && num > 0) {
+            costDollars = num > 100 ? num / 100 : num;
+          }
+        }
+
+        const costVal = costDollars !== null ? costDollars.toFixed(2) : 'N/A';
+
+        return {
+          id: v.id,
+          title: v.title,
+          color: v.options?.color || 'Default',
+          color_code: getColorCode(v.options?.color || ''),
+          size: v.options?.size || 'OS',
+          image: selectedProduct.images?.[0] || '/placeholder-product.png',
+          cost: costVal,
+          price: costVal,
+          premiumPrice: costVal,
+          is_available: true,
+          placeholders: v.placeholders
+        };
+      });
+
+      // Compute minimum cost for new provider across updatedVariants
+      const variantCosts = updatedVariants
+        .map((v: any) => parseFloat(v.cost))
+        .filter((c: number) => !isNaN(c) && c > 0);
+      // Use pricing API min cost if available (more accurate), else compute from variants
+      const providerMinCost = pricingResponse?.minCost != null
+        ? parseFloat(pricingResponse.minCost).toFixed(2)
+        : variantCosts.length > 0 ? Math.min(...variantCosts).toFixed(2) : null;
 
       // Compute printFiles from variant placeholders for the new provider
       let computedPrintFiles = null;
@@ -589,6 +713,9 @@ function CanvasContent() {
         const updated = {
           ...prev,
           variants: updatedVariants,
+          cost: providerMinCost,
+          premiumPrice: providerMinCost,
+          price: providerMinCost,
           print_provider_id: providerId,
           printProviderId: providerId
         };
@@ -600,8 +727,8 @@ function CanvasContent() {
         setPrintFiles(computedPrintFiles);
       }
       
-      // Clear selected variants and selections to avoid mismatch
-      setSelectedVariants([]);
+      // Pre-select new provider variants so pricing summary and checklist are immediately active
+      setSelectedVariants(updatedVariants.map((v: any) => v.id));
       
       toast.dismiss(toastId);
       toast.success("Print provider updated successfully!");

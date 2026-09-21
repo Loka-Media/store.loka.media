@@ -92,14 +92,10 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
     selectedVariantIds.includes(v.id)
   ) || [];
 
-  // Get price range from selected variants (representing original Printify wholesale cost)
-  const variantPrices = variants.map((v: any) => parseFloat(v.price || 0)).filter((p: number) => p > 0);
-  const minPrice = variantPrices.length > 0 ? Math.min(...variantPrices) : 20;
-  const maxPrice = variantPrices.length > 0 ? Math.max(...variantPrices) : 20;
-
-  // Compute Loka Base Cost (actual Printify Premium price)
-  const minLokaBase = calculatePremiumPrice(minPrice);
-  const maxLokaBase = calculatePremiumPrice(maxPrice);
+  // Get price range from selected variants (representing actual Printify Premium wholesale cost)
+  const variantCosts = variants.map((v: any) => parseFloat(v.cost != null ? v.cost : (v.price || 0))).filter((p: number) => p > 0);
+  const minLokaBase = variantCosts.length > 0 ? Math.min(...variantCosts) : 20;
+  const maxLokaBase = variantCosts.length > 0 ? Math.max(...variantCosts) : 20;
   const hasPriceRange = minLokaBase !== maxLokaBase;
 
   const markup = globalMarkup;

@@ -465,7 +465,7 @@ function PrintfulProductCard({
   const { calculateSellingPrice } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
   const pbcPrice = parseFloat(product.price || '0').toFixed(2);
-  const pppPrice = parseFloat(product.premiumPrice || (parseFloat(product.price || '0') * 0.77).toFixed(2)).toFixed(2);
+  const pppPrice = parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0').toFixed(2);
   const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), product.title).toFixed(2);
 
   return (
@@ -624,11 +624,11 @@ function ProductDetailsModal({
                     </div>
                     <div className="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg">
                       <span className="text-emerald-300 font-bold">Printify Premium Price (PPP):</span>{" "}
-                      <span className="text-emerald-400 font-extrabold text-base">${parseFloat(product.premiumPrice || (parseFloat(product.price || '0') * 0.77).toFixed(2)).toFixed(2)}</span>
+                      <span className="text-emerald-400 font-extrabold text-base">${parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0').toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center pt-2">
                       <span className="text-gray-400">Estimated Retail Price:</span>{" "}
-                      <span className="text-orange-400 font-extrabold text-base">${calculateSellingPrice(parseFloat(product.premiumPrice || (parseFloat(product.price || '0') * 0.77).toFixed(2)), product.title).toFixed(2)}</span>
+                      <span className="text-orange-400 font-extrabold text-base">${calculateSellingPrice(parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0'), product.title).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

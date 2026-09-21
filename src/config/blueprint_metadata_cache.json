@@ -2,47 +2,52 @@
   "5": {
     "title": "Unisex Cotton Crew Tee",
     "providerId": 41,
-    "price": "23.20",
-    "premiumPrice": "17.86",
-    "sizesCount": 7,
-    "colorsCount": 32,
-    "providersCount": 9
+    "price": "19.89",
+    "premiumPrice": "15.14",
+    "sizesCount": 6,
+    "colorsCount": 3,
+    "providersCount": 8,
+    "cost": "15.14"
   },
   "6": {
     "title": "Unisex Heavy Cotton Tee",
-    "providerId": 99,
-    "price": "8.65",
+    "providerId": 26,
+    "price": "9.40",
     "premiumPrice": "6.66",
     "sizesCount": 8,
     "colorsCount": 65,
-    "providersCount": 12
+    "providersCount": 12,
+    "cost": "6.66"
   },
   "9": {
     "title": "Women's Favorite Tee",
     "providerId": 6,
-    "price": "12.64",
-    "premiumPrice": "9.73",
+    "price": "17.07",
+    "premiumPrice": "12.64",
     "sizesCount": 7,
     "colorsCount": 14,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": "12.64"
   },
   "10": {
     "title": "Women's Flowy Racerback Tank",
     "providerId": 61,
-    "price": "23.17",
-    "premiumPrice": "17.84",
+    "price": "20.27",
+    "premiumPrice": "23.17",
     "sizesCount": 5,
     "colorsCount": 28,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "23.17"
   },
   "11": {
     "title": "Women's Jersey Short Sleeve Deep V-Neck Tee",
     "providerId": 39,
-    "price": "14.53",
-    "premiumPrice": "11.19",
+    "price": "12.50",
+    "premiumPrice": "14.53",
     "sizesCount": 9,
     "colorsCount": 16,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "14.53"
   },
   "12": {
     "title": "Unisex Jersey Short Sleeve Tee",
@@ -65,11 +70,12 @@
   "15": {
     "title": "Men's Very Important Tee",
     "providerId": 61,
-    "price": "17.12",
-    "premiumPrice": "13.18",
+    "price": "12.56",
+    "premiumPrice": "17.12",
     "sizesCount": 7,
     "colorsCount": 20,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "17.12"
   },
   "18": {
     "title": "Women's Ideal Racerback Tank",
@@ -82,12 +88,13 @@
   },
   "26": {
     "title": "Men's Lightweight Fashion Tee",
-    "providerId": 99,
-    "price": "11.85",
-    "premiumPrice": "9.21",
+    "providerId": 217,
+    "price": "12.79",
+    "premiumPrice": "9.56",
     "sizesCount": 6,
     "colorsCount": 31,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "9.56"
   },
   "31": {
     "title": "Infant Long Sleeve Bodysuit",
@@ -146,11 +153,12 @@
   "41": {
     "title": "Unisex Jersey Long Sleeve Tee",
     "providerId": 41,
-    "price": "25.00",
-    "premiumPrice": "19.25",
+    "price": "20.43",
+    "premiumPrice": "25.00",
     "sizesCount": 9,
     "colorsCount": 11,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "25.00"
   },
   "45": {
     "title": "Men's Long Sleeve Crew Tee",
@@ -182,29 +190,32 @@
   "49": {
     "title": "Unisex Heavy Blend™ Crewneck Sweatshirt",
     "providerId": 34,
-    "price": "11.45",
-    "premiumPrice": "8.82",
+    "price": "11.06",
+    "premiumPrice": "11.45",
     "sizesCount": 5,
     "colorsCount": 19,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": "11.45"
   },
   "65": {
     "title": "Kids Sweatshirt",
     "providerId": 30,
-    "price": "14.89",
-    "premiumPrice": "11.47",
+    "price": "20.27",
+    "premiumPrice": "14.89",
     "sizesCount": 9,
     "colorsCount": 35,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": "14.89"
   },
   "66": {
     "title": "Unisex Heavy Blend™ Full Zip Hooded Sweatshirt",
     "providerId": 39,
-    "price": "26.68",
-    "premiumPrice": "20.54",
+    "price": "36.49",
+    "premiumPrice": "26.68",
     "sizesCount": 4,
     "colorsCount": 36,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": "26.68"
   },
   "67": {
     "title": "Kids Hoodie",
@@ -218,11 +229,12 @@
   "68": {
     "title": "Mug 11oz",
     "providerId": 1,
-    "price": "4.81",
-    "premiumPrice": "3.70",
+    "price": "19.50",
+    "premiumPrice": "4.81",
     "sizesCount": 6,
     "colorsCount": 38,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "4.81"
   },
   "70": {
     "title": "Stainless Steel Travel Mug",
@@ -236,20 +248,22 @@
   "74": {
     "title": "Spiral Notebook - Ruled Line",
     "providerId": 1,
-    "price": "5.90",
-    "premiumPrice": "4.54",
+    "price": "20.27",
+    "premiumPrice": "5.90",
     "sizesCount": 6,
     "colorsCount": 9,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "5.90"
   },
   "75": {
     "title": "Journal - Ruled Line",
     "providerId": 1,
-    "price": "10.73",
-    "premiumPrice": "8.26",
+    "price": "20.27",
+    "premiumPrice": "10.73",
     "sizesCount": 7,
     "colorsCount": 10,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "10.73"
   },
   "76": {
     "title": "Journal - Blank",
@@ -290,11 +304,12 @@
   "80": {
     "title": "Unisex Ultra Cotton Long Sleeve Tee",
     "providerId": 3,
-    "price": "15.16",
-    "premiumPrice": "11.67",
+    "price": "13.60",
+    "premiumPrice": "15.16",
     "sizesCount": 6,
     "colorsCount": 15,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": "15.16"
   },
   "81": {
     "title": "Kids Softstyle Tee",
@@ -317,11 +332,12 @@
   "91": {
     "title": "Unisex Full Zip Hoodie",
     "providerId": 26,
-    "price": "28.61",
-    "premiumPrice": "22.03",
+    "price": "22.50",
+    "premiumPrice": "28.61",
     "sizesCount": 5,
     "colorsCount": 26,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": "28.61"
   },
   "92": {
     "title": "Unisex College Hoodie",
@@ -344,11 +360,12 @@
   "95": {
     "title": "Unisex Sweatshirt",
     "providerId": 99,
-    "price": "23.25",
-    "premiumPrice": "17.90",
+    "price": "20.27",
+    "premiumPrice": "23.25",
     "sizesCount": 9,
     "colorsCount": 30,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "23.25"
   },
   "97": {
     "title": "Satin Posters (210gsm)",
@@ -371,11 +388,12 @@
   "100": {
     "title": "Men's Softstyle Tank Top",
     "providerId": 6,
-    "price": "17.32",
-    "premiumPrice": "13.34",
+    "price": "16.57",
+    "premiumPrice": "17.32",
     "sizesCount": 8,
     "colorsCount": 35,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": "17.32"
   },
   "114": {
     "title": "Men's NUBLEND® Hooded Sweatshirt",
@@ -515,11 +533,12 @@
   "238": {
     "title": "Sherpa Fleece Blanket",
     "providerId": 10,
-    "price": "17.99",
-    "premiumPrice": "13.85",
+    "price": "19.50",
+    "premiumPrice": "17.99",
     "sizesCount": 8,
     "colorsCount": 33,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": "17.99"
   },
   "241": {
     "title": "Indoor Wall Tapestry",
@@ -560,11 +579,12 @@
   "268": {
     "title": "Slim Phone Cases",
     "providerId": 1,
-    "price": "7.35",
-    "premiumPrice": "5.66",
+    "price": "12.10",
+    "premiumPrice": "7.35",
     "sizesCount": 8,
     "colorsCount": 28,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": "7.35"
   },
   "269": {
     "title": "Tough Phone Cases",
@@ -587,11 +607,12 @@
   "277": {
     "title": "Wall Clock",
     "providerId": 1,
-    "price": "22.09",
-    "premiumPrice": "17.01",
+    "price": "19.50",
+    "premiumPrice": "22.09",
     "sizesCount": 5,
     "colorsCount": 37,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "22.09"
   },
   "279": {
     "title": "Women's Cut & Sew Tee (AOP)",
@@ -650,29 +671,32 @@
   "289": {
     "title": "Latte Mug",
     "providerId": 1,
-    "price": "6.40",
-    "premiumPrice": "4.93",
+    "price": "20.27",
+    "premiumPrice": "6.40",
     "sizesCount": 5,
     "colorsCount": 14,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": "6.40"
   },
   "291": {
     "title": "Men's Sneakers",
     "providerId": 14,
-    "price": "31.90",
-    "premiumPrice": "24.56",
+    "price": "20.27",
+    "premiumPrice": "31.90",
     "sizesCount": 7,
     "colorsCount": 16,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "31.90"
   },
   "292": {
     "title": "Women's Sneakers",
     "providerId": 14,
-    "price": "30.64",
-    "premiumPrice": "23.59",
+    "price": "20.27",
+    "premiumPrice": "30.64",
     "sizesCount": 8,
     "colorsCount": 17,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "30.64"
   },
   "293": {
     "title": "Men's Classic Sneakers",
@@ -695,11 +719,12 @@
   "295": {
     "title": "Microfiber Pillow Sham",
     "providerId": 10,
-    "price": "15.33",
-    "premiumPrice": "11.80",
+    "price": "19.50",
+    "premiumPrice": "15.33",
     "sizesCount": 5,
     "colorsCount": 20,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "15.33"
   },
   "296": {
     "title": "Microfiber Duvet Cover",
@@ -731,11 +756,12 @@
   "346": {
     "title": "Unisex Casual Shoulder Backpack",
     "providerId": 14,
-    "price": "26.99",
-    "premiumPrice": "20.78",
+    "price": "19.50",
+    "premiumPrice": "26.99",
     "sizesCount": 8,
     "colorsCount": 36,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": "26.99"
   },
   "347": {
     "title": "Unisex Classic Backpack",
@@ -785,11 +811,12 @@
   "353": {
     "title": "Tumbler 20oz",
     "providerId": 1,
-    "price": "17.31",
-    "premiumPrice": "13.33",
+    "price": "12.36",
+    "premiumPrice": "17.31",
     "sizesCount": 9,
     "colorsCount": 8,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": "17.31"
   },
   "355": {
     "title": "Can Holder",
@@ -839,11 +866,12 @@
   "365": {
     "title": "Crew Socks",
     "providerId": 14,
-    "price": "8.33",
-    "premiumPrice": "6.41",
+    "price": "20.27",
+    "premiumPrice": "8.33",
     "sizesCount": 9,
     "colorsCount": 20,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "8.33"
   },
   "370": {
     "title": "Flexi Cases",
@@ -875,11 +903,12 @@
   "376": {
     "title": "Sublimation Socks",
     "providerId": 1,
-    "price": "5.40",
-    "premiumPrice": "4.16",
+    "price": "20.99",
+    "premiumPrice": "5.40",
     "sizesCount": 8,
     "colorsCount": 31,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "5.40"
   },
   "380": {
     "title": "Christmas Stockings",
@@ -929,11 +958,12 @@
   "407": {
     "title": "Women's Briefs (AOP)",
     "providerId": 14,
-    "price": "15.93",
-    "premiumPrice": "12.27",
+    "price": "16.76",
+    "premiumPrice": "15.93",
     "sizesCount": 9,
     "colorsCount": 27,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "15.93"
   },
   "411": {
     "title": "Women's Crop Top",
@@ -1082,11 +1112,12 @@
   "433": {
     "title": "Men's Bomber Jacket (AOP)",
     "providerId": 14,
-    "price": "44.40",
-    "premiumPrice": "34.19",
+    "price": "20.27",
+    "premiumPrice": "44.40",
     "sizesCount": 5,
     "colorsCount": 18,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "44.40"
   },
   "438": {
     "title": "Area Rugs ",
@@ -1099,30 +1130,33 @@
   },
   "439": {
     "title": "Three-Panel Fleece Hoodie",
-    "providerId": 99,
-    "price": "18.56",
-    "premiumPrice": "14.29",
+    "providerId": 27,
+    "price": "20.27",
+    "premiumPrice": "21.68",
     "sizesCount": 5,
     "colorsCount": 24,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "21.68"
   },
   "440": {
     "title": "Adult Staple Tee",
     "providerId": 29,
-    "price": "18.06",
-    "premiumPrice": "13.91",
+    "price": "16.28",
+    "premiumPrice": "18.06",
     "sizesCount": 6,
     "colorsCount": 25,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "18.06"
   },
   "441": {
     "title": "Ceramic Mug (EU)",
     "providerId": 30,
-    "price": "4.39",
-    "premiumPrice": "3.38",
+    "price": "19.50",
+    "premiumPrice": "4.39",
     "sizesCount": 7,
     "colorsCount": 26,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": "4.39"
   },
   "442": {
     "title": "Mouse Pad (EU)",
@@ -1208,11 +1242,12 @@
   "454": {
     "title": "Single Jersey Men's T-shirt",
     "providerId": 26,
-    "price": "10.42",
-    "premiumPrice": "8.02",
+    "price": "13.96",
+    "premiumPrice": "10.42",
     "sizesCount": 8,
     "colorsCount": 39,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "10.42"
   },
   "455": {
     "title": "Unisex Hooded Zip Sweatshirt",
@@ -1370,11 +1405,12 @@
   "482": {
     "title": "20oz Insulated Bottle",
     "providerId": 28,
-    "price": "17.00",
-    "premiumPrice": "13.09",
+    "price": "22.91",
+    "premiumPrice": "17.00",
     "sizesCount": 6,
     "colorsCount": 32,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "17.00"
   },
   "483": {
     "title": "Enamel Camping Mug",
@@ -1613,11 +1649,12 @@
   "522": {
     "title": "Velveteen Plush Blanket",
     "providerId": 99,
-    "price": "9.88",
-    "premiumPrice": "7.61",
+    "price": "19.50",
+    "premiumPrice": "9.88",
     "sizesCount": 4,
     "colorsCount": 37,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "9.88"
   },
   "523": {
     "title": "Postcards (7 pcs)",
@@ -1685,11 +1722,12 @@
   "530": {
     "title": "Pewter Snowflake Ornament",
     "providerId": 66,
-    "price": "3.13",
-    "premiumPrice": "2.41",
+    "price": "20.27",
+    "premiumPrice": "3.13",
     "sizesCount": 6,
     "colorsCount": 10,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "3.13"
   },
   "531": {
     "title": "Ceramic Ornament, 4 Shapes",
@@ -1901,11 +1939,12 @@
   "571": {
     "title": "Pet Tank Top",
     "providerId": 70,
-    "price": "17.30",
-    "premiumPrice": "13.32",
+    "price": "13.11",
+    "premiumPrice": "17.30",
     "sizesCount": 5,
     "colorsCount": 16,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "17.30"
   },
   "572": {
     "title": "Copper Vacuum Insulated Bottle, 22oz",
@@ -1937,11 +1976,12 @@
   "576": {
     "title": "Baby Beanie (AOP)",
     "providerId": 70,
-    "price": "12.40",
-    "premiumPrice": "9.55",
+    "price": "18.79",
+    "premiumPrice": "12.40",
     "sizesCount": 4,
     "colorsCount": 21,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": "12.40"
   },
   "577": {
     "title": "Men's Jersey Curved Hem Tee",
@@ -2027,11 +2067,12 @@
   "588": {
     "title": "Foam Yoga Mat",
     "providerId": 80,
-    "price": "39.50",
-    "premiumPrice": "30.41",
+    "price": "20.27",
+    "premiumPrice": "39.50",
     "sizesCount": 4,
     "colorsCount": 33,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": "39.50"
   },
   "589": {
     "title": "Swim Trunks (AOP)",
@@ -2045,11 +2086,12 @@
   "591": {
     "title": "Athletic Joggers (AOP)",
     "providerId": 83,
-    "price": "26.35",
-    "premiumPrice": "20.29",
+    "price": "20.27",
+    "premiumPrice": "26.35",
     "sizesCount": 7,
     "colorsCount": 36,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": "26.35"
   },
   "592": {
     "title": "Fashion Hoodie (AOP)",
@@ -2063,11 +2105,12 @@
   "593": {
     "title": "Men's Baseball Jersey (AOP)",
     "providerId": 83,
-    "price": "24.50",
-    "premiumPrice": "18.87",
+    "price": "18.72",
+    "premiumPrice": "24.50",
     "sizesCount": 9,
     "colorsCount": 38,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "24.50"
   },
   "595": {
     "title": "Accent Mugs",
@@ -2126,11 +2169,12 @@
   "604": {
     "title": "Vacuum Insulated Tumbler, 11oz",
     "providerId": 75,
-    "price": "17.78",
+    "price": "20.99",
     "premiumPrice": "13.69",
     "sizesCount": 1,
     "colorsCount": 3,
-    "providersCount": 1
+    "providersCount": 1,
+    "cost": "13.69"
   },
   "605": {
     "title": "Organic Women's Classic T-Shirt",
@@ -2234,11 +2278,12 @@
   "620": {
     "title": "Chill Wine Tumbler",
     "providerId": 86,
-    "price": "13.10",
-    "premiumPrice": "10.09",
+    "price": "19.50",
+    "premiumPrice": "13.10",
     "sizesCount": 6,
     "colorsCount": 30,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "13.10"
   },
   "621": {
     "title": "Rally Towel, 11x18",
@@ -2297,11 +2342,12 @@
   "631": {
     "title": "Tie-Dye Tee, Cyclone",
     "providerId": 99,
-    "price": "19.28",
-    "premiumPrice": "14.85",
+    "price": "16.73",
+    "premiumPrice": "19.28",
     "sizesCount": 5,
     "colorsCount": 6,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "19.28"
   },
   "632": {
     "title": "Tie-Dye Tee, Spiral",
@@ -2315,11 +2361,12 @@
   "633": {
     "title": "Pint Glass, 16oz",
     "providerId": 86,
-    "price": "9.63",
-    "premiumPrice": "7.42",
+    "price": "20.27",
+    "premiumPrice": "9.63",
     "sizesCount": 7,
     "colorsCount": 8,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": "9.63"
   },
   "635": {
     "title": "Accent Coffee Mug (11, 15oz)",
@@ -2360,11 +2407,12 @@
   "642": {
     "title": "Women's Cropped Sweatshirt",
     "providerId": 39,
-    "price": "33.41",
-    "premiumPrice": "25.73",
+    "price": "25.68",
+    "premiumPrice": "33.41",
     "sizesCount": 4,
     "colorsCount": 17,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "33.41"
   },
   "643": {
     "title": "Cutting Board",
@@ -2595,10 +2643,11 @@
     "title": "Unisex Garment Dyed Tee",
     "providerId": 99,
     "price": "10.93",
-    "premiumPrice": "8.42",
+    "premiumPrice": "10.93",
     "sizesCount": 6,
     "colorsCount": 58,
-    "providersCount": 12
+    "providersCount": 12,
+    "cost": "10.93"
   },
   "707": {
     "title": "Wine Tote Bag",
@@ -2810,11 +2859,12 @@
   "736": {
     "title": "Hooded Sherpa Fleece Blanket",
     "providerId": 10,
-    "price": "43.60",
-    "premiumPrice": "33.57",
+    "price": "19.50",
+    "premiumPrice": "43.60",
     "sizesCount": 8,
     "colorsCount": 6,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "43.60"
   },
   "738": {
     "title": "Porcelain Magnet, Square",
@@ -3116,11 +3166,12 @@
   "787": {
     "title": "Shot Glass",
     "providerId": 41,
-    "price": "4.88",
-    "premiumPrice": "3.76",
+    "price": "20.27",
+    "premiumPrice": "4.88",
     "sizesCount": 5,
     "colorsCount": 22,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": "4.88"
   },
   "788": {
     "title": "Rubber Yoga Mat",
@@ -3206,11 +3257,12 @@
   "799": {
     "title": "Women's Bomber Jacket (AOP)",
     "providerId": 90,
-    "price": "18.38",
-    "premiumPrice": "14.15",
+    "price": "20.61",
+    "premiumPrice": "18.38",
     "sizesCount": 5,
     "colorsCount": 34,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "18.38"
   },
   "800": {
     "title": "Unisex Color Blast T-Shirt",
@@ -3413,20 +3465,22 @@
   "831": {
     "title": "Men's Baseball Jersey (AOP)",
     "providerId": 14,
-    "price": "22.38",
-    "premiumPrice": "17.23",
+    "price": "12.87",
+    "premiumPrice": "22.38",
     "sizesCount": 7,
     "colorsCount": 31,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": "22.38"
   },
   "832": {
     "title": "Men's Full-Zip Hoodie (AOP)",
     "providerId": 14,
-    "price": "30.95",
-    "premiumPrice": "23.83",
+    "price": "43.69",
+    "premiumPrice": "30.95",
     "sizesCount": 8,
     "colorsCount": 32,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "30.95"
   },
   "833": {
     "title": "Paper Lunch Bag",
@@ -3440,11 +3494,12 @@
   "834": {
     "title": "Women's High Top Sneakers",
     "providerId": 90,
-    "price": "23.81",
-    "premiumPrice": "18.33",
+    "price": "20.27",
+    "premiumPrice": "23.81",
     "sizesCount": 4,
     "colorsCount": 34,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "23.81"
   },
   "835": {
     "title": "Women's Low Top Sneakers",
@@ -3827,11 +3882,12 @@
   "896": {
     "title": "Heart-Shaped Mug",
     "providerId": 30,
-    "price": "10.83",
-    "premiumPrice": "8.34",
+    "price": "19.50",
+    "premiumPrice": "10.83",
     "sizesCount": 6,
     "colorsCount": 26,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": "10.83"
   },
   "897": {
     "title": "Balloons (Round and Heart-shaped), 6\"",
@@ -4259,11 +4315,12 @@
   "974": {
     "title": "Baby Long-Sleeve Organic Bodysuit",
     "providerId": 26,
-    "price": "14.09",
-    "premiumPrice": "10.85",
+    "price": "15.41",
+    "premiumPrice": "14.09",
     "sizesCount": 6,
     "colorsCount": 34,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "14.09"
   },
   "975": {
     "title": "Desk Mats",
@@ -4592,11 +4649,12 @@
   "1028": {
     "title": "Men's Hoodie (AOP)",
     "providerId": 90,
-    "price": "26.99",
-    "premiumPrice": "20.78",
+    "price": "45.76",
+    "premiumPrice": "26.99",
     "sizesCount": 6,
     "colorsCount": 18,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "26.99"
   },
   "1030": {
     "title": "Pennant",
@@ -5222,11 +5280,12 @@
   "1131": {
     "title": "Frosted Glass Beer Mug",
     "providerId": 59,
-    "price": "23.12",
+    "price": "20.99",
     "premiumPrice": "17.80",
     "sizesCount": 1,
     "colorsCount": 1,
-    "providersCount": 1
+    "providersCount": 1,
+    "cost": "17.80"
   },
   "1132": {
     "title": "Women's Biker Shorts (AOP)",
@@ -5402,11 +5461,12 @@
   "1155": {
     "title": "Kids' Puzzle, 30-Piece",
     "providerId": 28,
-    "price": "9.85",
-    "premiumPrice": "7.58",
+    "price": "20.27",
+    "premiumPrice": "9.85",
     "sizesCount": 7,
     "colorsCount": 5,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": "9.85"
   },
   "1156": {
     "title": "Color Morphing Mug, 11oz",
@@ -5951,11 +6011,12 @@
   "1261": {
     "title": "Men's Long Sleeve Shirt (AOP)",
     "providerId": 47,
-    "price": "22.55",
-    "premiumPrice": "17.36",
+    "price": "20.27",
+    "premiumPrice": "22.55",
     "sizesCount": 5,
     "colorsCount": 6,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "22.55"
   },
   "1262": {
     "title": "Women's Skater Dress (AOP)",
@@ -6599,11 +6660,12 @@
   "1380": {
     "title": "Custom Shaped Pillows",
     "providerId": 90,
-    "price": "7.35",
-    "premiumPrice": "5.66",
+    "price": "27.00",
+    "premiumPrice": "7.35",
     "sizesCount": 4,
     "colorsCount": 20,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "7.35"
   },
   "1382": {
     "title": "Unisex Oversized Boxy Tee",
@@ -6815,11 +6877,12 @@
   "1437": {
     "title": "Men's Denim Jacket",
     "providerId": 10,
-    "price": "31.32",
-    "premiumPrice": "24.12",
+    "price": "20.27",
+    "premiumPrice": "31.32",
     "sizesCount": 7,
     "colorsCount": 7,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": "31.32"
   },
   "1439": {
     "title": "Unisex HD Cotton™ T-shirt",
@@ -7067,11 +7130,12 @@
   "1485": {
     "title": "Men's Crewneck Sweatshirt (AOP)",
     "providerId": 14,
-    "price": "19.52",
-    "premiumPrice": "15.03",
+    "price": "36.91",
+    "premiumPrice": "19.52",
     "sizesCount": 7,
     "colorsCount": 20,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": "19.52"
   },
   "1486": {
     "title": "Women's Crewneck Sweatshirt (AOP)",
@@ -8138,11 +8202,12 @@
   "1644": {
     "title": "Toddler Sweatshirt",
     "providerId": 217,
-    "price": "20.37",
-    "premiumPrice": "15.68",
+    "price": "39.80",
+    "premiumPrice": "20.37",
     "sizesCount": 4,
     "colorsCount": 39,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "20.37"
   },
   "1645": {
     "title": "Toddler Pullover Fleece Hoodies",
@@ -8543,11 +8608,12 @@
   "1700": {
     "title": "Men's Crewneck Long Sleeve Sweatshirt (AOP)",
     "providerId": 332,
-    "price": "4.89",
-    "premiumPrice": "3.77",
+    "price": "21.05",
+    "premiumPrice": "4.89",
     "sizesCount": 6,
     "colorsCount": 25,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "4.89"
   },
   "1701": {
     "title": "Men's Short Sleeve T-Shirt",
@@ -11018,11 +11084,12 @@
   "2911": {
     "title": "Colorblock Performance Long Sleeve Tee",
     "providerId": 52,
-    "price": "35.44",
-    "premiumPrice": "27.29",
+    "price": "19.50",
+    "premiumPrice": "35.44",
     "sizesCount": 5,
     "colorsCount": 11,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": "35.44"
   },
   "2918": {
     "title": "Long Sleeve Heather Contender Tee",
@@ -15977,11 +16044,12 @@
   "5357": {
     "title": "Youth Baseball Cap (Embroidery)",
     "providerId": 99,
-    "price": "13.97",
-    "premiumPrice": "10.76",
+    "price": "15.54",
+    "premiumPrice": "13.97",
     "sizesCount": 9,
     "colorsCount": 7,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": "13.97"
   },
   "5358": {
     "title": "Women's Micro Rib Baby Tee",
@@ -16148,11 +16216,12 @@
   "5378": {
     "title": "Dog Foam Trucker Hat",
     "providerId": 41,
-    "price": "19.19",
-    "premiumPrice": "14.78",
+    "price": "20.27",
+    "premiumPrice": "19.19",
     "sizesCount": 6,
     "colorsCount": 28,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": "19.19"
   },
   "5379": {
     "title": "Women's Luxe Bra",
@@ -16436,11 +16505,12 @@
   "5464": {
     "title": "Women's Garment-Dyed Mid-Length Crewneck Sweatshirt",
     "providerId": 74,
-    "price": "28.23",
-    "premiumPrice": "21.74",
+    "price": "20.27",
+    "premiumPrice": "28.23",
     "sizesCount": 8,
     "colorsCount": 9,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": "28.23"
   },
   "5468": {
     "title": "Men's Cotton T-Shirt",
@@ -21323,11 +21393,12 @@
   "10987": {
     "title": "Swim Shorts 17\"",
     "providerId": 217,
-    "price": "20.24",
-    "premiumPrice": "15.58",
+    "price": "20.27",
+    "premiumPrice": "20.24",
     "sizesCount": 5,
     "colorsCount": 5,
-    "providersCount": 1
+    "providersCount": 1,
+    "cost": "20.24"
   },
   "10988": {
     "title": "Active Pro Shorts 18\"",

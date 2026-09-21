@@ -135,11 +135,11 @@ async function buildPrintifyProductPayload(
   const variantPayload = allVariants.map((v: any) => {
     const vId = Number(v.id);
     const isSelected = selectedVariantIds.length === 0 || selectedVariantIds.includes(vId);
-    const priceVal = typeof v.price === 'string' ? parseFloat(v.price) * 100 : v.price;
-    const baseCents: number = typeof priceVal === 'number' && !isNaN(priceVal) ? priceVal : 1500;
-
-    // Apply 23% Premium discount (0.77) + 35% Loka Platform markup (1.35) + Creator Markup with uniform .99 rule
-    const premiumBaseCost = (baseCents / 100) * 0.77;
+    
+    // Sourced cost from v.cost (in cents) if available, otherwise v.price
+    const rawCostCents = v.cost != null ? (typeof v.cost === 'string' ? parseFloat(v.cost) * 100 : v.cost) : (v.price != null ? (typeof v.price === 'string' ? parseFloat(v.price) * 100 : v.price) : 1500);
+    const premiumBaseCost = rawCostCents / 100;
+    
     const lokaBasePrice = Math.ceil(premiumBaseCost * 1.35) - 0.01;
     const finalSellingPrice = Math.ceil(lokaBasePrice * (1 + markupPercent / 100)) - 0.01;
     const retailCents = Math.round(finalSellingPrice * 100);

@@ -14,8 +14,7 @@ export function calculatePremiumPrice(regularPrice: number): number {
   const parsedPrice = typeof regularPrice === 'string' ? parseFloat(regularPrice) : regularPrice;
   if (isNaN(parsedPrice) || parsedPrice <= 0) return 0;
   
-  const premiumPrice = parsedPrice * 0.77;
-  return Math.round(premiumPrice * 100) / 100;
+  return Math.round(parsedPrice * 100) / 100;
 }
 
 /**
@@ -185,10 +184,9 @@ export function getVariantSellingPrice(
   if (variant.cost !== undefined && variant.cost !== null && !isNaN(parseFloat(variant.cost))) {
     baseCost = parseFloat(variant.cost);
   } else if (variant.price !== undefined && variant.price !== null && !isNaN(parseFloat(variant.price))) {
-    // Reverse engineer base cost (assuming 35% markup was added)
-    baseCost = parseFloat(variant.price) / 1.35;
+    baseCost = parseFloat(variant.price);
   } else {
-    baseCost = parseFloat(product?.base_price || '0');
+    baseCost = parseFloat(product?.base_price || product?.cost || '0');
   }
 
   if (typeof categoryOrMarkup === 'number') {

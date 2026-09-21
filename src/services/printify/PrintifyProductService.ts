@@ -118,11 +118,14 @@ function transformVariants(
 
       const colorCodes = colorValue?.colors || [];
 
+      const rawCost = variant.cost != null ? variant.cost / 100 : null;
+      const rawPrice = variant.price != null ? variant.price / 100 : null;
+
       return {
         id: variant.id,
         sku: variant.sku,
-        price: variant.price / 100,           // Convert cents → dollars
-        cost: variant.cost / 100,
+        price: rawPrice != null ? rawPrice : (rawCost != null ? rawCost : 0),
+        cost: rawCost != null ? rawCost : (rawPrice != null ? rawPrice : 0),
         title: variant.title,
         color: colorValue?.title || '',
         colorCode: colorCodes[0] || '#000000',
