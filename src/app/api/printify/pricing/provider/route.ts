@@ -79,7 +79,7 @@ async function getReusableImageId(apiKey: string): Promise<string | null> {
 async function fetchPricingViaDraft(
   blueprintId: number,
   providerId: number
-): Promise<{ variantCosts: Record<number, number>; minCost: number } | null> {
+): Promise<{ variantCosts: Record<number, number>; minCost: number; maxCost?: number } | null> {
   const cacheKey = `${blueprintId}_${providerId}`;
   const cached = draftPricingCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < DRAFT_CACHE_TTL) {
@@ -241,13 +241,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'blueprintId and providerId are required' }, { status: 400 });
     }
 
-    console.log(`[PricingAPI] Request for blueprint ${blueprintId} / provider ${providerId}`);
+    const forceRefresh = searchParams.get('refresh') === 'true';
+    const isStale = printifyPricingService.isProviderDataStale(blueprintId, providerId);
 
-    // ── Layer 1: in-memory shop index ────────────────────────────────────
+    console.log(`[PricingAPI] Request for blueprint ${blueprintId} / provider ${providerId} (forceRefresh=${forceRefresh}, isStale=${isStale})`);
+
+    // ── Layer 1: in-memory / persistent verified cache ───────────────────
     await printifyPricingService.initialize().catch(() => {});
     await printifyPricingService.fetchProviderCostsOnDemand(blueprintId, providerId).catch(() => {});
 
-    const hasData = printifyPricingService.hasProviderData(blueprintId, providerId);
+    const hasData = !forceRefresh && !isStale && printifyPricingService.hasProviderData(blueprintId, providerId);
 
     if (hasData) {
       // Build variant cost map from the in-memory index

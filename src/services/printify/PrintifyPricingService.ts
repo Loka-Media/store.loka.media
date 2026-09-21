@@ -26,7 +26,11 @@ class PrintifyPricingService {
 
   // Per-provider on-demand fetch cache: tracks which blueprint+provider we've already tried
   private providerFetchedMap = new Map<string, number>(); // `${blueprintId}_${providerId}` -> timestamp
-  private PROVIDER_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+  private ON_DEMAND_SCAN_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+  // Track when each provider's pricing was last verified
+  private providerUpdatedMap = new Map<string, number>(); // `${blueprintId}_${providerId}` -> timestamp
+  public PROVIDER_PRICING_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours TTL for auto-refreshing from Printify
 
   constructor() {
     this.loadFileCache();
@@ -62,12 +66,27 @@ class PrintifyPricingService {
               }
             }
           }
+          if (item.updatedAt) {
+            this.providerUpdatedMap.set(provKey, Number(item.updatedAt));
+          } else {
+            this.providerUpdatedMap.set(provKey, Date.now());
+          }
         }
         console.log(`[PrintifyPricingService] Loaded ${count} verified provider variant prices from provider_pricing_cache.json`);
       }
     } catch (e) {
       console.warn('[PrintifyPricingService] Could not load provider_pricing_cache.json:', e);
     }
+  }
+
+  /**
+   * Check if provider pricing in memory/disk has expired past the TTL (default 24h).
+   */
+  isProviderDataStale(blueprintId: number, printProviderId: number, maxAgeMs = this.PROVIDER_PRICING_TTL_MS): boolean {
+    const provKey = `${blueprintId}_${printProviderId}`;
+    const updatedAt = this.providerUpdatedMap.get(provKey);
+    if (!updatedAt) return true;
+    return (Date.now() - updatedAt) > maxAgeMs;
   }
 
   /**
@@ -84,19 +103,24 @@ class PrintifyPricingService {
           data = {};
         }
       }
+      const now = Date.now();
       data[`${blueprintId}_${providerId}`] = {
         blueprintId,
         providerId,
+        providerTitle: data[`${blueprintId}_${providerId}`]?.providerTitle || undefined,
         minCost,
         maxCost,
-        variants
+        variants,
+        updatedAt: now
       };
+      this.providerUpdatedMap.set(`${blueprintId}_${providerId}`, now);
+
       const dir = path.dirname(providerCachePath);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
       fs.writeFileSync(providerCachePath, JSON.stringify(data, null, 2), 'utf8');
-      console.log(`[PrintifyPricingService] Saved pricing for blueprint ${blueprintId} / provider ${providerId} to disk`);
+      console.log(`[PrintifyPricingService] Saved pricing for blueprint ${blueprintId} / provider ${providerId} to disk (updatedAt: ${new Date(now).toISOString()})`);
     } catch (e) {
       console.warn('[PrintifyPricingService] Failed to save provider pricing to disk:', e);
     }
@@ -277,7 +301,7 @@ class PrintifyPricingService {
     const lastFetched = this.providerFetchedMap.get(provKey);
 
     // Skip if we already checked recently for this provider
-    if (lastFetched && now - lastFetched < this.PROVIDER_CACHE_TTL_MS) {
+    if (lastFetched && now - lastFetched < this.ON_DEMAND_SCAN_TTL_MS) {
       return;
     }
 
