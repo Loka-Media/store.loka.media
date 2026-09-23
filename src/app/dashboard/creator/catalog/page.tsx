@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { Search, Package, Plus, ArrowLeft, X } from "lucide-react";
+import { Search, Package, Plus, ArrowLeft, X, Loader2, Folder, Tag, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { SUBCATEGORIES_CONFIG } from "@/config/categories";
 
@@ -233,10 +233,30 @@ export default function CreatorCatalogPage() {
         id: selectedCategory.id,
         title: selectedCategory.title
       }));
+    } else if (printfulProduct.categoryIds && printfulProduct.categoryIds.length > 0) {
+      const catId = printfulProduct.categoryIds[0];
+      const matchedCat = categories.find((c) => c.id === catId);
+      if (matchedCat) {
+        localStorage.setItem(
+          'sourceCatalogCategory',
+          JSON.stringify({
+            id: matchedCat.id,
+            title: matchedCat.title,
+          })
+        );
+      }
     }
 
     // Navigate to design canvas workflow with 4 steps
     router.push(`/dashboard/creator/canvas?blueprintId=${printfulProduct.id}`);
+  };
+
+  const handleSelectSubcategoryFromSearch = async (category: Category, subcat: any) => {
+    window.scrollTo(0, 0);
+    setSelectedCategory(category);
+    setSelectedSubcategory(subcat);
+    setFilters((prev) => ({ ...prev, search: "" }));
+    await fetchCatalog(category.id);
   };
 
   return (
@@ -244,11 +264,13 @@ export default function CreatorCatalogPage() {
       <div className="min-h-screen bg-black">
         <Navigation />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-26 pb-16">
           {!selectedCategory ? (
             <CategorySelection
               categories={categories}
               onSelectCategory={handleSelectCategory}
+              onSelectSubcategoryFromSearch={handleSelectSubcategoryFromSearch}
+              onCreateProduct={handleCreateProduct}
             />
           ) : !selectedSubcategory ? (
             <SubcategorySelection
@@ -285,33 +307,549 @@ export default function CreatorCatalogPage() {
   );
 }
 
-function CategorySelection({ categories, onSelectCategory }: any) {
+function GlobalCatalogSearch({
+  categories,
+  searchQuery,
+  setSearchQuery,
+  onSelectCategory,
+  onSelectSubcategory,
+  onCreateProduct,
+  onViewAllInGrid,
+}: {
+  categories: Category[];
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  onSelectCategory: (category: Category) => void;
+  onSelectSubcategory: (category: Category, subcat: any) => void;
+  onCreateProduct: (product: PrintfulProduct) => void;
+  onViewAllInGrid?: () => void;
+}) {
+  const { calculateSellingPrice } = useGlobalMarkup();
+  const { formatPrice } = useCurrency();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSearchingProducts, setIsSearchingProducts] = useState(false);
+  const [productResults, setProductResults] = useState<PrintfulProduct[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcut: Ctrl+K, Cmd+K, or "/"
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setIsOpen(true);
+      } else if (
+        e.key === "/" &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setIsOpen(true);
+      } else if (e.key === "Escape") {
+        setIsOpen(false);
+        inputRef.current?.blur();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Debounced API search for products/catalogs
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < 2) {
+      setProductResults([]);
+      setIsSearchingProducts(false);
+      return;
+    }
+
+    setIsSearchingProducts(true);
+    const timer = setTimeout(async () => {
+      try {
+        const response = await printifyAPI.getCatalog({ search: trimmed });
+        setProductResults(response.result || []);
+      } catch (err) {
+        console.error("Global search catalog error:", err);
+      } finally {
+        setIsSearchingProducts(false);
+      }
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Matching root categories
+  const matchingCategories = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return categories.filter(
+      (c) => c.parent_id === 0 && c.title.toLowerCase().includes(q)
+    );
+  }, [searchQuery, categories]);
+
+  // Matching subcategories across all categories
+  const matchingSubcategories = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    const matches: Array<{
+      id: string;
+      title: string;
+      category: Category;
+      subcat: any;
+    }> = [];
+
+    categories.forEach((cat) => {
+      const subcats = SUBCATEGORIES_CONFIG[cat.id] || [];
+      subcats.forEach((sub) => {
+        if (sub.title.toLowerCase().includes(q)) {
+          matches.push({
+            id: `${cat.id}-${sub.id}`,
+            title: `${sub.title} (${cat.title})`,
+            category: cat,
+            subcat: sub,
+          });
+        }
+      });
+    });
+
+    return matches.slice(0, 8);
+  }, [searchQuery, categories]);
+
+  const hasAnyResults =
+    matchingCategories.length > 0 ||
+    matchingSubcategories.length > 0 ||
+    productResults.length > 0;
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-[80%] mx-auto mb-8 sm:mb-12 z-30"
+    >
+      {/* Search Bar Container */}
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/25 via-orange-400/15 to-orange-600/25 rounded-2xl blur-sm opacity-50 group-hover:opacity-100 group-focus-within:opacity-100 transition duration-300 pointer-events-none"></div>
+
+        <div className="relative flex items-center bg-[#0d0d0f]/95 backdrop-blur-xl border border-white/15 focus-within:border-orange-500/80 rounded-2xl transition-all duration-300 shadow-2xl">
+          <div className="pl-4 sm:pl-5 text-gray-400 group-focus-within:text-orange-400 transition-colors pointer-events-none">
+            <Search className="w-5 h-5 sm:w-5 sm:h-5" />
+          </div>
+
+          <input
+            ref={inputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setIsOpen(true);
+            }}
+            onFocus={() => setIsOpen(true)}
+            placeholder="Search categories, products, catalogs (e.g. Hoodie, Bella Canvas, Mug, Men)..."
+            className="w-full bg-transparent px-3.5 sm:px-4 py-3.5 sm:py-4 text-white text-sm sm:text-base placeholder-gray-400 focus:outline-none font-medium"
+          />
+
+          <div className="pr-3.5 sm:pr-5 flex items-center gap-2.5 flex-shrink-0">
+            {isSearchingProducts && (
+              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 animate-spin flex-shrink-0" />
+            )}
+
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setProductResults([]);
+                  setIsOpen(false);
+                  inputRef.current?.focus();
+                }}
+                className="p-1 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+
+            <div className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-semibold text-gray-400 select-none pointer-events-none whitespace-nowrap flex-shrink-0">
+              <span>⌘K</span>
+              <span className="text-gray-600">•</span>
+              <span>/</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Interactive Dropdown Results */}
+      {isOpen && searchQuery.trim().length > 0 && (
+        <div className="absolute left-0 right-0 top-full mt-2 bg-[#101013]/98 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_30px_rgba(255,109,31,0.2)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="max-h-[70vh] overflow-y-auto divide-y divide-white/10 custom-scrollbar">
+            {/* Matching Categories & Subcategories */}
+            {(matchingCategories.length > 0 || matchingSubcategories.length > 0) && (
+              <div className="p-3 sm:p-4 bg-white/[0.02]">
+                <div className="flex items-center gap-2 mb-2.5 px-1">
+                  <Folder className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Categories & Subcategories
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {matchingCategories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        setIsOpen(false);
+                        onSelectCategory(cat);
+                      }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/25 border border-orange-500/30 hover:border-orange-500/60 text-white text-xs sm:text-sm font-semibold transition-all group"
+                    >
+                      <span className="text-orange-400">📁</span>
+                      <span>{cat.title}</span>
+                      <ArrowRight className="w-3 h-3 text-orange-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                    </button>
+                  ))}
+
+                  {matchingSubcategories.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setIsOpen(false);
+                        onSelectSubcategory(item.category, item.subcat);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-orange-400/50 text-gray-200 hover:text-white text-xs sm:text-sm font-medium transition-all group"
+                    >
+                      <Tag className="w-3 h-3 text-orange-400" />
+                      <span>{item.title}</span>
+                      <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Matching Products */}
+            {productResults.length > 0 && (
+              <div className="p-3 sm:p-4">
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <div className="flex items-center gap-2">
+                    <Package className="w-3.5 h-3.5 text-orange-400" />
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                      Catalog Products ({productResults.length})
+                    </span>
+                  </div>
+                  {onViewAllInGrid && (
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        onViewAllInGrid();
+                      }}
+                      className="text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors"
+                    >
+                      View all in grid →
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  {productResults.slice(0, 8).map((product) => {
+                    const pppPrice = parseFloat(
+                      (product as any).premiumPrice ||
+                        (product as any).cost ||
+                        product.price ||
+                        '0'
+                    ).toFixed(2);
+                    const lokaPrice = calculateSellingPrice(
+                      parseFloat(pppPrice),
+                      product.title
+                    ).toFixed(2);
+
+                    return (
+                      <div
+                        key={product.id}
+                        onClick={() => {
+                          setIsOpen(false);
+                          onCreateProduct(product);
+                        }}
+                        className="flex items-center gap-3 p-2 sm:p-2.5 rounded-xl hover:bg-white/[0.08] border border-transparent hover:border-orange-500/30 transition-all cursor-pointer group"
+                      >
+                        <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-black flex-shrink-0 border border-white/10">
+                          <ImageWithFallback
+                            src={product.image || "/placeholder-product.png"}
+                            alt={product.title || product.model}
+                            fill
+                            sizes="48px"
+                            className="object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-semibold text-sm truncate group-hover:text-orange-400 transition-colors">
+                              {product.title || product.model}
+                            </span>
+                            {product.brand && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-gray-300 border border-white/10 flex-shrink-0">
+                                {product.brand}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
+                            <span>{product.sizesCount || 4} sizes</span>
+                            <span>•</span>
+                            <span>{product.colorsCount || 5} colors</span>
+                            <span>•</span>
+                            <span className="text-emerald-400 font-medium">Cost: ${pppPrice}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <div className="text-right">
+                            <span className="text-[10px] text-gray-400 block font-medium">Selling From</span>
+                            <span className="font-extrabold text-orange-400 text-sm">
+                              {formatPrice(lokaPrice)}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs shadow-md group-hover:shadow-orange-500/30 transition-all"
+                          >
+                            <span>Design</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Loading state */}
+            {isSearchingProducts && productResults.length === 0 && (
+              <div className="p-8 text-center text-gray-400">
+                <Loader2 className="w-6 h-6 text-orange-400 animate-spin mx-auto mb-2" />
+                <span className="text-xs sm:text-sm">
+                  Searching Printify catalog for &quot;{searchQuery}&quot;...
+                </span>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!isSearchingProducts && !hasAnyResults && (
+              <div className="p-8 text-center text-gray-400">
+                <Package className="w-8 h-8 text-gray-500 mx-auto mb-2 opacity-50" />
+                <span className="text-sm font-semibold text-white block">
+                  No results found for &quot;{searchQuery}&quot;
+                </span>
+                <p className="text-xs text-gray-400 mt-1">
+                  Try searching for categories (e.g. &quot;Men&quot;, &quot;Mugs&quot;) or products (e.g. &quot;Bella Canvas&quot;, &quot;Hoodie&quot;, &quot;Gildan&quot;).
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CategorySelection({
+  categories,
+  onSelectCategory,
+  onSelectSubcategoryFromSearch,
+  onCreateProduct,
+}: {
+  categories: Category[];
+  onSelectCategory: (category: Category) => void;
+  onSelectSubcategoryFromSearch: (category: Category, subcat: any) => void;
+  onCreateProduct: (product: PrintfulProduct) => void;
+}) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchingCatalog, setIsSearchingCatalog] = useState(false);
+  const [searchResults, setSearchResults] = useState<PrintfulProduct[]>([]);
+
+  // Debounced search for the main page grid when user is searching
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < 2) {
+      setSearchResults([]);
+      setIsSearchingCatalog(false);
+      return;
+    }
+
+    setIsSearchingCatalog(true);
+    const timer = setTimeout(async () => {
+      try {
+        const response = await printifyAPI.getCatalog({ search: trimmed });
+        setSearchResults(response.result || []);
+      } catch (err) {
+        console.error("Search catalog error:", err);
+      } finally {
+        setIsSearchingCatalog(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const matchingCategories = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return categories.filter((c: { parent_id: number }) => c.parent_id === 0);
+    return categories.filter(
+      (c: { parent_id: number; title: string }) =>
+        c.parent_id === 0 && c.title.toLowerCase().includes(q)
+    );
+  }, [searchQuery, categories]);
+
+  const isSearchActive = searchQuery.trim().length > 0;
+
   return (
     <div>
-      <div className="text-center mb-6 sm:mb-8 md:mb-12">
-        <GradientTitle text="Choose a Category" size="sm" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl" />
-        <GradientText
-          className="block mt-2 sm:mt-3 leading-relaxed max-w-3xl mx-auto"
-          gradient="linear-gradient(91.77deg, #FFFFFF 0%, #000000 136.03%)"
-          style={{
-            fontSize: "0.875rem",
-            fontWeight: 500,
-          }}
-        >
-          Select a product category to start creating your designs
-        </GradientText>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-        {categories
-          .filter((c: { parent_id: number }) => c.parent_id === 0)
-          .map((category: any) => (
-            <CategoryCard
-              key={category.id}
-              category={category}
-              onSelect={onSelectCategory}
+      {/* Global Search Bar (Positioned ABOVE 'Choose a Category') */}
+      <GlobalCatalogSearch
+        categories={categories}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onSelectCategory={onSelectCategory}
+        onSelectSubcategory={onSelectSubcategoryFromSearch}
+        onCreateProduct={onCreateProduct}
+        onViewAllInGrid={() => {
+          const gridEl = document.getElementById("catalog-search-results");
+          if (gridEl) gridEl.scrollIntoView({ behavior: "smooth" });
+        }}
+      />
+
+      {!isSearchActive ? (
+        <>
+          <div className="text-center mb-6 sm:mb-8 md:mb-12">
+            <GradientTitle
+              text="Choose a Category"
+              size="sm"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
             />
-          ))}
-      </div>
+            <GradientText
+              className="block mt-2 sm:mt-3 leading-relaxed max-w-3xl mx-auto"
+              gradient="linear-gradient(91.77deg, #FFFFFF 0%, #000000 136.03%)"
+              style={{
+                fontSize: "0.875rem",
+                fontWeight: 500,
+              }}
+            >
+              Select a product category to start creating your designs
+            </GradientText>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {categories
+              .filter((c: { parent_id: number }) => c.parent_id === 0)
+              .map((category: any) => (
+                <CategoryCard
+                  key={category.id}
+                  category={category}
+                  onSelect={onSelectCategory}
+                />
+              ))}
+          </div>
+        </>
+      ) : (
+        /* Search Results View */
+        <div id="catalog-search-results" className="space-y-8 animate-in fade-in duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+            <div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+                <span>Search results for</span>
+                <span className="text-orange-400">&quot;{searchQuery}&quot;</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                Found {matchingCategories.length} categories and {searchResults.length} products
+              </p>
+            </div>
+
+            <Button
+              onClick={() => setSearchQuery("")}
+              variant="secondary"
+              className="self-start sm:self-auto px-4 py-2 text-xs sm:text-sm"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              View All Categories
+            </Button>
+          </div>
+
+          {/* Matched Categories in Grid */}
+          {matchingCategories.length > 0 && (
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-white mb-3 flex items-center gap-2">
+                <Folder className="w-4 h-4 text-orange-400" />
+                <span>Matching Categories ({matchingCategories.length})</span>
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                {matchingCategories.map((category: any) => (
+                  <CategoryCard
+                    key={category.id}
+                    category={category}
+                    onSelect={onSelectCategory}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Matched Products in Grid */}
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-3 flex items-center gap-2">
+              <Package className="w-4 h-4 text-orange-400" />
+              <span>Matching Products & Catalogs ({searchResults.length})</span>
+            </h3>
+
+            {isSearchingCatalog ? (
+              <CreativeLoader
+                variant="product"
+                message={`Searching catalog for "${searchQuery}"...`}
+              />
+            ) : searchResults.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+                {searchResults.map((product: PrintfulProduct) => (
+                  <PrintfulProductCard
+                    key={product.id}
+                    product={product}
+                    onCreateProduct={onCreateProduct}
+                  />
+                ))}
+              </div>
+            ) : matchingCategories.length === 0 ? (
+              <div className="text-center py-12 gradient-border-white-top rounded-2xl bg-gray-900/60 p-8 border border-white/10">
+                <Package className="mx-auto h-12 w-12 text-gray-500 mb-3" />
+                <span className="text-lg sm:text-xl font-bold text-white block mb-2">
+                  No matching categories or products found
+                </span>
+                <p className="text-sm text-gray-400 max-w-md mx-auto mb-6">
+                  We couldn&apos;t find anything matching &quot;{searchQuery}&quot;. Try searching with a different term like &quot;T-Shirt&quot;, &quot;Bella Canvas&quot;, &quot;Mug&quot;, or &quot;Hoodie&quot;.
+                </p>
+                <Button
+                  onClick={() => setSearchQuery("")}
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                >
+                  Clear Search and Browse Categories
+                </Button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
