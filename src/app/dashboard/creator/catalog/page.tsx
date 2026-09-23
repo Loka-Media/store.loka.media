@@ -182,20 +182,84 @@ export default function CreatorCatalogPage() {
     fetchCategories();
   }, []);
 
+  const restoreCatalogState = useCallback(
+    (cats: Category[]) => {
+      if (typeof window === "undefined" || cats.length === 0) return;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      let categoryParam = urlParams.get("category");
+      let subcategoryParam = urlParams.get("subcategory");
+
+      // Fallback to sessionStorage if URL params are empty
+      if (!categoryParam) {
+        try {
+          const saved = sessionStorage.getItem("last_catalog_state");
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.categoryId) {
+              categoryParam = String(parsed.categoryId);
+              subcategoryParam = parsed.subcategoryId ? String(parsed.subcategoryId) : null;
+            }
+          }
+        } catch (e) {
+          console.error("Error reading saved catalog state:", e);
+        }
+      }
+
+      if (categoryParam) {
+        const catId = parseInt(categoryParam, 10);
+        const targetCat = cats.find((c) => c.id === catId);
+        if (targetCat) {
+          setSelectedCategory(targetCat);
+          fetchCatalog(targetCat.id);
+
+          if (subcategoryParam) {
+            const subcats = SUBCATEGORIES_CONFIG[targetCat.id] || [];
+            const targetSubcat = subcats.find((s) => s.id === subcategoryParam);
+            if (targetSubcat) {
+              setSelectedSubcategory(targetSubcat);
+            }
+          }
+        }
+      }
+    },
+    [fetchCatalog]
+  );
+
   const fetchCategories = async () => {
     try {
       const response = await printifyAPI.getCategories();
-      setCategories(response.result?.categories || []);
+      const cats = response.result?.categories || [];
+      setCategories(cats);
+      restoreCatalogState(cats);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     }
   };
+
+  // Sync with browser Back / Forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      if (categories.length > 0) {
+        restoreCatalogState(categories);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [categories, restoreCatalogState]);
 
   const handleSelectCategory = (category: Category) => {
     window.scrollTo(0, 0);
     setSelectedCategory(category);
     setSelectedSubcategory(null);
     setFilters((prev) => ({ ...prev, search: "" }));
+
+    if (typeof window !== "undefined") {
+      const newUrl = `${window.location.pathname}?category=${category.id}`;
+      window.history.pushState({ categoryId: category.id, subcategoryId: null }, "", newUrl);
+      sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: category.id, subcategoryId: null }));
+    }
+
     fetchCatalog(category.id);
   };
 
@@ -203,12 +267,24 @@ export default function CreatorCatalogPage() {
     window.scrollTo(0, 0);
     setSelectedSubcategory(subcat);
     setFilters((prev) => ({ ...prev, search: "" }));
+
+    if (typeof window !== "undefined" && selectedCategory) {
+      const newUrl = `${window.location.pathname}?category=${selectedCategory.id}&subcategory=${subcat.id}`;
+      window.history.pushState({ categoryId: selectedCategory.id, subcategoryId: subcat.id }, "", newUrl);
+      sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: selectedCategory.id, subcategoryId: subcat.id }));
+    }
   };
 
   const handleBackToSubcategories = () => {
     window.scrollTo(0, 0);
     setSelectedSubcategory(null);
     setFilters((prev) => ({ ...prev, search: "" }));
+
+    if (typeof window !== "undefined" && selectedCategory) {
+      const newUrl = `${window.location.pathname}?category=${selectedCategory.id}`;
+      window.history.pushState({ categoryId: selectedCategory.id, subcategoryId: null }, "", newUrl);
+      sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: selectedCategory.id, subcategoryId: null }));
+    }
   };
 
   const handleBackToCategories = () => {
@@ -217,6 +293,11 @@ export default function CreatorCatalogPage() {
     setSelectedSubcategory(null);
     setFilters((prev) => ({ ...prev, search: "" }));
     setProducts([]);
+
+    if (typeof window !== "undefined") {
+      window.history.pushState({ categoryId: null, subcategoryId: null }, "", window.location.pathname);
+      sessionStorage.removeItem("last_catalog_state");
+    }
   };
 
   const handleCreateProduct = (printfulProduct: PrintfulProduct) => {
@@ -233,6 +314,10 @@ export default function CreatorCatalogPage() {
         id: selectedCategory.id,
         title: selectedCategory.title
       }));
+      sessionStorage.setItem("last_catalog_state", JSON.stringify({
+        categoryId: selectedCategory.id,
+        subcategoryId: selectedSubcategory ? selectedSubcategory.id : null
+      }));
     } else if (printfulProduct.categoryIds && printfulProduct.categoryIds.length > 0) {
       const catId = printfulProduct.categoryIds[0];
       const matchedCat = categories.find((c) => c.id === catId);
@@ -244,6 +329,10 @@ export default function CreatorCatalogPage() {
             title: matchedCat.title,
           })
         );
+        sessionStorage.setItem("last_catalog_state", JSON.stringify({
+          categoryId: matchedCat.id,
+          subcategoryId: null
+        }));
       }
     }
 
@@ -256,6 +345,13 @@ export default function CreatorCatalogPage() {
     setSelectedCategory(category);
     setSelectedSubcategory(subcat);
     setFilters((prev) => ({ ...prev, search: "" }));
+
+    if (typeof window !== "undefined") {
+      const newUrl = `${window.location.pathname}?category=${category.id}&subcategory=${subcat.id}`;
+      window.history.pushState({ categoryId: category.id, subcategoryId: subcat.id }, "", newUrl);
+      sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: category.id, subcategoryId: subcat.id }));
+    }
+
     await fetchCatalog(category.id);
   };
 

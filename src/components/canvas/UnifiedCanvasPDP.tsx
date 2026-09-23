@@ -2,10 +2,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   Check,
   Upload,
   Plus,
+  ArrowLeft,
   Trash2,
   HelpCircle,
   Info,
@@ -678,8 +680,32 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   isFetchingFiles = false,
   isEditing = false,
 }) => {
+  const router = useRouter();
   const { globalMarkup, categoryMarkup, calculateSellingPrice } = useGlobalMarkup();
   const { user } = useAuth();
+
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      try {
+        const saved = sessionStorage.getItem("last_catalog_state");
+        if (saved) {
+          const { categoryId, subcategoryId } = JSON.parse(saved);
+          if (categoryId && subcategoryId) {
+            router.push(`/dashboard/creator/catalog?category=${categoryId}&subcategory=${subcategoryId}`);
+            return;
+          } else if (categoryId) {
+            router.push(`/dashboard/creator/catalog?category=${categoryId}`);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Error reading last catalog state in canvas:", e);
+      }
+      router.push("/dashboard/creator/catalog");
+    }
+  };
   // Mobile accordion state
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     variants: true,
@@ -1672,13 +1698,23 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       {/* Sticky Header with Product Info & Continue Button - offset by navbar height + 10px spacing */}
       <div className="sticky top-[90px] md:top-[98px] z-40 bg-black/80 backdrop-blur-md border-b border-white/10 py-3 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="text-sm sm:text-base md:text-lg font-bold font-clash text-white line-clamp-1">
-              {selectedProduct?.title || selectedProduct?.name}
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-orange-500/50 text-gray-300 hover:text-white transition-all duration-200 flex-shrink-0 group cursor-pointer"
+              title="Go back to previous page"
+            >
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-0.5 transition-transform" />
+            </button>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm sm:text-base md:text-lg font-bold font-clash text-white line-clamp-1">
+                {selectedProduct?.title || selectedProduct?.name}
+              </div>
+              <p className="text-[10px] sm:text-xs text-gray-400 truncate">
+                SKU: {selectedProduct?.model || selectedProduct?.id} | {selectedProduct?.type_name}
+              </p>
             </div>
-            <p className="text-[10px] sm:text-xs text-gray-400 truncate">
-              SKU: {selectedProduct?.model || selectedProduct?.id} | {selectedProduct?.type_name}
-            </p>
           </div>
           <div className="flex-shrink-0 flex items-center gap-2">
             <div title={mockupStatus !== 'Mockups loaded successfully!' && mockupUrls.length === 0 ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
