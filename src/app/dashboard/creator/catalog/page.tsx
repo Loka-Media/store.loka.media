@@ -331,6 +331,41 @@ function GlobalCatalogSearch({
   const [productResults, setProductResults] = useState<PrintfulProduct[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownScrollRef = useRef<HTMLDivElement>(null);
+
+  // Prevent background page from scrolling while search dropdown is open
+  useEffect(() => {
+    if (isOpen && searchQuery.trim().length > 0) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen, searchQuery]);
+
+  // Ensure mouse wheel scrolls the dropdown smoothly and never leaks to the page
+  useEffect(() => {
+    const el = dropdownScrollRef.current;
+    if (!el || !isOpen) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation();
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      const canScrollDown = e.deltaY > 0 && scrollTop + clientHeight < scrollHeight;
+      const canScrollUp = e.deltaY < 0 && scrollTop > 0;
+
+      if (canScrollDown || canScrollUp) {
+        el.scrollTop += e.deltaY;
+      }
+      e.preventDefault();
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, [isOpen, productResults.length, searchQuery]);
 
   // Keyboard shortcut: Ctrl+K, Cmd+K, or "/"
   useEffect(() => {
@@ -495,8 +530,16 @@ function GlobalCatalogSearch({
 
       {/* Floating Interactive Dropdown Results */}
       {isOpen && searchQuery.trim().length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-2 bg-[#101013]/98 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_30px_rgba(255,109,31,0.2)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="max-h-[70vh] overflow-y-auto divide-y divide-white/10 custom-scrollbar">
+        <div
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          className="absolute left-0 right-0 top-full mt-2 bg-[#101013]/98 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_30px_rgba(255,109,31,0.2)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+        >
+          <div
+            ref={dropdownScrollRef}
+            className="max-h-[60vh] sm:max-h-[68vh] overflow-y-auto overscroll-contain divide-y divide-white/10 scrollbar-5px"
+            style={{ overscrollBehavior: "contain", WebkitOverflowScrolling: "touch" }}
+          >
             {/* Matching Categories & Subcategories */}
             {(matchingCategories.length > 0 || matchingSubcategories.length > 0) && (
               <div className="p-3 sm:p-4 bg-white/[0.02]">

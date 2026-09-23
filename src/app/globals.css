@@ -78,20 +78,57 @@ em {
 
 /* Scrollbar styling for Chrome, Safari, and Edge */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 5px !important;
+  height: 5px !important;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #FF6D1F;
-  border-radius: 3px;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #FF7A1A;
+}
+
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Dedicated 5px scrollbar class */
+.scrollbar-5px {
+  scrollbar-width: thin;
+  scrollbar-color: #FF6D1F transparent;
+}
+
+.scrollbar-5px::-webkit-scrollbar {
+  width: 5px !important;
+  height: 5px !important;
+}
+
+.scrollbar-5px::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-5px::-webkit-scrollbar-thumb {
+  background: #FF6D1F;
+  border-radius: 9999px;
+}
+
+.scrollbar-5px::-webkit-scrollbar-thumb:hover {
+  background: #FF7A1A;
+}
+
+.scrollbar-5px::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .font-clash,
