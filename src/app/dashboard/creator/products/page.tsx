@@ -128,7 +128,7 @@ export default function CreatorProductsPage() {
 
   const executeDeleteProduct = async () => {
     if (!deleteState.productId) return;
-    
+
     setDeleteState((prev) => ({ ...prev, isDeleting: true }));
     try {
       await productAPI.deleteProduct(deleteState.productId);
@@ -189,7 +189,7 @@ export default function CreatorProductsPage() {
     }
     const newStatus = !currentStatus;
     const toastId = toast.loading(newStatus ? "Activating product..." : "Deactivating product...");
-    
+
     const prod = products.find(p => p.id === productId);
     if (!prod) {
       toast.error("Product not found in state", { id: toastId });
@@ -289,11 +289,10 @@ export default function CreatorProductsPage() {
         <div className="flex border-b border-white/10 mb-6 gap-6">
           <button
             onClick={() => setFilters(prev => ({ ...prev, status: "active" }))}
-            className={`pb-3 text-sm font-semibold relative transition-all ${
-              filters.status === "active"
+            className={`pb-3 text-sm font-semibold relative transition-all ${filters.status === "active"
                 ? "text-white"
                 : "text-gray-400 hover:text-white"
-            }`}
+              }`}
           >
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500"></span>
@@ -306,14 +305,13 @@ export default function CreatorProductsPage() {
               <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#FF6D1F]"></span>
             )}
           </button>
-          
+
           <button
             onClick={() => setFilters(prev => ({ ...prev, status: "inactive" }))}
-            className={`pb-3 text-sm font-semibold relative transition-all ${
-              filters.status === "inactive"
+            className={`pb-3 text-sm font-semibold relative transition-all ${filters.status === "inactive"
                 ? "text-white"
                 : "text-gray-400 hover:text-white"
-            }`}
+              }`}
           >
 
             {filters.status === "inactive" && (
@@ -323,11 +321,10 @@ export default function CreatorProductsPage() {
 
           <button
             onClick={() => setFilters(prev => ({ ...prev, status: "" }))}
-            className={`pb-3 text-sm font-semibold relative transition-all ${
-              filters.status === ""
+            className={`pb-3 text-sm font-semibold relative transition-all ${filters.status === ""
                 ? "text-white"
                 : "text-gray-400 hover:text-white"
-            }`}
+              }`}
           >
             <span className="flex items-center gap-2">
               All Products
@@ -400,7 +397,7 @@ export default function CreatorProductsPage() {
 
               {/* Clear Filters Button */}
               {(filters.search || filters.category || filters.sortBy !== "created_at" || filters.sortOrder !== "DESC") && (
-                <button 
+                <button
                   onClick={() => setFilters(prev => ({ ...prev, search: "", category: "", sortBy: "created_at", sortOrder: "DESC" }))}
                   className="h-[42px] sm:h-[46px] px-4 rounded-lg bg-white/5 border border-white/20 hover:bg-white/10 text-white text-sm font-medium transition-colors"
                 >

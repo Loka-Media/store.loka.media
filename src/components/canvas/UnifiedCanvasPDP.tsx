@@ -1105,7 +1105,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           return val;
         })
         .filter((p: number) => p > 0);
-      
+
       if (prices.length > 0) {
         const minCost = Math.min(...prices);
         const maxCost = Math.max(...prices);
@@ -1443,13 +1443,28 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     const finalForm = {
       ...productForm,
       markupPercentage: String(creatorMarkup),
+      markup_percentage: creatorMarkup,
       price: minSellingPrice,
       base_price: minSellingPrice,
+      basePrice: minSellingPrice,
       selling_price: minSellingPrice,
+      retail_price: minSellingPrice,
       min_price: minSellingPrice,
       max_price: maxSellingPrice,
+      minPrice: minSellingPrice,
+      maxPrice: maxSellingPrice,
       variantPrices: (selectedProduct?.variants || []).map((v: any) => {
-        const vCost = v.price ? parseFloat(v.price) : pricingRange.min;
+        let vCost = pricingRange.min;
+        if (v.cost != null && !isNaN(parseFloat(v.cost)) && parseFloat(v.cost) > 0) {
+          const num = parseFloat(v.cost);
+          vCost = num > 100 ? num / 100 : num;
+        } else if (v.premiumPrice != null && !isNaN(parseFloat(v.premiumPrice)) && parseFloat(v.premiumPrice) > 0) {
+          const num = parseFloat(v.premiumPrice);
+          vCost = num > 100 ? num / 100 : num;
+        } else if (v.price != null && !isNaN(parseFloat(v.price)) && parseFloat(v.price) > 0) {
+          const num = parseFloat(v.price);
+          vCost = num > 100 ? num / 100 : num;
+        }
         const vPlatform = calculateSellingPrice(vCost);
         const vSelling = calculateRetailPriceFromMarkup(vPlatform, creatorMarkup);
         return {
@@ -1707,11 +1722,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               </div>
 
               <div className="flex-1 space-y-2">
-                <span className={`text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${
-                  isEditing
-                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                    : "bg-[#FF6D1F]/20 text-[#FF6D1F]"
-                }`}>
+                <span className={`text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${isEditing
+                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                  : "bg-[#FF6D1F]/20 text-[#FF6D1F]"
+                  }`}>
                   {isEditing ? "Editing Product" : "Base Catalog Item"}
                 </span>
                 <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
@@ -1725,9 +1739,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     return (
                       <>
                         <p
-                          className={`text-xs sm:text-sm text-gray-300 font-medium leading-relaxed break-words ${
-                            !isDescExpanded && isLongText ? "line-clamp-3" : ""
-                          }`}
+                          className={`text-xs sm:text-sm text-gray-300 font-medium leading-relaxed break-words ${!isDescExpanded && isLongText ? "line-clamp-3" : ""
+                            }`}
                           title={fullDesc}
                         >
                           {fullDesc}
@@ -1887,7 +1900,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         .map((v: any) => parseFloat(v.price || '0'))
                         .filter((p: number) => p > 0);
                       const minBasePrice = sizePrices.length > 0 ? Math.min(...sizePrices) : 0;
-                      const sizeFinalPrice = minBasePrice > 0 
+                      const sizeFinalPrice = minBasePrice > 0
                         ? calculateRetailPriceFromMarkup(calculateSellingPrice(minBasePrice), creatorMarkup)
                         : 0;
 
@@ -2314,22 +2327,20 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                 onDragOver={(e) => handleImageDragOver(e, index)}
                                 onDrop={(e) => handleImageDrop(e, index)}
                                 onDragEnd={handleImageDragEnd}
-                                className={`border rounded-2xl overflow-hidden transition-all duration-300 relative aspect-square p-3.5 flex flex-col justify-between group ${
-                                  draggedIndex === index
-                                    ? "opacity-40 border-dashed border-orange-500 bg-orange-500/10"
-                                    : isCover
+                                className={`border rounded-2xl overflow-hidden transition-all duration-300 relative aspect-square p-3.5 flex flex-col justify-between group ${draggedIndex === index
+                                  ? "opacity-40 border-dashed border-orange-500 bg-orange-500/10"
+                                  : isCover
                                     ? "border-orange-500/70 bg-gradient-to-b from-orange-950/30 via-gray-900/80 to-black/60 shadow-[0_0_25px_rgba(255,109,31,0.2)]"
                                     : "border-white/10 bg-black/50 hover:border-white/20"
-                                }`}
+                                  }`}
                               >
                                 {/* Top Bar: Badge & Action Controls */}
                                 <div className="flex items-center justify-between gap-1 z-20">
                                   <div className="flex items-center gap-1.5">
-                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
-                                      isCover
-                                        ? "bg-[#FF6D1F] text-white flex items-center gap-1 shadow-sm"
-                                        : "bg-black/80 text-gray-300 border border-white/10"
-                                    }`}>
+                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${isCover
+                                      ? "bg-[#FF6D1F] text-white flex items-center gap-1 shadow-sm"
+                                      : "bg-black/80 text-gray-300 border border-white/10"
+                                      }`}>
                                       {isCover ? <>★ COVER</> : `#${index + 1}`}
                                     </span>
                                     {m.isCustomUpload && (
@@ -2521,11 +2532,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                 setFormErrors((prev) => ({ ...prev, tags: "" }));
                               }
                             }}
-                            className={`py-3 px-3 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                              isSelected
-                                ? `${tagItem.color} ring-2 ring-orange-500/50 shadow-lg scale-[1.02]`
-                                : "bg-black/60 border-white/10 text-gray-400 hover:border-white/30 hover:text-white"
-                            }`}
+                            className={`py-3 px-3 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${isSelected
+                              ? `${tagItem.color} ring-2 ring-orange-500/50 shadow-lg scale-[1.02]`
+                              : "bg-black/60 border-white/10 text-gray-400 hover:border-white/30 hover:text-white"
+                              }`}
                           >
                             <span>{tagItem.icon}</span>
                             <span>{tagItem.label}</span>
@@ -2731,11 +2741,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           <button
                             key={preset}
                             onClick={() => handleCreatorPresetClick(preset)}
-                            className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all ${
-                              isActive
-                                ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)] cursor-pointer'
-                                : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200 cursor-pointer'
-                            }`}
+                            className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all ${isActive
+                              ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)] cursor-pointer'
+                              : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200 cursor-pointer'
+                              }`}
                           >
                             {preset}%
                           </button>
@@ -2764,8 +2773,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="flex justify-between items-center text-gray-400 font-medium">
                     <span>Creator Markup ({creatorMarkup}%)</span>
                     <span className="text-green-400 font-semibold">
-                      +{hasPriceRange 
-                        ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}` 
+                      +{hasPriceRange
+                        ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
                         : `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)}`}
                     </span>
                   </div>

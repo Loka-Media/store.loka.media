@@ -106,9 +106,16 @@ async function handleUpdate(req: NextRequest) {
         name,
         description,
         markupPercentage: markupVal,
+        markup_percentage: markupVal,
         basePrice: finalRetailPrice,
         base_price: finalRetailPrice,
         price: finalRetailPrice,
+        selling_price: finalRetailPrice,
+        retail_price: finalRetailPrice,
+        min_price: finalRetailPrice,
+        max_price: finalRetailPrice,
+        minPrice: finalRetailPrice,
+        maxPrice: finalRetailPrice,
         category,
         tags: tagsArr,
         thumbnailUrl: coverUrl,
@@ -117,6 +124,7 @@ async function handleUpdate(req: NextRequest) {
         status: status || 'active',
         is_active: true,
         isActive: true,
+        variantPrices: variantPrices || [],
       };
 
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };

@@ -861,15 +861,21 @@ function CanvasContent() {
         const mainCoverUrl = imagesList[0] || selectedProduct?.thumbnail_url || selectedProduct?.thumbnailUrl || "";
 
         const finalPrice = (formDataToUse as any).price || (formDataToUse as any).base_price || 14.99;
+        const markupVal = parseFloat(formDataToUse.markupPercentage) || 30;
         const updateData: any = {
           name: formDataToUse.name.trim(),
           description: formDataToUse.description.trim(),
-          markupPercentage: parseFloat(formDataToUse.markupPercentage) || 30,
+          markupPercentage: markupVal,
+          markup_percentage: markupVal,
           basePrice: finalPrice,
           base_price: finalPrice,
           price: finalPrice,
+          selling_price: finalPrice,
+          retail_price: finalPrice,
           min_price: (formDataToUse as any).min_price || finalPrice,
           max_price: (formDataToUse as any).max_price || finalPrice,
+          minPrice: (formDataToUse as any).min_price || finalPrice,
+          maxPrice: (formDataToUse as any).max_price || finalPrice,
           category: formDataToUse.category?.trim() || "",
           tags: (formDataToUse.tags && formDataToUse.tags.length > 0) ? formDataToUse.tags : ['New'],
           thumbnailUrl: mainCoverUrl,
@@ -981,18 +987,24 @@ function CanvasContent() {
       }
 
       const finalPublishPrice = (formDataToUse as any).price || (formDataToUse as any).base_price;
+      const pubMarkupVal = parseFloat(formDataToUse.markupPercentage) || 30;
       const productData = {
         id: selectedProduct?.id,
         name: formDataToUse.name.trim(),
         description: formDataToUse.description.trim(),
         category: formDataToUse.category,
         tags: (formDataToUse.tags && formDataToUse.tags.length > 0) ? formDataToUse.tags : ['New'],
-        markupPercentage: parseFloat(formDataToUse.markupPercentage),
+        markupPercentage: pubMarkupVal,
+        markup_percentage: pubMarkupVal,
         price: finalPublishPrice,
+        selling_price: finalPublishPrice,
+        retail_price: finalPublishPrice,
         base_price: finalPublishPrice,
         basePrice: finalPublishPrice,
         min_price: (formDataToUse as any).min_price || finalPublishPrice,
         max_price: (formDataToUse as any).max_price || finalPublishPrice,
+        minPrice: (formDataToUse as any).min_price || finalPublishPrice,
+        maxPrice: (formDataToUse as any).max_price || finalPublishPrice,
         variants: selectedVariants,
         variantPrices: (formDataToUse as any).variantPrices || [],
         base_product: selectedProduct
@@ -1049,6 +1061,25 @@ function CanvasContent() {
       toast.dismiss("publishing-progress");
 
       if (result.success && result.marketplace_ready) {
+        const createdId = result.product_id || result.productId;
+        if (createdId) {
+          try {
+            await fetch('/api/products/update', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`
+              },
+              body: JSON.stringify({
+                productId: createdId,
+                ...productData
+              })
+            });
+          } catch (syncErr) {
+            console.warn('[Canvas Publish] Post-publish sync notice:', syncErr);
+          }
+        }
+
         toast.success(`"${formDataToUse.name}" is now live in the marketplace!`, {
           duration: 4000,
         });

@@ -10,6 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { printifyProductsAPI, printifyCatalogAPI } from '@/services/printify/PrintifyClient';
 import { transformProductForStorefront } from '@/services/printify/PrintifyProductService';
+import { queryDb } from '@/lib/db';
+import { calculateSellingPrice } from '@/lib/pricing';
+import { calculateRetailPriceFromMarkup, ensure99Pricing } from '@/lib/pricing-utils';
 import fs from 'fs';
 import path from 'path';
 
@@ -136,12 +139,21 @@ async function buildPrintifyProductPayload(
     const vId = Number(v.id);
     const isSelected = selectedVariantIds.length === 0 || selectedVariantIds.includes(vId);
     
-    // Sourced cost from v.cost (in cents) if available, otherwise v.price
-    const rawCostCents = v.cost != null ? (typeof v.cost === 'string' ? parseFloat(v.cost) * 100 : v.cost) : (v.price != null ? (typeof v.price === 'string' ? parseFloat(v.price) * 100 : v.price) : 1500);
-    const premiumBaseCost = rawCostCents / 100;
-    
-    const lokaBasePrice = Math.ceil(premiumBaseCost * 1.35) - 0.01;
-    const finalSellingPrice = Math.ceil(lokaBasePrice * (1 + markupPercent / 100)) - 0.01;
+    // Check if client provided precalculated variant price from Canvas
+    const matchingVP = (productData?.variantPrices || []).find(
+      (vp: any) => Number(vp.id) === vId || Number(vp.printify_variant_id) === vId
+    );
+
+    let finalSellingPrice: number;
+    if (matchingVP?.price && parseFloat(matchingVP.price) > 0) {
+      finalSellingPrice = ensure99Pricing(matchingVP.price);
+    } else {
+      const rawCost = matchingVP?.cost != null
+        ? parseFloat(matchingVP.cost)
+        : (v.cost != null ? (typeof v.cost === 'string' ? parseFloat(v.cost) : v.cost / 100) : (v.price != null ? (typeof v.price === 'string' ? parseFloat(v.price) : v.price / 100) : 18.00));
+      const lokaBasePrice = calculateSellingPrice(rawCost, undefined);
+      finalSellingPrice = calculateRetailPriceFromMarkup(lokaBasePrice, markupPercent);
+    }
     const retailCents = Math.round(finalSellingPrice * 100);
 
     return {
@@ -397,6 +409,7 @@ export async function POST(request: NextRequest) {
       let printifyProductId: string | null = null;
       let printifyError: string | null = null;
       let created: any = null;
+      let syncedTargetId: number | null = null;
 
       // ── Step A: Create or Update product on Printify API (server-side, non-fatal) ──
       try {
@@ -421,7 +434,7 @@ export async function POST(request: NextRequest) {
 
             // Printify generates mockups asynchronously.
             // Poll Printify API to get the generated product mockups (including human/model images)
-            const maxAttempts = 10;
+            const maxAttempts = 18;
             console.log('[Printify Sync] Waiting for Printify to generate mockups...');
             let attempts = 0;
             while (attempts < maxAttempts) {
@@ -429,17 +442,17 @@ export async function POST(request: NextRequest) {
                 const checkProduct = await printifyProductsAPI.getProduct(printifyProductId);
                 if (checkProduct.images && checkProduct.images.length > 0 && checkProduct.images.some(img => img.src)) {
                   created.images = checkProduct.images;
-                  console.log(`[Printify Sync] Mockups generated after ${attempts * 0.8} seconds! (${checkProduct.images.length} images)`);
+                  console.log(`[Printify Sync] Mockups generated after ${attempts * 1.2} seconds! (${checkProduct.images.length} images)`);
                   break;
                 }
               } catch (e) {
                 // Ignore fetch errors during polling
               }
-              await new Promise(resolve => setTimeout(resolve, 800)); // 0.8 sec interval
+              await new Promise(resolve => setTimeout(resolve, 1200)); // 1.2 sec interval
               attempts++;
             }
             if (!created?.images || created.images.length === 0) {
-              console.warn('[Printify Sync] Mockups not ready within polling period.');
+              console.warn('[Printify Sync] Mockups not ready within polling period, will sync in background.');
             }
 
             // Only publish to Printify shop channel if it is NOT a preview request
@@ -568,8 +581,14 @@ export async function POST(request: NextRequest) {
           base_price: uniformPrice,
           basePrice: uniformPrice,
           price: uniformPrice,
+          selling_price: productData?.selling_price || productData?.price || uniformPrice,
+          retail_price: productData?.retail_price || productData?.price || uniformPrice,
           min_price: productData?.min_price || uniformPrice,
           max_price: productData?.max_price || uniformPrice,
+          minPrice: productData?.min_price || uniformPrice,
+          maxPrice: productData?.max_price || uniformPrice,
+          markup_percentage: parseFloat(productData?.markupPercentage || productData?.markup_percentage || '30'),
+          markupPercentage: parseFloat(productData?.markupPercentage || productData?.markup_percentage || '30'),
           thumbnail_url: finalMockupUrls[0],
           thumbnailUrl: finalMockupUrls[0],
           images: finalMockupUrls,
@@ -603,6 +622,131 @@ export async function POST(request: NextRequest) {
         if (saved.ok) {
           console.log('[Printify Sync] Product saved to database successfully.');
           logToFile(`[Printify Sync] Product saved to database successfully.`);
+
+          // CRITICAL: Synchronize PostgreSQL product and variants with exact creator retail pricing
+          try {
+            let targetProductId: number | null = null;
+            if ((saved.data as any)?.product?.id) {
+              targetProductId = Number((saved.data as any).product.id);
+            } else if ((saved.data as any)?.id) {
+              targetProductId = Number((saved.data as any).id);
+            } else if ((saved.data as any)?.productId) {
+              targetProductId = Number((saved.data as any).productId);
+            }
+
+            if (!targetProductId) {
+              const findRes = await queryDb(
+                `SELECT id FROM products WHERE (printify_product_id = $1 OR name = $2) ORDER BY id DESC LIMIT 1`,
+                [printifyProductId ? String(printifyProductId) : '', productData.name]
+              );
+              if (findRes && findRes.length > 0) {
+                targetProductId = Number(findRes[0].id);
+              }
+            }
+
+            if (targetProductId) {
+              syncedTargetId = targetProductId;
+              console.log(`[Printify Sync] Syncing retail pricing for product ${targetProductId}...`);
+              const creatorMarkup = parseFloat(String(productData?.markupPercentage || productData?.markup_percentage || '30')) || 30;
+
+              const dbVariants = await queryDb(
+                `SELECT id, printify_variant_id, price, base_cost FROM product_variants WHERE product_id = $1`,
+                [targetProductId]
+              );
+
+              const variantPricesList = Array.isArray(productData?.variantPrices) ? productData.variantPrices : [];
+              const calculatedPrices: number[] = [];
+
+              for (const dbV of dbVariants) {
+                let finalPrice: number | null = null;
+
+                const matchingVP = variantPricesList.find(
+                  (vp: any) => Number(vp.id) === Number(dbV.id) || 
+                               Number(vp.printify_variant_id) === Number(dbV.printify_variant_id) || 
+                               Number(vp.id) === Number(dbV.printify_variant_id)
+                );
+
+                if (matchingVP?.price && parseFloat(matchingVP.price) > 0) {
+                  finalPrice = ensure99Pricing(matchingVP.price);
+                } else {
+                  const vCost = parseFloat(String(dbV.base_cost || matchingVP?.cost || '0'));
+                  if (vCost > 0) {
+                    const vPlatform = calculateSellingPrice(vCost, undefined);
+                    finalPrice = calculateRetailPriceFromMarkup(vPlatform, creatorMarkup);
+                  }
+                }
+
+                if (finalPrice && finalPrice > 0) {
+                  calculatedPrices.push(finalPrice);
+                  await queryDb(
+                    `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE id = $2`,
+                    [finalPrice, dbV.id]
+                  );
+                }
+              }
+
+              const minRetailPrice = calculatedPrices.length > 0 
+                ? Math.min(...calculatedPrices) 
+                : ensure99Pricing(productData?.price || productData?.base_price || 14.99);
+
+              // Retrieve all mockups from created or re-fetch from Printify
+              let productImages: string[] = [];
+              if (created?.images && created.images.length > 0) {
+                productImages = created.images.map((img: any) => img.src).filter(Boolean);
+              }
+
+              if (productImages.length === 0 && printifyProductId) {
+                try {
+                  const latestPrintify = await printifyProductsAPI.getProduct(printifyProductId);
+                  if (latestPrintify.images && latestPrintify.images.length > 0) {
+                    productImages = latestPrintify.images.map((img: any) => img.src).filter(Boolean);
+                  }
+                } catch (_) {}
+              }
+
+              if (productImages.length > 0) {
+                const finalThumbnail = productImages[0];
+                await queryDb(
+                  `UPDATE products SET base_price = $1, markup_percentage = $2, thumbnail_url = $3, images = $4, printify_product_id = $5, updated_at = NOW() WHERE id = $6`,
+                  [minRetailPrice, creatorMarkup, finalThumbnail, productImages, String(printifyProductId || ''), targetProductId]
+                );
+                console.log(`[Printify Sync] Successfully updated product ${targetProductId} with ${productImages.length} mockups and retail price $${minRetailPrice}`);
+              } else {
+                await queryDb(
+                  `UPDATE products SET base_price = $1, markup_percentage = $2, printify_product_id = $3, updated_at = NOW() WHERE id = $4`,
+                  [minRetailPrice, creatorMarkup, String(printifyProductId || ''), targetProductId]
+                );
+                console.log(`[Printify Sync] Successfully synced product ${targetProductId} to retail price $${minRetailPrice} with ${calculatedPrices.length} variants updated`);
+
+                // Background polling fallback to capture mockups as soon as Printify rendering finishes
+                if (printifyProductId) {
+                  const bgPrintifyId = printifyProductId;
+                  const bgDbId = targetProductId;
+                  (async () => {
+                    for (let attempt = 0; attempt < 15; attempt++) {
+                      await new Promise(r => setTimeout(r, 2000));
+                      try {
+                        const p = await printifyProductsAPI.getProduct(bgPrintifyId);
+                        if (p.images && p.images.length > 0 && p.images.some((img: any) => img.src)) {
+                          const urls = p.images.map((img: any) => img.src).filter(Boolean);
+                          if (urls.length > 0) {
+                            await queryDb(
+                              `UPDATE products SET thumbnail_url = $1, images = $2, printify_product_id = $3, updated_at = NOW() WHERE id = $4`,
+                              [urls[0], urls, String(bgPrintifyId), bgDbId]
+                            );
+                            console.log(`[Printify Sync Background] Product ${bgDbId} mockups updated (${urls.length} images).`);
+                            break;
+                          }
+                        }
+                      } catch (_) {}
+                    }
+                  })();
+                }
+              }
+            }
+          } catch (syncErr: any) {
+            console.warn('[Printify Sync] Direct PostgreSQL retail pricing sync exception:', syncErr?.message || syncErr);
+          }
         } else {
           console.error('[Printify Sync] Failed to save product to database. Status:', saved.status, 'Error:', saved.errorText);
           logToFile(`[Printify Sync] Failed to save product to database. Status: ${saved.status}, Error: ${saved.errorText}`);
@@ -618,6 +762,8 @@ export async function POST(request: NextRequest) {
         success: true,
         marketplace_ready: true,
         printify_product_id: printifyProductId,
+        product_id: syncedTargetId,
+        productId: syncedTargetId,
         backend_saved: backendSaved,
         message: printifyProductId
           ? `Product published to Printify (ID: ${printifyProductId})`

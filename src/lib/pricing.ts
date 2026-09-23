@@ -86,7 +86,7 @@ export function calculateSellingPrice(
   return Math.ceil(sellingPrice) - 0.01;
 }
 
-import { ensure99Pricing } from './pricing-utils';
+import { ensure99Pricing, calculateRetailPriceFromMarkup } from './pricing-utils';
 
 /**
  * Get dynamic retail price range for a product.
@@ -106,6 +106,7 @@ export function getProductPriceRange(
     product.minPrice ?? 
     product.price_range?.min ?? 
     product.price ?? 
+    product.selling_price ?? 
     product.retail_price ?? 
     0
   );
@@ -114,6 +115,7 @@ export function getProductPriceRange(
     product.maxPrice ?? 
     product.price_range?.max ?? 
     product.price ?? 
+    product.selling_price ?? 
     product.retail_price ?? 
     directMin
   );
@@ -130,7 +132,7 @@ export function getProductPriceRange(
   // 2. Gather variant retail prices if available
   if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
     const prices = product.variants
-      .map((v: any) => parseFloat(v.price || v.retail_price || v.cost || 0))
+      .map((v: any) => parseFloat(v.price || v.selling_price || v.retail_price || v.cost || 0))
       .filter((p: number) => !isNaN(p) && p > 0);
     
     if (prices.length > 0) {
@@ -142,12 +144,25 @@ export function getProductPriceRange(
   }
 
   // 3. Fallback to calculating selling price from base cost & markup
-  const baseCost = parseFloat(product.base_price || product.basePrice || product.min_base_cost || product.cost || '0');
+  const rawCost = parseFloat(product.cost || product.min_base_cost || '0');
+  const baseCost = !isNaN(rawCost) && rawCost > 0 
+    ? rawCost 
+    : parseFloat(product.base_price || product.basePrice || '0');
   const creatorMarkup = parseFloat(product.markup_percentage || product.markupPercentage || '0');
 
   if (!isNaN(baseCost) && baseCost > 0) {
     if (!isNaN(creatorMarkup) && creatorMarkup > 0) {
-      const creatorPrice = Math.ceil(baseCost * (1 + creatorMarkup / 100)) - 0.01;
+      if (!isNaN(rawCost) && rawCost > 0) {
+        const platformPrice = calculateSellingPrice(rawCost, categoryOrMarkup, categoryMarkups, globalMarkup);
+        const creatorPrice = calculateRetailPriceFromMarkup(platformPrice, creatorMarkup);
+        return { minPrice: ensure99Pricing(creatorPrice), maxPrice: ensure99Pricing(creatorPrice) };
+      }
+      // If baseCost already ends in .99 and is not a sub-$5 item, it is already a finalized retail price
+      const cents = Math.round(baseCost * 100);
+      if (cents % 100 === 99 && baseCost >= 5) {
+        return { minPrice: baseCost, maxPrice: baseCost };
+      }
+      const creatorPrice = calculateRetailPriceFromMarkup(baseCost, creatorMarkup);
       return { minPrice: ensure99Pricing(creatorPrice), maxPrice: ensure99Pricing(creatorPrice) };
     }
 
