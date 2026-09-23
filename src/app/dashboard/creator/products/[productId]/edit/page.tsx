@@ -443,13 +443,13 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                 <label className="block text-sm font-medium text-white/90 mb-2">
                   Printify Premium Pricing (PPP) <span className="text-white/50 text-xs">(23% discount wholesale cost)</span>
                 </label>
-                <input
+                {/* <input
                   type="text"
                   value={`$${parseFloat((formData as any).cost || (formData as any).premiumPrice || formData.basePrice || '0').toFixed(2)}`}
                   readOnly
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white/70 cursor-not-allowed"
                   title="This is the Printify Premium cost"
-                />
+                /> */}
               </div>
 
               <div>

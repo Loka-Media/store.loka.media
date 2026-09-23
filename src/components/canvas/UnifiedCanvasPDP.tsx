@@ -2792,15 +2792,15 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                 {/* Pricing Summary & Clean Creator Breakdown */}
                 <div className="mt-4 bg-black/60 border border-white/5 p-4 rounded-2xl space-y-2.5 text-[11px] backdrop-blur-md">
-                  <div className="flex justify-between items-center text-gray-400 font-medium">
+                  {/* <div className="flex justify-between items-center text-gray-400 font-medium">
                     <span className="text-emerald-400/90 font-semibold">Printify Premium Cost</span>
                     <span className="text-emerald-400 font-bold">
                       {hasPriceRange ? `$${pricingRange.min.toFixed(2)} - $${pricingRange.max.toFixed(2)}` : `$${pricingRange.min.toFixed(2)}`}
                     </span>
-                  </div>
+                  </div> */}
 
                   <div className="flex justify-between items-center text-gray-400 font-medium">
-                    <span>Loka Base Cost (+{globalMarkup}%)</span>
+                    <span>Loka Base Cost</span>
                     <span className="text-orange-400 font-semibold">
                       {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} - $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
                     </span>
