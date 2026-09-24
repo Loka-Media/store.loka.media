@@ -534,7 +534,7 @@ export default function AddressesPage() {
                         onValueChange={(val) => setAddressForm(prev => ({ ...prev, state: val }))}
                         disabled={!addressForm.country}
                       >
-                        <SelectTrigger className="w-full p-3 h-12 bg-gray-800 border border-gray-700 rounded-xl text-white text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">
+                        <SelectTrigger className="w-full p-3 h-12 bg-gray-800 border border-gray-700 rounded-xl text-white text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                           <SelectValue placeholder={addressForm.country ? 'Select State/Province *' : 'Select Country First'} />
                         </SelectTrigger>
                         <SelectContent className="bg-gray-950/95 border border-white/20 rounded-2xl text-white shadow-2xl backdrop-blur-xl max-h-60 z-[120]">
@@ -551,7 +551,8 @@ export default function AddressesPage() {
                         placeholder="State / Province / Region *"
                         value={addressForm.state}
                         onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
-                        className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                        disabled={!addressForm.country}
+                        className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-800/50"
                         required
                       />
                     )}

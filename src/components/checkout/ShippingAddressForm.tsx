@@ -205,7 +205,7 @@ export const ShippingAddressForm = ({
                   <select
                     value={customerInfo.state}
                     onChange={(e) => updateCustomerInfo({ state: e.target.value })}
-                    className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-800/50"
                     disabled={!customerInfo.country}
                   >
                     <option value="">{customerInfo.country ? 'Select State/Province *' : 'Select Country First'}</option>
@@ -221,7 +221,8 @@ export const ShippingAddressForm = ({
                     placeholder="State / Province / Region *"
                     value={customerInfo.state}
                     onChange={(e) => updateCustomerInfo({ state: e.target.value })}
-                    className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500"
+                    disabled={!customerInfo.country}
+                    className="w-full p-3 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-800/50"
                   />
                 )}
                 {customerInfo.country && !customerInfo.state && (
