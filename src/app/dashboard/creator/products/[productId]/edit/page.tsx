@@ -24,6 +24,8 @@ import {
   validateProductCategory,
   validateMarkupPercentage
 } from '@/lib/validators/product';
+import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
+import { calculateRetailPriceFromMarkup } from '@/lib/pricing-utils';
 
 interface Product {
   id: number;
@@ -60,6 +62,7 @@ interface Product {
 export default function EditProductPage({ params }: { params: Promise<{ productId: string }> }) {
   const { user } = useAuth();
   const router = useRouter();
+  const { calculateSellingPrice: getLokaBaseCost } = useGlobalMarkup();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -794,27 +797,27 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   <thead>
                     <tr className="text-left border-b border-white/20">
                       <th className="pb-2 sm:pb-3 text-white/70 font-medium">Variant</th>
-                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">PBC (Base)</th>
-                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">PPP (Premium)</th>
-                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Selling Price</th>
-                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Profit</th>
+                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Printify Base</th>
+                      <th className="pb-2 sm:pb-3 text-orange-400 font-medium">Loka Base Cost</th>
+                      <th className="pb-2 sm:pb-3 text-white font-medium">Selling Price</th>
+                      <th className="pb-2 sm:pb-3 text-green-400 font-medium">Creator Profit (+)</th>
                     </tr>
                   </thead>
                   <tbody>
                     {product.variants.map((variant) => {
                       const baseCost = typeof variant.base_cost === 'string' ? parseFloat(variant.base_cost) : (variant.base_cost || 0);
-                      const pppCost = (variant as any).cost != null ? parseFloat((variant as any).cost) : ((variant as any).premiumPrice != null ? parseFloat((variant as any).premiumPrice) : baseCost);
+                      const lokaBaseCost = getLokaBaseCost(baseCost, formData.category);
                       const markupVal = parseFloat(formData.markupPercentage) || 0;
-                      const sellingPrice = pppCost * (1 + markupVal / 100);
-                      const profit = sellingPrice - pppCost;
+                      const sellingPrice = calculateRetailPriceFromMarkup(lokaBaseCost, markupVal);
+                      const profit = Math.max(0, sellingPrice - lokaBaseCost);
 
                       return (
                         <tr key={variant.id} className="border-b border-white/10">
                           <td className="py-2 sm:py-3 text-white">{variant.title}</td>
                           <td className="py-2 sm:py-3 text-white/60">${baseCost.toFixed(2)}</td>
-                          <td className="py-2 sm:py-3 text-white/60">${pppCost.toFixed(2)}</td>
-                          <td className="py-2 sm:py-3 text-white font-medium">${sellingPrice.toFixed(2)}</td>
-                          <td className="py-2 sm:py-3 text-green-400 font-medium">${profit.toFixed(2)}</td>
+                          <td className="py-2 sm:py-3 text-orange-400 font-medium">${lokaBaseCost.toFixed(2)}</td>
+                          <td className="py-2 sm:py-3 text-white font-semibold">${sellingPrice.toFixed(2)}</td>
+                          <td className="py-2 sm:py-3 text-green-400 font-bold">+${profit.toFixed(2)}</td>
                         </tr>
                       );
                     })}

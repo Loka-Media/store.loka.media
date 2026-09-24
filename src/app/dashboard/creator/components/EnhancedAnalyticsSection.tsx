@@ -50,11 +50,28 @@ export function EnhancedAnalyticsSection({ selectedCreatorId, stats }: Analytics
         const productsMap = new Map<string, TopProduct>();
 
         orders.forEach((order: any) => {
-          const productsList = order.products || [];
+          const productsList = order.products || order.order_items || order.items || [];
           productsList.forEach((p: any) => {
             const quantity = parseInt(p.quantity || '1', 10);
-            const itemRevenue = parseFloat(p.order_amount || '0');
-            const productName = p.product_name || p.name || 'Unnamed Product';
+            const unitPrice = parseFloat(
+              p.unit_price || 
+              p.price || 
+              p.price_at_order || 
+              p.product_snapshot?.price_at_order || 
+              p.creator_cost || 
+              p.base_price || 
+              (parseFloat(p.order_amount || '0') > 0 ? p.order_amount : '0')
+            );
+            let itemRevenue = p.total_price 
+              ? parseFloat(p.total_price) 
+              : (unitPrice > 0 ? unitPrice * quantity : parseFloat(p.order_amount || '0'));
+
+            if (itemRevenue === 0 && productsList.length === 1 && order.customer_payment_amount) {
+              itemRevenue = parseFloat(order.customer_payment_amount);
+            }
+
+            const productName = p.product_name || p.name || p.product_snapshot?.product_name || 'Unnamed Product';
+            const productImage = p.images?.[0] || p.product_images?.[0] || p.thumbnail_url || p.product_snapshot?.images?.[0] || '/placeholder-product.png';
             
             const existing = productsMap.get(productName);
             if (existing) {
@@ -66,7 +83,7 @@ export function EnhancedAnalyticsSection({ selectedCreatorId, stats }: Analytics
                 name: productName,
                 sales: quantity,
                 revenue: itemRevenue,
-                image: p.images?.[0] || p.thumbnail_url || '/placeholder-product.png'
+                image: productImage
               });
             }
           });
