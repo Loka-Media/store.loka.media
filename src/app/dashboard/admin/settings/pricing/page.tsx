@@ -225,7 +225,7 @@ export default function AdminPricingSettings() {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-white">Category Markups</h2>
-                <p className="text-xs text-gray-400">Override the global markup per category. Fetched dynamically from Printify.</p>
+                <p className="text-xs text-gray-400">Override the global markup per category. Synced dynamically from catalog.</p>
               </div>
             </div>
 

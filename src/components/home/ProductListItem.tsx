@@ -118,13 +118,7 @@ export function ProductListItem({
                     }`}
                   >
                     {product.product_source === "printful" ? (
-                      <Image
-                        src="/printful-logo.svg"
-                        alt="Printful"
-                        width={14}
-                        height={14}
-                        className="mr-1"
-                      />
+                      <Globe className="w-4 h-4 mr-1" />
                     ) : product.product_source === "shopify" ? (
                       <Image
                         src="/shopify-logo.svg"
@@ -137,7 +131,7 @@ export function ProductListItem({
                       <Globe className="w-4 h-4 mr-1" />
                     )}
                     {product.product_source === "printful"
-                      ? "Printful"
+                      ? "Made to Order"
                       : product.product_source === "shopify"
                       ? "Shopify"
                       : "Custom"}

@@ -431,28 +431,21 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
 
               <div>
                 <label className="block text-sm font-medium text-white/90 mb-2">
-                  Printify Base Price (PBC) <span className="text-white/50 text-xs">(Standard wholesale catalog cost)</span>
+                  Base Wholesale Price (PBC) <span className="text-white/50 text-xs">(Standard wholesale catalog cost)</span>
                 </label>
                 <input
                   type="text"
                   value={`$${parseFloat(formData.basePrice || '0').toFixed(2)}`}
                   readOnly
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white/70 cursor-not-allowed"
-                  title="This is the standard wholesale catalog cost from Printify"
+                  title="This is the standard wholesale catalog cost"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-white/90 mb-2">
-                  Printify Premium Pricing (PPP) <span className="text-white/50 text-xs">(23% discount wholesale cost)</span>
+                  Wholesale Discount Pricing (PPP) <span className="text-white/50 text-xs">(Wholesale discount cost)</span>
                 </label>
-                {/* <input
-                  type="text"
-                  value={`$${parseFloat((formData as any).cost || (formData as any).premiumPrice || formData.basePrice || '0').toFixed(2)}`}
-                  readOnly
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white/70 cursor-not-allowed"
-                  title="This is the Printify Premium cost"
-                /> */}
               </div>
 
               <div>
@@ -797,7 +790,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                   <thead>
                     <tr className="text-left border-b border-white/20">
                       <th className="pb-2 sm:pb-3 text-white/70 font-medium">Variant</th>
-                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Printify Base</th>
+                      <th className="pb-2 sm:pb-3 text-white/70 font-medium">Base Cost</th>
                       <th className="pb-2 sm:pb-3 text-orange-400 font-medium">Loka Base Cost</th>
                       <th className="pb-2 sm:pb-3 text-white font-medium">Selling Price</th>
                       <th className="pb-2 sm:pb-3 text-green-400 font-medium">Creator Profit (+)</th>

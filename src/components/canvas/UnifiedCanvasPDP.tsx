@@ -2233,7 +2233,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               <div className="space-y-6 pt-3 animate-fadeIn">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <p className="text-xs sm:text-sm text-gray-400">
-                    Real-time local preview is active. To fetch high-quality Printify mockups, click regenerate.
+                    Real-time local preview is active. To fetch high-quality production mockups, click regenerate.
                   </p>
                   <Button
                     onClick={handleManualRegenerate}
@@ -2793,7 +2793,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 {/* Pricing Summary & Clean Creator Breakdown */}
                 <div className="mt-4 bg-black/60 border border-white/5 p-4 rounded-2xl space-y-2.5 text-[11px] backdrop-blur-md">
                   {/* <div className="flex justify-between items-center text-gray-400 font-medium">
-                    <span className="text-emerald-400/90 font-semibold">Printify Premium Cost</span>
+                    <span className="text-emerald-400/90 font-semibold">Wholesale Base Cost</span>
                     <span className="text-emerald-400 font-bold">
                       {hasPriceRange ? `$${pricingRange.min.toFixed(2)} - $${pricingRange.max.toFixed(2)}` : `$${pricingRange.min.toFixed(2)}`}
                     </span>

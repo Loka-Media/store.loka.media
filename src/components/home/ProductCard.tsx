@@ -198,13 +198,7 @@ export function ProductCard({
               }`}
             >
               {product.product_source === "printful" ? (
-                <Image
-                  src="/printful-logo.svg"
-                  alt="Printful"
-                  width={12}
-                  height={12}
-                  className="mr-1"
-                />
+                <Globe className="w-3 h-3 mr-1" />
               ) : product.product_source === "shopify" ? (
                 <Image
                   src="/shopify-logo.svg"
@@ -217,7 +211,7 @@ export function ProductCard({
                 <Globe className="w-3 h-3 mr-1" />
               )}
               {product.product_source === "printful"
-                ? "Printful"
+                ? "Made to Order"
                 : product.product_source === "shopify"
                 ? "Shopify"
                 : "Custom"}

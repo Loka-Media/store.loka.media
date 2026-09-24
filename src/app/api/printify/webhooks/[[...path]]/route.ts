@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { printifyWebhooksAPI } from '@/services/printify/PrintifyClient';
+import { syncPrintifyOrder } from '@/services/printify/orderSync';
 import type { PrintifyWebhookPayload } from '@/types/printify';
 
 export async function GET(
@@ -36,8 +37,19 @@ export async function POST(
       const payload: PrintifyWebhookPayload = await request.json();
       console.log('[Printify Webhook Received]', payload.type, payload.resource?.id);
 
-      // Forward to backend for order/fulfillment status updates
-      const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003').replace(/\/$/, '');
+      // 1. Direct PostgreSQL sync using Printify order ID or shop order ID
+      const printifyOrderId = payload.resource?.id;
+      if (printifyOrderId) {
+        try {
+          const syncResult = await syncPrintifyOrder(printifyOrderId);
+          console.log('[Printify Webhook DB Sync]', syncResult);
+        } catch (dbSyncErr) {
+          console.error('[Printify Webhook DB Sync Error]', dbSyncErr);
+        }
+      }
+
+      // 2. Forward to backend for compatibility
+      const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
       try {
         const response = await fetch(`${backendUrl}/api/printify/webhooks/receive`, {
           method: 'POST',
@@ -48,11 +60,10 @@ export async function POST(
           console.error(`[Printify Webhook] Backend returned status ${response.status}`);
         }
       } catch (forwardError) {
-        console.error('[Printify Webhook] Failed to forward to backend:', forwardError);
-        // Don't fail the webhook response even if forwarding fails
+        console.warn('[Printify Webhook] Backend forward note:', forwardError);
       }
 
-      return NextResponse.json({ received: true });
+      return NextResponse.json({ received: true, synced: true });
     }
 
     // POST /api/printify/webhooks → register a new webhook

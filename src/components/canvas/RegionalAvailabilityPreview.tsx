@@ -300,7 +300,7 @@ export function RegionalAvailabilityPreview({
                         {showRowTooltip && (
                           <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-gray-900 border border-gray-700 rounded-lg text-xs font-normal text-gray-300 shadow-xl">
                             <p className="mb-2">
-                              <strong>"Rest of World"</strong> includes over 150+ international destinations supported by Printify.
+                              <strong>"Rest of World"</strong> includes over 150+ international destinations supported by our global fulfillment network.
                             </p>
                             <p className="text-gray-400 mb-1">Popular destinations include:</p>
                             <ul className="list-disc pl-4 grid grid-cols-2 gap-x-2 text-gray-400">

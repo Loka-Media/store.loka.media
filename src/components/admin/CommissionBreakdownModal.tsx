@@ -191,7 +191,7 @@ export default function CommissionBreakdownModal({
                       <h4 className="font-semibold text-white mb-1">Estimated Commissions</h4>
                       <p className="text-sm text-gray-300">
                         Commission amounts shown are <strong>estimates</strong> based on pre-order calculations.
-                        Final confirmed amounts will be calculated after payment release, using actual Printful production costs.
+                        Final confirmed amounts will be calculated after payment release, using actual production costs.
                       </p>
                     </div>
                   </div>
@@ -207,7 +207,7 @@ export default function CommissionBreakdownModal({
                     <div className="flex-1">
                       <h4 className="font-semibold text-white mb-1">Confirmed Commissions</h4>
                       <p className="text-sm text-gray-300">
-                        Commission amounts are <strong>confirmed</strong> and calculated using actual Printful production costs after order fulfillment.
+                        Commission amounts are <strong>confirmed</strong> and calculated using actual production costs after order fulfillment.
                       </p>
                     </div>
                   </div>

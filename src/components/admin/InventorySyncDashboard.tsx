@@ -57,18 +57,18 @@ const InventorySyncDashboard: React.FC = () => {
   const handleSyncPrintful = async () => {
     setIsLoading(true);
     try {
-      toast.loading('Syncing Printful inventory...', { id: 'sync-printful' });
+      toast.loading('Syncing inventory...', { id: 'sync-printful' });
       const result = await inventoryAPI.syncPrintfulInventory();
       
       if (result.success) {
-        toast.success(`Printful sync completed! ${result.stats.synced}/${result.stats.total} products synced`, { id: 'sync-printful' });
+        toast.success(`Inventory sync completed! ${result.stats.synced}/${result.stats.total} products synced`, { id: 'sync-printful' });
         await fetchSyncStats();
       } else {
-        toast.error('Printful sync failed', { id: 'sync-printful' });
+        toast.error('Inventory sync failed', { id: 'sync-printful' });
       }
     } catch (error: any) {
-      console.error('Printful sync error:', error);
-      toast.error(`Printful sync failed: ${error.message}`, { id: 'sync-printful' });
+      console.error('Inventory sync error:', error);
+      toast.error(`Inventory sync failed: ${error.message}`, { id: 'sync-printful' });
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +120,7 @@ const InventorySyncDashboard: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
-          <p className="text-gray-600">Sync and monitor inventory across Printful and Shopify</p>
+          <p className="text-gray-600">Sync and monitor inventory across Fulfillment Network and Shopify</p>
         </div>
         <div className="flex space-x-3">
           <button
@@ -162,7 +162,7 @@ const InventorySyncDashboard: React.FC = () => {
           <div className="flex items-center">
             <Package className="w-8 h-8 text-green-500" />
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-500">Printful Syncs</p>
+              <p className="text-sm font-medium text-gray-500">POD Syncs</p>
               <p className="text-2xl font-bold text-gray-900">
                 {getStatsByType('printful').reduce((sum, stat) => sum + parseInt(stat.count.toString()), 0)}
               </p>
@@ -198,10 +198,10 @@ const InventorySyncDashboard: React.FC = () => {
         <div className="bg-white rounded-lg border p-6">
           <div className="flex items-center mb-4">
             <Package className="w-6 h-6 text-green-600" />
-            <h3 className="ml-2 text-lg font-semibold text-gray-900">Printful Inventory</h3>
+            <h3 className="ml-2 text-lg font-semibold text-gray-900">POD Inventory</h3>
           </div>
           <p className="text-gray-600 mb-4">
-            Sync print-on-demand inventory status from Printful. Shows in-stock/out-of-stock status.
+            Sync print-on-demand inventory status from production partner. Shows in-stock/out-of-stock status.
           </p>
           <div className="flex items-center justify-between">
             <div>
@@ -219,7 +219,7 @@ const InventorySyncDashboard: React.FC = () => {
               ) : (
                 <Package className="w-4 h-4 mr-2 inline" />
               )}
-              Sync Printful
+              Sync POD Inventory
             </button>
           </div>
         </div>

@@ -147,7 +147,7 @@ function CanvasContent() {
                 variant_ids: [],
                 title: idx === 0 ? "Front View" : idx === 1 ? "Back View" : `View ${idx + 1}`,
                 option: idx === 0 ? "front" : idx === 1 ? "back" : "other",
-                option_group: "Printify Mockup",
+                option_group: "Production Mockup",
               }));
               setMockupUrls(formattedMockups);
               setMockupStatus("Mockups loaded successfully!");
@@ -421,7 +421,7 @@ function CanvasContent() {
           // Handle 404 errors for unavailable blueprints
           if (error?.response?.status === 404) {
             const errorData = error?.response?.data;
-            const message = errorData?.message || 'This product blueprint is no longer available in Printify catalog. Please select a different product.';
+            const message = errorData?.message || 'This product blueprint is no longer available in the catalog. Please select a different product.';
             
             toast.error(message, { duration: 5000 });
             router.push('/dashboard/creator/catalog');

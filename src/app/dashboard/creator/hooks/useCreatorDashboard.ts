@@ -202,14 +202,14 @@ export function useCreatorDashboard() {
 
       if (response.connected) {
         setConnection({ connected: true, adminAccount: true });
-        toast.success("Connected to Printify account successfully!");
+        toast.success("Connected to fulfillment provider successfully!");
       } else {
         setConnection({ connected: false, adminAccount: false });
-        toast.error("Failed to connect to Printify. Check API key configuration.");
+        toast.error("Failed to connect to fulfillment provider. Check API configuration.");
       }
     } catch (error) {
       console.error("Failed to test connection:", error);
-      toast.error("Failed to connect to Printify");
+      toast.error("Failed to connect to fulfillment provider");
     }
   };
 

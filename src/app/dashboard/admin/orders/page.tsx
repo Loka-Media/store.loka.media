@@ -170,6 +170,45 @@ export default function AdminOrdersPage() {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showCommissionModal, setShowCommissionModal] = useState(false);
+  const [isSyncingPrintify, setIsSyncingPrintify] = useState(false);
+
+  const handleSyncPrintify = async (orderId: number | string) => {
+    try {
+      setIsSyncingPrintify(true);
+      const res = await fetch(`/api/printify/orders/sync?orderId=${orderId}`);
+      const json = await res.json();
+      if (json?.success && json?.data) {
+        toast.success(`Fulfillment status refreshed: ${json.data.newStatus}`);
+        await loadDashboardData();
+        setSelectedOrder((prev: any) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            order_status: json.data.newStatus || prev.order_status,
+            tracking: json.data.tracking || prev.tracking,
+            fulfillment: {
+              ...(prev.fulfillment || {}),
+              status: json.data.newStatus,
+              fulfillment_data: {
+                shipments: json.data.tracking ? [json.data.tracking] : []
+              }
+            },
+            metadata: {
+              ...prev.metadata,
+              tracking: json.data.tracking || prev.metadata?.tracking,
+              printify_status: json.data.printifyStatus || prev.metadata?.printify_status,
+            }
+          };
+        });
+      } else {
+        toast.error(json?.error || 'Failed to refresh fulfillment status');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Sync failed');
+    } finally {
+      setIsSyncingPrintify(false);
+    }
+  };
 
   // View mode (table/grid) - persisted in localStorage
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
@@ -479,7 +518,7 @@ export default function AdminOrdersPage() {
 
           toast.success(
             `✅ Order Approved & Submitted Successfully!\n\n` +
-            `🖨️ Printify: ${result.summary.printfulItems} items sent to production\n` +
+            `🖨️ Production: ${result.summary.printfulItems} items sent to production\n` +
             `🛒 Shopify: Checkout link opened in new tab`,
             { duration: 8000 }
           );
@@ -500,7 +539,7 @@ export default function AdminOrdersPage() {
         } else if (hasPrintful) {
           toast.success(
             `✅ Order Approved Successfully!\n\n` +
-            `🖨️ ${result.summary.printfulItems} items sent to Printify for production`,
+            `🖨️ ${result.summary.printfulItems} items sent to production partner`,
             { duration: 5000 }
           );
         }
@@ -938,12 +977,23 @@ export default function AdminOrdersPage() {
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setShowOrderModal(false)}
-                    className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
-                  >
-                    <span className="text-lg leading-none">&times;</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleSyncPrintify(selectedOrder.id)}
+                      disabled={isSyncingPrintify}
+                      title="Refresh live fulfillment status"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-orange-400 hover:text-white bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 rounded-xl transition-all disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isSyncingPrintify ? 'animate-spin' : ''}`} />
+                      Refresh Status
+                    </button>
+                    <button
+                      onClick={() => setShowOrderModal(false)}
+                      className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      <span className="text-lg leading-none">&times;</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1027,32 +1077,55 @@ export default function AdminOrdersPage() {
                     )}
 
                     {/* Fulfillment & Tracking Details */}
-                    {selectedOrder.fulfillment && (
+                    {(selectedOrder.fulfillment || (selectedOrder as any).metadata?.tracking || (selectedOrder as any).metadata?.shipments || selectedOrder.order_status === 'shipped') && (
                       <div className="bg-neutral-950/50 border border-white/5 rounded-2xl p-5">
-                        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Fulfillment Details</h4>
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Fulfillment Details</h4>
+                          <button
+                            onClick={() => handleSyncPrintify(selectedOrder.id)}
+                            disabled={isSyncingPrintify}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-orange-400 hover:text-white bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 rounded-lg transition-all disabled:opacity-50"
+                          >
+                            <RefreshCw className={`w-3 h-3 ${isSyncingPrintify ? 'animate-spin' : ''}`} />
+                            Refresh Status
+                          </button>
+                        </div>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2">
                             <span className="text-gray-400">Type</span>
-                            <span className="font-semibold text-white capitalize">{selectedOrder.fulfillment.fulfillment_type || 'Printify'}</span>
+                            <span className="font-semibold text-white capitalize">{selectedOrder.fulfillment?.fulfillment_type?.toLowerCase() === 'printify' ? 'Fulfillment Partner' : (selectedOrder.fulfillment?.fulfillment_type || selectedOrder.order_type || 'Fulfillment Partner')}</span>
                           </div>
                           <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2">
                             <span className="text-gray-400">Status</span>
                             <span className="inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 capitalize">
-                              {selectedOrder.fulfillment.status || 'fulfilled'}
+                              {selectedOrder.fulfillment?.status || selectedOrder.order_status || 'fulfilled'}
                             </span>
                           </div>
 
                           {/* Shipments parsing */}
                           {(() => {
-                            const data = typeof selectedOrder.fulfillment.fulfillment_data === 'string'
-                              ? JSON.parse(selectedOrder.fulfillment.fulfillment_data)
-                              : selectedOrder.fulfillment.fulfillment_data;
-                            const shipments = data?.shipments || [];
+                            let shipments = [];
+                            if (selectedOrder.fulfillment?.fulfillment_data) {
+                              const data = typeof selectedOrder.fulfillment.fulfillment_data === 'string'
+                                ? JSON.parse(selectedOrder.fulfillment.fulfillment_data)
+                                : selectedOrder.fulfillment.fulfillment_data;
+                              shipments = data?.shipments || [];
+                            }
+                            const meta: any = (selectedOrder as any).metadata;
+                            if (shipments.length === 0 && meta?.shipments) {
+                              shipments = meta.shipments;
+                            }
+                            if (shipments.length === 0 && meta?.tracking) {
+                              shipments = [meta.tracking];
+                            }
+                            if (shipments.length === 0 && (selectedOrder as any).tracking) {
+                              shipments = [(selectedOrder as any).tracking];
+                            }
 
                             if (shipments.length === 0) {
                               return (
                                 <p className="text-xs text-gray-500 italic mt-2">
-                                  No shipments recorded yet.
+                                  No shipments recorded yet. Click &apos;Refresh Status&apos; to refresh status.
                                 </p>
                               );
                             }
@@ -1063,20 +1136,20 @@ export default function AdminOrdersPage() {
                                   <div key={idx} className="bg-black/40 border border-white/5 rounded-xl p-3 space-y-2">
                                     <div className="flex justify-between text-xs">
                                       <span className="text-gray-500">Carrier:</span>
-                                      <span className="font-semibold text-white">{shipment.carrier || 'N/A'}</span>
+                                      <span className="font-semibold text-white uppercase">{shipment.carrier || 'N/A'}</span>
                                     </div>
                                     <div className="flex justify-between text-xs">
                                       <span className="text-gray-500">Tracking:</span>
-                                      <span className="font-semibold text-orange-400 selection:bg-orange-500/20">{shipment.number || 'N/A'}</span>
+                                      <span className="font-mono text-xs font-semibold text-orange-400 selection:bg-orange-500/20">{shipment.number || shipment.tracking_number || 'N/A'}</span>
                                     </div>
-                                    {shipment.url && (
+                                    {(shipment.url || shipment.tracking_url) && (
                                       <a
-                                        href={shipment.url}
+                                        href={shipment.url || shipment.tracking_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="w-full mt-2 inline-flex items-center justify-center py-2 bg-orange-500 hover:bg-orange-600 text-black text-xs font-bold rounded-lg transition-all"
+                                        className="w-full mt-2 inline-flex items-center justify-center py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all"
                                       >
-                                        Track Shipment
+                                        Track Shipment Live
                                       </a>
                                     )}
                                   </div>

@@ -74,7 +74,7 @@ export default function OrderPage({ params }: OrderPageProps) {
           total_amount: parseFloat(response.order.total || '0'),
           shipping_address: response.order.shippingAddress || {},
           payment_status: response.order.paymentStatus,
-          payment_method: response.order.orderType === 'printify' ? 'Printify' : response.order.orderType,
+          payment_method: response.order.orderType === 'printify' ? 'Direct Checkout' : response.order.orderType,
           created_at: response.order.createdAt,
           updated_at: response.order.updatedAt,
           items: (response.order.items || []).map((item: any) => ({
@@ -278,7 +278,7 @@ export default function OrderPage({ params }: OrderPageProps) {
                   <div>
                     <span className="text-xs text-gray-500 uppercase tracking-wider block">Fulfillment Partner</span>
                     <span className="text-sm font-semibold text-gray-800 capitalize">
-                      {fulfillment.fulfillment_type || 'Printify'}
+                      {fulfillment.fulfillment_type?.toLowerCase() === 'printify' ? 'Global Direct Network' : (fulfillment.fulfillment_type || 'Global Direct Network')}
                     </span>
                   </div>
                   <div>
@@ -299,7 +299,7 @@ export default function OrderPage({ params }: OrderPageProps) {
                   if (shipments.length === 0) {
                     return (
                       <p className="text-sm text-gray-500 italic">
-                        Order is sent to print provider. Tracking details will show here once shipped.
+                        Order is sent to production partner. Tracking details will show here once shipped.
                       </p>
                     );
                   }

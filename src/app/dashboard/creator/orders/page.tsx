@@ -21,6 +21,11 @@ import {
   Calendar,
   Clock,
   AlertTriangle,
+  Truck,
+  ExternalLink,
+  Loader2,
+  Copy,
+  Check,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navigation from '@/components/Navigation';
@@ -48,14 +53,31 @@ interface Order {
   customer_payment_amount: string;
   customer_name?: string;
   customer_email?: string;
+  customer_phone?: string;
   created_at: string;
   updated_at: string;
   printful_order_id: string | null;
   printful_draft_order_key: string | null;
+  printify_order_id?: string | null;
   total_commission: string;
   products_count: number;
   commission_statuses: string[];
   products: Product[];
+  metadata?: any;
+  tracking?: {
+    carrier?: string;
+    number?: string;
+    url?: string;
+    shipped_at?: string;
+    delivered_at?: string | null;
+  } | null;
+  shipments?: Array<{
+    carrier?: string;
+    number?: string;
+    url?: string;
+    shipped_at?: string;
+    delivered_at?: string | null;
+  }>;
   shipping_address?: {
     name?: string;
     address1?: string;
@@ -88,6 +110,7 @@ const getOrderStatusBadge = (status: string) => {
     verified:         'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     processing:       'bg-purple-500/10 text-purple-400 border-purple-500/20',
     fulfilled:        'bg-green-500/10 text-green-400 border-green-500/20',
+    shipped:          'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     cancelled:        'bg-red-500/10 text-red-400 border-red-500/20',
     completed:        'bg-green-500/10 text-green-400 border-green-500/20',
   };
@@ -133,6 +156,87 @@ export default function CreatorOrdersPage() {
   const [showModal, setShowModal] = useState(false);
   const [cancellingId, setCancellingId] = useState<number | string | null>(null);
   const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+  const [isSyncingPrintify, setIsSyncingPrintify] = useState(false);
+  const [copiedTracking, setCopiedTracking] = useState(false);
+
+  // Lock background scroll when modal is open
+  useEffect(() => {
+    const isAnyModalOpen = showModal || !!orderToCancel;
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [showModal, orderToCancel]);
+
+  // Block background smooth scroll (Lenis, wheel, touchmove) when modal is open
+  useEffect(() => {
+    const isAnyModalOpen = showModal || !!orderToCancel;
+    if (!isAnyModalOpen) return;
+
+    const preventBackgroundScroll = (e: WheelEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.closest('[data-modal-scroll]')) return;
+      e.preventDefault();
+    };
+
+    window.addEventListener('wheel', preventBackgroundScroll as EventListener, { passive: false });
+    window.addEventListener('touchmove', preventBackgroundScroll as EventListener, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', preventBackgroundScroll as EventListener);
+      window.removeEventListener('touchmove', preventBackgroundScroll as EventListener);
+    };
+  }, [showModal, orderToCancel]);
+
+  const handleCopyTracking = (trackingNum: string) => {
+    navigator.clipboard.writeText(trackingNum);
+    setCopiedTracking(true);
+    toast.success('Tracking number copied!');
+    setTimeout(() => setCopiedTracking(false), 2000);
+  };
+
+  const handleSyncPrintify = async (orderId: number | string) => {
+    try {
+      setIsSyncingPrintify(true);
+      const res = await fetch(`/api/printify/orders/sync?orderId=${orderId}`);
+      const json = await res.json();
+      if (json?.success && json?.data) {
+        toast.success(`Fulfillment status refreshed: ${json.data.newStatus}`);
+        await loadOrders();
+        setSelectedOrder(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            order_status: json.data.newStatus || prev.order_status,
+            tracking: json.data.tracking || prev.tracking,
+            customer_name: json.data.customer?.name || prev.customer_name,
+            customer_email: json.data.customer?.email || prev.customer_email,
+            customer_phone: json.data.customer?.phone || prev.customer_phone,
+            shipping_address: json.data.shippingAddress || prev.shipping_address,
+            metadata: {
+              ...prev.metadata,
+              tracking: json.data.tracking || prev.metadata?.tracking,
+              printify_status: json.data.printifyStatus || prev.metadata?.printify_status,
+              printify_customer: json.data.customer || prev.metadata?.printify_customer,
+            }
+          };
+        });
+      } else {
+        toast.error(json?.error || 'Failed to refresh fulfillment status');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Sync failed');
+    } finally {
+      setIsSyncingPrintify(false);
+    }
+  };
 
   const confirmCancelOrder = async () => {
     if (!orderToCancel) return;
@@ -209,10 +313,33 @@ export default function CreatorOrdersPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const response = await api.get<OrdersResponse>('/api/creator/orders', {
-        params: { limit: 1000, offset: 0 },
-      });
-      setAllOrders(response.data.data || []);
+      let ordersData: Order[] = [];
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+
+      // 1. Try local route with direct PostgreSQL access & Printify tracking
+      try {
+        const localRes = await fetch('/api/creator/orders?limit=1000', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (localRes.ok) {
+          const json = await localRes.json();
+          if (json?.data && Array.isArray(json.data)) {
+            ordersData = json.data;
+          }
+        }
+      } catch (localErr) {
+        console.warn('Local creator orders fetch note:', localErr);
+      }
+
+      // 2. Fallback to API client
+      if (ordersData.length === 0) {
+        const response = await api.get<OrdersResponse>('/api/creator/orders', {
+          params: { limit: 1000, offset: 0 },
+        });
+        ordersData = response.data.data || [];
+      }
+
+      setAllOrders(ordersData);
     } catch (error: unknown) {
       const err = error as { response?: { data?: { error?: string } } };
       toast.error(err?.response?.data?.error || 'Failed to load orders');
@@ -592,124 +719,104 @@ export default function CreatorOrdersPage() {
         {showModal && selectedOrder && (
           <div
             data-modal-scroll
-            className="fixed inset-0 bg-black/90 overflow-y-auto h-full w-full z-50 backdrop-blur-md flex items-start justify-center p-4 md:py-8"
+            data-lenis-prevent
+            className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden"
           >
-            <div className="relative mx-auto w-full max-w-5xl shadow-2xl rounded-3xl bg-neutral-900 border border-white/10 text-white overflow-clip">
+            {/* Backdrop click to dismiss */}
+            <div className="absolute inset-0" onClick={() => setShowModal(false)} />
 
-              {/* Modal Header */}
-              <div className="sticky top-0 z-10 bg-neutral-900/95 backdrop-blur-xl border-b border-white/10 px-8 py-5">
+            {/* Modal Dialog Container */}
+            <div className="relative w-full max-w-5xl max-h-[90vh] flex flex-col rounded-3xl bg-neutral-900 border border-white/10 text-white shadow-2xl z-10 overflow-hidden">
+
+              {/* Fixed Modal Header */}
+              <div className="flex-shrink-0 bg-neutral-900/95 backdrop-blur-xl border-b border-white/10 px-6 sm:px-8 py-4 sm:py-5">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="flex items-center justify-center w-10 h-10 bg-orange-500/10 border border-orange-500/20 rounded-xl flex-shrink-0">
                       <ShoppingBag className="w-5 h-5 text-orange-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white tracking-tight">{selectedOrder.order_number}</h3>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">{selectedOrder.order_number}</h3>
+                      <p className="text-xs text-gray-400 mt-0.5">
                         Placed {new Date(selectedOrder.created_at).toLocaleDateString('en-US', {
                           month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
                         })}
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleSyncPrintify(selectedOrder.id)}
+                      disabled={isSyncingPrintify}
+                      title="Refresh live fulfillment status"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-orange-400 hover:text-white bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 rounded-xl transition-all disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isSyncingPrintify ? 'animate-spin' : ''}`} />
+                      Refresh Status
+                    </button>
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Modal Body */}
-              <div className="px-8 py-6 space-y-6">
-
-                {/* Quick Info */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="bg-neutral-950/50 border border-white/5 rounded-xl p-4">
-                    <p className="text-[11px] text-gray-500 uppercase tracking-wider font-semibold mb-1">Order Total</p>
-                    <p className="text-xl font-bold text-white">{formatCurrency(selectedOrder.customer_payment_amount)}</p>
+              {/* Scrollable Modal Body (Only this scrolls) */}
+              <div
+                data-modal-scroll
+                data-lenis-prevent
+                className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-6 scrollbar-5px"
+                style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#FF6D1F transparent',
+                }}
+              >
+                {/* Quick Info Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-neutral-950/60 border border-white/5 rounded-xl p-4">
+                    <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Order Total</p>
+                    <p className="text-lg sm:text-xl font-bold text-white">{formatCurrency(selectedOrder.customer_payment_amount)}</p>
                   </div>
-                  <div className="bg-neutral-950/50 border border-white/5 rounded-xl p-4">
-                    <p className="text-[11px] text-gray-500 uppercase tracking-wider font-semibold mb-1">My Commission</p>
-                    <p className="text-xl font-bold text-emerald-400">{formatCurrency(selectedOrder.total_commission)}</p>
+                  <div className="bg-neutral-950/60 border border-white/5 rounded-xl p-4">
+                    <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-1">My Commission</p>
+                    <p className="text-lg sm:text-xl font-bold text-emerald-400">{formatCurrency(selectedOrder.total_commission)}</p>
                   </div>
-                  <div className="bg-neutral-950/50 border border-white/5 rounded-xl p-4">
-                    <p className="text-[11px] text-gray-500 uppercase tracking-wider font-semibold mb-1">Order Status</p>
+                  <div className="bg-neutral-950/60 border border-white/5 rounded-xl p-4">
+                    <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Order Status</p>
                     <span className={getOrderStatusBadge(selectedOrder.order_status)}>{selectedOrder.order_status.replace('_', ' ')}</span>
                   </div>
-                  <div className="bg-neutral-950/50 border border-white/5 rounded-xl p-4">
-                    <p className="text-[11px] text-gray-500 uppercase tracking-wider font-semibold mb-1">Commission</p>
+                  <div className="bg-neutral-950/60 border border-white/5 rounded-xl p-4">
+                    <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Commission</p>
                     <span className={getCommissionBadge(getCommissionStatusSummary(selectedOrder.commission_statuses))}>
                       {getCommissionStatusSummary(selectedOrder.commission_statuses)}
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Main Balanced 2-Column Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-                  {/* Left Column */}
-                  <div className="lg:col-span-1 space-y-5">
-                    <div className="bg-neutral-950/50 border border-white/5 rounded-2xl p-5">
-                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Order Info</h4>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2">
-                          <span className="text-gray-400">Products</span>
-                          <span className="font-semibold text-white">{selectedOrder.products_count}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-400">Date</span>
-                          <span className="font-semibold text-white">{formatDate(selectedOrder.created_at)}</span>
-                        </div>
-                      </div>
-                    </div>
+                  {/* Left Column (7 cols): Products + Fulfillment Tracking */}
+                  <div className="lg:col-span-7 space-y-5">
 
-                    {(selectedOrder.customer_name || selectedOrder.customer_email) && (
-                      <div className="bg-neutral-950/50 border border-white/5 rounded-2xl p-5">
-                        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Customer</h4>
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center w-9 h-9 bg-white/5 rounded-full border border-white/10">
-                            <span className="text-sm font-bold text-white">{(selectedOrder.customer_name || 'G')[0].toUpperCase()}</span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-white">{selectedOrder.customer_name || 'Guest'}</p>
-                            <p className="text-xs text-gray-500">{selectedOrder.customer_email || ''}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedOrder.shipping_address && (
-                      <div className="bg-neutral-950/50 border border-white/5 rounded-2xl p-5">
-                        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Shipping</h4>
-                        <div className="space-y-1.5 text-sm">
-                          {selectedOrder.shipping_address.name && <p className="font-semibold text-white">{selectedOrder.shipping_address.name}</p>}
-                          {selectedOrder.shipping_address.address1 && <p className="text-gray-400">{selectedOrder.shipping_address.address1}</p>}
-                          {selectedOrder.shipping_address.address2 && <p className="text-gray-400">{selectedOrder.shipping_address.address2}</p>}
-                          {selectedOrder.shipping_address.city && (
-                            <p className="text-gray-400">
-                              {selectedOrder.shipping_address.city}{selectedOrder.shipping_address.state ? `, ${selectedOrder.shipping_address.state}` : ''} {selectedOrder.shipping_address.zip}
-                            </p>
-                          )}
-                          {selectedOrder.shipping_address.country && <p className="text-gray-400">{selectedOrder.shipping_address.country}</p>}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Right Column — Product Breakdown */}
-                  <div className="lg:col-span-2">
-                    <div className="bg-neutral-950/50 border border-white/5 rounded-2xl p-5 h-full">
+                    {/* Product Breakdown */}
+                    <div className="bg-neutral-950/60 border border-white/5 rounded-2xl p-5">
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Product Breakdown</h4>
-                        <span className="text-xs text-gray-500 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                        <div className="flex items-center gap-2">
+                          <Package className="w-4 h-4 text-orange-400" />
+                          <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Product Breakdown</h4>
+                        </div>
+                        <span className="text-xs text-gray-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10 font-medium">
                           {selectedOrder.products.length} item{selectedOrder.products.length !== 1 ? 's' : ''}
                         </span>
                       </div>
 
-                      <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                      <div className="space-y-3">
                         {selectedOrder.products.map((product, idx) => (
-                          <div key={`${product.product_id}-${idx}`} className="flex gap-4 p-4 bg-neutral-900/60 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
+                          <div key={`${product.product_id}-${idx}`} className="flex gap-4 p-3.5 bg-neutral-900/80 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
                             <div className="flex-shrink-0 w-16 h-16 bg-neutral-800 border border-white/10 rounded-xl overflow-hidden">
                               {product.images && product.images.length > 0 ? (
                                 <img src={product.images[0]} alt={product.product_name} className="w-full h-full object-cover" />
@@ -722,25 +829,33 @@ export default function CreatorOrdersPage() {
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold text-white truncate">{product.product_name}</p>
                               <p className="text-xs text-gray-500 mt-0.5">ID: {product.product_id}</p>
-                              <div className="flex items-center gap-4 mt-2 text-sm">
-                                <div>
-                                  <span className="text-gray-400">Revenue: </span>
-                                  <span className="font-medium text-white">{formatCurrency(product.order_amount)}</span>
-                                </div>
+                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs sm:text-sm">
+                    
                                 <div>
                                   <span className="text-gray-400">Commission: </span>
-                                  <span className="font-bold text-emerald-400">{formatCurrency(product.commission_amount)}</span>
+                                  <span className="font-bold text-emerald-400">
+                                    {formatCurrency(
+                                      parseFloat(product.commission_amount) > 0
+                                        ? product.commission_amount
+                                        : ((product as any).creator_revenue || (product as any).commission || (selectedOrder.products.length === 1 ? selectedOrder.total_commission : '0'))
+                                    )}
+                                  </span>
                                 </div>
                               </div>
                               {product.paid_at && (
                                 <p className="text-xs text-gray-500 mt-1">
-                                  <Calendar className="w-3 h-3 inline mr-1" />
+                                  <Calendar className="w-3 h-3 inline mr-1 text-gray-400" />
                                   Paid: {formatDate(product.paid_at)}
                                 </p>
                               )}
                             </div>
-                            <div className="flex-shrink-0 text-right">
+                            <div className="flex-shrink-0 text-right flex flex-col items-end gap-1.5">
                               <span className={getCommissionBadge(product.status)}>{product.status}</span>
+                              {selectedOrder.order_status === 'shipped' && (
+                                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                  Shipped
+                                </span>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -753,25 +868,211 @@ export default function CreatorOrdersPage() {
                         )}
                       </div>
 
-                      <div className="mt-4 pt-4 border-t border-white/5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-gray-400">Total Commission Earned</span>
-                          <span className="text-xl font-bold text-emerald-400">{formatCurrency(selectedOrder.total_commission)}</span>
+                      <div className="mt-4 pt-3.5 border-t border-white/5 flex items-center justify-between">
+                        <span className="text-xs sm:text-sm font-semibold text-gray-400">Total Commission Earned</span>
+                        <span className="text-lg sm:text-xl font-bold text-emerald-400">{formatCurrency(selectedOrder.total_commission)}</span>
+                      </div>
+                    </div>
+
+                    {/* Order Fulfillment & Live Tracking */}
+                    <div className="bg-neutral-950/60 border border-white/5 rounded-2xl p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <Truck className="w-4 h-4 text-emerald-400" />
+                          <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                            Order Fulfillment & Tracking
+                          </h4>
+                        </div>
+                        <button
+                          onClick={() => handleSyncPrintify(selectedOrder.id)}
+                          disabled={isSyncingPrintify}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-orange-400 hover:text-white bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 rounded-lg transition-all disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-3 h-3 ${isSyncingPrintify ? 'animate-spin' : ''}`} />
+                          Sync Status
+                        </button>
+                      </div>
+
+                      {(() => {
+                        const tracking = selectedOrder.tracking || 
+                                         selectedOrder.metadata?.tracking || 
+                                         selectedOrder.metadata?.shipments?.[0] || 
+                                         selectedOrder.shipments?.[0];
+                        const printifyStatus = selectedOrder.metadata?.printify_status || 
+                                               (selectedOrder.order_status === 'shipped' ? 'fulfilled' : selectedOrder.order_status);
+
+                        return (
+                          <div className="space-y-3 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-white/5">
+                              <div className="flex items-center justify-between p-2.5 bg-neutral-900/60 rounded-xl border border-white/5">
+                                <span className="text-gray-400 text-xs">Fulfillment Status</span>
+                                <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold uppercase ${
+                                  selectedOrder.order_status === 'shipped' || printifyStatus === 'fulfilled'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                    : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                }`}>
+                                  {selectedOrder.order_status === 'shipped' ? 'Shipped / Fulfilled' : printifyStatus}
+                                </span>
+                              </div>
+
+                              {selectedOrder.printify_order_id ? (
+                                <div className="flex items-center justify-between p-2.5 bg-neutral-900/60 rounded-xl border border-white/5">
+                                  <span className="text-gray-400 text-xs">Reference ID</span>
+                                  <span className="font-mono text-xs text-white/80 truncate max-w-[120px]">{selectedOrder.printify_order_id}</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-between p-2.5 bg-neutral-900/60 rounded-xl border border-white/5">
+                                  <span className="text-gray-400 text-xs">Fulfillment Type</span>
+                                  <span className="text-xs font-semibold text-white/80">Direct Network</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {tracking ? (
+                              <div className="space-y-3 pt-1">
+                                <div className="p-3.5 bg-neutral-900/70 border border-white/5 rounded-xl space-y-2.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-400 text-xs font-medium">Carrier</span>
+                                    <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-md font-bold text-white text-xs uppercase tracking-wider">
+                                      {tracking.carrier || 'Standard'}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-gray-400 text-xs font-medium">Tracking Number</span>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-mono text-xs font-bold text-orange-400 select-all">{tracking.number}</span>
+                                      <button
+                                        onClick={() => handleCopyTracking(tracking.number)}
+                                        title="Copy tracking number"
+                                        className="p-1 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                      >
+                                        {copiedTracking ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                      </button>
+                                    </div>
+                                  </div>
+                                  {tracking.shipped_at && (
+                                    <div className="flex items-center justify-between text-xs text-gray-500 pt-1.5 border-t border-white/5">
+                                      <span>Shipped On</span>
+                                      <span className="text-gray-400">{new Date(tracking.shipped_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {tracking.url && (
+                                  <a
+                                    href={tracking.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-emerald-900/20"
+                                  >
+                                    <Truck className="w-4 h-4" />
+                                    Track Shipment Live
+                                    <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
+                                  </a>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-gray-400 italic py-2 text-center bg-neutral-900/40 rounded-xl border border-white/5">
+                                Order sent to production partner. Tracking details will update automatically once shipped.
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Right Column (5 cols): Customer + Shipping Destination + Order Info */}
+                  <div className="lg:col-span-5 space-y-5">
+
+                    {/* Customer Information Card */}
+                    <div className="bg-neutral-950/60 border border-white/5 rounded-2xl p-5">
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3.5">Customer Information</h4>
+                      <div className="flex items-start gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 bg-white/5 rounded-full border border-white/10 text-orange-400 font-bold text-sm flex-shrink-0 mt-0.5">
+                          {(selectedOrder.customer_name || 'G')[0].toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <p className="text-sm font-semibold text-white truncate">{selectedOrder.customer_name || 'Guest Customer'}</p>
+                          <p className="text-xs text-gray-400 truncate">{selectedOrder.customer_email || 'No email provided'}</p>
+                          {(selectedOrder.customer_phone || selectedOrder.shipping_address?.phone) && (
+                            <p className="text-xs text-gray-400 truncate">
+                              <span className="text-gray-500">Phone: </span>
+                              {selectedOrder.customer_phone || selectedOrder.shipping_address?.phone}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
+
+                    {/* Shipping Address Card */}
+                    {selectedOrder.shipping_address && (
+                      <div className="bg-neutral-950/60 border border-white/5 rounded-2xl p-5">
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3.5">Shipping Destination</h4>
+                        <div className="space-y-1.5 text-xs sm:text-sm text-gray-300">
+                          {(selectedOrder.shipping_address.name || selectedOrder.customer_name) && (
+                            <p className="font-semibold text-white">{selectedOrder.shipping_address.name || selectedOrder.customer_name}</p>
+                          )}
+                          {selectedOrder.shipping_address.address1 && (
+                            <p className="text-gray-300">{selectedOrder.shipping_address.address1}</p>
+                          )}
+                          {selectedOrder.shipping_address.address2 && (
+                            <p className="text-gray-400">{selectedOrder.shipping_address.address2}</p>
+                          )}
+                          {(selectedOrder.shipping_address.city || selectedOrder.shipping_address.state || selectedOrder.shipping_address.zip) && (
+                            <p className="text-gray-300">
+                              {selectedOrder.shipping_address.city}
+                              {selectedOrder.shipping_address.state ? `, ${selectedOrder.shipping_address.state}` : ''}
+                              {selectedOrder.shipping_address.zip ? ` ${selectedOrder.shipping_address.zip}` : ''}
+                            </p>
+                          )}
+                          {selectedOrder.shipping_address.country && (
+                            <p className="text-gray-400 font-medium">{selectedOrder.shipping_address.country}</p>
+                          )}
+                          {(selectedOrder.shipping_address.phone || selectedOrder.customer_phone) && (
+                            <div className="pt-2 mt-2 border-t border-white/5 text-xs text-gray-400">
+                              <span className="text-gray-500">Phone: </span>{selectedOrder.shipping_address.phone || selectedOrder.customer_phone}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Order Details / Summary Card */}
+                    <div className="bg-neutral-950/60 border border-white/5 rounded-2xl p-5">
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3.5">Order Summary</h4>
+                      <div className="space-y-2.5 text-xs sm:text-sm">
+                        <div className="flex items-center justify-between py-1 border-b border-white/5">
+                          <span className="text-gray-400">Order Placed</span>
+                          <span className="font-medium text-white">{formatDate(selectedOrder.created_at)}</span>
+                        </div>
+                        <div className="flex items-center justify-between py-1 border-b border-white/5">
+                          <span className="text-gray-400">Total Items</span>
+                          <span className="font-semibold text-white">{selectedOrder.products_count}</span>
+                        </div>
+                        <div className="flex items-center justify-between py-1 border-b border-white/5">
+                          <span className="text-gray-400">Payment Status</span>
+                          <span className="font-semibold text-emerald-400 capitalize">{selectedOrder.payment_status || 'Paid'}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-gray-400">Fulfillment</span>
+                          <span className="font-semibold text-blue-400 capitalize">{selectedOrder.order_status.replace('_', ' ')}</span>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>
 
-              {/* Modal Footer */}
-              <div className="sticky bottom-0 bg-neutral-900/95 backdrop-blur-xl border-t border-white/10 px-8 py-4">
+              {/* Fixed Modal Footer */}
+              <div className="flex-shrink-0 bg-neutral-900/95 backdrop-blur-xl border-t border-white/10 px-6 sm:px-8 py-4">
                 <div className="flex items-center justify-between">
                   {selectedOrder.order_status !== 'cancelled' ? (
                     <button
                       onClick={() => setOrderToCancel(selectedOrder)}
                       disabled={cancellingId === selectedOrder.id}
-                      className="px-4 py-2.5 text-sm font-medium text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
+                      className="px-4 py-2.5 text-xs sm:text-sm font-medium text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
                     >
                       <X className="w-4 h-4" />
                       {cancellingId === selectedOrder.id ? 'Cancelling...' : 'Cancel Order'}
@@ -783,12 +1084,13 @@ export default function CreatorOrdersPage() {
                   )}
                   <button
                     onClick={() => setShowModal(false)}
-                    className="px-5 py-2.5 text-sm font-medium text-white bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all"
+                    className="px-5 py-2.5 text-xs sm:text-sm font-medium text-white bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all"
                   >
                     Close
                   </button>
                 </div>
               </div>
+
             </div>
           </div>
         )}

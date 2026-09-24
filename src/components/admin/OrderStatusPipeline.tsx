@@ -189,7 +189,7 @@ export const OrderStatusPipeline = ({
 
         {printfulStatus && (
           <div className="bg-neutral-900/60 border border-white/10 rounded-xl p-3">
-            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Printful Status</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Fulfillment Status</div>
             <div className={`text-sm font-bold mt-1 ${printfulStatus === 'processing' ? 'text-orange-400' :
                 printfulStatus === 'shipped' ? 'text-purple-400' :
                   printfulStatus === 'delivered' ? 'text-green-400' :

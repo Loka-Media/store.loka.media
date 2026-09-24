@@ -96,7 +96,7 @@ export function PrintifyShippingDestinations({
               Available Shipping Countries
             </h4>
             <p className="text-[11px] sm:text-xs text-gray-400">
-              Printify Direct Global Fulfillment
+              Global Direct Fulfillment
             </p>
           </div>
         </div>

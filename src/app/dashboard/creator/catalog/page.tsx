@@ -782,7 +782,7 @@ function GlobalCatalogSearch({
               <div className="p-8 text-center text-gray-400">
                 <Loader2 className="w-6 h-6 text-orange-400 animate-spin mx-auto mb-2" />
                 <span className="text-xs sm:text-sm">
-                  Searching Printify catalog for &quot;{searchQuery}&quot;...
+                  Searching catalog for &quot;{searchQuery}&quot;...
                 </span>
               </div>
             )}
@@ -1200,7 +1200,7 @@ function PrintfulProductCard({
         {/* Pricing Info */}
         <div className="flex flex-col gap-1.5 mt-1 border-t border-white/10 pt-2 text-left">
           {/* <div className="flex items-center justify-between">
-            <span className="text-[11px] text-emerald-400/90 font-semibold">Printify Premium Cost:</span>
+            <span className="text-[11px] text-emerald-400/90 font-semibold">Base Wholesale Cost:</span>
             <span className="font-bold text-emerald-400 text-xs">
               From {formatPrice(pppPrice)}
             </span>
@@ -1300,7 +1300,7 @@ function ProductDetailsModal({
                       <span className="text-gray-400 line-through font-semibold">${parseFloat(product.price || '0').toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg">
-                      <span className="text-emerald-300 font-bold">Printify Premium Price (PPP):</span>{" "}
+                      <span className="text-emerald-300 font-bold">Base Wholesale Price (PPP):</span>{" "}
                       <span className="text-emerald-400 font-extrabold text-base">${parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0').toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center pt-2">

@@ -611,21 +611,13 @@ function EarningsPageContent() {
 
             {/* TAB: Commissions & Orders Summary */}
             {activeTab === 'commissions' && (
-              <div className="space-y-6">
+              <div className="">
                 {/* How Commission Tracking Works Accordion */}
                 <button
                   onClick={() => setShowCommissionInfo(!showCommissionInfo)}
                   className="w-full text-left hover:opacity-90 transition-opacity"
-                >
-                  <div className="bg-black border border-gray-800 rounded-xl p-4 flex items-center gap-3">
-                    <Info className="w-5 h-5 text-orange-400 flex-shrink-0" />
-                    <span className="font-semibold text-gray-200 flex-1">Understanding Whitelabel Earnings</span>
-                    <span className="text-gray-400">{showCommissionInfo ? '−' : '+'}</span>
-                  </div>
+                >             
                 </button>
-
-
-
                 {/* Printify Orders (white-labeled) */}
                 {printifyOrders.length > 0 ? (
                   <div>

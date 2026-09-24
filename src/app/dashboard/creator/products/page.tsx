@@ -230,8 +230,8 @@ export default function CreatorProductsPage() {
 
   const handleSyncPrintify = async () => {
     try {
-      const toastId = toast.loading("Syncing products from Printify...");
-      // Hit the Next.js API route which will fetch all Printify products and save to backend
+      const toastId = toast.loading("Syncing products...");
+      // Hit the Next.js API route which will fetch all products and save to backend
       const res = await fetch("/api/printify/sync/all", {
         method: "POST",
         headers: {
@@ -247,7 +247,7 @@ export default function CreatorProductsPage() {
       }
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Failed to sync products from Printify");
+      toast.error(err.message || "Failed to sync products");
     }
   };
 
