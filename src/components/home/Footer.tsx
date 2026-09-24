@@ -171,7 +171,7 @@ export default function Footer() {
         className="relative z-10 flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-4 px-6 py-5 sm:px-12 md:px-20 lg:px-20 border-t border-[#2a2520]"
       >
         <a
-          href="https://www.instagram.com/_loka.media_"
+          href="https://www.instagram.com/loka.hq"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-colors duration-200 order-1 sm:order-2"
