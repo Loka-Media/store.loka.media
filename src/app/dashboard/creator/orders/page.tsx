@@ -815,11 +815,13 @@ export default function CreatorOrdersPage() {
                       </div>
 
                       <div className="space-y-3">
-                        {selectedOrder.products.map((product, idx) => (
+                        {selectedOrder.products.map((product, idx) => {
+                          const prodImg = (Array.isArray(product.images) && product.images[0]) || (product as any).product_image || (product as any).image_url || (product as any).thumbnail_url || (Array.isArray((product as any).product_images) && (product as any).product_images[0]) || (typeof product.images === 'string' && (product.images as string).startsWith('http') ? product.images : null);
+                          return (
                           <div key={`${product.product_id}-${idx}`} className="flex gap-4 p-3.5 bg-neutral-900/80 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
                             <div className="flex-shrink-0 w-16 h-16 bg-neutral-800 border border-white/10 rounded-xl overflow-hidden">
-                              {product.images && product.images.length > 0 ? (
-                                <img src={product.images[0]} alt={product.product_name} className="w-full h-full object-cover" />
+                              {prodImg ? (
+                                <img src={prodImg} alt={product.product_name} className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                   <Package className="w-6 h-6 text-gray-600" />
@@ -849,16 +851,14 @@ export default function CreatorOrdersPage() {
                                 </p>
                               )}
                             </div>
-                            <div className="flex-shrink-0 text-right flex flex-col items-end gap-1.5">
-                              <span className={getCommissionBadge(product.status)}>{product.status}</span>
-                              {selectedOrder.order_status === 'shipped' && (
-                                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                  Shipped
-                                </span>
-                              )}
+                            <div className="flex-shrink-0 text-right flex items-center">
+                              <span className={getOrderStatusBadge(selectedOrder.order_status || 'processing')}>
+                                {(selectedOrder.order_status || 'processing').replace('_', ' ')}
+                              </span>
                             </div>
                           </div>
-                        ))}
+                        );
+                      })}
 
                         {selectedOrder.products.length === 0 && (
                           <div className="text-center py-8">

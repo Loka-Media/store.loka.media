@@ -89,13 +89,81 @@ function AdminPayoutsPageContent() {
     try {
       setLoading(true);
 
-      const [withdrawalsRes, overviewRes] = await Promise.all([
-        api.get('/api/admin/withdrawals'),
-        api.get('/api/admin/commissions/overview')
-      ]);
+      let withdrawalsData: WithdrawalRequest[] = [];
+      let overviewData: CommissionOverview | null = null;
 
-      setWithdrawals(withdrawalsRes.data?.data || []);
-      setOverview(overviewRes.data?.data);
+      // 1. Fetch overview from local/api routes
+      try {
+        const localOverviewRes = await fetch('/api/admin/commissions/overview');
+        if (localOverviewRes.ok) {
+          const json = await localOverviewRes.json();
+          if (json?.data) overviewData = json.data;
+        }
+      } catch (e) {
+        console.warn('Local overview route fetch failed, trying backend...', e);
+      }
+
+      if (!overviewData) {
+        try {
+          const overviewRes = await api.get('/api/admin/commissions/overview');
+          if (overviewRes.data?.data) overviewData = overviewRes.data.data;
+        } catch (e) {
+          console.warn('Backend overview fetch failed:', e);
+        }
+      }
+
+      // 2. Fetch withdrawals from local/api routes
+      try {
+        const localWithdrawalsRes = await fetch('/api/admin/withdrawals');
+        if (localWithdrawalsRes.ok) {
+          const json = await localWithdrawalsRes.json();
+          if (json?.data) withdrawalsData = json.data;
+        }
+      } catch (e) {
+        console.warn('Local withdrawals route fetch failed, trying backend...', e);
+      }
+
+      if (!withdrawalsData.length) {
+        try {
+          const withdrawalsRes = await api.get('/api/admin/withdrawals');
+          if (withdrawalsRes.data?.data) withdrawalsData = withdrawalsRes.data.data;
+        } catch (e) {
+          console.warn('Backend withdrawals fetch failed:', e);
+        }
+      }
+
+      // 3. If overview is still missing or has 0, derive from creator earnings
+      if (!overviewData || overviewData.totalCommissionsAmount === 0) {
+        try {
+          const earningsRes = await api.get('/api/admin/creators/earnings');
+          const earningsList: any[] = earningsRes.data?.data || [];
+          if (Array.isArray(earningsList) && earningsList.length > 0) {
+            const totalCommissionsAmount = earningsList.reduce((sum, e) => sum + (parseFloat(e.totalEarned) || 0), 0);
+            const totalCommissionsTracked = earningsList.reduce((sum, e) => sum + (parseInt(e.commissionsCount) || 1), 0);
+            const pendingCommissions = earningsList.filter(e => parseFloat(e.pendingAmount) > 0).length;
+            const totalPayoutAmount = earningsList.reduce((sum, e) => sum + (parseFloat(e.processedAmount) || 0), 0);
+            const avgCommission = totalCommissionsTracked > 0 ? totalCommissionsAmount / totalCommissionsTracked : 0;
+
+            overviewData = {
+              totalCommissionsTracked,
+              totalCommissionsAmount,
+              pendingCommissions,
+              processingCommissions: pendingCommissions,
+              paidCommissions: earningsList.filter(e => parseFloat(e.processedAmount) > 0).length,
+              refundedCommissions: 0,
+              averageCommission: Math.round(avgCommission * 100) / 100,
+              totalPayouts: earningsList.filter(e => parseFloat(e.processedAmount) > 0).length,
+              totalPayoutAmount,
+              creatorsWithPendingPayouts: pendingCommissions,
+            };
+          }
+        } catch (e) {
+          console.warn('Earnings fallback error:', e);
+        }
+      }
+
+      setWithdrawals(withdrawalsData);
+      setOverview(overviewData);
     } catch (error) {
       console.error('Error fetching admin payout data:', error);
       toast.error('Failed to load payout data');

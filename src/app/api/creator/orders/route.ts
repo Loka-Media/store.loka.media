@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
 import { getApiUrl } from '@/lib/getApiUrl';
+import { calculateSellingPrice } from '@/lib/pricing';
 
 export async function GET(request: NextRequest) {
   try {
@@ -100,18 +101,29 @@ export async function GET(request: NextRequest) {
 
         const products = displayItems.map((item: any) => {
           const matchingComm = orderComms.find((c: any) => c.product_id === item.product_id);
-          const commAmt = matchingComm
-            ? parseFloat(matchingComm.creator_revenue || '0')
-            : (parseFloat(item.creator_revenue || '0') > 0 ? parseFloat(item.creator_revenue) : 0);
+          const quantity = parseInt(item.quantity || '1', 10);
+          const unitPrice = parseFloat(item.price || item.unit_price || item.base_price || '0');
+          const totalItemPrice = (unitPrice * quantity).toFixed(2);
+
+          let commAmt = 0;
+          if (matchingComm && parseFloat(matchingComm.creator_revenue || '0') > 0) {
+            commAmt = parseFloat(matchingComm.creator_revenue);
+          } else if (parseFloat(item.creator_revenue || '0') > 0) {
+            commAmt = parseFloat(item.creator_revenue);
+          } else if (parseFloat(item.commission_amount || '0') > 0) {
+            commAmt = parseFloat(item.commission_amount);
+          } else {
+            const wholesaleCost = parseFloat(item.pbc || item.base_cost || '0');
+            if (wholesaleCost > 0 && unitPrice > 0) {
+              const lokaBaseCost = calculateSellingPrice(wholesaleCost, item.category);
+              commAmt = Math.max(0, unitPrice - lokaBaseCost) * quantity;
+            }
+          }
 
           totalCommission += commAmt;
 
           const commStatus = matchingComm?.status || 'processing';
           commissionStatuses.push(commStatus);
-
-          const quantity = parseInt(item.quantity || '1', 10);
-          const unitPrice = item.price || item.unit_price || item.base_price || '0';
-          const totalItemPrice = (parseFloat(unitPrice) * quantity).toFixed(2);
 
           return {
             product_id: item.product_id,
