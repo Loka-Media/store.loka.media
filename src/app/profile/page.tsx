@@ -52,6 +52,37 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set());
   const [loadingImages, setLoadingImages] = useState<Set<string>>(new Set());
+  const [userCreatedAt, setUserCreatedAt] = useState<string | null>(null);
+
+  const memberSinceYear = (() => {
+    const rawDate =
+      userCreatedAt ||
+      user?.created_at ||
+      user?.createdAt ||
+      (user as any)?.created ||
+      (user as any)?.joined_at ||
+      (user as any)?.date_joined;
+
+    if (rawDate) {
+      const parsedDate = new Date(rawDate);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate.getFullYear();
+      }
+    }
+    // Try to decode year from JWT token if available
+    if (typeof window !== 'undefined') {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.iat) {
+            return new Date(payload.iat * 1000).getFullYear();
+          }
+        }
+      } catch {}
+    }
+    return 2024;
+  })();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -66,10 +97,20 @@ export default function ProfilePage() {
     try {
       setLoading(true);
       setError(null);
-      const [ordersResponse, addressesResponse] = await Promise.all([
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      const [ordersResponse, addressesResponse, userProfileResponse] = await Promise.all([
         checkoutAPI.getUserOrders({ limit: 50 }),
-        addressAPI.getAddresses()
+        addressAPI.getAddresses(),
+        fetch('/api/user/profile', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
       ]);
+
+      if (userProfileResponse?.user?.created_at) {
+        setUserCreatedAt(userProfileResponse.user.created_at);
+      }
 
       console.log('📦 Raw orders response:', ordersResponse);
 
@@ -273,7 +314,7 @@ export default function ProfilePage() {
           {/* Top Row - Member Since & Edit Button */}
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-white/10">
             <div className="flex items-center gap-1.5">
-              <span className="text-white/80 text-xs sm:text-sm font-medium">Member Since 2024</span>
+              <span className="text-white/80 text-xs sm:text-sm font-medium">Member Since {memberSinceYear}</span>
               <svg width="18" height="18" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path opacity="0.965" fillRule="evenodd" clipRule="evenodd" d="M10.7852 2.58461C11.8398 2.39405 12.5918 2.77686 13.041 3.73304C13.0958 4.71742 13.0958 5.70179 13.041 6.68617C12.4626 7.84249 11.5739 8.15694 10.375 7.62953C9.99062 7.35347 9.73083 6.98433 9.59572 6.5221C9.54101 5.6471 9.54101 4.77211 9.59572 3.8971C9.75544 3.23209 10.1519 2.7946 10.7852 2.58461Z" fill="url(#paint0_linear_1394_2121)" />
                 <path opacity="0.965" fillRule="evenodd" clipRule="evenodd" d="M29.9844 2.58394C31.157 2.35602 31.9362 2.79352 32.3223 3.89644C32.377 4.77144 32.377 5.64644 32.3223 6.52144C31.9367 7.63752 31.1574 8.06135 29.9844 7.79292C29.4512 7.58785 29.0821 7.21871 28.877 6.6855C28.8223 5.70113 28.8223 4.71675 28.877 3.73238C29.0974 3.19762 29.4665 2.8148 29.9844 2.58394Z" fill="url(#paint1_linear_1394_2121)" />

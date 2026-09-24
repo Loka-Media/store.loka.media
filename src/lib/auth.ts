@@ -78,6 +78,8 @@ export interface User {
   isVerified: boolean;
   creatorStatus?: 'pending' | 'approved' | 'rejected' | null;
   profileImg?: string | null;
+  created_at?: string;
+  createdAt?: string;
 }
 
 export interface AuthResponse {
