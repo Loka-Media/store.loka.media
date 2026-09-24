@@ -376,20 +376,6 @@ export default function ProductPage({ params }: ProductPageProps) {
 
                 {/* Printify Available Shipping Countries & Destinations */}
                 <PrintifyShippingDestinations product={product} selectedVariant={selectedVariant} />
-
-                {/* Tags and Metadata */}
-                {product.tags && product.tags.length > 0 && (
-                  <div>
-                    <div className="text-xs font-medium text-gray-400 mb-2">Tags</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {product.tags.map((tag) => (
-                        <span key={tag} className="bg-white/10 border border-white/10 text-gray-300 text-xs font-medium px-2.5 py-1 rounded-lg">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>

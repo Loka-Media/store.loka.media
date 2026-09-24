@@ -30,18 +30,6 @@ export function ProductMeta({ creatorName, creatorUsername, category, tags }: Pr
           </div>
         </div>
       )}
-      {tags && tags.length > 0 && (
-        <div>
-          <div className="text-xs font-medium text-gray-400 mb-2">Tags</div>
-          <div className="flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
-              <span key={tag} className="bg-white/10 border border-white/10 text-gray-300 text-xs font-medium px-2.5 py-1 rounded-lg">
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
