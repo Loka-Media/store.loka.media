@@ -60,7 +60,7 @@ function ProductsContent() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [activeView, setActiveView] = useState<ViewType>("trending");
+  const [activeView, setActiveView] = useState<ViewType | null>(null);
   const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
   const [isPriceRangeOpen, setIsPriceRangeOpen] = useState(false);
   const [minPriceInput, setMinPriceInput] = useState(() =>
@@ -560,6 +560,7 @@ function ProductsContent() {
     setSearchInput("");
     setMinPriceInput("");
     setMaxPriceInput("");
+    setActiveView(null);
 
     // Clear the URL first to avoid sync issues
     router.replace('/products', { scroll: false });
@@ -570,14 +571,23 @@ function ProductsContent() {
   }, [router]);
 
   const handleViewChange = (view: ViewType) => {
-    setActiveView(view);
-    const sortConfig = {
-      trending: { sortBy: "created_at", sortOrder: "DESC" },
-      new: { sortBy: "created_at", sortOrder: "DESC" },
-      popular: { sortBy: "base_price", sortOrder: "DESC" },
-    };
-    const newSort = sortConfig[view];
-    setFilters((prev) => ({ ...prev, ...newSort }));
+    if (activeView === view) {
+      setActiveView(null);
+      setFilters((prev) => ({
+        ...prev,
+        sortBy: "created_at",
+        sortOrder: "DESC",
+      }));
+    } else {
+      setActiveView(view);
+      const sortConfig = {
+        trending: { sortBy: "created_at", sortOrder: "DESC" },
+        new: { sortBy: "created_at", sortOrder: "DESC" },
+        popular: { sortBy: "base_price", sortOrder: "DESC" },
+      };
+      const newSort = sortConfig[view];
+      setFilters((prev) => ({ ...prev, ...newSort }));
+    }
   };
 
   return (
