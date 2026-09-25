@@ -133,13 +133,19 @@ export function getValidImageUrl(product: any): string {
   const uniqueUrls = Array.from(new Set(candidateUrls)).filter(Boolean);
 
   if (uniqueUrls.length > 0) {
-    // Sort unique URLs so that images WITH printed designs / artwork or generated mockups come FIRST
+    // Sort unique URLs: prefer stable CDN images over time-limited mockup API tokens
     uniqueUrls.sort((a, b) => {
       const aLower = a.toLowerCase();
       const bLower = b.toLowerCase();
 
-      const aHasDesign = aLower.includes('design') || aLower.includes('printify') || aLower.includes('preview') || aLower.includes('mockup');
-      const bHasDesign = bLower.includes('design') || bLower.includes('printify') || bLower.includes('preview') || bLower.includes('mockup');
+      const aHasDesign = aLower.includes('design') || aLower.includes('preview') || aLower.includes('mockup');
+      const bHasDesign = bLower.includes('design') || bLower.includes('preview') || bLower.includes('mockup');
+
+      // Stable printify CDN (images.printify.com) > time-limited mockup API (images-api.printify.com)
+      const aIsStablePrintify = aLower.includes('images.printify.com');
+      const bIsStablePrintify = bLower.includes('images.printify.com');
+      const aIsMockupApi = aLower.includes('images-api.printify.com') || aLower.includes('mockup-api.printify.com');
+      const bIsMockupApi = bLower.includes('images-api.printify.com') || bLower.includes('mockup-api.printify.com');
 
       const aIsBlank = aLower.includes('blank') || aLower.includes('flat_') || aLower.includes('camera_1_front.jpg');
       const bIsBlank = bLower.includes('blank') || bLower.includes('flat_') || bLower.includes('camera_1_front.jpg');
@@ -149,6 +155,10 @@ export function getValidImageUrl(product: any): string {
 
       if (aHasDesign) aScore += 10;
       if (bHasDesign) bScore += 10;
+      if (aIsStablePrintify) aScore += 15;
+      if (bIsStablePrintify) bScore += 15;
+      if (aIsMockupApi) aScore += 5;   // Still prefer over generic, but below stable CDN
+      if (bIsMockupApi) bScore += 5;
       if (aIsBlank) aScore -= 20;
       if (bIsBlank) bScore -= 20;
 

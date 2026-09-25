@@ -40,6 +40,34 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const imageUrl = getValidImageUrl(product);
 
+  // Build a list of all possible image URLs for fallback
+  const allImageUrls = (() => {
+    const urls: string[] = [];
+    // Primary from getValidImageUrl
+    if (imageUrl && !imageUrl.includes('placeholder')) urls.push(imageUrl);
+    // All images from the product
+    if (Array.isArray(product.images)) {
+      product.images.forEach((img: any) => {
+        const url = typeof img === 'string' ? img : (img?.src || img?.url || img?.preview_url);
+        if (url && !url.includes('placeholder') && !urls.includes(url)) urls.push(url);
+      });
+    }
+    return urls;
+  })();
+
+  const [imgIndex, setImgIndex] = useState(0);
+  const [imgFailed, setImgFailed] = useState(false);
+
+  const currentImgUrl = allImageUrls[imgIndex] || null;
+
+  const handleImgError = () => {
+    if (imgIndex < allImageUrls.length - 1) {
+      setImgIndex(prev => prev + 1);
+    } else {
+      setImgFailed(true);
+    }
+  };
+
   // Helper to extract and format tags
   const productTags = (() => {
     let raw: any =
@@ -126,34 +154,29 @@ export function ProductCard({ product }: ProductCardProps) {
               })}
             </div>
           )}
-          <Image
-            src={imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover transition-all duration-700 group-hover:scale-110"
-            unoptimized={true}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              const fallbackImg =
-                e.currentTarget.parentElement?.querySelector(
-                  ".fallback-img"
-                ) as HTMLImageElement;
-              if (fallbackImg) {
-                fallbackImg.style.display = "block";
-              }
-            }}
-          />
-
-          <img
-            src={imageUrl}
-            alt={product.name}
-            className="fallback-img absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
-            style={{ display: "none" }}
-            onError={(e) => {
-              e.currentTarget.src = "/placeholder-product.svg";
-            }}
-          />
+          {imgFailed || !currentImgUrl ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+              <div className="w-14 h-14 rounded-2xl bg-gray-700/50 flex items-center justify-center mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-[10px] text-gray-600 font-medium">No Image</span>
+            </div>
+          ) : (
+            <>
+              <Image
+                key={currentImgUrl}
+                src={currentImgUrl}
+                alt={product.name}
+                fill
+                className="object-cover transition-all duration-700 group-hover:scale-110"
+                unoptimized={true}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                onError={handleImgError}
+              />
+            </>
+          )}
 
           {/* Premium overlay on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

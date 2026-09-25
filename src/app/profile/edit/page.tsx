@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { userAPI } from '@/lib/api';
-import { ArrowLeft, Save, User, Phone, Mail, AtSign, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, User, Phone, Mail, AtSign, AlertCircle, Instagram } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -16,7 +16,8 @@ export default function EditProfilePage() {
   
   const [formData, setFormData] = useState({
     name: '',
-    phone: ''
+    phone: '',
+    creatorUrl: '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -60,9 +61,20 @@ export default function EditProfilePage() {
     }
 
     if (user) {
+      const storedUrl =
+        user.creatorUrl ||
+        user.creator_url ||
+        (typeof window !== 'undefined'
+          ? localStorage.getItem(`creatorUrl_${user.username}`) ||
+            localStorage.getItem(`creatorUrl_${user.email}`) ||
+            localStorage.getItem('creatorUrl')
+          : '') ||
+        '';
+
       setFormData({
         name: user.name || '',
-        phone: user.phone || ''
+        phone: user.phone || '',
+        creatorUrl: storedUrl,
       });
     }
   }, [isAuthenticated, user, router]);
@@ -96,6 +108,14 @@ export default function EditProfilePage() {
         phone: formData.phone.trim(),
         profile_img: base64Image || undefined
       });
+
+      if (user) {
+        if (formData.creatorUrl) {
+          localStorage.setItem(`creatorUrl_${user.username}`, formData.creatorUrl.trim());
+          localStorage.setItem(`creatorUrl_${user.email}`, formData.creatorUrl.trim());
+          localStorage.setItem('creatorUrl', formData.creatorUrl.trim());
+        }
+      }
 
       toast.success('Profile updated successfully!');
       
@@ -240,6 +260,26 @@ export default function EditProfilePage() {
                 className="w-full px-4 py-2.5 sm:py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
                 placeholder="Enter your phone number"
               />
+            </div>
+
+            {/* Instagram Profile URL */}
+            <div>
+              <label htmlFor="creatorUrl" className="flex items-center text-base font-bold text-white mb-3">
+                <Instagram className="w-4 h-4 mr-2 text-pink-500" />
+                Instagram Profile URL
+              </label>
+              <input
+                type="text"
+                id="creatorUrl"
+                name="creatorUrl"
+                value={formData.creatorUrl}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2.5 sm:py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-all text-sm sm:text-base"
+                placeholder="https://instagram.com/yourhandle"
+              />
+              <p className="text-xs text-gray-400 mt-2">
+                Your live Instagram follower count will be displayed next to your creator profile and cards.
+              </p>
             </div>
 
             {/* Form Actions */}

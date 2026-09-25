@@ -137,10 +137,13 @@ export function useCreatorDashboard() {
         summaryParams.creatorId = selectedCreatorId;
       }
 
-      // Fetch products and commission summary safely using Promise.allSettled
-      const [productsResult, summaryResult] = await Promise.allSettled([
+      // Fetch products, commission summary, and real local analytics
+      const [productsResult, summaryResult, analyticsResult] = await Promise.allSettled([
         productAPI.getCreatorProducts(params),
         api.get("/api/creator/commissions/summary", { params: summaryParams }),
+        fetch(`/api/creator/analytics?creatorId=${selectedCreatorId !== "all" ? selectedCreatorId : ""}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }).then((r) => (r.ok ? r.json() : null)),
       ]);
 
       let fetchedProducts: CreatorProduct[] = [];
@@ -164,7 +167,7 @@ export function useCreatorDashboard() {
       };
       const activeProducts = fetchedProducts.filter((p: CreatorProduct) => isProductActive(p)).length;
 
-      // Extract stats from commission summary
+      // Extract stats from commission summary or real local analytics
       let totalSales = 0;
       let revenue = 0;
 
@@ -176,6 +179,12 @@ export function useCreatorDashboard() {
         });
       } else if (summaryResult.status === "rejected") {
         console.warn("Failed to fetch commission summary:", summaryResult.reason);
+      }
+
+      // If external commission summary had 0 sales or failed, use real PostgreSQL database analytics
+      if (totalSales === 0 && analyticsResult.status === "fulfilled" && analyticsResult.value?.data) {
+        totalSales = analyticsResult.value.data.totalSales || 0;
+        revenue = analyticsResult.value.data.revenue || 0;
       }
 
       setStats({

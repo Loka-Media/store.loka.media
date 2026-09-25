@@ -14,6 +14,9 @@ interface Creator {
   name: string;
   username: string;
   product_count: number;
+  followers_count?: number;
+  creatorUrl?: string | null;
+  creator_url?: string | null;
   profile_img?: string | null;
   profileImg?: string | null;
   profile_image?: string | null;
@@ -28,6 +31,7 @@ export default function CreatorsPage() {
   const { user } = useAuth();
   const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
+  const [followersMap, setFollowersMap] = useState<Record<string, { followers: string; count: number }>>({});
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -53,11 +57,19 @@ export default function CreatorsPage() {
         const key = (username || name).toLowerCase().replace(/\s+/g, '');
         if (!key) return;
 
+        const storedUrl =
+          c.creatorUrl ||
+          c.creator_url ||
+          (typeof window !== 'undefined' ? localStorage.getItem(`creatorUrl_${username}`) : null) ||
+          null;
+
         creatorsMap.set(key, {
           id: Number(c.id) || Math.floor(Math.random() * 10000),
           name: name,
           username: username || name.toLowerCase().replace(/\s+/g, ''),
           product_count: 0, // will be counted accurately from active products
+          followers_count: Number(c.followers_count ?? c.followers ?? 0),
+          creatorUrl: storedUrl,
           profile_img:
             c.profile_img ||
             c.profileImg ||
@@ -98,12 +110,17 @@ export default function CreatorsPage() {
           if (!existing.name && name) existing.name = name;
           if (!existing.username && username) existing.username = username;
         } else {
+          const storedUrl =
+            (typeof window !== 'undefined' ? localStorage.getItem(`creatorUrl_${username}`) : null) ||
+            null;
+
           creatorsMap.set(key, {
             id: Number(p.creator_id || cObj?.id) || Math.floor(Math.random() * 10000),
             name: name || username,
             username: username || name.toLowerCase().replace(/\s+/g, ''),
             product_count: 1,
             profile_img: avatar,
+            creatorUrl: storedUrl,
           });
         }
       });
@@ -113,10 +130,20 @@ export default function CreatorsPage() {
         const uName = (user.name || '').trim();
         const uUsername = (user.username || '').trim();
         const userKey = (uUsername || uName).toLowerCase().replace(/\s+/g, '');
+        const userUrl =
+          user.creatorUrl ||
+          user.creator_url ||
+          (typeof window !== 'undefined'
+            ? localStorage.getItem(`creatorUrl_${user.username}`) ||
+              localStorage.getItem(`creatorUrl_${user.email}`) ||
+              localStorage.getItem('creatorUrl')
+            : null);
+
         if (userKey) {
           if (creatorsMap.has(userKey)) {
             const existing = creatorsMap.get(userKey)!;
             if (!existing.profile_img && user.profileImg) existing.profile_img = user.profileImg;
+            if (userUrl) existing.creatorUrl = userUrl;
           } else {
             creatorsMap.set(userKey, {
               id: user.id || Math.floor(Math.random() * 10000),
@@ -124,6 +151,7 @@ export default function CreatorsPage() {
               username: uUsername || uName.toLowerCase().replace(/\s+/g, ''),
               product_count: 0,
               profile_img: user.profileImg || null,
+              creatorUrl: userUrl || null,
             });
           }
         }
@@ -148,6 +176,78 @@ export default function CreatorsPage() {
   useEffect(() => {
     fetchCreators();
   }, [fetchCreators]);
+
+  // Fetch real Instagram followers for creators based on their Instagram URL or handle
+  useEffect(() => {
+    if (creators.length === 0) return;
+
+    const targetsMap: Record<string, string> = {}; // creatorKey -> url/handle
+    creators.forEach((c) => {
+      const key = (c.username || c.name).toLowerCase().replace(/\s+/g, '');
+      const isUser = user && (user.username?.toLowerCase() === c.username?.toLowerCase() || user.name?.toLowerCase() === c.name?.toLowerCase());
+      const explicitUrl =
+        (isUser ? (user.creatorUrl || user.creator_url) : null) ||
+        c.creatorUrl ||
+        c.creator_url ||
+        (typeof window !== 'undefined'
+          ? localStorage.getItem(`creatorUrl_${c.username}`) ||
+            (isUser ? localStorage.getItem('creatorUrl') : null)
+          : null);
+
+      const target = explicitUrl || c.username;
+      if (target) {
+        targetsMap[key] = target;
+      }
+    });
+
+    // Check cached follower counts in localStorage for instantaneous display
+    const cachedData: Record<string, { followers: string; count: number }> = {};
+    Object.keys(targetsMap).forEach((key) => {
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem(`ig_followers_${key}`);
+        if (cached) {
+          try {
+            cachedData[key] = JSON.parse(cached);
+          } catch {
+            cachedData[key] = { followers: cached, count: 0 };
+          }
+        }
+      }
+    });
+
+    if (Object.keys(cachedData).length > 0) {
+      setFollowersMap((prev) => ({ ...cachedData, ...prev }));
+    }
+
+    const uniqueTargets = Array.from(new Set(Object.values(targetsMap)));
+    if (uniqueTargets.length === 0) return;
+
+    fetch('/api/creators/instagram-followers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targets: uniqueTargets }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.success && data?.data) {
+          const updated: Record<string, { followers: string; count: number }> = {};
+          Object.entries(targetsMap).forEach(([creatorKey, target]) => {
+            const resObj = data.data[target];
+            if (resObj && resObj.followers && resObj.followers !== '0') {
+              updated[creatorKey] = {
+                followers: resObj.followers,
+                count: resObj.count,
+              };
+              if (typeof window !== 'undefined') {
+                localStorage.setItem(`ig_followers_${creatorKey}`, JSON.stringify(updated[creatorKey]));
+              }
+            }
+          });
+          setFollowersMap((prev) => ({ ...prev, ...updated }));
+        }
+      })
+      .catch((err) => console.error('Error fetching creator followers:', err));
+  }, [creators, user]);
 
   const filteredCreators = creators.filter((creator) => {
     const query = searchQuery.toLowerCase().trim();
@@ -221,8 +321,16 @@ export default function CreatorsPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
             {filteredCreators.map((creator, index) => {
-              // Deterministically generate a mock follower count so stats look populated
-              const followers = ((creator.id * 63 + 120) % 850) + 140;
+              const creatorKey = (creator.username || creator.name).toLowerCase().replace(/\s+/g, '');
+              const igData = followersMap[creatorKey];
+
+              // Real follower count: uses Instagram followers fetched from the creator's URL/handle
+              const followersDisplay =
+                igData?.followers && igData.followers !== '0'
+                  ? igData.followers
+                  : creator.followers_count && creator.followers_count > 0
+                  ? creator.followers_count.toLocaleString()
+                  : '0';
 
               // Check all property aliases and fallback to logged-in user if matching
               const creatorImage =
@@ -293,9 +401,9 @@ export default function CreatorsPage() {
                       <div className="flex items-center justify-between pt-2 sm:pt-4 border-t border-white/10 w-full mt-1 sm:mt-2 z-10 relative">
                         {/* Followers and products counter */}
                         <div className="flex items-center gap-2 sm:gap-3.5 text-[10px] sm:text-xs text-white/95 font-extrabold drop-shadow">
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1" title={`${followersDisplay} followers`}>
                             <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/60" />
-                            {followers}
+                            {followersDisplay}
                           </span>
                           <span className="flex items-center gap-1">
                             <Package className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-500" />

@@ -80,6 +80,8 @@ export interface User {
   profileImg?: string | null;
   created_at?: string;
   createdAt?: string;
+  creatorUrl?: string;
+  creator_url?: string;
 }
 
 export interface AuthResponse {

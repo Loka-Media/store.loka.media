@@ -37,12 +37,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuthStatus();
   }, []);
 
+  const getResolvedUser = (userData: User): User => {
+    const storedUrl =
+      (typeof window !== 'undefined'
+        ? localStorage.getItem(`creatorUrl_${userData.username}`) ||
+          localStorage.getItem(`creatorUrl_${userData.email}`) ||
+          localStorage.getItem('creatorUrl')
+        : null) || undefined;
+
+    return {
+      ...userData,
+      creatorUrl: userData.creatorUrl || userData.creator_url || storedUrl,
+    };
+  };
+
   const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem('accessToken');
       if (token) {
         const response = await authAPI.getMe();
-        setUser(response.user);
+        setUser(getResolvedUser(response.user));
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -56,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await authAPI.login({ email, password });
-      setUser(response.user);
+      setUser(getResolvedUser(response.user));
       toast.success('Login successful');
       return true;
     } catch (error: unknown) {
@@ -89,6 +103,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
 
       await authAPI.register(registrationData);
+
+      if (data.creatorUrl && typeof window !== 'undefined') {
+        localStorage.setItem(`creatorUrl_${data.username}`, data.creatorUrl);
+        localStorage.setItem(`creatorUrl_${data.email}`, data.creatorUrl);
+        localStorage.setItem('creatorUrl', data.creatorUrl);
+      }
 
       // Trigger pending approval notification email via Resend
       if (data.creatorUrl) {
@@ -184,7 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = localStorage.getItem('accessToken');
       if (token) {
         const response = await authAPI.getMe();
-        setUser(response.user);
+        setUser(getResolvedUser(response.user));
       }
     } catch (error) {
       console.error('Refresh user failed:', error);

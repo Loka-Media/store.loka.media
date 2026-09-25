@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { productAPI } from '@/lib/api';
 import { Switch } from "@/components/ui/switch";
-import { createProductSlug } from '@/lib/utils';
+import { createProductSlug, getValidImageUrl } from '@/lib/utils';
 import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
@@ -42,7 +42,10 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);
   const [newStatus, setNewStatus] = useState<boolean | null>(null);
   const [localStatus, setLocalStatus] = useState(product.status === "active" || product.is_active);
+  const [imgError, setImgError] = useState(false);
   const productHref = `/products/${createProductSlug(product.name, product.id)}`;
+
+  const imageUrl = getValidImageUrl(product);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -146,21 +149,26 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
               })}
             </div>
           )}
-          <Image
-            src={(() => {
-              let url = product.thumbnail_url;
-              if (typeof url === 'string' && url.startsWith('[')) {
-                try { const parsed = JSON.parse(url); if (parsed.length) url = parsed[0]; } catch (e) { }
-              }
-              if (!url) return "/placeholder-product.png";
-              return url.startsWith('//') ? `https:${url}` : url;
-            })()}
-            alt={product.name}
-            fill
-            unoptimized
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          />
+          {imgError ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-black">
+              <div className="w-16 h-16 rounded-2xl bg-gray-800 flex items-center justify-center mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-xs text-gray-500">Image unavailable</span>
+            </div>
+          ) : (
+            <Image
+              src={imageUrl}
+              alt={product.name}
+              fill
+              unoptimized
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              onError={() => setImgError(true)}
+            />
+          )}
 
           {/* Status badge */}
           <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">

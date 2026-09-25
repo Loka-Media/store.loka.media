@@ -26,83 +26,50 @@ interface TopProduct {
 export function EnhancedAnalyticsSection({ selectedCreatorId, stats }: AnalyticsProps) {
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Dynamic but deterministic Views and Conversion calculation
-  // Views scale with sales and products to maintain realism and prevent static values
-  const totalSales = Number(stats.totalSales) || 0;
-  const totalProducts = Number(stats.totalProducts) || 0;
-  const views = (totalSales * 48) + (totalProducts * 7) + 142;
-  const conversionRate = views > 0 ? (totalSales / views) * 100 : 0;
+  const [analyticsData, setAnalyticsData] = useState<{
+    totalViews: number;
+    conversionRate: number;
+    totalSales: number;
+    revenue: number;
+    topProducts: TopProduct[];
+  } | null>(null);
 
   useEffect(() => {
-    async function fetchTopProducts() {
+    async function fetchAnalytics() {
       try {
         setLoading(true);
-        // Fetch creator's orders list (limit 100 for analytics breakdown)
-        const response = await api.get('/api/creator/orders', {
-          params: { 
-            limit: 100,
-            creatorId: selectedCreatorId !== 'all' ? selectedCreatorId : undefined
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+        const res = await fetch(
+          `/api/creator/analytics?creatorId=${selectedCreatorId !== 'all' ? selectedCreatorId : ''}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
           }
-        });
+        );
 
-        const orders = response?.data?.data || [];
-        const productsMap = new Map<string, TopProduct>();
-
-        orders.forEach((order: any) => {
-          const productsList = order.products || order.order_items || order.items || [];
-          productsList.forEach((p: any) => {
-            const quantity = parseInt(p.quantity || '1', 10);
-            const unitPrice = parseFloat(
-              p.unit_price || 
-              p.price || 
-              p.price_at_order || 
-              p.product_snapshot?.price_at_order || 
-              p.creator_cost || 
-              p.base_price || 
-              (parseFloat(p.order_amount || '0') > 0 ? p.order_amount : '0')
-            );
-            let itemRevenue = p.total_price 
-              ? parseFloat(p.total_price) 
-              : (unitPrice > 0 ? unitPrice * quantity : parseFloat(p.order_amount || '0'));
-
-            if (itemRevenue === 0 && productsList.length === 1 && order.customer_payment_amount) {
-              itemRevenue = parseFloat(order.customer_payment_amount);
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.data) {
+            setAnalyticsData(json.data);
+            if (Array.isArray(json.data.topProducts) && json.data.topProducts.length > 0) {
+              setTopProducts(json.data.topProducts);
             }
-
-            const productName = p.product_name || p.name || p.product_snapshot?.product_name || 'Unnamed Product';
-            const productImage = p.images?.[0] || p.product_images?.[0] || p.thumbnail_url || p.product_snapshot?.images?.[0] || '/placeholder-product.png';
-            
-            const existing = productsMap.get(productName);
-            if (existing) {
-              existing.sales += quantity;
-              existing.revenue += itemRevenue;
-            } else {
-              productsMap.set(productName, {
-                id: p.product_id || p.id,
-                name: productName,
-                sales: quantity,
-                revenue: itemRevenue,
-                image: productImage
-              });
-            }
-          });
-        });
-
-        const sorted = Array.from(productsMap.values())
-          .sort((a, b) => b.sales - a.sales)
-          .slice(0, 5);
-
-        setTopProducts(sorted);
+          }
+        }
       } catch (error) {
-        console.error('Failed to fetch top-selling products for analytics:', error);
+        console.error('Failed to fetch real storefront analytics:', error);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchTopProducts();
-  }, [selectedCreatorId, stats.totalSales]);
+    fetchAnalytics();
+  }, [selectedCreatorId]);
+
+  // Real and accurate metrics directly from database
+  const totalSales = analyticsData?.totalSales ?? (Number(stats.totalSales) || 0);
+  const revenue = analyticsData?.revenue ?? (Number(stats.revenue) || 0);
+  const views = analyticsData?.totalViews ?? (totalSales > 0 ? totalSales : 0);
+  const conversionRate = analyticsData?.conversionRate ?? (views > 0 ? (totalSales / views) * 100 : 0);
 
   return (
     <div className="mb-12">
@@ -150,7 +117,7 @@ export function EnhancedAnalyticsSection({ selectedCreatorId, stats }: Analytics
           <div className="space-y-1">
             <span className="text-xs sm:text-sm font-semibold text-gray-400 block">Commissions Earned</span>
             <span className="text-2xl sm:text-3xl font-extrabold text-orange-400 block">
-              ${stats.revenue.toFixed(2)}
+              ${revenue.toFixed(2)}
             </span>
             <span className="text-[10px] text-purple-400 block font-medium">Based on {totalSales} sales</span>
           </div>

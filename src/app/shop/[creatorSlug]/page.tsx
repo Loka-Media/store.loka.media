@@ -102,13 +102,14 @@ function CreatorShopContent() {
         const cleanFilters: any = {
           limit: 1000,
           offset: 0,
-          sortBy: customFilters.sortBy,
-          sortOrder: customFilters.sortOrder,
+          sortBy: customFilters.sortBy || "created_at",
+          sortOrder: customFilters.sortOrder || "DESC",
           isActive: true, // Only show active products on the shop page
         };
 
-        // Only add filter params if they have values
-        if (customFilters.category) cleanFilters.category = customFilters.category;
+        // Note: Do NOT add customFilters.category to cleanFilters.
+        // We retrieve the creator's full product catalog so all category chips and counts remain visible and accessible.
+        // Category filtering is handled client-side in displayProducts.
         if (customFilters.search) cleanFilters.search = customFilters.search;
         if (customFilters.source && customFilters.source !== "all") cleanFilters.source = customFilters.source;
         if (customFilters.minPrice) cleanFilters.minPrice = customFilters.minPrice;
@@ -300,7 +301,14 @@ function CreatorShopContent() {
 
     fetchCategories();
     fetchCreator();
-  }, [fetchCategories, fetchCreator]);
+
+    // Record real storefront view
+    fetch('/api/creator/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ creatorSlug }),
+    }).catch(() => {});
+  }, [creatorSlug, fetchCategories, fetchCreator]);
 
   // URL Sync for Category Filter
   useEffect(() => {
@@ -330,18 +338,19 @@ function CreatorShopContent() {
 
   // 3. Main Data Fetch - De-duped Strict Mode Guard
   useEffect(() => {
-    const filtersKey = JSON.stringify(filters);
-
-    if (lastFetchedFiltersRef.current === filtersKey) {
+    // Only re-fetch from network when creatorSlug changes.
+    // Category selection and activeView filtering are performed client-side so all categories remain visible without loading delay.
+    if (lastFetchedFiltersRef.current === creatorSlug) {
       return;
     }
-    lastFetchedFiltersRef.current = filtersKey;
+    lastFetchedFiltersRef.current = creatorSlug;
 
     setPagination((prev) => ({ ...prev, offset: 0 }));
     fetchProducts(filters, { limit: 20, offset: 0 });
   }, [
-    filters,
-    fetchProducts
+    creatorSlug,
+    fetchProducts,
+    filters
   ]);
 
   // 4. Pagination Fetch (Load More)
@@ -502,20 +511,36 @@ function CreatorShopContent() {
   const displayProducts = useMemo(() => {
     if (!products || products.length === 0) return [];
 
-    // Step 1: Filter strictly by selected category
+    // Step 1: Filter strictly by selected category, source, price
     let pool = products.filter((p) => {
       if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
       if (filters.category && !isCategoryMatch(p, filters.category)) return false;
+      if (filters.source && filters.source !== "all" && p.source !== filters.source) return false;
+      if (filters.minPrice !== undefined && Number(p.base_price || 0) < filters.minPrice) return false;
+      if (filters.maxPrice !== undefined && Number(p.base_price || 0) > filters.maxPrice) return false;
       return true;
     });
 
     // Step 2: Handle activeView (trending, new, popular)
     if (activeView === "trending" || activeView === "new" || activeView === "popular") {
-      return pool.filter((p) => productHasTag(p, activeView));
+      pool = pool.filter((p) => productHasTag(p, activeView));
+    }
+
+    // Step 3: Handle sorting
+    if (filters.sortBy === "base_price" || filters.sortBy === "price") {
+      const direction = filters.sortOrder === "DESC" ? -1 : 1;
+      pool = [...pool].sort((a, b) => ((Number(a.base_price) || 0) - (Number(b.base_price) || 0)) * direction);
+    } else if (filters.sortBy === "created_at") {
+      const direction = filters.sortOrder === "DESC" ? -1 : 1;
+      pool = [...pool].sort((a, b) => {
+        const dateA = new Date(a.created_at || 0).getTime();
+        const dateB = new Date(b.created_at || 0).getTime();
+        return (dateA - dateB) * direction;
+      });
     }
 
     return pool;
-  }, [products, filters.category, activeView]);
+  }, [products, filters.category, filters.source, filters.minPrice, filters.maxPrice, filters.sortBy, filters.sortOrder, activeView]);
 
   if (!creator && !loading) {
     return (
@@ -564,8 +589,8 @@ function CreatorShopContent() {
           avatarUrl={creator.profileImg || creator.profile_img || undefined}
           isVerified={false}
           tagline="Exclusive drops and curated essentials."
-          productCount={pagination.total}
-          categoryCount={categories.length}
+          productCount={products.length}
+          categoryCount={displayCategories.length}
         />
       )}
 
@@ -592,7 +617,7 @@ function CreatorShopContent() {
               >
                 <button
                   onClick={() => handleFilterChange("category", "")}
-                  className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold border transition-all flex-shrink-0 whitespace-nowrap ${
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold border transition-all flex-shrink-0 whitespace-nowrap cursor-pointer ${
                     filters.category === ""
                       ? "bg-white text-black border-white"
                       : "border-white/30 text-white/80 hover:border-white/60"
@@ -600,19 +625,22 @@ function CreatorShopContent() {
                 >
                   All
                 </button>
-                {displayCategories.map((cat) => (
-                  <button
-                    key={cat.category}
-                    onClick={() => handleFilterChange("category", cat.category)}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold border transition-all flex-shrink-0 whitespace-nowrap cursor-pointer ${
-                      cleanCat(filters.category) === cleanCat(cat.category)
-                        ? "bg-orange-500 text-white border-orange-500 shadow-md"
-                        : "border-white/30 text-white/80 hover:border-white/60"
-                    }`}
-                  >
-                    {cat.category} ({cat.product_count})
-                  </button>
-                ))}
+                {displayCategories.map((cat) => {
+                  const isSelected = cleanCat(filters.category) === cleanCat(cat.category);
+                  return (
+                    <button
+                      key={cat.category}
+                      onClick={() => handleFilterChange("category", isSelected ? "" : cat.category)}
+                      className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold border transition-all flex-shrink-0 whitespace-nowrap cursor-pointer ${
+                        isSelected
+                          ? "bg-orange-500 text-white border-orange-500 shadow-md"
+                          : "border-white/30 text-white/80 hover:border-white/60"
+                      }`}
+                    >
+                      {cat.category} ({cat.product_count})
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Right Arrow */}
