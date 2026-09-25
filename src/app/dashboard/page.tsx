@@ -49,9 +49,9 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-40">
+      <header className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent mt-8 sm:mt-12 lg:mt-14">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 py-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 py-6 sm:py-8">
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                 Dashboard

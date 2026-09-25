@@ -14,7 +14,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid notification type' }, { status: 400 });
     }
 
-    const result = await sendResendEmail({ to, name, type });
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const proto = request.headers.get('x-forwarded-proto') || 'https';
+    const origin = request.headers.get('origin') || (host ? `${proto}://${host}` : undefined);
+    const appUrl = body.appUrl || origin;
+
+    const result = await sendResendEmail({ to, name, type, appUrl });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 500 });

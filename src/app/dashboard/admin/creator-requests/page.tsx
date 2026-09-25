@@ -57,6 +57,7 @@ export default function CreatorRequestsPage() {
             to: targetRequest.email,
             name: targetRequest.name,
             type: 'approved',
+            appUrl: window.location.origin,
           }),
         }).catch((e) => console.error('Failed to send approval email:', e));
       }

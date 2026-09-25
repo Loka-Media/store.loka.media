@@ -6,9 +6,10 @@ export interface SendEmailOptions {
   to: string;
   name?: string;
   type: 'pending_approval' | 'approved' | 'rejected';
+  appUrl?: string;
 }
 
-export const sendResendEmail = async ({ to, name, type }: SendEmailOptions) => {
+export const sendResendEmail = async ({ to, name, type, appUrl }: SendEmailOptions) => {
   const apiKey = process.env.RESEND_API_KEY || '';
   const fromEmail = process.env.EMAIL_FROM || 'Loka Media <noreply@loka.media>';
 
@@ -18,6 +19,9 @@ export const sendResendEmail = async ({ to, name, type }: SendEmailOptions) => {
   }
 
   const recipientName = name || 'Creator';
+  const rawBaseUrl = appUrl || process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://store-loka-ui-v2-glksz.ondigitalocean.app';
+  const baseUrl = rawBaseUrl.replace(/\/$/, '');
+  const creatorLoginUrl = `${baseUrl}/auth/login?redirect=/dashboard/creator`;
 
   let subject = '';
   let html = '';
@@ -72,8 +76,8 @@ export const sendResendEmail = async ({ to, name, type }: SendEmailOptions) => {
           </p>
         </div>
         <div style="text-align: center; margin: 28px 0;">
-          <a href="https://store.loka.media/auth/login" style="display: inline-block; background-color: #FF6D1F; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; font-size: 14px; border-radius: 10px;">
-            Go to Creator Login →
+          <a href="${creatorLoginUrl}" style="display: inline-block; background-color: #FF6D1F; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; font-size: 14px; border-radius: 10px;">
+            Go to Creator Hub →
           </a>
         </div>
         <hr style="border: none; border-top: 1px solid #222222; margin: 28px 0 20px 0;" />
