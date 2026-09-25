@@ -221,7 +221,40 @@ function ProductsContent() {
   // 3. Reset pagination offset when filters change
   useEffect(() => {
     setPagination((prev) => ({ ...prev, offset: 0 }));
-  }, [searchInput, filters]);
+  }, [searchInput, filters, activeView]);
+
+  // Helper to extract normalized tags list from product
+  const getProductTagsList = (product: any): string[] => {
+    const raw =
+      product.tags ||
+      product.productData?.tags ||
+      product.details?.tags ||
+      product.base_product?.tags;
+
+    let list: string[] = [];
+    if (Array.isArray(raw)) {
+      list = raw;
+    } else if (typeof raw === "string") {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) list = parsed;
+        else list = raw.split(",").map((t: string) => t.trim());
+      } catch {
+        list = raw.split(",").map((t: string) => t.trim());
+      }
+    }
+    return list.map((t) => String(t).toLowerCase().trim()).filter(Boolean);
+  };
+
+  const productHasTag = (product: any, targetTag: "trending" | "new" | "popular"): boolean => {
+    const tags = getProductTagsList(product);
+    const target = targetTag.toLowerCase().trim();
+    return tags.some((t) => {
+      if (t === target) return true;
+      const words = t.split(/[\s,_\-]+/);
+      return words.includes(target);
+    });
+  };
 
   const cleanCat = (str: string) => str.toLowerCase().trim().replace(/[-_&]/g, ' ');
 
@@ -450,6 +483,11 @@ function ProductsContent() {
         return String(product.description || "").toLowerCase().includes(query);
       });
     }
+  }
+
+  // Step C: Tag Filter (Trending, New, Popular)
+  if (activeView) {
+    pool = pool.filter((product) => productHasTag(product, activeView));
   }
 
   const filteredProducts = pool;
@@ -852,7 +890,7 @@ function ProductsContent() {
               </div>
             )}
 
-            {(filters.category || searchInput || filters.creator || filters.minPrice !== undefined || filters.maxPrice !== undefined) && (
+            {(filters.category || searchInput || filters.creator || filters.minPrice !== undefined || filters.maxPrice !== undefined || activeView) && (
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -871,7 +909,7 @@ function ProductsContent() {
         </div>
       </div>
 
-      {!loading && paginatedProducts.length > 0 && filters.category === "" && (!searchInput || !searchInput.trim()) && !filters.creator && filters.minPrice === undefined && filters.maxPrice === undefined && (
+      {!loading && paginatedProducts.length > 0 && !activeView && filters.category === "" && (!searchInput || !searchInput.trim()) && !filters.creator && filters.minPrice === undefined && filters.maxPrice === undefined && (
         <FeaturedProducts products={paginatedProducts} />
       )}
 

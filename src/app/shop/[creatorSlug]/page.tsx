@@ -399,6 +399,38 @@ function CreatorShopContent() {
     }
   };
 
+  const getProductTagsList = (product: any): string[] => {
+    const raw =
+      product.tags ||
+      product.productData?.tags ||
+      product.details?.tags ||
+      product.base_product?.tags;
+
+    let list: string[] = [];
+    if (Array.isArray(raw)) {
+      list = raw;
+    } else if (typeof raw === "string") {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) list = parsed;
+        else list = raw.split(",").map((t: string) => t.trim());
+      } catch {
+        list = raw.split(",").map((t: string) => t.trim());
+      }
+    }
+    return list.map((t) => String(t).toLowerCase().trim()).filter(Boolean);
+  };
+
+  const productHasTag = (product: any, targetTag: "trending" | "new" | "popular"): boolean => {
+    const tags = getProductTagsList(product);
+    const target = targetTag.toLowerCase().trim();
+    return tags.some((t) => {
+      if (t === target) return true;
+      const words = t.split(/[\s,_\-]+/);
+      return words.includes(target);
+    });
+  };
+
   const cleanCat = (str: string) => str.toLowerCase().trim().replace(/[-_&]/g, ' ');
 
   // Helper for resilient category matching
@@ -479,29 +511,7 @@ function CreatorShopContent() {
 
     // Step 2: Handle activeView (trending, new, popular)
     if (activeView === "trending" || activeView === "new" || activeView === "popular") {
-      const targetTag = activeView.toLowerCase();
-      
-      const taggedProducts = pool.filter((p) => {
-        const rawTags = (p as any).tags;
-        const tagsList: string[] = Array.isArray(rawTags)
-          ? rawTags
-          : typeof rawTags === "string"
-          ? (rawTags as string).split(",")
-          : [];
-        return tagsList.some((t) => String(t).toLowerCase().trim() === targetTag);
-      });
-
-      if (taggedProducts.length > 0) {
-        return taggedProducts;
-      }
-
-      // Fallback: If no products have this explicit tag in DB, sort products so page never shows 0 products unexpectedly
-      const sorted = [...pool];
-      if (activeView === "new" || activeView === "trending") {
-        return sorted.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-      } else if (activeView === "popular") {
-        return sorted.sort((a: any, b: any) => parseFloat(String(b.base_price || 0)) - parseFloat(String(a.base_price || 0)));
-      }
+      return pool.filter((p) => productHasTag(p, activeView));
     }
 
     return pool;
