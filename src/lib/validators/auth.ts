@@ -25,8 +25,21 @@ export const usernameValidator = z
 
 export const phoneValidator = z
   .string()
+  .trim()
   .min(1, "Phone number is required")
-  .regex(/^[0-9]{10}$/, "Please enter a valid 10-digit mobile number");
+  .refine(
+    (val) => {
+      // Must contain only digits, spaces, hyphens, parentheses, dots, and optional leading +
+      const validPhonePattern = /^\+?[0-9\s\-().]{7,25}$/;
+      if (!validPhonePattern.test(val)) return false;
+
+      const digitsOnly = val.replace(/\D/g, "");
+      return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+    },
+    {
+      message: "Please enter a valid phone number (e.g., +44 7123 456789 or 07123 456789)",
+    }
+  );
 
 export const otpValidator = z
   .string()
@@ -141,4 +154,9 @@ export function validatePasswordMatch(
   confirmPassword: string
 ): true | string {
   return password === confirmPassword ? true : "Passwords don't match";
+}
+
+export function validatePhone(phone: string): true | string {
+  const result = phoneValidator.safeParse(phone);
+  return result.success ? true : result.error.issues[0].message;
 }
