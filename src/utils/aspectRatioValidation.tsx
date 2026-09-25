@@ -13,7 +13,7 @@ export function aspectRatioValidation(
   imageUrl: string,
   positionWidth: number,
   positionHeight: number,
-  tolerancePercent: number = 1 // Stricter tolerance for print compliance
+  tolerancePercent: number = 5.0 // Sensible tolerance for print compliance and pixel rounding
 ): Promise<AspectRatioResult> {
   return new Promise((resolve, reject) => {
     if (!imageUrl || !positionWidth || !positionHeight) {
@@ -26,26 +26,40 @@ export function aspectRatioValidation(
       const imageWidth = img.naturalWidth;
       const imageHeight = img.naturalHeight;
 
+      if (!imageWidth || !imageHeight) {
+        return resolve({
+          isValid: true,
+          percentDifference: 0,
+          correctedDimensions: null,
+        });
+      }
+
       const targetRatio = positionWidth / positionHeight;
       const fileRatio = imageWidth / imageHeight;
-      const relativeDiff = Math.abs(fileRatio - targetRatio) / targetRatio;
+      const relativeDiff = Math.abs(fileRatio - targetRatio) / fileRatio;
       const diffPercent = relativeDiff * 100;
 
       const valid = diffPercent <= tolerancePercent;
       let correctedDimensions: CorrectedDimensions | null = null;
 
       if (!valid) {
-        if (fileRatio < targetRatio) {
-          correctedDimensions = {
-            width: Math.round(imageHeight * targetRatio),
-            height: imageHeight,
-          };
+        let correctedWidth = positionWidth;
+        let correctedHeight = positionHeight;
+
+        if (targetRatio > fileRatio) {
+          // Current box is wider than the natural ratio: constrain width to height * fileRatio
+          correctedWidth = Math.round(positionHeight * fileRatio);
+          correctedHeight = Math.round(positionHeight);
         } else {
-          correctedDimensions = {
-            width: imageWidth,
-            height: Math.round(imageWidth / targetRatio),
-          };
+          // Current box is taller than the natural ratio: constrain height to width / fileRatio
+          correctedWidth = Math.round(positionWidth);
+          correctedHeight = Math.round(positionWidth / fileRatio);
         }
+
+        correctedDimensions = {
+          width: Math.max(1, correctedWidth),
+          height: Math.max(1, correctedHeight),
+        };
       }
 
       resolve({

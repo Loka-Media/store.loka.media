@@ -287,41 +287,24 @@ export const calculateAspectRatioAwareDimensions = async (
       const maxWidth = printFile.width * maxScale;
       const maxHeight = printFile.height * maxScale;
 
-      // SMART ADAPTATION: Choose best fitting strategy
-      if (adaptToArea && Math.abs(imageAspectRatio - printAreaAspectRatio) > 0.15) {
-        // Image aspect ratio is significantly different from print area
-        // AUTO-ADAPT to print area for better visual harmony
-
-        console.log(`🎯 Auto-adapting aspect ratio: ${imageAspectRatio.toFixed(2)} → ${printAreaAspectRatio.toFixed(2)}`);
-
-        designWidth = maxWidth;
+      // Always preserve natural image aspect ratio to prevent distortion and compliance errors
+      if (maxWidth / maxHeight > imageAspectRatio) {
         designHeight = maxHeight;
-        adapted = true;
-
-        console.log(`✨ Smart adaptation applied! Image will fill the print area beautifully.`);
+        designWidth = designHeight * imageAspectRatio;
       } else {
-        // Maintain original image aspect ratio
-        if (maxWidth / maxHeight > imageAspectRatio) {
-          designHeight = maxHeight;
-          designWidth = designHeight * imageAspectRatio;
-        } else {
-          designWidth = maxWidth;
-          designHeight = designWidth / imageAspectRatio;
-        }
+        designWidth = maxWidth;
+        designHeight = designWidth / imageAspectRatio;
       }
 
-      // Ensure minimum size constraints
+      // Ensure minimum size constraints while preserving ratio
       const minSize = Math.min(printFile.width, printFile.height) * 0.2;
-      if (designWidth < minSize || designHeight < minSize) {
-        const ratio = adapted ? printAreaAspectRatio : imageAspectRatio;
-        if (designWidth < minSize) {
-          designWidth = minSize;
-          designHeight = designWidth / ratio;
-        }
-        if (designHeight < minSize) {
-          designHeight = minSize;
-          designWidth = designHeight * ratio;
-        }
+      if (designWidth < minSize) {
+        designWidth = minSize;
+        designHeight = designWidth / imageAspectRatio;
+      }
+      if (designHeight < minSize) {
+        designHeight = minSize;
+        designWidth = designHeight * imageAspectRatio;
       }
 
       const finalDimensions = {

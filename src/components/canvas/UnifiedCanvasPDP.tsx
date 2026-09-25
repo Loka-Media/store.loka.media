@@ -52,7 +52,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CATEGORIES_MAP } from "@/config/categories";
 import { calculateFinalRetailPrice, calculateRetailPriceFromMarkup, ensure99Pricing } from "@/lib/pricing-utils";
 
-import { getCanvasDimensions, getActivePrintFile, applyQuickPosition } from "./utils";
+import { getCanvasDimensions, getActivePrintFile, applyQuickPosition, calculateAspectRatioAwareDimensions } from "./utils";
 import DesignCanvasTab from "./DesignCanvasTab";
 import PrintingTechniqueSelector from "./PrintingTechniqueSelector";
 import { RegionalAvailabilityPreview } from "./RegionalAvailabilityPreview";
@@ -1336,18 +1336,36 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
     setSelectedFileId(file.id);
 
-    // Calculate initial placement bounds (center of printable area)
-    const baseWidth = activePrintFile.width * 0.7;
-    const baseHeight = activePrintFile.height * 0.7;
-    const baseTop = (activePrintFile.height - baseHeight) / 2;
-    const baseLeft = (activePrintFile.width - baseWidth) / 2;
+    const imageUrl = file.file_url || file.thumbnail_url || file.preview_url || "";
+    let baseWidth = activePrintFile.width * 0.7;
+    let baseHeight = activePrintFile.height * 0.7;
+
+    if (imageUrl) {
+      try {
+        const dimensions = await calculateAspectRatioAwareDimensions(
+          imageUrl,
+          activePrintFile,
+          0.7,
+          false
+        );
+        baseWidth = dimensions.width;
+        baseHeight = dimensions.height;
+      } catch (err) {
+        console.warn("Could not calculate aspect-ratio aware dimensions:", err);
+      }
+    }
+
+    baseWidth = Math.round(baseWidth);
+    baseHeight = Math.round(baseHeight);
+    const baseTop = Math.max(0, Math.round((activePrintFile.height - baseHeight) / 2));
+    const baseLeft = Math.max(0, Math.round((activePrintFile.width - baseWidth) / 2));
 
     const newDesign: any = {
       id: Date.now(),
       printify_id: file.id,
       imageId: file.id,
       filename: file.filename || file.file_name,
-      url: file.file_url || file.thumbnail_url || file.preview_url || "",
+      url: imageUrl,
       type: "design",
       placement: activePlacement,
       position: {
@@ -1390,6 +1408,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       setSelectedDesignFile(updatedDesign);
     });
   };
+
+  const handleUpdateDesignPosition = useCallback((designId: number | string, updates: any) => {
+    setDesignFiles((prev) => prev.map((d) => (d.id === designId ? { ...d, position: { ...d.position, ...updates } } : d)));
+  }, [setDesignFiles]);
+
+  const handleSetAspectRatioIssues = useCallback((issues: any[]) => {
+    setAspectRatioIssues((prev) => {
+      if (prev.length === 0 && issues.length === 0) return prev;
+      if (prev.length === issues.length && JSON.stringify(prev) === JSON.stringify(issues)) return prev;
+      return issues;
+    });
+  }, []);
 
   // Metadata form changes
   const handleInputChange = (field: string, value: any) => {
@@ -2172,10 +2202,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     selectedDesignFile={selectedDesignFile}
                     setSelectedDesignFile={setSelectedDesignFile}
                     activePrintFile={getActivePrintFile(printFiles, selectedVariants, activePlacement)}
-                    updateDesignPosition={(designId, updates) => {
-                      setDesignFiles((prev) => prev.map((d) => (d.id === designId ? { ...d, position: { ...d.position, ...updates } } : d)));
-                    }}
-                    onAspectRatioIssues={setAspectRatioIssues}
+                    updateDesignPosition={handleUpdateDesignPosition}
+                    onAspectRatioIssues={handleSetAspectRatioIssues}
                     aspectRatioIssues={aspectRatioIssues}
                   />
 

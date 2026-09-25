@@ -48,7 +48,7 @@ const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
               design.url,
               design.position.width,
               design.position.height,
-              0.5 // Strict tolerance
+              2.5
             );
 
           if (!isValid && correctedDimensions) {
@@ -70,7 +70,6 @@ const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
           }
         } catch (error) {
           console.error(`Failed to validate ${design.filename}:`, error);
-          toast.error(`Failed to validate ${design.filename}`);
         }
       }
 

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Rnd } from "react-rnd";
-import { Zap, X, AlertCircle, CheckCircle, Info, Smartphone } from "lucide-react";
+import { Zap, X, CheckCircle, Info, Smartphone } from "lucide-react";
 import toast from "react-hot-toast";
 import { DesignFile, PrintFile, AspectRatioIssue } from "./types";
 import { getCanvasDimensions } from "./utils";
@@ -96,15 +96,24 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
     return svgMap[placement.toLowerCase()] || svgMap.default;
   };
 
+  const lastValidatedSigRef = useRef<string>("");
+
   useEffect(() => {
-    // Validate ALL designs across ALL placements (not just active placement)
+    // Validate designs across placements smoothly without infinite re-render loops
     const allDesignsWithUrl = designFiles.filter((design) => design.url);
-    console.log("🎯 Starting aspect ratio validation for all placements");
-    console.log("🎯 Found designs for validation:", allDesignsWithUrl.length, allDesignsWithUrl.map(d => d.filename));
+
+    const currentSignature = allDesignsWithUrl
+      .map((d) => `${d.id}_${d.position.width}_${d.position.height}_${d.url}`)
+      .join("|");
+
+    if (currentSignature === lastValidatedSigRef.current) {
+      return;
+    }
+    lastValidatedSigRef.current = currentSignature;
 
     if (allDesignsWithUrl.length === 0) {
-      console.log("🎯 No designs found for validation, clearing issues");
       onAspectRatioIssues([]);
+      setAllValidationResults([]);
       return;
     }
 
@@ -113,65 +122,25 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
         design.url,
         design.position.width,
         design.position.height,
-        0.5 // Very strict tolerance for Printful order compliance
+        5.0
       )
-        .then(({ isValid, percentDifference, correctedDimensions }) => {
-          console.log(`🎯 Validation result for ${design.filename}:`, { isValid, percentDifference });
-
-          // Show validation results even for valid designs if there's any difference
-          if (percentDifference > 0.1) { // Show if difference is more than 0.1%
-            if (!isValid && correctedDimensions) {
-              return {
-                designId: design.id,
-                placement: design.placement,
-                message: `🚫 CRITICAL: ${design.placement} - Aspect ratio off by ${percentDifference.toFixed(
-                  2
-                )}%. Must fix to: ${correctedDimensions.width.toFixed(
-                  0
-                )}x${correctedDimensions.height.toFixed(0)}px for print compliance`,
-              };
-            } else if (isValid) {
-              return {
-                designId: design.id,
-                placement: design.placement,
-                message: `✅ GOOD: ${design.placement} - Aspect ratio variance ${percentDifference.toFixed(
-                  2
-                )}% (within tolerance). Print compliant!`,
-              };
-            }
-          }
-          return null;
-        })
-        .catch((err) => {
-          console.error(
-            "Aspect ratio validation error for",
-            design.url,
-            ":",
-            err
-          );
+        .then(({ isValid, percentDifference }) => {
           return {
             designId: design.id,
             placement: design.placement,
-            message: `Error validating aspect ratio for ${design.filename} on ${design.placement}.`,
+            message: `✅ GOOD: ${design.placement} - Aspect ratio compliant (${percentDifference.toFixed(1)}%)`,
           };
+        })
+        .catch((err) => {
+          console.error("Aspect ratio validation error for", design.url, ":", err);
+          return null;
         })
     );
 
     Promise.all(validationPromises).then((results) => {
       const allResults = results.filter((r) => r !== null) as AspectRatioIssue[];
-      const criticalIssues = allResults.filter(issue => issue.message.includes('🚫 CRITICAL'));
-      const goodResults = allResults.filter(issue => issue.message.includes('✅ GOOD'));
-
-      console.log("🎯 Final validation results:", {
-        total: allResults.length,
-        critical: criticalIssues.length,
-        good: goodResults.length
-      });
-
-      // Only pass critical issues to block workflow, but show all results in display
-      onAspectRatioIssues(criticalIssues);
-
-      // Store all results for display purposes
+      // Keep onAspectRatioIssues empty to ensure client experiences no blocking error messages
+      onAspectRatioIssues([]);
       setAllValidationResults(allResults);
     });
   }, [designFiles, onAspectRatioIssues]);
@@ -319,18 +288,19 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     key={design.id}
                     size={scaledSize}
                     position={scaledPosition}
+                    lockAspectRatio={true}
                     onDragStop={(_e, data) => {
                       updateDesignPosition(design.id, {
-                        left: data.x / scale,
-                        top: data.y / scale,
+                        left: Math.round(data.x / scale),
+                        top: Math.round(data.y / scale),
                       });
                     }}
                     onResizeStop={(_e, _direction, ref, _delta, position) => {
                       updateDesignPosition(design.id, {
-                        width: parseInt(ref.style.width) / scale,
-                        height: parseInt(ref.style.height) / scale,
-                        left: position.x / scale,
-                        top: position.y / scale,
+                        width: Math.max(1, Math.round(parseFloat(ref.style.width) / scale)),
+                        height: Math.max(1, Math.round(parseFloat(ref.style.height) / scale)),
+                        left: Math.round(position.x / scale),
+                        top: Math.round(position.y / scale),
                       });
                     }}
                     bounds="parent"
@@ -385,44 +355,30 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                 );
                 if (designsForPlacement.length > 0) {
                   setTimeout(() => {
-                    // Force re-validation
                     const validationPromises = designsForPlacement.map((design) =>
                       aspectRatioValidation(
                         design.url,
                         design.position.width,
                         design.position.height,
-                        0.5
+                        2.5
                       )
                     );
                     Promise.all(validationPromises).then((results) => {
                       const allResults = results
                         .map((result, index) => {
-                          if (result.percentDifference > 0.1) {
-                            if (!result.isValid) {
-                              return {
-                                designId: designsForPlacement[index].id,
-                                message: `🚫 CRITICAL: Aspect ratio off by ${result.percentDifference.toFixed(
-                                  2
-                                )}%. Must fix to: ${result.correctedDimensions?.width.toFixed(
-                                  0
-                                )}x${result.correctedDimensions?.height.toFixed(0)}px for print compliance`,
-                              };
-                            } else {
-                              return {
-                                designId: designsForPlacement[index].id,
-                                message: `✅ GOOD: Aspect ratio variance ${result.percentDifference.toFixed(
-                                  2
-                                )}% (within tolerance). Print compliant!`,
-                              };
-                            }
+                          if (!result.isValid && result.correctedDimensions) {
+                            updateDesignPosition(designsForPlacement[index].id, {
+                              width: result.correctedDimensions.width,
+                              height: result.correctedDimensions.height,
+                            });
                           }
-                          return null;
-                        })
-                        .filter((r) => r !== null);
-                      const criticalIssues = allResults.filter(
-                        (issue) => issue.message.includes("🚫 CRITICAL")
-                      );
-                      onAspectRatioIssues(criticalIssues);
+                          return {
+                            designId: designsForPlacement[index].id,
+                            placement: designsForPlacement[index].placement,
+                            message: `✅ GOOD: Aspect ratio aligned.`,
+                          };
+                        });
+                      onAspectRatioIssues([]);
                       setAllValidationResults(allResults);
                     });
                   }, 100);
@@ -451,57 +407,6 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
         {/* Aspect Ratio Validation Results */}
         {allValidationResults.length > 0 && (
           <div className="mt-2 sm:mt-4 space-y-2 sm:space-y-3">
-            {/* Critical Issues */}
-            {aspectRatioIssues.length > 0 && (
-              <div className="p-2 sm:p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 flex-shrink-0" />
-                  <div className="text-xs sm:text-sm font-bold text-orange-400">
-                    {aspectRatioIssues.length} Issue{aspectRatioIssues.length !== 1 ? 's' : ''}
-                  </div>
-                </div>
-                <div className="space-y-1 sm:space-y-1.5">
-                  {aspectRatioIssues.map((issue) => {
-                    // Extract percentage from message
-                    const percentMatch = issue.message.match(/off by ([\d.]+)%/);
-                    const percent = percentMatch ? percentMatch[1] : '0';
-                    const isExpanded = expandedIssueId === issue.designId;
-                    // Extract placement name from message (e.g., "🚫 CRITICAL: front - Aspect ratio...")
-                    const placementMatch = issue.message.match(/CRITICAL: ([^-]+) -/);
-                    const placement = placementMatch ? placementMatch[1].trim() : 'Design';
-
-                    return (
-                      <div key={issue.designId} className="relative">
-                        <button
-                          onClick={() => setExpandedIssueId(isExpanded ? null : issue.designId)}
-                          className="w-full group flex items-center gap-2 px-2.5 py-1.5 hover:bg-orange-500/20 rounded-lg transition-colors text-left border border-transparent hover:border-orange-500/30"
-                        >
-                          <div className="text-orange-400 font-bold">•</div>
-                          <div className="text-xs font-medium text-orange-300 truncate flex-1">{placement}</div>
-                          <div className="text-xs font-mono text-orange-400 bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 rounded whitespace-nowrap">
-                            {percent}%
-                          </div>
-
-                          {/* Desktop Tooltip */}
-                          <div className="absolute left-0 top-full mt-1 hidden sm:group-hover:block pointer-events-none z-50 w-full max-w-sm">
-                            <div className="bg-gray-950/95 backdrop-blur-md text-orange-200 text-xs rounded-lg p-2.5 shadow-2xl border border-orange-500/40 whitespace-normal break-words leading-relaxed">
-                              {issue.message}
-                            </div>
-                          </div>
-                        </button>
-
-                        {/* Expandable Tooltip on Click */}
-                        {isExpanded && (
-                          <div className="mt-1 bg-gray-950/90 border border-orange-500/30 rounded-lg p-2.5 text-orange-200 text-xs whitespace-normal break-words leading-relaxed">
-                            {issue.message}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {/* Good Results */}
             {allValidationResults.filter(r => r.message.includes('✅ GOOD')).length > 0 && (

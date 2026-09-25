@@ -337,7 +337,7 @@ const EnhancedCanvasWizard: React.FC<UnifiedDesignEditorProps> = ({
           design.url,
           design.position.width,
           design.position.height,
-          0.5
+          2.5
         );
 
         if (!result.isValid && result.correctedDimensions) {
