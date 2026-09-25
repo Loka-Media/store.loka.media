@@ -271,15 +271,41 @@ export default function EditProfilePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-base sm:text-lg font-bold text-white">Account Type</p>
-                  <p className="text-xs sm:text-sm text-gray-400 font-medium mt-1">Your Current Account Role</p>
+                  <p className="text-xs sm:text-sm text-gray-400 font-medium mt-1">
+                    {user?.creatorStatus === 'pending'
+                      ? 'Creator application under review'
+                      : 'Your Current Account Role'}
+                  </p>
                 </div>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold capitalize border ${
-                  user.role === 'creator'
-                    ? 'bg-orange-500/20 text-orange-400 border-orange-500/50'
-                    : 'bg-blue-500/20 text-blue-400 border-blue-500/50'
-                }`}>
-                  {user.role}
-                </span>
+                {(() => {
+                  if (user?.role === 'admin') {
+                    return (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border bg-purple-500/20 text-purple-400 border-purple-500/50">
+                        Admin
+                      </span>
+                    );
+                  }
+                  if (user?.role === 'creator' || user?.creatorStatus === 'approved') {
+                    return (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border bg-orange-500/20 text-orange-400 border-orange-500/50">
+                        Creator
+                      </span>
+                    );
+                  }
+                  if (user?.creatorStatus === 'pending') {
+                    return (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-yellow-500/20 text-yellow-300 border-yellow-500/50">
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+                        Waiting for Approval
+                      </span>
+                    );
+                  }
+                  return (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border bg-blue-500/20 text-blue-400 border-blue-500/50">
+                      User
+                    </span>
+                  );
+                })()}
               </div>
             </div>
 

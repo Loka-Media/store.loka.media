@@ -552,9 +552,25 @@ export default function ProfilePage() {
                   </svg>
                 </div>
 
-                <p className="text-lg sm:text-2xl font-bold text-white capitalize truncate">
-                  {user?.role || "User"}
-                </p>
+                <div className="text-right">
+                  <p className={`font-bold truncate ${
+                    user?.creatorStatus === 'pending'
+                      ? 'text-sm sm:text-base text-yellow-400 flex items-center gap-1.5 justify-end'
+                      : (user?.role === 'creator' || user?.creatorStatus === 'approved')
+                        ? 'text-lg sm:text-2xl text-orange-400 capitalize'
+                        : 'text-lg sm:text-2xl text-white capitalize'
+                  }`}>
+                    {user?.creatorStatus === 'pending' && (
+                      <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+                    )}
+                    {(() => {
+                      if (user?.role === 'admin') return 'Admin';
+                      if (user?.role === 'creator' || user?.creatorStatus === 'approved') return 'Creator';
+                      if (user?.creatorStatus === 'pending') return 'Waiting for Approval';
+                      return 'User';
+                    })()}
+                  </p>
+                </div>
               </div>
 
               <p className="text-right text-white/60 font-medium text-xs sm:text-base">
