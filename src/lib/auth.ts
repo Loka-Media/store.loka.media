@@ -201,6 +201,37 @@ export const adminAPI = {
     return response.data;
   },
 
+  removeCreator: async (requestId: number, data?: { userId?: number; deactivateProducts?: boolean; reason?: string }) => {
+    const response = await fetch(`/api/admin/creator-requests/${requestId}/remove`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
+      },
+      body: JSON.stringify(data || {}),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to remove creator');
+    }
+    return result;
+  },
+
+  deleteCreatorRequest: async (requestId: number) => {
+    const response = await fetch(`/api/admin/creator-requests/${requestId}/remove`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
+      },
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to delete creator request');
+    }
+    return result;
+  },
+
   // Creator Earnings APIs
   getCreatorEarnings: async (params?: { limit?: number; offset?: number; sortBy?: string }) => {
     const response = await api.get('/api/admin/creators/earnings', { params });

@@ -217,6 +217,9 @@ function AdminEarningsPageContent() {
                         <th className="px-6 py-4 text-left font-bold text-gray-300">
                           Last Activity
                         </th>
+                        <th className="px-6 py-4 text-left font-bold text-gray-300">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -263,6 +266,16 @@ function AdminEarningsPageContent() {
                             {earning.lastEarningDate
                               ? new Date(earning.lastEarningDate).toLocaleDateString()
                               : 'N/A'}
+                          </td>
+                          <td className="px-6 py-4 text-sm whitespace-nowrap">
+                            <Link
+                              href={`/dashboard/admin/creator-requests?search=${encodeURIComponent(
+                                earning.creatorName || earning.creatorId.toString()
+                              )}`}
+                              className="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-lg text-orange-400 bg-orange-500/10 hover:bg-orange-500 hover:text-black border border-orange-500/20 transition-all"
+                            >
+                              Manage / Remove
+                            </Link>
                           </td>
                         </tr>
                       ))}
