@@ -36,6 +36,15 @@ import { resolveProductCategoryName, calculateSellingPrice } from '@/lib/pricing
 // Admin API functions using the configured axios instance
 const adminAPI = {
   getDashboardStats: async () => {
+    try {
+      const res = await fetch('/api/admin/orders/stats');
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.stats) return data;
+      }
+    } catch (e) {
+      console.warn('Local admin orders stats fetch warning:', e);
+    }
     const response = await api.get('/api/unified-checkout/admin/dashboard/stats');
     return response.data;
   },
@@ -293,7 +302,6 @@ export default function AdminOrdersPage() {
 
   // Filters
   const [statusFilter, setStatusFilter] = useState('');
-  const [orderTypeFilter, setOrderTypeFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -314,7 +322,6 @@ export default function AdminOrdersPage() {
   const filteredOrders = useMemo(() => {
     return allOrders.filter(order => {
       if (statusFilter && order.order_status !== statusFilter) return false;
-      if (orderTypeFilter && order.order_type !== orderTypeFilter) return false;
       if (priorityFilter && (order.priority || 'low') !== priorityFilter) return false;
 
       if (searchTerm) {
@@ -348,7 +355,7 @@ export default function AdminOrdersPage() {
 
       return true;
     });
-  }, [allOrders, statusFilter, orderTypeFilter, priorityFilter, searchTerm]);
+  }, [allOrders, statusFilter, priorityFilter, searchTerm]);
 
   // Dynamic filter options derived from actual data
   const uniqueStatuses = useMemo(() =>
@@ -356,18 +363,79 @@ export default function AdminOrdersPage() {
     [allOrders]
   );
 
-  const uniqueOrderTypes = useMemo(() =>
-    [...new Set(allOrders.map(o => o.order_type))]
-      .filter(Boolean)
-      .filter(t => t.toLowerCase() !== 'printful')
-      .sort(),
-    [allOrders]
-  );
 
   const uniquePriorities = useMemo(() =>
     [...new Set(allOrders.map(o => o.priority || 'low'))].filter(Boolean).sort(),
     [allOrders]
   );
+
+  // Compute real & accurate stats dynamically from allOrders
+  const computedStats = useMemo(() => {
+    const totalOrders = allOrders.length;
+    const pendingOrders = allOrders.filter(o => o.order_status === 'pending').length;
+    const processingOrders = allOrders.filter(o => o.order_status === 'processing').length;
+    const fulfilledOrders = allOrders.filter(o => ['shipped', 'fulfilled', 'delivered'].includes(o.order_status)).length;
+    const cancelledOrders = allOrders.filter(o => o.order_status === 'cancelled').length;
+
+    // Escrowed / Pending funds (funds held and not yet released to vendor/creator)
+    const escrowedFunds = allOrders
+      .filter(o => 
+        (o.payment_status === 'escrowed' || o.payment_status === 'pending' || o.order_status === 'pending') && 
+        o.order_status !== 'cancelled'
+      )
+      .reduce((sum, o) => sum + (parseFloat(o.customer_payment_amount) || 0), 0);
+
+    const totalRevenue = allOrders
+      .filter(o => o.order_status !== 'cancelled')
+      .reduce((sum, o) => sum + (parseFloat(o.customer_payment_amount) || 0), 0);
+
+    // Verification Queue: pending orders awaiting admin / payment verification
+    const verificationQueue = allOrders.filter(
+      o => (o.order_status === 'pending' || o.payment_status === 'pending') && o.order_status !== 'cancelled'
+    ).length;
+
+    // Urgent items: orders marked urgent/high priority or pending > 48h
+    const urgentItems = allOrders.filter(o => {
+      if (o.order_status === 'cancelled' || o.order_status === 'fulfilled' || o.order_status === 'shipped') return false;
+      if (o.priority === 'urgent' || o.priority === 'high') return true;
+      const createdAt = new Date(o.created_at).getTime();
+      const hoursOld = (Date.now() - createdAt) / (1000 * 60 * 60);
+      return hoursOld > 48 && o.order_status === 'pending';
+    }).length;
+
+    return {
+      totalOrders,
+      pendingOrders,
+      processingOrders,
+      fulfilledOrders,
+      cancelledOrders,
+      escrowedFunds,
+      totalRevenue,
+      verificationQueue,
+      urgentItems,
+    };
+  }, [allOrders]);
+
+  // Combine DB API stats with client computed stats to ensure non-zero accurate real data
+  const displayPendingOrders = stats?.orders?.pending && stats.orders.pending > 0
+    ? stats.orders.pending
+    : (computedStats.pendingOrders || stats?.orders?.paymentReceived || 0);
+
+  const displayEscrowedFunds = stats?.payments?.totalEscrowed && parseFloat(stats.payments.totalEscrowed) > 0
+    ? parseFloat(stats.payments.totalEscrowed)
+    : computedStats.escrowedFunds;
+
+  const displayTotalRevenue = (stats?.payments as any)?.totalRevenue && parseFloat((stats?.payments as any)?.totalRevenue) > 0
+    ? parseFloat((stats?.payments as any)?.totalRevenue)
+    : computedStats.totalRevenue;
+
+  const displayVerificationQueue = stats?.verification?.totalPending && stats.verification.totalPending > 0
+    ? stats.verification.totalPending
+    : computedStats.verificationQueue;
+
+  const displayUrgentItems = stats?.verification?.urgent !== undefined && stats.verification.urgent > 0
+    ? stats.verification.urgent
+    : computedStats.urgentItems;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -670,9 +738,14 @@ export default function AdminOrdersPage() {
         </div>
 
         {/* Stats Cards */}
-        {stats && (
+        {(stats || allOrders.length > 0) && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
+            <div 
+              onClick={() => setStatusFilter(statusFilter === 'pending' ? '' : 'pending')}
+              className={`bg-neutral-900/60 backdrop-blur-sm rounded-2xl border p-7 transition-all duration-200 cursor-pointer ${
+                statusFilter === 'pending' ? 'border-orange-500 bg-neutral-900/90' : 'border-white/10 hover:border-white/20'
+              }`}
+            >
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-blue-500/10 p-3 rounded-xl">
                   <Package className="h-6 w-6 text-blue-400" />
@@ -683,8 +756,11 @@ export default function AdminOrdersPage() {
                       Pending Orders
                     </dt>
                     <dd className="text-2xl font-bold text-white mt-1">
-                      {stats.orders.paymentReceived}
+                      {displayPendingOrders}
                     </dd>
+                    <p className="text-xs text-gray-500 mt-1 truncate">
+                      {statusFilter === 'pending' ? 'Click to show all' : `${computedStats.totalOrders} total orders`}
+                    </p>
                   </dl>
                 </div>
               </div>
@@ -701,14 +777,22 @@ export default function AdminOrdersPage() {
                       Escrowed Funds
                     </dt>
                     <dd className="text-2xl font-bold text-white mt-1">
-                      ${parseFloat(stats.payments.totalEscrowed).toFixed(2)}
+                      ${displayEscrowedFunds.toFixed(2)}
                     </dd>
+                    <p className="text-xs text-gray-500 mt-1 truncate">
+                      Revenue: ${displayTotalRevenue.toFixed(2)}
+                    </p>
                   </dl>
                 </div>
               </div>
             </div>
 
-            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
+            <div 
+              onClick={() => setStatusFilter(statusFilter === 'pending' ? '' : 'pending')}
+              className={`bg-neutral-900/60 backdrop-blur-sm rounded-2xl border p-7 transition-all duration-200 cursor-pointer ${
+                statusFilter === 'pending' ? 'border-amber-500 bg-neutral-900/90' : 'border-white/10 hover:border-white/20'
+              }`}
+            >
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-amber-500/10 p-3 rounded-xl">
                   <Clock className="h-6 w-6 text-amber-400" />
@@ -719,14 +803,22 @@ export default function AdminOrdersPage() {
                       Verification Queue
                     </dt>
                     <dd className="text-2xl font-bold text-white mt-1">
-                      {stats.verification.totalPending}
+                      {displayVerificationQueue}
                     </dd>
+                    <p className="text-xs text-gray-500 mt-1 truncate">
+                      Awaiting review / release
+                    </p>
                   </dl>
                 </div>
               </div>
             </div>
 
-            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
+            <div 
+              onClick={() => setPriorityFilter(priorityFilter === 'urgent' ? '' : 'urgent')}
+              className={`bg-neutral-900/60 backdrop-blur-sm rounded-2xl border p-7 transition-all duration-200 cursor-pointer ${
+                priorityFilter === 'urgent' ? 'border-red-500 bg-neutral-900/90' : 'border-white/10 hover:border-white/20'
+              }`}
+            >
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-red-500/10 p-3 rounded-xl">
                   <AlertTriangle className="h-6 w-6 text-red-400" />
@@ -737,8 +829,11 @@ export default function AdminOrdersPage() {
                       Urgent Items
                     </dt>
                     <dd className="text-2xl font-bold text-white mt-1">
-                      {stats.verification.urgent}
+                      {displayUrgentItems}
                     </dd>
+                    <p className="text-xs text-gray-500 mt-1 truncate">
+                      {priorityFilter === 'urgent' ? 'Click to show all' : 'Priority or pending > 48h'}
+                    </p>
                   </dl>
                 </div>
               </div>
@@ -748,7 +843,7 @@ export default function AdminOrdersPage() {
 
         {/* Filters */}
         <div className="bg-neutral-900/40 backdrop-blur-sm rounded-2xl border border-white/10 p-8 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-300 mb-3">
                 Status
@@ -762,24 +857,6 @@ export default function AdminOrdersPage() {
                 {uniqueStatuses.map(status => (
                   <option key={status} value={status}>
                     {status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-3">
-                Order Type
-              </label>
-              <select
-                value={orderTypeFilter}
-                onChange={(e) => setOrderTypeFilter(e.target.value)}
-                className="w-full p-3 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-orange-500 transition-all cursor-pointer"
-              >
-                <option value="">All Types</option>
-                {uniqueOrderTypes.map(t => (
-                  <option key={t} value={t}>
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
                   </option>
                 ))}
               </select>

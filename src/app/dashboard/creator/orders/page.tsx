@@ -42,6 +42,7 @@ interface Product {
   tracked_at: string;
   paid_at: string | null;
   images: string[];
+  quantity?: number;
 }
 
 interface Order {
@@ -136,6 +137,20 @@ const getCommissionStatusSummary = (statuses: string[]) => {
   return unique.length === 1 ? unique[0] : 'mixed';
 };
 
+const getOrderCommissionStatus = (order: Order) => {
+  if (order.order_status === 'cancelled') {
+    const summary = getCommissionStatusSummary(order.commission_statuses);
+    if (summary === 'refunded' && order.payment_status !== 'refunded') {
+      return 'cancelled';
+    }
+    if (summary === 'refunded' || summary === 'cancelled') {
+      return order.payment_status === 'refunded' ? 'refunded' : 'cancelled';
+    }
+    return 'cancelled';
+  }
+  return getCommissionStatusSummary(order.commission_statuses);
+};
+
 const formatCurrency = (amount: string | number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
     typeof amount === 'string' ? parseFloat(amount) : amount
@@ -143,6 +158,22 @@ const formatCurrency = (amount: string | number) =>
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+const getProductImage = (product?: Product | any) => {
+  if (!product) return null;
+  const img = (Array.isArray(product.images) && product.images[0]) ||
+    product.product_image ||
+    product.image_url ||
+    product.thumbnail_url ||
+    (Array.isArray(product.product_images) && product.product_images[0]) ||
+    (typeof product.images === 'string' && product.images.startsWith('http') ? product.images : null);
+  return typeof img === 'string' && img.length > 0 ? img : null;
+};
+
+const getProductName = (product?: Product | any) => {
+  if (!product) return 'Unnamed Product';
+  return product.product_name || product.name || product.title || 'Unnamed Product';
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -242,14 +273,29 @@ export default function CreatorOrdersPage() {
     if (!orderToCancel) return;
     try {
       setCancellingId(orderToCancel.id);
-      await api.post(`/api/creator/orders/${orderToCancel.id}/cancel`);
-      toast.success(`Order ${orderToCancel.order_number} cancelled successfully!`);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      const res = await fetch(`/api/creator/orders/${orderToCancel.id}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || 'Failed to cancel order');
+      }
+
+      const pStatus = json.data?.printifyCancelled ? ' • Printify order cancelled' : '';
+      const emailStatus = json.data?.emailSent ? ' • Customer cancellation email sent' : '';
+      toast.success(`Order ${orderToCancel.order_number} cancelled!${pStatus}${emailStatus}`);
       setShowModal(false);
       setOrderToCancel(null);
-      loadOrders();
+      await loadOrders();
     } catch (error: any) {
       console.error('Cancel order error:', error);
-      toast.error(error.response?.data?.error || 'Failed to cancel order');
+      toast.error(error.message || 'Failed to cancel order');
     } finally {
       setCancellingId(null);
     }
@@ -273,7 +319,7 @@ export default function CreatorOrdersPage() {
   const pendingCommission = useMemo(
     () =>
       allOrders
-        .filter(o => getCommissionStatusSummary(o.commission_statuses) === 'pending')
+        .filter(o => getOrderCommissionStatus(o) === 'pending' && o.order_status !== 'cancelled')
         .reduce((acc, o) => acc + parseFloat(o.total_commission || '0'), 0),
     [allOrders]
   );
@@ -351,7 +397,7 @@ export default function CreatorOrdersPage() {
   const filteredOrders = useMemo(() => {
     return allOrders.filter(order => {
       if (statusFilter && order.order_status !== statusFilter) return false;
-      if (commissionFilter && getCommissionStatusSummary(order.commission_statuses) !== commissionFilter) return false;
+      if (commissionFilter && getOrderCommissionStatus(order) !== commissionFilter) return false;
       if (searchTerm) {
         const t = searchTerm.toLowerCase();
         const targets = [
@@ -375,7 +421,7 @@ export default function CreatorOrdersPage() {
     [allOrders]
   );
   const uniqueCommissions = useMemo(
-    () => [...new Set(allOrders.map(o => getCommissionStatusSummary(o.commission_statuses)))].filter(Boolean).sort(),
+    () => [...new Set(allOrders.map(o => getOrderCommissionStatus(o)))].filter(Boolean).sort(),
     [allOrders]
   );
 
@@ -394,7 +440,14 @@ export default function CreatorOrdersPage() {
         return (parseFloat(a.customer_payment_amount) - parseFloat(b.customer_payment_amount)) * dir;
       case 'total_commission':
         return (parseFloat(a.total_commission) - parseFloat(b.total_commission)) * dir;
-      case 'products_count': return (a.products_count - b.products_count) * dir;
+      case 'products_count': {
+        const nameA = a.products?.[0]?.product_name || '';
+        const nameB = b.products?.[0]?.product_name || '';
+        if (nameA && nameB && nameA !== nameB) {
+          return nameA.localeCompare(nameB) * dir;
+        }
+        return (a.products_count - b.products_count) * dir;
+      }
       default:
         return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir;
     }
@@ -573,13 +626,60 @@ export default function CreatorOrdersPage() {
                             <tr
                               key={order.id}
                               onClick={() => { setSelectedOrder(order); setShowModal(true); }}
-                              className="hover:bg-white/[0.02] transition-colors cursor-pointer"
+                              className="hover:bg-white/[0.02] transition-colors cursor-pointer group"
                             >
                               <td className="px-6 py-4">
-                                <span className="text-sm font-semibold text-white">{order.order_number}</span>
+                                <span className="text-sm font-semibold text-white group-hover:text-orange-400 transition-colors">{order.order_number}</span>
                               </td>
                               <td className="px-6 py-4">
-                                <span className="text-sm text-gray-300">{order.products_count}</span>
+                                {(() => {
+                                  const productsList = (order.products && order.products.length > 0)
+                                    ? order.products
+                                    : Array.isArray((order as any).order_items)
+                                    ? (order as any).order_items
+                                    : typeof (order as any).order_items === 'string'
+                                    ? (() => { try { return JSON.parse((order as any).order_items); } catch { return []; } })()
+                                    : [];
+                                  const firstProd = productsList[0];
+                                  const prodName = getProductName(firstProd) || `Product (${order.products_count || 1})`;
+                                  const prodImg = getProductImage(firstProd);
+                                  const extraCount = productsList.length > 1
+                                    ? productsList.length - 1
+                                    : (order.products_count > 1 ? order.products_count - 1 : 0);
+                                  const allNames = productsList.map((p: any) => getProductName(p)).filter(Boolean).join(', ');
+
+                                  return (
+                                    <div className="flex items-center gap-3 min-w-[200px] max-w-[320px]" title={allNames || prodName}>
+                                      <div className="w-10 h-10 rounded-lg border border-white/10 bg-neutral-800 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                        {prodImg ? (
+                                          <img
+                                            src={prodImg}
+                                            alt={prodName}
+                                            className="w-full h-full object-cover"
+                                          />
+                                        ) : (
+                                          <Package className="w-4 h-4 text-gray-500" />
+                                        )}
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-medium text-white group-hover:text-orange-400 transition-colors truncate">
+                                          {prodName}
+                                        </p>
+                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                          {extraCount > 0 ? (
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                                              +{extraCount} more
+                                            </span>
+                                          ) : (
+                                            <span className="text-xs text-gray-500">
+                                              Qty: {firstProd?.quantity || order.products_count || 1}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
                               </td>
                               <td className="px-6 py-4">
                                 <span className="text-sm font-semibold text-white">{formatCurrency(order.customer_payment_amount)}</span>
@@ -594,8 +694,8 @@ export default function CreatorOrdersPage() {
                                 <span className="text-sm text-gray-400">{formatDate(order.created_at)}</span>
                               </td>
                               <td className="px-6 py-4 text-right">
-                                <span className={getCommissionBadge(getCommissionStatusSummary(order.commission_statuses))}>
-                                  {getCommissionStatusSummary(order.commission_statuses)}
+                                <span className={getCommissionBadge(getOrderCommissionStatus(order))}>
+                                  {getOrderCommissionStatus(order)}
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-right">
@@ -643,8 +743,8 @@ export default function CreatorOrdersPage() {
                           </div>
                           <div className="flex flex-col items-end gap-1.5">
                             <span className={getOrderStatusBadge(order.order_status)}>{order.order_status.replace('_', ' ')}</span>
-                            <span className={getCommissionBadge(getCommissionStatusSummary(order.commission_statuses))}>
-                              {getCommissionStatusSummary(order.commission_statuses)} commission
+                            <span className={getCommissionBadge(getOrderCommissionStatus(order))}>
+                              {getOrderCommissionStatus(order)} commission
                             </span>
                           </div>
                         </div>
@@ -662,24 +762,46 @@ export default function CreatorOrdersPage() {
                           ))}
                         </div>
 
-                        {order.products && order.products.length > 0 && (
-                          <div className="flex items-center gap-2 mb-4">
-                            {order.products.slice(0, 4).map((p, i) => (
-                              <div key={i} className="w-10 h-10 rounded-lg border border-white/10 bg-neutral-800 overflow-hidden flex-shrink-0">
-                                {p.images && p.images.length > 0 ? (
-                                  <img src={p.images[0]} alt={p.product_name} className="w-full h-full object-cover" />
+                        {(() => {
+                          const prods = (order.products && order.products.length > 0)
+                            ? order.products
+                            : Array.isArray((order as any).order_items)
+                            ? (order as any).order_items
+                            : [];
+                          if (prods.length === 0) return null;
+                          const first = prods[0];
+                          const name = getProductName(first);
+                          const img = getProductImage(first);
+                          const extra = prods.length > 1 ? prods.length - 1 : (order.products_count > 1 ? order.products_count - 1 : 0);
+
+                          return (
+                            <div className="flex items-center gap-3 p-3 bg-black/40 rounded-xl border border-white/5 mb-4 group-hover:border-white/10 transition-colors">
+                              <div className="w-12 h-12 rounded-lg border border-white/10 bg-neutral-800 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                {img ? (
+                                  <img src={img} alt={name} className="w-full h-full object-cover" />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <Package className="w-4 h-4 text-gray-600" />
-                                  </div>
+                                  <Package className="w-5 h-5 text-gray-500" />
                                 )}
                               </div>
-                            ))}
-                            {order.products.length > 4 && (
-                              <span className="text-xs text-gray-500">+{order.products.length - 4} more</span>
-                            )}
-                          </div>
-                        )}
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold text-white truncate" title={name}>
+                                  {name}
+                                </p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  {extra > 0 ? (
+                                    <span className="text-xs text-orange-400 font-medium">
+                                      +{extra} more item{extra > 1 ? 's' : ''}
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs text-gray-500">
+                                      Qty: {first.quantity || order.products_count || 1}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
 
                         <div className="flex items-center justify-end pt-4 border-t border-white/5">
                           <button className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
@@ -790,8 +912,8 @@ export default function CreatorOrdersPage() {
                   </div>
                   <div className="bg-neutral-950/60 border border-white/5 rounded-xl p-4">
                     <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Commission</p>
-                    <span className={getCommissionBadge(getCommissionStatusSummary(selectedOrder.commission_statuses))}>
-                      {getCommissionStatusSummary(selectedOrder.commission_statuses)}
+                    <span className={getCommissionBadge(getOrderCommissionStatus(selectedOrder))}>
+                      {getOrderCommissionStatus(selectedOrder)}
                     </span>
                   </div>
                 </div>

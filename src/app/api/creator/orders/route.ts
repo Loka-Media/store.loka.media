@@ -122,12 +122,20 @@ export async function GET(request: NextRequest) {
 
           totalCommission += commAmt;
 
-          const commStatus = matchingComm?.status || 'processing';
+          let commStatus = matchingComm?.status || 'processing';
+          if (order.order_status === 'cancelled') {
+            if (commStatus === 'refunded' && order.payment_status !== 'refunded') {
+              commStatus = 'cancelled';
+            } else if (commStatus !== 'refunded') {
+              commStatus = 'cancelled';
+            }
+          }
           commissionStatuses.push(commStatus);
 
           return {
             product_id: item.product_id,
-            product_name: item.product_name || item.name || 'Unnamed Product',
+            product_name: item.product_name || item.name || item.title || 'Unnamed Product',
+            quantity,
             order_amount: totalItemPrice,
             commission_amount: commAmt.toFixed(2),
             status: commStatus,
