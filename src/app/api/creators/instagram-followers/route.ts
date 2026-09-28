@@ -11,7 +11,7 @@ interface CachedFollowerData {
 const cache = new Map<string, CachedFollowerData>();
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
-export function extractInstagramHandle(input: string): string {
+function extractInstagramHandle(input: string): string {
   if (!input) return "";
   let clean = input.trim();
 
@@ -40,7 +40,7 @@ export function extractInstagramHandle(input: string): string {
   return clean;
 }
 
-export async function fetchInstagramFollowers(handle: string): Promise<{ followers: string; count: number }> {
+async function fetchInstagramFollowers(handle: string): Promise<{ followers: string; count: number }> {
   if (!handle) return { followers: "0", count: 0 };
 
   const key = handle.toLowerCase();
