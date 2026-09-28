@@ -79,16 +79,30 @@ export async function POST(
         [targetUserId]
       );
 
-      // 4. Optionally deactivate active products belonging to this creator
+      // 4. Deactivate ALL products belonging to this creator
       if (deactivateProducts) {
         const prodResult = await queryDb<any>(
           `UPDATE products 
            SET status = 'inactive', updated_at = NOW() 
-           WHERE created_by = $1 AND status = 'active'
+           WHERE created_by = $1
            RETURNING id`,
           [targetUserId]
         );
         deactivatedProductsCount = prodResult?.length || 0;
+
+        // Clean up pending cart items containing this creator's products
+        await queryDb(
+          `DELETE FROM cart_items 
+           WHERE product_id IN (SELECT id FROM products WHERE created_by = $1)`,
+          [targetUserId]
+        ).catch(() => null);
+
+        // Clean up wishlist items containing this creator's products
+        await queryDb(
+          `DELETE FROM wishlist_items 
+           WHERE product_id IN (SELECT id FROM products WHERE created_by = $1)`,
+          [targetUserId]
+        ).catch(() => null);
       }
     }
 
