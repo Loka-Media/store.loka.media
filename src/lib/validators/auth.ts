@@ -27,19 +27,33 @@ export const phoneValidator = z
   .string()
   .trim()
   .min(1, "Phone number is required")
-  .refine(
-    (val) => {
-      // Must contain only digits, spaces, hyphens, parentheses, dots, and optional leading +
-      const validPhonePattern = /^\+?[0-9\s\-().]{7,25}$/;
-      if (!validPhonePattern.test(val)) return false;
-
-      const digitsOnly = val.replace(/\D/g, "");
-      return digitsOnly.length >= 7 && digitsOnly.length <= 15;
-    },
-    {
-      message: "Please enter a valid phone number (e.g., +44 7123 456789 or 07123 456789)",
+  .superRefine((val, ctx) => {
+    // Must contain only digits, spaces, hyphens, parentheses, dots, and optional leading +
+    const validPhonePattern = /^\+?[0-9\s\-().]{7,25}$/;
+    if (!validPhonePattern.test(val)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Please enter a valid phone number (e.g., +44 7123 456789 or +1234567890)",
+      });
+      return;
     }
-  );
+
+    const digitsOnly = val.replace(/\D/g, "");
+    if (digitsOnly.length < 7) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Phone number must have at least 7 digits",
+      });
+      return;
+    }
+    if (digitsOnly.length > 14) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Phone number cannot exceed 14 digits (combining area code and local number)",
+      });
+      return;
+    }
+  });
 
 export const otpValidator = z
   .string()

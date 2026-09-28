@@ -211,6 +211,11 @@ export default function UnifiedCheckoutPage() {
         setLoading(false);
         return;
       }
+      if (phoneDigits.length > 14) {
+        toast.error("Phone number cannot exceed 14 digits (combining area code and local number)");
+        setLoading(false);
+        return;
+      }
 
       // Validate state for all countries
       if (customerInfo.country && !customerInfo.state) {

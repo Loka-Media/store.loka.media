@@ -37,6 +37,7 @@ function CustomerSignupContent() {
     formState: { errors },
   } = useForm<CustomerRegisterFormData>({
     resolver: zodResolver(customerRegisterSchema),
+    mode: "onTouched",
   });
 
   const onSubmit = async (data: CustomerRegisterFormData) => {

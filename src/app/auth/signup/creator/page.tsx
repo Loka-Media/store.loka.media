@@ -37,6 +37,7 @@ function CreatorSignupContent() {
     formState: { errors },
   } = useForm<CreatorRegisterFormData>({
     resolver: zodResolver(creatorRegisterSchema),
+    mode: "onTouched",
   });
 
   const onSubmit = async (data: CreatorRegisterFormData) => {

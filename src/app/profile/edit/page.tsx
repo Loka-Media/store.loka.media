@@ -100,6 +100,16 @@ export default function EditProfilePage() {
       return;
     }
 
+    const phoneDigits = formData.phone.replace(/\D/g, '');
+    if (phoneDigits.length < 7) {
+      toast.error('Phone number must have at least 7 digits');
+      return;
+    }
+    if (phoneDigits.length > 14) {
+      toast.error('Phone number cannot exceed 14 digits (combining area code and local number)');
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -260,6 +270,9 @@ export default function EditProfilePage() {
                 className="w-full px-4 py-2.5 sm:py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
                 placeholder="Enter your phone number"
               />
+              {formData.phone && formData.phone.replace(/\D/g, '').length > 14 && (
+                <p className="text-xs text-red-400 mt-1">❌ Phone number cannot exceed 14 digits</p>
+              )}
             </div>
 
             {/* Instagram Profile URL */}

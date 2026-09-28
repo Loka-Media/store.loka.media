@@ -38,12 +38,17 @@ export const validateShippingAddress = (
     if (!customerInfo.phone) {
       errors.push({ field: 'phone', message: 'Phone number is required' });
     } else {
-      // Basic phone validation - must have at least 7 digits
+      // Phone validation - must have at least 7 digits and maximum 14 digits
       const digitsOnly = customerInfo.phone.replace(/\D/g, '');
       if (digitsOnly.length < 7) {
         errors.push({
           field: 'phone',
           message: 'Phone number must have at least 7 digits'
+        });
+      } else if (digitsOnly.length > 14) {
+        errors.push({
+          field: 'phone',
+          message: 'Phone number cannot exceed 14 digits'
         });
       }
     }

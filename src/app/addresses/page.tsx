@@ -199,8 +199,8 @@ export default function AddressesPage() {
       toast.error("Phone number must have at least 7 digits");
       return;
     }
-    if (phoneDigits.length > 15) {
-      toast.error("Phone number is too long (maximum 15 digits)");
+    if (phoneDigits.length > 14) {
+      toast.error("Phone number cannot exceed 14 digits (combining area code and local number)");
       return;
     }
     if (!addressForm.phone.startsWith('+')) {
@@ -483,12 +483,15 @@ export default function AddressesPage() {
                       {addressForm.phone.replace(/\D/g, '').length < 7 && (
                         <p className="text-xs text-red-400 mt-1">❌ Phone must have at least 7 digits</p>
                       )}
-                      {addressForm.phone.replace(/\D/g, '').length >= 7 && !addressForm.phone.startsWith('+') && (
+                      {addressForm.phone.replace(/\D/g, '').length > 14 && (
+                        <p className="text-xs text-red-400 mt-1">❌ Phone number must not exceed 14 digits</p>
+                      )}
+                      {addressForm.phone.replace(/\D/g, '').length >= 7 && addressForm.phone.replace(/\D/g, '').length <= 14 && !addressForm.phone.startsWith('+') && (
                         <p className="text-xs text-yellow-400 mt-1">
                           💡 Tip: Start with + for international format (e.g. +1 for US/Canada)
                         </p>
                       )}
-                      {addressForm.phone.replace(/\D/g, '').length >= 7 && addressForm.phone.startsWith('+') && (
+                      {addressForm.phone.replace(/\D/g, '').length >= 7 && addressForm.phone.replace(/\D/g, '').length <= 14 && addressForm.phone.startsWith('+') && (
                         <p className="text-xs text-green-400 mt-1">✓ Valid phone format</p>
                       )}
                     </>

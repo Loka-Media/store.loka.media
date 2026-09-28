@@ -67,7 +67,10 @@ export const CustomerInformationForm = ({
           {customerInfo.phone && customerInfo.phone.replace(/\D/g, '').length < 7 && (
             <p className="text-xs text-red-400 mt-1">Phone must have at least 7 digits</p>
           )}
-          {!customerInfo.phone.startsWith('+') && customerInfo.phone.length > 0 && (
+          {customerInfo.phone && customerInfo.phone.replace(/\D/g, '').length > 14 && (
+            <p className="text-xs text-red-400 mt-1">Phone number cannot exceed 14 digits</p>
+          )}
+          {!customerInfo.phone.startsWith('+') && customerInfo.phone.length > 0 && customerInfo.phone.replace(/\D/g, '').length <= 14 && (
             <p className="text-xs text-yellow-400 mt-1">
               Tip: Include country code (e.g. +1 for US/Canada)
             </p>
