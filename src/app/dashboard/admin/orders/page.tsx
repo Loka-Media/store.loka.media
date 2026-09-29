@@ -417,9 +417,9 @@ export default function AdminOrdersPage() {
   }, [allOrders]);
 
   // Combine DB API stats with client computed stats to ensure non-zero accurate real data
-  const displayPendingOrders = stats?.orders?.pending && stats.orders.pending > 0
-    ? stats.orders.pending
-    : (computedStats.pendingOrders || stats?.orders?.paymentReceived || 0);
+  const displayPendingOrders = computedStats.pendingOrders > 0
+    ? Math.max(stats?.orders?.pending || 0, computedStats.pendingOrders)
+    : (stats?.orders?.pending || stats?.orders?.paymentReceived || 0);
 
   const displayEscrowedFunds = stats?.payments?.totalEscrowed && parseFloat(stats.payments.totalEscrowed) > 0
     ? parseFloat(stats.payments.totalEscrowed)
@@ -430,11 +430,11 @@ export default function AdminOrdersPage() {
     : computedStats.totalRevenue;
 
   const displayVerificationQueue = stats?.verification?.totalPending && stats.verification.totalPending > 0
-    ? stats.verification.totalPending
+    ? Math.max(stats.verification.totalPending, computedStats.verificationQueue)
     : computedStats.verificationQueue;
 
   const displayUrgentItems = stats?.verification?.urgent !== undefined && stats.verification.urgent > 0
-    ? stats.verification.urgent
+    ? Math.max(stats.verification.urgent, computedStats.urgentItems)
     : computedStats.urgentItems;
 
   useEffect(() => {
@@ -740,12 +740,7 @@ export default function AdminOrdersPage() {
         {/* Stats Cards */}
         {(stats || allOrders.length > 0) && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div 
-              onClick={() => setStatusFilter(statusFilter === 'pending' ? '' : 'pending')}
-              className={`bg-neutral-900/60 backdrop-blur-sm rounded-2xl border p-7 transition-all duration-200 cursor-pointer ${
-                statusFilter === 'pending' ? 'border-orange-500 bg-neutral-900/90' : 'border-white/10 hover:border-white/20'
-              }`}
-            >
+            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-blue-500/10 p-3 rounded-xl">
                   <Package className="h-6 w-6 text-blue-400" />
@@ -759,7 +754,7 @@ export default function AdminOrdersPage() {
                       {displayPendingOrders}
                     </dd>
                     <p className="text-xs text-gray-500 mt-1 truncate">
-                      {statusFilter === 'pending' ? 'Click to show all' : `${computedStats.totalOrders} total orders`}
+                      {computedStats.totalOrders} total orders
                     </p>
                   </dl>
                 </div>
@@ -787,12 +782,7 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div 
-              onClick={() => setStatusFilter(statusFilter === 'pending' ? '' : 'pending')}
-              className={`bg-neutral-900/60 backdrop-blur-sm rounded-2xl border p-7 transition-all duration-200 cursor-pointer ${
-                statusFilter === 'pending' ? 'border-amber-500 bg-neutral-900/90' : 'border-white/10 hover:border-white/20'
-              }`}
-            >
+            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-amber-500/10 p-3 rounded-xl">
                   <Clock className="h-6 w-6 text-amber-400" />
@@ -813,12 +803,7 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            <div 
-              onClick={() => setPriorityFilter(priorityFilter === 'urgent' ? '' : 'urgent')}
-              className={`bg-neutral-900/60 backdrop-blur-sm rounded-2xl border p-7 transition-all duration-200 cursor-pointer ${
-                priorityFilter === 'urgent' ? 'border-red-500 bg-neutral-900/90' : 'border-white/10 hover:border-white/20'
-              }`}
-            >
+            <div className="bg-neutral-900/60 backdrop-blur-sm rounded-2xl border border-white/10 p-7 hover:border-white/20 transition-all duration-200">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-red-500/10 p-3 rounded-xl">
                   <AlertTriangle className="h-6 w-6 text-red-400" />
@@ -832,7 +817,7 @@ export default function AdminOrdersPage() {
                       {displayUrgentItems}
                     </dd>
                     <p className="text-xs text-gray-500 mt-1 truncate">
-                      {priorityFilter === 'urgent' ? 'Click to show all' : 'Priority or pending > 48h'}
+                      Priority or pending &gt; 48h
                     </p>
                   </dl>
                 </div>
@@ -947,11 +932,9 @@ export default function AdminOrdersPage() {
                           {[
                             { field: 'order_number', label: 'Order ID' },
                             { field: 'customer_name', label: 'Customer' },
-                            { field: 'order_type', label: 'Type' },
                             { field: 'customer_payment_amount', label: 'Total' },
                             { field: 'order_status', label: 'Order Status' },
                             { field: 'payment_status', label: 'Payment' },
-                            { field: 'priority', label: 'Priority' },
                             { field: 'created_at', label: 'Date' },
                           ].map(({ field, label }) => (
                             <th
@@ -1001,11 +984,6 @@ export default function AdminOrdersPage() {
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <span className="text-sm text-gray-300 capitalize">
-                                {order.order_type}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
                               <span className="text-sm font-semibold text-white">
                                 ${parseFloat(order.customer_payment_amount).toFixed(2)}
                               </span>
@@ -1018,11 +996,6 @@ export default function AdminOrdersPage() {
                             <td className="px-6 py-4">
                               <span className={getStatusBadge(order.payment_status, 'payment')}>
                                 {order.payment_status.replace('_', ' ')}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={getPriorityBadge(order.priority || 'low')}>
-                                {order.priority || 'low'}
                               </span>
                             </td>
                             <td className="px-6 py-4">
