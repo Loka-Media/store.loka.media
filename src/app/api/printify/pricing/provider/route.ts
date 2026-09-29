@@ -248,9 +248,14 @@ export async function GET(request: NextRequest) {
 
     // ── Layer 1: in-memory / persistent verified cache ───────────────────
     await printifyPricingService.initialize().catch(() => {});
-    await printifyPricingService.fetchProviderCostsOnDemand(blueprintId, providerId).catch(() => {});
 
-    const hasData = !forceRefresh && !isStale && printifyPricingService.hasProviderData(blueprintId, providerId);
+    let hasData = !forceRefresh && !isStale && printifyPricingService.hasProviderData(blueprintId, providerId);
+
+    // Only scan on-demand if not already cached and not explicitly force-refreshing
+    if (!hasData && !forceRefresh) {
+      await printifyPricingService.fetchProviderCostsOnDemand(blueprintId, providerId).catch(() => {});
+      hasData = printifyPricingService.hasProviderData(blueprintId, providerId);
+    }
 
     if (hasData) {
       // Build variant cost map from the in-memory index
