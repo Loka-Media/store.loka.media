@@ -2,8 +2,8 @@
 /* disable-eslint */
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -90,14 +90,20 @@ interface PrintfulProduct {
 
 
 
-function CreatorCatalogContent() {
+export default function CreatorCatalogPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const categoryParam = searchParams.get("category");
-  const subcategoryParam = searchParams.get("subcategory");
+  const productsCache = useRef<Record<number, PrintfulProduct[]>>({});
   const [products, setProducts] = useState<PrintfulProduct[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = sessionStorage.getItem("cached_printify_categories");
+        if (saved) return JSON.parse(saved);
+      } catch (_) {}
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] =
     useState<PrintfulProduct | null>(null);
   const [filters, setFilters] = useState({
@@ -118,6 +124,13 @@ function CreatorCatalogContent() {
 
   const fetchCatalog = useCallback(
     async (categoryId: number) => {
+      // Instant cache hit - zero latency, zero flicker
+      if (productsCache.current[categoryId] && productsCache.current[categoryId].length > 0) {
+        setProducts(productsCache.current[categoryId]);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         console.log(
@@ -148,7 +161,9 @@ function CreatorCatalogContent() {
           toast("No products found in this category", { duration: 4000 });
         }
 
-        setProducts(response.result || []);
+        const fetched = response.result || [];
+        productsCache.current[categoryId] = fetched;
+        setProducts(fetched);
       } catch (error: any) {
         console.error("Failed to fetch catalog:", error);
         console.error("Error details:", {
@@ -185,20 +200,24 @@ function CreatorCatalogContent() {
     fetchCategories();
   }, []);
 
-  const syncCatalogFromParams = useCallback(
-    (cats: Category[], catParam: string | null, subcatParam: string | null) => {
+  const restoreCatalogState = useCallback(
+    (cats: Category[]) => {
       if (typeof window === "undefined" || cats.length === 0) return;
 
-      if (catParam) {
-        const catId = parseInt(catParam, 10);
+      const urlParams = new URLSearchParams(window.location.search);
+      const categoryParam = urlParams.get("category");
+      const subcategoryParam = urlParams.get("subcategory");
+
+      if (categoryParam) {
+        const catId = parseInt(categoryParam, 10);
         const targetCat = cats.find((c) => c.id === catId);
         if (targetCat) {
           setSelectedCategory(targetCat);
           fetchCatalog(targetCat.id);
 
-          if (subcatParam) {
+          if (subcategoryParam) {
             const subcats = SUBCATEGORIES_CONFIG[targetCat.id] || [];
-            const targetSubcat = subcats.find((s) => s.id === subcatParam);
+            const targetSubcat = subcats.find((s) => s.id === subcategoryParam);
             setSelectedSubcategory(targetSubcat || null);
           } else {
             setSelectedSubcategory(null);
@@ -207,7 +226,7 @@ function CreatorCatalogContent() {
         }
       }
 
-      // No category param in URL -> explicitly show the main category selection page ("Choose a Category")
+      // No category param in URL -> explicitly show "Choose a Category" (zero flicker)
       setSelectedCategory(null);
       setSelectedSubcategory(null);
       setProducts([]);
@@ -223,17 +242,27 @@ function CreatorCatalogContent() {
       const response = await printifyAPI.getCategories();
       const cats = response.result?.categories || [];
       setCategories(cats);
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("cached_printify_categories", JSON.stringify(cats));
+        } catch (_) {}
+      }
+      restoreCatalogState(cats);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     }
   };
 
-  // React to URL search param changes automatically
+  // Sync with browser Back / Forward buttons instantly (popstate)
   useEffect(() => {
-    if (categories.length > 0) {
-      syncCatalogFromParams(categories, categoryParam, subcategoryParam);
-    }
-  }, [categories, categoryParam, subcategoryParam, syncCatalogFromParams]);
+    const handlePopState = () => {
+      if (categories.length > 0) {
+        restoreCatalogState(categories);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [categories, restoreCatalogState]);
 
   const handleSelectCategory = (category: Category) => {
     window.scrollTo(0, 0);
@@ -242,9 +271,10 @@ function CreatorCatalogContent() {
     setFilters((prev) => ({ ...prev, search: "" }));
 
     if (typeof window !== "undefined") {
+      const newUrl = `${window.location.pathname}?category=${category.id}`;
+      window.history.pushState({ categoryId: category.id, subcategoryId: null }, "", newUrl);
       sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: category.id, subcategoryId: null }));
     }
-    router.push(`/dashboard/creator/catalog?category=${category.id}`);
 
     fetchCatalog(category.id);
   };
@@ -254,11 +284,10 @@ function CreatorCatalogContent() {
     setSelectedSubcategory(subcat);
     setFilters((prev) => ({ ...prev, search: "" }));
 
-    if (selectedCategory) {
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: selectedCategory.id, subcategoryId: subcat.id }));
-      }
-      router.push(`/dashboard/creator/catalog?category=${selectedCategory.id}&subcategory=${subcat.id}`);
+    if (typeof window !== "undefined" && selectedCategory) {
+      const newUrl = `${window.location.pathname}?category=${selectedCategory.id}&subcategory=${subcat.id}`;
+      window.history.pushState({ categoryId: selectedCategory.id, subcategoryId: subcat.id }, "", newUrl);
+      sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: selectedCategory.id, subcategoryId: subcat.id }));
     }
   };
 
@@ -267,11 +296,10 @@ function CreatorCatalogContent() {
     setSelectedSubcategory(null);
     setFilters((prev) => ({ ...prev, search: "" }));
 
-    if (selectedCategory) {
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: selectedCategory.id, subcategoryId: null }));
-      }
-      router.push(`/dashboard/creator/catalog?category=${selectedCategory.id}`);
+    if (typeof window !== "undefined" && selectedCategory) {
+      const newUrl = `${window.location.pathname}?category=${selectedCategory.id}`;
+      window.history.pushState({ categoryId: selectedCategory.id, subcategoryId: null }, "", newUrl);
+      sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: selectedCategory.id, subcategoryId: null }));
     }
   };
 
@@ -283,9 +311,9 @@ function CreatorCatalogContent() {
     setProducts([]);
 
     if (typeof window !== "undefined") {
+      window.history.pushState({ categoryId: null, subcategoryId: null }, "", window.location.pathname);
       sessionStorage.removeItem("last_catalog_state");
     }
-    router.push("/dashboard/creator/catalog");
   };
 
   const handleCreateProduct = (printfulProduct: PrintfulProduct) => {
@@ -335,9 +363,10 @@ function CreatorCatalogContent() {
     setFilters((prev) => ({ ...prev, search: "" }));
 
     if (typeof window !== "undefined") {
+      const newUrl = `${window.location.pathname}?category=${category.id}&subcategory=${subcat.id}`;
+      window.history.pushState({ categoryId: category.id, subcategoryId: subcat.id }, "", newUrl);
       sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: category.id, subcategoryId: subcat.id }));
     }
-    router.push(`/dashboard/creator/catalog?category=${category.id}&subcategory=${subcat.id}`);
 
     await fetchCatalog(category.id);
   };
@@ -1417,13 +1446,5 @@ function SubcategorySelection({ category, products, loading, onSelectSubcategory
         </div>
       )}
     </div>
-  );
-}
-
-export default function CreatorCatalogPage() {
-  return (
-    <Suspense fallback={<CreativeLoader variant="design" message="Loading catalog..." />}>
-      <CreatorCatalogContent />
-    </Suspense>
   );
 }
