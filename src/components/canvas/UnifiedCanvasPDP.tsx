@@ -56,7 +56,7 @@ import { getCanvasDimensions, getActivePrintFile, applyQuickPosition, calculateA
 import DesignCanvasTab from "./DesignCanvasTab";
 import PrintingTechniqueSelector from "./PrintingTechniqueSelector";
 import { RegionalAvailabilityPreview } from "./RegionalAvailabilityPreview";
-import { FrontSVG, BackSVG, LeftSleeveSVG, RightSleeveSVG } from "./PlacementSVGs";
+import { FrontSVG, BackSVG, LeftSleeveSVG, RightSleeveSVG, CollarSVG } from "./PlacementSVGs";
 
 interface UnifiedCanvasPDPProps {
   selectedProduct: any;
@@ -2033,7 +2033,29 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 {/* Placement Cards */}
                 <div className="space-y-3">
                   <label className="text-xs sm:text-sm font-semibold text-gray-300">Choose Placement Target</label>
-                  <div className={`grid gap-3 grid-cols-2 sm:grid-cols-${Math.min(getSupportedPlacements().length, 4)}`}>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      {(() => {
+                        const pf = getActivePrintFile(printFiles, selectedVariants, activePlacement);
+                        if (pf && pf.width && pf.height) {
+                          return (
+                            <div className="flex items-center gap-2 text-[11px] text-gray-400 bg-white/5 border border-white/10 rounded-xl px-3 py-1">
+                              <span className="font-semibold text-orange-400 capitalize">{getPlacementLabel(activePlacement)}</span>
+                              <span>•</span>
+                              <span>{pf.width} × {pf.height} px</span>
+                              <span>•</span>
+                              <span>{pf.dpi || 300} DPI</span>
+                            </div>
+                          );
+                        }
+                        return <span className="text-[11px] text-gray-500">Select an area to place your artwork</span>;
+                      })()}
+                      <span className="text-[11px] text-gray-400">
+                        {getSupportedPlacements().length} print areas available
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {getSupportedPlacements().map((placement) => {
                       const isActive = activePlacement === placement;
                       const hasAssigned = designFiles.find((d) => d.placement === placement);

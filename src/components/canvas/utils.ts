@@ -190,9 +190,19 @@ export const getActivePrintFile = (
     return printFiles.printfiles[0] || DEFAULT_FALLBACK_PRINTFILE;
   }
 
-  // Map placements (UI can be sleeve_left/left/left_sleeve/front/back etc.)
-  const cleanPlacement = (activePlacement || "front").toLowerCase();
+  // Map placements (UI can be sleeve_left/left/left_sleeve/collar/hood/front/back etc.)
+  const cleanPlacement = (activePlacement || "front").toLowerCase().trim();
   let printFileId = variantPrintFile.placements[activePlacement] || variantPrintFile.placements[cleanPlacement];
+
+  if (!printFileId) {
+    // Try case-insensitive matching across all variant placement keys
+    const matchKey = Object.keys(variantPrintFile.placements).find(
+      (k) => k.toLowerCase().trim() === cleanPlacement
+    );
+    if (matchKey) {
+      printFileId = variantPrintFile.placements[matchKey];
+    }
+  }
 
   if (!printFileId) {
     let keysToTry: string[] = [];
@@ -204,6 +214,18 @@ export const getActivePrintFile = (
       keysToTry = ["front", "front_print", "front_chest", "chest", "default", "all_over", "print", "legs"];
     } else if (cleanPlacement === "back") {
       keysToTry = ["back", "back_print", "back_chest"];
+    } else if (cleanPlacement.includes("collar")) {
+      keysToTry = ["collar", "collar_band", "neck_collar", "neck"];
+    } else if (cleanPlacement.includes("neck")) {
+      keysToTry = ["neck", "neck_inner", "inner_neck", "neck_outer", "outer_neck", "neck_label", "label", "tag"];
+    } else if (cleanPlacement.includes("hood")) {
+      keysToTry = ["hood", "hood_left", "hood_right"];
+    } else if (cleanPlacement.includes("pocket")) {
+      keysToTry = ["pocket", "front_pocket"];
+    } else if (cleanPlacement.includes("leg")) {
+      keysToTry = ["leg_left", "left_leg", "leg_right", "right_leg"];
+    } else if (cleanPlacement.includes("wrap") || cleanPlacement.includes("all")) {
+      keysToTry = ["all_over", "all", "wrap", "full_wrap"];
     }
     
     for (const key of keysToTry) {
@@ -211,6 +233,20 @@ export const getActivePrintFile = (
         printFileId = variantPrintFile.placements[key];
         break;
       }
+    }
+  }
+
+  // Check if printfiles has a direct match by position if printFileId wasn't found in placements map
+  if (!printFileId && Array.isArray(printFiles.printfiles)) {
+    const directMatch = printFiles.printfiles.find((pf: any) => {
+      const pos = (pf?.position || "").toLowerCase().trim();
+      return pos === cleanPlacement || 
+        (cleanPlacement.includes("collar") && pos.includes("collar")) ||
+        (cleanPlacement.includes("sleeve_left") && (pos.includes("left") || pos.includes("left_sleeve"))) ||
+        (cleanPlacement.includes("sleeve_right") && (pos.includes("right") || pos.includes("right_sleeve")));
+    });
+    if (directMatch) {
+      return directMatch;
     }
   }
 

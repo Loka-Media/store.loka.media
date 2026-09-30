@@ -65,6 +65,113 @@ function getColorCode(colorName: string): string {
   return '#cccccc';
 }
 
+function getPrintfilePosCode(posStr: string): number {
+  const s = (posStr || '').toLowerCase().trim();
+  if (s.includes('front')) return 1;
+  if (s.includes('back')) return 2;
+  if (s === 'left' || s.includes('left_sleeve') || s.includes('sleeve_left')) return 3;
+  if (s === 'right' || s.includes('right_sleeve') || s.includes('sleeve_right')) return 4;
+  if (s.includes('collar')) return 5;
+  if (s.includes('neck') || s.includes('label')) return 6;
+  if (s.includes('hood')) return 7;
+  if (s.includes('pocket')) return 8;
+  if (s.includes('waistband') || s.includes('cuff')) return 9;
+  if (s.includes('leg_left') || s.includes('left_leg')) return 10;
+  if (s.includes('leg_right') || s.includes('right_leg')) return 11;
+  if (s.includes('wrap') || s.includes('all')) return 12;
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = ((hash << 5) - hash) + s.charCodeAt(i);
+    hash |= 0;
+  }
+  return 100 + (Math.abs(hash) % 899);
+}
+
+function computePrintFilesFromVariants(variants: any[]) {
+  if (!variants || variants.length === 0) return null;
+
+  const variant_printfiles = variants.map((v: any) => {
+    const placements: Record<string, number> = {};
+    const placeholders = (v.placeholders && v.placeholders.length > 0)
+      ? v.placeholders
+      : [{ position: 'front', width: 4000, height: 4000 }];
+
+    placeholders.forEach((p: any) => {
+      const rawPos = (p.position || 'front').toLowerCase().trim();
+      const code = getPrintfilePosCode(rawPos);
+      const printfile_id = v.id * 1000 + code;
+
+      // Assign exact raw position
+      placements[rawPos] = printfile_id;
+
+      // Also set aliases so any lookup variant works flawlessly
+      if (rawPos === 'left' || rawPos === 'left_sleeve' || rawPos === 'sleeve_left') {
+        placements['left'] = printfile_id;
+        placements['sleeve_left'] = printfile_id;
+        placements['left_sleeve'] = printfile_id;
+      } else if (rawPos === 'right' || rawPos === 'right_sleeve' || rawPos === 'sleeve_right') {
+        placements['right'] = printfile_id;
+        placements['sleeve_right'] = printfile_id;
+        placements['right_sleeve'] = printfile_id;
+      } else if (rawPos.includes('collar')) {
+        placements['collar'] = printfile_id;
+      } else if (rawPos.includes('neck')) {
+        placements['neck'] = printfile_id;
+        placements['neck_inner'] = printfile_id;
+        placements['inner_neck'] = printfile_id;
+      }
+    });
+
+    if (Object.keys(placements).length === 0) {
+      placements['front'] = v.id * 1000 + 1;
+    }
+
+    return {
+      variant_id: v.id,
+      placements
+    };
+  });
+
+  const printfiles: any[] = [];
+  variants.forEach((v: any) => {
+    const placeholders = (v.placeholders && v.placeholders.length > 0)
+      ? v.placeholders
+      : [{ position: 'front', width: 4000, height: 4000 }];
+
+    placeholders.forEach((p: any) => {
+      const rawPos = (p.position || 'front').toLowerCase().trim();
+      const code = getPrintfilePosCode(rawPos);
+      const printfile_id = v.id * 1000 + code;
+
+      if (!printfiles.some(pf => pf.printfile_id === printfile_id)) {
+        printfiles.push({
+          printfile_id,
+          position: rawPos,
+          width: p.width || 4000,
+          height: p.height || 4000,
+          dpi: p.dpi || 300
+        });
+      }
+    });
+  });
+
+  if (printfiles.length === 0) {
+    printfiles.push({
+      printfile_id: 1,
+      position: 'front',
+      width: 4000,
+      height: 4000,
+      dpi: 300
+    });
+  }
+
+  return {
+    variant_printfiles,
+    printfiles,
+    available_techniques: ['DTG', 'AOP']
+  };
+}
+
 function CanvasContent() {
   const { user } = useAuth();
   const router = useRouter();
@@ -336,75 +443,11 @@ function CanvasContent() {
                 setSelectedVariants(availableVariants.map((v: any) => v.id));
               }
 
-              const variant_printfiles = availableVariants.map((v: any) => {
-                const placements: Record<string, number> = {};
-                const placeholders = (v.placeholders && v.placeholders.length > 0)
-                  ? v.placeholders
-                  : [{ position: 'front', width: 4000, height: 4000 }];
-
-                placeholders.forEach((p: any) => {
-                  const rawPos = (p.position || 'front').toLowerCase();
-                  const pos = rawPos === 'left_sleeve' ? 'left' : rawPos === 'right_sleeve' ? 'right' : rawPos;
-                  if (pos === 'left') {
-                    placements['left'] = v.id * 10 + 3;
-                    placements['sleeve_left'] = v.id * 10 + 3;
-                    placements['left_sleeve'] = v.id * 10 + 3;
-                  } else if (pos === 'right') {
-                    placements['right'] = v.id * 10 + 4;
-                    placements['sleeve_right'] = v.id * 10 + 4;
-                    placements['right_sleeve'] = v.id * 10 + 4;
-                  } else {
-                    const code = pos.includes('front') ? 1 : pos.includes('back') ? 2 : 5;
-                    placements[pos] = v.id * 10 + code;
-                    placements['front'] = placements['front'] || (v.id * 10 + code);
-                  }
-                });
-
-                if (Object.keys(placements).length === 0) {
-                  placements['front'] = v.id * 10 + 1;
-                }
-
-                return {
-                  variant_id: v.id,
-                  placements
-                };
-              });
-
-              const printfiles: any[] = [];
-              availableVariants.forEach((v: any) => {
-                const placeholders = (v.placeholders && v.placeholders.length > 0)
-                  ? v.placeholders
-                  : [{ position: 'front', width: 4000, height: 4000 }];
-
-                placeholders.forEach((p: any) => {
-                  const rawPos = (p.position || 'front').toLowerCase();
-                  const pos = rawPos === 'left_sleeve' ? 'left' : rawPos === 'right_sleeve' ? 'right' : rawPos;
-                  const printfile_id = v.id * 10 + (pos.includes('front') ? 1 : pos.includes('back') ? 2 : pos === 'left' ? 3 : pos === 'right' ? 4 : 5);
-                  if (!printfiles.some(pf => pf.printfile_id === printfile_id)) {
-                    printfiles.push({
-                      printfile_id,
-                      width: p.width || 4000,
-                      height: p.height || 4000
-                    });
-                  }
-                });
-              });
-
-              if (printfiles.length === 0) {
-                printfiles.push({
-                  printfile_id: 1,
-                  width: 4000,
-                  height: 4000
-                });
+              const computedPrintFiles = computePrintFilesFromVariants(availableVariants);
+              if (computedPrintFiles) {
+                setPrintFiles(computedPrintFiles);
+                console.log('computedPrintFiles from Printify placeholders:', computedPrintFiles);
               }
-
-              const computedPrintFiles = {
-                variant_printfiles,
-                printfiles,
-                available_techniques: ['DTG']
-              };
-              setPrintFiles(computedPrintFiles);
-              console.log('computedPrintFiles from Printify placeholders:', computedPrintFiles);
             }
 
             if (!existingProductData) {
@@ -670,49 +713,7 @@ function CanvasContent() {
       const providerMinCost = variantCosts.length > 0 ? Math.min(...variantCosts).toFixed(2) : selectedProduct.cost;
 
       // Compute printFiles from variant placeholders for the new provider
-      let computedPrintFiles = null;
-      if (updatedVariants.length > 0) {
-        const variant_printfiles = updatedVariants.map((v: any) => {
-          const placements: Record<string, number> = {};
-          v.placeholders?.forEach((p: any) => {
-            const pos = p.position === 'left_sleeve' ? 'left' : p.position === 'right_sleeve' ? 'right' : p.position;
-            if (pos === 'left') {
-              placements['left'] = v.id * 10 + 3;
-              placements['sleeve_left'] = v.id * 10 + 3;
-            } else if (pos === 'right') {
-              placements['right'] = v.id * 10 + 4;
-              placements['sleeve_right'] = v.id * 10 + 4;
-            } else {
-              placements[pos] = v.id * 10 + (pos === 'front' ? 1 : pos === 'back' ? 2 : 5);
-            }
-          });
-          return {
-            variant_id: v.id,
-            placements
-          };
-        });
-
-        const printfiles: any[] = [];
-        updatedVariants.forEach((v: any) => {
-          v.placeholders?.forEach((p: any) => {
-            const pos = p.position === 'left_sleeve' ? 'left' : p.position === 'right_sleeve' ? 'right' : p.position;
-            const printfile_id = v.id * 10 + (pos === 'front' ? 1 : pos === 'back' ? 2 : pos === 'left' ? 3 : pos === 'right' ? 4 : 5);
-            if (!printfiles.some(pf => pf.printfile_id === printfile_id)) {
-              printfiles.push({
-                printfile_id,
-                width: p.width,
-                height: p.height
-              });
-            }
-          });
-        });
-
-        computedPrintFiles = {
-          variant_printfiles,
-          printfiles,
-          available_techniques: ['DTG']
-        };
-      }
+      const computedPrintFiles = computePrintFilesFromVariants(updatedVariants);
 
       setSelectedProduct((prev: any) => {
         if (!prev) return prev;
@@ -787,8 +788,10 @@ function CanvasContent() {
   };
 
   const handlePrintFilesLoaded = (printFilesData: any) => {
-    setPrintFiles(printFilesData);
-    console.log("Print files loaded:", printFilesData);
+    if (printFilesData?.variant_printfiles && printFilesData.variant_printfiles.length > 0) {
+      setPrintFiles(printFilesData);
+      console.log("Print files loaded:", printFilesData);
+    }
   };
 
   const generatePreview = useCallback(async (

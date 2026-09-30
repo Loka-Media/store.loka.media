@@ -201,3 +201,42 @@ export const RightSleeveSVG: React.FC<SVGProps> = ({
     />
   </svg>
 );
+
+export const CollarSVG: React.FC<SVGProps> = ({
+  width = 104,
+  height = 104,
+  className = "",
+  fill = "white",
+  stroke = "currentColor",
+  strokeWidth = 2,
+}) => (
+  <svg
+    width={width}
+    height={height}
+    viewBox="0 0 104 104"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path
+      d="M18 36C28 22 76 22 86 36C78 46 64 52 52 52C40 52 26 46 18 36Z"
+      fill={fill}
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+      strokeLinejoin="round"
+    />
+    <path
+      d="M26 38C34 28 70 28 78 38"
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+    />
+    <path
+      d="M38 52L52 68L66 52"
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

@@ -11,6 +11,7 @@ import {
   BackSVG,
   LeftSleeveSVG,
   RightSleeveSVG,
+  CollarSVG,
 } from "./PlacementSVGs";
 
 interface DesignCanvasTabProps {
@@ -86,6 +87,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
       right: <RightSleeveSVG className="w-4 h-4" />,
       sleeve_left: <LeftSleeveSVG className="w-4 h-4" />,
       sleeve_right: <RightSleeveSVG className="w-4 h-4" />,
+      collar: <CollarSVG className="w-4 h-4" />,
       chest_left: <FrontSVG className="w-4 h-4" />,
       chest_right: <FrontSVG className="w-4 h-4" />,
       label: <FrontSVG className="w-4 h-4" />,
