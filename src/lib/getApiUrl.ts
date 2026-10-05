@@ -3,13 +3,13 @@
  * Works in both server and client components
  */
 export const getApiUrl = (): string => {
-  // In browser environment
+  // In browser environment, use same-origin relative URL so requests proxy through Next.js without CORS errors
   if (typeof window !== 'undefined') {
-    return (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
+    return '';
   }
 
   // On server side
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media';
+  const apiUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media';
   return apiUrl.replace(/\/$/, '');
 };
 
