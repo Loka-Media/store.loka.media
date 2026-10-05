@@ -217,7 +217,32 @@ async function buildPrintifyProductPayload(
       return validPositionsMap.get(clean)!;
     }
 
-    // 2. Common alias & position mappings for Printify catalog types
+    // 2. Technique / prefix matching (e.g. "front" -> "front_dtf", "back" -> "back_dtf")
+    for (const [key, val] of validPositionsMap.entries()) {
+      if (clean === 'front' && (key.startsWith('front') || key === 'chest')) {
+        return val;
+      }
+      if (clean === 'back' && (key.startsWith('back') || key === 'rear' || key === 'reverse')) {
+        return val;
+      }
+      if (clean === 'neck' && (key.includes('neck') || key.includes('collar') || key.includes('label'))) {
+        return val;
+      }
+      if ((clean === 'sleeve_left' || clean === 'left') && key.includes('left')) {
+        return val;
+      }
+      if ((clean === 'sleeve_right' || clean === 'right') && key.includes('right')) {
+        return val;
+      }
+      if (clean === 'pocket' && key.includes('pocket')) {
+        return val;
+      }
+      if (clean === 'hood' && key.includes('hood')) {
+        return val;
+      }
+    }
+
+    // 3. Common alias & position mappings for Printify catalog types
     if (clean === 'sleeve_left' || clean === 'left') {
       if (validPositionsMap.has('left_sleeve')) return validPositionsMap.get('left_sleeve')!;
     }
@@ -235,7 +260,7 @@ async function buildPrintifyProductPayload(
       if (validPositionsMap.has('inside')) return validPositionsMap.get('inside')!;
     }
 
-    // 3. Fallback to first available valid position for this blueprint
+    // 4. Fallback to first available valid position for this blueprint
     return validPositionsList[0];
   };
 

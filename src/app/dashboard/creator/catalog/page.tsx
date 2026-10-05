@@ -213,14 +213,17 @@ export default function CreatorCatalogPage() {
         const targetCat = cats.find((c) => c.id === catId);
         if (targetCat) {
           setSelectedCategory(targetCat);
-          fetchCatalog(targetCat.id);
-
           if (subcategoryParam) {
             const subcats = SUBCATEGORIES_CONFIG[targetCat.id] || [];
             const targetSubcat = subcats.find((s) => s.id === subcategoryParam);
             setSelectedSubcategory(targetSubcat || null);
+            if (targetSubcat?.id === 'acc-underwear') {
+              fetchCatalog(0);
+            } else {
+              fetchCatalog(targetCat.id);
+            }
           } else {
-            setSelectedSubcategory(null);
+            fetchCatalog(targetCat.id);
           }
           return;
         }
@@ -283,6 +286,10 @@ export default function CreatorCatalogPage() {
     window.scrollTo(0, 0);
     setSelectedSubcategory(subcat);
     setFilters((prev) => ({ ...prev, search: "" }));
+
+    if (subcat.id === "acc-underwear") {
+      fetchCatalog(0);
+    }
 
     if (typeof window !== "undefined" && selectedCategory) {
       const newUrl = `${window.location.pathname}?category=${selectedCategory.id}&subcategory=${subcat.id}`;
@@ -368,7 +375,11 @@ export default function CreatorCatalogPage() {
       sessionStorage.setItem("last_catalog_state", JSON.stringify({ categoryId: category.id, subcategoryId: subcat.id }));
     }
 
-    await fetchCatalog(category.id);
+    if (subcat.id === "acc-underwear") {
+      await fetchCatalog(0);
+    } else {
+      await fetchCatalog(category.id);
+    }
   };
 
   return (

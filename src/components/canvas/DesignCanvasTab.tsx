@@ -27,6 +27,7 @@ interface DesignCanvasTabProps {
   updateDesignPosition: (designId: number, updates: any) => void;
   onAspectRatioIssues: (issues: AspectRatioIssue[]) => void;
   aspectRatioIssues: AspectRatioIssue[];
+  hidePlacementTabs?: boolean;
 }
 
 const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
@@ -42,33 +43,47 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   updateDesignPosition,
   onAspectRatioIssues,
   aspectRatioIssues,
+  hidePlacementTabs = true,
 }) => {
   const [allValidationResults, setAllValidationResults] = React.useState<AspectRatioIssue[]>([]);
   const [expandedIssueId, setExpandedIssueId] = useState<number | null>(null);
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
   const canvasDims = getCanvasDimensions(activePrintFile);
 
   // Listen for window resize to update orientation
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
     };
     window.addEventListener("resize", handleResize);
+    // Measure immediately
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.offsetWidth);
+    }
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Calculate dynamic scale for mobile - ensure canvas fits within viewport
-  const calculateMobileScale = () => {
-    if (windowWidth >= 640) {
-      return 1;
+  // Re-measure when container might change (e.g. step change)
+  useEffect(() => {
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.offsetWidth);
     }
-    // Available width with padding (16px left + 16px right)
-    const availableWidth = windowWidth - 32;
-    // Calculate scale to fit canvas width within available space
-    const scale = Math.min(availableWidth / canvasDims.width, 1);
-    return Math.max(scale, 0.4); // Minimum scale of 0.4
+  });
+
+  // Calculate dynamic scale to fit the canvas in its actual container
+  const calculateMobileScale = () => {
+    // Use container width if available, otherwise fall back to viewport width
+    const availableWidth = containerWidth > 0 ? containerWidth - 16 : windowWidth - 32;
+    if (availableWidth >= canvasDims.width) return 1;
+    const scale = availableWidth / canvasDims.width;
+    return Math.max(scale, 0.35); // Minimum scale of 0.35
   };
 
   // Check if canvas is too wide for portrait mode (should rotate to landscape)
@@ -176,10 +191,10 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   };
 
   return (
-    <div className="flex-1 bg-black flex items-center justify-center">
-      <div className="w-full max-w-4xl">
-        {/* Placement Tabs - Switch between selected placements */}
-        {selectedPlacements.length > 0 && (
+    <div className="w-full bg-black flex items-center justify-center overflow-hidden">
+      <div className="w-full max-w-full">
+        {/* Placement Tabs - Switch between selected placements (hidden by default when controlled externally) */}
+        {!hidePlacementTabs && selectedPlacements.length > 0 && (
           <div className="mb-6 flex gap-2 overflow-x-auto pb-3">
             {selectedPlacements.map((placement) => (
               <button
@@ -225,170 +240,191 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row justify-center items-center sm:items-start gap-2 sm:gap-4 w-full max-w-full overflow-hidden">
-            {/* Canvas Container */}
-            <div
-              className="gradient-border-white-bottom rounded-lg relative shadow-[0_10px_30px_rgba(255,133,27,0.2)] overflow-hidden max-w-full"
-              style={{
-                width: `${canvasDims.width}px`,
-                height: `${canvasDims.height}px`,
-                maxWidth: "100%",
-                background: "linear-gradient(135deg, #1f2937 0%, #111827 100%)",
-                boxShadow:
-                  "0 20px 40px rgba(255,133,27,0.1), inset 0 1px 0 rgba(255,133,27,0.05)",
-                transform: `scale(${calculateMobileScale()})`,
-                transformOrigin: "center center",
-                transition: "transform 0.3s ease-in-out",
-              }}
-            >
-          {designFiles.length === 0 ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-gray-400">
-                <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner border border-gray-700">
-                  <Zap className="w-8 h-8 text-orange-400" />
-                </div>
-                <p className="text-lg font-medium mb-2 text-white">
-                  Product Canvas
-                </p>
-                <p className="text-sm text-gray-400">
-                  Select a file to add your design
-                </p>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Design elements container */}
-          <div className="absolute inset-0 w-full h-full">
-            {/* Design elements will appear here */}
-            {designFiles
-              .filter((design) => design.placement === activePlacement)
-              .map((design) => {
-                // Scale design to fit in dynamic canvas
-                const canvasWidth = canvasDims.width;
-                const canvasHeight = canvasDims.height;
-                const printFile = activePrintFile;
-
-                // Calculate scaling factor to fit print file in canvas
-                const scaleX = printFile ? canvasWidth / printFile.width : 0.5;
-                const scaleY = printFile
-                  ? canvasHeight / printFile.height
-                  : 0.5;
-                const scale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
-
-                const scaledSize = {
-                  width: design.position.width * scale,
-                  height: design.position.height * scale,
-                };
-
-                const scaledPosition = {
-                  x: design.position.left * scale,
-                  y: design.position.top * scale,
-                };
-
-                return (
-                  <Rnd
-                    key={design.id}
-                    size={scaledSize}
-                    position={scaledPosition}
-                    lockAspectRatio={true}
-                    onDragStop={(_e, data) => {
-                      updateDesignPosition(design.id, {
-                        left: Math.round(data.x / scale),
-                        top: Math.round(data.y / scale),
-                      });
+          <div ref={containerRef} className="w-full">
+            {/* Outer wrapper takes the SCALED dimensions as layout space */}
+            {(() => {
+              const scale = calculateMobileScale();
+              const scaledW = Math.round(canvasDims.width * scale);
+              const scaledH = Math.round(canvasDims.height * scale);
+              return (
+                <div
+                  style={{
+                    width: `${scaledW}px`,
+                    height: `${scaledH}px`,
+                    position: "relative",
+                    margin: "0 auto",
+                  }}
+                >
+                  {/* Inner canvas positioned absolutely, scaled from top-left */}
+                  <div
+                    className="gradient-border-white-bottom rounded-lg relative shadow-[0_10px_30px_rgba(255,133,27,0.2)] overflow-hidden"
+                    style={{
+                      width: `${canvasDims.width}px`,
+                      height: `${canvasDims.height}px`,
+                      background: "linear-gradient(135deg, #1f2937 0%, #111827 100%)",
+                      boxShadow: "0 20px 40px rgba(255,133,27,0.1), inset 0 1px 0 rgba(255,133,27,0.05)",
+                      transform: `scale(${scale})`,
+                      transformOrigin: "top left",
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      transition: "transform 0.3s ease-in-out",
                     }}
-                    onResizeStop={(_e, _direction, ref, _delta, position) => {
-                      updateDesignPosition(design.id, {
-                        width: Math.max(1, Math.round(parseFloat(ref.style.width) / scale)),
-                        height: Math.max(1, Math.round(parseFloat(ref.style.height) / scale)),
-                        left: Math.round(position.x / scale),
-                        top: Math.round(position.y / scale),
-                      });
-                    }}
-                    bounds="parent"
-                    minWidth={30}
-                    minHeight={30}
-                    className={`border rounded relative ${
-                      selectedDesignFile?.id === design.id
-                        ? "border-white border-2"
-                        : "border-white/30"
-                    } ${design.id === -1 ? "bg-blue-100/20" : "bg-white/10"}`}
-                    onClick={() => setSelectedDesignFile(design)}
                   >
-                    {design.filename.endsWith(".txt") ? (
-                      // Render text
-                      <div className="w-full h-full flex items-center justify-center p-2 text-gray-900 font-semibold text-center overflow-hidden">
-                        {decodeURIComponent(design.url.split(",")[1] || "")}
+                    {designFiles.length === 0 ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center text-gray-400">
+                          <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner border border-gray-700">
+                            <Zap className="w-8 h-8 text-orange-400" />
+                          </div>
+                          <p className="text-lg font-medium mb-2 text-white">
+                            Product Canvas
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            Select a file to add your design
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Click an artwork on the left to place it here
+                          </p>
+                        </div>
                       </div>
-                    ) : (
-                      // Render image
-                      <img
-                        src={design.url ? design.url.replace(/%25/g, '%') : ''}
-                        alt={design.filename}
-                        className="w-full h-full object-contain"
-                        draggable={false}
-                      />
-                    )}
-                    {/* Remove button - Top Right Corner */}
-                    <button
-                      onClick={(e) => handleRemoveDesign(design, e)}
-                      className="absolute top-2 right-2 w-6 h-6 bg-transparent border border-white text-white rounded-full flex items-center justify-center hover:bg-white/20 transition-all p-0"
-                      title="Remove from placement"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Rnd>
-                );
-              })}
-          </div>
-          </div>
+                    ) : null}
 
-          {/* Auto-Fix Aspect Ratio Button */}
-          <div className="flex items-start pt-2">
-            <AspectRatioFixButton
-              designFiles={designFiles}
-              activePlacement={activePlacement}
-              activePrintFile={activePrintFile}
-              updateDesignPosition={updateDesignPosition}
-              onFixComplete={() => {
-                // Re-validate after fixing
-                const designsForPlacement = designFiles.filter(
-                  (design) => design.placement === activePlacement && design.url
-                );
-                if (designsForPlacement.length > 0) {
-                  setTimeout(() => {
-                    const validationPromises = designsForPlacement.map((design) =>
-                      aspectRatioValidation(
-                        design.url,
-                        design.position.width,
-                        design.position.height,
-                        2.5
-                      )
-                    );
-                    Promise.all(validationPromises).then((results) => {
-                      const allResults = results
-                        .map((result, index) => {
-                          if (!result.isValid && result.correctedDimensions) {
-                            updateDesignPosition(designsForPlacement[index].id, {
-                              width: result.correctedDimensions.width,
-                              height: result.correctedDimensions.height,
-                            });
-                          }
-                          return {
-                            designId: designsForPlacement[index].id,
-                            placement: designsForPlacement[index].placement,
-                            message: `✅ GOOD: Aspect ratio aligned.`,
+                    {/* Design elements container */}
+                    <div className="absolute inset-0 w-full h-full">
+                      {/* Design elements will appear here */}
+                      {designFiles
+                        .filter((design) => design.placement === activePlacement)
+                        .map((design) => {
+                          // Scale design to fit in dynamic canvas
+                          const canvasWidth = canvasDims.width;
+                          const canvasHeight = canvasDims.height;
+                          const printFile = activePrintFile;
+
+                          // Calculate scaling factor to fit print file in canvas
+                          const scaleX = printFile ? canvasWidth / printFile.width : 0.5;
+                          const scaleY = printFile
+                            ? canvasHeight / printFile.height
+                            : 0.5;
+                          const designScale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
+
+                          const scaledSize = {
+                            width: design.position.width * designScale,
+                            height: design.position.height * designScale,
                           };
-                        });
-                      onAspectRatioIssues([]);
-                      setAllValidationResults(allResults);
-                    });
-                  }, 100);
-                }
-              }}
-            />
+
+                          const scaledPosition = {
+                            x: design.position.left * designScale,
+                            y: design.position.top * designScale,
+                          };
+
+                          return (
+                            <Rnd
+                              key={design.id}
+                              size={scaledSize}
+                              position={scaledPosition}
+                              lockAspectRatio={true}
+                              onDragStop={(_e, data) => {
+                                updateDesignPosition(design.id, {
+                                  left: Math.round(data.x / designScale),
+                                  top: Math.round(data.y / designScale),
+                                });
+                              }}
+                              onResizeStop={(_e, _direction, ref, _delta, position) => {
+                                updateDesignPosition(design.id, {
+                                  width: Math.max(1, Math.round(parseFloat(ref.style.width) / designScale)),
+                                  height: Math.max(1, Math.round(parseFloat(ref.style.height) / designScale)),
+                                  left: Math.round(position.x / designScale),
+                                  top: Math.round(position.y / designScale),
+                                });
+                              }}
+                              bounds="parent"
+                              minWidth={30}
+                              minHeight={30}
+                              className={`border rounded relative ${
+                                selectedDesignFile?.id === design.id
+                                  ? "border-white border-2"
+                                  : "border-white/30"
+                              } ${design.id === -1 ? "bg-blue-100/20" : "bg-white/10"}`}
+                              onClick={() => setSelectedDesignFile(design)}
+                            >
+                              {design.filename.endsWith(".txt") ? (
+                                // Render text
+                                <div className="w-full h-full flex items-center justify-center p-2 text-gray-900 font-semibold text-center overflow-hidden">
+                                  {decodeURIComponent(design.url.split(",")[1] || "")}
+                                </div>
+                              ) : (
+                                // Render image
+                                <img
+                                  src={design.url ? design.url.replace(/%25/g, '%') : ''}
+                                  alt={design.filename}
+                                  className="w-full h-full object-contain"
+                                  draggable={false}
+                                />
+                              )}
+                              {/* Remove button - Top Right Corner */}
+                              <button
+                                onClick={(e) => handleRemoveDesign(design, e)}
+                                className="absolute top-2 right-2 w-6 h-6 bg-transparent border border-white text-white rounded-full flex items-center justify-center hover:bg-white/20 transition-all p-0"
+                                title="Remove from placement"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </Rnd>
+                          );
+                        })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Auto-Fix Aspect Ratio Button - below canvas, full width */}
+            <div className="flex items-center justify-center pt-2 w-full">
+              <AspectRatioFixButton
+                designFiles={designFiles}
+                activePlacement={activePlacement}
+                activePrintFile={activePrintFile}
+                updateDesignPosition={updateDesignPosition}
+                onFixComplete={() => {
+                  // Re-validate after fixing
+                  const designsForPlacement = designFiles.filter(
+                    (design) => design.placement === activePlacement && design.url
+                  );
+                  if (designsForPlacement.length > 0) {
+                    setTimeout(() => {
+                      const validationPromises = designsForPlacement.map((design) =>
+                        aspectRatioValidation(
+                          design.url,
+                          design.position.width,
+                          design.position.height,
+                          2.5
+                        )
+                      );
+                      Promise.all(validationPromises).then((results) => {
+                        const allResults = results
+                          .map((result, index) => {
+                            if (!result.isValid && result.correctedDimensions) {
+                              updateDesignPosition(designsForPlacement[index].id, {
+                                width: result.correctedDimensions.width,
+                                height: result.correctedDimensions.height,
+                              });
+                            }
+                            return {
+                              designId: designsForPlacement[index].id,
+                              placement: designsForPlacement[index].placement,
+                              message: `✅ GOOD: Aspect ratio aligned.`,
+                            };
+                          });
+                        onAspectRatioIssues([]);
+                        setAllValidationResults(allResults);
+                      });
+                    }, 100);
+                  }
+                }}
+              />
+            </div>
           </div>
-        </div>
         )}
 
         {/* Canvas Controls */}

@@ -211,13 +211,13 @@ export const getActivePrintFile = (
     } else if (cleanPlacement === "right" || cleanPlacement === "sleeve_right" || cleanPlacement === "right_sleeve") {
       keysToTry = ["right_sleeve", "sleeve_right", "right", "right_arm"];
     } else if (cleanPlacement === "front") {
-      keysToTry = ["front", "front_print", "front_chest", "chest", "default", "all_over", "print", "legs"];
+      keysToTry = ["front", "front_dtf", "front_print", "front_chest", "chest", "default", "all_over", "print", "legs"];
     } else if (cleanPlacement === "back") {
-      keysToTry = ["back", "back_print", "back_chest"];
+      keysToTry = ["back", "back_dtf", "back_print", "back_chest"];
     } else if (cleanPlacement.includes("collar")) {
       keysToTry = ["collar", "collar_band", "neck_collar", "neck"];
     } else if (cleanPlacement.includes("neck")) {
-      keysToTry = ["neck", "neck_inner", "inner_neck", "neck_outer", "outer_neck", "neck_label", "label", "tag"];
+      keysToTry = ["neck", "neck_dtf", "neck_inner", "inner_neck", "neck_outer", "outer_neck", "neck_label", "label", "tag"];
     } else if (cleanPlacement.includes("hood")) {
       keysToTry = ["hood", "hood_left", "hood_right"];
     } else if (cleanPlacement.includes("pocket")) {
@@ -234,6 +234,16 @@ export const getActivePrintFile = (
         break;
       }
     }
+
+    if (!printFileId) {
+      // Find any placement key that starts with cleanPlacement (e.g. "front_dtf" starts with "front")
+      const prefixMatchKey = Object.keys(variantPrintFile.placements).find(
+        (k) => k.toLowerCase().trim().startsWith(cleanPlacement) || cleanPlacement.startsWith(k.toLowerCase().trim())
+      );
+      if (prefixMatchKey) {
+        printFileId = variantPrintFile.placements[prefixMatchKey];
+      }
+    }
   }
 
   // Check if printfiles has a direct match by position if printFileId wasn't found in placements map
@@ -241,7 +251,10 @@ export const getActivePrintFile = (
     const directMatch = printFiles.printfiles.find((pf: any) => {
       const pos = (pf?.position || "").toLowerCase().trim();
       return pos === cleanPlacement || 
+        pos.startsWith(cleanPlacement) ||
+        cleanPlacement.startsWith(pos) ||
         (cleanPlacement.includes("collar") && pos.includes("collar")) ||
+        (cleanPlacement.includes("neck") && (pos.includes("neck") || pos.includes("label"))) ||
         (cleanPlacement.includes("sleeve_left") && (pos.includes("left") || pos.includes("left_sleeve"))) ||
         (cleanPlacement.includes("sleeve_right") && (pos.includes("right") || pos.includes("right_sleeve")));
     });

@@ -44,54 +44,92 @@ function inCategory(bp: any, categoryId: number): boolean {
 // Centralised keyword matching for Printify catalog blueprints.
 // ============================================================
 
-const isSweatshirt      = (t: string) => t.includes("sweatshirt") || t.includes("crewneck") || t.includes("crew neck");
-const isHoodie          = (t: string) => t.includes("hoodie") || t.includes("hooded sweatshirt") || t.includes("zip hoodie") || t.includes("full zip");
-const isTShirt          = (t: string) => t.includes("tee") || t.includes("t-shirt") || t.includes("t shirt") || t.includes("jersey tee") || t.includes("polo");
-const isLongSleeve      = (t: string) => t.includes("long sleeve") || t.includes("long-sleeve");
-const isTankTop         = (t: string) => t.includes("tank") || t.includes("racerback") || t.includes("muscle") || t.includes("crop top");
-const isSportswear      = (t: string) => t.includes("sport") || t.includes("active") || t.includes("jersey") || t.includes("athletic") || t.includes("performance") || t.includes("compression");
-const isBottoms         = (t: string) => t.includes("pant") || t.includes("jogger") || t.includes("shorts") || t.includes("sweatpant") || t.includes("legging") || t.includes("tights");
-const isSwimwear        = (t: string) => t.includes("swim") || t.includes("bikini") || t.includes("trunk") || t.includes("one-piece");
-const isShoe            = (t: string) => t.includes("shoe") || t.includes("sneaker") || t.includes("boot") || t.includes("slipper") || t.includes("loafer") || t.includes("canvas shoe") || t.includes("slide") || t.includes("clog");
-const isOuterwear       = (t: string) => t.includes("jacket") || t.includes("coat") || t.includes("windbreaker") || t.includes("bomber") || t.includes("parka") || t.includes("vest");
-const isDress           = (t: string) => t.includes("dress") || t.includes("skirt") || t.includes("romper");
-const isBag             = (t: string) => t.includes("bag") || t.includes("backpack") || t.includes("tote") || t.includes("pouch") || t.includes("wallet") || t.includes("purse") || t.includes("fanny pack") || t.includes("duffel") || t.includes("clutch");
-const isHat             = (t: string) => t.includes("hat") || t.includes("cap") || t.includes("beanie") || t.includes("bucket hat") || t.includes("snapback") || t.includes("trucker") || t.includes("visor");
-const isPhoneCase       = (t: string) => t.includes("phone") || t.includes("iphone") || t.includes("samsung") || (t.includes("case") && !t.includes("pillowcase") && !t.includes("cushion case") && !t.includes("laptop case"));
-const isSticker         = (t: string) => t.includes("sticker") || t.includes("decal");
-const isStationery      = (t: string) => t.includes("notebook") || t.includes("journal") || t.includes("pen ") || t.includes("pencil") || t.includes("postcard") || t.includes("greeting card") || t.includes("folder") || t.includes("pad");
-const isTechAcc         = (t: string) => t.includes("charger") || t.includes("mouse pad") || t.includes("mousepad") || t.includes("laptop sleeve") || t.includes("laptop case") || t.includes("phone stand") || t.includes("airpod") || t.includes("cable") || t.includes("desk mat") || t.includes("tech");
-const isPoster          = (t: string) => t.includes("poster") || t.includes("art print");
-const isCanvas          = (t: string) => t.includes("canvas") || t.includes("wall art") || t.includes("tapestry");
-const isBlanket         = (t: string) => t.includes("blanket") || t.includes("throw") || t.includes("fleece");
-const isPillow          = (t: string) => t.includes("pillow") || t.includes("cushion");
-const isTowel           = (t: string) => t.includes("towel");
-const isMug             = (t: string) => t.includes("mug");
-const isDrinkware       = (t: string) => t.includes("bottle") || t.includes("tumbler") || t.includes("cup") || (t.includes("glass") && !t.includes("sunglass") && !t.includes("hourglass")) || t.includes("flask") || t.includes("pint") || t.includes("shaker");
+const isSweatshirt      = (t: string) => /\b(sweatshirt|sweatshirts|crewneck|crewnecks|crew neck|crew necks)\b/i.test(t);
+const isHoodie          = (t: string) => /\b(hoodie|hoodies|hooded sweatshirt|zip hoodie|full zip)\b/i.test(t);
+const isTShirt          = (t: string) => {
+  if (t.includes("steel") || t.includes("canteen") || t.includes("fourteen") || t.includes("guarantee")) return false;
+  return /\b(tee|tees|t-shirt|t-shirts|t shirt|t shirts|jersey tee|polo|polos)\b/i.test(t);
+};
+const isLongSleeve      = (t: string) => /\b(long sleeve|long sleeves|long-sleeve|long-sleeves)\b/i.test(t);
+const isTankTop         = (t: string) => /\b(tank|tanks|racerback|racerbacks|muscle|crop top|crop tops)\b/i.test(t);
+const isSportswear      = (t: string) => {
+  if (t.includes("jersey tee") || t.includes("jersey short sleeve") || t.includes("single jersey")) return false;
+  return /\b(sport|sports|activewear|athletic|performance|compression)\b/i.test(t);
+};
+const isBottoms         = (t: string) => /\b(pant|pants|jogger|joggers|shorts|sweatpant|sweatpants|legging|leggings|tights|bottoms)\b/i.test(t);
+const isSwimwear        = (t: string) => /\b(swim|swimwear|bikini|bikinis|swim trunk|swim trunks|trunk|trunks|one-piece)\b/i.test(t);
+const isShoe            = (t: string) => /\b(shoe|shoes|sneaker|sneakers|boot|boots|slipper|slippers|loafer|loafers|canvas shoe|canvas shoes|slide|slides|clog|clogs|footwear)\b/i.test(t);
+const isOuterwear       = (t: string) => /\b(jacket|jackets|coat|coats|windbreaker|windbreakers|bomber|parka|vest|vests)\b/i.test(t);
+const isDress           = (t: string) => /\b(dress|dresses|skirt|skirts|romper|rompers)\b/i.test(t);
+const isBag             = (t: string) => /\b(bag|bags|backpack|backpacks|tote|totes|pouch|pouches|wallet|wallets|purse|purses|fanny pack|duffel|duffels|clutch)\b/i.test(t);
+const isHat             = (t: string) => {
+  if (t.includes("capri") || t.includes("capital") || t.includes("escape")) return false;
+  return /\b(hat|hats|cap|caps|beanie|beanies|bucket hat|snapback|trucker|visor|visors|headwear)\b/i.test(t);
+};
+const isPhoneCase       = (t: string) => {
+  if (t.includes("pillowcase") || t.includes("cushion case") || t.includes("laptop case") || t.includes("pencil case")) return false;
+  return /\b(phone case|phone cases|iphone|samsung)\b/i.test(t) || (t.includes("case") && !t.includes("pillow") && !t.includes("cushion"));
+};
+const isSticker         = (t: string) => /\b(sticker|stickers|decal|decals)\b/i.test(t);
+const isStationery      = (t: string) => {
+  if (t.includes("mousepad") || t.includes("mouse pad") || t.includes("ipad") || t.includes("desk mat")) return false;
+  return /\b(notebook|notebooks|journal|journals|pen|pens|pencil|pencils|postcard|postcards|greeting card|greeting cards|folder|folders|notepad|notepads|stationery)\b/i.test(t);
+};
+const isTechAcc         = (t: string) => {
+  if (t.includes("shirt") || t.includes("tee") || t.includes("apparel")) return false;
+  return /\b(charger|chargers|mouse pad|mousepad|laptop sleeve|laptop case|phone stand|airpod|cable|desk mat)\b/i.test(t);
+};
+const isPoster          = (t: string) => /\b(poster|posters|art print|wall art)\b/i.test(t);
+const isCanvas          = (t: string) => /\b(canvas|tapestry)\b/i.test(t);
+const isBlanket         = (t: string) => /\b(blanket|blankets|throw|throws|fleece)\b/i.test(t);
+const isPillow          = (t: string) => /\b(pillow|pillows|cushion|cushions)\b/i.test(t);
+const isTowel           = (t: string) => /\b(towel|towels)\b/i.test(t);
+const isMug             = (t: string) => /\b(mug|mugs)\b/i.test(t);
+const isDrinkware       = (t: string) => {
+  if (t.includes("sunglass") || t.includes("hourglass")) return false;
+  return /\b(mug|mugs|tumbler|tumblers|bottle|bottles|cup|cups|flask|flasks|pint|pints|glass|glassware|drinkware)\b/i.test(t);
+};
 const isBottleTumbler   = isDrinkware;
-const isSock            = (t: string) => t.includes("sock");
-const isKidsItem        = (t: string) => t.includes("kid") || t.includes("youth") || t.includes("toddler") || t.includes("baby") || t.includes("infant") || t.includes("bodysuit") || t.includes("creeper") || t.includes("bib") || t.includes("onesie");
-const isJewelry         = (t: string) => t.includes("jewelry") || t.includes("necklace") || t.includes("bracelet") || t.includes("ring") || t.includes("pendant") || t.includes("earring") || t.includes("charm");
-const isBook            = (t: string) => t.includes("book") || t.includes("coloring book") || t.includes("hardcover") || t.includes("paperback");
-const isUnderwear       = (t: string) => t.includes("underwear") || t.includes("boxer") || t.includes("brief") || t.includes("panties") || t.includes("thong") || t.includes("bra") || t.includes("lingerie");
-const isBabyAcc         = (t: string) => t.includes("baby") || t.includes("bib") || t.includes("pacifier") || t.includes("burp") || t.includes("swaddle") || t.includes("onesie") || t.includes("infant");
-const isMousePad        = (t: string) => t.includes("mouse pad") || t.includes("mousepad") || t.includes("desk mat");
-const isPetAcc          = (t: string) => t.includes("pet") || t.includes("dog") || t.includes("cat") || t.includes("leash") || t.includes("collar") || t.includes("harness") || t.includes("bandana") || t.includes("pet bowl") || t.includes("pet bed") || t.includes("pup");
-const isKitchenAcc      = (t: string) => t.includes("apron") || t.includes("oven mitt") || t.includes("pot holder") || t.includes("cutting board") || t.includes("coaster") || t.includes("placemat") || t.includes("trivet") || t.includes("kitchen");
-const isCarAcc          = (t: string) => t.includes("car") || t.includes("license plate") || t.includes("sunshade") || t.includes("car mat") || t.includes("seat cover") || t.includes("auto");
-const isSportsGames     = (t: string) => t.includes("sport") || t.includes("game") || t.includes("puzzle") || t.includes("playing card") || t.includes("golf") || t.includes("ball") || t.includes("pickleball") || t.includes("ping pong") || t.includes("yoga");
-const isFaceMask        = (t: string) => t.includes("mask") || t.includes("face mask") || t.includes("gaiter") || t.includes("covering");
-const isCandle          = (t: string) => t.includes("candle") || t.includes("wax") || t.includes("fragrance");
-const isOrnament        = (t: string) => t.includes("ornament") || t.includes("bauble");
-const isSeasonal        = (t: string) => t.includes("seasonal") || t.includes("holiday") || t.includes("christmas") || t.includes("halloween") || t.includes("easter") || t.includes("stocking") || t.includes("tree skirt");
-const isGlassware       = (t: string) => (t.includes("glass") && !t.includes("sunglass") && !t.includes("hourglass")) || t.includes("shot glass") || t.includes("wine glass") || t.includes("beer glass") || t.includes("mason jar");
-const isPostcard        = (t: string) => t.includes("postcard") || t.includes("greeting card") || t.includes("card");
-const isJournal         = (t: string) => t.includes("journal") || t.includes("notebook") || t.includes("planner");
-const isMagnetSticker   = (t: string) => t.includes("magnet") || t.includes("sticker") || t.includes("decal");
-const isHomeDecor       = (t: string) => t.includes("clock") || t.includes("banner") || t.includes("flag") || t.includes("sign") || t.includes("wood print") || t.includes("acrylic") || t.includes("metal print") || t.includes("mirror") || t.includes("vase") || t.includes("decor");
-const isBathroom        = (t: string) => t.includes("shower curtain") || t.includes("bath mat") || t.includes("bathrobe") || t.includes("bath");
-const isRugMat          = (t: string) => t.includes("rug") || t.includes("doormat") || t.includes("floor mat");
-const isBedding         = (t: string) => t.includes("duvet") || t.includes("comforter") || t.includes("bedding") || t.includes("sheet") || t.includes("quilt");
+const isSock            = (t: string) => /\b(sock|socks)\b/i.test(t);
+const isKidsItem        = (t: string) => /\b(kid|kids|youth|toddler|baby|infant|bodysuit|creeper|bib|onesie)\b/i.test(t);
+const isJewelry         = (t: string) => {
+  const clean = t.replace(/\b(ring spun|ringspun|drawstring|string|spring)\b/gi, "");
+  return (
+    /\b(jewelry|jewellery|necklace|necklaces|bracelet|bracelets|pendant|pendants|earring|earrings|charm|charms|bangle|bangles|cufflink|cufflinks|signet ring)\b/i.test(clean) ||
+    (/\bring\b/i.test(clean) && !/\b(keyring|key-ring)\b/i.test(clean))
+  );
+};
+const isBook            = (t: string) => /\b(book|books|coloring book|hardcover|paperback)\b/i.test(t);
+const isUnderwear       = (t: string) => {
+  if (isJewelry(t) || t.includes("pen") || t.includes("chambray") || t.includes("shirt") || t.includes("hoodie") || t.includes("jacket")) {
+    return false;
+  }
+  return /\b(underwear|boxer|boxers|brief|briefs|panties|thong|thongs|bra|bras|sports bra|lingerie)\b/i.test(t);
+};
+const isBabyAcc         = (t: string) => /\b(baby|bib|pacifier|burp|swaddle|onesie|infant)\b/i.test(t);
+const isMousePad        = (t: string) => /\b(mouse pad|mousepad|desk mat)\b/i.test(t);
+const isPetAcc          = (t: string) => /\b(pet|dog|cat|leash|collar|harness|bandana|pet bowl|pet bed|pup)\b/i.test(t);
+const isKitchenAcc      = (t: string) => /\b(apron|oven mitt|pot holder|cutting board|coaster|placemat|trivet|kitchen)\b/i.test(t);
+const isCarAcc          = (t: string) => /\b(car|license plate|sunshade|car mat|seat cover|auto)\b/i.test(t);
+const isSportsGames     = (t: string) => {
+  if (t.includes("ballpoint") || t.includes("ball point")) return false;
+  return /\b(sport|sports|game|games|puzzle|puzzles|playing card|golf|ball|balls|pickleball|ping pong|yoga)\b/i.test(t);
+};
+const isFaceMask        = (t: string) => /\b(mask|masks|face mask|gaiter|covering)\b/i.test(t);
+const isCandle          = (t: string) => /\b(candle|candles|wax|fragrance)\b/i.test(t);
+const isOrnament        = (t: string) => /\b(ornament|ornaments|bauble|baubles)\b/i.test(t);
+const isSeasonal        = (t: string) => /\b(seasonal|holiday|christmas|halloween|easter|stocking|tree skirt)\b/i.test(t);
+const isGlassware       = (t: string) => {
+  if (t.includes("sunglass") || t.includes("hourglass")) return false;
+  return /\b(glass|glasses|shot glass|wine glass|beer glass|mason jar)\b/i.test(t);
+};
+const isPostcard        = (t: string) => /\b(postcard|postcards|greeting card|card|cards)\b/i.test(t);
+const isJournal         = (t: string) => /\b(journal|journals|notebook|notebooks|planner|planners)\b/i.test(t);
+const isMagnetSticker   = (t: string) => /\b(magnet|magnets|sticker|stickers|decal|decals)\b/i.test(t);
+const isHomeDecor       = (t: string) => /\b(clock|banner|flag|sign|wood print|acrylic|metal print|mirror|vase|decor)\b/i.test(t);
+const isBathroom        = (t: string) => /\b(shower curtain|bath mat|bathrobe|bath)\b/i.test(t);
+const isRugMat          = (t: string) => /\b(rug|rugs|doormat|doormats|floor mat)\b/i.test(t);
+const isBedding         = (t: string) => /\b(duvet|comforter|bedding|sheet|sheets|quilt)\b/i.test(t);
 
 // ============================================================
 // SUBCATEGORIES CONFIG
@@ -157,6 +195,11 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
       id: "men-shoes",
       title: "Shoes",
       match: (bp) => inCategory(bp, 1) && isShoe(bp.title.toLowerCase())
+    },
+    {
+      id: "men-underwear",
+      title: "Underwear & Boxers",
+      match: (bp) => inCategory(bp, 1) && isUnderwear(bp.title.toLowerCase())
     },
     {
       id: "men-outerwear",
@@ -230,6 +273,11 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
       match: (bp) => inCategory(bp, 2) && isShoe(bp.title.toLowerCase())
     },
     {
+      id: "women-underwear",
+      title: "Underwear & Bras",
+      match: (bp) => inCategory(bp, 2) && isUnderwear(bp.title.toLowerCase())
+    },
+    {
       id: "women-outerwear",
       title: "Outerwear",
       match: (bp) => inCategory(bp, 2) && isOuterwear(bp.title.toLowerCase())
@@ -289,6 +337,11 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
       id: "unisex-swimwear",
       title: "Swimwear",
       match: (bp) => inCategory(bp, 8) && isSwimwear(bp.title.toLowerCase())
+    },
+    {
+      id: "unisex-underwear",
+      title: "Underwear & Boxers",
+      match: (bp) => inCategory(bp, 8) && isUnderwear(bp.title.toLowerCase())
     },
     {
       id: "unisex-outerwear",
@@ -375,7 +428,7 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     {
       id: "acc-underwear",
       title: "Underwear",
-      match: (bp) => inCategory(bp, 4) && isUnderwear(bp.title.toLowerCase())
+      match: (bp) => isUnderwear(bp.title.toLowerCase())
     },
     {
       id: "acc-baby-acc",

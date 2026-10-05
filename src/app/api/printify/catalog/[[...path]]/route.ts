@@ -403,12 +403,93 @@ export async function GET(
         });
       }
 
+const SEARCH_SYNONYMS: Record<string, RegExp> = {
+  underwear: /\b(underwear|boxer|boxers|brief|briefs|panties|thong|thongs|bra|bras|lingerie)\b/i,
+  boxer: /\b(boxer|boxers|brief|briefs|underwear)\b/i,
+  brief: /\b(brief|briefs|boxer|boxers|underwear)\b/i,
+  bra: /\b(bra|bras|sports bra|bralette)\b/i,
+  jewelry: /\b(jewelry|jewellery|necklace|necklaces|bracelet|bracelets|pendant|pendants|earring|earrings|charm|charms|bangle|bangles|cufflink|cufflinks|signet ring)\b/i,
+  jewellery: /\b(jewelry|jewellery|necklace|necklaces|bracelet|bracelets|pendant|pendants|earring|earrings|charm|charms|bangle|bangles|cufflink|cufflinks|signet ring)\b/i,
+  shoes: /\b(shoe|shoes|sneaker|sneakers|boot|boots|slipper|slippers|loafer|loafers|slide|slides|clog|clogs|footwear)\b/i,
+  shoe: /\b(shoe|shoes|sneaker|sneakers|boot|boots|slipper|slippers|loafer|loafers|slide|slides|clog|clogs|footwear)\b/i,
+  footwear: /\b(shoe|shoes|sneaker|sneakers|boot|boots|slipper|slippers|loafer|loafers|slide|slides|clog|clogs|footwear)\b/i,
+  sneakers: /\b(sneaker|sneakers|shoe|shoes)\b/i,
+  sneaker: /\b(sneaker|sneakers|shoe|shoes)\b/i,
+  boots: /\b(boot|boots)\b/i,
+  boot: /\b(boot|boots)\b/i,
+  drinkware: /\b(mug|mugs|tumbler|tumblers|bottle|bottles|cup|cups|flask|flasks|pint|pints|glass|glassware)\b/i,
+  bottle: /\b(bottle|bottles|flask|flasks|tumbler|tumblers)\b/i,
+  bottles: /\b(bottle|bottles|flask|flasks|tumbler|tumblers)\b/i,
+  tumbler: /\b(tumbler|tumblers|bottle|bottles)\b/i,
+  tumblers: /\b(tumbler|tumblers|bottle|bottles)\b/i,
+  mug: /\b(mug|mugs|cup|cups)\b/i,
+  mugs: /\b(mug|mugs|cup|cups)\b/i,
+  hoodie: /\b(hoodie|hoodies|hooded)\b/i,
+  hoodies: /\b(hoodie|hoodies|hooded)\b/i,
+  sweatshirt: /\b(sweatshirt|sweatshirts|crewneck|crewnecks)\b/i,
+  sweatshirts: /\b(sweatshirt|sweatshirts|crewneck|crewnecks)\b/i,
+  tshirt: /\b(t-shirt|t-shirts|t shirt|t shirts|tee|tees|polo)\b/i,
+  tshirts: /\b(t-shirt|t-shirts|t shirt|t shirts|tee|tees|polo)\b/i,
+  tee: /\b(tee|tees|t-shirt|t-shirts|t shirt|t shirts)\b/i,
+  tees: /\b(tee|tees|t-shirt|t-shirts|t shirt|t shirts)\b/i,
+  shirt: /\b(shirt|shirts|tee|tees|t-shirt|t-shirts)\b/i,
+  shirts: /\b(shirt|shirts|tee|tees|t-shirt|t-shirts)\b/i,
+  pants: /\b(pant|pants|jogger|joggers|sweatpant|sweatpants|trousers|bottoms)\b/i,
+  pant: /\b(pant|pants|jogger|joggers|sweatpant|sweatpants|trousers|bottoms)\b/i,
+  bottoms: /\b(pant|pants|jogger|joggers|shorts|sweatpant|sweatpants|legging|leggings)\b/i,
+  shorts: /\b(short|shorts)\b/i,
+  short: /\b(short|shorts)\b/i,
+  hat: /\b(hat|hats|cap|caps|beanie|beanies|snapback|trucker|visor)\b/i,
+  hats: /\b(hat|hats|cap|caps|beanie|beanies|snapback|trucker|visor)\b/i,
+  cap: /\b(cap|caps|hat|hats|beanie|beanies|snapback|trucker|visor)\b/i,
+  caps: /\b(cap|caps|hat|hats|beanie|beanies|snapback|trucker|visor)\b/i,
+  bag: /\b(bag|bags|backpack|backpacks|tote|totes|pouch|pouches|duffel|duffels)\b/i,
+  bags: /\b(bag|bags|backpack|backpacks|tote|totes|pouch|pouches|duffel|duffels)\b/i,
+  case: /\b(case|cases|cover|covers)\b/i,
+  cases: /\b(case|cases|cover|covers)\b/i,
+  phone: /\b(phone|iphone|samsung|case)\b/i,
+  sock: /\b(sock|socks)\b/i,
+  socks: /\b(sock|socks)\b/i,
+  swimwear: /\b(swim|swimwear|bikini|bikinis|trunk|trunks)\b/i,
+  swimsuit: /\b(swim|swimwear|bikini|bikinis|trunk|trunks)\b/i,
+  pillow: /\b(pillow|pillows|cushion|cushions)\b/i,
+  pillows: /\b(pillow|pillows|cushion|cushions)\b/i,
+  blanket: /\b(blanket|blankets|throw|throws|fleece)\b/i,
+  blankets: /\b(blanket|blankets|throw|throws|fleece)\b/i,
+  sticker: /\b(sticker|stickers|decal|decals)\b/i,
+  stickers: /\b(sticker|stickers|decal|decals)\b/i,
+  poster: /\b(poster|posters|canvas|print|prints|wall art)\b/i,
+  posters: /\b(poster|posters|canvas|print|prints|wall art)\b/i,
+  stationery: /\b(notebook|notebooks|journal|journals|pen|pens|pencil|pencils|card|cards)\b/i,
+  notebook: /\b(notebook|notebooks|journal|journals)\b/i,
+  notebooks: /\b(notebook|notebooks|journal|journals)\b/i,
+  journal: /\b(journal|journals|notebook|notebooks)\b/i,
+  candle: /\b(candle|candles|wax)\b/i,
+  candles: /\b(candle|candles|wax)\b/i,
+  towel: /\b(towel|towels)\b/i,
+  towels: /\b(towel|towels)\b/i,
+};
+
       if (search) {
-        filtered = filtered.filter(bp => 
-          bp.title.toLowerCase().includes(search) || 
-          bp.brand.toLowerCase().includes(search) || 
-          bp.model.toLowerCase().includes(search)
-        );
+        const searchNorm = search.trim().toLowerCase();
+        const synRegex = SEARCH_SYNONYMS[searchNorm];
+        filtered = filtered.filter(bp => {
+          const title = bp.title.toLowerCase();
+          const brand = (bp.brand || '').toLowerCase();
+          const model = (bp.model || '').toLowerCase();
+
+          if (title.includes(searchNorm) || brand.includes(searchNorm) || model.includes(searchNorm)) {
+            return true;
+          }
+
+          if (synRegex) {
+            if (searchNorm === 'underwear' || searchNorm === 'boxer' || searchNorm === 'brief' || searchNorm === 'bra') {
+              if (/bracelet|necklace|ring|pen|ballpoint|chambray|hoodie/i.test(title)) return false;
+            }
+            return synRegex.test(title);
+          }
+          return false;
+        });
       }
 
       // Ensure pricing index is initialized

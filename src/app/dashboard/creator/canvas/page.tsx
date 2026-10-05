@@ -105,7 +105,11 @@ function computePrintFilesFromVariants(variants: any[]) {
       placements[rawPos] = printfile_id;
 
       // Also set aliases so any lookup variant works flawlessly
-      if (rawPos === 'left' || rawPos === 'left_sleeve' || rawPos === 'sleeve_left') {
+      if (rawPos.startsWith('front') || rawPos === 'chest') {
+        placements['front'] = printfile_id;
+      } else if (rawPos.startsWith('back') || rawPos === 'rear' || rawPos === 'reverse') {
+        placements['back'] = printfile_id;
+      } else if (rawPos === 'left' || rawPos === 'left_sleeve' || rawPos === 'sleeve_left') {
         placements['left'] = printfile_id;
         placements['sleeve_left'] = printfile_id;
         placements['left_sleeve'] = printfile_id;
@@ -115,7 +119,7 @@ function computePrintFilesFromVariants(variants: any[]) {
         placements['right_sleeve'] = printfile_id;
       } else if (rawPos.includes('collar')) {
         placements['collar'] = printfile_id;
-      } else if (rawPos.includes('neck')) {
+      } else if (rawPos.includes('neck') || rawPos.includes('label')) {
         placements['neck'] = printfile_id;
         placements['neck_inner'] = printfile_id;
         placements['inner_neck'] = printfile_id;
@@ -321,8 +325,10 @@ function CanvasContent() {
 
           let variants: any[] = [];
 
-          // Fast-path: If getBlueprintDetails already provided variants for this provider, use them!
-          if (product.variants && product.variants.length > 0 && (!savedProviderId || savedProviderId === product.print_provider_id)) {
+          // Fast-path: If getBlueprintDetails already provided variants with placeholders for this provider, use them!
+          const hasDetailedPlaceholders = product.variants && product.variants.length > 0 && product.variants.some((v: any) => v.placeholders && v.placeholders.length > 0);
+
+          if (hasDetailedPlaceholders && (!savedProviderId || savedProviderId === product.print_provider_id)) {
             variants = product.variants;
           } else if (defaultProviderId) {
             const variantsResponse = await printifyAPI.getBlueprintVariantsForProvider(effectiveBlueprintId, defaultProviderId);
