@@ -2843,11 +2843,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         Product Description *
                       </label>
                       <textarea
+                        data-lenis-prevent
                         value={productForm.description}
                         onChange={(e) => handleInputChange("description", e.target.value)}
+                        onWheel={(e) => e.stopPropagation()}
                         rows={4}
                         placeholder="Describe your design and brand story... Must be at least 20 characters."
-                        className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all resize-none ${formErrors.description ? "border-red-500/50 bg-red-500/5" : "border-white/10"
+                        className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all overflow-y-auto resize-y min-h-[110px] max-h-[300px] ${formErrors.description ? "border-red-500/50 bg-red-500/5" : "border-white/10"
                           }`}
                       />
                       {formErrors.description ? (
