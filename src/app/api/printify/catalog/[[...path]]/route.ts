@@ -359,7 +359,7 @@ export async function GET(
         });
       });
 
-      const categoriesList = CATEGORIES_MAP.map(cat => {
+      let categoriesList = CATEGORIES_MAP.map(cat => {
         const hasBlueprints = activeCategoryIds.has(cat.id);
         if (!hasBlueprints) return null;
 
@@ -370,6 +370,16 @@ export async function GET(
           image_url: categoryCoverImages.get(cat.id) || STATIC_FALLBACK_IMAGES[cat.id] || "/placeholder-product.png"
         };
       }).filter(Boolean);
+
+      // Robust fallback: if blueprints couldn't be loaded or no categories matched, show all predefined categories
+      if (categoriesList.length === 0) {
+        categoriesList = CATEGORIES_MAP.map(cat => ({
+          id: cat.id,
+          parent_id: 0,
+          title: cat.title,
+          image_url: STATIC_FALLBACK_IMAGES[cat.id] || "/placeholder-product.png"
+        }));
+      }
 
       return NextResponse.json({
         success: true,
@@ -386,9 +396,13 @@ export async function GET(
         console.log(`[Printify Catalog Cache] Returning cached catalog list`);
         blueprints = catalogCache.data;
       } else {
-        console.log(`[Printify Catalog Cache] Fetching fresh catalog list from Printify`);
-        blueprints = await printifyCatalogAPI.getBlueprints();
-        catalogCache = { data: blueprints, timestamp: Date.now() };
+        try {
+          console.log(`[Printify Catalog Cache] Fetching fresh catalog list from Printify`);
+          blueprints = await printifyCatalogAPI.getBlueprints();
+          catalogCache = { data: blueprints, timestamp: Date.now() };
+        } catch (e: any) {
+          console.warn(`[Printify Catalog] Failed to fetch blueprints:`, e?.message);
+        }
       }
 
       const categoryId = parseInt(searchParams.get('category') || '0');

@@ -56,12 +56,19 @@ async function handler(
       responseHeaders.set('set-cookie', setCookie);
     }
 
+    if (targetPath.startsWith('shopify/shop') && response.status >= 400) {
+      return NextResponse.json({ connected: false, message: 'Shopify not connected' }, { status: 200 });
+    }
+
     return new NextResponse(data, {
       status: response.status,
       headers: responseHeaders,
     });
   } catch (error: any) {
     console.error(`Catchall proxy error for /api/${targetPath}:`, error);
+    if (targetPath.startsWith('shopify/shop')) {
+      return NextResponse.json({ connected: false, message: 'Shopify not connected' }, { status: 200 });
+    }
     return NextResponse.json(
       { error: 'Internal Server Error', message: error.message },
       { status: 500 }
