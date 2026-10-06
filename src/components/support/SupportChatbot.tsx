@@ -514,14 +514,6 @@ export default function SupportChatbot() {
           bottom: isMobile ? '5.5rem' : '1.75rem',
           right: isMobile ? '1rem' : '1.75rem',
         }}>
-          {/* Ambient ping ring */}
-          <span style={{
-            position: 'absolute', inset: 0, borderRadius: '9999px',
-            background: `radial-gradient(circle, ${ORANGE} 0%, transparent 70%)`,
-            opacity: 0.2, animation: 'lokaPing 2.5s cubic-bezier(0,0,0.2,1) infinite',
-            pointerEvents: 'none',
-          }} />
-
           <button
             onClick={() => setIsOpen(true)}
             aria-label="Open Customer Support Chat"
