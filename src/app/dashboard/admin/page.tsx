@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Users, Package, ShoppingCart, Settings, DollarSign, Wallet, Loader2 } from 'lucide-react';
+import { Users, Package, ShoppingCart, Settings, DollarSign, Wallet, Loader2, BookOpen } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { api } from '@/lib/auth';
 
@@ -115,6 +115,14 @@ export default function AdminDashboard() {
       href: '/dashboard/admin/payouts',
       color: 'bg-amber-500',
       stats: 'Withdrawal requests'
+    },
+    {
+      title: 'Knowledge & AI Chatbot',
+      description: 'Manage FAQs, product details, store policies, and refresh search index for the chatbot',
+      icon: BookOpen,
+      href: '/dashboard/admin/knowledge',
+      color: 'bg-emerald-500',
+      stats: 'FAQs, Products & Policies'
     }
   ];
 

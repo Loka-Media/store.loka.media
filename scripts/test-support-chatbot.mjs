@@ -30,7 +30,7 @@ const TEST_CASES = [
     question: 'Can I return an item if I ordered the wrong size?',
     validator: (reply) => {
       const lower = reply.toLowerCase();
-      const mentionsPolicy = (lower.includes('do not accept') || lower.includes('cannot') || lower.includes('custom made') || lower.includes('no return')) &&
+      const mentionsPolicy = (lower.includes('do not accept') || lower.includes('cannot') || lower.includes("can't") || lower.includes("can’t") || lower.includes('custom made') || lower.includes('custom-made') || lower.includes('no return')) &&
                              (lower.includes('sizing') || lower.includes('size'));
       return mentionsPolicy ? null : 'Failed to state policy: no returns for sizing due to custom made-to-order nature';
     }

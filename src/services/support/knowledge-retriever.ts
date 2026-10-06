@@ -12,6 +12,7 @@ import {
   CANNED_RESPONSES,
   FORBIDDEN_SUPPLIER_NAMES
 } from '@/config/support-knowledge';
+import { getSearchableKnowledgeBase } from './knowledge-manager';
 
 export interface RetrievalResult {
   items: KnowledgeItem[];
@@ -136,7 +137,17 @@ const COMMON_TYPOS: Record<string, string> = {
   brokn: 'broken',
   suport: 'support',
   qualtiy: 'quality',
-  staus: 'status'
+  staus: 'status',
+  cusotmised: 'customized',
+  cusotmize: 'customize',
+  customise: 'customize',
+  customised: 'customized',
+  customisation: 'customization',
+  kese: 'how',
+  kaise: 'how',
+  kharide: 'buy',
+  kharidna: 'buy',
+  kharid: 'buy'
 };
 
 const CORE_SUPPORT_KEYWORDS = [
@@ -144,7 +155,9 @@ const CORE_SUPPORT_KEYWORDS = [
   'return', 'returns', 'refund', 'exchange', 'cancel', 'cancellation',
   'address', 'product', 'products', 'apparel', 't-shirt', 'hoodie',
   'suitcase', 'luggage', 'mug', 'poster', 'canvas', 'payment', 'paypal',
-  'stripe', 'damaged', 'defective', 'defect', 'support', 'creator', 'payout'
+  'stripe', 'damaged', 'defective', 'defect', 'support', 'creator', 'payout',
+  'customize', 'customized', 'customization', 'design', 'buy', 'buying', 'purchase',
+  'founder', 'mangat', 'perry'
 ];
 
 /**
@@ -171,6 +184,16 @@ function normalizeWord(word: string): string {
   return lower;
 }
 
+const STOPWORDS = new Set([
+  'the', 'is', 'at', 'which', 'on', 'and', 'a', 'an', 'in', 'to', 'for', 'of',
+  'with', 'as', 'by', 'that', 'this', 'it', 'from', 'or', 'are', 'was', 'were',
+  'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'but',
+  'if', 'then', 'else', 'when', 'up', 'down', 'out', 'over', 'under', 'again',
+  'further', 'once', 'here', 'there', 'all', 'any', 'both', 'each',
+  'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only',
+  'own', 'same', 'so', 'than', 'too', 'very', 'can', 'will', 'just', 'should', 'now', 'what'
+]);
+
 /**
  * Tokenizes, corrects spelling, and normalizes text into searchable word tokens
  */
@@ -179,15 +202,18 @@ function tokenize(text: string): string[] {
     .toLowerCase()
     .replace(/[^\w\s-]/g, ' ')
     .split(/\s+/)
-    .filter(w => w.length > 2)
+    .filter(w => w.length > 2 && !STOPWORDS.has(w))
     .map(w => normalizeWord(w));
 }
 
 /**
  * Searches the knowledge base and determines user intent
  */
-export function retrieveKnowledge(query: string): RetrievalResult {
+export function retrieveKnowledge(query: string, customKnowledgeBase?: KnowledgeItem[]): RetrievalResult {
   const cleanQuery = (query || '').trim();
+  const knowledgeBase = (customKnowledgeBase && customKnowledgeBase.length > 0)
+    ? customKnowledgeBase
+    : getSearchableKnowledgeBase();
 
   // 1. Check for prompt injection / security probes
   for (const pattern of INJECTION_PATTERNS) {
@@ -236,7 +262,7 @@ export function retrieveKnowledge(query: string): RetrievalResult {
   // 5. Check for direct escalation request
   for (const pattern of ESCALATION_PATTERNS) {
     if (pattern.test(cleanQuery) || pattern.test(normalizedQuery)) {
-      const contactItem = SUPPORT_KNOWLEDGE_BASE.find(k => k.id === 'support-contact-info');
+      const contactItem = knowledgeBase.find(k => k.id === 'support-contact-info') || knowledgeBase.find(k => k.category === 'support');
       return {
         items: contactItem ? [contactItem] : [],
         intent: 'support_escalation',
@@ -250,7 +276,7 @@ export function retrieveKnowledge(query: string): RetrievalResult {
   const isDefectClaim = /\b(tear|torn|damaged?|defects?|defective|smudge[d]?|broken|misprints?|stained?|ripped|cracked)\b/i.test(normalizedQuery);
 
   // 7. Hybrid Search Ranking across Knowledge Base with Fuzzy Intelligence
-  const scoredItems = SUPPORT_KNOWLEDGE_BASE.map(item => {
+  const scoredItems = knowledgeBase.map(item => {
     let score = 0;
     const itemText = (item.title + ' ' + item.content).toLowerCase();
 
@@ -301,13 +327,23 @@ export function retrieveKnowledge(query: string): RetrievalResult {
 
   scoredItems.sort((a, b) => b.score - a.score);
 
-  // Take top 2-3 most relevant items with score > 2
+  const highestScore = scoredItems[0]?.score || 0;
+
+  // If score is too low, treat as out of scope / unsupported
+  if (highestScore < 8) {
+    return {
+      items: [],
+      intent: 'general',
+      confidence: 0
+    };
+  }
+
+  // Take top 2-3 most relevant items with score >= 8
   const topItems = scoredItems
-    .filter(si => si.score > 2)
+    .filter(si => si.score >= 8)
     .slice(0, 3)
     .map(si => si.item);
 
-  const highestScore = scoredItems[0]?.score || 0;
   const confidence = Math.min(1.0, highestScore / 20);
 
   return {

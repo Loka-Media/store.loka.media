@@ -37,6 +37,69 @@ export const SUPPORT_KNOWLEDGE_BASE: KnowledgeItem[] = [
     lastUpdated: '2026-10-06'
   },
   {
+    id: 'brand-founder',
+    title: 'Loka Media Founders, Leadership & Executive Team',
+    category: 'brand',
+    content: `The founder of Loka Media is Perry Mangat (Founder & CEO), who established the platform alongside co-founder Rupan Bal and an experienced team of creators and e-commerce innovators. Perry Mangat leads Loka Media to empower creators, influencers, and artists worldwide with seamless merchandise customization, automated printing, and global distribution. For corporate inquiries or executive partnerships, email hello@loka.media.`,
+    source: '/about, Leadership',
+    tags: ['founder', 'perry mangat', 'perry', 'mangat', 'co-founder', 'who founded loka', 'founder name', 'rupan bal', 'ceo', 'owner', 'who started loka', 'leadership', 'team'],
+    lastUpdated: '2026-10-06'
+  },
+  {
+    id: 'brand-stats-milestones',
+    title: 'Loka Media Creator Community & Platform Statistics',
+    category: 'brand',
+    content: `Key platform statistics for Loka Media:
+- Over $2 Million+ paid out directly to creators.
+- 10,000+ active creators running customized merchandise storefronts.
+- Creators keep up to 90% of their custom profit markups.
+- Worldwide shipping to over 180 countries.`,
+    source: 'Homepage /',
+    tags: ['stats', 'paid to creators', 'how many creators', 'milestones', 'revenue', 'platform stats', 'community'],
+    lastUpdated: '2026-10-06'
+  },
+  {
+    id: 'creator-canvas-studio',
+    title: 'Canvas Design Studio & Interactive 360° Preview Tools',
+    category: 'creator',
+    content: `Loka Media provides powerful creator tools:
+- Canvas Editor: Drag-and-drop design workspace with rich typography, clipart library, layer positioning, and high-resolution artwork uploads.
+- 360° Mockup Preview: Customers and creators can rotate merchandise across front, back, and sleeve angles on real garment colors before ordering.
+- Zero Upfront Costs: Signing up and publishing products is 100% free; printing and shipping occur only on demand when an order is placed.`,
+    source: '/creator/studio, /about',
+    tags: ['canvas', 'studio', 'design tools', 'editor', '360 preview', 'mockup', 'how to design'],
+    lastUpdated: '2026-10-06'
+  },
+  {
+    id: 'creator-how-to-customize',
+    title: 'How to Customize and Design Products on Loka Media',
+    category: 'creator',
+    content: `Customizing products on Loka Media is simple with our built-in Canvas Studio:
+1. Sign in or apply as a creator at store.loka.media/creators.
+2. Select a blank product from our catalog (Unisex T-Shirts, Hoodies, Coffee Mugs, Hard-Shell Suitcases, Posters, Phone Cases, etc.).
+3. Open the Canvas Studio to upload high-res artwork, add custom text, browse clipart, and position design layers.
+4. Preview in 360°: Use the interactive 360° product spinner to inspect mockups across front, back, and sleeve angles on real garment colors.
+5. Set your selling price and profit markup (you keep up to 90% profit), then publish to your custom shop with zero upfront cost!`,
+    source: '/creator/studio, /creators',
+    tags: ['how to customize', 'customize product', 'design product', 'canvas editor', 'customised', 'cusotmised', 'create design', '360 preview', 'how to design', 'customise', 'kese customise kare', 'kaise customize kare', 'how do we customize'],
+    lastUpdated: '2026-10-06'
+  },
+  {
+    id: 'customer-how-to-buy',
+    title: 'How Customers Buy Products on Loka Media',
+    category: 'products',
+    content: `Buying products on Loka Media is fast, easy, and secure:
+1. Browse & Discover: Explore creator designs at store.loka.media/products or visit a specific creator storefront (store.loka.media/creator/[id]).
+2. Select Variant & Size: On the Product Details Page, view the interactive 360° mockup angles, select your preferred garment color, and choose your size (consult our size chart for true-to-size unisex fit).
+3. Add to Cart: Click "Add to Cart" and review your items in the shopping bag.
+4. Unified Checkout: Head to /checkout-unified, enter your shipping destination address, and pick your preferred shipping speed (Standard or Express).
+5. Secure Payment: Pay safely using Credit/Debit Card (Stripe), PayPal, Apple Pay, Google Pay, Klarna, or AfterPay.
+6. Order Confirmation & Tracking: You will receive an instant confirmation email, and when your made-to-order item ships within 2–5 business days, an automated tracking email is sent with your live delivery link!`,
+    source: '/products, /checkout-unified',
+    tags: ['how to buy', 'buy product', 'how customers buy', 'purchase', 'order product', 'how to order', 'checkout flow', 'kese buy kare', 'kaise kharide', 'how do i buy', 'shopping guide', 'how to purchase'],
+    lastUpdated: '2026-10-06'
+  },
+  {
     id: 'brand-supplier-safe',
     title: 'Manufacturing & Fulfillment Operations',
     category: 'brand',

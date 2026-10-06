@@ -1,0 +1,782 @@
+[
+  {
+    "id": "brand-overview",
+    "title": "About Loka Media",
+    "category": "brand",
+    "content": "Loka Media (store.loka.media / loka.media) is a premium creator monetization platform and design marketplace. We empower independent artists, influencers, and creators worldwide to launch custom branded product lines and storefronts. Customers can discover and shop curated, high-quality merchandise created by their favorite independent creators.",
+    "source": "/about, /terms",
+    "tags": [
+      "about",
+      "company",
+      "brand",
+      "who is loka",
+      "what is loka",
+      "marketplace"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "brand-mission",
+    "title": "Quality Guarantee & Custom Made-to-Order",
+    "category": "brand",
+    "content": "All products on Loka Media are custom made-to-order especially for each customer. Because each product is crafted individually upon order, we prioritize exceptional print quality, durable materials, and premium finishes. Quality is 100% guaranteed: if an item arrives with a print defect or physical damage, we replace or refund it promptly within 30 days.",
+    "source": "/returns, /help",
+    "tags": [
+      "quality",
+      "guarantee",
+      "made to order",
+      "print quality",
+      "craftsmanship"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "brand-founder",
+    "title": "Loka Media Founders, Leadership & Executive Team",
+    "category": "brand",
+    "content": "The founder of Loka Media is Perry Mangat (Founder & CEO), who established the platform alongside co-founder Rupan Bal and an experienced team of creators and e-commerce innovators. Perry Mangat leads Loka Media to empower creators, influencers, and artists worldwide with seamless merchandise customization, automated printing, and global distribution. For corporate inquiries or executive partnerships, email hello@loka.media.",
+    "source": "/about, Leadership",
+    "tags": [
+      "founder",
+      "perry mangat",
+      "perry",
+      "mangat",
+      "co-founder",
+      "who founded loka",
+      "founder name",
+      "rupan bal",
+      "ceo",
+      "owner",
+      "who started loka",
+      "leadership",
+      "team"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "brand-stats-milestones",
+    "title": "Loka Media Creator Community & Platform Statistics",
+    "category": "brand",
+    "content": "Key platform statistics for Loka Media:\n- Over $2 Million+ paid out directly to creators.\n- 10,000+ active creators running customized merchandise storefronts.\n- Creators keep up to 90% of their custom profit markups.\n- Worldwide shipping to over 180 countries.",
+    "source": "Homepage /",
+    "tags": [
+      "stats",
+      "paid to creators",
+      "how many creators",
+      "milestones",
+      "revenue",
+      "platform stats",
+      "community"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "creator-canvas-studio",
+    "title": "Canvas Design Studio & Interactive 360° Preview Tools",
+    "category": "creator",
+    "content": "Loka Media provides powerful creator tools:\n- Canvas Editor: Drag-and-drop design workspace with rich typography, clipart library, layer positioning, and high-resolution artwork uploads.\n- 360° Mockup Preview: Customers and creators can rotate merchandise across front, back, and sleeve angles on real garment colors before ordering.\n- Zero Upfront Costs: Signing up and publishing products is 100% free; printing and shipping occur only on demand when an order is placed.",
+    "source": "/creator/studio, /about",
+    "tags": [
+      "canvas",
+      "studio",
+      "design tools",
+      "editor",
+      "360 preview",
+      "mockup",
+      "how to design"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "creator-how-to-customize",
+    "title": "How to Customize and Design Products on Loka Media",
+    "category": "creator",
+    "content": "Customizing products on Loka Media is simple with our built-in Canvas Studio:\n1. Sign in or apply as a creator at store.loka.media/creators.\n2. Select a blank product from our catalog (Unisex T-Shirts, Hoodies, Coffee Mugs, Hard-Shell Suitcases, Posters, Phone Cases, etc.).\n3. Open the Canvas Studio to upload high-res artwork, add custom text, browse clipart, and position design layers.\n4. Preview in 360°: Use the interactive 360° product spinner to inspect mockups across front, back, and sleeve angles on real garment colors.\n5. Set your selling price and profit markup (you keep up to 90% profit), then publish to your custom shop with zero upfront cost!",
+    "source": "/creator/studio, /creators",
+    "tags": [
+      "how to customize",
+      "customize product",
+      "design product",
+      "canvas editor",
+      "customised",
+      "cusotmised",
+      "create design",
+      "360 preview",
+      "how to design",
+      "customise",
+      "kese customise kare",
+      "kaise customize kare",
+      "how do we customize"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "customer-how-to-buy",
+    "title": "How Customers Buy Products on Loka Media",
+    "category": "products",
+    "content": "Buying products on Loka Media is fast, easy, and secure:\n1. Browse & Discover: Explore creator designs at store.loka.media/products or visit a specific creator storefront (store.loka.media/creator/[id]).\n2. Select Variant & Size: On the Product Details Page, view the interactive 360° mockup angles, select your preferred garment color, and choose your size (consult our size chart for true-to-size unisex fit).\n3. Add to Cart: Click \"Add to Cart\" and review your items in the shopping bag.\n4. Unified Checkout: Head to /checkout-unified, enter your shipping destination address, and pick your preferred shipping speed (Standard or Express).\n5. Secure Payment: Pay safely using Credit/Debit Card (Stripe), PayPal, Apple Pay, Google Pay, Klarna, or AfterPay.\n6. Order Confirmation & Tracking: You will receive an instant confirmation email, and when your made-to-order item ships within 2–5 business days, an automated tracking email is sent with your live delivery link!",
+    "source": "/products, /checkout-unified",
+    "tags": [
+      "how to buy",
+      "buy product",
+      "how customers buy",
+      "purchase",
+      "order product",
+      "how to order",
+      "checkout flow",
+      "kese buy kare",
+      "kaise kharide",
+      "how do i buy",
+      "shopping guide",
+      "how to purchase"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "brand-supplier-safe",
+    "title": "Manufacturing & Fulfillment Operations",
+    "category": "brand",
+    "content": "All Loka Media products are custom manufactured and fulfilled on demand through vetted global production and printing facilities located across North America, Europe, and key international hubs. This distributed production model ensures fast local fulfillment, reduces shipping times, and minimizes environmental waste. We do not disclose confidential backend vendor arrangements.",
+    "source": "Website Policies",
+    "tags": [
+      "supplier",
+      "manufacturer",
+      "fulfillment partner",
+      "where made",
+      "production",
+      "who makes"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "products-overview",
+    "title": "Products & Catalog Overview",
+    "category": "products",
+    "content": "Loka Media offers a diverse catalog of high-quality custom merchandise designed by creators worldwide:\n1. Apparel: Premium unisex t-shirts, heavy blend fleece hoodies, crewnecks, tank tops, crop tops, joggers, and activewear (sizes XS–5XL).\n2. Drinkware: Ceramic coffee mugs (11oz & 15oz, dishwasher & microwave safe), accent mugs, stainless steel tumblers, and water bottles.\n3. Luggage & Bags: Hard-shell polycarbonate suitcases (with 360° spinner wheels & security locks), canvas tote bags, duffel bags, and everyday backpacks.\n4. Accessories: Dual-layer shockproof phone cases, embroidered caps, beanies, socks, and enamel pins.\n5. Home & Living: Gallery canvas wall art, matte posters, fleece throw blankets, and decorative accent pillows.\nAll items are custom crafted on demand using professional-grade DTG, sublimation, or UV print technology for lasting durability.",
+    "source": "/catalog, /shop",
+    "tags": [
+      "products",
+      "catalog",
+      "what do you sell",
+      "kinds of products",
+      "what products",
+      "merchandise",
+      "tell me about your products",
+      "all products",
+      "items",
+      "categories"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "products-apparel",
+    "title": "Apparel Products (T-Shirts, Hoodies, Sweatshirts, Tanks)",
+    "category": "products",
+    "content": "We offer a wide collection of premium apparel including:\n- T-Shirts: Unisex heavy cotton tees, premium jersey crewnecks, garment-dyed tees, and relaxed crop tees. Available in sizes XS through 5XL with up to 60+ vibrant colors.\n- Hoodies & Sweatshirts: Heavy blend fleece pullover hoodies, zip-up hooded sweatshirts, and crewneck sweaters with double-needle stitching and ribbed cuffs.\n- Tank Tops & Crop Tops: Flowy racerback tanks, unisex jersey tanks, and athletic tops.\n- Bottoms & Activewear: Joggers, fleece sweatpants, athletic shorts, and compression leggings.\nAll apparel uses high-grade DTG (Direct-to-Garment) or dye-sublimation printing for vivid, wash-resistant graphics that won't crack or peel.",
+    "source": "/catalog, /shop",
+    "tags": [
+      "t-shirt",
+      "tee",
+      "hoodie",
+      "sweatshirt",
+      "tank top",
+      "clothing",
+      "apparel",
+      "sizes",
+      "materials",
+      "cotton"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "products-drinkware",
+    "title": "Mugs & Drinkware",
+    "category": "products",
+    "content": "Our drinkware catalog features:\n- Ceramic Mugs: 11oz and 15oz glossy white ceramic mugs with comfortable C-handles. Microwave and dishwasher safe.\n- Black Ceramic Mugs: 11oz and 15oz sleek black mugs.\n- Accent Mugs: Two-tone mugs with colored handles and interiors.\n- Travel Drinkware: Stainless steel insulated tumblers, water bottles with leak-proof lids, and camping mugs.\nPrints are heat-pressed using dye sublimation for permanent, scratch-proof, high-gloss color.",
+    "source": "/catalog",
+    "tags": [
+      "mug",
+      "mugs",
+      "coffee mug",
+      "tumbler",
+      "water bottle",
+      "drinkware",
+      "dishwasher safe",
+      "cup"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "products-accessories-luggage",
+    "title": "Bags, Luggage & Accessories",
+    "category": "products",
+    "content": "Our accessories range includes:\n- Suitcases & Luggage: Custom hard-shell suitcases featuring 100% durable polycarbonate front, black ABS back, 360-degree swivel wheels, built-in security lock, inner pockets, and expandable storage. Available in Small (carry-on), Medium, and Large.\n- Bags & Backpacks: Everyday zip backpacks, cotton canvas tote bags, duffel bags, and accessory pouches.\n- Phone Cases: Tough dual-layer shockproof cases and slim snap cases for popular iPhone and Samsung Galaxy models.\n- Accessories: Ribbed beanies, trucker hats, embroidered caps, socks, and enamel pins.",
+    "source": "/catalog",
+    "tags": [
+      "suitcase",
+      "luggage",
+      "bag",
+      "backpack",
+      "tote bag",
+      "phone case",
+      "hat",
+      "cap",
+      "beanie",
+      "socks",
+      "accessories"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "products-home-living",
+    "title": "Home & Living Products",
+    "category": "products",
+    "content": "Home decor products include:\n- Wall Art: Gallery-wrapped canvas prints (pine frame with protective coating) and museum-grade matte vertical/horizontal posters.\n- Comfort Items: Plush fleece throw blankets, sherpa blankets, and spun polyester square indoor accent pillows with hidden zippers.\n- Living Essentials: Ceramic scented soy candles, absorbent beach/bath towels, and desk mousepads.",
+    "source": "/catalog",
+    "tags": [
+      "canvas",
+      "poster",
+      "wall art",
+      "pillow",
+      "blanket",
+      "candle",
+      "towel",
+      "home",
+      "living",
+      "decor"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "products-sizing",
+    "title": "Sizing & Fit Advice",
+    "category": "products",
+    "content": "Most apparel items run true to size with a standard retail unisex fit. Detailed size charts (width, length, and sleeve measurements) are displayed on each product's page. If you prefer a loose or oversized streetwear aesthetic, we recommend sizing up one size. Because all products are custom printed upon order, we do not accept returns for sizing errors, so please check measurements before ordering.",
+    "source": "/help, /returns",
+    "tags": [
+      "sizing",
+      "size chart",
+      "fit",
+      "runs small",
+      "runs large",
+      "measurements",
+      "what size"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "shipping-times",
+    "title": "Shipping Times & Production Turnaround",
+    "category": "shipping",
+    "content": "Because products are custom printed to order:\n1. Production Time: Each item is printed and quality checked within 2 to 5 business days.\n2. Delivery Times (after production):\n- United States: 3 to 7 business days.\n- Europe / UK: 5 to 10 business days.\n- Canada / Australia: 5 to 12 business days.\n- Other International: 7 to 15 business days.\nTotal expected arrival is typically 5 to 12 business days for US domestic orders. Tracking links are emailed as soon as the order leaves the facility.",
+    "source": "/returns, /help",
+    "tags": [
+      "shipping",
+      "delivery time",
+      "how long",
+      "when will it arrive",
+      "transit time",
+      "production time",
+      "turnaround"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "shipping-costs",
+    "title": "Shipping Rates & Express Options",
+    "category": "shipping",
+    "content": "Shipping rates are dynamically calculated at checkout based on destination country, package weight, and number of items. Standard shipping starts at approximately $4.99–$6.99 for light apparel within the United States. Express/priority shipping methods may be offered at checkout depending on your location and items.",
+    "source": "/checkout-unified, /returns",
+    "tags": [
+      "shipping cost",
+      "shipping rate",
+      "free shipping",
+      "express shipping",
+      "postage",
+      "delivery cost"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "shipping-international",
+    "title": "International Shipping, Customs & Duties",
+    "category": "shipping",
+    "content": "We ship to over 180 countries worldwide! For international orders, shipments may be subject to local import taxes, customs duties, and brokerage fees imposed by your country's government upon arrival. These charges vary by country and are the responsibility of the recipient. Delivery times for international orders range from 7 to 15 business days.",
+    "source": "/returns, /help",
+    "tags": [
+      "international",
+      "customs",
+      "duties",
+      "taxes",
+      "worldwide shipping",
+      "uk",
+      "europe",
+      "canada",
+      "australia"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "orders-overview",
+    "title": "Order Support & Management Overview",
+    "category": "orders",
+    "content": "For any order-related questions, here is how we can help:\n1. Tracking: You will automatically receive a tracking link via email once shipped, or you can check your order status in your profile at store.loka.media/profile.\n2. Address Changes: Address updates must be requested within 2–4 hours of ordering before printing begins by emailing support@loka.media with your order number.\n3. Cancellations: Orders can be cancelled free of charge before production starts.\n4. Damaged or Lost Orders: If your package is lost in transit or arrives damaged/misprinted, email support@loka.media with photos and your order number for an immediate free replacement or full refund.",
+    "source": "/returns, /help, /profile",
+    "tags": [
+      "order",
+      "orders",
+      "order related",
+      "order help",
+      "need help with an order",
+      "about my order",
+      "order issue",
+      "order status",
+      "my order",
+      "orders related"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "orders-tracking",
+    "title": "How to Track Your Order",
+    "category": "orders",
+    "content": "Once your package is printed, inspected, and handed over to the courier (such as USPS, DHL, FedEx, or local postal services), you will automatically receive an email containing your tracking number and a direct tracking link. You can also view order status by logging into your account at store.loka.media/profile. Tracking updates may take 24–48 hours to appear after the label is generated.",
+    "source": "/help, /returns",
+    "tags": [
+      "track order",
+      "where is my order",
+      "tracking number",
+      "order status",
+      "shipment tracking"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "orders-change-address",
+    "title": "Changing Shipping Address or Order Details",
+    "category": "orders",
+    "content": "Address corrections or item modifications can only be made BEFORE your order enters production (usually within 2-4 hours of placing the order). If you noticed a mistake in your address, email support@loka.media immediately with:\n1. Your Order Number (e.g., LOKA-1234)\n2. The complete updated address.\nOnce an order has begun printing or has been shipped, the delivery address cannot be altered.",
+    "source": "/returns, /help",
+    "tags": [
+      "change address",
+      "wrong address",
+      "modify order",
+      "update shipping address",
+      "edit order"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "orders-cancellation",
+    "title": "Order Cancellation Policy",
+    "category": "orders",
+    "content": "Orders can be cancelled free of charge if you contact us before the item moves into active production. To cancel, immediately email support@loka.media with your order number and request. Once printing has commenced, made-to-order items cannot be cancelled.",
+    "source": "/returns",
+    "tags": [
+      "cancel order",
+      "cancellation",
+      "stop order",
+      "cancel"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "orders-lost-package",
+    "title": "Lost, Stolen, or Delayed Packages",
+    "category": "orders",
+    "content": "If your tracking information has not updated for more than 7 business days, or if the package is marked as delivered but you cannot locate it:\n1. Check with household members, neighbors, or building management.\n2. Confirm the shipping address entered at checkout.\n3. If still missing, email support@loka.media with your order number. Our support team will open an inquiry with the carrier and provide a free replacement or resolution if the package is verified lost in transit.",
+    "source": "/returns, /help",
+    "tags": [
+      "lost package",
+      "stolen",
+      "not delivered",
+      "missing package",
+      "delayed delivery",
+      "package not received"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "returns-policy",
+    "title": "Returns & Exchange Policy",
+    "category": "returns",
+    "content": "Because every item on Loka Media is custom printed individually on demand for each customer, WE DO NOT ACCEPT RETURNS OR EXCHANGES FOR SIZING PREFERENCES, BUYER'S REMORSE, OR UNWANTED STYLES. \nHowever, quality is 100% guaranteed! We gladly issue free replacements or full refunds for items that arrive defective, damaged, or misprinted. You have 30 days from delivery to report any quality issues.",
+    "source": "/returns",
+    "tags": [
+      "return policy",
+      "returns",
+      "exchange",
+      "wrong size",
+      "can i return",
+      "send back"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "returns-damaged-defective",
+    "title": "Reporting Damaged, Defective, or Misprinted Items",
+    "category": "returns",
+    "content": "If your product arrives damaged or with a print defect:\n1. Take clear, well-lit photos of the item lying on a flat surface showing the defect, garment tag, and damaged area.\n2. Email support@loka.media within 30 days of delivery.\n3. Include your Order Number and a brief description of the issue.\nOur customer support team will review the photos and immediately ship a free replacement or issue a full refund—no need to mail the defective item back!",
+    "source": "/returns",
+    "tags": [
+      "damaged item",
+      "defective",
+      "print error",
+      "misprint",
+      "broken",
+      "torn",
+      "tear",
+      "smudge",
+      "smudged",
+      "quality issue",
+      "replacement",
+      "damaged package",
+      "flawed",
+      "defect"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "returns-refund-timeline",
+    "title": "Refund Processing Timelines",
+    "category": "returns",
+    "content": "When a refund is approved by our support team:\n- PayPal: Funds appear in your PayPal account within 24 business hours.\n- Credit / Debit Cards (Stripe): Funds return to your bank account within 7 to 10 business days, depending on your financial institution.\nRefunds are always issued back to the original payment method used at checkout.",
+    "source": "/returns",
+    "tags": [
+      "refund timeline",
+      "how long refund",
+      "money back",
+      "refund processing",
+      "paypal refund",
+      "card refund"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "payments-accepted",
+    "title": "Accepted Payment Methods & Security",
+    "category": "payments",
+    "content": "Loka Media supports safe, encrypted checkout via Stripe and PayPal. We accept:\n- Credit & Debit Cards: Visa, MasterCard, American Express, Discover, Diners Club, JCB.\n- Digital Wallets: Apple Pay, Google Pay, PayPal.\n- Buy Now Pay Later: Klarna and AfterPay (where eligible by region).\nAll transactions use bank-level 256-bit SSL encryption. We never store credit card numbers on our servers.",
+    "source": "/returns, /checkout-unified",
+    "tags": [
+      "payment methods",
+      "credit card",
+      "paypal",
+      "apple pay",
+      "google pay",
+      "klarna",
+      "security",
+      "checkout"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "payments-currency",
+    "title": "Supported Currencies & Pricing Display",
+    "category": "payments",
+    "content": "Prices on Loka Media can be viewed in multiple currencies (USD, EUR, GBP, CAD, AUD, INR) using the currency switcher in the header. Orders are finalized and processed in the selected checkout currency or USD at the current exchange rate.",
+    "source": "/checkout-unified",
+    "tags": [
+      "currency",
+      "usd",
+      "eur",
+      "gbp",
+      "inr",
+      "cad",
+      "exchange rate",
+      "payment currency"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "creator-how-it-works",
+    "title": "How Creator Shops Work on Loka Media",
+    "category": "creator",
+    "content": "Loka Media allows creators, influencers, and artists to launch custom branded e-commerce storefronts with zero upfront fees. Creators upload their original artwork, select products from our catalog, set their desired profit markups, and publish them to their custom shop. Loka Media handles payment processing, on-demand printing, worldwide shipping, and customer support.",
+    "source": "/creators, /help",
+    "tags": [
+      "become a creator",
+      "creator program",
+      "sell on loka",
+      "creator shop",
+      "how creators earn",
+      "artist store"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "creator-earnings-payouts",
+    "title": "Creator Earnings & Payout Schedule",
+    "category": "creator",
+    "content": "Creators earn the markup they set on each product above the platform base cost. Earnings accumulate in the creator's wallet and can be withdrawn via Stripe Connect or PayPal once the minimum threshold is met. Payouts are processed on a regular monthly schedule.",
+    "source": "/help, /dashboard/creator/payouts",
+    "tags": [
+      "creator earnings",
+      "payouts",
+      "creator profit",
+      "when do creators get paid",
+      "stripe connect"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "support-contact-info",
+    "title": "How to Contact Human Support",
+    "category": "support",
+    "content": "Our customer support team is ready to help you with any issue:\n- Customer Support (orders, shipping, damaged items, refunds): support@loka.media\n- Creator Inquiries (onboarding, shop setup, payouts): creators@loka.media\n- General Brand Inquiries: hello@loka.media\nSupport hours: Monday to Friday, 9:00 AM – 6:00 PM EST. Typical email response time is within 12 to 24 business hours. Please include your Order Number for faster assistance.",
+    "source": "/contact, /help",
+    "tags": [
+      "contact support",
+      "human agent",
+      "customer service",
+      "email support",
+      "phone number",
+      "help desk"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-order-tracking",
+    "title": "How do I track my order status?",
+    "category": "faq",
+    "content": "You will receive an automated tracking email once your order ships with your carrier link. You can also view live order progress anytime at store.loka.media/profile.",
+    "source": "/profile",
+    "tags": [
+      "faq",
+      "track order",
+      "order tracking",
+      "tracking number",
+      "where is my order",
+      "status"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-change-shipping-address",
+    "title": "Can I change my delivery address after placing an order?",
+    "category": "faq",
+    "content": "Address updates must be requested within 2 to 4 hours of ordering before printing begins. Email support@loka.media immediately with your Order Number and corrected shipping address.",
+    "source": "/contact",
+    "tags": [
+      "faq",
+      "change address",
+      "wrong address",
+      "edit address",
+      "shipping address update"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-damaged-or-defective",
+    "title": "What if my item arrives damaged or with a print defect?",
+    "category": "faq",
+    "content": "We offer a 100% Quality Guarantee within 30 days! Simply email support@loka.media with clear photos of the defect and your order number. We will send a free replacement or full refund immediately without needing you to return the item.",
+    "source": "/returns",
+    "tags": [
+      "faq",
+      "damaged",
+      "defective",
+      "misprint",
+      "broken",
+      "replacement",
+      "refund defect"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-return-sizing",
+    "title": "Can I return an item if I ordered the wrong size?",
+    "category": "faq",
+    "content": "Because each item is custom crafted on demand especially for you, we cannot accept returns or exchanges for sizing errors or buyer remorse. Please check our detailed size charts on each product page before ordering.",
+    "source": "/returns",
+    "tags": [
+      "faq",
+      "wrong size",
+      "return size",
+      "exchange size",
+      "sizing return"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-shipping-timelines",
+    "title": "How long does delivery take?",
+    "category": "faq",
+    "content": "Orders take 2 to 5 business days for custom printing and quality checks. Domestic US delivery takes 3 to 7 business days after production. International delivery ranges from 7 to 15 business days.",
+    "source": "/returns",
+    "tags": [
+      "faq",
+      "delivery time",
+      "how long to ship",
+      "shipping days",
+      "turnaround",
+      "arrival"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-founder",
+    "title": "Who is the founder of Loka Media?",
+    "category": "faq",
+    "content": "The founder of Loka Media is Perry Mangat (Founder & CEO). The company was established by Perry Mangat alongside co-founder Rupan Bal to empower creators and artists worldwide to launch custom branded merchandise lines. For corporate inquiries or executive partnerships, email hello@loka.media.",
+    "source": "/about",
+    "tags": [
+      "faq",
+      "founder",
+      "perry mangat",
+      "perry",
+      "mangat",
+      "co-founder",
+      "who founded",
+      "rupan bal",
+      "founder name",
+      "who created",
+      "leadership",
+      "owner",
+      "ceo"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-cost-usage",
+    "title": "How much does it cost to use Loka?",
+    "category": "faq",
+    "content": "Loka is 100% free to join with zero upfront costs or monthly fees. Products are printed on demand only when an order is placed. Creators set their own selling price and keep up to 90% of their profit markup.",
+    "source": "/creators",
+    "tags": [
+      "faq",
+      "cost",
+      "free",
+      "how much does it cost",
+      "pricing",
+      "platform fee",
+      "upfront cost"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-custom-domain",
+    "title": "Can I connect a custom domain to my Loka store?",
+    "category": "faq",
+    "content": "Yes! Creators can connect their own custom domain to their Loka storefront to maintain brand identity and provide a seamless shopping experience for fans.",
+    "source": "/creators",
+    "tags": [
+      "faq",
+      "custom domain",
+      "domain",
+      "store url",
+      "branding"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-design-artwork-support",
+    "title": "Does Loka offer artwork and design support?",
+    "category": "faq",
+    "content": "Yes! Loka includes a built-in Canvas Studio with typography, clipart libraries, and 360° product mockup previews. Our team also offers design guidance and templates to help you launch.",
+    "source": "/creator/studio",
+    "tags": [
+      "faq",
+      "design tools",
+      "canvas",
+      "artwork",
+      "mockup",
+      "design support"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-customize-products",
+    "title": "How do creators customize and design products on Loka Media?",
+    "category": "faq",
+    "content": "Customizing products is easy with our built-in Canvas Studio: 1. Sign in or apply at store.loka.media/creators. 2. Pick a product blank (T-Shirts, Hoodies, Mugs, Suitcases, etc.). 3. Open Canvas Studio to upload artwork, add text, and layer graphics. 4. Inspect your design in 360° interactive mockup angles. 5. Set your selling price, profit margin (keep up to 90%), and publish to your store!",
+    "source": "/creator/studio, /creators",
+    "tags": [
+      "faq",
+      "customize",
+      "customise",
+      "how to customize",
+      "kese customise kare",
+      "kaise customize kare",
+      "design products",
+      "canvas editor"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-buy-products",
+    "title": "How do customers buy products on Loka Media?",
+    "category": "faq",
+    "content": "Buying products is simple and secure: 1. Explore creator designs at store.loka.media/products or your favorite creator’s shop. 2. On the product page, check 360° views, select color and size. 3. Click Add to Cart. 4. Go to /checkout-unified, enter delivery address, and choose shipping. 5. Pay securely via Card (Stripe), PayPal, Apple Pay, Google Pay, or Klarna. You’ll receive an order confirmation and live tracking link!",
+    "source": "/products, /checkout-unified",
+    "tags": [
+      "faq",
+      "how to buy",
+      "buy products",
+      "kese buy kare",
+      "kaise kharide",
+      "how customers buy",
+      "purchase merchandise",
+      "checkout"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  },
+  {
+    "id": "faq-become-creator",
+    "title": "How do I start selling as a creator on Loka Media?",
+    "category": "faq",
+    "content": "Apply for a creator storefront at store.loka.media/creators. Once approved, you can upload your designs, choose high-grade products from our catalog, set your own profit margins, and start earning instantly with zero upfront costs.",
+    "source": "/creators",
+    "tags": [
+      "faq",
+      "become creator",
+      "creator shop",
+      "artist store",
+      "sell designs",
+      "how to sell"
+    ],
+    "lastUpdated": "2026-10-06",
+    "enabled": true
+  }
+]
