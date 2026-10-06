@@ -13,6 +13,7 @@ import Navigation from "@/components/Navigation";
 import StickyHeader from "@/components/StickyHeader";
 import Footer from "@/components/home/Footer";
 import SmoothScroll from "@/components/SmoothScroll";
+import SupportChatbot from "@/components/support/SupportChatbot";
 
 export const metadata: Metadata = {
   title: "Loka Media - Premium Design Marketplace | Custom Products",
@@ -90,6 +91,7 @@ export default function RootLayout({
                     <Footer />
                   </div>
                   <Toaster position="top-right" />
+                  <SupportChatbot />
                 </WishlistProvider>
               </GuestCartProvider>
               {/* </CartProvider> */}
