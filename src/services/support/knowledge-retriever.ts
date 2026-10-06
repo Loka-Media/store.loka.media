@@ -30,7 +30,9 @@ const INJECTION_PATTERNS = [
   /show (me|your) (prompt|api key|credentials|database|env|system message)/i,
   /what (is|are) your (system prompt|internal instructions)/i,
   /jailbreak/i,
-  /repeat (everything|the above|your initial)/i
+  /repeat (everything|the above|your initial)/i,
+  /(wholesale|production|supplier|internal) (cost|price|margin|fee)/i,
+  /(database|admin|secret) (password|credential|token|url)/i
 ];
 
 // Supplier probing patterns
