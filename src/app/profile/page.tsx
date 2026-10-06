@@ -85,6 +85,16 @@ export default function ProfilePage() {
   })();
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'orders' || tabParam === 'addresses') {
+        setActiveTab(tabParam);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
