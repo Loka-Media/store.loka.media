@@ -521,7 +521,7 @@ const SEARCH_SYNONYMS: Record<string, RegExp> = {
         let premiumVal: string | number = 'N/A';
 
         if (liveCost !== null && liveCost > 0) {
-          priceVal = liveCost.toFixed(2);
+          priceVal = (fallback.price && Number(fallback.price) > liveCost) ? String(fallback.price) : liveCost.toFixed(2);
           premiumVal = liveCost.toFixed(2);
         } else if (fallback.price > 0 || fallback.premium > 0 || fallback.premiumPrice || fallback.cost) {
           priceVal = fallback.price || fallback.premiumPrice || fallback.cost || 'N/A';
@@ -599,7 +599,7 @@ const SEARCH_SYNONYMS: Record<string, RegExp> = {
             color_code: getColorCode(v.options?.color || ''),
             size: v.options?.size || 'OS',
             price: formattedCost,
-            cost: itemCost !== null ? Math.round(itemCost * 100) : null,
+            cost: formattedCost,
             premiumPrice: formattedCost,
             is_available: true,
             placeholders: v.placeholders

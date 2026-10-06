@@ -142,7 +142,7 @@ class PrintifyPricingService {
           const bpId = parseInt(bpIdStr);
           if (isNaN(bpId) || !item) continue;
 
-          const rawCost = item.cost || item.price || item.premiumPrice;
+          const rawCost = item.cost || item.premiumPrice || item.price;
           const cost = typeof rawCost === 'string' ? parseFloat(rawCost) : Number(rawCost);
           if (!isNaN(cost) && cost > 0) {
             this.blueprintMinCostMap.set(bpId, cost);

@@ -1248,6 +1248,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     return selectedProduct?.variants?.filter((v: any) => selectedVariants.includes(v.id)) || [];
   }, [selectedProduct, selectedVariants]);
 
+  // Helper to safely parse variant cost to dollars without dividing legitimate >$100 prices by 100
+  const parseVariantCostToDollars = useCallback((val: any): number => {
+    if (val == null || val === 'N/A') return 0;
+    const num = typeof val === 'string' ? parseFloat(val) : Number(val);
+    if (isNaN(num) || num <= 0) return 0;
+    // Only if it's an integer >= 500 (e.g. raw Printify cents 10714 or 1200) convert from cents
+    if (Number.isInteger(num) && num >= 500) {
+      return num / 100;
+    }
+    return num;
+  }, []);
+
   // Base cost and range uses selected variants pricing (or fallback to product defaults)
   const pricingRange = useMemo(() => {
     if (!selectedProduct) return { min: 0, max: 0, hasRange: false };
@@ -1259,18 +1271,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     if (sourceVariants.length > 0) {
       const prices = sourceVariants
         .map((v: any) => {
-          let val = 0;
-          if (v.cost != null && !isNaN(parseFloat(v.cost)) && parseFloat(v.cost) > 0) {
-            const num = parseFloat(v.cost);
-            val = num > 100 ? num / 100 : num;
-          } else if (v.premiumPrice != null && !isNaN(parseFloat(v.premiumPrice)) && parseFloat(v.premiumPrice) > 0) {
-            const num = parseFloat(v.premiumPrice);
-            val = num > 100 ? num / 100 : num;
-          } else if (v.price != null && !isNaN(parseFloat(v.price)) && parseFloat(v.price) > 0) {
-            const num = parseFloat(v.price);
-            val = num > 100 ? num / 100 : num;
-          }
-          return val;
+          return parseVariantCostToDollars(v.premiumPrice) ||
+                 parseVariantCostToDollars(v.cost) ||
+                 parseVariantCostToDollars(v.price) || 0;
         })
         .filter((p: number) => p > 0);
 
@@ -1285,10 +1288,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       }
     }
 
-    const rawFallback = parseFloat(selectedProduct.premiumPrice || selectedProduct.cost || selectedProduct.price || '0');
-    const fallbackBase = rawFallback > 100 ? rawFallback / 100 : rawFallback;
+    const fallbackBase = parseVariantCostToDollars(selectedProduct.premiumPrice) ||
+                         parseVariantCostToDollars(selectedProduct.cost) ||
+                         parseVariantCostToDollars(selectedProduct.price) || 0;
     return { min: fallbackBase, max: fallbackBase, hasRange: false };
-  }, [selectedProduct, selectedVariants]);
+  }, [selectedProduct, selectedVariants, parseVariantCostToDollars]);
 
   // Platform selling price = admin/category markup applied (no creator markup yet)
   const platformMinSellingPrice = calculateSellingPrice(pricingRange.min);
@@ -1669,17 +1673,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       minPrice: minSellingPrice,
       maxPrice: maxSellingPrice,
       variantPrices: (selectedProduct?.variants || []).map((v: any) => {
-        let vCost = pricingRange.min;
-        if (v.cost != null && !isNaN(parseFloat(v.cost)) && parseFloat(v.cost) > 0) {
-          const num = parseFloat(v.cost);
-          vCost = num > 100 ? num / 100 : num;
-        } else if (v.premiumPrice != null && !isNaN(parseFloat(v.premiumPrice)) && parseFloat(v.premiumPrice) > 0) {
-          const num = parseFloat(v.premiumPrice);
-          vCost = num > 100 ? num / 100 : num;
-        } else if (v.price != null && !isNaN(parseFloat(v.price)) && parseFloat(v.price) > 0) {
-          const num = parseFloat(v.price);
-          vCost = num > 100 ? num / 100 : num;
-        }
+        const vCost = parseVariantCostToDollars(v.premiumPrice) ||
+                      parseVariantCostToDollars(v.cost) ||
+                      parseVariantCostToDollars(v.price) ||
+                      pricingRange.min;
         const vPlatform = calculateSellingPrice(vCost);
         const vSelling = calculateRetailPriceFromMarkup(vPlatform, creatorMarkup);
         return {
@@ -2974,24 +2971,30 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-white/10">
-                  <div className="bg-black/40 border border-white/5 p-3 rounded-xl">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-3 border-t border-white/10">
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl">
+                    <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider block">Printify Premium</span>
+                    <span className="text-xs sm:text-sm font-bold text-emerald-300">
+                      {hasPriceRange ? `$${pricingRange.min.toFixed(2)} - $${pricingRange.max.toFixed(2)}` : `$${pricingRange.min.toFixed(2)}`}
+                    </span>
+                  </div>
+                  <div className="bg-black/40 border border-white/5 p-2.5 rounded-xl">
                     <span className="text-[10px] text-gray-500 uppercase tracking-wider block">Loka Base Cost</span>
-                    <span className="text-sm font-bold text-gray-300">
+                    <span className="text-xs sm:text-sm font-bold text-gray-300">
                       {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} - $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl">
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl">
                     <span className="text-[10px] text-emerald-400 uppercase tracking-wider block">Your Profit (+{creatorMarkup}%)</span>
-                    <span className="text-sm font-bold text-emerald-400">
+                    <span className="text-xs sm:text-sm font-bold text-emerald-400">
                       +{hasPriceRange
                         ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
                         : `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="bg-white/5 border border-white/10 p-3 rounded-xl">
+                  <div className="bg-white/5 border border-white/10 p-2.5 rounded-xl">
                     <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Customer Retail Price</span>
-                    <span className="text-sm font-extrabold text-white">
+                    <span className="text-xs sm:text-sm font-extrabold text-white">
                       {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
@@ -3572,12 +3575,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                 {/* Pricing Summary & Clean Creator Breakdown */}
                 <div className="mt-4 bg-black/60 border border-white/5 p-4 rounded-2xl space-y-2.5 text-[11px] backdrop-blur-md">
-                  {/* <div className="flex justify-between items-center text-gray-400 font-medium">
-                    <span className="text-emerald-400/90 font-semibold">Wholesale Base Cost</span>
-                    <span className="text-emerald-400 font-bold">
-                      {hasPriceRange ? `$${pricingRange.min.toFixed(2)} - $${pricingRange.max.toFixed(2)}` : `$${pricingRange.min.toFixed(2)}`}
-                    </span>
-                  </div> */}
 
                   <div className="flex justify-between items-center text-gray-400 font-medium">
                     <span>Loka Base Cost</span>

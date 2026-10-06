@@ -676,25 +676,18 @@ function CanvasContent() {
       const rawVariants = variantsData?.variants || [];
 
       const updatedVariants = rawVariants.map((v: any) => {
-        let costDollars: number | null = null;
+        const parseToDollars = (val: any): number | null => {
+          if (val == null || val === 'N/A') return null;
+          const num = typeof val === 'string' ? parseFloat(val) : Number(val);
+          if (isNaN(num) || num <= 0) return null;
+          // Only if it's an integer >= 500 (e.g. raw Printify cents 10714 or 1200) convert from cents
+          if (Number.isInteger(num) && num >= 500) {
+            return num / 100;
+          }
+          return num;
+        };
 
-        if (v.cost != null) {
-          const num = typeof v.cost === 'string' ? parseFloat(v.cost) : v.cost;
-          if (!isNaN(num) && num > 0) {
-            costDollars = num > 100 ? num / 100 : num;
-          }
-        } else if (v.premiumPrice != null && v.premiumPrice !== 'N/A') {
-          const num = parseFloat(v.premiumPrice);
-          if (!isNaN(num) && num > 0) {
-            costDollars = num > 100 ? num / 100 : num;
-          }
-        } else if (v.price != null && v.price !== 'N/A') {
-          const num = parseFloat(v.price);
-          if (!isNaN(num) && num > 0) {
-            costDollars = num > 100 ? num / 100 : num;
-          }
-        }
-
+        const costDollars = parseToDollars(v.premiumPrice) ?? parseToDollars(v.price) ?? parseToDollars(v.cost);
         const costVal = costDollars !== null ? costDollars.toFixed(2) : 'N/A';
 
         return {

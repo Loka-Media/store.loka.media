@@ -1,4 +1,30 @@
 {
+  "624_81": {
+    "blueprintId": 624,
+    "providerId": 81,
+    "providerTitle": "Personalized Luggage",
+    "minCost": 107.14,
+    "maxCost": 133.33,
+    "variants": {
+      "72133": 107.14,
+      "79350": 120.24,
+      "79351": 133.33
+    },
+    "updatedAt": 1790167585252
+  },
+  "624_99": {
+    "blueprintId": 624,
+    "providerId": 99,
+    "providerTitle": "Printify Choice",
+    "minCost": 107.14,
+    "maxCost": 133.33,
+    "variants": {
+      "72133": 107.14,
+      "79350": 120.24,
+      "79351": 133.33
+    },
+    "updatedAt": 1790167585252
+  },
   "5_41": {
     "blueprintId": 5,
     "providerId": 41,
