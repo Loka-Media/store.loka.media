@@ -56,7 +56,10 @@ const DEFAULT_WELCOME_MESSAGE: ChatMessage = {
 const ORDER_INTENT_REGEX = /\b(track|tracking|order|orders|parcel|package|shipment|delivery|kaha hai|status)\b/i;
 
 function renderContent(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  if (!text) return null;
+  // Clean raw markdown header hashes (e.g. ### Heading -> **Heading**)
+  const cleaned = text.replace(/^#{1,6}\s+(.+)$/gm, '**$1**');
+  const parts = cleaned.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part: string, i: number) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return <strong key={i} style={{ fontWeight: 600, color: 'white' }}>{part.slice(2, -2)}</strong>;

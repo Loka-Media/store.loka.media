@@ -371,5 +371,8 @@ export function sanitizeOutput(text: string): string {
   sanitized = sanitized.replace(/Bearer\s+[a-zA-Z0-9\-_.]+/gi, '[REDACTED]');
   sanitized = sanitized.replace(/(postgres|mongodb):\/\/[^\s]+/gi, '[DATABASE_REDACTED]');
 
+  // Clean raw markdown header hashes (### Heading -> **Heading**)
+  sanitized = sanitized.replace(/^#{1,6}\s+(.+)$/gm, '**$1**');
+
   return sanitized;
 }
