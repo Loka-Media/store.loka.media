@@ -49,12 +49,23 @@ export default function SupportChatbot() {
   const [sessionId, setSessionId] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const scrollWrapperRef = useRef<HTMLDivElement>(null);
   const scrollContentRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Detect mobile screen width dynamically
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Initialize or restore session ID
   useEffect(() => {
@@ -148,6 +159,18 @@ export default function SupportChatbot() {
     return () => clearTimeout(timer);
   }, [isOpen, messages, isLoading]);
 
+  // Prevent background scrolling on mobile when chatbot is open
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (isOpen && window.innerWidth < 640) {
+      const origOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = origOverflow;
+      };
+    }
+  }, [isOpen]);
+
   // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -238,29 +261,38 @@ export default function SupportChatbot() {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-[99999] font-sans">
+    <>
       {/* ── CHAT BUTTON (WHEN CLOSED) ────────────────────────── */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-3 bg-gradient-to-r from-[#FF6D1F] to-[#FF8C38] text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-[0_10px_30px_rgba(255,109,31,0.4)] hover:shadow-[0_15px_40px_rgba(255,109,31,0.6)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
-          aria-label="Open Customer Support Chat"
+        <div
+          style={{
+            position: 'fixed',
+            zIndex: 99999,
+            bottom: isMobile ? '6rem' : '1.5rem',
+            right: isMobile ? '1rem' : '1.5rem',
+          }}
         >
-          <div className="relative">
-            <MessageSquare className="w-6 h-6 transition-transform group-hover:rotate-6" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-black animate-pulse" />
-          </div>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="group relative flex items-center gap-3 bg-gradient-to-r from-[#FF6D1F] to-[#FF8C38] text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-[0_10px_30px_rgba(255,109,31,0.4)] hover:shadow-[0_15px_40px_rgba(255,109,31,0.6)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+            aria-label="Open Customer Support Chat"
+          >
+            <div className="relative">
+              <MessageSquare className="w-6 h-6 transition-transform group-hover:rotate-6" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-black animate-pulse" />
+            </div>
 
-          <span className="hidden sm:inline font-bold text-sm tracking-wide">
-            Support Chat
-          </span>
-
-          {unreadCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-black animate-bounce">
-              {unreadCount}
+            <span className="hidden sm:inline font-bold text-sm tracking-wide">
+              Support Chat
             </span>
-          )}
-        </button>
+
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-black animate-bounce">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
       )}
 
       {/* ── CHAT WINDOW (WHEN OPEN) ──────────────────────────── */}
@@ -270,8 +302,20 @@ export default function SupportChatbot() {
           data-modal-scroll="true"
           onWheel={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
-          className="fixed inset-x-0 bottom-0 sm:inset-auto sm:bottom-5 sm:right-5 w-full sm:w-[410px] h-[85vh] sm:h-[620px] max-h-[85vh] bg-[#0A0A0C]/95 backdrop-blur-2xl border border-white/10 sm:rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-300 relative"
-          style={{ overscrollBehavior: 'contain' }}
+          className={`flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300 ${
+            isMobile
+              ? 'bg-[#0A0A0C]'
+              : 'bg-[#0A0A0C]/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.8)]'
+          }`}
+          style={{
+            position: 'fixed',
+            zIndex: 999999,
+            overscrollBehavior: 'contain',
+            ...(isMobile
+              ? { top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100dvh' }
+              : { bottom: '1.5rem', right: '1.5rem', width: '410px', height: '620px', maxHeight: '85vh' }
+            )
+          }}
         >
           {/* THEMED CLEAR CONVERSATION CONFIRMATION DIALOG */}
           {showClearConfirm && (
@@ -318,9 +362,9 @@ export default function SupportChatbot() {
           )}
 
           {/* HEADER */}
-          <div className="px-5 py-4 bg-gradient-to-r from-white/[0.04] to-transparent border-b border-white/10 flex items-center justify-between select-none shrink-0">
+          <div className="px-4 sm:px-5 py-3 sm:py-4 pt-[max(0.75rem,env(safe-area-inset-top))] bg-[#121216] sm:bg-gradient-to-r sm:from-white/[0.04] sm:to-transparent border-b border-white/10 flex items-center justify-between select-none shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#FF6D1F] to-[#FFA14A] p-0.5 flex items-center justify-center shadow-lg shadow-[#FF6D1F]/20">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-[#FF6D1F] to-[#FFA14A] p-0.5 flex items-center justify-center shadow-lg shadow-[#FF6D1F]/20">
                 <div className="w-full h-full bg-[#121216] rounded-[14px] flex items-center justify-center">
                   <Bot className="w-5 h-5 text-[#FF6D1F]" />
                 </div>
@@ -350,9 +394,10 @@ export default function SupportChatbot() {
               <button
                 onClick={() => setIsOpen(false)}
                 title="Close Chat"
-                className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors cursor-pointer"
+                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer flex items-center justify-center"
               >
-                <X className="w-5 h-5" />
+                <ChevronDown className="w-5 h-5 sm:hidden" />
+                <X className="w-5 h-5 hidden sm:block" />
               </button>
             </div>
           </div>
@@ -489,7 +534,7 @@ export default function SupportChatbot() {
           <div
             data-lenis-prevent="true"
             data-modal-scroll="true"
-            className="p-3 sm:p-4 bg-black/60 border-t border-white/10 backdrop-blur-md shrink-0"
+            className="p-3 sm:p-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] bg-[#0E0F14] sm:bg-black/60 border-t border-white/10 backdrop-blur-md shrink-0"
           >
             <form
               onSubmit={(e) => {
@@ -527,6 +572,6 @@ export default function SupportChatbot() {
 
         </div>
       )}
-    </div>
+    </>
   );
 }
