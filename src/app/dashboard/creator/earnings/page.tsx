@@ -21,6 +21,7 @@ import {
 import CreatorProtectedRoute from '@/components/CreatorProtectedRoute';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { api } from '@/lib/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface WalletData {
   id: number;
@@ -110,6 +111,7 @@ interface PrintifyStatusOrder {
 
 function EarningsPageContent() {
   const router = useRouter();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('wallet');
   
@@ -145,26 +147,48 @@ function EarningsPageContent() {
   const fetchSavedBankDetails = async () => {
     try {
       let bankData = null;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const params = new URLSearchParams();
+      if (user?.id) params.set('userId', String(user.id));
+      if (user?.email) params.set('email', user.email);
+      const url = `/api/creator/payout/bank-details${params.toString() ? `?${params.toString()}` : ''}`;
+
       try {
-        const localBankRes = await fetch('/api/creator/payout/bank-details');
+        const localBankRes = await fetch(url, { headers });
         if (localBankRes.ok) {
           const json = await localBankRes.json();
           bankData = json?.data;
+        } else if (localBankRes.status === 404) {
+          bankData = null;
         }
       } catch (e) {
         console.warn('Local bank details fetch failed, trying backend...', e);
       }
 
-      if (!bankData) {
-        const bankRes = await api.get('/api/creator/payout/bank-details');
-        bankData = bankRes.data?.data;
+      if (!bankData && token) {
+        try {
+          const bankRes = await api.get('/api/creator/payout/bank-details');
+          bankData = bankRes.data?.data;
+        } catch {
+          // Ignored
+        }
       }
 
-      if (bankData) {
+      if (bankData && bankData.account_holder_name) {
         if (bankData.bank_name) setBankName(bankData.bank_name);
         if (bankData.account_holder_name) setAccountHolderName(bankData.account_holder_name);
         if (bankData.routing_number) setRoutingNumber(bankData.routing_number);
         if (bankData.account_number) setAccountNumber(bankData.account_number);
+      } else {
+        setBankName('');
+        setAccountHolderName('');
+        setRoutingNumber('');
+        setAccountNumber('');
       }
     } catch (e) {
       // Ignored if no bank details saved yet

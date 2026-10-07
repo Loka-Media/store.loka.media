@@ -6,6 +6,7 @@ import { Save, AlertCircle, CheckCircle, Eye, EyeOff, Lock, DollarSign, Edit2, T
 import CreatorProtectedRoute from '@/components/CreatorProtectedRoute';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { api } from '@/lib/auth';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Select,
   SelectContent,
@@ -42,6 +43,7 @@ interface BankDetails {
 }
 
 function PayoutSettingsPageContent() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isBusiness, setIsBusiness] = useState(false);
@@ -88,42 +90,90 @@ function PayoutSettingsPageContent() {
     };
   }, [isEditing, showRemoveConfirm]);
 
+  const getAuthHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
+  const getBankApiUrl = () => {
+    const params = new URLSearchParams();
+    if (user?.id) params.set('userId', String(user.id));
+    if (user?.email) params.set('email', user.email);
+    const qs = params.toString();
+    return `/api/creator/payout/bank-details${qs ? `?${qs}` : ''}`;
+  };
+
   const fetchBankDetails = async () => {
     try {
       setLoading(true);
       let data = null;
       try {
-        const localRes = await fetch('/api/creator/payout/bank-details');
+        const localRes = await fetch(getBankApiUrl(), {
+          headers: getAuthHeaders(),
+        });
         if (localRes.ok) {
           const json = await localRes.json();
           data = json?.data;
+        } else if (localRes.status === 404) {
+          data = null;
         }
       } catch (e) {
         console.warn('Local bank details fetch failed, trying backend...', e);
       }
 
       if (!data) {
-        const response = await api.get('/api/creator/payout/bank-details');
-        data = response.data?.data;
+        try {
+          const response = await api.get('/api/creator/payout/bank-details');
+          data = response.data?.data;
+        } catch {
+          // Backend returned error or 404
+        }
       }
 
-      if (data) {
+      if (data && data.account_holder_name) {
         setBankDetails(data);
-        setIsBusiness(data.is_business);
+        setIsBusiness(Boolean(data.is_business));
         setHasDetails(true);
       } else {
         setHasDetails(false);
+        setBankDetails({
+          account_holder_name: '',
+          account_holder_email: user?.email || '',
+          account_number: '',
+          routing_number: '',
+          swift_code: '',
+          iban: '',
+          account_type: 'checking',
+          bank_name: '',
+          bank_country: 'US',
+          account_holder_dob: '',
+          account_holder_address: '',
+          account_holder_city: '',
+          account_holder_state: '',
+          account_holder_zip: '',
+          account_holder_country: 'US',
+          tax_id_type: 'ssn',
+          tax_id: '',
+          business_name: '',
+          is_business: false,
+          currency: 'USD',
+        });
       }
     } catch (error: any) {
-      if (error?.response?.status === 404) {
-        setHasDetails(false);
-      } else {
-        console.error('Error fetching bank details:', error);
-      }
+      setHasDetails(false);
+      console.error('Error fetching bank details:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchBankDetails();
+  }, [user?.id, user?.email]);
 
   const COUNTRY_TO_CURRENCY_MAP: Record<string, string> = {
     IN: 'INR',
@@ -222,13 +272,18 @@ function PayoutSettingsPageContent() {
       const payload = {
         ...bankDetails,
         is_business: isBusiness,
+        user_id: user?.id,
+        user_email: user?.email,
       };
 
       let saved = false;
       try {
-        const localRes = await fetch('/api/creator/payout/bank-details', {
+        const localRes = await fetch(getBankApiUrl(), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders(),
+          },
           body: JSON.stringify(payload),
         });
         if (localRes.ok) {
@@ -313,7 +368,10 @@ function PayoutSettingsPageContent() {
       setIsRemoving(true);
       let removed = false;
       try {
-        const localRes = await fetch('/api/creator/payout/bank-details', { method: 'DELETE' });
+        const localRes = await fetch(getBankApiUrl(), {
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+        });
         if (localRes.ok) {
           removed = true;
         }
@@ -330,7 +388,7 @@ function PayoutSettingsPageContent() {
       setHasDetails(false);
       setBankDetails({
         account_holder_name: '',
-        account_holder_email: '',
+        account_holder_email: user?.email || '',
         account_number: '',
         routing_number: '',
         swift_code: '',
@@ -350,10 +408,9 @@ function PayoutSettingsPageContent() {
         is_business: false,
         currency: 'USD',
       });
-      setIsEditing(false);
     } catch (error: any) {
       console.error('Error removing bank details:', error);
-      toast.error(error?.response?.data?.message || 'Failed to remove bank details');
+      toast.error('Failed to remove bank details');
     } finally {
       setIsRemoving(false);
     }
