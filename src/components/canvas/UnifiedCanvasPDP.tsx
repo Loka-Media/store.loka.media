@@ -753,6 +753,60 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     }
   };
 
+  // Automatic error redirection helper: switches step, opens accordion, scrolls smoothly, and focuses invalid field
+  const scrollToFieldAndFocus = useCallback(
+    (
+      fieldId: string,
+      options?: {
+        step?: number;
+        accordion?: string;
+        focusSelector?: string;
+        errorMessage?: string;
+      }
+    ) => {
+      if (options?.step && viewMode !== "all") {
+        setActiveStep(options.step);
+      }
+      if (options?.accordion) {
+        setOpenAccordions((prev) => ({ ...prev, [options.accordion!]: true }));
+      }
+
+      if (options?.errorMessage) {
+        toast.error(options.errorMessage, { id: `err-${fieldId}` });
+      }
+
+      // Allow DOM to re-render step and expanded accordion
+      setTimeout(() => {
+        const container = document.getElementById(fieldId);
+        if (container) {
+          container.scrollIntoView({ behavior: "smooth", block: "center" });
+
+          // Find focusable input/element
+          const targetToFocus = options?.focusSelector
+            ? (container.querySelector(options.focusSelector) as HTMLElement | null)
+            : container.tagName === "INPUT" || container.tagName === "TEXTAREA"
+            ? (container as HTMLElement)
+            : (container.querySelector("input:not([type=hidden]), textarea, button") as HTMLElement | null);
+
+          if (targetToFocus && typeof targetToFocus.focus === "function") {
+            try {
+              targetToFocus.focus({ preventScroll: true });
+            } catch {
+              // Ignore focus error
+            }
+          }
+
+          // Add prominent visual error pulse
+          container.classList.add("ring-2", "ring-red-500", "shadow-[0_0_25px_rgba(239,68,68,0.5)]");
+          setTimeout(() => {
+            container.classList.remove("ring-2", "ring-red-500", "shadow-[0_0_25px_rgba(239,68,68,0.5)]");
+          }, 3500);
+        }
+      }, 150);
+    },
+    [viewMode]
+  );
+
   // Local component states
   const [activePlacement, setActivePlacement] = useState<string>("front");
   const [selectedPlacements, setSelectedPlacements] = useState<string[]>(["front"]);
@@ -1616,46 +1670,122 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     };
   }, [selectedVariants, designFiles, aspectRatioIssues, mockupUrls, productForm, selectedProduct, isEditing]);
 
-  // Publish submit action
-  const handlePublishSubmit = async () => {
+  // Validate and redirect helper for each step
+  const validateAndRedirect = (targetStep?: number): boolean => {
     // Check Step 1: Variants
-    if (selectedVariants.length === 0) {
-      goToStep(1);
-      toast.error("Step 1 incomplete: Please select at least one variant (color & size)");
-      return;
+    if (!targetStep || targetStep === 1) {
+      if (selectedVariants.length === 0) {
+        scrollToFieldAndFocus("field-variants", {
+          step: 1,
+          accordion: "variants",
+          errorMessage: "Step 1 incomplete: Please select at least one color & size variant",
+        });
+        return false;
+      }
     }
 
     // Check Step 2: Artwork
-    const hasExistingImages = isEditing && (mockupUrls?.length > 0 || (selectedProduct?.images && selectedProduct.images.length > 0));
-    if (designFiles.length === 0 && !hasExistingImages) {
-      goToStep(2);
-      toast.error("Step 2 incomplete: Please add and position your artwork on the canvas");
-      return;
+    if (!targetStep || targetStep === 2) {
+      const hasExistingImages = isEditing && (mockupUrls?.length > 0 || (selectedProduct?.images && selectedProduct.images.length > 0));
+      if (designFiles.length === 0 && !hasExistingImages) {
+        scrollToFieldAndFocus("field-artwork", {
+          step: 2,
+          accordion: "design",
+          errorMessage: "Step 2 incomplete: Please upload and place your artwork on the canvas",
+        });
+        return false;
+      }
     }
 
-    // Form validator for Step 3
-    const errors: Record<string, string> = {};
-    if (!productForm.name.trim()) errors.name = "Storefront product name is required";
-    if (!productForm.description.trim()) {
-      errors.description = "Product description is required";
-    } else if (productForm.description.trim().length < 20) {
-      errors.description = "Description must be at least 20 characters";
-    }
-    if (!productForm.category) errors.category = "Please select a category";
-    if (!productForm.tags || productForm.tags.length === 0) {
-      errors.tags = "Please select a Tag (Trending, New, or Popular)";
+    // Check Step 3: Title, Description, Category, Tags
+    if (!targetStep || targetStep === 3) {
+      const errors: Record<string, string> = {};
+      if (!productForm.name.trim()) errors.name = "Storefront product name is required";
+      if (!productForm.description.trim()) {
+        errors.description = "Product description is required";
+      } else if (productForm.description.trim().length < 20) {
+        errors.description = "Description must be at least 20 characters";
+      }
+      if (!productForm.category || productForm.category === "placeholder") {
+        errors.category = "Please select a marketplace category";
+      }
+      if (!productForm.tags || productForm.tags.length === 0) {
+        errors.tags = "Please select a tag (Trending, New, or Popular)";
+      }
+
+      if (errors.name) {
+        setFormErrors(errors);
+        scrollToFieldAndFocus("field-product-name", {
+          step: 3,
+          accordion: "listing",
+          focusSelector: "input",
+          errorMessage: errors.name,
+        });
+        return false;
+      }
+
+      if (errors.description) {
+        setFormErrors(errors);
+        scrollToFieldAndFocus("field-product-description", {
+          step: 3,
+          accordion: "listing",
+          focusSelector: "textarea",
+          errorMessage: errors.description,
+        });
+        return false;
+      }
+
+      if (errors.category) {
+        setFormErrors(errors);
+        scrollToFieldAndFocus("field-product-category", {
+          step: 3,
+          accordion: "listing",
+          focusSelector: "button",
+          errorMessage: errors.category,
+        });
+        return false;
+      }
+
+      if (errors.tags) {
+        setFormErrors(errors);
+        scrollToFieldAndFocus("field-product-tags", {
+          step: 3,
+          accordion: "listing",
+          errorMessage: errors.tags,
+        });
+        return false;
+      }
     }
 
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      goToStep(3);
-      toast.error("Step 3 incomplete: Please fill out all required listing details");
-      return;
+    // Check Step 4 Checklist & Mockups before publish
+    if (!targetStep) {
+      const isBlueprint = !selectedProduct?.printify_id;
+      if (!isBlueprint && !isEditing && mockupUrls.length === 0 && mockupStatus !== 'Mockups loaded successfully!') {
+        scrollToFieldAndFocus("field-mockup-studio", {
+          step: 4,
+          accordion: "review",
+          errorMessage: "Please generate mockups or preview before publishing",
+        });
+        return false;
+      }
+
+      if (!validationSummary.allValid) {
+        scrollToFieldAndFocus("field-checklist-review", {
+          step: 4,
+          accordion: "review",
+          errorMessage: "Please complete all checklist items before publishing",
+        });
+        return false;
+      }
     }
 
-    if (!validationSummary.allValid) {
-      goToStep(4);
-      toast.error("Please complete all checklist items before publishing");
+    return true;
+  };
+
+  // Publish submit action
+  const handlePublishSubmit = async () => {
+    // Automatically validate and redirect user to first incomplete field
+    if (!validateAndRedirect()) {
       return;
     }
 
@@ -1907,11 +2037,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             </div>
           </div>
           <div className="flex-shrink-0 flex items-center gap-2">
-            <div title={mockupStatus !== 'Mockups loaded successfully!' && mockupUrls.length === 0 ? "Please generate high-quality mockups first" : (!validationSummary.allValid ? "Please fill in all required fields" : "")}>
+            <div title={isPublishing ? "Publishing in progress..." : (!validationSummary.allValid ? "Click to jump to any incomplete field" : "Publish to live store")}>
               <Button
                 onClick={handlePublishSubmit}
-                disabled={isPublishing || !validationSummary.allValid || isGeneratingPreview || (!isEditing && mockupUrls.length === 0 && mockupStatus !== 'Mockups loaded successfully!')}
-                className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                disabled={isPublishing || isGeneratingPreview}
+                className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
               >
                 {isPublishing ? (
                   <div className="flex items-center gap-2 whitespace-nowrap">
@@ -2229,8 +2359,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               </div>
 
               {/* Section 2: Variant Selection */}
-              {/* Section 2: Variant Selection */}
-              <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6">
+              <div id="field-variants" className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6 scroll-mt-28 transition-all">
                 <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("variants")}>
                   <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                     <Palette className="w-5 h-5 text-[#FF6D1F]" />
@@ -2415,11 +2544,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <Button
                   type="button"
                   onClick={() => {
-                    if (selectedVariants.length === 0) {
-                      toast.error("Please select at least 1 color and size");
-                      return;
+                    if (validateAndRedirect(1)) {
+                      goToStep(2);
                     }
-                    goToStep(2);
                   }}
                   className="w-full sm:w-auto bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-black font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 cursor-pointer"
                 >
@@ -2519,11 +2646,12 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                   {/* Upload Dropzone */}
                   <div
+                    id="field-artwork"
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 ${isDragging
+                    className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 scroll-mt-28 ${isDragging
                       ? "border-[#FF6D1F] bg-[#FF6D1F]/15 scale-[1.01]"
                       : "border-orange-500/30 bg-orange-500/5 hover:border-orange-500 hover:bg-orange-500/10"
                       }`}
@@ -2763,12 +2891,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <Button
                   type="button"
                   onClick={() => {
-                    const hasExistingImages = isEditing && (mockupUrls?.length > 0 || (selectedProduct?.images && selectedProduct.images.length > 0));
-                    if (designFiles.length === 0 && !hasExistingImages) {
-                      toast.error("Please upload or select an artwork for your shirt");
-                      return;
+                    if (validateAndRedirect(2)) {
+                      goToStep(3);
                     }
-                    goToStep(3);
                   }}
                   className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-[#FF6D1F] hover:from-orange-400 hover:to-[#FF7A1A] text-white font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 cursor-pointer"
                 >
@@ -2819,34 +2944,36 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 {openAccordions.listing && (
                   <div className="space-y-5 pt-3 animate-fadeIn">
                     {/* Storefront Name */}
-                    <div className="space-y-2">
+                    <div id="field-product-name" className="space-y-2 scroll-mt-28 transition-all">
                       <label className="block text-xs sm:text-sm font-semibold text-gray-300">
                         Product Title *
                       </label>
                       <input
+                        id="input-product-name"
                         type="text"
                         value={productForm.name}
                         onChange={(e) => handleInputChange("name", e.target.value)}
                         placeholder="E.g., Limited Edition Neon Horizon Oversized Hoodie"
-                        className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${formErrors.name ? "border-red-500/50 bg-red-500/5" : "border-white/10"
+                        className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${formErrors.name ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
                           }`}
                       />
                       {formErrors.name && <p className="text-xs text-red-400 mt-1">{formErrors.name}</p>}
                     </div>
 
                     {/* Description */}
-                    <div className="space-y-2">
+                    <div id="field-product-description" className="space-y-2 scroll-mt-28 transition-all">
                       <label className="block text-xs sm:text-sm font-semibold text-gray-300">
                         Product Description *
                       </label>
                       <textarea
+                        id="input-product-description"
                         data-lenis-prevent
                         value={productForm.description}
                         onChange={(e) => handleInputChange("description", e.target.value)}
                         onWheel={(e) => e.stopPropagation()}
                         rows={4}
                         placeholder="Describe your design and brand story... Must be at least 20 characters."
-                        className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all overflow-y-auto resize-y min-h-[110px] max-h-[300px] ${formErrors.description ? "border-red-500/50 bg-red-500/5" : "border-white/10"
+                        className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all overflow-y-auto resize-y min-h-[110px] max-h-[300px] ${formErrors.description ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
                           }`}
                       />
                       {formErrors.description ? (
@@ -2860,7 +2987,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Category */}
-                      <div className="space-y-2">
+                      <div id="field-product-category" className="space-y-2 scroll-mt-28 transition-all">
                         <label className="block text-xs sm:text-sm font-semibold text-gray-300">
                           Marketplace Category *
                         </label>
@@ -2868,7 +2995,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           value={productForm.category || "placeholder"}
                           onValueChange={(val) => handleInputChange("category", val)}
                         >
-                          <SelectTrigger className={`w-full h-[46px] px-4 bg-black/60 rounded-xl text-sm text-white ${formErrors.category ? "border-red-500/50 bg-red-500/5" : "border-white/10"}`}>
+                          <SelectTrigger id="input-product-category" className={`w-full h-[46px] px-4 bg-black/60 rounded-xl text-sm text-white ${formErrors.category ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"}`}>
                             <SelectValue key={productForm.category || "placeholder"} placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent>
@@ -2884,11 +3011,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       </div>
 
                       {/* Required Tag Selector */}
-                      <div className="space-y-2">
+                      <div id="field-product-tags" className="space-y-2 scroll-mt-28 transition-all">
                         <label className="block text-xs sm:text-sm font-semibold text-gray-300">
                           Select Tag <span className="text-red-400">*</span>
                         </label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className={`grid grid-cols-3 gap-2 ${formErrors.tags ? "p-1 rounded-xl border border-red-500 bg-red-500/10 ring-1 ring-red-500" : ""}`}>
                           {[
                             { id: "Trending", label: "Trending", icon: "📈", color: "border-purple-500/50 bg-purple-500/10 text-purple-300" },
                             { id: "New", label: "New", icon: "✨", color: "border-blue-500/50 bg-blue-500/10 text-blue-300" },
@@ -3015,23 +3142,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <Button
                   type="button"
                   onClick={() => {
-                    if (!productForm.name.trim()) {
-                      toast.error("Please enter a product title");
-                      return;
+                    if (validateAndRedirect(3)) {
+                      goToStep(4);
                     }
-                    if (!productForm.description.trim() || productForm.description.trim().length < 20) {
-                      toast.error("Please enter a description (at least 20 characters)");
-                      return;
-                    }
-                    if (!productForm.category) {
-                      toast.error("Please select a marketplace category");
-                      return;
-                    }
-                    if (!productForm.tags || productForm.tags.length === 0) {
-                      toast.error("Please select a tag (Trending, New, or Popular)");
-                      return;
-                    }
-                    goToStep(4);
                   }}
                   className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer"
                 >
@@ -3144,7 +3257,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               </div>
 
               {/* Realistic Product Mockup Studio Card */}
-              <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-5">
+              <div id="field-mockup-studio" className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-5 scroll-mt-28 transition-all">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h4 className="text-base font-bold text-white flex items-center gap-2 font-clash">
@@ -3286,8 +3399,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               </div>
 
               {/* Section 7: Review & Validation Summary */}
-              {/* Section 7: Review & Validation Summary */}
-              <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6">
+              <div id="field-checklist-review" className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6 scroll-mt-28 transition-all">
                 <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("review")}>
                   <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
                     <ScanEye className="w-5 h-5 text-[#FF6D1F]" />
@@ -3299,28 +3411,74 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 {openAccordions.review && (
                   <div className="space-y-4 pt-3 text-xs sm:text-sm animate-fadeIn">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex items-center gap-2.5 bg-black/40 border border-white/5 p-3 rounded-xl">
-                        <div className={`p-1.5 rounded-full ${validationSummary.variants ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                          {validationSummary.variants ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                        </div>
-                        <div>
-                          <div className="font-bold">Variants Selected</div>
-                          <div className="text-[10px] text-gray-500">
-                            {selectedVariants.length} of {selectedProduct?.variants?.length || 0} variant IDs selected
+                      {/* Step 1 Check */}
+                      <div
+                        onClick={() => {
+                          if (!validationSummary.variants) {
+                            scrollToFieldAndFocus("field-variants", {
+                              step: 1,
+                              accordion: "variants",
+                              errorMessage: "Please select at least 1 color and size variant",
+                            });
+                          }
+                        }}
+                        className={`flex items-center justify-between bg-black/40 border p-3 rounded-xl transition-all ${
+                          validationSummary.variants
+                            ? "border-white/5"
+                            : "border-red-500/40 hover:border-red-500 hover:bg-red-500/10 cursor-pointer group"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={`p-1.5 rounded-full ${validationSummary.variants ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                            {validationSummary.variants ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                          </div>
+                          <div>
+                            <div className="font-bold">Variants Selected</div>
+                            <div className="text-[10px] text-gray-500">
+                              {selectedVariants.length} of {selectedProduct?.variants?.length || 0} variant IDs selected
+                            </div>
                           </div>
                         </div>
+                        {!validationSummary.variants && (
+                          <span className="text-xs font-semibold text-red-400 group-hover:underline flex items-center gap-1">
+                            Fix <ArrowRight className="w-3 h-3" />
+                          </span>
+                        )}
                       </div>
 
-                      <div className="flex items-center gap-2.5 bg-black/40 border border-white/5 p-3 rounded-xl">
-                        <div className={`p-1.5 rounded-full ${validationSummary.designs ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                          {validationSummary.designs ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                        </div>
-                        <div>
-                          <div className="font-bold">Designs Placed</div>
-                          <div className="text-[10px] text-gray-500">
-                            {designFiles.length} print area assignment(s) configured
+                      {/* Step 2 Check */}
+                      <div
+                        onClick={() => {
+                          if (!validationSummary.designs) {
+                            scrollToFieldAndFocus("field-artwork", {
+                              step: 2,
+                              accordion: "design",
+                              errorMessage: "Please upload and place artwork on the canvas",
+                            });
+                          }
+                        }}
+                        className={`flex items-center justify-between bg-black/40 border p-3 rounded-xl transition-all ${
+                          validationSummary.designs
+                            ? "border-white/5"
+                            : "border-red-500/40 hover:border-red-500 hover:bg-red-500/10 cursor-pointer group"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={`p-1.5 rounded-full ${validationSummary.designs ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                            {validationSummary.designs ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                          </div>
+                          <div>
+                            <div className="font-bold">Designs Placed</div>
+                            <div className="text-[10px] text-gray-500">
+                              {designFiles.length} print area assignment(s) configured
+                            </div>
                           </div>
                         </div>
+                        {!validationSummary.designs && (
+                          <span className="text-xs font-semibold text-red-400 group-hover:underline flex items-center gap-1">
+                            Fix <ArrowRight className="w-3 h-3" />
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2.5 bg-black/40 border border-white/5 p-3 rounded-xl">
@@ -3335,30 +3493,72 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2.5 bg-black/40 border border-white/5 p-3 rounded-xl">
-                        <div className={`p-1.5 rounded-full ${validationSummary.mockups ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                          {validationSummary.mockups ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                        </div>
-                        <div>
-                          <div className="font-bold">Product Previews Ready</div>
-                          <div className="text-[10px] text-gray-500">
-                            {validationSummary.mockups
-                              ? (!selectedProduct?.printify_id ? "Vector outlines loaded" : `${mockupUrls.length} view mockups ready`)
-                              : "No mockups generated yet"}
+                      {/* Mockups Check */}
+                      <div
+                        onClick={() => {
+                          if (!validationSummary.mockups) {
+                            scrollToFieldAndFocus("field-mockup-studio", {
+                              step: 4,
+                              accordion: "review",
+                              errorMessage: "Please generate realistic mockups before publishing",
+                            });
+                          }
+                        }}
+                        className={`flex items-center justify-between bg-black/40 border p-3 rounded-xl transition-all ${
+                          validationSummary.mockups
+                            ? "border-white/5"
+                            : "border-red-500/40 hover:border-red-500 hover:bg-red-500/10 cursor-pointer group"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={`p-1.5 rounded-full ${validationSummary.mockups ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                            {validationSummary.mockups ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                          </div>
+                          <div>
+                            <div className="font-bold">Product Previews Ready</div>
+                            <div className="text-[10px] text-gray-500">
+                              {validationSummary.mockups
+                                ? (!selectedProduct?.printify_id ? "Vector outlines loaded" : `${mockupUrls.length} view mockups ready`)
+                                : "No mockups generated yet"}
+                            </div>
                           </div>
                         </div>
+                        {!validationSummary.mockups && (
+                          <span className="text-xs font-semibold text-red-400 group-hover:underline flex items-center gap-1">
+                            Generate <ArrowRight className="w-3 h-3" />
+                          </span>
+                        )}
                       </div>
 
-                      <div className="flex items-center gap-2.5 bg-black/40 border border-white/5 p-3 rounded-xl md:col-span-2">
-                        <div className={`p-1.5 rounded-full ${validationSummary.details ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                          {validationSummary.details ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                        </div>
-                        <div>
-                          <div className="font-bold">Storefront Metadata Complete</div>
-                          <div className="text-[10px] text-gray-500">
-                            {validationSummary.details ? "Product name and description complete" : "Title and Description (&gt;=20 chars) are required"}
+                      {/* Step 3 Metadata Check */}
+                      <div
+                        onClick={() => {
+                          if (!validationSummary.details) {
+                            validateAndRedirect(3);
+                          }
+                        }}
+                        className={`flex items-center justify-between bg-black/40 border p-3 rounded-xl md:col-span-2 transition-all ${
+                          validationSummary.details
+                            ? "border-white/5"
+                            : "border-red-500/40 hover:border-red-500 hover:bg-red-500/10 cursor-pointer group"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={`p-1.5 rounded-full ${validationSummary.details ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                            {validationSummary.details ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                          </div>
+                          <div>
+                            <div className="font-bold">Storefront Metadata Complete</div>
+                            <div className="text-[10px] text-gray-500">
+                              {validationSummary.details ? "Product name and description complete" : "Title and Description (>=20 chars) are required"}
+                            </div>
                           </div>
                         </div>
+                        {!validationSummary.details && (
+                          <span className="text-xs font-semibold text-red-400 group-hover:underline flex items-center gap-1">
+                            Complete Now <ArrowRight className="w-3 h-3" />
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -3399,7 +3599,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                 <Button
                   onClick={handlePublishSubmit}
-                  disabled={isPublishing || !validationSummary.allValid}
+                  disabled={isPublishing}
                   className="w-full bg-gradient-to-r from-purple-600 via-[#FF6D1F] to-orange-500 hover:opacity-95 text-white font-extrabold text-base py-4 rounded-2xl transition-all shadow-[0_0_30px_rgba(255,109,31,0.35)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isPublishing ? (
@@ -3455,7 +3655,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 {activeStep < 4 && (
                   <button
                     type="button"
-                    onClick={() => goToStep(activeStep + 1)}
+                    onClick={() => {
+                      if (validateAndRedirect(activeStep)) {
+                        goToStep(activeStep + 1);
+                      }
+                    }}
                     className="text-[#FF6D1F] hover:underline font-bold ml-2 flex-shrink-0 cursor-pointer"
                   >
                     Next →
@@ -3653,7 +3857,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           {activeStep < 4 ? (
             <button
               type="button"
-              onClick={() => goToStep(activeStep + 1)}
+              onClick={() => {
+                if (validateAndRedirect(activeStep)) {
+                  goToStep(activeStep + 1);
+                }
+              }}
               className="h-9 bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs px-3.5 rounded-xl flex items-center gap-1.5 shadow-[0_0_10px_rgba(255,109,31,0.3)] cursor-pointer transition-all"
             >
               <span>Next</span>
@@ -3662,8 +3870,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           ) : (
             <Button
               onClick={handlePublishSubmit}
-              disabled={isPublishing || !validationSummary.allValid}
-              className="h-9 bg-gradient-to-r from-purple-600 to-[#FF6D1F] text-white font-extrabold text-xs px-3.5 rounded-xl shadow-[0_0_12px_rgba(255,109,31,0.4)] disabled:opacity-50"
+              disabled={isPublishing}
+              className="h-9 bg-gradient-to-r from-purple-600 to-[#FF6D1F] text-white font-extrabold text-xs px-3.5 rounded-xl shadow-[0_0_12px_rgba(255,109,31,0.4)] disabled:opacity-50 cursor-pointer"
             >
               {isPublishing ? "Publishing..." : "Publish 🚀"}
             </Button>
