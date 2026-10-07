@@ -639,7 +639,7 @@ export default function CreatorRequestsPage() {
                 <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                 <div className="space-y-1.5">
                   <p className="text-sm font-bold text-red-300">
-                    Aap is creator ko remove karenge to iske sare products bhi store se remove ho jayenge!
+                    Removing this creator will also remove all of their products from the store!
                   </p>
                   <p className="text-xs text-gray-300 leading-relaxed">
                     Removing this creator will automatically deactivate and remove all of their published products from the marketplace and catalog.
