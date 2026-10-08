@@ -297,11 +297,10 @@ export default function CreatorRequestsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
           <button
             onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
-            className={`text-left p-6 rounded-xl border transition-all cursor-pointer ${
-              statusFilter === 'pending'
-                ? 'bg-yellow-950/40 border-yellow-500 ring-2 ring-yellow-500/20'
-                : 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700/50 hover:border-gray-600'
-            }`}
+            className={`text-left p-6 rounded-xl border transition-all cursor-pointer ${statusFilter === 'pending'
+              ? 'bg-yellow-950/40 border-yellow-500 ring-2 ring-yellow-500/20'
+              : 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700/50 hover:border-gray-600'
+              }`}
           >
             <div className="flex items-center">
               <div className="w-12 h-12 bg-yellow-900/30 rounded-lg flex items-center justify-center">
@@ -316,11 +315,10 @@ export default function CreatorRequestsPage() {
 
           <button
             onClick={() => setStatusFilter(statusFilter === 'approved' ? 'all' : 'approved')}
-            className={`text-left p-6 rounded-xl border transition-all cursor-pointer ${
-              statusFilter === 'approved'
-                ? 'bg-green-950/40 border-green-500 ring-2 ring-green-500/20'
-                : 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700/50 hover:border-gray-600'
-            }`}
+            className={`text-left p-6 rounded-xl border transition-all cursor-pointer ${statusFilter === 'approved'
+              ? 'bg-green-950/40 border-green-500 ring-2 ring-green-500/20'
+              : 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700/50 hover:border-gray-600'
+              }`}
           >
             <div className="flex items-center">
               <div className="w-12 h-12 bg-green-900/30 rounded-lg flex items-center justify-center">
@@ -335,11 +333,10 @@ export default function CreatorRequestsPage() {
 
           <button
             onClick={() => setStatusFilter(statusFilter === 'rejected' ? 'all' : 'rejected')}
-            className={`text-left p-6 rounded-xl border transition-all cursor-pointer ${
-              statusFilter === 'rejected'
-                ? 'bg-red-950/40 border-red-500 ring-2 ring-red-500/20'
-                : 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700/50 hover:border-gray-600'
-            }`}
+            className={`text-left p-6 rounded-xl border transition-all cursor-pointer ${statusFilter === 'rejected'
+              ? 'bg-red-950/40 border-red-500 ring-2 ring-red-500/20'
+              : 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700/50 hover:border-gray-600'
+              }`}
           >
             <div className="flex items-center">
               <div className="w-12 h-12 bg-red-900/30 rounded-lg flex items-center justify-center">
@@ -359,41 +356,37 @@ export default function CreatorRequestsPage() {
           <div className="flex items-center gap-1.5 p-1 bg-gray-900/80 border border-gray-800 rounded-xl overflow-x-auto">
             <button
               onClick={() => setStatusFilter('all')}
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                statusFilter === 'all'
-                  ? 'bg-orange-500 text-black shadow-md'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
-              }`}
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${statusFilter === 'all'
+                ? 'bg-orange-500 text-black shadow-md'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+                }`}
             >
               All ({requests.length})
             </button>
             <button
               onClick={() => setStatusFilter('pending')}
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                statusFilter === 'pending'
-                  ? 'bg-yellow-500 text-black shadow-md'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
-              }`}
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${statusFilter === 'pending'
+                ? 'bg-yellow-500 text-black shadow-md'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+                }`}
             >
               Pending ({pendingCount})
             </button>
             <button
               onClick={() => setStatusFilter('approved')}
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                statusFilter === 'approved'
-                  ? 'bg-green-500 text-black shadow-md'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
-              }`}
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${statusFilter === 'approved'
+                ? 'bg-green-500 text-black shadow-md'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+                }`}
             >
               Approved ({approvedCount})
             </button>
             <button
               onClick={() => setStatusFilter('rejected')}
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                statusFilter === 'rejected'
-                  ? 'bg-red-500 text-black shadow-md'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
-              }`}
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${statusFilter === 'rejected'
+                ? 'bg-red-500 text-black shadow-md'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+                }`}
             >
               Rejected ({rejectedCount})
             </button>
