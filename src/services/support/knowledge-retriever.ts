@@ -16,7 +16,7 @@ import { getSearchableKnowledgeBase } from './knowledge-manager';
 
 export interface RetrievalResult {
   items: KnowledgeItem[];
-  intent: 'greeting' | 'supplier_probe' | 'security_probe' | 'support_escalation' | 'general';
+  intent: 'greeting' | 'supplier_probe' | 'security_probe' | 'support_escalation' | 'unsupported_query' | 'general';
   directAnswer?: string;
   confidence: number;
 }
@@ -155,9 +155,11 @@ const CORE_SUPPORT_KEYWORDS = [
   'return', 'returns', 'refund', 'exchange', 'cancel', 'cancellation',
   'address', 'product', 'products', 'apparel', 't-shirt', 'hoodie',
   'suitcase', 'luggage', 'mug', 'poster', 'canvas', 'payment', 'paypal',
-  'stripe', 'damaged', 'defective', 'defect', 'support', 'creator', 'payout',
-  'customize', 'customized', 'customization', 'design', 'buy', 'buying', 'purchase',
-  'founder', 'mangat', 'perry'
+  'stripe', 'damaged', 'defective', 'defect', 'support', 'creator', 'creators',
+  'payout', 'payouts', 'customize', 'customized', 'customization', 'design',
+  'buy', 'buying', 'purchase', 'founder', 'mangat', 'perry', 'rupan', 'bal',
+  'loka', 'media', 'store', 'website', 'catalog', 'sizing', 'size', 'chart',
+  'policy', 'contact', 'email', 'checkout', 'cart', 'markup', 'studio', 'spinner'
 ];
 
 /**
@@ -329,11 +331,12 @@ export function retrieveKnowledge(query: string, customKnowledgeBase?: Knowledge
 
   const highestScore = scoredItems[0]?.score || 0;
 
-  // If score is too low, treat as out of scope / unsupported
+  // If score is too low, the query is not found on our website (out of scope)
   if (highestScore < 8) {
     return {
       items: [],
-      intent: 'general',
+      intent: 'unsupported_query',
+      directAnswer: CANNED_RESPONSES.UNKNOWN_FALLBACK,
       confidence: 0
     };
   }

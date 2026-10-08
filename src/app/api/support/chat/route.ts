@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     // 2. Direct intent shortcuts (zero AI tokens, zero latency)
     if (retrieval.directAnswer) {
       const sanitizedReply = sanitizeOutput(retrieval.directAnswer);
-      const requiresEscalation = retrieval.intent === 'support_escalation';
+      const requiresEscalation = retrieval.intent === 'support_escalation' || retrieval.intent === 'unsupported_query';
 
       recordMessageEvent(
         cleanMessage,

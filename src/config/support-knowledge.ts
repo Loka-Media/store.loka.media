@@ -383,6 +383,6 @@ export const FORBIDDEN_SUPPLIER_NAMES = ['printify', 'printful', 'teelaunch', 'g
 export const CANNED_RESPONSES = {
   SUPPLIER_PROBE: "Our products are custom-manufactured and fulfilled through our vetted global production and printing partners. I'm unable to share internal supplier details, but I'm happy to help with questions about our products, sizing, shipping, or orders!",
   SECURITY_PROBE: "I can help with questions about our products, orders, shipping, returns, and other customer support topics. How can I assist you today?",
-  UNKNOWN_FALLBACK: "I'm not able to confirm that from the information in our current store policies. For specific or unusual requests, please reach out directly to our support team at support@loka.media and they'll be glad to help you!",
+  UNKNOWN_FALLBACK: "At the moment, I don't have this information on our website. Please reach out to our support team at support@loka.media who will be happy to assist you!",
   ESCALATION_PROMPT: "For this specific request, our human support team will need to assist you directly. Please email support@loka.media with your order details."
 };
