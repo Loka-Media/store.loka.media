@@ -37,6 +37,8 @@ import {
   ArrowRight,
   CheckCircle2,
   Layers,
+  BookOpen,
+  Footprints,
 } from "lucide-react";
 import { Slider } from "@mui/material";
 import toast from "react-hot-toast";
@@ -244,13 +246,28 @@ const Product360Viewer: React.FC<{
     const title = mockupTitle.toLowerCase();
     const p = (placement || "").toLowerCase();
 
+    // 1. Direct placement match
+    const direct = designFiles.find((d) => d.placement === p || d.placement === title);
+    if (direct) return direct;
+
+    // 2. Book / Journal cover views
+    if (p.includes("back") || title.includes("back")) {
+      const backDesign = designFiles.find((d) => d.placement === "back" || d.placement === "back_cover" || d.placement === "back_left_leg" || d.placement === "back_right_leg");
+      if (backDesign) return backDesign;
+    }
+
+    if (p.includes("front") || title.includes("front")) {
+      const frontDesign = designFiles.find((d) => d.placement === "front" || d.placement === "front_cover" || d.placement === "full_wrap" || d.placement === "front_left_leg" || d.placement === "front_right_leg");
+      if (frontDesign) return frontDesign;
+    }
+
     let resolvedPlacement = "front";
     if (p.includes("back") || title.includes("back")) resolvedPlacement = "back";
     else if (p.includes("neck") || title.includes("neck") || p.includes("label") || title.includes("label")) resolvedPlacement = "neck";
     else if (p.includes("left") || title.includes("left")) resolvedPlacement = "sleeve_left";
     else if (p.includes("right") || title.includes("right")) resolvedPlacement = "sleeve_right";
 
-    return designFiles.find((d) => d.placement === resolvedPlacement || (d.placement === "left" && resolvedPlacement === "sleeve_left") || (d.placement === "right" && resolvedPlacement === "sleeve_right"));
+    return designFiles.find((d) => d.placement === resolvedPlacement || (d.placement === "left" && resolvedPlacement === "sleeve_left") || (d.placement === "right" && resolvedPlacement === "sleeve_right")) || designFiles[0] || null;
   };
 
   const getDesignForDefault = () => {
@@ -884,38 +901,52 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       const lower = (pos || "").toLowerCase().trim();
       if (!lower) return "";
 
-      if (lower === "left" || lower.includes("sleeve_left") || lower.includes("left_sleeve") || lower.startsWith("left_")) {
+      // 1. Preserve specific multi-placement positions (legs, sides, covers, mugs, drinks, etc.)
+      if (
+        lower.includes("leg") ||
+        lower.includes("side") ||
+        lower.includes("cover") ||
+        lower.includes("page") ||
+        lower.includes("mug") ||
+        lower.includes("drinkware") ||
+        lower.includes("waistband") ||
+        lower.includes("cuff")
+      ) {
+        return lower;
+      }
+
+      // 2. Sleeve normalization
+      if (lower === "left" || lower === "sleeve_left" || lower === "left_sleeve") {
         return "sleeve_left";
       }
-      if (lower === "right" || lower.includes("sleeve_right") || lower.includes("right_sleeve") || lower.startsWith("right_")) {
+      if (lower === "right" || lower === "sleeve_right" || lower === "right_sleeve") {
         return "sleeve_right";
       }
+
+      // 3. Neck normalization
       if (lower.includes("neck_outer") || lower.includes("outer_neck")) {
         return "neck_outer";
       }
       if (lower.includes("neck") || lower.includes("collar") || lower.includes("label") || lower.includes("tag")) {
         return "neck";
       }
-      if (lower === "front" || lower.startsWith("front_") || lower.startsWith("front-") || lower.includes("front") || lower === "chest") {
+
+      // 4. Standard apparel front/back
+      if (lower === "front" || lower === "chest") {
         return "front";
       }
-      if (lower === "back" || lower.startsWith("back_") || lower.startsWith("back-") || lower.includes("back") || lower === "rear" || lower === "reverse") {
+      if (lower === "back" || lower === "rear" || lower === "reverse") {
         return "back";
       }
-      if (lower.includes("pocket")) {
-        return "pocket";
-      }
-      if (lower.includes("hood")) {
-        return "hood";
-      }
-      if (lower.includes("all_over") || lower.includes("wrap") || lower.includes("full")) {
-        return "all_over";
-      }
+
+      if (lower.includes("pocket")) return "pocket";
+      if (lower.includes("hood")) return "hood";
+      if (lower === "all_over" || lower === "aop") return "all_over";
 
       return lower;
     };
 
-    // 1. Collect directly from selectedProduct variant placeholders (Primary Printify source)
+    // 1. Collect directly from selectedProduct variant placeholders (Primary dynamic Printify source)
     if (selectedProduct?.variants && Array.isArray(selectedProduct.variants) && selectedProduct.variants.length > 0) {
       selectedProduct.variants.forEach((v: any) => {
         if (Array.isArray(v.placeholders)) {
@@ -929,8 +960,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       });
     }
 
-    // 2. Collect from selectedProduct root placeholders
-    if (Array.isArray((selectedProduct as any)?.placeholders)) {
+    // 2. Collect from selectedProduct root placeholders if variant placeholders were not populated
+    if (discoveredPlacements.size === 0 && Array.isArray((selectedProduct as any)?.placeholders)) {
       (selectedProduct as any).placeholders.forEach((p: any) => {
         if (p.position) {
           const canonical = toCanonicalPlacement(p.position);
@@ -939,31 +970,38 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       });
     }
 
-    // 3. Collect from printFiles printfiles
-    if (printFiles?.printfiles && Array.isArray(printFiles.printfiles)) {
-      printFiles.printfiles.forEach((pf: any) => {
-        if (pf.position) {
-          const canonical = toCanonicalPlacement(pf.position);
-          if (canonical) discoveredPlacements.add(canonical);
-        }
-      });
+    // 3. Wraparound books / journals detection (Hardcover Journal 485, notebooks, etc.)
+    // In Printify, a wraparound book/journal is split into Front Cover and Back Cover (strictly 2 options)
+    const title = ((selectedProduct?.title || selectedProduct?.name || "") as string).toLowerCase();
+    const isWraparoundBookOrJournal = (() => {
+      if (title.includes("journal") || title.includes("notebook") || title.includes("book") || title.includes("diary")) {
+        return true;
+      }
+      const pf = printFiles?.printfiles?.[0];
+      if (pf && pf.width && pf.height && (pf.width / pf.height > 1.25) && pf.width >= 3000) {
+        return true;
+      }
+      return false;
+    })();
+
+    if (isWraparoundBookOrJournal) {
+      discoveredPlacements.clear();
+      discoveredPlacements.add("front_cover");
+      discoveredPlacements.add("back_cover");
     }
 
-    // 4. Collect from printFiles variant_printfiles placements
-    if (printFiles?.variant_printfiles && Array.isArray(printFiles.variant_printfiles) && printFiles.variant_printfiles.length > 0) {
-      printFiles.variant_printfiles.forEach((vp: any) => {
-        if (vp.placements) {
-          Object.keys(vp.placements).forEach((k) => {
-            const canonical = toCanonicalPlacement(k);
-            if (canonical) discoveredPlacements.add(canonical);
-          });
-        }
-      });
-    }
-
-    // 5. Fallback ONLY if no placeholders were discovered from Printify API data
+    // 4. Fallback ONLY if no placeholders were discovered from Printify API data
     if (discoveredPlacements.size === 0) {
-      if (mockupUrls && Array.isArray(mockupUrls) && mockupUrls.length > 0) {
+      if (printFiles?.printfiles && Array.isArray(printFiles.printfiles)) {
+        printFiles.printfiles.forEach((pf: any) => {
+          if (pf.position) {
+            const canonical = toCanonicalPlacement(pf.position);
+            if (canonical) discoveredPlacements.add(canonical);
+          }
+        });
+      }
+
+      if (discoveredPlacements.size === 0 && mockupUrls && Array.isArray(mockupUrls) && mockupUrls.length > 0) {
         mockupUrls.forEach((m: any) => {
           const p = (m.placement || "").toLowerCase().trim();
           const t = (m.title || "").toLowerCase().trim();
@@ -982,14 +1020,32 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
     // Standard ordering preference matching Printify editor: Front -> Back -> Neck -> Sleeves -> Others
     const priorityOrder = [
+      "front_cover",
+      "back_cover",
       "front",
       "back",
+      "front_left_leg",
+      "front_right_leg",
+      "back_left_leg",
+      "back_right_leg",
+      "left_leg",
+      "right_leg",
+      "left_side",
+      "right_side",
+      "mug_front",
+      "mug_back",
+      "drinkware_front",
+      "drinkware_back",
       "neck",
       "neck_outer",
       "sleeve_left",
       "sleeve_right",
       "pocket",
       "hood",
+      "outside_cover",
+      "inside_cover",
+      "outside",
+      "inside",
       "all_over",
     ];
 
@@ -1537,15 +1593,19 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     setSelectedFileId(file.id);
 
     const imageUrl = file.file_url || file.thumbnail_url || file.preview_url || "";
-    let baseWidth = activePrintFile.width * 0.7;
-    let baseHeight = activePrintFile.height * 0.7;
+    const isWraparoundCover = (activePrintFile.width / activePrintFile.height > 1.25) && activePrintFile.width >= 3000;
+    const isCoverPlacement = activePlacement === "front_cover" || activePlacement === "back_cover";
+    const targetScale = (isWraparoundCover && isCoverPlacement) ? 0.40 : 0.7;
+
+    let baseWidth = activePrintFile.width * targetScale;
+    let baseHeight = activePrintFile.height * targetScale;
 
     if (imageUrl) {
       try {
         const dimensions = await calculateAspectRatioAwareDimensions(
           imageUrl,
           activePrintFile,
-          0.7,
+          targetScale,
           false
         );
         baseWidth = dimensions.width;
@@ -1558,7 +1618,15 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     baseWidth = Math.round(baseWidth);
     baseHeight = Math.round(baseHeight);
     const baseTop = Math.max(0, Math.round((activePrintFile.height - baseHeight) / 2));
-    const baseLeft = Math.max(0, Math.round((activePrintFile.width - baseWidth) / 2));
+    let baseLeft = Math.max(0, Math.round((activePrintFile.width - baseWidth) / 2));
+
+    if (isWraparoundCover) {
+      if (activePlacement === "front_cover") {
+        baseLeft = Math.round(activePrintFile.width * 0.75 - baseWidth / 2);
+      } else if (activePlacement === "back_cover") {
+        baseLeft = Math.round(activePrintFile.width * 0.25 - baseWidth / 2);
+      }
+    }
 
     const newDesign: any = {
       id: Date.now(),
@@ -1823,8 +1891,27 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   // Get placement friendly name
   const getPlacementLabel = (placementId: string) => {
     const labels: Record<string, string> = {
-      front: "Front Print",
-      back: "Back Print",
+      front: "Front",
+      back: "Back",
+      front_cover: "Front Cover",
+      back_cover: "Back Cover",
+      full_wrap: "Full Cover Wrap",
+      front_left_leg: "Front Left Leg",
+      front_right_leg: "Front Right Leg",
+      back_left_leg: "Back Left Leg",
+      back_right_leg: "Back Right Leg",
+      left_leg: "Left Leg",
+      right_leg: "Right Leg",
+      left_side: "Left Side",
+      right_side: "Right Side",
+      mug_front: "Mug Front",
+      mug_back: "Mug Back",
+      drinkware_front: "Front View",
+      drinkware_back: "Back View",
+      outside_cover: "Outside Cover",
+      inside_cover: "Inside Cover",
+      inside: "Inside",
+      outside: "Outside",
       sleeve_left: "Left Sleeve",
       sleeve_right: "Right Sleeve",
       left: "Left Sleeve",
@@ -1839,6 +1926,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   };
 
   const getPlacementIcon = (placementId: string) => {
+    const p = placementId.toLowerCase();
+    if (p.includes("cover") || p.includes("journal") || p.includes("book") || p === "full_wrap") {
+      return <BookOpen className="w-5 h-5 text-orange-400" />;
+    }
+    if (p.includes("leg") || p.includes("sock") || p.includes("foot")) {
+      return <Footprints className="w-5 h-5 text-orange-400" />;
+    }
     const svgs: Record<string, React.ReactNode> = {
       front: <FrontSVG className="w-5 h-5" />,
       back: <BackSVG className="w-5 h-5" />,
@@ -1847,8 +1941,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       sleeve_left: <LeftSleeveSVG className="w-5 h-5" />,
       sleeve_right: <RightSleeveSVG className="w-5 h-5" />,
       neck: <Tag className="w-5 h-5 text-orange-400" />,
+      all_over: <Layers className="w-5 h-5 text-orange-400" />,
     };
-    return svgs[placementId.toLowerCase()] || <FrontSVG className="w-5 h-5" />;
+    return svgs[p] || <FrontSVG className="w-5 h-5" />;
   };
 
   // Track viewer modes (360 interactive vs grid of all mockups)

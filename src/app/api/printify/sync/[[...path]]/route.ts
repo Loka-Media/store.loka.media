@@ -242,7 +242,11 @@ async function buildPrintifyProductPayload(
       }
     }
 
-    // 3. Common alias & position mappings for Printify catalog types
+    if (clean === 'front_cover' || clean === 'back_cover' || clean === 'full_wrap') {
+      if (validPositionsMap.has('front')) return validPositionsMap.get('front')!;
+      if (validPositionsMap.has('outside_cover')) return validPositionsMap.get('outside_cover')!;
+      if (validPositionsMap.has('cover')) return validPositionsMap.get('cover')!;
+    }
     if (clean === 'sleeve_left' || clean === 'left') {
       if (validPositionsMap.has('left_sleeve')) return validPositionsMap.get('left_sleeve')!;
     }
@@ -283,6 +287,7 @@ async function buildPrintifyProductPayload(
     for (const [placement, files] of Object.entries(byPlacement)) {
       const images = files
         .map((df: any) => {
+          const rawPlacement = (df.placement ?? df.position ?? df.print_area ?? '').toLowerCase().trim();
           const imgId: string | undefined =
             df.printify_id ??
             df.upload_id ??
@@ -316,11 +321,21 @@ async function buildPrintifyProductPayload(
               // Scale relative to the print area width
               scale = width / areaWidth;
             }
+          } else {
+            if (rawPlacement === 'front_cover') {
+              x = 0.75;
+              y = 0.5;
+              scale = 0.45;
+            } else if (rawPlacement === 'back_cover') {
+              x = 0.25;
+              y = 0.5;
+              scale = 0.45;
+            }
           }
 
           return {
             id: imgId,
-            x: x ?? 0.5,
+            x: x ?? (rawPlacement === 'front_cover' ? 0.75 : rawPlacement === 'back_cover' ? 0.25 : 0.5),
             y: y ?? 0.5,
             scale: scale ?? 1.0,
             angle: angle,

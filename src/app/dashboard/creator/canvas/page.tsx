@@ -65,20 +65,48 @@ function getColorCode(colorName: string): string {
   return '#cccccc';
 }
 
+const POS_CODE_MAP: Record<string, number> = {
+  front: 1,
+  back: 2,
+  left: 3,
+  right: 4,
+  left_sleeve: 5,
+  sleeve_left: 5,
+  right_sleeve: 6,
+  sleeve_right: 6,
+  neck: 7,
+  neck_inner: 7,
+  inner_neck: 7,
+  neck_outer: 8,
+  outer_neck: 8,
+  collar: 9,
+  hood: 10,
+  pocket: 11,
+  front_left_leg: 21,
+  front_right_leg: 22,
+  back_left_leg: 23,
+  back_right_leg: 24,
+  left_leg: 25,
+  right_leg: 26,
+  left_side: 27,
+  right_side: 28,
+  front_cover: 31,
+  back_cover: 32,
+  full_wrap: 33,
+  wrap: 33,
+  outside_cover: 34,
+  inside_cover: 35,
+  mug_front: 41,
+  mug_back: 42,
+  drinkware_front: 43,
+  drinkware_back: 44,
+  outside: 51,
+  inside: 52,
+};
+
 function getPrintfilePosCode(posStr: string): number {
   const s = (posStr || '').toLowerCase().trim();
-  if (s.includes('front')) return 1;
-  if (s.includes('back')) return 2;
-  if (s === 'left' || s.includes('left_sleeve') || s.includes('sleeve_left')) return 3;
-  if (s === 'right' || s.includes('right_sleeve') || s.includes('sleeve_right')) return 4;
-  if (s.includes('collar')) return 5;
-  if (s.includes('neck') || s.includes('label')) return 6;
-  if (s.includes('hood')) return 7;
-  if (s.includes('pocket')) return 8;
-  if (s.includes('waistband') || s.includes('cuff')) return 9;
-  if (s.includes('leg_left') || s.includes('left_leg')) return 10;
-  if (s.includes('leg_right') || s.includes('right_leg')) return 11;
-  if (s.includes('wrap') || s.includes('all')) return 12;
+  if (POS_CODE_MAP[s]) return POS_CODE_MAP[s];
   let hash = 0;
   for (let i = 0; i < s.length; i++) {
     hash = ((hash << 5) - hash) + s.charCodeAt(i);
@@ -104,10 +132,17 @@ function computePrintFilesFromVariants(variants: any[]) {
       // Assign exact raw position
       placements[rawPos] = printfile_id;
 
-      // Also set aliases so any lookup variant works flawlessly
-      if (rawPos.startsWith('front') || rawPos === 'chest') {
+      // Check if this is a wide wraparound cover (e.g. journal/notebook full cover: exactly 2 sides, Front Cover & Back Cover)
+      const isWraparoundCover = rawPos === 'front' && p.width && p.height && (p.width / p.height > 1.25) && p.width >= 3000;
+      if (isWraparoundCover) {
+        placements['front_cover'] = printfile_id;
+        placements['back_cover'] = v.id * 1000 + POS_CODE_MAP.back_cover;
+      }
+
+      // Also set aliases so standard lookups work seamlessly
+      if (rawPos === 'front' || rawPos === 'chest') {
         placements['front'] = printfile_id;
-      } else if (rawPos.startsWith('back') || rawPos === 'rear' || rawPos === 'reverse') {
+      } else if (rawPos === 'back' || rawPos === 'rear' || rawPos === 'reverse') {
         placements['back'] = printfile_id;
       } else if (rawPos === 'left' || rawPos === 'left_sleeve' || rawPos === 'sleeve_left') {
         placements['left'] = printfile_id;
@@ -119,7 +154,7 @@ function computePrintFilesFromVariants(variants: any[]) {
         placements['right_sleeve'] = printfile_id;
       } else if (rawPos.includes('collar')) {
         placements['collar'] = printfile_id;
-      } else if (rawPos.includes('neck') || rawPos.includes('label')) {
+      } else if (rawPos === 'neck' || rawPos === 'neck_inner' || rawPos === 'inner_neck') {
         placements['neck'] = printfile_id;
         placements['neck_inner'] = printfile_id;
         placements['inner_neck'] = printfile_id;
@@ -155,6 +190,22 @@ function computePrintFilesFromVariants(variants: any[]) {
           height: p.height || 4000,
           dpi: p.dpi || 300
         });
+      }
+
+      // If this is a wide wraparound cover, also generate virtual front_cover & back_cover printfiles (exactly 2 sides)
+      const isWraparoundCover = rawPos === 'front' && p.width && p.height && (p.width / p.height > 1.25) && p.width >= 3000;
+      if (isWraparoundCover) {
+        const backCode = POS_CODE_MAP.back_cover;
+        const backPrintfileId = v.id * 1000 + backCode;
+        if (!printfiles.some(pf => pf.printfile_id === backPrintfileId)) {
+          printfiles.push({
+            printfile_id: backPrintfileId,
+            position: 'back_cover',
+            width: p.width,
+            height: p.height,
+            dpi: p.dpi || 300
+          });
+        }
       }
     });
   });

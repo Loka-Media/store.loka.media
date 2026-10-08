@@ -290,12 +290,93 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       </div>
                     ) : null}
 
+                    {/* Wraparound Cover Visual Template Guides (Journal / Notebook / Book Covers) */}
+                    {(() => {
+                      const isWrap =
+                        activePlacement === "front_cover" ||
+                        activePlacement === "back_cover" ||
+                        activePlacement === "full_wrap" ||
+                        (activePrintFile && activePrintFile.width && activePrintFile.height && activePrintFile.width / activePrintFile.height > 1.25 && activePrintFile.width >= 3000);
+
+                      if (!isWrap) return null;
+
+                      return (
+                        <div className="absolute inset-0 pointer-events-none select-none z-0">
+                          {/* Left Half: BACK COVER */}
+                          <div
+                            className={`absolute top-0 bottom-0 left-0 w-[47%] border-r border-dashed transition-all ${
+                              activePlacement === "back_cover"
+                                ? "border-orange-500 bg-orange-500/10 ring-1 ring-orange-500/30"
+                                : "border-white/20 bg-white/[0.02]"
+                            }`}
+                          >
+                            <div className="p-3">
+                              <span
+                                className={`text-[11px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded ${
+                                  activePlacement === "back_cover"
+                                    ? "bg-orange-500 text-white shadow-md shadow-orange-500/40"
+                                    : "bg-white/10 text-gray-400"
+                                }`}
+                              >
+                                Back Cover
+                              </span>
+                            </div>
+
+                            {/* Production Barcode guide box (bottom right of back cover, matching Printify) */}
+                            <div className="absolute bottom-2 right-2 w-12 h-8 border border-white/20 bg-black/60 rounded flex flex-col items-center justify-center p-0.5 opacity-60">
+                              <div className="text-[7px] text-gray-400 font-mono tracking-tighter">|||||||||</div>
+                              <span className="text-[6px] text-gray-400">Barcode</span>
+                            </div>
+                          </div>
+
+                          {/* Center: SPINE Guide */}
+                          <div className="absolute top-0 bottom-0 left-[47%] w-[6%] border-r border-dashed border-white/20 flex flex-col items-center justify-center bg-black/30">
+                            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest -rotate-90">
+                              Spine
+                            </span>
+                          </div>
+
+                          {/* Right Half: FRONT COVER */}
+                          <div
+                            className={`absolute top-0 bottom-0 right-0 w-[47%] transition-all ${
+                              activePlacement === "front_cover"
+                                ? "border-l border-dashed border-orange-500 bg-orange-500/10 ring-1 ring-orange-500/30"
+                                : "border-l border-dashed border-white/20 bg-white/[0.02]"
+                            }`}
+                          >
+                            <div className="p-3 text-right">
+                              <span
+                                className={`text-[11px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded ${
+                                  activePlacement === "front_cover"
+                                    ? "bg-orange-500 text-white shadow-md shadow-orange-500/40"
+                                    : "bg-white/10 text-gray-400"
+                                }`}
+                              >
+                                Front Cover
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {/* Design elements container */}
-                    <div className="absolute inset-0 w-full h-full">
+                    <div className="absolute inset-0 w-full h-full z-10">
                       {/* Design elements will appear here */}
                       {designFiles
-                        .filter((design) => design.placement === activePlacement)
+                        .filter((design) => {
+                          if (design.placement === activePlacement) return true;
+                          if (
+                            (activePlacement === "front_cover" && design.placement === "back_cover") ||
+                            (activePlacement === "back_cover" && design.placement === "front_cover") ||
+                            (activePlacement === "full_wrap" && (design.placement === "front_cover" || design.placement === "back_cover"))
+                          ) {
+                            return true;
+                          }
+                          return false;
+                        })
                         .map((design) => {
+                          const isOtherPlacement = design.placement !== activePlacement;
                           // Scale design to fit in dynamic canvas
                           const canvasWidth = canvasDims.width;
                           const canvasHeight = canvasDims.height;
@@ -317,6 +398,34 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                             x: design.position.left * designScale,
                             y: design.position.top * designScale,
                           };
+
+                          if (isOtherPlacement) {
+                            return (
+                              <div
+                                key={design.id}
+                                style={{
+                                  width: `${scaledSize.width}px`,
+                                  height: `${scaledSize.height}px`,
+                                  left: `${scaledPosition.x}px`,
+                                  top: `${scaledPosition.y}px`,
+                                  position: "absolute",
+                                  opacity: 0.7,
+                                  pointerEvents: "none",
+                                }}
+                                className="border border-dashed border-white/40 rounded overflow-hidden"
+                              >
+                                <img
+                                  src={design.url ? design.url.replace(/%25/g, '%') : ''}
+                                  alt={design.filename}
+                                  className="w-full h-full object-contain"
+                                  draggable={false}
+                                />
+                                <span className="absolute bottom-1 left-1 bg-black/70 text-[9px] text-gray-300 px-1 py-0.5 rounded capitalize">
+                                  {design.placement.replace(/_/g, ' ')}
+                                </span>
+                              </div>
+                            );
+                          }
 
                           return (
                             <Rnd

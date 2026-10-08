@@ -222,8 +222,10 @@ export const getActivePrintFile = (
       keysToTry = ["hood", "hood_left", "hood_right"];
     } else if (cleanPlacement.includes("pocket")) {
       keysToTry = ["pocket", "front_pocket"];
+    } else if (cleanPlacement === "front_cover" || cleanPlacement === "back_cover" || cleanPlacement === "full_wrap") {
+      keysToTry = [cleanPlacement, "front", "wrap", "full_wrap", "all_over", "outside_cover"];
     } else if (cleanPlacement.includes("leg")) {
-      keysToTry = ["leg_left", "left_leg", "leg_right", "right_leg"];
+      keysToTry = [cleanPlacement, "front_left_leg", "front_right_leg", "back_left_leg", "back_right_leg", "left_leg", "right_leg", "legs"];
     } else if (cleanPlacement.includes("wrap") || cleanPlacement.includes("all")) {
       keysToTry = ["all_over", "all", "wrap", "full_wrap"];
     }
@@ -251,6 +253,7 @@ export const getActivePrintFile = (
     const directMatch = printFiles.printfiles.find((pf: any) => {
       const pos = (pf?.position || "").toLowerCase().trim();
       return pos === cleanPlacement || 
+        ((cleanPlacement === "front_cover" || cleanPlacement === "back_cover" || cleanPlacement === "full_wrap") && (pos === "front" || pos === "full_wrap" || pos === "wrap")) ||
         pos.startsWith(cleanPlacement) ||
         cleanPlacement.startsWith(pos) ||
         (cleanPlacement.includes("collar") && pos.includes("collar")) ||
