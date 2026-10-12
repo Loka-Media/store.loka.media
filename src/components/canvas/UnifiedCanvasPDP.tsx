@@ -223,7 +223,8 @@ const Product360Viewer: React.FC<{
   onPlacementChange?: (placement: string) => void;
   activeColorHex?: string;
   supportedPlacements?: string[];
-}> = ({ mockupUrls, images = [], defaultImage, productName, designFiles, activePlacement = "front", onPlacementChange, activeColorHex, supportedPlacements }) => {
+  activeUrl?: string;
+}> = ({ mockupUrls, images = [], defaultImage, productName, designFiles, activePlacement = "front", onPlacementChange, activeColorHex, supportedPlacements, activeUrl }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
@@ -382,6 +383,15 @@ const Product360Viewer: React.FC<{
 
     return result.length > 0 ? result : itemsToProcess;
   }, [mockupUrls, images, supportedPlacements]);
+
+  // Sync activeIndex when parent passes a specific activeUrl (left-card click)
+  useEffect(() => {
+    if (!activeUrl || sortedMockups.length === 0) return;
+    const index = sortedMockups.findIndex(m => (m.url || m.src) === activeUrl);
+    if (index !== -1 && index !== activeIndex) {
+      setActiveIndex(index);
+    }
+  }, [activeUrl, sortedMockups]);
 
   // Reset active view index when mockup set changes or activePlacement changes
   useEffect(() => {
@@ -826,6 +836,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Local component states
   const [activePlacement, setActivePlacement] = useState<string>("front");
+  const [activeMockupCardIndex, setActiveMockupCardIndex] = useState<number>(0);
+  const [activeMockupUrl, setActiveMockupUrl] = useState<string>("");
   const [selectedPlacements, setSelectedPlacements] = useState<string[]>(["front"]);
   const [selectedDesignFile, setSelectedDesignFile] = useState<any | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<number | string | undefined>();
@@ -2831,12 +2843,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         ].slice(0, 4);
 
                     return cardsToDisplay.map((mockup: any, idx: number) => {
-                      const isMockupActive = activePlacement === mockup?.placement || (idx === 0 && !mockup?.placement);
+                      const isMockupActive = idx === activeMockupCardIndex;
 
                       return (
                         <div
                           key={idx}
                           onClick={() => {
+                            setActiveMockupCardIndex(idx);
+                            // Sync URL so right-side viewer jumps to this image
+                            const url = mockup?.url || mockup?.src || "";
+                            if (url) setActiveMockupUrl(url);
                             if (mockup?.placement && getSupportedPlacements().includes(mockup.placement)) {
                               setActivePlacement(mockup.placement);
                             }
@@ -3233,39 +3249,31 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   })}
                 </div>
 
-                {/* 4 Summary Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                  {/* Card 1: Pricing Summary */}
-                  <div className="border border-emerald-500/30 bg-emerald-950/20 rounded-2xl p-3.5 space-y-1">
-                    <span className="text-xs text-emerald-400 font-medium block">Pricing Summary</span>
-                    <span className="text-sm sm:text-base font-bold text-emerald-300 block">
-                      {hasPriceRange ? `$${pricingRange.min.toFixed(2)} - $${pricingRange.max.toFixed(2)}` : `$${pricingRange.min.toFixed(2)}`}
-                    </span>
-                  </div>
-
-                  {/* Card 2: Base Cost */}
+                {/* 3 Summary Cards */}
+                <div className="grid grid-cols-3 gap-3 pt-2">
+                  {/* Card 1: Base Cost */}
                   <div className="border border-white/10 bg-black/40 rounded-2xl p-3.5 space-y-1">
                     <span className="text-xs text-gray-400 font-medium block">Base Cost</span>
                     <span className="text-sm sm:text-base font-bold text-white block">
-                      {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} - $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
+                      {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} – $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
 
-                  {/* Card 3: Your Profit */}
+                  {/* Card 2: Your Profit */}
                   <div className="border border-emerald-500/30 bg-emerald-950/20 rounded-2xl p-3.5 space-y-1">
                     <span className="text-xs text-emerald-400 font-medium block">Your Profit ({creatorMarkup}%)</span>
                     <span className="text-sm sm:text-base font-bold text-emerald-300 block">
                       +{hasPriceRange
-                        ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
+                        ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} – $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
                         : `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)}`}
                     </span>
                   </div>
 
-                  {/* Card 4: Customer Retail Price */}
+                  {/* Card 3: Customer Retail Price */}
                   <div className="border border-white/10 bg-black/40 rounded-2xl p-3.5 space-y-1">
                     <span className="text-xs text-gray-400 font-medium block">Customer Retail Price</span>
                     <span className="text-sm sm:text-base font-bold text-white block">
-                      {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
+                      {hasPriceRange ? `$${minSellingPrice.toFixed(2)} – $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
                 </div>
@@ -3425,6 +3433,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       onPlacementChange={setActivePlacement}
                       activeColorHex={activeColorHex}
                       supportedPlacements={getSupportedPlacements()}
+                      activeUrl={activeMockupUrl}
                     />
                   </div>
                 </div>
@@ -3582,6 +3591,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 onPlacementChange={setActivePlacement}
                 activeColorHex={activeColorHex}
                 supportedPlacements={getSupportedPlacements()}
+                activeUrl={activeMockupUrl}
               />
 
               <div className="space-y-1">
@@ -3631,21 +3641,24 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400">Loka Base Cost</span>
                     <span className="text-[#FF6D1F] font-bold">
-                      {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} - $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
+                      {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} – $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Loka Base Cost</span>
+                    <span className="text-gray-400 flex items-center gap-1">
+                      Creator Profit
+                      <span className="text-[10px] text-emerald-400/70 font-semibold">(+{creatorMarkup}%)</span>
+                    </span>
                     <span className="text-emerald-400 font-bold">
                       +{hasPriceRange
-                        ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
+                        ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} – $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
                         : `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400">Loka Base Cost</span>
-                    <span className="text-white font-bold">
-                      {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
+                  <div className="border-t border-white/10 pt-2 flex justify-between items-center">
+                    <span className="text-gray-200 font-semibold">Final Product Price</span>
+                    <span className="text-white font-extrabold text-sm">
+                      {hasPriceRange ? `$${minSellingPrice.toFixed(2)} – $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
                 </div>
