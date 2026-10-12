@@ -1850,6 +1850,42 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     return true;
   };
 
+  // Save Draft action
+  const handleSaveDraft = () => {
+    try {
+      const draftData = {
+        blueprintId: selectedProduct?.id || selectedProduct?.blueprintId,
+        productForm,
+        selectedVariants,
+        selectedColors,
+        selectedSizes,
+        activePlacement,
+        creatorMarkup,
+        updatedAt: new Date().toISOString(),
+      };
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          `loka_draft_${selectedProduct?.id || selectedProduct?.blueprintId || "custom"}`,
+          JSON.stringify(draftData)
+        );
+        toast.success("Draft saved successfully! You can resume editing anytime.", { id: "draft-success" });
+      }
+    } catch (e) {
+      toast.error("Failed to save draft.");
+    }
+  };
+
+  // Continue to next step helper
+  const handleContinueNext = () => {
+    if (activeStep < 4) {
+      if (validateAndRedirect(activeStep)) {
+        goToStep(activeStep + 1);
+      }
+    } else {
+      handlePublishSubmit();
+    }
+  };
+
   // Publish submit action
   const handlePublishSubmit = async () => {
     // Automatically validate and redirect user to first incomplete field
@@ -2098,6 +2134,37 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     setDraggedIndex(null);
   };
 
+  const CREATOR_STEPS = [
+    {
+      step: 1,
+      num: "01",
+      title: "Color & Sizes",
+      subtitle: "Product options",
+      isValid: validationSummary.variants,
+    },
+    {
+      step: 2,
+      num: "02",
+      title: "Add Artwork",
+      subtitle: "Upload & position",
+      isValid: validationSummary.designs,
+    },
+    {
+      step: 3,
+      num: "03",
+      title: "Title & Price",
+      subtitle: "Product options",
+      isValid: validationSummary.details,
+    },
+    {
+      step: 4,
+      num: "04",
+      title: "Review & Launch",
+      subtitle: "Final checklist",
+      isValid: validationSummary.allValid,
+    },
+  ];
+
   return (
     <div className="bg-[#050505] min-h-screen text-white relative pt-[30px] md:pt-[40px]">
       {/* Hidden input for custom image uploads */}
@@ -2127,259 +2194,133 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 {selectedProduct?.title || selectedProduct?.name}
               </div>
               <p className="text-[10px] sm:text-xs text-gray-400 truncate">
-                SKU: {selectedProduct?.model || selectedProduct?.id} | {selectedProduct?.type_name}
+                SKU: {selectedProduct?.model || selectedProduct?.id} | {selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}
               </p>
             </div>
           </div>
-          <div className="flex-shrink-0 flex items-center gap-2">
-            <div title={isPublishing ? "Publishing in progress..." : (!validationSummary.allValid ? "Click to jump to any incomplete field" : "Publish to live store")}>
-              <Button
-                onClick={handlePublishSubmit}
-                disabled={isPublishing || isGeneratingPreview}
-                className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
-              >
-                {isPublishing ? (
-                  <div className="flex items-center gap-2 whitespace-nowrap">
-                    <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                    <span>{isEditing ? "Updating..." : "Publishing..."}</span>
-                  </div>
-                ) : (
-                  isEditing ? "Update Product" : "Publish Product"
-                )}
-              </Button>
+          <div className="flex-shrink-0 flex items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold border border-white/20 bg-black/40 hover:bg-white/10 text-white transition-all cursor-pointer whitespace-nowrap"
+            >
+              Save Draft
+            </button>
+            <Button
+              onClick={handleContinueNext}
+              disabled={isPublishing || isGeneratingPreview}
+              className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+            >
+              {isPublishing ? (
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                  <span>{isEditing ? "Updating..." : "Publishing..."}</span>
+                </div>
+              ) : activeStep < 4 ? (
+                <>
+                  <span>Continue</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              ) : (
+                isEditing ? "Update Product" : "Publish Product"
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* FULL-WIDTH STEPPER BAR (Figma Design) */}
+      <div ref={topStepperRef} className="max-w-7xl mx-auto px-3 sm:px-6 pt-5 sm:pt-7">
+        <div className="bg-[#0B132B]/85 border border-white/10 rounded-2xl md:rounded-3xl p-5 sm:p-6 md:px-10 backdrop-blur-md shadow-2xl relative">
+          <div className="relative">
+            {/* Background connecting track line running between 01 and 04 */}
+            <div className="absolute top-4 sm:top-4 left-[12.5%] right-[12.5%] h-[2px] bg-white/20 -translate-y-1/2 pointer-events-none" />
+
+            {/* Active orange connecting track line */}
+            <div
+              className="absolute top-4 sm:top-4 left-[12.5%] h-[2px] bg-[#FF6D1F] -translate-y-1/2 pointer-events-none transition-all duration-300 shadow-[0_0_10px_rgba(255,109,31,0.6)]"
+              style={{
+                width:
+                  activeStep === 1
+                    ? "0%"
+                    : activeStep === 2
+                    ? "25%"
+                    : activeStep === 3
+                    ? "50%"
+                    : "75%",
+              }}
+            />
+
+            {/* 4 Steps */}
+            <div className="grid grid-cols-4 relative z-10 w-full">
+              {CREATOR_STEPS.map((s) => {
+                const isActive = activeStep === s.step;
+                const isPassed = activeStep > s.step;
+
+                return (
+                  <button
+                    key={s.step}
+                    type="button"
+                    onClick={() => goToStep(s.step)}
+                    className="flex flex-col items-center text-center cursor-pointer group transition-all"
+                  >
+                    {/* Circle badge */}
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all duration-200 ${
+                        isActive
+                          ? "bg-[#FF6D1F] text-white shadow-[0_0_16px_rgba(255,109,31,0.6)] ring-2 ring-[#FF6D1F]/50 scale-105"
+                          : isPassed
+                          ? "bg-[#FF6D1F] text-white shadow-sm"
+                          : "bg-[#0B132B] border-2 border-white/40 text-white/70 group-hover:border-white/80 group-hover:text-white"
+                      }`}
+                    >
+                      {s.num}
+                    </div>
+
+                    {/* Step Title & Subtitle */}
+                    <div className="mt-2.5 space-y-0.5">
+                      <div
+                        className={`text-xs sm:text-sm font-bold font-clash leading-tight transition-colors ${
+                          isActive
+                            ? "text-white"
+                            : "text-gray-300 group-hover:text-white"
+                        }`}
+                      >
+                        {s.title}
+                      </div>
+                      <div className="text-[10px] sm:text-xs text-gray-400">
+                        {s.subtitle}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 lg:py-10 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 lg:py-8 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
 
         {/* LEFT COLUMN: Main PDP Customizer Workspace */}
         <div className="lg:col-span-2 space-y-6 sm:space-y-8">
 
-          {/* Color-Coded Numbered Stepper Navigation Bar */}
-          <div ref={topStepperRef} className="bg-gray-900/80 border border-white/10 rounded-3xl p-4 sm:p-5 backdrop-blur-md space-y-4 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/5">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-orange-500/10 border border-orange-500/20 text-[#FF6D1F]">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Easy 4-Step Creator Flow
-                  </span>
-                  <span className="text-xs text-gray-400 font-medium hidden sm:inline">
-                    Step {activeStep} of 4: {activeStep === 1 ? "Colors & Sizes" : activeStep === 2 ? "Artwork & Placement" : activeStep === 3 ? "Title & Profit Margin" : "Review & Go Live"}
-                  </span>
-                </div>
-                <p className="text-[11px] text-gray-400 mt-1">
-                  Follow each numbered step from left to right. Simple, clear, and easy to complete.
-                </p>
-              </div>
-
-              {/* Toggle View Mode: Guided vs All */}
-              <div className="flex items-center gap-1 bg-black/60 border border-white/10 rounded-2xl p-1 self-start sm:self-auto">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("stepper")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${viewMode === "stepper"
-                    ? "bg-[#FF6D1F] text-white shadow-[0_0_12px_rgba(255,109,31,0.4)]"
-                    : "text-gray-400 hover:text-white"
-                    }`}
-                >
-                  <span>Guided Steps</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("all")}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${viewMode === "all"
-                    ? "bg-[#FF6D1F] text-white shadow-[0_0_12px_rgba(255,109,31,0.4)]"
-                    : "text-gray-400 hover:text-white"
-                    }`}
-                >
-                  <span>View All</span>
-                </button>
-              </div>
-            </div>
-
-            {/* 4 Color-Coded Step Badges */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
-              {/* Step 1: Sky Blue */}
-              <button
-                type="button"
-                onClick={() => goToStep(1)}
-                className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2 cursor-pointer ${activeStep === 1
-                  ? "border-sky-500 bg-sky-500/10 shadow-[0_0_20px_rgba(14,165,233,0.2)] ring-1 ring-sky-500/40"
-                  : validationSummary.variants
-                    ? "border-sky-500/30 bg-black/40 hover:border-sky-500/60"
-                    : "border-white/10 bg-black/30 hover:border-white/20 opacity-80"
-                  }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${activeStep === 1
-                    ? "bg-sky-500 text-black shadow-md shadow-sky-500/30"
-                    : validationSummary.variants
-                      ? "bg-green-500 text-black font-black"
-                      : "bg-sky-500/20 text-sky-400 border border-sky-500/30"
-                    }`}>
-                    {validationSummary.variants ? <Check className="w-4 h-4 stroke-[3]" /> : "1"}
-                  </div>
-                  {validationSummary.variants ? (
-                    <span className="text-[10px] font-bold text-green-400 flex items-center gap-1 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
-                      <Check className="w-3 h-3" /> Ready
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-sky-400 font-semibold bg-sky-500/10 px-2 py-0.5 rounded-full">
-                      {selectedColors.length} colors
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <div className={`text-xs font-bold font-clash leading-tight ${activeStep === 1 ? "text-sky-300" : "text-white"}`}>
-                    1. Colors & Sizes
-                  </div>
-                  <div className="text-[10px] text-gray-400 truncate mt-0.5">Product options</div>
-                </div>
-              </button>
-
-              {/* Step 2: Vibrant Orange */}
-              <button
-                type="button"
-                onClick={() => goToStep(2)}
-                className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2 cursor-pointer ${activeStep === 2
-                  ? "border-orange-500 bg-orange-500/10 shadow-[0_0_20px_rgba(249,115,22,0.2)] ring-1 ring-orange-500/40"
-                  : validationSummary.designs
-                    ? "border-orange-500/30 bg-black/40 hover:border-orange-500/60"
-                    : "border-white/10 bg-black/30 hover:border-white/20 opacity-80"
-                  }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${activeStep === 2
-                    ? "bg-[#FF6D1F] text-white shadow-md shadow-orange-500/30"
-                    : validationSummary.designs
-                      ? "bg-green-500 text-black font-black"
-                      : "bg-orange-500/20 text-orange-400 border border-orange-500/30"
-                    }`}>
-                    {validationSummary.designs ? <Check className="w-4 h-4 stroke-[3]" /> : "2"}
-                  </div>
-                  {validationSummary.designs ? (
-                    <span className="text-[10px] font-bold text-green-400 flex items-center gap-1 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
-                      <Check className="w-3 h-3" /> Placed
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-orange-400 font-semibold bg-orange-500/10 px-2 py-0.5 rounded-full">
-                      {designFiles.length} designs
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <div className={`text-xs font-bold font-clash leading-tight ${activeStep === 2 ? "text-orange-300" : "text-white"}`}>
-                    2. Add Artwork
-                  </div>
-                  <div className="text-[10px] text-gray-400 truncate mt-0.5">Upload & position</div>
-                </div>
-              </button>
-
-              {/* Step 3: Emerald Green */}
-              <button
-                type="button"
-                onClick={() => goToStep(3)}
-                className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2 cursor-pointer ${activeStep === 3
-                  ? "border-emerald-500 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500/40"
-                  : validationSummary.details
-                    ? "border-emerald-500/30 bg-black/40 hover:border-emerald-500/60"
-                    : "border-white/10 bg-black/30 hover:border-white/20 opacity-80"
-                  }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${activeStep === 3
-                    ? "bg-emerald-500 text-black shadow-md shadow-emerald-500/30"
-                    : validationSummary.details
-                      ? "bg-green-500 text-black font-black"
-                      : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                    }`}>
-                    {validationSummary.details ? <Check className="w-4 h-4 stroke-[3]" /> : "3"}
-                  </div>
-                  {validationSummary.details ? (
-                    <span className="text-[10px] font-bold text-green-400 flex items-center gap-1 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
-                      <Check className="w-3 h-3" /> Ready
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                      {creatorMarkup}% Markup
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <div className={`text-xs font-bold font-clash leading-tight ${activeStep === 3 ? "text-emerald-300" : "text-white"}`}>
-                    3. Title & Price
-                  </div>
-                  <div className="text-[10px] text-gray-400 truncate mt-0.5">Details & profit</div>
-                </div>
-              </button>
-
-              {/* Step 4: Royal Purple */}
-              <button
-                type="button"
-                onClick={() => goToStep(4)}
-                className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2 cursor-pointer ${activeStep === 4
-                  ? "border-purple-500 bg-purple-500/10 shadow-[0_0_20px_rgba(168,85,247,0.2)] ring-1 ring-purple-500/40"
-                  : validationSummary.allValid
-                    ? "border-purple-500/30 bg-black/40 hover:border-purple-500/60"
-                    : "border-white/10 bg-black/30 hover:border-white/20 opacity-80"
-                  }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${activeStep === 4
-                    ? "bg-purple-500 text-white shadow-md shadow-purple-500/30"
-                    : validationSummary.allValid
-                      ? "bg-green-500 text-black font-black"
-                      : "bg-purple-500/20 text-purple-400 border border-purple-500/30"
-                    }`}>
-                    {validationSummary.allValid ? <Check className="w-4 h-4 stroke-[3]" /> : "4"}
-                  </div>
-                  {validationSummary.allValid ? (
-                    <span className="text-[10px] font-bold text-green-400 flex items-center gap-1 bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">
-                      <Check className="w-3 h-3" /> Ready!
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-purple-400 font-semibold bg-purple-500/10 px-2 py-0.5 rounded-full">
-                      Launch
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <div className={`text-xs font-bold font-clash leading-tight ${activeStep === 4 ? "text-purple-300" : "text-white"}`}>
-                    4. Review & Launch
-                  </div>
-                  <div className="text-[10px] text-gray-400 truncate mt-0.5">Final checklist</div>
-                </div>
-              </button>
-            </div>
-          </div>
-
           {/* ═══════════════════════════════════════════════════════════════
-              STEP 1: VARIANTS (COLORS & SIZES) - SKY BLUE THEME
+              STEP 1: VARIANTS (COLORS & SIZES)
              ═══════════════════════════════════════════════════════════════ */}
           {(activeStep === 1 || viewMode === "all") && (
             <div className="space-y-6 animate-fadeIn">
-              {/* Step 1 Header Banner */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-sky-500/15 via-blue-500/10 to-transparent border border-sky-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-sky-500 text-black font-black text-lg flex items-center justify-center shadow-lg shadow-sky-500/25 flex-shrink-0">
-                    1
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-sky-400">Step 1 of 4</span>
-                      <span className="text-xs text-gray-500">•</span>
-                      <span className="text-xs text-gray-400">Colors & Sizes</span>
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold font-clash text-white">Choose Product Variants</h3>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs font-bold text-sky-300 self-start sm:self-auto">
-                  <Palette className="w-4 h-4 text-sky-400" />
-                  <span>{selectedColors.length} Colors • {selectedSizes.length} Sizes</span>
-                </div>
+              {/* Step 1 Typography Header (Figma Design) */}
+              <div className="space-y-1 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#FF6D1F]">
+                  Step 01 to 04
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-extrabold font-clash text-white">
+                  Choose Product Variants
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-400">
+                  Select the product options you want to offer in your store.
+                </p>
               </div>
 
               {/* Section 1: Product Information */}
@@ -2503,12 +2444,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     {/* Colors Select */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs sm:text-sm font-semibold text-gray-300">Select Colors</label>
-                        <span className="text-[10px] text-gray-500">{selectedColors.length} color(s) selected</span>
+                        <div className="flex items-center gap-2.5">
+                          <img src="/palette.png" alt="Select Colors" className="w-6 h-6 object-contain flex-shrink-0" />
+                          <label className="text-sm sm:text-base font-bold font-clash text-white">Select Colors</label>
+                        </div>
+                        <span className="text-xs text-gray-400">{selectedColors.length} color(s) selected</span>
                       </div>
-                      <div className="flex flex-wrap gap-2.5">
+                      <div className="flex flex-wrap gap-3 pt-1">
                         {uniqueColors.map((color: any) => {
                           const isSelected = selectedColors.includes(color.name);
+                          const isActive = activeColor === color.name;
                           return (
                             <button
                               key={color.name}
@@ -2524,14 +2469,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                   setSelectedColors([...selectedColors, color.name]);
                                 }
                               }}
-                              className={`relative border-2 rounded-full px-4 py-2 flex items-center gap-2 transition-all duration-300 ${isSelected
-                                ? (activeColor === color.name ? "border-[#FF6D1F] scale-105 shadow-[0_0_12px_rgba(255,109,31,0.3)]" : "border-white scale-105")
-                                : "border-transparent hover:border-white/30"
+                              className={`relative border-2 rounded-full px-5 py-2 min-w-[85px] flex items-center justify-center transition-all duration-200 cursor-pointer ${isSelected
+                                ? isActive
+                                  ? "border-[#FF6D1F] shadow-[0_0_12px_rgba(255,109,31,0.35)]"
+                                  : "border-white"
+                                : "border-white/20 hover:border-white/50 opacity-80 hover:opacity-100"
                                 }`}
                               style={{ backgroundColor: color.code }}
                             >
                               <span
-                                className="text-xs font-semibold whitespace-nowrap"
+                                className="text-xs sm:text-sm font-semibold whitespace-nowrap"
                                 style={{
                                   color: getContrastTextColor(color.code),
                                 }}
@@ -2539,8 +2486,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                 {color.name}
                               </span>
                               {isSelected && (
-                                <span className="bg-white/90 p-0.5 rounded-full">
-                                  <Check className="w-3 h-3 text-black" />
+                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#FF6D1F] rounded-full flex items-center justify-center text-white shadow-sm ring-2 ring-[#0B132B] pointer-events-none">
+                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
                                 </span>
                               )}
                             </button>
@@ -2552,26 +2499,39 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     {/* Sizes Select */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs sm:text-sm font-semibold text-gray-300">Select Sizes</label>
-                        <div className="flex gap-3 text-[10px]">
+                        <div className="flex items-center gap-2.5">
+                          <img src="/measuring-tape 1.png" alt="Select Sizes" className="w-6 h-6 object-contain flex-shrink-0" />
+                          <label className="text-sm sm:text-base font-bold font-clash text-white">Select Sizes</label>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs">
                           <button
                             onClick={() => setSelectedSizes(uniqueSizes)}
-                            className="text-[#FF6D1F] hover:underline"
+                            className="text-[#FF6D1F] hover:underline cursor-pointer font-medium"
                           >
                             Select All
                           </button>
                           <span className="text-gray-600">|</span>
                           <button
                             onClick={() => setSelectedSizes([])}
-                            className="text-gray-400 hover:underline"
+                            className="text-gray-400 hover:underline cursor-pointer font-medium"
                           >
                             Clear Selection
                           </button>
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-2.5">
+                      <div className="flex flex-wrap gap-3 pt-1">
                         {uniqueSizes.map((size: string) => {
                           const isSelected = selectedSizes.includes(size);
+                          const formatSizeLabel = (s: string) => {
+                            const lower = s.toLowerCase().trim();
+                            if (lower === "s") return "Small";
+                            if (lower === "m") return "Medium";
+                            if (lower === "l") return "Large";
+                            if (lower === "xl") return "X-Large";
+                            if (lower === "2xl" || lower === "xxl") return "2X-Large";
+                            if (lower === "3xl" || lower === "xxxl") return "3X-Large";
+                            return s;
+                          };
 
                           return (
                             <button
@@ -2583,15 +2543,15 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                   setSelectedSizes([...selectedSizes, size]);
                                 }
                               }}
-                              className={`border-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-2 cursor-pointer ${isSelected
-                                ? "border-[#FF6D1F] bg-[#FF6D1F]/10 text-white font-bold"
-                                : "border-white/10 bg-white/5 text-gray-300 hover:border-white/35"
+                              className={`relative border-2 rounded-full px-5 py-2 min-w-[85px] text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center cursor-pointer bg-black/80 ${isSelected
+                                ? "border-white text-white shadow-sm"
+                                : "border-white/20 text-gray-300 hover:border-white/50"
                                 }`}
                             >
-                              <span>{size}</span>
+                              <span>{formatSizeLabel(size)}</span>
                               {isSelected && (
-                                <span className="bg-white/90 p-0.5 rounded-full flex-shrink-0">
-                                  <Check className="w-3 h-3 text-black" />
+                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#FF6D1F] rounded-full flex items-center justify-center text-white shadow-sm ring-2 ring-[#0B132B] pointer-events-none">
+                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
                                 </span>
                               )}
                             </button>
@@ -2643,9 +2603,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       goToStep(2);
                     }
                   }}
-                  className="w-full sm:w-auto bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-black font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>Next: Add Artwork (Step 2)</span>
+                  <span>Next Page</span>
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -2653,102 +2613,112 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           )}
 
           {/* ═══════════════════════════════════════════════════════════════
-              STEP 2: ARTWORK & POSITION - VIBRANT ORANGE THEME
+              STEP 2: ARTWORK & POSITION (FIGMA DESIGN)
              ═══════════════════════════════════════════════════════════════ */}
           {(activeStep === 2 || viewMode === "all") && (
-            <div className="space-y-5 animate-fadeIn">
-              {/* Step 2 Header Banner */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-orange-500/15 via-[#FF6D1F]/10 to-transparent border border-[#FF6D1F]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#FF6D1F] text-white font-black text-lg flex items-center justify-center shadow-lg shadow-orange-500/25 flex-shrink-0">
-                    2
+            <div className="space-y-6 animate-fadeIn">
+              {/* Step 2 Typography Header (Figma Design) */}
+              <div className="space-y-1 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#FF6D1F]">
+                  Step 02 to 04
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-extrabold font-clash text-white">
+                  Choose Product Variants
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-400">
+                  Select the product options you want to offer in your store.
+                </p>
+              </div>
+
+              {/* Base Catalog Item Card */}
+              <div className="p-5 sm:p-6 bg-gray-900/60 rounded-3xl border border-white/10 shadow-lg">
+                <div className="flex flex-col sm:flex-row gap-5 items-start">
+                  <div className="w-full sm:w-[150px] aspect-square relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
+                    {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
+                      <img
+                        src={selectedProduct?.image || selectedProduct?.images?.[0]}
+                        alt={selectedProduct?.title}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <ShoppingBag className="w-12 h-12 text-gray-600" />
+                    )}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-orange-400">Step 2 of 4</span>
-                      <span className="text-xs text-gray-500">•</span>
-                      <span className="text-xs text-gray-400">Artwork & Placement</span>
+
+                  <div className="flex-1 space-y-2">
+                    <span className="inline-block bg-[#342318] text-[#FF6D1F] border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                      {isEditing ? "Editing Product" : "Base Catalog Item"}
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
+                      {selectedProduct?.title || selectedProduct?.name}
+                    </h2>
+                    <div className="space-y-1 pt-1">
+                      {(() => {
+                        const fullDesc = cleanDescription(selectedProduct?.description) || "High-quality custom creator merchandise product. Select colors and sizes, add designs on print areas, and preview your premium storefront ready mockup.";
+                        const isLongText = fullDesc.length > 120;
+
+                        return (
+                          <>
+                            <p
+                              className={`text-xs sm:text-sm text-gray-300 font-medium leading-relaxed break-words ${!isDescExpanded && isLongText ? "line-clamp-3" : ""
+                                }`}
+                              title={fullDesc}
+                            >
+                              {fullDesc}
+                            </p>
+                            {isLongText && (
+                              <button
+                                type="button"
+                                onClick={() => setIsDescExpanded(!isDescExpanded)}
+                                className="text-xs font-semibold text-[#FF6D1F] hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
+                              >
+                                {isDescExpanded ? (
+                                  <>
+                                    <span>Show Less</span>
+                                    <ChevronUp className="w-3.5 h-3.5" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>Read More</span>
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold font-clash text-white">Upload & Position Your Design</h3>
+                    <div className="flex flex-wrap gap-5 pt-2 text-xs text-gray-400">
+                      <div><span className="text-[#FF6D1F] font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
+                      <div><span className="text-[#FF6D1F] font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-xs font-bold text-orange-300 self-start sm:self-auto">
-                  <Upload className="w-4 h-4 text-orange-400" />
-                  <span>{designFiles.length} Placed Area(s)</span>
                 </div>
               </div>
 
-              {/* ✅ HOW IT WORKS - 3-Step Mini Guide */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                {[
-                  { num: "1", icon: <UploadCloud className="w-4 h-4" />, title: "Upload", desc: "Add your artwork file", color: "text-orange-400 bg-orange-500/10 border-orange-500/30" },
-                  { num: "2", icon: <Plus className="w-4 h-4" />, title: "Click to Place", desc: "Click any artwork below", color: "text-amber-400 bg-amber-500/10 border-amber-500/30" },
-                  { num: "3", icon: <Eye className="w-4 h-4" />, title: "Adjust & Preview", desc: "Drag to resize & move", color: "text-green-400 bg-green-500/10 border-green-500/30" },
-                ].map((step, i) => (
-                  <div key={i} className={`flex flex-col items-center text-center gap-2 p-3 rounded-2xl border ${step.color} backdrop-blur-sm`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${step.color}`}>
-                      {step.icon}
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white">{step.title}</div>
-                      <div className="text-[10px] text-gray-400 leading-tight mt-0.5">{step.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {/* Upload & Position Your Design Card (Figma Design) */}
+              <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6">
+                <h3 className="text-xl font-bold font-clash text-white">
+                  Upload & Position Your Design
+                </h3>
 
-              {/* ✅ PLACEMENT SELECTOR */}
-              <div className="p-4 bg-gray-900/60 rounded-2xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold uppercase tracking-wider text-orange-400 block">Print Side</span>
-                  <p className="text-[11px] text-gray-400">Which side to customize?</p>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {getSupportedPlacements().map((placement) => {
-                    const isActive = activePlacement === placement;
-                    const hasAssigned = designFiles.find((d) => d.placement === placement);
-                    return (
-                      <button
-                        key={placement}
-                        type="button"
-                        onClick={() => setActivePlacement(placement)}
-                        className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${isActive
-                          ? "bg-[#FF6D1F] text-white shadow-lg shadow-orange-500/30 ring-2 ring-orange-400/50"
-                          : hasAssigned
-                            ? "bg-orange-500/10 text-orange-300 border border-orange-500/30 hover:border-orange-500/60"
-                            : "bg-black/50 text-gray-400 border border-white/10 hover:border-white/30 hover:text-white"
-                          }`}
-                      >
-                        <span className="capitalize">{getPlacementLabel(placement)}</span>
-                        {hasAssigned && (
-                          <span className="w-2 h-2 rounded-full bg-green-400 ring-2 ring-green-400/30 flex-shrink-0" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                {/* Choose Artwork */}
+                <div className="space-y-3">
+                  <label className="text-xs sm:text-sm font-semibold text-gray-300 block">
+                    Choose Artwork
+                  </label>
 
-              {/* ✅ MAIN DESIGN STUDIO: Left controls + Right live canvas SIDE BY SIDE */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-
-                {/* LEFT: Artwork Picker + Controls */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-orange-400">Choose Artwork</span>
-                    <span className="text-[11px] text-gray-400">Click any image to place it ↓</span>
-                  </div>
-
-                  {/* Upload Dropzone */}
+                  {/* Upload Dropzone (Brown tint with dashed orange border) */}
                   <div
                     id="field-artwork"
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 scroll-mt-28 ${isDragging
-                      ? "border-[#FF6D1F] bg-[#FF6D1F]/15 scale-[1.01]"
-                      : "border-orange-500/30 bg-orange-500/5 hover:border-orange-500 hover:bg-orange-500/10"
+                    className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 cursor-pointer transition-all duration-300 scroll-mt-28 flex items-center gap-4 ${isDragging
+                      ? "border-[#FF6D1F] bg-[#FF6D1F]/20 scale-[1.01]"
+                      : "border-[#8E5B37] bg-[#241A14] hover:bg-[#2C1F18]"
                       }`}
                   >
                     <input
@@ -2759,65 +2729,33 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       onChange={handleFileChange}
                       className="hidden"
                     />
-                    {uploadingFile ? (
-                      <div className="flex items-center justify-center gap-2 py-2">
-                        <Loader2 className="w-5 h-5 text-[#FF6D1F] animate-spin" />
-                        <span className="text-xs font-bold text-white">Uploading artwork...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-3 py-1">
-                        <div className="p-2.5 bg-[#FF6D1F]/20 border border-[#FF6D1F]/30 rounded-xl text-[#FF6D1F]">
-                          <Upload className="w-5 h-5" />
-                        </div>
-                        <div className="text-left">
-                          <p className="text-xs font-bold text-white">Upload New Artwork</p>
-                          <p className="text-[10px] text-gray-400">PNG, SVG, JPG · Transparent PNG recommended</p>
-                        </div>
+                    <div className="w-12 h-12 rounded-xl bg-[#FF6D1F]/20 border border-[#FF6D1F]/30 flex items-center justify-center text-[#FF6D1F] flex-shrink-0">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-xs sm:text-sm font-bold text-white">Upload New Artwork</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">PNG, SVG, JPG. Transparent PNG recommended</p>
+                    </div>
+                    {uploadingFile && (
+                      <div className="flex items-center gap-2 text-xs font-bold text-orange-400 flex-shrink-0">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#FF6D1F]" />
+                        <span>Uploading...</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Uploaded Designs Library */}
-                  <div className="bg-black/40 border border-white/5 p-3.5 rounded-2xl space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-gray-300">Your Artwork Library</span>
-                      {totalPages > 1 && (
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => onRefreshFiles(currentPage - 1)}
-                            disabled={currentPage <= 1 || isFetchingFiles}
-                            className="p-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-40 cursor-pointer"
-                          >
-                            <ChevronLeft className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="text-[10px] text-gray-400 font-mono">
-                            {currentPage}/{totalPages}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => onRefreshFiles(currentPage + 1)}
-                            disabled={currentPage >= totalPages || isFetchingFiles}
-                            className="p-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-40 cursor-pointer"
-                          >
-                            <ChevronRight className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {isFetchingFiles ? (
-                      <div className="py-8 text-center text-xs text-gray-400 flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-orange-400" />
-                        <span>Loading artwork...</span>
+                  {/* Artwork Library */}
+                  {uploadedFiles.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        <span>Your Artwork Library ({uploadedFiles.length})</span>
+                        <span className="text-[11px] text-[#FF6D1F]">Click to place on product</span>
                       </div>
-                    ) : uploadedFiles.length > 0 ? (
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-[200px] overflow-y-auto pr-1">
+                      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5 max-h-[140px] overflow-y-auto pr-1">
                         {uploadedFiles.map((file) => {
                           const hasAssigned = designFiles.find(
                             (d) => d.placement === activePlacement && (d.file_id === file.id || d.url === (file.file_url || file.preview_url || file.thumbnail_url))
                           );
-
                           return (
                             <div
                               key={file.id}
@@ -2826,7 +2764,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                 ? "border-[#FF6D1F] ring-2 ring-orange-500/40 shadow-md shadow-orange-500/20"
                                 : "border-white/10 hover:border-orange-500/50 hover:scale-[1.02]"
                                 }`}
-                              title="Click to place on shirt"
+                              title="Click to place on product"
                             >
                               <img
                                 src={file.thumbnail_url || file.file_url || file.preview_url}
@@ -2846,107 +2784,157 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           );
                         })}
                       </div>
-                    ) : (
-                      <p className="text-xs text-gray-500 py-6 text-center">
-                        No artwork uploaded yet. Upload one above!
-                      </p>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Alignment & Helper Controls (When a design is placed) */}
+                {/* Print side */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <label className="text-xs sm:text-sm font-semibold text-gray-300">Print side</label>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {getSupportedPlacements().map((placement) => {
+                        const isActive = activePlacement === placement;
+                        const hasAssigned = designFiles.find((d) => d.placement === placement);
+                        return (
+                          <button
+                            key={placement}
+                            type="button"
+                            onClick={() => setActivePlacement(placement)}
+                            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${isActive
+                              ? "bg-[#FF6D1F] text-white shadow-md shadow-orange-500/30"
+                              : hasAssigned
+                                ? "bg-orange-500/10 text-orange-300 border border-orange-500/30 hover:border-orange-500/60"
+                                : "bg-black/60 border border-white/20 text-gray-300 hover:border-white/40 hover:text-white"
+                              }`}
+                          >
+                            <span className="capitalize">{getPlacementLabel(placement)}</span>
+                            {hasAssigned && (
+                              <span className="w-2 h-2 rounded-full bg-green-400 ring-2 ring-green-400/30 flex-shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4 Mockup Preview Cards Grid (Figma Design) */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-2">
                   {(() => {
-                    const hasAssigned = designFiles.find((d) => d.placement === activePlacement);
-                    if (!hasAssigned) {
+                    const mockups = getEffectiveMockups();
+                    const cardsToDisplay = mockups.length >= 4 
+                      ? mockups.slice(0, 4) 
+                      : [
+                          ...mockups,
+                          ...Array(Math.max(0, 4 - mockups.length)).fill(mockups[0] || { url: selectedProduct?.image })
+                        ].slice(0, 4);
+
+                    return cardsToDisplay.map((mockup: any, idx: number) => {
+                      const isMockupActive = activePlacement === mockup?.placement || (idx === 0 && !mockup?.placement);
+
                       return (
-                        <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/20 text-xs text-orange-300 flex items-center gap-2">
-                          <Info className="w-4 h-4 text-orange-400 flex-shrink-0" />
-                          <span>👆 Click any artwork above to place it on the {getPlacementLabel(activePlacement)}. You can see it appear on the shirt preview instantly!</span>
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            if (mockup?.placement && getSupportedPlacements().includes(mockup.placement)) {
+                              setActivePlacement(mockup.placement);
+                            }
+                          }}
+                          className={`aspect-[4/5] rounded-2xl overflow-hidden border-2 bg-white/5 p-2 flex flex-col items-center justify-center transition-all cursor-pointer relative group ${isMockupActive
+                            ? "border-[#FF6D1F] ring-2 ring-orange-500/30 shadow-lg shadow-orange-500/10 bg-white/10"
+                            : "border-white/10 hover:border-white/30"
+                            }`}
+                        >
+                          <div className="w-full h-full relative flex items-center justify-center">
+                            {mockup?.url || mockup?.src ? (
+                              <img
+                                src={mockup.url || mockup.src}
+                                alt={mockup.title || `View ${idx + 1}`}
+                                className="w-full h-full object-contain pointer-events-none"
+                              />
+                            ) : (
+                              <ShoppingBag className="w-8 h-8 text-gray-600" />
+                            )}
+                          </div>
+                          {mockup?.title && (
+                            <span className="text-[10px] text-gray-400 mt-1 truncate max-w-full text-center">
+                              {mockup.title}
+                            </span>
+                          )}
                         </div>
                       );
-                    }
-
-                    return (
-                      <div className="p-3.5 bg-black/50 border border-green-500/20 rounded-2xl space-y-2.5">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-green-400 flex items-center gap-1.5">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            Design placed on {getPlacementLabel(activePlacement)} ✓
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveDesign(activePlacement)}
-                            className="text-xs text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 cursor-pointer"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                            <span>Remove</span>
-                          </button>
-                        </div>
-
-                        <div className="text-[10px] text-gray-400 mb-1">Quick Alignment:</div>
-                        <div className="grid grid-cols-3 gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleCenterDesign("center")}
-                            className="px-2 py-1.5 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-xs font-semibold text-gray-200 transition-colors cursor-pointer text-center"
-                          >
-                            Center
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleCenterDesign("top-center")}
-                            className="px-2 py-1.5 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-xs font-semibold text-gray-200 transition-colors cursor-pointer text-center"
-                          >
-                            Top
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleCenterDesign("bottom-center")}
-                            className="px-2 py-1.5 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-xs font-semibold text-gray-200 transition-colors cursor-pointer text-center"
-                          >
-                            Bottom
-                          </button>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={handleRemoveDesignBackground}
-                          disabled={!selectedDesignFile || isRemovingBackground}
-                          className="w-full px-3 py-1.5 bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 hover:border-orange-500/60 rounded-xl text-xs font-bold text-orange-300 hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Sparkles className="w-3.5 h-3.5 text-orange-400" />
-                          <span>{isRemovingBackground ? "Removing Background..." : "✨ AI Remove Background"}</span>
-                        </button>
-                      </div>
-                    );
+                    });
                   })()}
                 </div>
 
-                {/* RIGHT: Live Canvas Preview (always visible) */}
-                <div className="space-y-2 w-full min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-orange-400">Live Preview</span>
-                    <span className="text-[11px] text-gray-400">Drag to resize · Click to select</span>
-                  </div>
-
-                  <div className="bg-black/90 rounded-3xl border border-white/10 flex flex-col items-center justify-center min-h-[420px] relative w-full">
-                    {/* Active Placement Badge */}
-                    <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-white bg-black/70 border border-white/10 px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md">
-                        {getPlacementLabel(activePlacement)}
+                {/* Interactive Design Studio & Alignment Tools */}
+                <div className="space-y-3 pt-3 border-t border-white/5">
+                  <div className="flex flex-wrap items-center justify-between gap-2.5 p-3 bg-black/40 border border-white/10 rounded-2xl text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="text-orange-400 font-bold uppercase tracking-wider text-[11px]">
+                        Canvas Placement: {getPlacementLabel(activePlacement)}
                       </span>
                       {designFiles.some((d) => d.placement === activePlacement) ? (
-                        <span className="text-[10px] text-green-400 font-bold bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                        <span className="text-[10px] text-green-400 font-bold bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
                           <Check className="w-2.5 h-2.5" /> Design Active
                         </span>
                       ) : (
                         <span className="text-[10px] text-orange-400 font-bold bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
-                          Waiting for artwork
+                          Select artwork above
                         </span>
                       )}
                     </div>
+                    {designFiles.some((d) => d.placement === activePlacement) && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400 text-[11px]">Align:</span>
+                        <button
+                          type="button"
+                          onClick={() => handleCenterDesign("center")}
+                          className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 cursor-pointer"
+                        >
+                          Center
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCenterDesign("top-center")}
+                          className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 cursor-pointer"
+                        >
+                          Top
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCenterDesign("bottom-center")}
+                          className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 cursor-pointer"
+                        >
+                          Bottom
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemoveDesignBackground}
+                          disabled={!selectedDesignFile || isRemovingBackground}
+                          className="px-2.5 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 cursor-pointer disabled:opacity-50"
+                        >
+                          ✨ AI BG
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveDesign(activePlacement)}
+                          className="px-2 py-1 text-red-400 hover:text-red-300 text-xs cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
-                    {/* The Interactive Canvas */}
-                    <div className="w-full flex items-center justify-center pt-4">
+                  {/* Interactive Canvas */}
+                  <div className="bg-black/60 rounded-2xl border border-white/10 p-3 sm:p-4">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/5 text-xs text-gray-400">
+                      <span>Adjust & Resize Artwork</span>
+                      <span className="text-[11px] text-gray-500">Drag corners to resize · Move design anywhere on print area</span>
+                    </div>
+                    <div className="w-full flex items-center justify-center min-h-[340px]">
                       <DesignCanvasTab
                         designFiles={designFiles}
                         setDesignFiles={setDesignFiles}
@@ -2963,209 +2951,257 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         hidePlacementTabs={true}
                       />
                     </div>
-
-
-                    <div className="pt-3 text-[11px] text-gray-400 text-center">
-                      Drag corners to resize · Move design anywhere on the shirt
-                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Step 2 Navigation Footer */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => goToStep(1)}
-                  className="w-full sm:w-auto text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 font-semibold text-xs sm:text-sm px-4 py-3 rounded-xl border border-white/10 flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back: Step 1 (Variants)</span>
-                </button>
+                {/* Progress Divider Line (half orange) matching Figma */}
+                <div className="w-full h-[3px] bg-white/10 relative rounded-full overflow-hidden my-4">
+                  <div className="absolute left-0 top-0 h-full bg-[#FF6D1F] w-1/2" />
+                </div>
 
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (validateAndRedirect(2)) {
-                      goToStep(3);
-                    }
-                  }}
-                  className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-[#FF6D1F] hover:from-orange-400 hover:to-[#FF7A1A] text-white font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>Next: Title & Price (Step 3)</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+                {/* Step 2 Navigation Footer */}
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={() => goToStep(1)}
+                    className="px-5 py-2.5 rounded-xl border border-white/20 bg-black/40 hover:bg-white/10 text-white font-medium text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back</span>
+                  </button>
+
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (validateAndRedirect(2)) {
+                        goToStep(3);
+                      }
+                    }}
+                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>Next Page</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
 
           {/* ═══════════════════════════════════════════════════════════════
-              STEP 3: TITLE, STORY & PROFIT - EMERALD GREEN THEME
+              STEP 3: TITLE, STORY & PROFIT
+             ═══════════════════════════════════════════════════════════════ */}
+          {/* ═══════════════════════════════════════════════════════════════
+              STEP 3: TITLE, STORY & PROFIT (FIGMA DESIGN)
              ═══════════════════════════════════════════════════════════════ */}
           {(activeStep === 3 || viewMode === "all") && (
             <div className="space-y-6 animate-fadeIn">
-              {/* Step 3 Header Banner */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-transparent border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500 text-black font-black text-lg flex items-center justify-center shadow-lg shadow-emerald-500/25 flex-shrink-0">
-                    3
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Step 3 of 4</span>
-                      <span className="text-xs text-gray-500">•</span>
-                      <span className="text-xs text-gray-400">Storefront & Pricing</span>
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold font-clash text-white">Title, Story & Creator Profit</h3>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-300 self-start sm:self-auto">
-                  <DollarSign className="w-4 h-4 text-emerald-400" />
-                  <span>Profit: {creatorMarkup}%</span>
-                </div>
+              {/* Step 3 Typography Header (Figma Design) */}
+              <div className="space-y-1 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#FF6D1F]">
+                  Step 03 to 04
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-extrabold font-clash text-white">
+                  Choose Product Variants
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-400">
+                  Select the product options you want to offer in your store.
+                </p>
               </div>
 
-              {/* Section 6: Storefront Details Form */}
-              {/* Section 6: Storefront Details Form */}
-              <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6">
-                <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("listing")}>
-                  <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
-                    <FileText className="w-5 h-5 text-[#FF6D1F]" />
-                    Storefront Listing Details
-                  </h3>
-                  {openAccordions.listing ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                </div>
-
-                {openAccordions.listing && (
-                  <div className="space-y-5 pt-3 animate-fadeIn">
-                    {/* Storefront Name */}
-                    <div id="field-product-name" className="space-y-2 scroll-mt-28 transition-all">
-                      <label className="block text-xs sm:text-sm font-semibold text-gray-300">
-                        Product Title *
-                      </label>
-                      <input
-                        id="input-product-name"
-                        type="text"
-                        value={productForm.name}
-                        onChange={(e) => handleInputChange("name", e.target.value)}
-                        placeholder="E.g., Limited Edition Neon Horizon Oversized Hoodie"
-                        className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${formErrors.name ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
-                          }`}
+              {/* Base Catalog Item Card (Figma Design) */}
+              <div className="p-5 sm:p-6 bg-gray-900/60 rounded-3xl border border-white/10 shadow-lg">
+                <div className="flex flex-col sm:flex-row gap-5 items-start">
+                  <div className="w-full sm:w-[150px] aspect-square relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
+                    {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
+                      <img
+                        src={selectedProduct?.image || selectedProduct?.images?.[0]}
+                        alt={selectedProduct?.title}
+                        className="w-full h-full object-contain"
                       />
-                      {formErrors.name && <p className="text-xs text-red-400 mt-1">{formErrors.name}</p>}
-                    </div>
+                    ) : (
+                      <ShoppingBag className="w-12 h-12 text-gray-600" />
+                    )}
+                  </div>
 
-                    {/* Description */}
-                    <div id="field-product-description" className="space-y-2 scroll-mt-28 transition-all">
-                      <label className="block text-xs sm:text-sm font-semibold text-gray-300">
-                        Product Description *
-                      </label>
-                      <textarea
-                        id="input-product-description"
-                        data-lenis-prevent
-                        value={productForm.description}
-                        onChange={(e) => handleInputChange("description", e.target.value)}
-                        onWheel={(e) => e.stopPropagation()}
-                        rows={4}
-                        placeholder="Describe your design and brand story... Must be at least 20 characters."
-                        className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all overflow-y-auto resize-y min-h-[110px] max-h-[300px] ${formErrors.description ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
-                          }`}
-                      />
-                      {formErrors.description ? (
-                        <p className="text-xs text-red-400 mt-1">{formErrors.description}</p>
-                      ) : (
-                        <p className="text-[10px] text-gray-500">
-                          {productForm.description.trim().length} / 500 minimum character check
-                        </p>
-                      )}
-                    </div>
+                  <div className="flex-1 space-y-2">
+                    <span className="inline-block bg-[#342318] text-[#FF6D1F] border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                      {isEditing ? "Editing Product" : "Base Catalog Item"}
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
+                      {selectedProduct?.title || selectedProduct?.name}
+                    </h2>
+                    <div className="space-y-1 pt-1">
+                      {(() => {
+                        const fullDesc = cleanDescription(selectedProduct?.description) || "High-quality custom creator merchandise product. Select colors and sizes, add designs on print areas, and preview your premium storefront ready mockup.";
+                        const isLongText = fullDesc.length > 120;
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Category */}
-                      <div id="field-product-category" className="space-y-2 scroll-mt-28 transition-all">
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-300">
-                          Marketplace Category *
-                        </label>
-                        <Select
-                          value={productForm.category || "placeholder"}
-                          onValueChange={(val) => handleInputChange("category", val)}
-                        >
-                          <SelectTrigger id="input-product-category" className={`w-full h-[46px] px-4 bg-black/60 rounded-xl text-sm text-white ${formErrors.category ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"}`}>
-                            <SelectValue key={productForm.category || "placeholder"} placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="placeholder" disabled>Select category</SelectItem>
-                            {CATEGORIES_MAP.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.title}>
-                                {cat.title}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {formErrors.category && <p className="text-xs text-red-400 mt-1">{formErrors.category}</p>}
-                      </div>
-
-                      {/* Required Tag Selector */}
-                      <div id="field-product-tags" className="space-y-2 scroll-mt-28 transition-all">
-                        <label className="block text-xs sm:text-sm font-semibold text-gray-300">
-                          Select Tag <span className="text-red-400">*</span>
-                        </label>
-                        <div className={`grid grid-cols-3 gap-2 ${formErrors.tags ? "p-1 rounded-xl border border-red-500 bg-red-500/10 ring-1 ring-red-500" : ""}`}>
-                          {[
-                            { id: "Trending", label: "Trending", icon: "📈", color: "border-purple-500/50 bg-purple-500/10 text-purple-300" },
-                            { id: "New", label: "New", icon: "✨", color: "border-blue-500/50 bg-blue-500/10 text-blue-300" },
-                            { id: "Popular", label: "Popular", icon: "🔥", color: "border-red-500/50 bg-red-500/10 text-red-300" },
-                          ].map((tagItem) => {
-                            const isSelected = productForm.tags && productForm.tags.includes(tagItem.id);
-                            return (
+                        return (
+                          <>
+                            <p
+                              className={`text-xs sm:text-sm text-gray-300 font-medium leading-relaxed break-words ${!isDescExpanded && isLongText ? "line-clamp-3" : ""
+                                }`}
+                              title={fullDesc}
+                            >
+                              {fullDesc}
+                            </p>
+                            {isLongText && (
                               <button
-                                key={tagItem.id}
                                 type="button"
-                                onClick={() => {
-                                  handleInputChange("tags", [tagItem.id]);
-                                  if (formErrors.tags) {
-                                    setFormErrors((prev) => ({ ...prev, tags: "" }));
-                                  }
-                                }}
-                                className={`py-3 px-3 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${isSelected
-                                  ? `${tagItem.color} ring-2 ring-orange-500/50 shadow-lg scale-[1.02]`
-                                  : "bg-black/60 border-white/10 text-gray-400 hover:border-white/30 hover:text-white"
-                                  }`}
+                                onClick={() => setIsDescExpanded(!isDescExpanded)}
+                                className="text-xs font-semibold text-[#FF6D1F] hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
                               >
-                                <span>{tagItem.icon}</span>
-                                <span>{tagItem.label}</span>
+                                {isDescExpanded ? (
+                                  <>
+                                    <span>Show Less</span>
+                                    <ChevronUp className="w-3.5 h-3.5" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>Read More</span>
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                  </>
+                                )}
                               </button>
-                            );
-                          })}
-                        </div>
-                        {formErrors.tags && <p className="text-xs text-red-400 mt-1">{formErrors.tags}</p>}
-                      </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+                    <div className="flex flex-wrap gap-5 pt-2 text-xs text-gray-400">
+                      <div><span className="text-[#FF6D1F] font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
+                      <div><span className="text-[#FF6D1F] font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
-              {/* In-Step Creator Markup & Profit Calculator */}
-              <div className="p-5 sm:p-6 bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-emerald-500/30 space-y-5">
+              {/* Card 1: Title,Story & Creator Profit (Figma Design) */}
+              <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-5">
+                <h3 className="text-xl font-bold font-clash text-white">
+                  Title,Story & Creator Profit
+                </h3>
+
+                {/* Product Title */}
+                <div id="field-product-name" className="space-y-2 scroll-mt-28 transition-all">
+                  <label className="block text-xs sm:text-sm font-semibold text-gray-300">
+                    Product Title <span className="text-[#FF6D1F]">*</span>
+                  </label>
+                  <input
+                    id="input-product-name"
+                    type="text"
+                    value={productForm.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    placeholder="Custom Suitcase"
+                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${formErrors.name ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
+                      }`}
+                  />
+                  {formErrors.name && <p className="text-xs text-red-400 mt-1">{formErrors.name}</p>}
+                </div>
+
+                {/* Product Description */}
+                <div id="field-product-description" className="space-y-2 scroll-mt-28 transition-all">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-300">
+                      Product Description <span className="text-[#FF6D1F]">*</span>
+                    </label>
+                    <span className="text-[11px] text-gray-500">
+                      {productForm.description ? cleanDescription(productForm.description).length : 0}/1500 Minium Character Check
+                    </span>
+                  </div>
+                  <textarea
+                    id="input-product-description"
+                    data-lenis-prevent
+                    rows={4}
+                    value={cleanDescription(productForm.description)}
+                    onChange={(e) => handleInputChange("description", e.target.value)}
+                    onWheel={(e) => e.stopPropagation()}
+                    placeholder="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966 dummy text of the printing and typesetting industry Lorem Ipsum has been the industry's...."
+                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all overflow-y-auto resize-y min-h-[110px] max-h-[300px] ${formErrors.description ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
+                      }`}
+                  />
+                  {formErrors.description && <p className="text-xs text-red-400 mt-1">{formErrors.description}</p>}
+                </div>
+
+                {/* Marketplace Category & Select Tag Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                  {/* Category */}
+                  <div id="field-product-category" className="space-y-2 scroll-mt-28 transition-all">
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-300">
+                      Marketplace category <span className="text-[#FF6D1F]">*</span>
+                    </label>
+                    <Select
+                      value={productForm.category || "placeholder"}
+                      onValueChange={(val) => handleInputChange("category", val)}
+                    >
+                      <SelectTrigger id="input-product-category" className={`w-full h-[46px] px-4 bg-black/60 rounded-xl text-sm text-white ${formErrors.category ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"}`}>
+                        <SelectValue key={productForm.category || "placeholder"} placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="placeholder" disabled>Select category</SelectItem>
+                        {CATEGORIES_MAP.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.title}>
+                            {cat.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {formErrors.category && <p className="text-xs text-red-400 mt-1">{formErrors.category}</p>}
+                  </div>
+
+                  {/* Select Tag */}
+                  <div id="field-product-tags" className="space-y-2 scroll-mt-28 transition-all">
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-300">
+                      Select tag <span className="text-[#FF6D1F]">*</span>
+                    </label>
+                    <div className="flex items-center gap-2 pt-0.5">
+                      {["Trending", "New", "Popular"].map((tagName) => {
+                        const isSelected = productForm.tags && productForm.tags.includes(tagName);
+                        return (
+                          <button
+                            key={tagName}
+                            type="button"
+                            onClick={() => {
+                              handleInputChange("tags", [tagName]);
+                              if (formErrors.tags) {
+                                setFormErrors((prev) => ({ ...prev, tags: "" }));
+                              }
+                            }}
+                            className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isSelected
+                              ? "bg-[#FF6D1F] text-white shadow-md shadow-orange-500/25 font-bold"
+                              : "bg-[#141B26] border border-white/20 text-gray-300 hover:text-white hover:border-white/40"
+                              }`}
+                          >
+                            {tagName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {formErrors.tags && <p className="text-xs text-red-400 mt-1">{formErrors.tags}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Your Creator Profit Markup (Figma Design) */}
+              <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                      <Percent className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-base font-bold text-white">Your Creator Profit Markup</h4>
-                      <p className="text-xs text-gray-400">Slide to choose how much profit you earn on each sale</p>
-                    </div>
+                  <div>
+                    <h3 className="text-xl font-bold font-clash text-white">
+                      Your Creator Profit Markup
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      slide to Choose how much profit you earn on each sale
+                    </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-2xl sm:text-3xl font-black text-emerald-400 tabular-nums">
+                    <span className="text-3xl font-extrabold text-[#FF6D1F] tabular-nums block">
                       {creatorMarkup}%
                     </span>
-                    <span className="text-[10px] text-gray-500 block">Your Margin</span>
+                    <span className="text-[11px] text-gray-400 block">Your Margin</span>
                   </div>
                 </div>
 
-                <div className="px-2">
+                {/* Slider */}
+                <div className="px-1 py-2">
                   <Slider
                     value={creatorMarkup}
                     min={0}
@@ -3176,504 +3212,300 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   />
                 </div>
 
-                <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-xs font-semibold text-gray-400 mr-2">Quick Presets:</span>
-                  {CREATOR_MARKUP_PRESETS.map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => handleCreatorPresetClick(preset)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${creatorMarkup === preset
-                        ? "bg-emerald-500 text-black border-emerald-400 shadow-md shadow-emerald-500/20"
-                        : "bg-black/60 text-gray-400 border-white/10 hover:border-emerald-500/40 hover:text-white"
-                        }`}
-                    >
-                      {preset}%
-                    </button>
-                  ))}
+                {/* Quick Presets */}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="text-xs font-semibold text-gray-400 mr-1">Quick Presets:</span>
+                  {CREATOR_MARKUP_PRESETS.map((preset) => {
+                    const isSelected = creatorMarkup === preset;
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => handleCreatorPresetClick(preset)}
+                        className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${isSelected
+                          ? "bg-[#FF6D1F] text-white shadow-md shadow-orange-500/25 font-extrabold"
+                          : "bg-[#141B26] border border-white/20 text-gray-300 hover:text-white hover:border-white/40"
+                          }`}
+                      >
+                        {preset}%
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-3 border-t border-white/10">
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl">
-                    <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider block">Printify Premium</span>
-                    <span className="text-xs sm:text-sm font-bold text-emerald-300">
+                {/* 4 Summary Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                  {/* Card 1: Pricing Summary */}
+                  <div className="border border-emerald-500/30 bg-emerald-950/20 rounded-2xl p-3.5 space-y-1">
+                    <span className="text-xs text-emerald-400 font-medium block">Pricing Summary</span>
+                    <span className="text-sm sm:text-base font-bold text-emerald-300 block">
                       {hasPriceRange ? `$${pricingRange.min.toFixed(2)} - $${pricingRange.max.toFixed(2)}` : `$${pricingRange.min.toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="bg-black/40 border border-white/5 p-2.5 rounded-xl">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-wider block">Loka Base Cost</span>
-                    <span className="text-xs sm:text-sm font-bold text-gray-300">
+
+                  {/* Card 2: Base Cost */}
+                  <div className="border border-white/10 bg-black/40 rounded-2xl p-3.5 space-y-1">
+                    <span className="text-xs text-gray-400 font-medium block">Base Cost</span>
+                    <span className="text-sm sm:text-base font-bold text-white block">
                       {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} - $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl">
-                    <span className="text-[10px] text-emerald-400 uppercase tracking-wider block">Your Profit (+{creatorMarkup}%)</span>
-                    <span className="text-xs sm:text-sm font-bold text-emerald-400">
+
+                  {/* Card 3: Your Profit */}
+                  <div className="border border-emerald-500/30 bg-emerald-950/20 rounded-2xl p-3.5 space-y-1">
+                    <span className="text-xs text-emerald-400 font-medium block">Your Profit ({creatorMarkup}%)</span>
+                    <span className="text-sm sm:text-base font-bold text-emerald-300 block">
                       +{hasPriceRange
                         ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
                         : `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="bg-white/5 border border-white/10 p-2.5 rounded-xl">
-                    <span className="text-[10px] text-gray-400 uppercase tracking-wider block">Customer Retail Price</span>
-                    <span className="text-xs sm:text-sm font-extrabold text-white">
+
+                  {/* Card 4: Customer Retail Price */}
+                  <div className="border border-white/10 bg-black/40 rounded-2xl p-3.5 space-y-1">
+                    <span className="text-xs text-gray-400 font-medium block">Customer Retail Price</span>
+                    <span className="text-sm sm:text-base font-bold text-white block">
                       {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
                 </div>
-              </div>
 
-              {/* Step 3 Navigation Footer */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => goToStep(2)}
-                  className="w-full sm:w-auto text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 font-semibold text-xs sm:text-sm px-4 py-3 rounded-xl border border-white/10 flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back: Step 2 (Artwork)</span>
-                </button>
+                {/* Step 3 Navigation Buttons */}
+                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => goToStep(2)}
+                    className="px-5 py-2.5 rounded-xl border border-white/20 bg-transparent hover:bg-white/10 text-white font-medium text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back</span>
+                  </button>
 
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (validateAndRedirect(3)) {
-                      goToStep(4);
-                    }
-                  }}
-                  className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-extrabold text-sm px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>Next: Review & Launch (Step 4)</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      if (validateAndRedirect(3)) {
+                        goToStep(4);
+                      }
+                    }}
+                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>Next Page</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
 
           {/* ═══════════════════════════════════════════════════════════════
-              STEP 4: REVIEW & LAUNCH LIVE - ROYAL PURPLE THEME
+              STEP 4: REVIEW & LAUNCH LIVE
+             ═══════════════════════════════════════════════════════════════ */}
+          {/* ═══════════════════════════════════════════════════════════════
+              STEP 4: REVIEW & LAUNCH LIVE (FIGMA DESIGN)
              ═══════════════════════════════════════════════════════════════ */}
           {(activeStep === 4 || viewMode === "all") && (
             <div className="space-y-6 animate-fadeIn">
-              {/* Step 4 Header Banner */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-transparent border border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500 text-white font-black text-lg flex items-center justify-center shadow-lg shadow-purple-500/25 flex-shrink-0">
-                    4
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-purple-400">Step 4 of 4</span>
-                      <span className="text-xs text-gray-500">•</span>
-                      <span className="text-xs text-gray-400">Launch to Marketplace</span>
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold font-clash text-white">Review & Publish Live</h3>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs font-bold text-purple-300 self-start sm:self-auto">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  <span>{validationSummary.allValid ? "All Systems Go! 🚀" : "Review Checklist Below"}</span>
-                </div>
+              {/* Step 4 Typography Header (Figma Design) */}
+              <div className="space-y-1 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#FF6D1F]">
+                  Step 04
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-extrabold font-clash text-white">
+                  Choose Product Variants
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-400">
+                  Select the product options you want to offer in your store.
+                </p>
               </div>
 
-              {/* Quick Step Summary Cards with Instant Edit Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {/* Step 1 Recap */}
-                <div className="bg-black/40 border border-sky-500/20 rounded-2xl p-4 flex flex-col justify-between gap-3">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-sky-400" /> Step 1: Variants
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => goToStep(1)}
-                        className="text-xs font-bold text-sky-400 hover:text-sky-300 hover:underline cursor-pointer"
-                      >
-                        Edit
-                      </button>
-                    </div>
-                    <p className="text-xs text-gray-300 mt-2 font-medium">
-                      {selectedColors.length > 0 ? selectedColors.join(", ") : "No colors"}
-                    </p>
-                    <p className="text-[11px] text-gray-500 mt-0.5">
-                      {selectedSizes.length > 0 ? selectedSizes.join(", ") : "No sizes"}
-                    </p>
+              {/* Base Catalog Item Card (Figma Design) */}
+              <div className="p-5 sm:p-6 bg-gray-900/60 rounded-3xl border border-white/10 shadow-lg">
+                <div className="flex flex-col sm:flex-row gap-5 items-start">
+                  <div className="w-full sm:w-[150px] aspect-square relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
+                    {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
+                      <img
+                        src={selectedProduct?.image || selectedProduct?.images?.[0]}
+                        alt={selectedProduct?.title}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <ShoppingBag className="w-12 h-12 text-gray-600" />
+                    )}
                   </div>
-                </div>
 
-                {/* Step 2 Recap */}
-                <div className="bg-black/40 border border-orange-500/20 rounded-2xl p-4 flex flex-col justify-between gap-3">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-orange-400" /> Step 2: Artwork
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => goToStep(2)}
-                        className="text-xs font-bold text-orange-400 hover:text-orange-300 hover:underline cursor-pointer"
-                      >
-                        Edit
-                      </button>
-                    </div>
-                    <p className="text-xs text-gray-300 mt-2 font-medium">
-                      {designFiles.length} print area(s) configured
-                    </p>
-                    <p className="text-[11px] text-gray-500 mt-0.5">
-                      {mockupUrls.length > 0 ? `${mockupUrls.length} mockups generated` : "Outlines loaded"}
-                    </p>
-                  </div>
-                </div>
+                  <div className="flex-1 space-y-2">
+                    <span className="inline-block bg-[#342318] text-[#FF6D1F] border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                      {isEditing ? "Editing Product" : "Base Catalog Item"}
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
+                      {selectedProduct?.title || selectedProduct?.name}
+                    </h2>
+                    <div className="space-y-1 pt-1">
+                      {(() => {
+                        const fullDesc = cleanDescription(selectedProduct?.description) || "High-quality custom creator merchandise product. Select colors and sizes, add designs on print areas, and preview your premium storefront ready mockup.";
+                        const isLongText = fullDesc.length > 120;
 
-                {/* Step 3 Recap */}
-                <div className="bg-black/40 border border-emerald-500/20 rounded-2xl p-4 flex flex-col justify-between gap-3">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400" /> Step 3: Details & Price
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => goToStep(3)}
-                        className="text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer"
-                      >
-                        Edit
-                      </button>
+                        return (
+                          <>
+                            <p
+                              className={`text-xs sm:text-sm text-gray-300 font-medium leading-relaxed break-words ${!isDescExpanded && isLongText ? "line-clamp-3" : ""
+                                }`}
+                              title={fullDesc}
+                            >
+                              {fullDesc}
+                            </p>
+                            {isLongText && (
+                              <button
+                                type="button"
+                                onClick={() => setIsDescExpanded(!isDescExpanded)}
+                                className="text-xs font-semibold text-[#FF6D1F] hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
+                              >
+                                {isDescExpanded ? (
+                                  <>
+                                    <span>Show Less</span>
+                                    <ChevronUp className="w-3.5 h-3.5" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>Read More</span>
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
-                    <p className="text-xs text-gray-300 mt-2 font-medium truncate">
-                      {productForm.name || "Untitled Product"}
-                    </p>
-                    <p className="text-[11px] text-emerald-400 font-semibold mt-0.5">
-                      Retail: {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`} ({creatorMarkup}% Markup)
-                    </p>
+                    <div className="flex flex-wrap gap-5 pt-2 text-xs text-gray-400">
+                      <div><span className="text-[#FF6D1F] font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
+                      <div><span className="text-[#FF6D1F] font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Realistic Product Mockup Studio Card */}
-              <div id="field-mockup-studio" className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-5 scroll-mt-28 transition-all">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <h4 className="text-base font-bold text-white flex items-center gap-2 font-clash">
-                      <Sparkles className="w-5 h-5 text-[#FF6D1F]" />
-                      High-Quality Product Mockups
-                    </h4>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      Preview realistic 3D angles and choose your storefront cover photo.
-                    </p>
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={handleManualRegenerate}
-                    disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
-                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs py-2 px-4 rounded-xl cursor-pointer disabled:opacity-50"
-                  >
-                    {isGeneratingPreview ? "Generating..." : cooldown > 0 ? `Wait ${cooldown}s` : "Regenerate Previews"}
-                  </Button>
-                </div>
-
-                {mockupStatus && (
-                  <div className="bg-black/40 p-3 rounded-xl border border-white/5 flex items-center gap-2 text-xs text-gray-300">
-                    <Info className="w-4 h-4 text-[#FF6D1F] flex-shrink-0" />
-                    <span>{mockupStatus}</span>
-                  </div>
-                )}
-
-                {/* View Mode Bar */}
-                <div className="flex items-center justify-between bg-black/60 p-2 rounded-2xl border border-white/10">
-                  <div className="flex border border-white/10 rounded-xl p-1 bg-black/60">
-                    <button
-                      type="button"
-                      onClick={() => setMockupViewMode("360")}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${mockupViewMode === "360" ? "bg-[#FF6D1F] text-white" : "text-gray-400 hover:text-white"
-                        }`}
-                    >
-                      <RotateCw className="w-3.5 h-3.5" />
-                      <span>360° Spin View</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMockupViewMode("grid")}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${mockupViewMode === "grid" ? "bg-[#FF6D1F] text-white" : "text-gray-400 hover:text-white"
-                        }`}
-                    >
-                      <Palette className="w-3.5 h-3.5" />
-                      <span>Grid & Reorder</span>
-                    </button>
-                  </div>
-
-                  <Button
+              {/* Card 1: Review & Publish Live (Figma Design) */}
+              <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold font-clash text-white">
+                    Review & Publish Live
+                  </h3>
+                  <button
                     type="button"
                     onClick={() => customFileInputRef.current?.click()}
                     disabled={isUploadingCustomImage}
-                    className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl border border-white/10 cursor-pointer"
+                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_4px_16px_rgba(255,109,31,0.3)] transition-all cursor-pointer disabled:opacity-50"
                   >
-                    <UploadCloud className="w-3.5 h-3.5 mr-1" />
-                    <span>Upload Custom Photo</span>
-                  </Button>
+                    <span>Upload Image</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
 
-                {/* Mockup Display */}
-                {isGeneratingPreview ? (
-                  <div className="py-16 text-center space-y-3">
-                    <Loader2 className="w-8 h-8 text-[#FF6D1F] animate-spin mx-auto" />
-                    <p className="text-sm font-bold text-white">Rendering mockups...</p>
-                  </div>
-                ) : getEffectiveMockups().length > 0 ? (
-                  mockupViewMode === "360" ? (
-                    <div className="max-w-md mx-auto">
-                      <Product360Viewer
-                        mockupUrls={getEffectiveMockups()}
-                        images={selectedProduct?.images || []}
-                        defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
-                        productName={selectedProduct?.title || selectedProduct?.name}
-                        designFiles={designFiles}
-                        activePlacement={activePlacement}
-                        onPlacementChange={setActivePlacement}
-                        activeColorHex={activeColorHex}
-                        supportedPlacements={getSupportedPlacements()}
-                      />
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="text-xs text-orange-400 bg-orange-500/10 border border-orange-500/20 p-2.5 rounded-xl flex items-center gap-2">
-                        <Star className="w-4 h-4 text-orange-400 fill-orange-400 flex-shrink-0" />
-                        <span>Image <strong>#1 (★ COVER)</strong> is the primary storefront thumbnail. Drag cards or use buttons to reorder.</span>
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        {getEffectiveMockups().map((m: any, index: number) => {
-                          const isCover = index === 0;
-                          return (
-                            <div
-                              key={m.id || m.url || index}
-                              draggable
-                              onDragStart={(e) => handleImageDragStart(e, index)}
-                              onDragOver={(e) => handleImageDragOver(e, index)}
-                              onDrop={(e) => handleImageDrop(e, index)}
-                              onDragEnd={handleImageDragEnd}
-                              className={`border rounded-2xl overflow-hidden aspect-square p-2 bg-black/60 relative cursor-grab flex flex-col justify-between ${isCover ? "border-[#FF6D1F] ring-2 ring-orange-500/40 shadow-lg" : "border-white/10"
-                                }`}
-                            >
-                              <div className="flex items-center justify-between text-[10px]">
-                                {isCover ? (
-                                  <span className="bg-[#FF6D1F] text-white px-2 py-0.5 rounded-full font-bold">COVER ★</span>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSetAsCover(index)}
-                                    className="text-gray-400 hover:text-white bg-black/60 px-1.5 py-0.5 rounded cursor-pointer"
-                                  >
-                                    Set Cover
-                                  </button>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveImage(index)}
-                                  className="text-red-400 hover:text-red-300 p-1"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                              <img src={m.url} alt="Mockup" className="w-full h-28 object-contain my-auto" />
-                              <div className="flex items-center justify-between text-[10px] text-gray-400">
-                                <span className="truncate max-w-[100px]">{m.title || `View ${index + 1}`}</span>
-                                <GripVertical className="w-3 h-3" />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )
-                ) : (
-                  <div className="py-12 text-center text-xs text-gray-400">
-                    No mockups loaded yet. Click "Regenerate Previews" to fetch high-resolution mockups.
-                  </div>
-                )}
-              </div>
+                {/* Hidden Custom Image Upload input */}
+                <input
+                  ref={customFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCustomImageUpload}
+                />
 
-              {/* Section 7: Review & Validation Summary */}
-              <div id="field-checklist-review" className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6 scroll-mt-28 transition-all">
-                <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("review")}>
-                  <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
-                    <ScanEye className="w-5 h-5 text-[#FF6D1F]" />
-                    Customization Review Checklist
-                  </h3>
-                  {openAccordions.review ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                {/* Big Preview Showcase Frame (matching Figma neutral background) */}
+                <div className="bg-[#E5E2DA] rounded-2xl border border-white/10 p-4 sm:p-6 relative">
+                  <div className="w-full max-w-md mx-auto">
+                    <Product360Viewer
+                      mockupUrls={getEffectiveMockups()}
+                      images={selectedProduct?.images || []}
+                      defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
+                      productName={selectedProduct?.title || selectedProduct?.name}
+                      designFiles={designFiles}
+                      activePlacement={activePlacement}
+                      onPlacementChange={setActivePlacement}
+                      activeColorHex={activeColorHex}
+                      supportedPlacements={getSupportedPlacements()}
+                    />
+                  </div>
                 </div>
-
-                {openAccordions.review && (
-                  <div className="space-y-4 pt-3 text-xs sm:text-sm animate-fadeIn">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Step 1 Check */}
-                      <div
-                        onClick={() => {
-                          if (!validationSummary.variants) {
-                            scrollToFieldAndFocus("field-variants", {
-                              step: 1,
-                              accordion: "variants",
-                              errorMessage: "Please select at least 1 color and size variant",
-                            });
-                          }
-                        }}
-                        className={`flex items-center justify-between bg-black/40 border p-3 rounded-xl transition-all ${
-                          validationSummary.variants
-                            ? "border-white/5"
-                            : "border-red-500/40 hover:border-red-500 hover:bg-red-500/10 cursor-pointer group"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className={`p-1.5 rounded-full ${validationSummary.variants ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                            {validationSummary.variants ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                          </div>
-                          <div>
-                            <div className="font-bold">Variants Selected</div>
-                            <div className="text-[10px] text-gray-500">
-                              {selectedVariants.length} of {selectedProduct?.variants?.length || 0} variant IDs selected
-                            </div>
-                          </div>
-                        </div>
-                        {!validationSummary.variants && (
-                          <span className="text-xs font-semibold text-red-400 group-hover:underline flex items-center gap-1">
-                            Fix <ArrowRight className="w-3 h-3" />
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Step 2 Check */}
-                      <div
-                        onClick={() => {
-                          if (!validationSummary.designs) {
-                            scrollToFieldAndFocus("field-artwork", {
-                              step: 2,
-                              accordion: "design",
-                              errorMessage: "Please upload and place artwork on the canvas",
-                            });
-                          }
-                        }}
-                        className={`flex items-center justify-between bg-black/40 border p-3 rounded-xl transition-all ${
-                          validationSummary.designs
-                            ? "border-white/5"
-                            : "border-red-500/40 hover:border-red-500 hover:bg-red-500/10 cursor-pointer group"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className={`p-1.5 rounded-full ${validationSummary.designs ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                            {validationSummary.designs ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                          </div>
-                          <div>
-                            <div className="font-bold">Designs Placed</div>
-                            <div className="text-[10px] text-gray-500">
-                              {designFiles.length} print area assignment(s) configured
-                            </div>
-                          </div>
-                        </div>
-                        {!validationSummary.designs && (
-                          <span className="text-xs font-semibold text-red-400 group-hover:underline flex items-center gap-1">
-                            Fix <ArrowRight className="w-3 h-3" />
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2.5 bg-black/40 border border-white/5 p-3 rounded-xl">
-                        <div className={`p-1.5 rounded-full ${validationSummary.aspectRatio ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}`}>
-                          {validationSummary.aspectRatio ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                        </div>
-                        <div>
-                          <div className="font-bold">Aspect Ratio Status</div>
-                          <div className="text-[10px] text-gray-500">
-                            {validationSummary.aspectRatio ? "All placements pass backend validation" : `${aspectRatioIssues.length} aspect ratio warning(s) (non-blocking)`}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Mockups Check */}
-                      <div
-                        onClick={() => {
-                          if (!validationSummary.mockups) {
-                            scrollToFieldAndFocus("field-mockup-studio", {
-                              step: 4,
-                              accordion: "review",
-                              errorMessage: "Please generate realistic mockups before publishing",
-                            });
-                          }
-                        }}
-                        className={`flex items-center justify-between bg-black/40 border p-3 rounded-xl transition-all ${
-                          validationSummary.mockups
-                            ? "border-white/5"
-                            : "border-red-500/40 hover:border-red-500 hover:bg-red-500/10 cursor-pointer group"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className={`p-1.5 rounded-full ${validationSummary.mockups ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                            {validationSummary.mockups ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                          </div>
-                          <div>
-                            <div className="font-bold">Product Previews Ready</div>
-                            <div className="text-[10px] text-gray-500">
-                              {validationSummary.mockups
-                                ? (!selectedProduct?.printify_id ? "Vector outlines loaded" : `${mockupUrls.length} view mockups ready`)
-                                : "No mockups generated yet"}
-                            </div>
-                          </div>
-                        </div>
-                        {!validationSummary.mockups && (
-                          <span className="text-xs font-semibold text-red-400 group-hover:underline flex items-center gap-1">
-                            Generate <ArrowRight className="w-3 h-3" />
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Step 3 Metadata Check */}
-                      <div
-                        onClick={() => {
-                          if (!validationSummary.details) {
-                            validateAndRedirect(3);
-                          }
-                        }}
-                        className={`flex items-center justify-between bg-black/40 border p-3 rounded-xl md:col-span-2 transition-all ${
-                          validationSummary.details
-                            ? "border-white/5"
-                            : "border-red-500/40 hover:border-red-500 hover:bg-red-500/10 cursor-pointer group"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className={`p-1.5 rounded-full ${validationSummary.details ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                            {validationSummary.details ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                          </div>
-                          <div>
-                            <div className="font-bold">Storefront Metadata Complete</div>
-                            <div className="text-[10px] text-gray-500">
-                              {validationSummary.details ? "Product name and description complete" : "Title and Description (>=20 chars) are required"}
-                            </div>
-                          </div>
-                        </div>
-                        {!validationSummary.details && (
-                          <span className="text-xs font-semibold text-red-400 group-hover:underline flex items-center gap-1">
-                            Complete Now <ArrowRight className="w-3 h-3" />
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {validationSummary.allValid && (
-                      <div className="bg-green-500/10 border border-green-500/30 p-4 rounded-2xl flex items-start gap-3 mt-4">
-                        <Check className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <h4 className="font-bold text-green-400 text-sm">All Checks Passed Successfully!</h4>
-                          <p className="text-xs text-green-300/80 mt-1">
-                            Your custom product is fully configured and ready to be published live to the marketplace.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
 
-              {/* Big Launch Call To Action Card */}
-              <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-950/40 via-gray-900 to-black border border-purple-500/40 space-y-4 shadow-2xl">
+              {/* Card 2: Customization Review Checklist (Figma Design) */}
+              <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-4">
+                <h3 className="text-xl font-bold font-clash text-white">
+                  Customization Review Checklist
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                  {/* Item 1: Variants Selected */}
+                  <div className="bg-black/50 border border-white/10 rounded-2xl p-4 flex items-center gap-3.5">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-xs sm:text-sm text-white">Variants Selected</div>
+                      <div className="text-[11px] text-gray-400 mt-0.5">
+                        {selectedVariants.length > 0 ? `${selectedVariants.length} of ${selectedProduct?.variants?.length || selectedVariants.length} variant IDs selected` : "3 of 3 variant IDs selected"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Item 2: Design Placed */}
+                  <div className="bg-black/50 border border-white/10 rounded-2xl p-4 flex items-center gap-3.5">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-xs sm:text-sm text-white">Design Placed</div>
+                      <div className="text-[11px] text-gray-400 mt-0.5">
+                        {designFiles.length} print area assignment(s) configured
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Item 3: Aspect Ratio Status */}
+                  <div className="bg-black/50 border border-white/10 rounded-2xl p-4 flex items-center gap-3.5">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-xs sm:text-sm text-white">Aspect ratio Status</div>
+                      <div className="text-[11px] text-gray-400 mt-0.5">
+                        All placement pass backend validation
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Item 4: Product Previews Ready */}
+                  <div className="bg-black/50 border border-white/10 rounded-2xl p-4 flex items-center gap-3.5">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-xs sm:text-sm text-white">Product Previews Ready</div>
+                      <div className="text-[11px] text-gray-400 mt-0.5">
+                        Vector outlines loaded
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Item 5: Storefront Metadata Complete */}
+                  <div className="bg-black/50 border border-white/10 rounded-2xl p-4 flex items-center gap-3.5 sm:col-span-2">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-xs sm:text-sm text-white">Storefront Metadata Complete</div>
+                      <div className="text-[11px] text-gray-400 mt-0.5">
+                        Title and description (&gt;=20 chars) are required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Big Ready to Go Live Card (Figma Design) */}
+              <div className="p-6 rounded-3xl bg-gradient-to-br from-[#1C1229] via-[#0E1322] to-[#0A0D18] border border-purple-500/30 space-y-4 shadow-2xl">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-lg sm:text-xl font-bold font-clash text-white flex items-center gap-2">
@@ -3684,9 +3516,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       Publish your product directly to the Loka Creator Marketplace.
                     </p>
                   </div>
-                  <div className="text-right hidden sm:block">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-wider">Your Price</div>
-                    <div className="text-xl font-black text-white">
+                  <div className="text-right">
+                    <div className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">YOUR PRICE</div>
+                    <div className="text-xl sm:text-2xl font-black text-white">
                       {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
                     </div>
                   </div>
@@ -3695,7 +3527,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <Button
                   onClick={handlePublishSubmit}
                   disabled={isPublishing}
-                  className="w-full bg-gradient-to-r from-purple-600 via-[#FF6D1F] to-orange-500 hover:opacity-95 text-white font-extrabold text-base py-4 rounded-2xl transition-all shadow-[0_0_30px_rgba(255,109,31,0.35)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full bg-gradient-to-r from-purple-700 via-[#8A3816] to-[#A3430C] border border-orange-500/30 hover:opacity-95 text-white font-extrabold text-sm sm:text-base py-4 rounded-xl transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
                 >
                   {isPublishing ? (
                     <div className="flex items-center justify-center gap-2">
@@ -3704,26 +3536,22 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-2">
-                      <span>{isEditing ? "Update Product Now" : "🚀 Publish Live to Marketplace"}</span>
+                      <span>🚀 Publish Live to Marketplace</span>
                     </div>
                   )}
                 </Button>
               </div>
 
               {/* Step 4 Navigation Footer */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-white/10 flex items-center justify-between">
+              <div className="flex items-center justify-between pt-1">
                 <button
                   type="button"
                   onClick={() => goToStep(3)}
-                  className="text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 font-semibold text-xs sm:text-sm px-4 py-3 rounded-xl border border-white/10 flex items-center gap-2 cursor-pointer transition-colors"
+                  className="px-5 py-2.5 rounded-xl border border-white/20 bg-transparent hover:bg-white/10 text-white font-medium text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  <span>Back: Step 3 (Details & Price)</span>
+                  <span>Back</span>
                 </button>
-
-                <span className="text-xs text-gray-500 hidden sm:inline">
-                  Step 4 of 4: Final Step
-                </span>
               </div>
             </div>
           )}
@@ -3733,34 +3561,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
         <div className="hidden lg:block">
           <div className="sticky top-[110px] space-y-6">
 
-            {/* Desktop Step Progress Mini Card */}
-            <div className="bg-gray-900/60 border border-white/10 rounded-2xl p-3.5 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Creation Progress</span>
-                <span className="text-xs font-extrabold text-[#FF6D1F]">Step {activeStep} of 4</span>
-              </div>
-              <div className="grid grid-cols-4 gap-1.5 h-1.5 w-full">
-                <div className={`rounded-full transition-all ${activeStep >= 1 ? "bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]" : "bg-white/10"}`} />
-                <div className={`rounded-full transition-all ${activeStep >= 2 ? "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]" : "bg-white/10"}`} />
-                <div className={`rounded-full transition-all ${activeStep >= 3 ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-white/10"}`} />
-                <div className={`rounded-full transition-all ${activeStep >= 4 ? "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" : "bg-white/10"}`} />
-              </div>
-              <div className="flex items-center justify-between text-[11px] text-gray-400">
-                <span className="truncate">{activeStep === 1 ? "🎨 1. Colors & Sizes" : activeStep === 2 ? "🖌️ 2. Add Artwork" : activeStep === 3 ? "🏷️ 3. Title & Price" : "🚀 4. Review & Go Live"}</span>
-                {activeStep < 4 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (validateAndRedirect(activeStep)) {
-                        goToStep(activeStep + 1);
-                      }
-                    }}
-                    className="text-[#FF6D1F] hover:underline font-bold ml-2 flex-shrink-0 cursor-pointer"
-                  >
-                    Next →
-                  </button>
-                )}
-              </div>
+            {/* Live Preview Header (Figma Design) */}
+            <div className="space-y-0.5">
+              <h3 className="text-base sm:text-lg font-bold font-clash text-white">Live Preview</h3>
+              <p className="text-[11px] sm:text-xs text-gray-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#FF6D1F] animate-pulse" />
+                Updates as you configure your product
+              </p>
             </div>
 
             {/* Thumbnail Preview Card */}
@@ -3814,105 +3621,57 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
               <hr className="border-white/10" />
 
-              {/* Creator Markup */}
-              <div className="relative p-5 bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl border border-white/8 shadow-xl overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-orange-500/5 rounded-full blur-2xl pointer-events-none" />
-
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-                    <Percent className="w-4 h-4 text-orange-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-white">Creator Markup</h3>
-                    <p className="text-[10px] text-gray-400">Set your own additional markup for this product.</p>
-                  </div>
+              {/* Creator Markup Summary Card (Figma Design) */}
+              <div className="bg-[#101726] border border-white/10 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center gap-2 text-white font-bold text-sm">
+                  <span className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-black">%</span>
+                  <span>Creator Markup</span>
                 </div>
-
-                <div className="space-y-4 py-1">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-xs font-semibold text-gray-400">Your Markup</span>
-                    <div className="text-right">
-                      <span className="text-3xl font-extrabold text-orange-400 tabular-nums block">
-                        {creatorMarkup}%
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="px-1">
-                    <Slider
-                      value={creatorMarkup}
-                      min={0}
-                      max={100}
-                      step={1}
-                      onChange={handleCreatorMarkupChange}
-                      sx={creatorSliderSx}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Quick Presets</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {CREATOR_MARKUP_PRESETS.map((preset) => {
-                        const isActive = creatorMarkup === preset;
-
-                        return (
-                          <button
-                            key={preset}
-                            onClick={() => handleCreatorPresetClick(preset)}
-                            className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all ${isActive
-                              ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)] cursor-pointer'
-                              : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200 cursor-pointer'
-                              }`}
-                          >
-                            {preset}%
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Pricing Summary & Clean Creator Breakdown */}
-                <div className="mt-4 bg-black/60 border border-white/5 p-4 rounded-2xl space-y-2.5 text-[11px] backdrop-blur-md">
-
-                  <div className="flex justify-between items-center text-gray-400 font-medium">
-                    <span>Loka Base Cost</span>
-                    <span className="text-orange-400 font-semibold">
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Loka Base Cost</span>
+                    <span className="text-[#FF6D1F] font-bold">
                       {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} - $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
-
-                  <div className="flex justify-between items-center text-gray-400 font-medium">
-                    <span>Creator Markup ({creatorMarkup}%)</span>
-                    <span className="text-green-400 font-semibold">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Loka Base Cost</span>
+                    <span className="text-emerald-400 font-bold">
                       +{hasPriceRange
                         ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} - $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
                         : `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)}`}
                     </span>
                   </div>
-
-                  <div className="flex justify-between items-center pt-2.5 border-t border-white/10 mt-1 font-extrabold text-white text-xs">
-                    <span>Product Cost</span>
-                    <span className="text-white text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Loka Base Cost</span>
+                    <span className="text-white font-bold">
                       {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
                 </div>
               </div>
 
-            </div>
-
-            {/* Creator Help banner */}
-            <div className="bg-[#FF6D1F]/5 border border-[#FF6D1F]/15 rounded-3xl p-5 space-y-3">
-              <h5 className="font-bold text-sm text-white flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-[#FF6D1F]" />
-                Creator Tips
-              </h5>
-              <ul className="text-xs text-gray-400 space-y-2 list-disc list-inside">
-                <li>Choose bright colors to attract customer attention</li>
-                <li>Write a description with materials & sizing tips</li>
-                <li>Keep the main design centered for best results</li>
-              </ul>
+              {/* Creator Tips (Figma Design) */}
+              <div className="bg-[#161D2B] border border-orange-500/20 rounded-2xl p-4 sm:p-5 space-y-3 shadow-lg">
+                <h5 className="font-bold text-sm text-[#FF6D1F] flex items-center gap-2 font-clash">
+                  <Sparkles className="w-4 h-4 text-[#FF6D1F]" />
+                  Creator Tips
+                </h5>
+                <ul className="text-xs text-gray-300 space-y-2.5">
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#FF6D1F] font-bold text-sm leading-none">•</span>
+                    <span>Choose bright colors to attract customer attention</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#FF6D1F] font-bold text-sm leading-none">•</span>
+                    <span>Write a description with materials & sizing tips</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#FF6D1F] font-bold text-sm leading-none">•</span>
+                    <span>Keep the main design centered for best results</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
