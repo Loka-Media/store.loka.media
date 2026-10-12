@@ -811,12 +811,56 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const goToStep = (stepNumber: number) => {
     setActiveStep(stepNumber);
     if (typeof window !== "undefined") {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
+      const resetScroll = () => {
+        if ((window as any).__lenis) {
+          (window as any).__lenis.scrollTo(0, { immediate: true });
+          (window as any).__lenis.resize();
+        }
+        if ((window as any).lenis) {
+          (window as any).lenis.scrollTo(0, { immediate: true });
+        }
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      };
+
+      resetScroll();
+      requestAnimationFrame(resetScroll);
+      setTimeout(resetScroll, 30);
+      setTimeout(resetScroll, 100);
+      setTimeout(resetScroll, 250);
     }
   };
+
+  // Always reset scroll to the top of the page when activeStep changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const resetScroll = () => {
+      if ((window as any).__lenis) {
+        (window as any).__lenis.scrollTo(0, { immediate: true });
+        (window as any).__lenis.resize();
+      }
+      if ((window as any).lenis) {
+        (window as any).lenis.scrollTo(0, { immediate: true });
+      }
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    resetScroll();
+    const rafId = requestAnimationFrame(resetScroll);
+    const t1 = setTimeout(resetScroll, 30);
+    const t2 = setTimeout(resetScroll, 100);
+    const t3 = setTimeout(resetScroll, 250);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [activeStep]);
 
   // Automatic error redirection helper: switches step, opens accordion, scrolls smoothly, and focuses invalid field
   const scrollToFieldAndFocus = useCallback(
@@ -2258,53 +2302,54 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           </div>
           <div className="flex-shrink-0 flex items-center gap-2 sm:gap-3">
             {activeStep === 2 && (
-              <Button
+              <button
                 type="button"
                 onClick={handleManualRegenerate}
                 disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
-                className="px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold border border-[#FF6D1F]/50 bg-[#FF6D1F]/15 hover:bg-[#FF6D1F]/25 text-white transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_12px_rgba(255,109,31,0.2)]"
+                className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_16px_rgba(255,109,31,0.25)] flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed leading-none"
               >
                 {isGeneratingPreview ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span className="hidden sm:inline">Generating...</span>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+                    <span className="leading-none">Generating...</span>
                   </>
                 ) : cooldown > 0 ? (
-                  <span>Wait {cooldown}s</span>
+                  <span className="leading-none">Wait {cooldown}s</span>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 text-[#FF6D1F]" />
-                    <span>{mockupUrls && mockupUrls.length > 0 ? "Regenerate Preview" : "Generate Preview"}</span>
+                    <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="leading-none">{mockupUrls && mockupUrls.length > 0 ? "Regenerate Preview" : "Generate Preview"}</span>
                   </>
                 )}
-              </Button>
+              </button>
             )}
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold border border-white/20 bg-black/40 hover:bg-white/10 text-white transition-all cursor-pointer whitespace-nowrap"
+              className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold border border-white/20 bg-black/40 hover:bg-white/10 text-white transition-all cursor-pointer whitespace-nowrap flex items-center justify-center leading-none"
             >
               Save Draft
             </button>
-            <Button
+            <button
+              type="button"
               onClick={handleContinueNext}
               disabled={isPublishing || isGeneratingPreview}
-              className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+              className="h-9 sm:h-10 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 leading-none"
             >
               {isPublishing ? (
                 <div className="flex items-center gap-2 whitespace-nowrap">
                   <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                  <span>{isEditing ? "Updating..." : "Publishing..."}</span>
+                  <span className="leading-none">{isEditing ? "Updating..." : "Publishing..."}</span>
                 </div>
               ) : activeStep < 4 ? (
                 <>
-                  <span>Continue</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span className="leading-none">Continue</span>
+                  <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
                 </>
               ) : (
-                isEditing ? "Update Product" : "Publish Product"
+                <span className="leading-none">{isEditing ? "Update Product" : "Publish Product"}</span>
               )}
-            </Button>
+            </button>
           </div>
         </div>
       </div>

@@ -27,6 +27,10 @@ export default function SmoothScroll() {
     } as any);
 
     lenisRef.current = lenis;
+    if (typeof window !== 'undefined') {
+      (window as any).__lenis = lenis;
+      (window as any).lenis = lenis;
+    }
 
     function raf(time: number) {
       lenis.raf(time);
@@ -56,6 +60,10 @@ export default function SmoothScroll() {
 
     return () => {
       window.removeEventListener('popstate', handlePopState);
+      if (typeof window !== 'undefined') {
+        delete (window as any).__lenis;
+        delete (window as any).lenis;
+      }
       lenis.destroy();
       lenisRef.current = null;
     };
