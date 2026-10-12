@@ -1087,6 +1087,13 @@ function CanvasContent() {
 
       const finalPublishPrice = (formDataToUse as any).price || (formDataToUse as any).base_price;
       const pubMarkupVal = parseFloat(formDataToUse.markupPercentage) || 30;
+
+      const imagesList = (mockupUrls && mockupUrls.length > 0)
+        ? mockupUrls.map((m: any) => m.url || m.src || m.preview_url).filter(Boolean)
+        : (selectedProduct?.images || []);
+
+      const mainCoverUrl = imagesList[0] || selectedProduct?.thumbnail_url || selectedProduct?.thumbnailUrl || "";
+
       const productData = {
         id: selectedProduct?.id,
         name: formDataToUse.name.trim(),
@@ -1106,7 +1113,10 @@ function CanvasContent() {
         maxPrice: (formDataToUse as any).max_price || finalPublishPrice,
         variants: selectedVariants,
         variantPrices: (formDataToUse as any).variantPrices || [],
-        base_product: selectedProduct
+        base_product: selectedProduct,
+        images: imagesList,
+        thumbnail_url: mainCoverUrl,
+        thumbnailUrl: mainCoverUrl
       };
 
       toast.loading("Step 2/3: Uploading product images to marketplace...", {
@@ -1227,7 +1237,7 @@ function CanvasContent() {
             setDesignFiles={setDesignFiles}
             uploadedFiles={uploadedFiles}
             printFiles={printFiles}
-            onGeneratePreview={debouncedGeneratePreview}
+            onGeneratePreview={generatePreview}
             isGeneratingPreview={isGeneratingMockup}
             mockupUrls={mockupUrls}
             setMockupUrls={setMockupUrls}
