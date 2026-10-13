@@ -7,7 +7,7 @@ import Link from "next/link";
 import { AlertCircle, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext"; 
 import { printifyAPI, productAPI } from "@/lib/api";
 import { mockupAPI } from "@/lib/MockupAPI";
 import { retryWithExponentialBackoff } from "@/lib/retryWithBackoff";
@@ -513,16 +513,47 @@ function CanvasContent() {
                 JSON.stringify(productWithVariants)
               );
 
-              // Check if there's saved product form data for this product
-              const savedFormKey = `productForm_${effectiveBlueprintId}`;
-              const savedForm = localStorage.getItem(savedFormKey);
+              // Check if there's a saved draft for this product
+              const savedDraftKey = `loka_draft_${effectiveBlueprintId}`;
+              const savedDraftJson = localStorage.getItem(savedDraftKey);
+              let draftRestored = false;
 
-              if (savedForm) {
-                // Use saved form data if it exists
-                const parsedForm = JSON.parse(savedForm);
-                setProductForm(parsedForm);
-                console.log(`📝 Loaded saved product form for product ${effectiveBlueprintId}`);
-              } else {
+              if (savedDraftJson) {
+                try {
+                  const savedDraft = JSON.parse(savedDraftJson);
+                  if (savedDraft.productForm) {
+                    setProductForm(savedDraft.productForm);
+                  }
+                  if (savedDraft.designFiles && Array.isArray(savedDraft.designFiles) && savedDraft.designFiles.length > 0) {
+                    setDesignFiles(savedDraft.designFiles);
+                  }
+                  if (savedDraft.uploadedFiles && Array.isArray(savedDraft.uploadedFiles) && savedDraft.uploadedFiles.length > 0) {
+                    setUploadedFiles(savedDraft.uploadedFiles);
+                  }
+                  if (savedDraft.selectedVariants && Array.isArray(savedDraft.selectedVariants) && savedDraft.selectedVariants.length > 0) {
+                    setSelectedVariants(savedDraft.selectedVariants);
+                  }
+                  if (savedDraft.mockupUrls && Array.isArray(savedDraft.mockupUrls) && savedDraft.mockupUrls.length > 0) {
+                    setMockupUrls(savedDraft.mockupUrls);
+                  }
+                  draftRestored = true;
+                  toast.success("Loaded your saved draft design!", { id: "draft-loaded" });
+                } catch (e) {
+                  console.error("Error restoring saved draft:", e);
+                }
+              }
+
+              if (!draftRestored) {
+                // Check if there's saved product form data for this product
+                const savedFormKey = `productForm_${effectiveBlueprintId}`;
+                const savedForm = localStorage.getItem(savedFormKey);
+
+                if (savedForm) {
+                  // Use saved form data if it exists
+                  const parsedForm = JSON.parse(savedForm);
+                  setProductForm(parsedForm);
+                  console.log(`📝 Loaded saved product form for product ${effectiveBlueprintId}`);
+                } else {
                 // Read source category from catalog navigation for auto-selection
                 let sourceCategoryTitle = '';
                 try {
@@ -543,11 +574,12 @@ function CanvasContent() {
                 });
               }
             }
-
-            setStep("unified-editor");
-
-            return;
           }
+
+          setStep("unified-editor");
+
+          return;
+        }
         } catch (error: any) {
           console.error("Failed to load product from URL:", error);
           

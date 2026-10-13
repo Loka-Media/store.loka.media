@@ -1168,7 +1168,6 @@ function PrintfulProductCard({
 }) {
   const { calculateSellingPrice } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
-  const pbcPrice = parseFloat(product.price || '0').toFixed(2);
   const pppPrice = parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0').toFixed(2);
   const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), product.title).toFixed(2);
 
@@ -1225,13 +1224,7 @@ function PrintfulProductCard({
         </div>
 
         {/* Pricing Info */}
-        <div className="flex flex-col gap-1.5 mt-1 border-t border-white/10 pt-2 text-left">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] text-emerald-400 font-semibold">Printify Premium:</span>
-            <span className="font-bold text-emerald-400 text-xs">
-              From {formatPrice(pppPrice)}
-            </span>
-          </div>
+        <div className="mt-1 border-t border-white/10 pt-2 text-left">
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-400 font-medium">Selling Price:</span>
             <span className="font-extrabold text-orange-400 text-sm">

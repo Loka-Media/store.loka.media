@@ -43,9 +43,26 @@ interface Product {
   created_at: string;
 }
 
+interface CreatorDraft {
+  id: string;
+  blueprintId: string | number;
+  productId?: number;
+  name?: string;
+  title?: string;
+  thumbnail?: string;
+  designFiles?: any;
+  uploadedFiles?: any[];
+  mockupUrls?: any[];
+  productForm?: any;
+  selectedVariants?: any[];
+  savedAt?: string;
+  updatedAt?: string;
+}
+
 export default function CreatorProductsPage() {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
+  const [drafts, setDrafts] = useState<CreatorDraft[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filters, setFilters] = useState({
@@ -61,6 +78,48 @@ export default function CreatorProductsPage() {
     offset: 0,
     hasNext: false,
   });
+
+  const loadDrafts = useCallback(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("loka_creator_drafts");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setDrafts(parsed);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load drafts:", e);
+      }
+      setDrafts([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadDrafts();
+  }, [loadDrafts]);
+
+  const handleDeleteDraft = (draft: CreatorDraft, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const draftName = draft.name || draft.title || `Draft #${draft.blueprintId}`;
+    if (!window.confirm(`Are you sure you want to delete the draft "${draftName}"?`)) {
+      return;
+    }
+    try {
+      const updated = drafts.filter((d) => d.id !== draft.id);
+      setDrafts(updated);
+      localStorage.setItem("loka_creator_drafts", JSON.stringify(updated));
+      localStorage.removeItem(`loka_draft_${draft.blueprintId}`);
+      toast.success("Draft deleted successfully");
+    } catch (err) {
+      toast.error("Failed to delete draft");
+    }
+  };
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -181,6 +240,32 @@ export default function CreatorProductsPage() {
     }
     return 0;
   });
+
+  const filteredDrafts = drafts
+    .filter((d) => {
+      if (!filters.search) return true;
+      const q = filters.search.toLowerCase();
+      return (
+        (d.name && d.name.toLowerCase().includes(q)) ||
+        (d.title && d.title.toLowerCase().includes(q)) ||
+        String(d.blueprintId).includes(q)
+      );
+    })
+    .sort((a, b) => {
+      if (filters.sortBy === "created_at") {
+        const dateA = new Date(a.updatedAt || a.savedAt || 0).getTime();
+        const dateB = new Date(b.updatedAt || b.savedAt || 0).getTime();
+        return filters.sortOrder === "DESC" ? dateB - dateA : dateA - dateB;
+      }
+      if (filters.sortBy === "name") {
+        const nameA = (a.name || a.title || "").toLowerCase();
+        const nameB = (b.name || b.title || "").toLowerCase();
+        if (nameA < nameB) return filters.sortOrder === "ASC" ? -1 : 1;
+        if (nameA > nameB) return filters.sortOrder === "ASC" ? 1 : -1;
+        return 0;
+      }
+      return 0;
+    });
 
   const handleToggleStatus = async (productId: number, currentStatus: boolean, e?: React.MouseEvent) => {
     if (e) {
@@ -313,8 +398,33 @@ export default function CreatorProductsPage() {
                 : "text-gray-400 hover:text-white"
               }`}
           >
-
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+              Inactive Products
+              <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs font-normal text-gray-400">
+                {products.filter(p => !p.is_active).length}
+              </span>
+            </span>
             {filters.status === "inactive" && (
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#FF6D1F]"></span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, status: "drafts" }))}
+            className={`pb-3 text-sm font-semibold relative transition-all ${filters.status === "drafts"
+                ? "text-white"
+                : "text-gray-400 hover:text-white"
+              }`}
+          >
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#FF6D1F]"></span>
+              Saved Drafts
+              <span className="bg-[#FF6D1F]/20 text-[#FF6D1F] px-2 py-0.5 rounded-full text-xs font-bold">
+                {drafts.length}
+              </span>
+            </span>
+            {filters.status === "drafts" && (
               <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[#FF6D1F]"></span>
             )}
           </button>
@@ -430,15 +540,80 @@ export default function CreatorProductsPage() {
               </div>
 
               <div className="text-xs sm:text-sm font-medium text-gray-400">
-                <span className="text-white/80">{sortedAndFilteredProducts.length}</span>{" "}
-                products
+                <span className="text-white/80">
+                  {filters.status === "drafts" ? filteredDrafts.length : sortedAndFilteredProducts.length}
+                </span>{" "}
+                {filters.status === "drafts" ? "drafts" : "products"}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Products Display */}
-        {loading ? (
+        {/* Products or Drafts Display */}
+        {filters.status === "drafts" ? (
+          filteredDrafts.length === 0 ? (
+            <div className="gradient-border-white-bottom p-8 sm:p-12 flex flex-col items-center justify-center text-center">
+              <div className="text-[#FF6D1F] mb-6">
+                <Package className="mx-auto h-16 w-16 sm:h-20 sm:w-20" />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                No saved drafts found
+              </h3>
+              <p className="text-sm sm:text-base text-gray-400 max-w-md mb-8">
+                {filters.search
+                  ? "No drafts matched your search query."
+                  : "When you customize a product in Canvas and click 'Save Draft', your designs are saved here so you can resume editing anytime."}
+              </p>
+              <Button href="/dashboard/creator/catalog" variant="primary">
+                <Plus className="w-5 h-5 sm:w-6 sm:h-6 mr-2 inline" />
+                Design New Product
+              </Button>
+            </div>
+          ) : viewMode === "grid" ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+              {filteredDrafts.map((draft) => (
+                <DraftGridCard
+                  key={draft.id}
+                  draft={draft}
+                  onDelete={handleDeleteDraft}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="gradient-border-white-bottom overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="border-b border-white/10">
+                  <tr>
+                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Draft Product
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Artworks
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Last Saved
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {filteredDrafts.map((draft) => (
+                    <DraftListRow
+                      key={draft.id}
+                      draft={draft}
+                      onDelete={handleDeleteDraft}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        ) : loading ? (
           <CreativeLoader variant="product" message="Loading your products..." />
         ) : sortedAndFilteredProducts.length === 0 ? (
           <div className="gradient-border-white-bottom p-8 sm:p-12 flex flex-col items-center justify-center text-center">
@@ -807,3 +982,204 @@ function ProductListRow({
     </tr>
   );
 }
+
+function DraftGridCard({
+  draft,
+  onDelete,
+}: {
+  draft: CreatorDraft;
+  onDelete: (draft: CreatorDraft, e?: React.MouseEvent) => void;
+}) {
+  const router = useRouter();
+
+  const handleResume = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    router.push(`/dashboard/creator/canvas?blueprintId=${draft.blueprintId}`);
+  };
+
+  const artworksCount = Array.isArray(draft.designFiles)
+    ? draft.designFiles.length
+    : (draft.designFiles ? Object.keys(draft.designFiles).length : 0);
+
+  const formattedDate = draft.updatedAt || draft.savedAt
+    ? new Date(draft.updatedAt || draft.savedAt || "").toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "Recently";
+
+  const thumbnail = draft.thumbnail || "/images/placeholder-product.png";
+
+  return (
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={() => handleResume()}
+      className="group cursor-pointer"
+    >
+      <div className="gradient-border-white-bottom overflow-hidden bg-white/[0.02] hover:border-orange-500/50 transition-all rounded-xl border border-white/10 flex flex-col h-full">
+        <div className="w-full relative bg-black/40" style={{ aspectRatio: "1/1" }}>
+          <Image
+            src={thumbnail}
+            alt={draft.name || draft.title || "Draft"}
+            fill
+            className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          {/* Status badge */}
+          <div className="absolute top-3 left-3 z-10">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FF6D1F]/20 text-[#FF6D1F] border border-[#FF6D1F]/40 backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D1F] animate-pulse"></span>
+              Draft
+            </span>
+          </div>
+
+          {/* Artworks count badge */}
+          {artworksCount > 0 && (
+            <div className="absolute top-3 right-3 z-10">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white/15 text-white/90 border border-white/20 backdrop-blur-md">
+                {artworksCount} {artworksCount === 1 ? "design" : "designs"}
+              </span>
+            </div>
+          )}
+
+          {/* Action buttons overlay */}
+          <div className="absolute bottom-3 right-3 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-10">
+            <button
+              onClick={handleResume}
+              className="p-2 bg-[#FF6D1F] text-white hover:bg-[#FF7A1A] rounded-lg transition-all shadow-lg flex items-center gap-1 text-xs font-bold cursor-pointer"
+              title="Resume editing in Canvas"
+            >
+              <Edit className="w-4 h-4" />
+              <span className="hidden sm:inline">Resume</span>
+            </button>
+            <button
+              onClick={(e) => onDelete(draft, e)}
+              className="p-2 bg-white/10 border border-white/20 text-white hover:bg-red-500/30 hover:border-red-500/50 rounded-lg transition-all backdrop-blur-sm cursor-pointer"
+              title="Delete draft"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+          <div>
+            <h3 className="font-bold text-sm sm:text-base text-white mb-1.5 truncate group-hover:text-[#FF6D1F] transition-colors">
+              {draft.name || draft.title || `Draft #${draft.blueprintId}`}
+            </h3>
+            <p className="text-xs text-gray-400 font-medium mb-3">
+              Blueprint #{draft.blueprintId}
+            </p>
+          </div>
+
+          <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+            <span className="text-[11px] text-gray-500">
+              Saved {formattedDate}
+            </span>
+            <span className="text-xs font-semibold text-[#FF6D1F] group-hover:underline flex items-center gap-1">
+              Open Canvas →
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DraftListRow({
+  draft,
+  onDelete,
+}: {
+  draft: CreatorDraft;
+  onDelete: (draft: CreatorDraft, e?: React.MouseEvent) => void;
+}) {
+  const router = useRouter();
+
+  const handleResume = () => {
+    router.push(`/dashboard/creator/canvas?blueprintId=${draft.blueprintId}`);
+  };
+
+  const artworksCount = Array.isArray(draft.designFiles)
+    ? draft.designFiles.length
+    : (draft.designFiles ? Object.keys(draft.designFiles).length : 0);
+
+  const formattedDate = draft.updatedAt || draft.savedAt
+    ? new Date(draft.updatedAt || draft.savedAt || "").toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "Recently";
+
+  const thumbnail = draft.thumbnail || "/images/placeholder-product.png";
+
+  return (
+    <tr
+      onClick={handleResume}
+      className="hover:bg-white/5 transition-colors cursor-pointer group"
+    >
+      <td className="px-4 sm:px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-white/10 flex-shrink-0">
+            <Image
+              src={thumbnail}
+              alt={draft.name || draft.title || "Draft"}
+              fill
+              className="object-contain p-1"
+              unoptimized
+            />
+          </div>
+          <div>
+            <div className="font-bold text-sm text-white group-hover:text-[#FF6D1F] transition-colors truncate max-w-xs">
+              {draft.name || draft.title || `Draft #${draft.blueprintId}`}
+            </div>
+            <div className="text-xs text-gray-400">
+              Blueprint #{draft.blueprintId}
+            </div>
+          </div>
+        </div>
+      </td>
+      <td className="px-4 sm:px-6 py-4">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[#FF6D1F]/20 text-[#FF6D1F] border border-[#FF6D1F]/40">
+          Draft
+        </span>
+      </td>
+      <td className="px-4 sm:px-6 py-4 text-sm text-gray-300">
+        {artworksCount} {artworksCount === 1 ? "design" : "designs"}
+      </td>
+      <td className="px-4 sm:px-6 py-4 text-xs text-gray-400">
+        {formattedDate}
+      </td>
+      <td className="px-4 sm:px-6 py-4 text-right">
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleResume();
+            }}
+            className="h-8 px-3 rounded-lg bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white text-xs font-semibold flex items-center transition-all cursor-pointer"
+          >
+            <Edit className="w-3.5 h-3.5 mr-1" />
+            Resume
+          </button>
+          <button
+            onClick={(e) => onDelete(draft, e)}
+            className="p-2 text-gray-400 hover:text-red-400 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+            title="Delete draft"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
