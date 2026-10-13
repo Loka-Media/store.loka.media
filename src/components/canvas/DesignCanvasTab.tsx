@@ -53,6 +53,8 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const canvasDims = getCanvasDimensions(activePrintFile);
+  const printAreaWidth = activePrintFile?.width || canvasDims.printWidth || 0;
+  const printAreaHeight = activePrintFile?.height || canvasDims.printHeight || 0;
 
   // Listen for window resize to update orientation
   useEffect(() => {
@@ -236,7 +238,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">Rotate Your Phone</h3>
               <p className="text-gray-300 mb-2">This design is wider and looks better in landscape mode</p>
-              <p className="text-sm text-gray-400">Canvas Size: {canvasDims.width} × {canvasDims.height}px</p>
+              <p className="text-sm text-gray-400">
+                Print area size: {printAreaWidth && printAreaHeight ? `${printAreaWidth} × ${printAreaHeight} px` : "Loading..."}
+              </p>
             </div>
           </div>
         ) : (
@@ -538,8 +542,15 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
 
         {/* Canvas Controls */}
         <div className="mt-2 sm:mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 flex-wrap">
-          <div className="whitespace-nowrap">
-            Canvas Size: {canvasDims.width} x {canvasDims.height}
+          <div className="whitespace-nowrap flex items-center gap-1.5">
+            <span>Print area size:</span>
+            {printAreaWidth && printAreaHeight ? (
+              <span className="font-semibold text-gray-200">
+                {printAreaWidth} × {printAreaHeight} px
+              </span>
+            ) : (
+              <span className="text-gray-500">Loading...</span>
+            )}
           </div>
           <div className="hidden sm:block">•</div>
           <div className="whitespace-nowrap">

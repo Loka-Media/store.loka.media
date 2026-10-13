@@ -43,6 +43,7 @@ async function handler(
       method: request.method,
       headers,
       body,
+      cache: 'no-store',
     });
 
     const data = await response.text();

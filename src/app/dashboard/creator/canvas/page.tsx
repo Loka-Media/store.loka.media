@@ -602,11 +602,13 @@ function CanvasContent() {
         localStorage.getItem('selectedPrintfulProduct'); // legacy key
       if (savedProduct) {
         const product = JSON.parse(savedProduct);
-        if (!product.variants?.length) {
+        let currentVariants = product.variants || [];
+        if (!currentVariants.length || !currentVariants.some((v: any) => v.placeholders && v.placeholders.length > 0)) {
           const detailed = await printifyAPI.getBlueprintDetails(product.id);
-          const variants = detailed?.data?.variants || [];
-          if (variants?.length) {
-            const updatedProduct = { ...product, variants };
+          const rawVariants = detailed?.data?.variants || detailed?.variants || [];
+          if (rawVariants.length) {
+            currentVariants = rawVariants;
+            const updatedProduct = { ...product, variants: rawVariants };
             localStorage.setItem('selectedPrintifyProduct', JSON.stringify(updatedProduct));
             setSelectedProduct(updatedProduct);
           } else {
@@ -614,6 +616,14 @@ function CanvasContent() {
           }
         } else {
           setSelectedProduct(product);
+        }
+
+        if (currentVariants.length > 0) {
+          setSelectedVariants(currentVariants.map((v: any) => v.id));
+          const computedPrintFiles = computePrintFilesFromVariants(currentVariants);
+          if (computedPrintFiles) {
+            setPrintFiles(computedPrintFiles);
+          }
         }
 
         // Read source category from catalog navigation for auto-selection

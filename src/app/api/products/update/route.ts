@@ -86,6 +86,11 @@ async function handleUpdate(req: NextRequest) {
             [vpPrice, vp.id || vp.printify_variant_id, id]
           );
         }
+        // Fallback: If blueprint variant IDs did not match shop variant IDs, ensure all variants have finalRetailPrice
+        await queryDb(
+          `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE product_id = $2 AND (price IS NULL OR price = 0 OR price != $1)`,
+          [finalRetailPrice, id]
+        );
       } else {
         // Uniformly update all variants of this product to the exact final retail price
         await queryDb(

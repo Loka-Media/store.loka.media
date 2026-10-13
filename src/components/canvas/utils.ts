@@ -31,8 +31,8 @@ export const getCanvasDimensions = (activePrintFile: PrintFile | null) => {
       width: 400, 
       height: 400, 
       aspectRatio: 1,
-      printWidth: 400,
-      printHeight: 400,
+      printWidth: 0,
+      printHeight: 0,
       printAreaInfo: "No print area selected"
     }; // Default square
   }

@@ -3620,5 +3620,15 @@
       "17981": 12.64
     },
     "updatedAt": 1791868439038
+  },
+  "765_99": {
+    "blueprintId": 765,
+    "providerId": 99,
+    "minCost": 4.53,
+    "maxCost": 4.53,
+    "variants": {
+      "74607": 4.53
+    },
+    "updatedAt": 1791892217553
   }
 }

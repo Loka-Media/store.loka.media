@@ -3238,7 +3238,20 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   {/* Interactive Canvas */}
                   <div className="bg-black/60 rounded-2xl border border-white/10 p-3 sm:p-4">
                     <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/5 text-xs text-gray-400">
-                      <span>Adjust & Resize Artwork</span>
+                      <div className="flex items-center gap-2">
+                        <span>Adjust & Resize Artwork</span>
+                        {(() => {
+                          const apf = getActivePrintFile(printFiles, selectedVariants, activePlacement);
+                          if (apf?.width && apf?.height) {
+                            return (
+                              <span className="text-[11px] text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full font-medium">
+                                Print area: {apf.width} × {apf.height} px
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
                       <span className="text-[11px] text-gray-500">Drag corners to resize · Move design anywhere on print area</span>
                     </div>
                     <div className="w-full flex items-center justify-center min-h-[340px]">

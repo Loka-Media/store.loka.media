@@ -144,14 +144,25 @@ async function buildPrintifyProductPayload(
       (vp: any) => Number(vp.id) === vId || Number(vp.printify_variant_id) === vId
     );
 
+    const defaultProductPrice = ensure99Pricing(
+      productData?.price || 
+      productData?.selling_price || 
+      productData?.retail_price || 
+      productData?.base_price || 
+      productData?.basePrice || 
+      0
+    );
+
     let finalSellingPrice: number;
     if (matchingVP?.price && parseFloat(matchingVP.price) > 0) {
       finalSellingPrice = ensure99Pricing(matchingVP.price);
+    } else if (defaultProductPrice > 0) {
+      finalSellingPrice = defaultProductPrice;
     } else {
       const rawCost = matchingVP?.cost != null
         ? parseFloat(matchingVP.cost)
         : (v.cost != null ? (typeof v.cost === 'string' ? parseFloat(v.cost) : v.cost / 100) : (v.price != null ? (typeof v.price === 'string' ? parseFloat(v.price) : v.price / 100) : 18.00));
-      const lokaBasePrice = calculateSellingPrice(rawCost, undefined);
+      const lokaBasePrice = calculateSellingPrice(rawCost, productData?.category);
       finalSellingPrice = calculateRetailPriceFromMarkup(lokaBasePrice, markupPercent);
     }
     const retailCents = Math.round(finalSellingPrice * 100);
@@ -689,6 +700,15 @@ export async function POST(request: NextRequest) {
               console.log(`[Printify Sync] Syncing retail pricing for product ${targetProductId}...`);
               const creatorMarkup = parseFloat(String(productData?.markupPercentage || productData?.markup_percentage || '30')) || 30;
 
+              const targetCreatorPrice = ensure99Pricing(
+                productData?.price ||
+                productData?.selling_price ||
+                productData?.retail_price ||
+                productData?.base_price ||
+                productData?.basePrice ||
+                0
+              );
+
               const dbVariants = await queryDb(
                 `SELECT id, printify_variant_id, price, base_cost FROM product_variants WHERE product_id = $1`,
                 [targetProductId]
@@ -697,21 +717,38 @@ export async function POST(request: NextRequest) {
               const variantPricesList = Array.isArray(productData?.variantPrices) ? productData.variantPrices : [];
               const calculatedPrices: number[] = [];
 
-              for (const dbV of dbVariants) {
+              for (let i = 0; i < dbVariants.length; i++) {
+                const dbV = dbVariants[i];
                 let finalPrice: number | null = null;
 
-                const matchingVP = variantPricesList.find(
+                // 1. Match by variant ID or printify_variant_id from client's variantPrices
+                let matchingVP = variantPricesList.find(
                   (vp: any) => Number(vp.id) === Number(dbV.id) || 
                                Number(vp.printify_variant_id) === Number(dbV.printify_variant_id) || 
                                Number(vp.id) === Number(dbV.printify_variant_id)
                 );
 
+                // 2. If blueprint variant IDs differ from newly generated shop variant IDs, match by index
+                if (!matchingVP && variantPricesList[i]?.price) {
+                  matchingVP = variantPricesList[i];
+                }
+
+                // 3. Match from Printify API created product variants
+                const createdV = created?.variants?.find(
+                  (cv: any) => Number(cv.id) === Number(dbV.printify_variant_id) || Number(cv.id) === Number(dbV.id)
+                );
+                const createdPrice = createdV?.price ? (createdV.price >= 500 ? createdV.price / 100 : createdV.price) : 0;
+
                 if (matchingVP?.price && parseFloat(matchingVP.price) > 0) {
                   finalPrice = ensure99Pricing(matchingVP.price);
+                } else if (createdPrice > 0) {
+                  finalPrice = ensure99Pricing(createdPrice);
+                } else if (targetCreatorPrice > 0) {
+                  finalPrice = targetCreatorPrice;
                 } else {
                   const vCost = parseFloat(String(dbV.base_cost || matchingVP?.cost || '0'));
                   if (vCost > 0) {
-                    const vPlatform = calculateSellingPrice(vCost, undefined);
+                    const vPlatform = calculateSellingPrice(vCost, productData?.category);
                     finalPrice = calculateRetailPriceFromMarkup(vPlatform, creatorMarkup);
                   }
                 }
@@ -727,7 +764,7 @@ export async function POST(request: NextRequest) {
 
               const minRetailPrice = calculatedPrices.length > 0 
                 ? Math.min(...calculatedPrices) 
-                : ensure99Pricing(productData?.price || productData?.base_price || 14.99);
+                : (targetCreatorPrice > 0 ? targetCreatorPrice : ensure99Pricing(productData?.price || productData?.base_price || 14.99));
 
               // Retrieve all mockups from created or re-fetch from Printify
               let productImages: string[] = [];
