@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { printifyWebhooksAPI } from '@/services/printify/PrintifyClient';
 import { syncPrintifyOrder } from '@/services/printify/orderSync';
+import { syncPrintifyProduct, handleProductDeleted, ensurePrintifyWebhooksRegistered } from '@/services/printify/productSync';
 import type { PrintifyWebhookPayload } from '@/types/printify';
 
 export async function GET(
@@ -16,6 +17,18 @@ export async function GET(
   { params }: { params: Promise<{ path?: string[] }> }
 ) {
   try {
+    const { path } = await params;
+    const segments = path || [];
+
+    // GET /api/printify/webhooks/setup → One-click verify and auto-register all Printify webhooks
+    if (segments[0] === 'setup') {
+      const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'localhost:3000';
+      const proto = request.headers.get('x-forwarded-proto') || 'https';
+      const baseUrl = `${proto}://${host}`;
+      const setupResult = await ensurePrintifyWebhooksRegistered(baseUrl);
+      return NextResponse.json({ success: true, ...setupResult });
+    }
+
     const webhooks = await printifyWebhooksAPI.getWebhooks();
     return NextResponse.json({ success: true, data: webhooks });
   } catch (error: unknown) {
@@ -32,38 +45,78 @@ export async function POST(
     const { path } = await params;
     const segments = path || [];
 
+    // POST /api/printify/webhooks/setup → auto-register webhooks with custom or inferred domain
+    if (segments[0] === 'setup') {
+      const body = await request.json().catch(() => ({}));
+      const host = body?.baseUrl || request.headers.get('x-forwarded-host') || request.headers.get('host') || 'localhost:3000';
+      const proto = request.headers.get('x-forwarded-proto') || 'https';
+      const baseUrl = body?.baseUrl || `${proto}://${host}`;
+      const setupResult = await ensurePrintifyWebhooksRegistered(baseUrl);
+      return NextResponse.json({ success: true, ...setupResult });
+    }
+
     // POST /api/printify/webhooks/receive → handle incoming Printify event
     if (segments[0] === 'receive') {
       const payload: PrintifyWebhookPayload = await request.json();
-      console.log('[Printify Webhook Received]', payload.type, payload.resource?.id);
+      const eventType = String(payload.type || '').toLowerCase();
+      const resourceId = String(payload.resource?.id || '');
 
-      // 1. Direct PostgreSQL sync using Printify order ID or shop order ID
-      const printifyOrderId = payload.resource?.id;
-      if (printifyOrderId) {
-        try {
-          const syncResult = await syncPrintifyOrder(printifyOrderId);
-          console.log('[Printify Webhook DB Sync]', syncResult);
-        } catch (dbSyncErr) {
-          console.error('[Printify Webhook DB Sync Error]', dbSyncErr);
+      console.log(`[Printify Webhook Received] Type: "${eventType}" | Resource ID: "${resourceId}"`);
+
+      let productSyncResult = null;
+      let orderSyncResult = null;
+
+      // 1. Product Updated or Created
+      if (
+        eventType.includes('product:updated') ||
+        eventType.includes('product:created') ||
+        eventType.includes('product:publish')
+      ) {
+        if (resourceId) {
+          productSyncResult = await syncPrintifyProduct(resourceId, payload.resource?.data);
+          console.log('[Printify Webhook Product Sync Result]:', productSyncResult);
+        }
+      } 
+      // 2. Product Deleted
+      else if (eventType.includes('product:deleted')) {
+        if (resourceId) {
+          productSyncResult = await handleProductDeleted(resourceId);
+          console.log('[Printify Webhook Product Deleted Result]:', productSyncResult);
+        }
+      } 
+      // 3. Order Events
+      else if (eventType.includes('order')) {
+        if (resourceId) {
+          orderSyncResult = await syncPrintifyOrder(resourceId);
+          console.log('[Printify Webhook Order Sync Result]:', orderSyncResult);
+        }
+      } 
+      // 4. Fallback: Check if resourceId matches a product or order
+      else if (resourceId) {
+        productSyncResult = await syncPrintifyProduct(resourceId, payload.resource?.data);
+        if (!productSyncResult?.success) {
+          orderSyncResult = await syncPrintifyOrder(resourceId).catch(() => null);
         }
       }
 
-      // 2. Forward to backend for compatibility
+      // Forward to backend for external catalog compatibility if configured
       const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
       try {
-        const response = await fetch(`${backendUrl}/api/printify/webhooks/receive`, {
+        await fetch(`${backendUrl}/api/printify/webhooks/receive`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
-        });
-        if (!response.ok) {
-          console.error(`[Printify Webhook] Backend returned status ${response.status}`);
-        }
-      } catch (forwardError) {
-        console.warn('[Printify Webhook] Backend forward note:', forwardError);
-      }
+        }).catch(() => null);
+      } catch (_) {}
 
-      return NextResponse.json({ received: true, synced: true });
+      return NextResponse.json({
+        received: true,
+        synced: true,
+        eventType,
+        resourceId,
+        productSync: productSyncResult,
+        orderSync: orderSyncResult,
+      });
     }
 
     // POST /api/printify/webhooks → register a new webhook

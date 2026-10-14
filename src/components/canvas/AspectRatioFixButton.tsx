@@ -10,6 +10,8 @@ interface AspectRatioFixButtonProps {
   activePrintFile: PrintFile | null;
   updateDesignPosition: (designId: number, updates: any) => void;
   onFixComplete?: () => void;
+  className?: string;
+  children?: React.ReactNode;
 }
 
 const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
@@ -18,6 +20,8 @@ const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
   activePrintFile,
   updateDesignPosition,
   onFixComplete,
+  className,
+  children,
 }) => {
   const [isFixing, setIsFixing] = useState(false);
 
@@ -52,7 +56,6 @@ const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
             );
 
           if (!isValid && correctedDimensions) {
-            // Apply the corrected dimensions
             updateDesignPosition(design.id, {
               width: correctedDimensions.width,
               height: correctedDimensions.height,
@@ -73,7 +76,6 @@ const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
         }
       }
 
-      // Show summary toast
       if (fixedCount > 0) {
         toast.success(
           `Fixed ${fixedCount} design${fixedCount !== 1 ? 's' : ''} for print compatibility!`
@@ -88,26 +90,37 @@ const AspectRatioFixButton: React.FC<AspectRatioFixButtonProps> = ({
     }
   };
 
+  const defaultClassName =
+    'group relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl disabled:cursor-not-allowed';
+
   return (
     <button
+      type="button"
       onClick={handleAutoFixAspectRatio}
       disabled={isFixing || !activePlacement}
-      className="group relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl disabled:cursor-not-allowed"
-      title="Auto-fix aspect ratio"
+      className={className || defaultClassName}
+      title="Auto-fix aspect ratio to match Printify print area specifications"
     >
-      <Zap className={`w-4 h-4 sm:w-5 sm:h-5 ${isFixing ? 'animate-spin' : ''}`} />
-
-      {/* Tooltip */}
-      <div className="absolute right-10 sm:right-12 top-1/2 -translate-y-1/2 hidden group-hover:block pointer-events-none z-50">
-        <div className="bg-gray-900 text-white text-xs rounded-lg px-2 sm:px-3 py-1 sm:py-2 whitespace-nowrap shadow-lg border border-gray-700">
-          <div className="font-semibold text-xs">Auto-fix</div>
-          <div className="text-blue-300 text-xs mt-0.5 font-mono">
-            {isFixing ? 'Fixing...' : 'Click to fix'}
+      {children ? (
+        <>
+          {children}
+          {isFixing && <span className="animate-spin text-xs">⏳</span>}
+        </>
+      ) : (
+        <>
+          <Zap className={`w-4 h-4 sm:w-5 sm:h-5 ${isFixing ? 'animate-spin' : ''}`} />
+          {/* Tooltip */}
+          <div className="absolute right-10 sm:right-12 top-1/2 -translate-y-1/2 hidden group-hover:block pointer-events-none z-50">
+            <div className="bg-gray-900 text-white text-xs rounded-lg px-2 sm:px-3 py-1 sm:py-2 whitespace-nowrap shadow-lg border border-gray-700">
+              <div className="font-semibold text-xs">Auto-fix</div>
+              <div className="text-blue-300 text-xs mt-0.5 font-mono">
+                {isFixing ? 'Fixing...' : 'Click to fix'}
+              </div>
+            </div>
+            <div className="absolute left-full top-1/2 -translate-y-1/2 border-8 border-transparent border-l-gray-900" />
           </div>
-        </div>
-        {/* Tooltip arrow */}
-        <div className="absolute left-full top-1/2 -translate-y-1/2 border-8 border-transparent border-l-gray-900" />
-      </div>
+        </>
+      )}
     </button>
   );
 };

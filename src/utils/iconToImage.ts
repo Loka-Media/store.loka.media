@@ -1,4 +1,148 @@
-// Convert icon/clipart to image and upload to get a public URL
+/**
+ * Graphics & Shapes converter for direct Printify printing
+ * Renders SVG shapes and customizable typography badges to high-res transparent PNGs.
+ */
+
+export interface GraphicShape {
+  id: string;
+  name: string;
+  category: 'Shapes' | 'Badges' | 'Symbols';
+  path: string;
+  defaultColor?: string;
+  viewBox?: string;
+}
+
+export const SHAPES_CATALOG: GraphicShape[] = [
+  {
+    id: 'star',
+    name: 'Star',
+    category: 'Shapes',
+    path: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+    viewBox: '0 0 24 24',
+  },
+  {
+    id: 'heart',
+    name: 'Heart',
+    category: 'Shapes',
+    path: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+    viewBox: '0 0 24 24',
+  },
+  {
+    id: 'crown',
+    name: 'Crown',
+    category: 'Symbols',
+    path: 'M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z',
+    viewBox: '0 0 24 24',
+  },
+  {
+    id: 'lightning',
+    name: 'Lightning',
+    category: 'Symbols',
+    path: 'M7 2v11h3v9l7-12h-4l4-8z',
+    viewBox: '0 0 24 24',
+  },
+  {
+    id: 'flame',
+    name: 'Flame',
+    category: 'Symbols',
+    path: 'M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM12 20c-3.31 0-6-2.69-6-6 0-1.53.58-2.92 1.53-3.98.05.82.35 1.58.84 2.21 1.09 1.41 2.91 1.95 4.54 1.25.96-.41 1.7-1.19 2.09-2.14.01.12.02.24.02.36 0 1.93-1.57 3.5-3.5 3.5-.96 0-1.84-.39-2.47-1.03-.39.63-.61 1.37-.61 2.16 0 2.07 1.68 3.75 3.75 3.75 1.83 0 3.34-1.31 3.67-3.04.53.86.83 1.88.83 2.97 0 3.31-2.69 6-6 6z',
+    viewBox: '0 0 24 24',
+  },
+  {
+    id: 'shield',
+    name: 'Shield',
+    category: 'Shapes',
+    path: 'M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z',
+    viewBox: '0 0 24 24',
+  },
+  {
+    id: 'circle',
+    name: 'Circle Badge',
+    category: 'Shapes',
+    path: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z',
+    viewBox: '0 0 24 24',
+  },
+  {
+    id: 'diamond',
+    name: 'Diamond',
+    category: 'Shapes',
+    path: 'M19 3H5L2 9l10 12L22 9l-3-6zM9.62 8l1.5-3h1.76l1.5 3H9.62zM11 10v6.68L5.44 10H11zm2 0h5.56L13 16.68V10zm3.08-2l-1.5-3h1.84l1.5 3h-1.84zm-9.08 0H5.16l1.5-3H8.5l-1.42 3z',
+    viewBox: '0 0 24 24',
+  },
+  {
+    id: 'divider-line',
+    name: 'Divider Line',
+    category: 'Shapes',
+    path: 'M2 11h20v2H2z',
+    viewBox: '0 0 24 24',
+  },
+];
+
+export interface TypographyBadge {
+  id: string;
+  title: string;
+  subtext?: string;
+  year?: string;
+  style: 'vintage' | 'bold' | 'arch' | 'badge';
+  defaultText: string;
+}
+
+export const TYPOGRAPHY_BADGES: TypographyBadge[] = [
+  {
+    id: 'rip-twenties',
+    title: 'R.I.P TWENTIES',
+    subtext: 'Death to My 20s',
+    style: 'bold',
+    defaultText: 'R.I.P\nTWENTIES',
+  },
+  {
+    id: 'mama-dude',
+    title: 'MAMA OF THE BIRTHDAY DUDE',
+    style: 'badge',
+    defaultText: 'MAMA\nOF THE\nBIRTHDAY DUDE',
+  },
+  {
+    id: 'finally-legal',
+    title: 'FINALLY LEGAL',
+    subtext: "21st Birthday",
+    style: 'vintage',
+    defaultText: "Hailey's 21st Birthday\nFINALLY\nLEGAL",
+  },
+  {
+    id: 'birthday-crew',
+    title: "MARTIN'S 50TH BIRTHDAY CREW",
+    style: 'badge',
+    defaultText: "Martin's 50th\nBIRTHDAY\nCrew",
+  },
+  {
+    id: 'cruisin-60',
+    title: "CRUISIN' MY WAY INTO 60",
+    style: 'vintage',
+    defaultText: "CRUISIN'\nMY WAY\ninto 60",
+  },
+  {
+    id: 'certified-classic',
+    title: '60 YEARS CERTIFIED CLASSIC',
+    style: 'bold',
+    defaultText: '60 YEARS\nCERTIFIED\nCLASSIC',
+  },
+  {
+    id: 'vintage-legend',
+    title: 'VINTAGE 1994 LEGEND',
+    style: 'badge',
+    defaultText: 'VINTAGE 1994\nLIMITED EDITION\nALL ORIGINAL PARTS',
+  },
+  {
+    id: 'lifetime-member',
+    title: 'LIFETIME MEMBER',
+    style: 'arch',
+    defaultText: 'COFFEE LOVERS CLUB\nEST. 2024\nLIFETIME MEMBER',
+  },
+];
+
+/**
+ * Converts an SVG string into a transparent PNG Blob
+ */
 export const convertSvgToImage = async (
   svgString: string,
   options: {
@@ -8,136 +152,110 @@ export const convertSvgToImage = async (
     iconColor?: string;
   } = {}
 ): Promise<Blob> => {
-  const {
-    width = 512,
-    height = 512,
-    backgroundColor = 'transparent',
-    iconColor = '#000000'
-  } = options;
+  const { width = 1000, height = 1000, backgroundColor = 'transparent', iconColor = '#FFFFFF' } = options;
 
   return new Promise((resolve, reject) => {
-    // Create SVG with proper styling
-    const styledSvg = svgString
-      .replace(/fill="[^"]*"/g, `fill="${iconColor}"`)
-      .replace(/stroke="[^"]*"/g, `stroke="${iconColor}"`);
-    
-    const svgBlob = new Blob([styledSvg], { type: 'image/svg+xml' });
+    // Replace any fill/stroke color with target color
+    let styledSvg = svgString;
+    if (!styledSvg.includes('xmlns')) {
+      styledSvg = styledSvg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+
+    const svgBlob = new Blob([styledSvg], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
-    
+
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
-      
       canvas.width = width;
       canvas.height = height;
-      
-      // Set background if not transparent
+      const ctx = canvas.getContext('2d')!;
+
       if (backgroundColor !== 'transparent') {
         ctx.fillStyle = backgroundColor;
         ctx.fillRect(0, 0, width, height);
       }
-      
-      // Draw the SVG
+
       ctx.drawImage(img, 0, 0, width, height);
-      
+
       canvas.toBlob((blob) => {
         URL.revokeObjectURL(url);
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error('Failed to convert SVG to blob'));
-        }
+        if (blob) resolve(blob);
+        else reject(new Error('Failed to convert SVG to blob'));
       }, 'image/png');
     };
-    
+
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error('Failed to load SVG'));
+      reject(new Error('Failed to load SVG into image element'));
     };
-    
+
     img.src = url;
   });
 };
 
-// Icon name to SVG path mapping for common Lucide icons
-const ICON_PATHS: Record<string, string> = {
-  Heart: 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z',
-  Star: 'm12 2 3.09 6.26L22 9l-5 4.87 1.18 6.88L12 17.77l-6.18 2.98L7 14.87 2 9l6.91-1.74L12 2Z',
-  Smile: 'M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z',
-  Sun: 'M12 2v2M12 20v2m8-10h2M2 12h2m15.364-6.364L18.95 7.05M5.636 18.364L7.05 16.95m12.728 0L18.364 18.364M5.636 5.636L7.05 7.05M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z',
-  Moon: 'M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z',
-  Coffee: 'M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3',
-  Camera: 'M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3zM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z',
-  Music: 'M9 18V5l12-2v13M9 9l12-2',
-  Car: 'M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0M5 17H3v-6l2-5h9l4 5v6h-2',
-  Home: 'm3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10',
-  Gift: 'M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z'
+/**
+ * Converts a shape from the catalog and uploads directly to Printify
+ */
+export const uploadShapeAsImage = async (
+  shape: GraphicShape,
+  color: string = '#FFFFFF'
+): Promise<{ id: string; url: string; filename: string }> => {
+  const { printifyAPI } = await import('../lib/api');
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="${shape.viewBox || '0 0 24 24'}" width="1000" height="1000">
+      <path d="${shape.path}" fill="${color}" stroke="${color}" stroke-width="0.5" stroke-linejoin="round"/>
+    </svg>
+  `;
+
+  const blob = await convertSvgToImage(svg, { width: 1000, height: 1000, iconColor: color });
+
+  const filename = `shape_${shape.id}_${Date.now()}.png`;
+  const file = new File([blob], filename, { type: 'image/png' });
+
+  const result = await printifyAPI.uploadFileDirectly(file);
+  const uploaded = result?.result || result;
+
+  return {
+    id: uploaded.id || String(Date.now()),
+    url: (uploaded.file_url || uploaded.url || '').replace(/%25/g, '%'),
+    filename,
+  };
 };
 
-const getIconName = (IconComponent: React.ComponentType): string => {
-  return IconComponent.displayName || IconComponent.name || 'Star';
+export const getIconSvgData = (IconComponent: any, color: string = '#000000'): string => {
+  const iconName = IconComponent?.displayName || IconComponent?.name || 'Star';
+  const shape = SHAPES_CATALOG.find(s => s.name.toLowerCase() === iconName.toLowerCase()) || SHAPES_CATALOG[0];
+  return `<svg width="512" height="512" viewBox="${shape.viewBox || '0 0 24 24'}" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="${shape.path}" fill="${color}" stroke="${color}" stroke-width="1"/>
+  </svg>`;
 };
 
 export const convertIconToImage = async (
-  IconComponent: React.ComponentType,
+  IconComponent: any,
   options: {
     size?: number;
     color?: string;
     backgroundColor?: string;
   } = {}
 ): Promise<Blob> => {
-  const {
-    size = 512,
-    color = '#000000',
-    backgroundColor = 'transparent'
-  } = options;
-
-  return new Promise((resolve, reject) => {
-    const iconName = getIconName(IconComponent);
-    const iconPath = ICON_PATHS[iconName] || ICON_PATHS.Star;
-    
-    // Create SVG string
-    const svgString = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="${iconPath}" fill="${color}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>`;
-    
-    // Convert SVG to image using the existing function
-    convertSvgToImage(svgString, {
-      width: size,
-      height: size,
-      backgroundColor,
-      iconColor: color
-    }).then(resolve).catch(reject);
-  });
+  const { size = 512, color = '#000000', backgroundColor = 'transparent' } = options;
+  const svg = getIconSvgData(IconComponent, color);
+  return convertSvgToImage(svg, { width: size, height: size, backgroundColor, iconColor: color });
 };
 
 export const uploadIconAsImage = async (
   iconData: Blob,
   iconName: string
 ): Promise<{ url: string; filename: string }> => {
-  // Import the printifyAPI to use existing upload infrastructure
   const { printifyAPI } = await import('../lib/api');
-  
-  // Create a File object from the blob
   const filename = `clipart-${iconName}-${Date.now()}.png`;
   const file = new File([iconData], filename, { type: 'image/png' });
-  
-  // Use the existing upload method
   const result = await printifyAPI.uploadFileDirectly(file);
-  
+  const uploaded = result?.result || result;
   return {
-    url: result.result.file_url,
-    filename: filename,
+    url: (uploaded.file_url || uploaded.url || '').replace(/%25/g, '%'),
+    filename,
   };
-};
-
-// Helper function to get icon SVG data
-export const getIconSvgData = (IconComponent: React.ComponentType, color: string = '#000000'): string => {
-  const iconName = getIconName(IconComponent);
-  const iconPath = ICON_PATHS[iconName] || ICON_PATHS.Star;
-  
-  return `<svg width="512" height="512" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="${iconPath}" fill="${color}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`;
 };

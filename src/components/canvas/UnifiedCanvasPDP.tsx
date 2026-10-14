@@ -39,6 +39,7 @@ import {
   Layers,
   BookOpen,
   Footprints,
+  Sliders,
 } from "lucide-react";
 import { Slider } from "@mui/material";
 import toast from "react-hot-toast";
@@ -59,6 +60,7 @@ import { calculateFinalRetailPrice, calculateRetailPriceFromMarkup, ensure99Pric
 
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition, calculateAspectRatioAwareDimensions } from "./utils";
 import DesignCanvasTab from "./DesignCanvasTab";
+import StudioToolsPanel from "./StudioToolsPanel";
 import PrintingTechniqueSelector from "./PrintingTechniqueSelector";
 import { RegionalAvailabilityPreview } from "./RegionalAvailabilityPreview";
 import { FrontSVG, BackSVG, LeftSleeveSVG, RightSleeveSVG, CollarSVG } from "./PlacementSVGs";
@@ -899,6 +901,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const [selectedDesignFile, setSelectedDesignFile] = useState<any | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<number | string | undefined>();
   const [aspectRatioIssues, setAspectRatioIssues] = useState<any[]>([]);
+  const [isAllAreasView, setIsAllAreasView] = useState<boolean>(false);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [activeColor, setActiveColor] = useState<string>("");
@@ -1043,14 +1046,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     // In Printify, a wraparound book/journal is split into Front Cover and Back Cover (strictly 2 options)
     const title = ((selectedProduct?.title || selectedProduct?.name || "") as string).toLowerCase();
     const isWraparoundBookOrJournal = (() => {
-      if (title.includes("journal") || title.includes("notebook") || title.includes("book") || title.includes("diary")) {
-        return true;
-      }
-      const pf = printFiles?.printfiles?.[0];
-      if (pf && pf.width && pf.height && (pf.width / pf.height > 1.25) && pf.width >= 3000) {
-        return true;
-      }
-      return false;
+      const isBookTitle = title.includes("journal") || title.includes("notebook") || title.includes("book") || title.includes("diary");
+      if (!isBookTitle) return false;
+      return true;
     })();
 
     if (isWraparoundBookOrJournal) {
@@ -1099,6 +1097,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       "back_right_leg",
       "left_leg",
       "right_leg",
+      "waistband",
       "left_side",
       "right_side",
       "mug_front",
@@ -1151,6 +1150,23 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       }
     }
   }, [printFiles, selectedProduct, activePlacement, getSupportedPlacements]);
+
+  // Check if current product is Joggers, Sweatpants, Pants, or AOP apparel
+  const isAOPGarment = useMemo(() => {
+    const title = ((selectedProduct?.title || selectedProduct?.name || "") as string).toLowerCase();
+    const type = ((selectedProduct?.type_name || selectedProduct?.brand || "") as string).toLowerCase();
+    const searchStr = `${title} ${type}`;
+    const supported = getSupportedPlacements();
+    return (
+      searchStr.includes("jogger") ||
+      searchStr.includes("pant") ||
+      searchStr.includes("sweatpant") ||
+      searchStr.includes("trouser") ||
+      searchStr.includes("legging") ||
+      searchStr.includes("aop") ||
+      supported.some((p) => p.includes("leg") || p.includes("waistband") || p.includes("pocket"))
+    );
+  }, [selectedProduct, getSupportedPlacements]);
 
   const dataUrlToFile = async (dataUrl: string, filename: string): Promise<File> => {
     const response = await fetch(dataUrl);
@@ -2932,90 +2948,21 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   Upload & Position Your Design
                 </h3>
 
-                {/* Choose Artwork */}
-                <div className="space-y-3">
-                  <label className="text-xs sm:text-sm font-semibold text-gray-300 block">
-                    Choose Artwork
-                  </label>
-
-                  {/* Upload Dropzone (Brown tint with dashed orange border) */}
-                  <div
-                    id="field-artwork"
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 cursor-pointer transition-all duration-300 scroll-mt-48 flex items-center gap-4 ${isDragging
-                      ? "border-[#FF6D1F] bg-[#FF6D1F]/20 scale-[1.01]"
-                      : "border-[#8E5B37] bg-[#241A14] hover:bg-[#2C1F18]"
-                      }`}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      accept=".png,.jpg,.jpeg,.svg,.webp"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <div className="w-12 h-12 rounded-xl bg-[#FF6D1F]/20 border border-[#FF6D1F]/30 flex items-center justify-center text-[#FF6D1F] flex-shrink-0">
-                      <Upload className="w-6 h-6" />
-                    </div>
-                    <div className="flex-1 min-w-0 text-left">
-                      <p className="text-xs sm:text-sm font-bold text-white">Upload New Artwork</p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">PNG, SVG, JPG. Transparent PNG recommended</p>
-                    </div>
-                    {uploadingFile && (
-                      <div className="flex items-center gap-2 text-xs font-bold text-orange-400 flex-shrink-0">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#FF6D1F]" />
-                        <span>Uploading...</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Artwork Library */}
-                  {uploadedFiles.length > 0 && (
-                    <div className="space-y-2 pt-1">
-                      <div className="flex items-center justify-between text-xs text-gray-400">
-                        <span>Your Artwork Library ({uploadedFiles.length})</span>
-                        <span className="text-[11px] text-[#FF6D1F]">Click to place on product</span>
-                      </div>
-                      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 max-h-[260px] overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-orange-500/30 scrollbar-track-transparent">
-                        {uploadedFiles.map((file) => {
-                          const hasAssigned = designFiles.find(
-                            (d) => d.placement === activePlacement && (d.file_id === file.id || d.url === (file.file_url || file.preview_url || file.thumbnail_url))
-                          );
-                          return (
-                            <div
-                              key={file.id}
-                              onClick={() => handleAddDesign(file)}
-                              className={`group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all bg-black/60 ${hasAssigned
-                                ? "border-[#FF6D1F] ring-2 ring-orange-500/50 shadow-md shadow-orange-500/30"
-                                : "border-white/10 hover:border-orange-500/50 hover:scale-[1.02]"
-                                }`}
-                              title="Click to place on product"
-                            >
-                              <img
-                                src={file.thumbnail_url || file.file_url || file.preview_url}
-                                alt="Artwork"
-                                className="w-full h-full object-contain p-1.5 bg-gray-900"
-                              />
-                              {hasAssigned ? (
-                                <div className="absolute top-1.5 right-1.5 bg-[#FF6D1F] text-white p-0.5 rounded-full shadow">
-                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
-                                </div>
-                              ) : (
-                                <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <Plus className="w-4 h-4 text-white" />
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {/* Studio Tools (Uploads | Add Text & Google Fonts | Graphics & Shapes) */}
+                <StudioToolsPanel
+                  activePlacement={activePlacement}
+                  activePlacementLabel={getPlacementLabel(activePlacement)}
+                  onAddDesignFile={handleAddDesign}
+                  uploadedFiles={uploadedFiles}
+                  designFiles={designFiles}
+                  onUploadFile={handleFileChange}
+                  uploadingFile={uploadingFile}
+                  fileInputRef={fileInputRef}
+                  isDragging={isDragging}
+                  handleDragOver={handleDragOver}
+                  handleDragLeave={handleDragLeave}
+                  handleDrop={handleDrop}
+                />
 
                 {/* Print side */}
                 <div className="space-y-3 pt-2">
@@ -3023,13 +2970,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <label className="text-xs sm:text-sm font-semibold text-gray-300">Print side</label>
                     <div className="flex items-center gap-2 flex-wrap">
                       {getSupportedPlacements().map((placement) => {
-                        const isActive = activePlacement === placement;
+                        const isActive = activePlacement === placement && !isAllAreasView;
                         const hasAssigned = designFiles.find((d) => d.placement === placement);
                         return (
                           <button
                             key={placement}
                             type="button"
-                            onClick={() => handlePlacementSelect(placement)}
+                            onClick={() => {
+                              setIsAllAreasView(false);
+                              handlePlacementSelect(placement);
+                            }}
                             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${isActive
                               ? "bg-[#FF6D1F] text-white shadow-md shadow-orange-500/30"
                               : hasAssigned
@@ -3044,6 +2994,20 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           </button>
                         );
                       })}
+                      {isAOPGarment && (
+                        <button
+                          type="button"
+                          onClick={() => setIsAllAreasView(!isAllAreasView)}
+                          className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                            isAllAreasView
+                              ? "bg-purple-600 text-white shadow-md shadow-purple-500/30 ring-2 ring-purple-400/50"
+                              : "bg-black/60 border border-purple-500/30 text-purple-300 hover:border-purple-400 hover:text-white"
+                          }`}
+                        >
+                          <Eye className="w-3.5 h-3.5 text-purple-300" />
+                          <span>All areas (view only)</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -3175,85 +3139,35 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   })()}
                 </div>
 
-                {/* Interactive Design Studio & Alignment Tools */}
+                {/* Interactive Design Studio & Canvas */}
                 <div className="space-y-3 pt-3 border-t border-white/5">
-                  <div className="flex flex-wrap items-center justify-between gap-2.5 p-3 bg-black/40 border border-white/10 rounded-2xl text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="text-orange-400 font-bold uppercase tracking-wider text-[11px]">
-                        Canvas Placement: {getPlacementLabel(activePlacement)}
-                      </span>
-                      {designFiles.some((d) => d.placement === activePlacement) ? (
-                        <span className="text-[10px] text-green-400 font-bold bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                          <Check className="w-2.5 h-2.5" /> Design Active
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-orange-400 font-bold bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
-                          Select artwork above
-                        </span>
-                      )}
-                    </div>
-                    {designFiles.some((d) => d.placement === activePlacement) && (
+                  <div className="bg-gradient-to-b from-gray-900/80 to-black/90 rounded-2xl border border-white/10 p-3 sm:p-5 shadow-2xl">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10 text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-400 text-[11px]">Align:</span>
-                        <button
-                          type="button"
-                          onClick={() => handleCenterDesign("center")}
-                          className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 cursor-pointer"
-                        >
-                          Center
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleCenterDesign("top-center")}
-                          className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 cursor-pointer"
-                        >
-                          Top
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleCenterDesign("bottom-center")}
-                          className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 cursor-pointer"
-                        >
-                          Bottom
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleRemoveDesignBackground}
-                          disabled={!selectedDesignFile || isRemovingBackground}
-                          className="px-2.5 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 cursor-pointer disabled:opacity-50"
-                        >
-                          ✨ AI BG
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveDesign(activePlacement)}
-                          className="px-2 py-1 text-red-400 hover:text-red-300 text-xs cursor-pointer"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Interactive Canvas */}
-                  <div className="bg-black/60 rounded-2xl border border-white/10 p-3 sm:p-4">
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/5 text-xs text-gray-400">
-                      <div className="flex items-center gap-2">
-                        <span>Adjust & Resize Artwork</span>
+                        <span className="font-clash font-bold text-white text-sm sm:text-base tracking-wide flex items-center gap-1.5">
+                          <Sliders className="w-4 h-4 text-[#FF6D1F]" />
+                          Adjust & Resize Artwork
+                        </span>
+                        <span className="text-[11px] font-semibold text-[#FF6D1F] bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 rounded-full capitalize">
+                          {getPlacementLabel(activePlacement)}
+                        </span>
                         {(() => {
                           const apf = getActivePrintFile(printFiles, selectedVariants, activePlacement);
                           if (apf?.width && apf?.height) {
                             return (
-                              <span className="text-[11px] text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full font-medium">
-                                Print area: {apf.width} × {apf.height} px
+                              <span className="text-[11px] text-gray-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-mono">
+                                {apf.width} × {apf.height} px
                               </span>
                             );
                           }
                           return null;
                         })()}
                       </div>
-                      <span className="text-[11px] text-gray-500">Drag corners to resize · Move design anywhere on print area</span>
+                      <span className="text-[11px] text-gray-400 hidden sm:inline-block">
+                        Drag corner dots to resize · Move design anywhere on print area
+                      </span>
                     </div>
+
                     <div className="w-full flex items-center justify-center min-h-[340px]">
                       <DesignCanvasTab
                         designFiles={designFiles}
@@ -3269,6 +3183,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         onAspectRatioIssues={handleSetAspectRatioIssues}
                         aspectRatioIssues={aspectRatioIssues}
                         hidePlacementTabs={true}
+                        productTitle={selectedProduct?.title || selectedProduct?.name || ""}
+                        productType={selectedProduct?.type_name || selectedProduct?.brand || ""}
+                        onRemoveDesign={handleRemoveDesign}
+                        onRemoveBackground={handleRemoveDesignBackground}
+                        isRemovingBackground={isRemovingBackground}
+                        isAllAreasView={isAllAreasView}
+                        setIsAllAreasView={setIsAllAreasView}
                       />
                     </div>
                   </div>

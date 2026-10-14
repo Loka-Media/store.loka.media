@@ -25,11 +25,15 @@ export const getUniqueSizes = (product: Product): string[] => {
   return [...new Set(product?.variants?.map((v) => v.size) || [])];
 };
 
-export const getCanvasDimensions = (activePrintFile: PrintFile | null) => {
-  if (!activePrintFile) {
+export const getCanvasDimensions = (
+  activePrintFile: PrintFile | null,
+  maxBoundingWidth = 580,
+  maxBoundingHeight = 380
+) => {
+  if (!activePrintFile || !activePrintFile.width || !activePrintFile.height) {
     return { 
-      width: 400, 
-      height: 400, 
+      width: 440, 
+      height: 360, 
       aspectRatio: 1,
       printWidth: 0,
       printHeight: 0,
@@ -40,25 +44,30 @@ export const getCanvasDimensions = (activePrintFile: PrintFile | null) => {
   const { width, height } = activePrintFile;
   const aspectRatio = width / height;
   
-  // Maximum canvas bounding dimensions that fit within the editor card
-  const maxCanvasWidth = 460;
-  const maxCanvasHeight = 420;
+  // Responsive canvas bounding box
+  const maxCanvasWidth = maxBoundingWidth || 580;
+  const maxCanvasHeight = maxBoundingHeight || 380;
   
-  let canvasWidth = maxCanvasWidth;
-  let canvasHeight = maxCanvasHeight;
+  let canvasWidth: number;
+  let canvasHeight: number;
   
   if (aspectRatio >= 1) {
-    // Landscape print area (e.g. tumblers, mugs, wraps)
+    // Landscape print area (e.g. waistbands, mugs, blankets, panoramic prints)
     canvasWidth = maxCanvasWidth;
     canvasHeight = Math.round(canvasWidth / aspectRatio);
     
-    // Ensure minimal usable height
-    if (canvasHeight < 140) {
-      canvasHeight = 140;
-      canvasWidth = Math.min(maxCanvasWidth, Math.round(canvasHeight * aspectRatio));
+    if (canvasHeight > maxCanvasHeight) {
+      canvasHeight = maxCanvasHeight;
+      canvasWidth = Math.round(canvasHeight * aspectRatio);
+    }
+    
+    // Maintain a comfortable minimum height for very wide banners/waistbands
+    if (canvasHeight < 120) {
+      canvasHeight = 120;
+      canvasWidth = Math.round(canvasHeight * aspectRatio);
     }
   } else {
-    // Portrait print area (e.g. tees, hoodies, posters)
+    // Portrait print area (e.g. tees, hoodies, posters, joggers leg)
     canvasHeight = maxCanvasHeight;
     canvasWidth = Math.round(canvasHeight * aspectRatio);
     
@@ -66,12 +75,18 @@ export const getCanvasDimensions = (activePrintFile: PrintFile | null) => {
       canvasWidth = maxCanvasWidth;
       canvasHeight = Math.round(canvasWidth / aspectRatio);
     }
+    
+    // Maintain a comfortable minimum width for very tall vertical strips
+    if (canvasWidth < 140) {
+      canvasWidth = 140;
+      canvasHeight = Math.round(canvasWidth / aspectRatio);
+    }
   }
   
-  const printAreaInfo = `Print Area: ${width}×${height}px (${aspectRatio > 1 ? 'Landscape' : aspectRatio < 1 ? 'Portrait' : 'Square'})`;
+  const printAreaInfo = `Print Area: ${width}×${height}px (${aspectRatio > 1.15 ? 'Landscape' : aspectRatio < 0.85 ? 'Portrait' : 'Square'})`;
   
   return {
-    width: Math.min(maxCanvasWidth, Math.round(canvasWidth)),
+    width: Math.round(canvasWidth),
     height: Math.round(canvasHeight),
     aspectRatio,
     printWidth: width,
@@ -84,61 +99,97 @@ export const applyQuickPosition = (
   position: string,
   designFile: DesignFile | null,
   activePrintFile: PrintFile | null,
-  onUpdateDesign: (updatedDesign: DesignFile) => void
+  onUpdateDesign: (updatedDesign: DesignFile) => void,
+  customScaleRatio?: number
 ) => {
   if (!designFile || !activePrintFile) return;
 
-  const { width, height } = designFile.position;
   const { width: areaWidth, height: areaHeight } = activePrintFile;
+  let { width, height, left, top } = designFile.position;
 
-  let newPosition = { ...designFile.position };
+  // Calculate natural aspect ratio of the design
+  const designRatio = (width > 0 && height > 0) ? width / height : 1;
 
-  switch (position) {
-    case 'center':
-      newPosition.left = (areaWidth - width) / 2;
-      newPosition.top = (areaHeight - height) / 2;
-      break;
-    case 'top-left':
-      newPosition.left = 0;
-      newPosition.top = 0;
-      break;
-    case 'top-center':
-      newPosition.left = (areaWidth - width) / 2;
-      newPosition.top = 0;
-      break;
-    case 'top-right':
-      newPosition.left = areaWidth - width;
-      newPosition.top = 0;
-      break;
-    case 'center-left':
-      newPosition.left = 0;
-      newPosition.top = (areaHeight - height) / 2;
-      break;
-    case 'center-right':
-      newPosition.left = areaWidth - width;
-      newPosition.top = (areaHeight - height) / 2;
-      break;
-    case 'bottom-left':
-      newPosition.left = 0;
-      newPosition.top = areaHeight - height;
-      break;
-    case 'bottom-center':
-      newPosition.left = (areaWidth - width) / 2;
-      newPosition.top = areaHeight - height;
-      break;
-    case 'bottom-right':
-      newPosition.left = areaWidth - width;
-      newPosition.top = areaHeight - height;
-      break;
+  // Max size design can occupy within print area without overflowing
+  const maxFitWidth = (areaWidth / areaHeight > designRatio) ? (areaHeight * designRatio) : areaWidth;
+  const maxFitHeight = maxFitWidth / designRatio;
+
+  if (position === 'fit') {
+    // Fit cleanly inside print area with comfortable safe margins (85% of max fit)
+    width = Math.round(maxFitWidth * 0.85);
+    height = Math.round(maxFitHeight * 0.85);
+    left = Math.round((areaWidth - width) / 2);
+    top = Math.round((areaHeight - height) / 2);
+  } else if (position === 'fill') {
+    // Fill print area completely (covering full width or height)
+    width = Math.round(maxFitWidth);
+    height = Math.round(maxFitHeight);
+    left = Math.round((areaWidth - width) / 2);
+    top = Math.round((areaHeight - height) / 2);
+  } else if (position === 'scale' && typeof customScaleRatio === 'number') {
+    // Scale around the current center point
+    const currentCenterX = left + width / 2;
+    const currentCenterY = top + height / 2;
+    const clampedScale = Math.max(0.1, Math.min(customScaleRatio, 1.25));
+    width = Math.round(maxFitWidth * clampedScale);
+    height = Math.round(maxFitHeight * clampedScale);
+    left = Math.round(currentCenterX - width / 2);
+    top = Math.round(currentCenterY - height / 2);
+  } else {
+    // Standard alignment presets
+    switch (position) {
+      case 'center':
+        left = (areaWidth - width) / 2;
+        top = (areaHeight - height) / 2;
+        break;
+      case 'top-left':
+        left = 0;
+        top = 0;
+        break;
+      case 'top-center':
+        left = (areaWidth - width) / 2;
+        top = 0;
+        break;
+      case 'top-right':
+        left = areaWidth - width;
+        top = 0;
+        break;
+      case 'center-left':
+        left = 0;
+        top = (areaHeight - height) / 2;
+        break;
+      case 'center-right':
+        left = areaWidth - width;
+        top = (areaHeight - height) / 2;
+        break;
+      case 'bottom-left':
+        left = 0;
+        top = areaHeight - height;
+        break;
+      case 'bottom-center':
+        left = (areaWidth - width) / 2;
+        top = areaHeight - height;
+        break;
+      case 'bottom-right':
+        left = areaWidth - width;
+        top = areaHeight - height;
+        break;
+    }
   }
 
   // CRITICAL FIX: Clamp position values to prevent negative coordinates and overflow
-  newPosition.left = Math.max(0, Math.min(newPosition.left, areaWidth - width));
-  newPosition.top = Math.max(0, Math.min(newPosition.top, areaHeight - height));
+  left = Math.round(Math.max(0, Math.min(left, Math.max(0, areaWidth - width))));
+  top = Math.round(Math.max(0, Math.min(top, Math.max(0, areaHeight - height))));
 
   const updatedDesign = {
     ...designFile,
-    position: newPosition
+    position: {
+      ...designFile.position,
+      width: Math.max(20, Math.round(width)),
+      height: Math.max(20, Math.round(height)),
+      left,
+      top,
+    }
   };
 
   onUpdateDesign(updatedDesign);

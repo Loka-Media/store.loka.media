@@ -776,8 +776,6 @@ function GlobalCatalogSearch({
                             <span>{product.sizesCount || 4} sizes</span>
                             <span>•</span>
                             <span>{product.colorsCount || 5} colors</span>
-                            <span>•</span>
-                            <span className="text-emerald-400 font-medium">Cost: ${pppPrice}</span>
                           </div>
                         </div>
 
