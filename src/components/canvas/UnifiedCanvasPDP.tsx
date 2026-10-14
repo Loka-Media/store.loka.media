@@ -60,7 +60,6 @@ import { calculateFinalRetailPrice, calculateRetailPriceFromMarkup, ensure99Pric
 
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition, calculateAspectRatioAwareDimensions } from "./utils";
 import DesignCanvasTab from "./DesignCanvasTab";
-import StudioToolsPanel from "./StudioToolsPanel";
 import PrintingTechniqueSelector from "./PrintingTechniqueSelector";
 import { RegionalAvailabilityPreview } from "./RegionalAvailabilityPreview";
 import { FrontSVG, BackSVG, LeftSleeveSVG, RightSleeveSVG, CollarSVG } from "./PlacementSVGs";
@@ -901,7 +900,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const [selectedDesignFile, setSelectedDesignFile] = useState<any | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<number | string | undefined>();
   const [aspectRatioIssues, setAspectRatioIssues] = useState<any[]>([]);
-  const [isAllAreasView, setIsAllAreasView] = useState<boolean>(false);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [activeColor, setActiveColor] = useState<string>("");
@@ -1046,9 +1044,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     // In Printify, a wraparound book/journal is split into Front Cover and Back Cover (strictly 2 options)
     const title = ((selectedProduct?.title || selectedProduct?.name || "") as string).toLowerCase();
     const isWraparoundBookOrJournal = (() => {
-      const isBookTitle = title.includes("journal") || title.includes("notebook") || title.includes("book") || title.includes("diary");
-      if (!isBookTitle) return false;
-      return true;
+      if (title.includes("journal") || title.includes("notebook") || title.includes("book") || title.includes("diary")) {
+        return true;
+      }
+      const pf = printFiles?.printfiles?.[0];
+      if (pf && pf.width && pf.height && (pf.width / pf.height > 1.25) && pf.width >= 3000) {
+        return true;
+      }
+      return false;
     })();
 
     if (isWraparoundBookOrJournal) {
@@ -1097,7 +1100,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       "back_right_leg",
       "left_leg",
       "right_leg",
-      "waistband",
       "left_side",
       "right_side",
       "mug_front",
@@ -1150,23 +1152,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       }
     }
   }, [printFiles, selectedProduct, activePlacement, getSupportedPlacements]);
-
-  // Check if current product is Joggers, Sweatpants, Pants, or AOP apparel
-  const isAOPGarment = useMemo(() => {
-    const title = ((selectedProduct?.title || selectedProduct?.name || "") as string).toLowerCase();
-    const type = ((selectedProduct?.type_name || selectedProduct?.brand || "") as string).toLowerCase();
-    const searchStr = `${title} ${type}`;
-    const supported = getSupportedPlacements();
-    return (
-      searchStr.includes("jogger") ||
-      searchStr.includes("pant") ||
-      searchStr.includes("sweatpant") ||
-      searchStr.includes("trouser") ||
-      searchStr.includes("legging") ||
-      searchStr.includes("aop") ||
-      supported.some((p) => p.includes("leg") || p.includes("waistband") || p.includes("pocket"))
-    );
-  }, [selectedProduct, getSupportedPlacements]);
 
   const dataUrlToFile = async (dataUrl: string, filename: string): Promise<File> => {
     const response = await fetch(dataUrl);
@@ -2948,21 +2933,90 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   Upload & Position Your Design
                 </h3>
 
-                {/* Studio Tools (Uploads | Add Text & Google Fonts | Graphics & Shapes) */}
-                <StudioToolsPanel
-                  activePlacement={activePlacement}
-                  activePlacementLabel={getPlacementLabel(activePlacement)}
-                  onAddDesignFile={handleAddDesign}
-                  uploadedFiles={uploadedFiles}
-                  designFiles={designFiles}
-                  onUploadFile={handleFileChange}
-                  uploadingFile={uploadingFile}
-                  fileInputRef={fileInputRef}
-                  isDragging={isDragging}
-                  handleDragOver={handleDragOver}
-                  handleDragLeave={handleDragLeave}
-                  handleDrop={handleDrop}
-                />
+                {/* Choose Artwork */}
+                <div className="space-y-3">
+                  <label className="text-xs sm:text-sm font-semibold text-gray-300 block">
+                    Choose Artwork
+                  </label>
+
+                  {/* Upload Dropzone (Brown tint with dashed orange border) */}
+                  <div
+                    id="field-artwork"
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 cursor-pointer transition-all duration-300 scroll-mt-48 flex items-center gap-4 ${isDragging
+                      ? "border-[#FF6D1F] bg-[#FF6D1F]/20 scale-[1.01]"
+                      : "border-[#8E5B37] bg-[#241A14] hover:bg-[#2C1F18]"
+                      }`}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept=".png,.jpg,.jpeg,.svg,.webp"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <div className="w-12 h-12 rounded-xl bg-[#FF6D1F]/20 border border-[#FF6D1F]/30 flex items-center justify-center text-[#FF6D1F] flex-shrink-0">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-xs sm:text-sm font-bold text-white">Upload New Artwork</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">PNG, SVG, JPG. Transparent PNG recommended</p>
+                    </div>
+                    {uploadingFile && (
+                      <div className="flex items-center gap-2 text-xs font-bold text-orange-400 flex-shrink-0">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#FF6D1F]" />
+                        <span>Uploading...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Artwork Library */}
+                  {uploadedFiles.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        <span>Your Artwork Library ({uploadedFiles.length})</span>
+                        <span className="text-[11px] text-[#FF6D1F]">Click to place on product</span>
+                      </div>
+                      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 max-h-[260px] overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-orange-500/30 scrollbar-track-transparent">
+                        {uploadedFiles.map((file) => {
+                          const hasAssigned = designFiles.find(
+                            (d) => d.placement === activePlacement && (d.file_id === file.id || d.url === (file.file_url || file.preview_url || file.thumbnail_url))
+                          );
+                          return (
+                            <div
+                              key={file.id}
+                              onClick={() => handleAddDesign(file)}
+                              className={`group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all bg-black/60 ${hasAssigned
+                                ? "border-[#FF6D1F] ring-2 ring-orange-500/50 shadow-md shadow-orange-500/30"
+                                : "border-white/10 hover:border-orange-500/50 hover:scale-[1.02]"
+                                }`}
+                              title="Click to place on product"
+                            >
+                              <img
+                                src={file.thumbnail_url || file.file_url || file.preview_url}
+                                alt="Artwork"
+                                className="w-full h-full object-contain p-1.5 bg-gray-900"
+                              />
+                              {hasAssigned ? (
+                                <div className="absolute top-1.5 right-1.5 bg-[#FF6D1F] text-white p-0.5 rounded-full shadow">
+                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                </div>
+                              ) : (
+                                <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <Plus className="w-4 h-4 text-white" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Print side */}
                 <div className="space-y-3 pt-2">
@@ -2970,16 +3024,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <label className="text-xs sm:text-sm font-semibold text-gray-300">Print side</label>
                     <div className="flex items-center gap-2 flex-wrap">
                       {getSupportedPlacements().map((placement) => {
-                        const isActive = activePlacement === placement && !isAllAreasView;
+                        const isActive = activePlacement === placement;
                         const hasAssigned = designFiles.find((d) => d.placement === placement);
                         return (
                           <button
                             key={placement}
                             type="button"
-                            onClick={() => {
-                              setIsAllAreasView(false);
-                              handlePlacementSelect(placement);
-                            }}
+                            onClick={() => handlePlacementSelect(placement)}
                             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${isActive
                               ? "bg-[#FF6D1F] text-white shadow-md shadow-orange-500/30"
                               : hasAssigned
@@ -2994,20 +3045,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           </button>
                         );
                       })}
-                      {isAOPGarment && (
-                        <button
-                          type="button"
-                          onClick={() => setIsAllAreasView(!isAllAreasView)}
-                          className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                            isAllAreasView
-                              ? "bg-purple-600 text-white shadow-md shadow-purple-500/30 ring-2 ring-purple-400/50"
-                              : "bg-black/60 border border-purple-500/30 text-purple-300 hover:border-purple-400 hover:text-white"
-                          }`}
-                        >
-                          <Eye className="w-3.5 h-3.5 text-purple-300" />
-                          <span>All areas (view only)</span>
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -3188,8 +3225,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         onRemoveDesign={handleRemoveDesign}
                         onRemoveBackground={handleRemoveDesignBackground}
                         isRemovingBackground={isRemovingBackground}
-                        isAllAreasView={isAllAreasView}
-                        setIsAllAreasView={setIsAllAreasView}
                       />
                     </div>
                   </div>

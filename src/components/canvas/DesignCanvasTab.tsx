@@ -17,15 +17,12 @@ import {
   ArrowRight,
   Sliders,
   Move,
-  Eye,
-  Layers,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { DesignFile, PrintFile, AspectRatioIssue } from "./types";
 import { getCanvasDimensions, applyQuickPosition } from "./utils";
 import { aspectRatioValidation } from "@/utils/aspectRatioValidation";
 import AspectRatioFixButton from "./AspectRatioFixButton";
-import AOPGarmentPatternOverlay from "./AOPGarmentPatternOverlay";
 import {
   FrontSVG,
   BackSVG,
@@ -53,8 +50,6 @@ interface DesignCanvasTabProps {
   onRemoveDesign?: (placement: string) => void;
   onRemoveBackground?: () => void;
   isRemovingBackground?: boolean;
-  isAllAreasView?: boolean;
-  setIsAllAreasView?: (val: boolean) => void;
 }
 
 const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
@@ -76,27 +71,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   onRemoveDesign,
   onRemoveBackground,
   isRemovingBackground = false,
-  isAllAreasView: isAllAreasViewProp,
-  setIsAllAreasView: setIsAllAreasViewProp,
 }) => {
-  const [internalAllAreasView, setInternalAllAreasView] = useState<boolean>(false);
-  const isAllAreas = isAllAreasViewProp !== undefined ? isAllAreasViewProp : internalAllAreasView;
-  const setIsAllAreas = setIsAllAreasViewProp || setInternalAllAreasView;
-
-  // Detect if current product is Joggers, Sweatpants, Pants, or AOP apparel
-  const isJoggersOrAOP = useMemo(() => {
-    const searchStr = `${productTitle} ${productType} ${activePlacement}`.toLowerCase();
-    return (
-      searchStr.includes("jogger") ||
-      searchStr.includes("pant") ||
-      searchStr.includes("sweatpant") ||
-      searchStr.includes("trouser") ||
-      searchStr.includes("legging") ||
-      searchStr.includes("aop") ||
-      selectedPlacements.some((p) => p.includes("leg") || p.includes("waistband") || p.includes("pocket"))
-    );
-  }, [productTitle, productType, activePlacement, selectedPlacements]);
-
   const [allValidationResults, setAllValidationResults] = React.useState<AspectRatioIssue[]>([]);
   const [expandedIssueId, setExpandedIssueId] = useState<number | null>(null);
   const [windowWidth, setWindowWidth] = useState<number>(
@@ -384,28 +359,6 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
           </div>
         ) : (
           <div ref={containerRef} className="w-full flex flex-col items-center">
-            {/* Quick Header Toggle for Joggers & AOP Products */}
-            {isJoggersOrAOP && (
-              <div className="w-full flex items-center justify-between pb-2.5 px-1 max-w-2xl">
-                <span className="text-[11px] text-gray-300 flex items-center gap-1.5 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
-                  Pattern Outline: <span className="text-orange-300 capitalize font-mono">{activePlacement.replace(/_/g, " ")}</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsAllAreas(!isAllAreas)}
-                  className={`px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    isAllAreas
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-500/30 ring-1 ring-purple-400"
-                      : "bg-gray-800/90 border border-purple-500/40 text-purple-300 hover:border-purple-400 hover:text-white"
-                  }`}
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>{isAllAreas ? "Exit Overview" : "All areas (view only)"}</span>
-                </button>
-              </div>
-            )}
-
             {/* Outer wrapper sized to scaled canvas dimensions */}
             {(() => {
               const scaledW = Math.round(canvasDims.width * scale);
@@ -462,23 +415,6 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                         Safe Zone
                       </span>
                     </div>
-
-                    {/* AOP Garment Cutting Pattern Overlay (Joggers, Sweatpants, AOP Apparel) */}
-                    <AOPGarmentPatternOverlay
-                      activePlacement={activePlacement}
-                      productTitle={productTitle}
-                      productType={productType}
-                      printAreaWidth={printAreaWidth}
-                      printAreaHeight={printAreaHeight}
-                      canvasWidth={canvasDims.width}
-                      canvasHeight={canvasDims.height}
-                      designFiles={designFiles}
-                      isAllAreasView={isAllAreas}
-                      onSelectPlacement={(placement) => {
-                        setActivePlacement(placement);
-                        if (setIsAllAreas) setIsAllAreas(false);
-                      }}
-                    />
 
                     {/* Empty Canvas Placeholder */}
                     {designFiles.length === 0 ? (
@@ -560,8 +496,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     )}
 
                     {/* Design elements container */}
-                    {!isAllAreas && (
-                      <div className="absolute inset-0 w-full h-full z-10">
+                    <div className="absolute inset-0 w-full h-full z-10">
                       {designFiles
                         .filter((design) => {
                           if (design.placement === activePlacement) return true;
@@ -710,15 +645,14 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                             </Rnd>
                           );
                         })}
-                      </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               );
             })()}
 
-            {/* Intuitive Studio Controls Toolbar (Always visible when a design exists, unless in overview) */}
-            {activeDesign && !isAllAreas && (
+            {/* Intuitive Studio Controls Toolbar (Always visible when a design exists) */}
+            {activeDesign && (
               <div className="w-full max-w-2xl mt-4 bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-4 shadow-xl space-y-3">
                 {/* Header row: Placement info & dimensions */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/10 text-xs">
