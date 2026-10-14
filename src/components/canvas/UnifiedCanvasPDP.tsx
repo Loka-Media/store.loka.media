@@ -3049,7 +3049,61 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
                 </div>
 
-                {/* Previews Action Header & Cooldown Notice */}
+                {/* Adjust & Resize Artwork (Main Design Canvas) */}
+                <div className="space-y-3 pt-3 border-t border-white/5">
+                  <div className="bg-gradient-to-b from-gray-900/80 to-black/90 rounded-2xl border border-white/10 p-3 sm:p-5 shadow-2xl">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="font-clash font-bold text-white text-sm sm:text-base tracking-wide flex items-center gap-1.5">
+                          <Sliders className="w-4 h-4 text-[#FF6D1F]" />
+                          Adjust & Resize Artwork
+                        </span>
+                        <span className="text-[11px] font-semibold text-[#FF6D1F] bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 rounded-full capitalize">
+                          {getPlacementLabel(activePlacement)}
+                        </span>
+                        {(() => {
+                          const apf = getActivePrintFile(printFiles, selectedVariants, activePlacement);
+                          if (apf?.width && apf?.height) {
+                            return (
+                              <span className="text-[11px] text-gray-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-mono">
+                                {apf.width} × {apf.height} px
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
+                      <span className="text-[11px] text-gray-400 hidden sm:inline-block">
+                        Drag corner dots to resize · Move design anywhere on print area
+                      </span>
+                    </div>
+
+                    <div className="w-full flex items-center justify-center min-h-[340px]">
+                      <DesignCanvasTab
+                        designFiles={designFiles}
+                        setDesignFiles={setDesignFiles}
+                        activePlacement={activePlacement}
+                        selectedPlacements={selectedPlacements}
+                        setSelectedPlacements={setSelectedPlacements}
+                        setActivePlacement={setActivePlacement}
+                        selectedDesignFile={selectedDesignFile}
+                        setSelectedDesignFile={setSelectedDesignFile}
+                        activePrintFile={getActivePrintFile(printFiles, selectedVariants, activePlacement)}
+                        updateDesignPosition={handleUpdateDesignPosition}
+                        onAspectRatioIssues={handleSetAspectRatioIssues}
+                        aspectRatioIssues={aspectRatioIssues}
+                        hidePlacementTabs={true}
+                        productTitle={selectedProduct?.title || selectedProduct?.name || ""}
+                        productType={selectedProduct?.type_name || selectedProduct?.brand || ""}
+                        onRemoveDesign={handleRemoveDesign}
+                        onRemoveBackground={handleRemoveDesignBackground}
+                        isRemovingBackground={isRemovingBackground}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Realistic Product Previews (Action Header & Generate Preview Button) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-[#FF6D1F]/15 via-black/50 to-black/40 border border-[#FF6D1F]/30 rounded-2xl shadow-lg">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-[#FF6D1F]/20 border border-[#FF6D1F]/40 flex items-center justify-center flex-shrink-0 text-[#FF6D1F]">
@@ -3100,7 +3154,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </Button>
                 </div>
 
-                {/* 4 Mockup Preview Cards Grid (Figma Design) */}
+                {/* Mockup Gallery (4 Mockup Preview Cards Grid) */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-1">
                   {(() => {
                     const mockups = getEffectiveMockups();
@@ -3174,60 +3228,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       );
                     });
                   })()}
-                </div>
-
-                {/* Interactive Design Studio & Canvas */}
-                <div className="space-y-3 pt-3 border-t border-white/5">
-                  <div className="bg-gradient-to-b from-gray-900/80 to-black/90 rounded-2xl border border-white/10 p-3 sm:p-5 shadow-2xl">
-                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="font-clash font-bold text-white text-sm sm:text-base tracking-wide flex items-center gap-1.5">
-                          <Sliders className="w-4 h-4 text-[#FF6D1F]" />
-                          Adjust & Resize Artwork
-                        </span>
-                        <span className="text-[11px] font-semibold text-[#FF6D1F] bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 rounded-full capitalize">
-                          {getPlacementLabel(activePlacement)}
-                        </span>
-                        {(() => {
-                          const apf = getActivePrintFile(printFiles, selectedVariants, activePlacement);
-                          if (apf?.width && apf?.height) {
-                            return (
-                              <span className="text-[11px] text-gray-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-mono">
-                                {apf.width} × {apf.height} px
-                              </span>
-                            );
-                          }
-                          return null;
-                        })()}
-                      </div>
-                      <span className="text-[11px] text-gray-400 hidden sm:inline-block">
-                        Drag corner dots to resize · Move design anywhere on print area
-                      </span>
-                    </div>
-
-                    <div className="w-full flex items-center justify-center min-h-[340px]">
-                      <DesignCanvasTab
-                        designFiles={designFiles}
-                        setDesignFiles={setDesignFiles}
-                        activePlacement={activePlacement}
-                        selectedPlacements={selectedPlacements}
-                        setSelectedPlacements={setSelectedPlacements}
-                        setActivePlacement={setActivePlacement}
-                        selectedDesignFile={selectedDesignFile}
-                        setSelectedDesignFile={setSelectedDesignFile}
-                        activePrintFile={getActivePrintFile(printFiles, selectedVariants, activePlacement)}
-                        updateDesignPosition={handleUpdateDesignPosition}
-                        onAspectRatioIssues={handleSetAspectRatioIssues}
-                        aspectRatioIssues={aspectRatioIssues}
-                        hidePlacementTabs={true}
-                        productTitle={selectedProduct?.title || selectedProduct?.name || ""}
-                        productType={selectedProduct?.type_name || selectedProduct?.brand || ""}
-                        onRemoveDesign={handleRemoveDesign}
-                        onRemoveBackground={handleRemoveDesignBackground}
-                        isRemovingBackground={isRemovingBackground}
-                      />
-                    </div>
-                  </div>
                 </div>
 
                 {/* Progress Divider Line (half orange) matching Figma */}
