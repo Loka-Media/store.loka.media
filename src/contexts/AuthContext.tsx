@@ -45,9 +45,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.getItem('creatorUrl')
         : null) || undefined;
 
+    const resolvedUrl = userData.creatorUrl || userData.creator_url || storedUrl;
+
+    if (resolvedUrl && typeof window !== 'undefined') {
+      if (userData.username) localStorage.setItem(`creatorUrl_${userData.username}`, resolvedUrl);
+      if (userData.email) localStorage.setItem(`creatorUrl_${userData.email}`, resolvedUrl);
+      localStorage.setItem('creatorUrl', resolvedUrl);
+    }
+
     return {
       ...userData,
-      creatorUrl: userData.creatorUrl || userData.creator_url || storedUrl,
+      creatorUrl: resolvedUrl,
+      creator_url: resolvedUrl,
     };
   };
 

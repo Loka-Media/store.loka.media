@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { formatDate, checkoutAPI, addressAPI, Address } from '@/lib/api';
-import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus, ChevronDown, ChevronUp, LogOut, AlertCircle } from 'lucide-react';
+import { User, Package, MapPin, Calendar, Phone, Mail, Edit2, Plus, ChevronDown, ChevronUp, LogOut, AlertCircle, Instagram } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -397,6 +397,19 @@ export default function ProfilePage() {
                 <p className="text-xs text-orange-400 font-medium mt-0.5 truncate">
                   @{user?.username}
                 </p>
+                {(user?.creatorUrl || user?.creator_url) && (
+                  <a
+                    href={user.creatorUrl || user.creator_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-pink-400 hover:text-pink-300 font-medium mt-1 truncate hover:underline"
+                  >
+                    <Instagram className="w-3.5 h-3.5 flex-shrink-0 text-pink-500" />
+                    <span className="truncate">
+                      {(user.creatorUrl || user.creator_url)?.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '@').replace(/\/$/, '')}
+                    </span>
+                  </a>
+                )}
               </div>
             </div>
 

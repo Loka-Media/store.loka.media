@@ -71,11 +71,36 @@ export default function EditProfilePage() {
           : '') ||
         '';
 
-      setFormData({
+      setFormData(prev => ({
         name: user.name || '',
         phone: user.phone || '',
-        creatorUrl: storedUrl,
-      });
+        creatorUrl: prev.creatorUrl || storedUrl,
+      }));
+
+      // If storedUrl is still empty, fetch fresh profile from DB API
+      if (!storedUrl) {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+        if (token) {
+          fetch('/api/user/profile', {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+              if (data?.user) {
+                const url = data.user.creator_url || data.user.creatorUrl || '';
+                if (url) {
+                  setFormData(prev => ({ ...prev, creatorUrl: url }));
+                  if (typeof window !== 'undefined') {
+                    if (user.username) localStorage.setItem(`creatorUrl_${user.username}`, url);
+                    if (user.email) localStorage.setItem(`creatorUrl_${user.email}`, url);
+                    localStorage.setItem('creatorUrl', url);
+                  }
+                }
+              }
+            })
+            .catch(() => {});
+        }
+      }
     }
   }, [isAuthenticated, user, router]);
 
@@ -113,17 +138,25 @@ export default function EditProfilePage() {
     try {
       setLoading(true);
       
+      const cleanCreatorUrl = formData.creatorUrl ? formData.creatorUrl.trim() : '';
+
       await userAPI.updateProfile({
         name: formData.name.trim(),
         phone: formData.phone.trim(),
-        profile_img: base64Image || undefined
+        profile_img: base64Image || undefined,
+        creatorUrl: cleanCreatorUrl,
+        creator_url: cleanCreatorUrl,
       });
 
       if (user) {
-        if (formData.creatorUrl) {
-          localStorage.setItem(`creatorUrl_${user.username}`, formData.creatorUrl.trim());
-          localStorage.setItem(`creatorUrl_${user.email}`, formData.creatorUrl.trim());
-          localStorage.setItem('creatorUrl', formData.creatorUrl.trim());
+        if (cleanCreatorUrl) {
+          localStorage.setItem(`creatorUrl_${user.username}`, cleanCreatorUrl);
+          localStorage.setItem(`creatorUrl_${user.email}`, cleanCreatorUrl);
+          localStorage.setItem('creatorUrl', cleanCreatorUrl);
+        } else {
+          localStorage.removeItem(`creatorUrl_${user.username}`);
+          localStorage.removeItem(`creatorUrl_${user.email}`);
+          localStorage.removeItem('creatorUrl');
         }
       }
 
