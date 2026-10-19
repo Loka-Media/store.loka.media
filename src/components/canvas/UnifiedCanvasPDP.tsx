@@ -1096,16 +1096,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     // 3. Wraparound books / journals detection (Hardcover Journal 485, notebooks, etc.)
     // In Printify, a wraparound book/journal is split into Front Cover and Back Cover (strictly 2 options)
     const title = ((selectedProduct?.title || selectedProduct?.name || "") as string).toLowerCase();
-    const isWraparoundBookOrJournal = (() => {
-      if (title.includes("journal") || title.includes("notebook") || title.includes("book") || title.includes("diary")) {
-        return true;
-      }
-      const pf = printFiles?.printfiles?.[0];
-      if (pf && pf.width && pf.height && (pf.width / pf.height > 1.25) && pf.width >= 3000) {
-        return true;
-      }
-      return false;
-    })();
+    const isStationery = /\b(journal|notebook|diary|planner|hardcover)\b/i.test(title);
+    const isApparelOrOther = /\b(hoodie|sweatshirt|shirt|tee|t-shirt|apparel|pullover|jacket|tank|top|sweater|fleece|jogger|pant|pants|sock|socks|hat|cap|beanie|mug|mugs|tumbler|bottle|poster|posters|canvas|banner|pillow|blanket|tote|bag)\b/i.test(title);
+    const hasBackPlacement = discoveredPlacements.has("back") || discoveredPlacements.has("rear");
+
+    const isWraparoundBookOrJournal = isStationery && !isApparelOrOther && !hasBackPlacement;
 
     if (isWraparoundBookOrJournal) {
       discoveredPlacements.clear();
@@ -1193,7 +1188,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     return result.length > 0 ? result : ["front"];
   }, [printFiles, selectedProduct, mockupUrls]);
 
-  // Reset activePlacement if it becomes invalid/unsupported
+  // Reset activePlacement if it becomes invalid/unsupported and auto-migrate legacy cover placements
   useEffect(() => {
     const supported = getSupportedPlacements();
     if (supported.length > 0) {
@@ -1201,7 +1196,32 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       const hasRight = activePlacement === "sleeve_right" && (supported.includes("right") || supported.includes("sleeve_right"));
 
       if (!supported.includes(activePlacement) && !hasLeft && !hasRight) {
-        setActivePlacement(supported[0]);
+        if (activePlacement === "front_cover" && supported.includes("front")) {
+          setActivePlacement("front");
+        } else if (activePlacement === "back_cover" && supported.includes("back")) {
+          setActivePlacement("back");
+        } else {
+          setActivePlacement(supported[0]);
+        }
+      }
+
+      // Auto-migrate legacy front_cover / back_cover designs for products that use standard front / back
+      if (supported.includes("front") && !supported.includes("front_cover")) {
+        setDesignFiles((prev) => {
+          let changed = false;
+          const updated = prev.map((d) => {
+            if (d.placement === "front_cover") {
+              changed = true;
+              return { ...d, placement: "front" };
+            }
+            if (d.placement === "back_cover") {
+              changed = true;
+              return { ...d, placement: "back" };
+            }
+            return d;
+          });
+          return changed ? updated : prev;
+        });
       }
     }
   }, [printFiles, selectedProduct, activePlacement, getSupportedPlacements]);
@@ -1782,9 +1802,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     setSelectedFileId(file.id);
 
     const imageUrl = file.file_url || file.thumbnail_url || file.preview_url || "";
-    const isWraparoundCover = (activePrintFile.width / activePrintFile.height > 1.25) && activePrintFile.width >= 3000;
     const isCoverPlacement = activePlacement === "front_cover" || activePlacement === "back_cover";
-    const targetScale = (isWraparoundCover && isCoverPlacement) ? 0.40 : 0.7;
+    const isWraparoundCover = isCoverPlacement && (activePrintFile.width / activePrintFile.height > 1.25) && activePrintFile.width >= 3000;
+    const targetScale = isWraparoundCover ? 0.40 : 0.7;
 
     let baseWidth = activePrintFile.width * targetScale;
     let baseHeight = activePrintFile.height * targetScale;
@@ -2146,8 +2166,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   // Get placement friendly name
   const getPlacementLabel = (placementId: string) => {
     const labels: Record<string, string> = {
-      front: "Front",
-      back: "Back",
+      front: "Front side",
+      back: "Back side",
       front_cover: "Front Cover",
       back_cover: "Back Cover",
       full_wrap: "Full Cover Wrap",

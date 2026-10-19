@@ -143,9 +143,11 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   // Check if this product is genuinely a book/journal wrap
   const isBookOrJournal = useMemo(() => {
     const searchString = `${productTitle || ""} ${productType || ""}`.toLowerCase();
-    const isBookProduct = /journal|notebook|hardcover|spiral|planner|diary|book\b/.test(searchString);
-    const isCoverPlacement = activePlacement === "front_cover" || activePlacement === "back_cover";
-    return isBookProduct || isCoverPlacement;
+    const isApparel = /\b(hoodie|sweatshirt|shirt|tee|t-shirt|apparel|pullover|jacket|tank|top|sweater|fleece|jogger|pant|pants|sock|socks|hat|cap|beanie)\b/i.test(searchString);
+    if (isApparel) return false;
+    const isBookProduct = /\b(journal|notebook|hardcover|spiral|planner|diary)\b/i.test(searchString);
+    const isCoverPlacement = activePlacement === "front_cover" || activePlacement === "back_cover" || activePlacement === "full_wrap";
+    return isBookProduct && isCoverPlacement;
   }, [productTitle, productType, activePlacement]);
 
   const showBookGuides = useMemo(() => {
@@ -501,9 +503,10 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                         .filter((design) => {
                           if (design.placement === activePlacement) return true;
                           if (
-                            (activePlacement === "front_cover" && design.placement === "back_cover") ||
-                            (activePlacement === "back_cover" && design.placement === "front_cover") ||
-                            (activePlacement === "full_wrap" && (design.placement === "front_cover" || design.placement === "back_cover"))
+                            showBookGuides &&
+                            ((activePlacement === "front_cover" && design.placement === "back_cover") ||
+                              (activePlacement === "back_cover" && design.placement === "front_cover") ||
+                              (activePlacement === "full_wrap" && (design.placement === "front_cover" || design.placement === "back_cover")))
                           ) {
                             return true;
                           }

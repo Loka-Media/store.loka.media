@@ -127,8 +127,17 @@ function getVariantSortScore(v: any): number {
   return 10;
 }
 
-function computePrintFilesFromVariants(variants: any[]) {
+function computePrintFilesFromVariants(variants: any[], productTitle?: string) {
   if (!variants || variants.length === 0) return null;
+
+  // Determine if this product is genuinely a stationery book/journal that uses a single wraparound cover
+  const isGenuineBookProduct = (() => {
+    const t = (productTitle || '').toLowerCase();
+    if (!t) return false;
+    const isBook = /\b(journal|notebook|diary|planner|hardcover|spiral)\b/i.test(t);
+    const isApparelOrOther = /\b(hoodie|sweatshirt|shirt|tee|t-shirt|apparel|pullover|jacket|tank|top|sweater|fleece|jogger|pant|pants|sock|socks|hat|cap|beanie|mug|mugs|tumbler|bottle|poster|posters|canvas|banner|pillow|blanket|tote|bag)\b/i.test(t);
+    return isBook && !isApparelOrOther;
+  })();
 
   // Prioritize standard reference variant (Size "L" for apparel, matching Printify defaults)
   const sortedVariants = [...variants].sort((a, b) => getVariantSortScore(b) - getVariantSortScore(a));
@@ -139,6 +148,11 @@ function computePrintFilesFromVariants(variants: any[]) {
       ? v.placeholders
       : [{ position: 'front', width: 4000, height: 4000 }];
 
+    const hasExplicitBack = placeholders.some((pl: any) => {
+      const pos = (pl.position || '').toLowerCase().trim();
+      return pos === 'back' || pos === 'rear' || pos === 'reverse';
+    });
+
     placeholders.forEach((p: any) => {
       const rawPos = (p.position || 'front').toLowerCase().trim();
       const code = getPrintfilePosCode(rawPos);
@@ -147,8 +161,8 @@ function computePrintFilesFromVariants(variants: any[]) {
       // Assign exact raw position
       placements[rawPos] = printfile_id;
 
-      // Check if this is a wide wraparound cover (e.g. journal/notebook full cover: exactly 2 sides, Front Cover & Back Cover)
-      const isWraparoundCover = rawPos === 'front' && p.width && p.height && (p.width / p.height > 1.25) && p.width >= 3000;
+      // Check if this is a wide wraparound cover (ONLY for actual books/journals with NO separate back placement)
+      const isWraparoundCover = isGenuineBookProduct && !hasExplicitBack && rawPos === 'front' && p.width && p.height && (p.width / p.height > 1.25) && p.width >= 3000;
       if (isWraparoundCover) {
         placements['front_cover'] = printfile_id;
         placements['back_cover'] = v.id * 1000 + POS_CODE_MAP.back_cover;
@@ -192,6 +206,11 @@ function computePrintFilesFromVariants(variants: any[]) {
       ? v.placeholders
       : [{ position: 'front', width: 4000, height: 4000 }];
 
+    const hasExplicitBack = placeholders.some((pl: any) => {
+      const pos = (pl.position || '').toLowerCase().trim();
+      return pos === 'back' || pos === 'rear' || pos === 'reverse';
+    });
+
     placeholders.forEach((p: any) => {
       const rawPos = (p.position || 'front').toLowerCase().trim();
       const code = getPrintfilePosCode(rawPos);
@@ -207,8 +226,8 @@ function computePrintFilesFromVariants(variants: any[]) {
         });
       }
 
-      // If this is a wide wraparound cover, also generate virtual front_cover & back_cover printfiles (exactly 2 sides)
-      const isWraparoundCover = rawPos === 'front' && p.width && p.height && (p.width / p.height > 1.25) && p.width >= 3000;
+      // If this is a wide wraparound cover, also generate virtual front_cover & back_cover printfiles (ONLY for books/journals)
+      const isWraparoundCover = isGenuineBookProduct && !hasExplicitBack && rawPos === 'front' && p.width && p.height && (p.width / p.height > 1.25) && p.width >= 3000;
       if (isWraparoundCover) {
         const backCode = POS_CODE_MAP.back_cover;
         const backPrintfileId = v.id * 1000 + backCode;
@@ -515,7 +534,7 @@ function CanvasContent() {
                 setSelectedVariants(availableVariants.map((v: any) => v.id));
               }
 
-              const computedPrintFiles = computePrintFilesFromVariants(availableVariants);
+              const computedPrintFiles = computePrintFilesFromVariants(availableVariants, product?.title || product?.name);
               if (computedPrintFiles) {
                 setPrintFiles(computedPrintFiles);
                 console.log('computedPrintFiles from Printify placeholders:', computedPrintFiles);
@@ -635,7 +654,7 @@ function CanvasContent() {
 
         if (currentVariants.length > 0) {
           setSelectedVariants(currentVariants.map((v: any) => v.id));
-          const computedPrintFiles = computePrintFilesFromVariants(currentVariants);
+          const computedPrintFiles = computePrintFilesFromVariants(currentVariants, selectedProduct?.title || selectedProduct?.name || product?.title || product?.name);
           if (computedPrintFiles) {
             setPrintFiles(computedPrintFiles);
           }
@@ -820,7 +839,7 @@ function CanvasContent() {
       const providerMinCost = variantCosts.length > 0 ? Math.min(...variantCosts).toFixed(2) : selectedProduct.cost;
 
       // Compute printFiles from variant placeholders for the new provider
-      const computedPrintFiles = computePrintFilesFromVariants(updatedVariants);
+      const computedPrintFiles = computePrintFilesFromVariants(updatedVariants, selectedProduct?.title || selectedProduct?.name);
 
       setSelectedProduct((prev: any) => {
         if (!prev) return prev;
