@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { productAPI, ExtendedProduct } from "@/lib/api";
-import { createProductSlug, isVariantAvailable } from "@/lib/utils";
+import { createProductSlug, isVariantAvailable, cleanDescription } from "@/lib/utils";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useWishlist, addPendingWishlistItem } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -315,7 +315,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
               </div>
 
               <p className="text-gray-400 mb-3 line-clamp-2 text-sm leading-relaxed">
-                {product.description ||
+                {cleanDescription(product.description) ||
                   "Discover this amazing product with unique design and premium quality craftsmanship."}
               </p>
 

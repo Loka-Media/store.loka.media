@@ -96,20 +96,72 @@ interface UnifiedCanvasPDPProps {
   isEditing?: boolean;
 }
 
-const cleanDescription = (text?: string): string => {
+export const cleanDescription = (text?: string): string => {
   if (!text) return "";
-  // Strip HTML tags
-  let clean = text.replace(/<[^>]*>?/gm, '');
-  // Decode common HTML entities and clean Printify formatting artifact
+  let clean = text;
+
+  // 1. Decode numeric entities (e.g. &#160; for nbsp)
+  clean = clean.replace(/&#(\d+);/g, (_, dec) => {
+    try { return String.fromCharCode(parseInt(dec, 10)); } catch { return ''; }
+  });
+  clean = clean.replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
+    try { return String.fromCharCode(parseInt(hex, 16)); } catch { return ''; }
+  });
+
+  // 2. Decode double-escaped entities
+  clean = clean
+    .replace(/&amp;nbsp;/gi, ' ')
+    .replace(/&amp;quot;/gi, '"')
+    .replace(/&amp;lt;/gi, '<')
+    .replace(/&amp;gt;/gi, '>')
+    .replace(/&amp;amp;/gi, '&');
+
+  // 3. Replace HTML line breaks and block elements with spaces
+  clean = clean
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/&lt;br\s*\/?&gt;/gi, ' ')
+    .replace(/<\/(p|div|li|tr|h[1-6])>/gi, ' ')
+    .replace(/&lt;\/(p|div|li|tr|h[1-6])&gt;/gi, ' ')
+    .replace(/<(p|div|li|tr|h[1-6])[^>]*>/gi, ' ')
+    .replace(/&lt;(p|div|li|tr|h[1-6])[^&]*&gt;/gi, ' ');
+
+  // 4. Strip any remaining raw or escaped HTML tags
+  clean = clean.replace(/<[^>]*>?/gm, ' ');
+  clean = clean.replace(/&lt;[^&]*&gt;/gm, ' ');
+
+  // 5. Decode all named HTML entities
+  clean = clean
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&amp;/gi, '&')
+    .replace(/&bull;/gi, ' • ')
+    .replace(/&middot;/gi, ' · ')
+    .replace(/&ndash;/gi, '–')
+    .replace(/&mdash;/gi, '—')
+    .replace(/&trade;/gi, '™')
+    .replace(/&copy;/gi, '©')
+    .replace(/&reg;/gi, '®')
+    .replace(/&hellip;/gi, '…')
+    .replace(/&rsquo;|&lsquo;/gi, "'")
+    .replace(/&rdquo;|&ldquo;/gi, '"');
+
+  // 6. Clean Printify formatting artifacts
   clean = clean
     .replace(/\.\.\:/g, '. ')
     .replace(/\.\:/g, ': ')
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&#39;/g, "'");
-  return clean.trim();
+    .replace(/:\s*:/g, ':');
+
+  // 7. Normalize spaces
+  clean = clean.replace(/[ \t\f\v]+/g, ' ');
+
+  // 8. Fix punctuation spacing (e.g. "outfit.Please" -> "outfit. Please")
+  clean = clean.replace(/([.!?])([A-Z])/g, '$1 $2');
+
+  return clean.replace(/\s+/g, ' ').trim();
 };
 
 // Helper to determine readable text contrast color (black or white) based on background hex code
