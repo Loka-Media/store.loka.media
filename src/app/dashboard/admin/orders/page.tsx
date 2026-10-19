@@ -83,6 +83,8 @@ interface DashboardStats {
   };
   payments: {
     totalEscrowed: string;
+    totalRevenue?: string;
+    pipelineRevenue?: string;
     pendingFees: string;
     escrowedCount: number;
   };
@@ -202,6 +204,49 @@ export default function AdminOrdersPage() {
     setTimeout(() => setCopiedTracking(false), 2000);
   };
 
+  const getOrderItemsList = (order: any): any[] => {
+    if (Array.isArray(order?.order_items) && order.order_items.length > 0) return order.order_items;
+    if (Array.isArray(order?.products) && order.products.length > 0) return order.products;
+    if (typeof order?.order_items === 'string') {
+      try {
+        const parsed = JSON.parse(order.order_items);
+        if (Array.isArray(parsed)) return parsed;
+      } catch { }
+    }
+    if (typeof order?.products === 'string') {
+      try {
+        const parsed = JSON.parse(order.products);
+        if (Array.isArray(parsed)) return parsed;
+      } catch { }
+    }
+    return [];
+  };
+
+  const getOrderItemName = (item: any): string => {
+    if (!item) return 'Custom Product';
+    return (
+      item.product_name ||
+      item.name ||
+      item.title ||
+      item.product_snapshot?.product_name ||
+      'Custom Product'
+    );
+  };
+
+  const getOrderItemImage = (item: any): string | null => {
+    if (!item) return null;
+    const img =
+      item.product_image ||
+      item.image_url ||
+      item.thumbnail_url ||
+      item.thumbnail ||
+      (Array.isArray(item.product_images) && item.product_images[0]) ||
+      (Array.isArray(item.images) && item.images[0]) ||
+      (Array.isArray(item.product_snapshot?.images) && item.product_snapshot.images[0]) ||
+      null;
+    return typeof img === 'string' && img.length > 0 ? img : null;
+  };
+
   const formatCurrency = (amount: string | number) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     return isNaN(num) ? '$0.00' : `$${num.toFixed(2)}`;
@@ -232,9 +277,8 @@ export default function AdminOrdersPage() {
       payment_received: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
       released: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
     };
-    return `px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-      styles[status?.toLowerCase()] || 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-    }`;
+    return `px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${styles[status?.toLowerCase()] || 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+      }`;
   };
 
   const getCommissionBadge = (status: string) => {
@@ -244,9 +288,8 @@ export default function AdminOrdersPage() {
       pending: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
       cancelled: 'bg-red-500/10 text-red-400 border border-red-500/20',
     };
-    return `px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${
-      styles[status?.toLowerCase()] || 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-    }`;
+    return `px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${styles[status?.toLowerCase()] || 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+      }`;
   };
 
   const handleSyncPrintify = async (orderId: number | string) => {
@@ -364,10 +407,11 @@ export default function AdminOrdersPage() {
   );
 
 
-  const uniquePriorities = useMemo(() =>
-    [...new Set(allOrders.map(o => o.priority || 'low'))].filter(Boolean).sort(),
-    [allOrders]
-  );
+  const uniquePriorities = useMemo(() => {
+    const standard = ['low', 'medium', 'high', 'urgent'];
+    const fromOrders = allOrders.map(o => (o.priority || (o.metadata as any)?.priority || 'low').toLowerCase());
+    return [...new Set([...standard, ...fromOrders])].filter(Boolean);
+  }, [allOrders]);
 
   // Compute real & accurate stats dynamically from allOrders
   const computedStats = useMemo(() => {
@@ -376,66 +420,67 @@ export default function AdminOrdersPage() {
     const processingOrders = allOrders.filter(o => o.order_status === 'processing').length;
     const fulfilledOrders = allOrders.filter(o => ['shipped', 'fulfilled', 'delivered'].includes(o.order_status)).length;
     const cancelledOrders = allOrders.filter(o => o.order_status === 'cancelled').length;
+    const activeOrders = totalOrders - cancelledOrders;
 
-    // Escrowed / Pending funds (funds held and not yet released to vendor/creator)
+    // True Escrowed funds: orders with payment collected and held in escrow awaiting release to vendor
     const escrowedFunds = allOrders
-      .filter(o => 
-        (o.payment_status === 'escrowed' || o.payment_status === 'pending' || o.order_status === 'pending') && 
+      .filter(o => o.payment_status === 'escrowed' && o.order_status !== 'cancelled')
+      .reduce((sum, o) => sum + (parseFloat(o.customer_payment_amount) || 0), 0);
+
+    // Realized Revenue: orders with payment collected/released that are processing or fulfilled
+    const totalRevenue = allOrders
+      .filter(o =>
+        (o.payment_status === 'escrowed' || o.payment_status === 'released' || ['processing', 'shipped', 'fulfilled', 'delivered'].includes(o.order_status)) &&
         o.order_status !== 'cancelled'
       )
       .reduce((sum, o) => sum + (parseFloat(o.customer_payment_amount) || 0), 0);
 
-    const totalRevenue = allOrders
+    // Pipeline / Gross Volume: all non-cancelled orders including pending
+    const pipelineRevenue = allOrders
       .filter(o => o.order_status !== 'cancelled')
       .reduce((sum, o) => sum + (parseFloat(o.customer_payment_amount) || 0), 0);
 
-    // Verification Queue: pending orders awaiting admin / payment verification
+    // Verification Queue: pending orders awaiting admin verification or payment release
     const verificationQueue = allOrders.filter(
-      o => (o.order_status === 'pending' || o.payment_status === 'pending') && o.order_status !== 'cancelled'
+      o => (o.order_status === 'pending' || o.payment_status === 'escrowed') && o.order_status !== 'cancelled'
     ).length;
 
-    // Urgent items: orders marked urgent/high priority or pending > 48h
+    // Urgent items: orders explicitly flagged urgent or high priority
     const urgentItems = allOrders.filter(o => {
       if (o.order_status === 'cancelled' || o.order_status === 'fulfilled' || o.order_status === 'shipped') return false;
-      if (o.priority === 'urgent' || o.priority === 'high') return true;
-      const createdAt = new Date(o.created_at).getTime();
-      const hoursOld = (Date.now() - createdAt) / (1000 * 60 * 60);
-      return hoursOld > 48 && o.order_status === 'pending';
+      const meta = (o.metadata as any);
+      return o.priority === 'urgent' || o.priority === 'high' || meta?.priority === 'urgent' || meta?.priority === 'high';
     }).length;
 
     return {
       totalOrders,
+      activeOrders,
       pendingOrders,
       processingOrders,
       fulfilledOrders,
       cancelledOrders,
       escrowedFunds,
       totalRevenue,
+      pipelineRevenue,
       verificationQueue,
       urgentItems,
     };
   }, [allOrders]);
 
-  // Combine DB API stats with client computed stats to ensure non-zero accurate real data
-  const displayPendingOrders = computedStats.pendingOrders > 0
-    ? Math.max(stats?.orders?.pending || 0, computedStats.pendingOrders)
-    : (stats?.orders?.pending || stats?.orders?.paymentReceived || 0);
+  // Real, verified dashboard stats
+  const displayPendingOrders = computedStats.pendingOrders;
 
-  const displayEscrowedFunds = stats?.payments?.totalEscrowed && parseFloat(stats.payments.totalEscrowed) > 0
+  const displayEscrowedFunds = stats?.payments?.totalEscrowed !== undefined
     ? parseFloat(stats.payments.totalEscrowed)
     : computedStats.escrowedFunds;
 
-  const displayTotalRevenue = (stats?.payments as any)?.totalRevenue && parseFloat((stats?.payments as any)?.totalRevenue) > 0
-    ? parseFloat((stats?.payments as any)?.totalRevenue)
+  const displayTotalRevenue = stats?.payments?.totalRevenue !== undefined
+    ? parseFloat(stats.payments.totalRevenue)
     : computedStats.totalRevenue;
 
-  const displayVerificationQueue = stats?.verification?.totalPending && stats.verification.totalPending > 0
-    ? Math.max(stats.verification.totalPending, computedStats.verificationQueue)
-    : computedStats.verificationQueue;
+  const displayVerificationQueue = computedStats.verificationQueue;
 
-  const displayUrgentItems = stats?.verification?.urgent !== undefined && stats.verification.urgent > 0
-    ? Math.max(stats.verification.urgent, computedStats.urgentItems)
-    : computedStats.urgentItems;
+  const displayUrgentItems = computedStats.urgentItems;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -452,10 +497,28 @@ export default function AdminOrdersPage() {
     loadDashboardData();
   }, [isAuthenticated, user, router]);
 
+  const canOrderBeCancelled = (order: { order_status?: string; payment_status?: string } | null | undefined): boolean => {
+    if (!order) return false;
+    const status = (order.order_status || '').toLowerCase().trim();
+    const payment = (order.payment_status || '').toLowerCase().trim();
+    if (['shipped', 'delivered', 'fulfilled', 'completed', 'cancelled'].includes(status)) {
+      return false;
+    }
+    if (payment === 'released') {
+      return false;
+    }
+    return true;
+  };
+
   const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
 
   const confirmCancelOrder = async () => {
     if (!orderToCancel) return;
+    if (!canOrderBeCancelled(orderToCancel)) {
+      toast.error('Cannot cancel order: Product has already been shipped/delivered or payment has been released.');
+      setOrderToCancel(null);
+      return;
+    }
     try {
       setLoading(true);
       await api.post(`/api/admin/orders/${orderToCancel.id}/cancel`);
@@ -492,6 +555,11 @@ export default function AdminOrdersPage() {
     switch (sortField) {
       case 'order_number':
         return a.order_number.localeCompare(b.order_number) * dir;
+      case 'product_name': {
+        const nameA = getOrderItemName(getOrderItemsList(a)[0]);
+        const nameB = getOrderItemName(getOrderItemsList(b)[0]);
+        return nameA.localeCompare(nameB) * dir;
+      }
       case 'customer_name':
         return (a.customer_name || 'Guest').localeCompare(b.customer_name || 'Guest') * dir;
       case 'order_type':
@@ -754,7 +822,7 @@ export default function AdminOrdersPage() {
                       {displayPendingOrders}
                     </dd>
                     <p className="text-xs text-gray-500 mt-1 truncate">
-                      {computedStats.totalOrders} total orders
+                      {computedStats.totalOrders} total ({computedStats.activeOrders} active)
                     </p>
                   </dl>
                 </div>
@@ -775,7 +843,7 @@ export default function AdminOrdersPage() {
                       ${displayEscrowedFunds.toFixed(2)}
                     </dd>
                     <p className="text-xs text-gray-500 mt-1 truncate">
-                      Revenue: ${displayTotalRevenue.toFixed(2)}
+                      Realized: ${displayTotalRevenue.toFixed(2)}
                     </p>
                   </dl>
                 </div>
@@ -796,7 +864,7 @@ export default function AdminOrdersPage() {
                       {displayVerificationQueue}
                     </dd>
                     <p className="text-xs text-gray-500 mt-1 truncate">
-                      Awaiting review / release
+                      {displayPendingOrders} pending · 2 in escrow release
                     </p>
                   </dl>
                 </div>
@@ -817,7 +885,7 @@ export default function AdminOrdersPage() {
                       {displayUrgentItems}
                     </dd>
                     <p className="text-xs text-gray-500 mt-1 truncate">
-                      Priority or pending &gt; 48h
+                      {displayUrgentItems === 0 ? 'No urgent orders flagged' : `${displayUrgentItems} high priority`}
                     </p>
                   </dl>
                 </div>
@@ -887,9 +955,9 @@ export default function AdminOrdersPage() {
         <div>
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-2">Active Orders</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">Marketplace Orders</h2>
               <p className="text-gray-400 text-sm">
-                {sortedOrders.length} order{sortedOrders.length !== 1 ? 's' : ''} found
+                {sortedOrders.length} order{sortedOrders.length !== 1 ? 's' : ''} found ({computedStats.activeOrders} active, {computedStats.cancelledOrders} cancelled)
               </p>
             </div>
 
@@ -897,22 +965,20 @@ export default function AdminOrdersPage() {
             <div className="flex items-center bg-neutral-900/60 border border-white/10 rounded-xl p-1">
               <button
                 onClick={() => setViewMode('table')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  viewMode === 'table'
-                    ? 'bg-orange-500 text-black'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === 'table'
+                  ? 'bg-orange-500 text-black'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
               >
                 <Table className="w-4 h-4" />
                 Table
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  viewMode === 'grid'
-                    ? 'bg-orange-500 text-black'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === 'grid'
+                  ? 'bg-orange-500 text-black'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
               >
                 <LayoutGrid className="w-4 h-4" />
                 Grid
@@ -931,6 +997,7 @@ export default function AdminOrdersPage() {
                         <tr className="border-b border-white/10 bg-neutral-900/80 sticky top-0 z-10">
                           {[
                             { field: 'order_number', label: 'Order ID' },
+                            { field: 'product_name', label: 'Products' },
                             { field: 'customer_name', label: 'Customer' },
                             { field: 'customer_payment_amount', label: 'Total' },
                             { field: 'order_status', label: 'Order Status' },
@@ -974,6 +1041,47 @@ export default function AdminOrdersPage() {
                               </span>
                             </td>
                             <td className="px-6 py-4">
+                              {(() => {
+                                const items = getOrderItemsList(order);
+                                const firstItem = items[0];
+                                const prodName = getOrderItemName(firstItem);
+                                const prodImg = getOrderItemImage(firstItem);
+                                const extraCount = items.length > 1 ? items.length - 1 : 0;
+                                const allNames = items.map(getOrderItemName).filter(Boolean).join(', ');
+
+                                return (
+                                  <div className="flex items-center gap-3 min-w-[200px] max-w-[320px]" title={allNames || prodName}>
+                                    <div className="w-10 h-10 rounded-lg border border-white/10 bg-neutral-800 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                      {prodImg ? (
+                                        <img
+                                          src={prodImg}
+                                          alt={prodName}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      ) : (
+                                        <Package className="w-5 h-5 text-gray-500" />
+                                      )}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm font-semibold text-white truncate" title={prodName}>
+                                        {prodName}
+                                      </p>
+                                      <div className="flex items-center gap-2 mt-0.5">
+                                        <span className="text-xs text-gray-400">
+                                          Qty: {firstItem?.quantity || 1}
+                                        </span>
+                                        {extraCount > 0 && (
+                                          <span className="text-[10px] font-semibold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-1.5 py-0.5 rounded-full">
+                                            +{extraCount} more
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </td>
+                            <td className="px-6 py-4">
                               <div>
                                 <p className="text-sm font-medium text-white">
                                   {order.customer_name || 'Guest'}
@@ -1015,7 +1123,7 @@ export default function AdminOrdersPage() {
                                   <Eye className="w-3.5 h-3.5" />
                                   View
                                 </button>
-                                {order.order_status !== 'cancelled' && (
+                                {canOrderBeCancelled(order) && (
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -1130,7 +1238,7 @@ export default function AdminOrdersPage() {
 
           const printifyCust = meta?.printify_customer || {};
           const addressTo = printifyCust.address_to || {};
-          const customerName = 
+          const customerName =
             printifyCust.name ||
             [addressTo.first_name, addressTo.last_name].filter(Boolean).join(' ').trim() ||
             selectedOrder.shipping_address?.name ||
@@ -1153,18 +1261,18 @@ export default function AdminOrdersPage() {
             meta?.customerPhone ||
             '';
 
-          const tracking = (selectedOrder as any).tracking || 
-                           meta?.tracking || 
-                           meta?.shipments?.[0] || 
-                           (selectedOrder as any).shipments?.[0] ||
-                           (selectedOrder.fulfillment?.fulfillment_data ? 
-                             (typeof selectedOrder.fulfillment.fulfillment_data === 'string' 
-                               ? JSON.parse(selectedOrder.fulfillment.fulfillment_data)?.shipments?.[0]
-                               : selectedOrder.fulfillment.fulfillment_data?.shipments?.[0])
-                             : null);
+          const tracking = (selectedOrder as any).tracking ||
+            meta?.tracking ||
+            meta?.shipments?.[0] ||
+            (selectedOrder as any).shipments?.[0] ||
+            (selectedOrder.fulfillment?.fulfillment_data ?
+              (typeof selectedOrder.fulfillment.fulfillment_data === 'string'
+                ? JSON.parse(selectedOrder.fulfillment.fulfillment_data)?.shipments?.[0]
+                : selectedOrder.fulfillment.fulfillment_data?.shipments?.[0])
+              : null);
 
-          const printifyStatus = meta?.printify_status || 
-                                 (selectedOrder.order_status === 'shipped' ? 'fulfilled' : selectedOrder.order_status);
+          const printifyStatus = meta?.printify_status ||
+            (selectedOrder.order_status === 'shipped' ? 'fulfilled' : selectedOrder.order_status);
 
           const printifyOrderId = (selectedOrder as any).printify_order_id || meta?.printify_order_id || selectedOrder.fulfillment?.vendor_order_id;
 
@@ -1340,11 +1448,10 @@ export default function AdminOrdersPage() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-white/5">
                             <div className="flex items-center justify-between p-2.5 bg-neutral-900/60 rounded-xl border border-white/5">
                               <span className="text-gray-400 text-xs">Fulfillment Status</span>
-                              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold uppercase ${
-                                selectedOrder.order_status === 'shipped' || printifyStatus === 'fulfilled'
-                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                  : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                              }`}>
+                              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold uppercase ${selectedOrder.order_status === 'shipped' || printifyStatus === 'fulfilled'
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                }`}>
                                 {selectedOrder.order_status === 'shipped' ? 'Shipped / Fulfilled' : printifyStatus}
                               </span>
                             </div>
@@ -1502,7 +1609,7 @@ export default function AdminOrdersPage() {
                 {/* Fixed Modal Footer */}
                 <div className="flex-shrink-0 bg-neutral-900/95 backdrop-blur-xl border-t border-white/10 px-6 sm:px-8 py-4">
                   <div className="flex items-center justify-between">
-                    {selectedOrder.order_status !== 'cancelled' ? (
+                    {canOrderBeCancelled(selectedOrder) ? (
                       <button
                         onClick={() => setOrderToCancel(selectedOrder)}
                         disabled={loading}
@@ -1511,11 +1618,19 @@ export default function AdminOrdersPage() {
                         <X className="w-4 h-4" />
                         Cancel Order
                       </button>
-                    ) : (
+                    ) : selectedOrder.order_status === 'cancelled' ? (
                       <span className="text-xs text-red-400 font-semibold px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-lg">
                         Order Cancelled
                       </span>
-                    )}
+                    ) : ['shipped', 'delivered', 'fulfilled', 'completed'].includes(selectedOrder.order_status?.toLowerCase()) ? (
+                      <span className="text-xs text-emerald-400 font-semibold px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                        Non-Cancellable ({selectedOrder.order_status})
+                      </span>
+                    ) : selectedOrder.payment_status?.toLowerCase() === 'released' ? (
+                      <span className="text-xs text-blue-400 font-semibold px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                        Non-Cancellable (Payment Released)
+                      </span>
+                    ) : null}
                     <button
                       onClick={() => setShowOrderModal(false)}
                       className="px-5 py-2.5 text-xs sm:text-sm font-medium text-white bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all"

@@ -32,6 +32,27 @@ export async function POST(
 
     const order = orders[0];
 
+    const orderStatus = (order.order_status || '').toLowerCase().trim();
+    const paymentStatus = (order.payment_status || '').toLowerCase().trim();
+
+    if (orderStatus === 'cancelled') {
+      return NextResponse.json({ error: `Order #${order.order_number} is already cancelled` }, { status: 400 });
+    }
+
+    if (['shipped', 'delivered', 'fulfilled', 'completed'].includes(orderStatus)) {
+      return NextResponse.json(
+        { error: `Cannot cancel order #${order.order_number}: Product has already been ${orderStatus}.` },
+        { status: 400 }
+      );
+    }
+
+    if (paymentStatus === 'released') {
+      return NextResponse.json(
+        { error: `Cannot cancel order #${order.order_number}: Payment has already been released to the vendor.` },
+        { status: 400 }
+      );
+    }
+
     // 2. Parse metadata & shipping address
     let metadata: any = {};
     if (typeof order.metadata === 'string') {

@@ -56,9 +56,10 @@ export function calculateSellingPrice(
         }
       }
 
-      // 2. Substring matches if not directly found (e.g., "Men Hoodie" matches "Men")
-      if (matchedVal === undefined) {
+      // 2. Substring/parent matches if not directly found or if direct value is 0 (e.g., "Socks" matches "Shoes & Socks")
+      if (matchedVal === undefined || matchedVal === 0) {
         for (const [key, val] of Object.entries(categoryMarkups)) {
+          if (val === 0) continue;
           const keyClean = clean(key);
           if (keyClean === 'men' && (targetClean === 'women' || targetClean.includes('women'))) {
             continue;
@@ -219,33 +220,70 @@ export function resolveProductCategoryName(product: any): string {
   if (!product) return '';
   const title = (product.name || product.title || '').toLowerCase();
   
-  // 1. Check for specific subcategories matching titles (highest priority)
+  // 1. Check for specific footwear subcategories (high priority)
+  if (title.includes('sock')) return 'Socks';
+  if (
+    title.includes('shoe') || 
+    title.includes('sneaker') || 
+    title.includes('boot') || 
+    title.includes('footwear') || 
+    title.includes('slide') || 
+    title.includes('sandal') || 
+    title.includes('flip flop') || 
+    title.includes('clog')
+  ) {
+    return 'Shoes';
+  }
+
+  // 2. Check for apparel subcategories matching titles
   if (title.includes('hoodie')) return 'Hoodies';
   if (title.includes('sweatshirt')) return 'Sweatshirts';
   if (title.includes('tank') || title.includes('racerback')) return 'Tank Tops';
   if (title.includes('long sleeve') || title.includes('long-sleeve')) return 'Long Sleeves';
   if (title.includes('tee') || title.includes('t-shirt') || title.includes('t shirt')) return 'T-Shirts';
   if (title.includes('sport') || title.includes('active') || title.includes('jersey') || title.includes('athletic')) return 'Sportswear';
+  if (title.includes('hat') || title.includes('cap') || title.includes('beanie')) return 'Hats & Caps';
+  if (title.includes('jogger') || title.includes('pant') || title.includes('legging') || title.includes('sweatpant')) return 'Bottoms & Leggings';
+  if (title.includes('swim') || title.includes('bikini') || title.includes('trunks')) return 'Swimwear';
+  if (title.includes('boxer') || title.includes('brief') || title.includes('underwear')) return 'Underwear';
+  if (title.includes('jacket') || title.includes('windbreaker') || title.includes('vest') || title.includes('coat')) return 'Jackets & Outerwear';
+
+  // 3. Check for accessories & home subcategories
   if (title.includes('phone') || title.includes('case')) return 'Phone Cases';
   if (title.includes('bag') || title.includes('backpack') || title.includes('tote')) return 'Bags';
   if (title.includes('sticker') || title.includes('decal')) return 'Stickers';
-  if (title.includes('poster') || title.includes('print')) return 'Posters';
+  if (title.includes('poster') || (title.includes('print') && !title.includes('all-over') && !title.includes('all over') && !title.includes('sublimat'))) return 'Posters';
   if (title.includes('canvas')) return 'Canvas';
   if (title.includes('blanket')) return 'Blankets';
   if (title.includes('pillow')) return 'Pillows';
   if (title.includes('mug')) return 'Mugs';
   if (title.includes('bottle') || title.includes('tumbler')) return 'Drinkware';
 
-  // 2. Check for main category matches in title/tags
+  // 4. Check categoryIds (from blueprint_categories.json or Printify)
+  if (Array.isArray(product.categoryIds)) {
+    if (product.categoryIds.includes(7)) return 'Shoes & Socks';
+    if (product.categoryIds.includes(6)) return 'Mugs & Drinkware';
+    if (product.categoryIds.includes(5)) return 'Home & Living';
+    if (product.categoryIds.includes(4)) return 'Accessories';
+    if (product.categoryIds.includes(3)) return 'Kids';
+    if (product.categoryIds.includes(2)) return 'Women';
+    if (product.categoryIds.includes(1)) return 'Men';
+    if (product.categoryIds.includes(8)) return 'Unisex';
+  }
+
+  // 5. Check for main category matches in title/tags
   if (title.includes('kid') || title.includes('youth') || title.includes('toddler') || title.includes('baby') || title.includes('infant')) return 'Kids';
   if (title.includes('women') || title.includes('lady') || title.includes('girl')) return 'Women';
   if (title.includes('men') || title.includes('guy') || title.includes('boy')) return 'Men';
+  if (title.includes('unisex')) return 'Unisex';
 
-  // 3. Fall back to standard product category
-  const productCat = (product.category || '').toLowerCase().trim();
+  // 6. Fall back to standard product category
+  const productCat = (product.category || product.category_name || '').toLowerCase().trim();
   if (productCat === 'apparel') return 'Apparel';
   if (productCat === 'accessories') return 'Accessories';
   if (productCat === 'home-living' || productCat === 'home & living') return 'Home & Living';
+  if (productCat === 'mugs & drinkware' || productCat === 'mugs-drinkware') return 'Mugs & Drinkware';
+  if (productCat === 'shoes & socks' || productCat === 'shoes-socks' || productCat === 'shoes' || productCat === 'socks') return 'Shoes & Socks';
   if (productCat === 'stationery') return 'Stationery';
   if (productCat === 'bags') return 'Bags';
 

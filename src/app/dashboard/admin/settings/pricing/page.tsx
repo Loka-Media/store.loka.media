@@ -65,7 +65,7 @@ export default function AdminPricingSettings() {
                   ? data.categoryMarkup[cat]
                   : data.categoryMarkup[cat.toLowerCase()] !== undefined
                   ? data.categoryMarkup[cat.toLowerCase()]
-                  : 35;
+                  : 0;
               initialSliders[cat] = savedVal;
               console.log(`[PricingPage] Loaded ${cat}: ${savedVal}`);
             });
@@ -114,7 +114,7 @@ export default function AdminPricingSettings() {
           ? categoryMarkup[cat]
           : categoryMarkup[cat.toLowerCase()] !== undefined
           ? categoryMarkup[cat.toLowerCase()]
-          : 35;
+          : 0;
       return categorySliderValues[cat] !== savedVal;
     });
 
@@ -238,9 +238,9 @@ export default function AdminPricingSettings() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {categories.map((category) => {
-                  const currentVal = categorySliderValues[category] ?? 35;
+                  const currentVal = categorySliderValues[category] ?? 0;
                   const isChanged =
-                    (categoryMarkup[category] ?? categoryMarkup[category.toLowerCase()] ?? 35) !== currentVal;
+                    (categoryMarkup[category] ?? categoryMarkup[category.toLowerCase()] ?? 0) !== currentVal;
 
                   return (
                     <div

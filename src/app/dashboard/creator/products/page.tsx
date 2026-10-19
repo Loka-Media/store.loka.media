@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useRouter } from "next/navigation";
 import { productAPI } from "@/lib/api";
 import { createProductSlug, getValidImageUrl } from "@/lib/utils";
+import { resolveProductCategoryName } from "@/lib/pricing";
 import { ArrowLeft, Edit, ExternalLink, Grid, List, Plus, Search, Trash2, Package, Loader2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -49,6 +50,7 @@ interface CreatorDraft {
   productId?: number;
   name?: string;
   title?: string;
+  category?: string;
   thumbnail?: string;
   designFiles?: any;
   uploadedFiles?: any[];
@@ -201,71 +203,188 @@ export default function CreatorProductsPage() {
     }
   };
 
-  // Extract unique categories from the products list dynamically
-  const availableCategories = Array.from(
-    new Set(products.map((p) => p.category).filter(Boolean))
-  );
+  // Comprehensive list of available categories for filter dropdown
+  const availableCategories = useMemo(() => {
+    const standard = [
+      "Men",
+      "Women",
+      "Kids",
+      "Unisex",
+      "Shoes & Socks",
+      "Accessories",
+      "Home & Living",
+      "Mugs & Drinkware",
+      "T-Shirts",
+      "Hoodies",
+      "Sweatshirts",
+      "Sportswear",
+      "Phone Cases",
+      "Bags",
+      "Posters",
+      "Canvas",
+    ];
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      !filters.search ||
-      product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-      product.description.toLowerCase().includes(filters.search.toLowerCase());
-    const matchesCategory =
-      !filters.category || product.category === filters.category;
-    const matchesStatus =
-      !filters.status ||
-      (filters.status === "active" ? product.is_active : !product.is_active);
+    const categorySet = new Set<string>();
 
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+    // 1. Add categories present in products
+    products.forEach((p) => {
+      if (p.category) categorySet.add(p.category.trim());
+      const resolved = resolveProductCategoryName(p);
+      if (resolved && resolved !== "Other") categorySet.add(resolved);
+    });
 
-  const sortedAndFilteredProducts = [...filteredProducts].sort((a, b) => {
-    if (filters.sortBy === "created_at") {
-      const dateA = new Date(a.created_at || 0).getTime();
-      const dateB = new Date(b.created_at || 0).getTime();
-      return filters.sortOrder === "DESC" ? dateB - dateA : dateA - dateB;
-    }
-    if (filters.sortBy === "name") {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
-      if (nameA < nameB) return filters.sortOrder === "ASC" ? -1 : 1;
-      if (nameA > nameB) return filters.sortOrder === "ASC" ? 1 : -1;
-      return 0;
-    }
-    if (filters.sortBy === "base_price") {
-      const priceA = Number(a.base_price) || 0;
-      const priceB = Number(b.base_price) || 0;
-      return filters.sortOrder === "DESC" ? priceB - priceA : priceA - priceB;
-    }
-    return 0;
-  });
+    // 2. Add categories present in drafts
+    drafts.forEach((d) => {
+      const draftCat = d.productForm?.category || d.category;
+      if (draftCat) categorySet.add(draftCat.trim());
+      const resolved = resolveProductCategoryName({ name: d.name || d.title, category: draftCat });
+      if (resolved && resolved !== "Other") categorySet.add(resolved);
+    });
 
-  const filteredDrafts = drafts
-    .filter((d) => {
-      if (!filters.search) return true;
-      const q = filters.search.toLowerCase();
-      return (
-        (d.name && d.name.toLowerCase().includes(q)) ||
-        (d.title && d.title.toLowerCase().includes(q)) ||
-        String(d.blueprintId).includes(q)
-      );
-    })
-    .sort((a, b) => {
+    // 3. Include any standard category that appears in products/drafts or common categories
+    standard.forEach((s) => categorySet.add(s));
+
+    // Normalize and deduplicate case-insensitively
+    const normalizedMap = new Map<string, string>();
+    Array.from(categorySet).forEach((cat) => {
+      const lower = cat.toLowerCase();
+      if (!normalizedMap.has(lower)) {
+        const stdMatch = standard.find((s) => s.toLowerCase() === lower);
+        normalizedMap.set(lower, stdMatch || cat);
+      }
+    });
+
+    const uniqueList = Array.from(normalizedMap.values());
+    const primary = standard.filter((s) => uniqueList.some((u) => u.toLowerCase() === s.toLowerCase()));
+    const extras = uniqueList
+      .filter((u) => !standard.some((s) => s.toLowerCase() === u.toLowerCase()))
+      .sort((a, b) => a.localeCompare(b));
+
+    return [...primary, ...extras];
+  }, [products, drafts]);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      // 1. Search filter
+      if (filters.search) {
+        const q = filters.search.toLowerCase();
+        const matchesName = product.name && product.name.toLowerCase().includes(q);
+        const matchesDesc = product.description && product.description.toLowerCase().includes(q);
+        const matchesCat = product.category && product.category.toLowerCase().includes(q);
+        const matchesTags = Array.isArray(product.tags) && product.tags.some(t => t && t.toLowerCase().includes(q));
+        if (!matchesName && !matchesDesc && !matchesCat && !matchesTags) {
+          return false;
+        }
+      }
+
+      // 2. Category filter
+      if (filters.category) {
+        const catFilter = filters.category.toLowerCase().trim();
+        const prodCat = (product.category || "").toLowerCase().trim();
+        const resolved = resolveProductCategoryName(product).toLowerCase().trim();
+
+        const matchesCategory =
+          prodCat === catFilter ||
+          resolved === catFilter ||
+          prodCat.includes(catFilter) ||
+          catFilter.includes(prodCat) ||
+          resolved.includes(catFilter) ||
+          catFilter.includes(resolved);
+
+        if (!matchesCategory) {
+          return false;
+        }
+      }
+
+      // 3. Status filter
+      if (filters.status) {
+        if (filters.status === "active" && !product.is_active) return false;
+        if (filters.status === "inactive" && product.is_active) return false;
+      }
+
+      return true;
+    });
+  }, [products, filters.search, filters.category, filters.status]);
+
+  const sortedAndFilteredProducts = useMemo(() => {
+    return [...filteredProducts].sort((a, b) => {
       if (filters.sortBy === "created_at") {
-        const dateA = new Date(a.updatedAt || a.savedAt || 0).getTime();
-        const dateB = new Date(b.updatedAt || b.savedAt || 0).getTime();
+        const dateA = new Date(a.created_at || 0).getTime();
+        const dateB = new Date(b.created_at || 0).getTime();
         return filters.sortOrder === "DESC" ? dateB - dateA : dateA - dateB;
       }
       if (filters.sortBy === "name") {
-        const nameA = (a.name || a.title || "").toLowerCase();
-        const nameB = (b.name || b.title || "").toLowerCase();
-        if (nameA < nameB) return filters.sortOrder === "ASC" ? -1 : 1;
-        if (nameA > nameB) return filters.sortOrder === "ASC" ? 1 : -1;
-        return 0;
+        const nameA = (a.name || "").toLowerCase();
+        const nameB = (b.name || "").toLowerCase();
+        return filters.sortOrder === "ASC"
+          ? nameA.localeCompare(nameB)
+          : nameB.localeCompare(nameA);
+      }
+      if (filters.sortBy === "base_price") {
+        const priceA = Number(a.min_price ?? a.base_price ?? 0);
+        const priceB = Number(b.min_price ?? b.base_price ?? 0);
+        return filters.sortOrder === "DESC" ? priceB - priceA : priceA - priceB;
       }
       return 0;
     });
+  }, [filteredProducts, filters.sortBy, filters.sortOrder]);
+
+  const filteredDrafts = useMemo(() => {
+    return drafts
+      .filter((d) => {
+        // Search filter
+        if (filters.search) {
+          const q = filters.search.toLowerCase();
+          const matchesSearch =
+            (d.name && d.name.toLowerCase().includes(q)) ||
+            (d.title && d.title.toLowerCase().includes(q)) ||
+            (d.productForm?.name && d.productForm.name.toLowerCase().includes(q)) ||
+            (d.productForm?.description && d.productForm.description.toLowerCase().includes(q)) ||
+            String(d.blueprintId).includes(q);
+          if (!matchesSearch) return false;
+        }
+
+        // Category filter
+        if (filters.category) {
+          const catFilter = filters.category.toLowerCase().trim();
+          const draftCat = (d.productForm?.category || d.category || "").toLowerCase().trim();
+          const draftTitle = (d.name || d.title || d.productForm?.name || "").toLowerCase().trim();
+          const resolved = resolveProductCategoryName({ name: draftTitle, category: draftCat }).toLowerCase().trim();
+
+          const matchesCategory =
+            draftCat === catFilter ||
+            resolved === catFilter ||
+            draftCat.includes(catFilter) ||
+            catFilter.includes(draftCat) ||
+            resolved.includes(catFilter) ||
+            catFilter.includes(resolved);
+
+          if (!matchesCategory) return false;
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        if (filters.sortBy === "created_at") {
+          const dateA = new Date(a.updatedAt || a.savedAt || 0).getTime();
+          const dateB = new Date(b.updatedAt || b.savedAt || 0).getTime();
+          return filters.sortOrder === "DESC" ? dateB - dateA : dateA - dateB;
+        }
+        if (filters.sortBy === "name") {
+          const nameA = (a.name || a.title || a.productForm?.name || "").toLowerCase();
+          const nameB = (b.name || b.title || b.productForm?.name || "").toLowerCase();
+          return filters.sortOrder === "ASC"
+            ? nameA.localeCompare(nameB)
+            : nameB.localeCompare(nameA);
+        }
+        if (filters.sortBy === "base_price") {
+          const priceA = Number(a.productForm?.retailPrice || a.productForm?.price || a.productForm?.basePrice || 0);
+          const priceB = Number(b.productForm?.retailPrice || b.productForm?.price || b.productForm?.basePrice || 0);
+          return filters.sortOrder === "DESC" ? priceB - priceA : priceA - priceB;
+        }
+        return 0;
+      });
+  }, [drafts, filters.search, filters.category, filters.sortBy, filters.sortOrder]);
 
   const handleToggleStatus = async (productId: number, currentStatus: boolean, e?: React.MouseEvent) => {
     if (e) {

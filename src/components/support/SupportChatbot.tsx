@@ -239,8 +239,22 @@ function getStatusDescription(status: string) {
   return 'Your order has been confirmed and is waiting to enter the production queue shortly.';
 }
 
+const isPageReloadOrHardRefresh = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  try {
+    const navEntries = performance.getEntriesByType('navigation');
+    if (navEntries && navEntries.length > 0) {
+      const nav = navEntries[0] as PerformanceNavigationTiming;
+      return nav.type === 'reload';
+    }
+    return (performance as any)?.navigation?.type === 1;
+  } catch {
+    return false;
+  }
+};
+
 export default function SupportChatbot() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { formatPrice } = useCurrency();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -271,83 +285,90 @@ export default function SupportChatbot() {
 
   const prevAuthKeyRef = useRef<string | null>(null);
 
-  // Session ID & History restore
+  // Session ID & Reload initialization
   useEffect(() => {
+    const isReload = isPageReloadOrHardRefresh();
+    const savedAuthUser = sessionStorage.getItem('loka_support_auth_user');
+    const wasGuest = !savedAuthUser || savedAuthUser === 'guest';
+
+    // If page reloaded / hard-refreshed as guest, ensure old guest history is wiped immediately
+    if (wasGuest) {
+      sessionStorage.removeItem('loka_support_chat_history');
+      sessionStorage.removeItem('loka_support_auth_user');
+      if (isReload) {
+        sessionStorage.removeItem('loka_support_session_id');
+      }
+    }
+
     let sId = sessionStorage.getItem('loka_support_session_id');
-    if (!sId) {
+    if (!sId || (isReload && wasGuest)) {
       sId = 'session_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
       sessionStorage.setItem('loka_support_session_id', sId);
     }
     setSessionId(sId);
+  }, []);
+
+  // Synchronize chat greeting and history with authentication state
+  useEffect(() => {
+    if (authLoading) return;
 
     const currentKey = isAuthenticated && user ? `user_${user.id || user.email}` : 'guest';
-    const savedAuthUser = sessionStorage.getItem('loka_support_auth_user');
+    const isReload = isPageReloadOrHardRefresh();
 
-    // If session belonged to another user or if logged out with stale session
-    if (savedAuthUser && savedAuthUser !== currentKey) {
+    // ── GUEST USER (NOT LOGGED IN) ──
+    if (!isAuthenticated || !user) {
+      // Guest chat is never persisted across hard refresh or page reload
       sessionStorage.removeItem('loka_support_chat_history');
-      sessionStorage.setItem('loka_support_auth_user', currentKey);
-      setMessages([getWelcomeMessage(user, isAuthenticated)]);
+      sessionStorage.removeItem('loka_support_auth_user');
+
+      // Reset to guest welcome message on first load, logout, or reload
+      if (prevAuthKeyRef.current !== 'guest' || isReload) {
+        setMessages([getWelcomeMessage(null, false)]);
+      }
+      prevAuthKeyRef.current = 'guest';
       return;
     }
 
-    // Handle legacy session where loka_support_auth_user was not set yet
-    if (!savedAuthUser) {
-      sessionStorage.setItem('loka_support_auth_user', currentKey);
-      if (!isAuthenticated || !user) {
-        sessionStorage.removeItem('loka_support_chat_history');
-        setMessages([getWelcomeMessage(null, false)]);
-        return;
-      }
-    }
+    // ── LOGGED-IN USER ──
+    const userChatKey = `loka_support_chat_user_${user.id || user.email}`;
+    sessionStorage.setItem('loka_support_auth_user', currentKey);
 
-    const savedChat = sessionStorage.getItem('loka_support_chat_history');
-    if (savedChat) {
-      try {
-        const parsed = JSON.parse(savedChat);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          if (parsed.length === 1 && parsed[0].id === 'welcome') {
-            setMessages([getWelcomeMessage(user, isAuthenticated)]);
-          } else {
+    if (prevAuthKeyRef.current !== currentKey) {
+      // User logged in or switched accounts: try restoring their saved session
+      const savedUserChat = sessionStorage.getItem(userChatKey);
+      if (savedUserChat) {
+        try {
+          const parsed = JSON.parse(savedUserChat);
+          if (Array.isArray(parsed) && parsed.length > 0) {
             setMessages(parsed);
+            prevAuthKeyRef.current = currentKey;
+            return;
           }
-          return;
-        }
-      } catch { }
-    }
-
-    setMessages([getWelcomeMessage(user, isAuthenticated)]);
-  }, []);
-
-  // Save history
-  useEffect(() => {
-    if (messages.length > 0) {
-      try { sessionStorage.setItem('loka_support_chat_history', JSON.stringify(messages)); } catch { }
-    }
-  }, [messages]);
-
-  // Keep chat greeting and history synchronized with authentication state
-  useEffect(() => {
-    const currentKey = isAuthenticated && user ? `user_${user.id || user.email}` : 'guest';
-
-    if (prevAuthKeyRef.current !== null && prevAuthKeyRef.current !== currentKey) {
-      // User logged in, logged out, or switched accounts: reset chat history
-      sessionStorage.removeItem('loka_support_chat_history');
-      sessionStorage.setItem('loka_support_auth_user', currentKey);
-      setMessages([getWelcomeMessage(user, isAuthenticated)]);
+        } catch { }
+      }
+      setMessages([getWelcomeMessage(user, true)]);
     } else {
-      // If conversation only contains welcome message, update greeting to match current user state
+      // If conversation only contains welcome message, update greeting to include user's name
       setMessages(prev => {
         if (prev.length === 1 && prev[0].id === 'welcome') {
-          return [getWelcomeMessage(user, isAuthenticated)];
+          return [getWelcomeMessage(user, true)];
         }
         return prev;
       });
-      sessionStorage.setItem('loka_support_auth_user', currentKey);
     }
 
     prevAuthKeyRef.current = currentKey;
-  }, [isAuthenticated, user]);
+  }, [authLoading, isAuthenticated, user]);
+
+  // Save history only for authenticated users (guest chat stays only in active memory)
+  useEffect(() => {
+    if (messages.length > 0 && isAuthenticated && user) {
+      try {
+        const userChatKey = `loka_support_chat_user_${user.id || user.email}`;
+        sessionStorage.setItem(userChatKey, JSON.stringify(messages));
+      } catch { }
+    }
+  }, [messages, isAuthenticated, user]);
 
   // Lenis smooth scroll
   useEffect(() => {
@@ -766,7 +787,19 @@ export default function SupportChatbot() {
                   >Cancel</button>
                   <button
                     type="button"
-                    onClick={() => { setMessages([getWelcomeMessage(user, isAuthenticated)]); sessionStorage.removeItem('loka_support_chat_history'); setError(null); setShowClearConfirm(false); }}
+                    onClick={() => {
+                      setMessages([getWelcomeMessage(user, isAuthenticated)]);
+                      sessionStorage.removeItem('loka_support_chat_history');
+                      sessionStorage.removeItem('loka_support_auth_user');
+                      if (user) {
+                        sessionStorage.removeItem(`loka_support_chat_user_${user.id || user.email}`);
+                      }
+                      const newSId = 'session_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+                      sessionStorage.setItem('loka_support_session_id', newSId);
+                      setSessionId(newSId);
+                      setError(null);
+                      setShowClearConfirm(false);
+                    }}
                     style={{ flex: 1, padding: '0.65rem', borderRadius: '12px', background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_LIGHT})`, border: 'none', color: 'white', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(255,109,31,0.3)' }}
                   >Clear Chat</button>
                 </div>

@@ -10,47 +10,89 @@ const CONFIG_PATH = path.join(process.cwd(), 'src/config/global_settings.json');
 let categoriesCache: { data: string[]; timestamp: number } | null = null;
 const CACHE_TTL = 300000; // 5 minutes in milliseconds
 
+const STANDARD_CATEGORIES = [
+  // Primary Categories (from CATEGORIES_MAP)
+  "Men",
+  "Women",
+  "Kids",
+  "Unisex",
+  "Shoes & Socks",
+  "Accessories",
+  "Home & Living",
+  "Mugs & Drinkware",
+
+  // Footwear
+  "Shoes",
+  "Socks",
+
+  // Apparel Subcategories
+  "T-Shirts",
+  "Hoodies",
+  "Sweatshirts",
+  "Long Sleeves",
+  "Tank Tops",
+  "Sportswear",
+  "Bottoms & Leggings",
+  "Swimwear",
+  "Underwear",
+  "Jackets & Outerwear",
+
+  // Accessories Subcategories
+  "Phone Cases",
+  "Bags",
+  "Hats & Caps",
+  "Stickers",
+
+  // Home & Living Subcategories
+  "Posters",
+  "Canvas",
+  "Blankets",
+  "Pillows",
+
+  // Drinkware Subcategories
+  "Drinkware",
+  "Mugs",
+];
+
 async function getDynamicCategories(): Promise<string[]> {
   if (categoriesCache && (Date.now() - categoriesCache.timestamp < CACHE_TTL)) {
     return categoriesCache.data;
   }
 
+  const categoriesSet = new Set<string>();
+
+  // 1. Always include all standard Loka categories
+  STANDARD_CATEGORIES.forEach(c => categoriesSet.add(c));
+
+  // 2. Include any categories from saved settings
+  const settings = loadSettings();
+  Object.keys(settings.categoryMarkup || {}).forEach(c => {
+    if (c && c !== 'Other') categoriesSet.add(c);
+  });
+
+  // 3. Include categories resolved from Printify blueprints
   try {
     const blueprints = await printifyCatalogAPI.getBlueprints();
-    const categoriesSet = new Set<string>();
-
-    blueprints.forEach((bp: any) => {
-      const categoryName = resolveProductCategoryName(bp);
-      if (categoryName && categoryName !== 'Other') {
-        categoriesSet.add(categoryName);
-      }
-    });
-
-    // Seeding standard categories first to keep order consistent, then dynamic categories alphabetically
-    const standardCategories = [
-      "Men", "Women", "Kids", "Accessories", "Home & Living", 
-      "Mugs & Drinkware", "Shoes & Socks", "Tank Tops", "Hoodies", 
-      "Sweatshirts", "Long Sleeves", "T-Shirts", "Sportswear", 
-      "Phone Cases", "Bags", "Stickers", "Posters"
-    ];
-
-    const resolvedList = Array.from(categoriesSet);
-    const sortedCategories = standardCategories.filter(c => resolvedList.includes(c));
-    const otherCategories = resolvedList.filter(c => !standardCategories.includes(c)).sort();
-    const finalCategories = [...sortedCategories, ...otherCategories];
-
-    categoriesCache = { data: finalCategories, timestamp: Date.now() };
-    return finalCategories;
+    if (Array.isArray(blueprints)) {
+      blueprints.forEach((bp: any) => {
+        const categoryName = resolveProductCategoryName(bp);
+        if (categoryName && categoryName !== 'Other') {
+          categoriesSet.add(categoryName);
+        }
+      });
+    }
   } catch (error) {
     console.error('[Pricing Settings API] Error fetching blueprints from Printify:', error);
-    // Return default fallback categories if Printify is unavailable
-    return [
-      "Men", "Women", "Kids", "Accessories", "Home & Living", 
-      "Mugs & Drinkware", "Shoes & Socks", "Tank Tops", "Hoodies", 
-      "Sweatshirts", "Long Sleeves", "T-Shirts", "Sportswear", 
-      "Phone Cases", "Bags", "Stickers", "Posters"
-    ];
   }
+
+  // Preserve STANDARD_CATEGORIES order first, then any additional dynamic categories alphabetically
+  const allCategories = Array.from(categoriesSet);
+  const primarySorted = STANDARD_CATEGORIES.filter(c => allCategories.includes(c));
+  const dynamicExtra = allCategories.filter(c => !STANDARD_CATEGORIES.includes(c)).sort();
+  const finalCategories = [...primarySorted, ...dynamicExtra];
+
+  categoriesCache = { data: finalCategories, timestamp: Date.now() };
+  return finalCategories;
 }
 
 // Helper to safely load settings
@@ -78,6 +120,7 @@ function saveSettings(settings: { globalMarkup: number; categoryMarkup: Record<s
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(settings, null, 2), 'utf8');
+    categoriesCache = null; // Invalidate cache on save
     return true;
   } catch (error) {
     console.error('[Pricing Settings API] Error saving settings:', error);
@@ -88,10 +131,23 @@ function saveSettings(settings: { globalMarkup: number; categoryMarkup: Record<s
 export async function GET() {
   const settings = loadSettings();
   const categories = await getDynamicCategories();
+
+  // Ensure every category has an initialized markup entry (default to existing value or 0)
+  const mergedCategoryMarkup: Record<string, number> = {};
+  categories.forEach(cat => {
+    const existing =
+      settings.categoryMarkup[cat] !== undefined
+        ? settings.categoryMarkup[cat]
+        : settings.categoryMarkup[cat.toLowerCase()] !== undefined
+        ? settings.categoryMarkup[cat.toLowerCase()]
+        : 0;
+    mergedCategoryMarkup[cat] = existing;
+  });
+
   return NextResponse.json({
     success: true,
     globalMarkup: settings.globalMarkup,
-    categoryMarkup: settings.categoryMarkup,
+    categoryMarkup: mergedCategoryMarkup,
     categories
   });
 }

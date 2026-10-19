@@ -269,8 +269,26 @@ export default function CreatorOrdersPage() {
     }
   };
 
+  const canOrderBeCancelled = (order: { order_status?: string; payment_status?: string } | null | undefined): boolean => {
+    if (!order) return false;
+    const status = (order.order_status || '').toLowerCase().trim();
+    const payment = (order.payment_status || '').toLowerCase().trim();
+    if (['shipped', 'delivered', 'fulfilled', 'completed', 'cancelled'].includes(status)) {
+      return false;
+    }
+    if (payment === 'released') {
+      return false;
+    }
+    return true;
+  };
+
   const confirmCancelOrder = async () => {
     if (!orderToCancel) return;
+    if (!canOrderBeCancelled(orderToCancel)) {
+      toast.error('Cannot cancel order: Product has already been shipped/delivered or payment has been released.');
+      setOrderToCancel(null);
+      return;
+    }
     try {
       setCancellingId(orderToCancel.id);
       const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
@@ -707,7 +725,7 @@ export default function CreatorOrdersPage() {
                                     <Eye className="w-3.5 h-3.5" />
                                     View
                                   </button>
-                                  {order.order_status !== 'cancelled' && (
+                                  {canOrderBeCancelled(order) && (
                                     <button
                                       onClick={e => { e.stopPropagation(); setOrderToCancel(order); }}
                                       disabled={cancellingId === order.id}
@@ -1190,7 +1208,7 @@ export default function CreatorOrdersPage() {
               {/* Fixed Modal Footer */}
               <div className="flex-shrink-0 bg-neutral-900/95 backdrop-blur-xl border-t border-white/10 px-6 sm:px-8 py-4">
                 <div className="flex items-center justify-between">
-                  {selectedOrder.order_status !== 'cancelled' ? (
+                  {canOrderBeCancelled(selectedOrder) ? (
                     <button
                       onClick={() => setOrderToCancel(selectedOrder)}
                       disabled={cancellingId === selectedOrder.id}
@@ -1199,11 +1217,19 @@ export default function CreatorOrdersPage() {
                       <X className="w-4 h-4" />
                       {cancellingId === selectedOrder.id ? 'Cancelling...' : 'Cancel Order'}
                     </button>
-                  ) : (
+                  ) : selectedOrder.order_status === 'cancelled' ? (
                     <span className="text-xs text-red-400 font-semibold px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-lg">
                       Order Cancelled
                     </span>
-                  )}
+                  ) : ['shipped', 'delivered', 'fulfilled', 'completed'].includes(selectedOrder.order_status?.toLowerCase()) ? (
+                    <span className="text-xs text-emerald-400 font-semibold px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                      Non-Cancellable ({selectedOrder.order_status})
+                    </span>
+                  ) : selectedOrder.payment_status?.toLowerCase() === 'released' ? (
+                    <span className="text-xs text-blue-400 font-semibold px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                      Non-Cancellable (Payment Released)
+                    </span>
+                  ) : null}
                   <button
                     onClick={() => setShowModal(false)}
                     className="px-5 py-2.5 text-xs sm:text-sm font-medium text-white bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all"
