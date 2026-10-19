@@ -499,7 +499,7 @@ export const checkoutAPI = {
 // User Profile API
 export const userAPI = {
   // Update user profile
-  updateProfile: async (userData: { name?: string; phone?: string; profile_img?: string }) => {
+  updateProfile: async (userData: { name?: string; phone?: string; profile_img?: string; creatorUrl?: string; creator_url?: string }) => {
     const response = await api.put("/api/auth/me", userData);
     return response.data;
   },

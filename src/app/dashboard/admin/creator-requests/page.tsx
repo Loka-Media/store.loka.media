@@ -33,6 +33,13 @@ interface CreatorRequest {
   updatedAt: string;
 }
 
+const normalizeUrl = (url?: string) => {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+};
+
 export default function CreatorRequestsPage() {
   const [requests, setRequests] = useState<CreatorRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -469,16 +476,20 @@ export default function CreatorRequestsPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           <LinkIcon className="w-4 h-4 text-gray-500 mr-2 flex-shrink-0" />
-                          <a
-                            href={request.creatorUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-orange-400 hover:text-orange-300 flex items-center transition-colors truncate max-w-[200px]"
-                            title={request.creatorUrl}
-                          >
-                            {request.creatorUrl || 'No URL provided'}
-                            <ExternalLink className="w-3 h-3 ml-1 flex-shrink-0" />
-                          </a>
+                          {request.creatorUrl ? (
+                            <a
+                              href={normalizeUrl(request.creatorUrl)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-orange-400 hover:text-orange-300 hover:underline flex items-center transition-colors truncate max-w-[200px] cursor-pointer"
+                              title={request.creatorUrl}
+                            >
+                              <span className="truncate">{request.creatorUrl}</span>
+                              <ExternalLink className="w-3 h-3 ml-1 flex-shrink-0" />
+                            </a>
+                          ) : (
+                            <span className="text-sm text-gray-500">No URL provided</span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -619,9 +630,18 @@ export default function CreatorRequestsPage() {
               <div className="text-xs text-gray-400 mt-0.5">@{removeModal.request.username}</div>
               <div className="text-xs text-gray-500 mt-1">{removeModal.request.email}</div>
               {removeModal.request.creatorUrl && (
-                <div className="text-xs text-orange-400/90 truncate mt-1 flex items-center gap-1">
-                  <LinkIcon className="w-3 h-3 flex-shrink-0" />
-                  <span className="truncate">{removeModal.request.creatorUrl}</span>
+                <div className="mt-1 flex items-center gap-1 min-w-0">
+                  <LinkIcon className="w-3 h-3 flex-shrink-0 text-orange-400" />
+                  <a
+                    href={normalizeUrl(removeModal.request.creatorUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-orange-400 hover:text-orange-300 hover:underline transition-colors truncate inline-flex items-center gap-1 cursor-pointer"
+                    title={removeModal.request.creatorUrl}
+                  >
+                    <span className="truncate">{removeModal.request.creatorUrl}</span>
+                    <ExternalLink className="w-2.5 h-2.5 flex-shrink-0 opacity-80" />
+                  </a>
                 </div>
               )}
             </div>

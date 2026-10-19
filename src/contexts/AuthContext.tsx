@@ -45,9 +45,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.getItem('creatorUrl')
         : null) || undefined;
 
+    const resolvedUrl = userData.creatorUrl || userData.creator_url || storedUrl;
+
+    if (resolvedUrl && typeof window !== 'undefined') {
+      if (userData.username) localStorage.setItem(`creatorUrl_${userData.username}`, resolvedUrl);
+      if (userData.email) localStorage.setItem(`creatorUrl_${userData.email}`, resolvedUrl);
+      localStorage.setItem('creatorUrl', resolvedUrl);
+    }
+
     return {
       ...userData,
-      creatorUrl: userData.creatorUrl || userData.creator_url || storedUrl,
+      creatorUrl: resolvedUrl,
+      creator_url: resolvedUrl,
     };
   };
 
@@ -216,11 +225,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await authAPI.logout();
       // Clear the legacy shared storage key so the next user won't see this user's files
       localStorage.removeItem('uploaded_printify_images');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('loka_support_chat_history');
+        sessionStorage.removeItem('loka_support_session_id');
+        sessionStorage.removeItem('loka_support_auth_user');
+      }
       setUser(null);
       toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
       localStorage.removeItem('uploaded_printify_images');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('loka_support_chat_history');
+        sessionStorage.removeItem('loka_support_session_id');
+        sessionStorage.removeItem('loka_support_auth_user');
+      }
       setUser(null);
     }
   };

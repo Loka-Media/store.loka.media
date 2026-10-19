@@ -46,14 +46,113 @@ export interface ChatMessage {
   showAuthPrompt?: boolean;
 }
 
-const DEFAULT_WELCOME_MESSAGE: ChatMessage = {
-  id: 'welcome',
-  role: 'assistant',
-  content: "Hi there! 👋 I'm **Loka Assistant** — your personal support guide.\n\nI can help you with products, sizing, shipping, returns, and live order tracking. What can I help you with today?",
-  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+const getWelcomeMessage = (currentUser?: { name?: string; username?: string } | null, isAuth?: boolean): ChatMessage => {
+  const isUserLoggedIn = Boolean(isAuth && currentUser);
+  const displayName = isUserLoggedIn
+    ? (currentUser?.name?.trim() || currentUser?.username?.trim() || 'User')
+    : 'User';
+
+  const greetingTitle = isUserLoggedIn
+    ? `Hi ${displayName}! 👋 Welcome back to **Loka Media**.`
+    : `Hi User! 👋 Welcome to **Loka Media**.`;
+
+  return {
+    id: 'welcome',
+    role: 'assistant',
+    content: `${greetingTitle}\n\nI can help you track your live orders, check shipments, explore products, or answer any questions. What can I do for you today?`,
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  };
 };
 
+const DEFAULT_WELCOME_MESSAGE: ChatMessage = getWelcomeMessage(null, false);
+
 const ORDER_INTENT_REGEX = /\b(track|tracking|order|orders|parcel|package|shipment|delivery|kaha hai|status)\b/i;
+
+function renderInlineText(text: string, baseKey: string) {
+  // Matches markdown links [label](url), email addresses, and web URLs
+  const TOKEN_REGEX = /(\[[^\]]+\]\([^)]+\)|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|https?:\/\/[^\s<>)"]+)/g;
+  const parts = text.split(TOKEN_REGEX);
+
+  return parts.map((part, index) => {
+    if (!part) return null;
+    const key = `${baseKey}-${index}`;
+
+    // 1. Markdown Link: [label](url)
+    const mdMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (mdMatch) {
+      const linkLabel = mdMatch[1];
+      const linkHref = mdMatch[2].trim();
+      const isMailto = linkHref.startsWith('mailto:') || /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(linkHref);
+      const finalHref = isMailto
+        ? (linkHref.startsWith('mailto:') ? linkHref : `mailto:${linkHref}`)
+        : linkHref;
+
+      return (
+        <a
+          key={key}
+          href={finalHref}
+          target={isMailto ? undefined : '_blank'}
+          rel={isMailto ? undefined : 'noopener noreferrer'}
+          className="hover:underline transition-colors cursor-pointer"
+          style={{
+            color: '#FF8C38',
+            textDecoration: 'underline',
+            textUnderlineOffset: '3px',
+            fontWeight: 600,
+          }}
+        >
+          {linkLabel}
+        </a>
+      );
+    }
+
+    // 2. Email Address: name@domain.tld
+    if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(part)) {
+      return (
+        <a
+          key={key}
+          href={`mailto:${part}`}
+          className="hover:underline transition-colors cursor-pointer"
+          style={{
+            color: '#FF8C38',
+            textDecoration: 'underline',
+            textUnderlineOffset: '3px',
+            fontWeight: 600,
+          }}
+          title={`Click to send email to ${part}`}
+        >
+          {part}
+        </a>
+      );
+    }
+
+    // 3. Web URL: https?://...
+    if (/^https?:\/\//i.test(part)) {
+      return (
+        <a
+          key={key}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline transition-colors cursor-pointer"
+          style={{
+            color: '#FF8C38',
+            textDecoration: 'underline',
+            textUnderlineOffset: '3px',
+            wordBreak: 'break-all',
+            fontWeight: 600,
+          }}
+          title={part}
+        >
+          {part}
+        </a>
+      );
+    }
+
+    // Regular text
+    return <span key={key}>{part}</span>;
+  });
+}
 
 function renderContent(text: string) {
   if (!text) return null;
@@ -62,9 +161,14 @@ function renderContent(text: string) {
   const parts = cleaned.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part: string, i: number) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} style={{ fontWeight: 600, color: 'white' }}>{part.slice(2, -2)}</strong>;
+      const boldInner = part.slice(2, -2);
+      return (
+        <strong key={i} style={{ fontWeight: 600, color: 'white' }}>
+          {renderInlineText(boldInner, `bold-${i}`)}
+        </strong>
+      );
     }
-    return <span key={i}>{part}</span>;
+    return <React.Fragment key={i}>{renderInlineText(part, `txt-${i}`)}</React.Fragment>;
   });
 }
 
@@ -165,6 +269,8 @@ export default function SupportChatbot() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const prevAuthKeyRef = useRef<string | null>(null);
+
   // Session ID & History restore
   useEffect(() => {
     let sId = sessionStorage.getItem('loka_support_session_id');
@@ -173,13 +279,44 @@ export default function SupportChatbot() {
       sessionStorage.setItem('loka_support_session_id', sId);
     }
     setSessionId(sId);
+
+    const currentKey = isAuthenticated && user ? `user_${user.id || user.email}` : 'guest';
+    const savedAuthUser = sessionStorage.getItem('loka_support_auth_user');
+
+    // If session belonged to another user or if logged out with stale session
+    if (savedAuthUser && savedAuthUser !== currentKey) {
+      sessionStorage.removeItem('loka_support_chat_history');
+      sessionStorage.setItem('loka_support_auth_user', currentKey);
+      setMessages([getWelcomeMessage(user, isAuthenticated)]);
+      return;
+    }
+
+    // Handle legacy session where loka_support_auth_user was not set yet
+    if (!savedAuthUser) {
+      sessionStorage.setItem('loka_support_auth_user', currentKey);
+      if (!isAuthenticated || !user) {
+        sessionStorage.removeItem('loka_support_chat_history');
+        setMessages([getWelcomeMessage(null, false)]);
+        return;
+      }
+    }
+
     const savedChat = sessionStorage.getItem('loka_support_chat_history');
     if (savedChat) {
       try {
         const parsed = JSON.parse(savedChat);
-        if (Array.isArray(parsed) && parsed.length > 0) setMessages(parsed);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (parsed.length === 1 && parsed[0].id === 'welcome') {
+            setMessages([getWelcomeMessage(user, isAuthenticated)]);
+          } else {
+            setMessages(parsed);
+          }
+          return;
+        }
       } catch { }
     }
+
+    setMessages([getWelcomeMessage(user, isAuthenticated)]);
   }, []);
 
   // Save history
@@ -189,20 +326,27 @@ export default function SupportChatbot() {
     }
   }, [messages]);
 
-  // Personalize welcome message for logged-in user if conversation is fresh
+  // Keep chat greeting and history synchronized with authentication state
   useEffect(() => {
-    if (isAuthenticated && user) {
-      const displayName = user.name || user.username || 'there';
+    const currentKey = isAuthenticated && user ? `user_${user.id || user.email}` : 'guest';
+
+    if (prevAuthKeyRef.current !== null && prevAuthKeyRef.current !== currentKey) {
+      // User logged in, logged out, or switched accounts: reset chat history
+      sessionStorage.removeItem('loka_support_chat_history');
+      sessionStorage.setItem('loka_support_auth_user', currentKey);
+      setMessages([getWelcomeMessage(user, isAuthenticated)]);
+    } else {
+      // If conversation only contains welcome message, update greeting to match current user state
       setMessages(prev => {
         if (prev.length === 1 && prev[0].id === 'welcome') {
-          return [{
-            ...prev[0],
-            content: `Hi ${displayName}! 👋 Welcome back to **Loka Media**.\n\nI can help you track your live orders, check shipments, explore products, or answer any questions. What can I do for you today?`,
-          }];
+          return [getWelcomeMessage(user, isAuthenticated)];
         }
         return prev;
       });
+      sessionStorage.setItem('loka_support_auth_user', currentKey);
     }
+
+    prevAuthKeyRef.current = currentKey;
   }, [isAuthenticated, user]);
 
   // Lenis smooth scroll
@@ -622,7 +766,7 @@ export default function SupportChatbot() {
                   >Cancel</button>
                   <button
                     type="button"
-                    onClick={() => { setMessages([DEFAULT_WELCOME_MESSAGE]); sessionStorage.removeItem('loka_support_chat_history'); setError(null); setShowClearConfirm(false); }}
+                    onClick={() => { setMessages([getWelcomeMessage(user, isAuthenticated)]); sessionStorage.removeItem('loka_support_chat_history'); setError(null); setShowClearConfirm(false); }}
                     style={{ flex: 1, padding: '0.65rem', borderRadius: '12px', background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_LIGHT})`, border: 'none', color: 'white', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(255,109,31,0.3)' }}
                   >Clear Chat</button>
                 </div>

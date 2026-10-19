@@ -7,7 +7,7 @@ import { Heart, User, Tag, Globe } from "lucide-react";
 import { ExtendedProduct } from "@/lib/api";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { getProductPriceRange } from "@/lib/pricing";
-import { createProductSlug } from "@/lib/utils";
+import { createProductSlug, cleanDescription } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 interface ProductListItemProps {
@@ -99,7 +99,7 @@ export function ProductListItem({
               </p>
 
               <p className="text-gray-300 mt-3 line-clamp-3 text-sm">
-                {product.description || "No description available."}
+                {cleanDescription(product.description) || "No description available."}
               </p>
 
               <div className="flex flex-wrap items-center gap-2 mt-4">

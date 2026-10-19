@@ -18,6 +18,7 @@ interface EnhancedProductInfoProps {
 const TRUNCATE_LENGTH = 200;
 
 import { ensure99Pricing } from '@/lib/pricing-utils';
+import { cleanDescription } from '@/lib/utils';
 
 export function EnhancedProductInfo({
   productName,
@@ -76,14 +77,15 @@ export function EnhancedProductInfo({
 
 export function EnhancedProductDescription({ description }: { description: string }) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const canTruncate = description.length > TRUNCATE_LENGTH;
+  const cleaned = cleanDescription(description);
+  const canTruncate = cleaned.length > TRUNCATE_LENGTH;
 
   return (
     <div className="text-gray-400 text-xs sm:text-sm leading-relaxed space-y-3">
       <p className="whitespace-pre-wrap">
         {canTruncate && !isDescriptionExpanded
-          ? `${description.substring(0, TRUNCATE_LENGTH)}...`
-          : description}
+          ? `${cleaned.substring(0, TRUNCATE_LENGTH)}...`
+          : cleaned}
       </p>
       {canTruncate && (
         <button
