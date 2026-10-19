@@ -62,6 +62,14 @@ async function postToBackend(
   }
 }
 
+// Ask the backend to drop its cached product (price, images) after we write to the DB directly
+async function refreshBackendProductCache(productId: number, authHeader: string | null): Promise<void> {
+  const result = await postToBackend(`/api/products/${productId}/refresh-cache`, {}, authHeader);
+  if (!result.ok) {
+    console.warn(`[Printify Sync] Backend cache refresh failed for product ${productId}. Status: ${result.status}, Error: ${result.errorText}`);
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Build a Printify product creation payload from canvas data
 // ─────────────────────────────────────────────────────────────────────────────
@@ -812,6 +820,7 @@ export async function POST(request: NextRequest) {
                               [urls[0], urls, String(bgPrintifyId), bgDbId]
                             );
                             console.log(`[Printify Sync Background] Product ${bgDbId} mockups updated (${urls.length} images).`);
+                            await refreshBackendProductCache(bgDbId, authHeader);
                             break;
                           }
                         }
@@ -823,6 +832,11 @@ export async function POST(request: NextRequest) {
             }
           } catch (syncErr: any) {
             console.warn('[Printify Sync] Direct PostgreSQL retail pricing sync exception:', syncErr?.message || syncErr);
+          }
+
+          // The writes above go straight to PostgreSQL, so the backend's cached copy is now stale
+          if (syncedTargetId) {
+            await refreshBackendProductCache(syncedTargetId, authHeader);
           }
         } else {
           console.error('[Printify Sync] Failed to save product to database. Status:', saved.status, 'Error:', saved.errorText);
