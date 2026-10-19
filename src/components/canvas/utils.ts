@@ -198,7 +198,8 @@ export const applyQuickPosition = (
 export const getActivePrintFile = (
   printFiles: PrintFilesData | null,
   selectedVariants: number[],
-  activePlacement: string
+  activePlacement: string,
+  preferredVariantId?: number
 ): PrintFile | null => {
   if (!printFiles) return null;
 
@@ -224,15 +225,20 @@ export const getActivePrintFile = (
     return DEFAULT_FALLBACK_PRINTFILE;
   }
 
-  // 1. Try to find matching variant printfile
+  // 1. If preferredVariantId is provided, try to match it directly
   let variantPrintFile = null;
-  if (selectedVariants && selectedVariants.length > 0) {
+  if (preferredVariantId) {
+    variantPrintFile = printFiles.variant_printfiles.find((vp) => vp.variant_id === preferredVariantId);
+  }
+
+  // 2. Try to find matching variant printfile from selectedVariants
+  if (!variantPrintFile && selectedVariants && selectedVariants.length > 0) {
     variantPrintFile = printFiles.variant_printfiles.find((vp) =>
       selectedVariants.includes(vp.variant_id)
     );
   }
 
-  // 2. Fallback: use first variant printfile if no match/no selected variants
+  // 3. Fallback: use first variant printfile if no match/no selected variants
   if (!variantPrintFile && printFiles.variant_printfiles.length > 0) {
     variantPrintFile = printFiles.variant_printfiles[0];
   }

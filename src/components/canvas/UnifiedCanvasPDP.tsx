@@ -903,6 +903,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [activeColor, setActiveColor] = useState<string>("");
+  const [activeSize, setActiveSize] = useState<string>("");
   const [isDescExpanded, setIsDescExpanded] = useState<boolean>(false);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -1365,9 +1366,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     setSelectedColors([]);
     setSelectedSizes([]);
     setActiveColor("");
+    setActiveSize("");
   }, [selectedProduct?.id, selectedProduct?.print_provider_id, selectedProduct?.printProviderId]);
 
-  // Load saved local selections or default to first options
+  // Load saved local selections or default to first options (defaulting activeSize to "L" for apparel, matching Printify)
   useEffect(() => {
     if (uniqueColors.length > 0 && selectedColors.length === 0) {
       setSelectedColors([uniqueColors[0].name]);
@@ -1375,6 +1377,12 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     }
     if (uniqueSizes.length > 0 && selectedSizes.length === 0) {
       setSelectedSizes(uniqueSizes);
+    }
+    if (uniqueSizes.length > 0 && (!activeSize || !uniqueSizes.includes(activeSize))) {
+      const defaultSize = uniqueSizes.find((s: string) => s.toUpperCase() === "L")
+        || uniqueSizes.find((s: string) => s.toUpperCase() === "M")
+        || uniqueSizes[0];
+      setActiveSize(defaultSize);
     }
   }, [uniqueColors, uniqueSizes]);
 
@@ -1384,6 +1392,57 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       setActiveColor(selectedColors[0]);
     }
   }, [selectedColors, activeColor]);
+
+  // Keep activeSize in sync if it is no longer selected
+  useEffect(() => {
+    if (selectedSizes.length > 0 && !selectedSizes.includes(activeSize)) {
+      const preferred = selectedSizes.find((s: string) => s.toUpperCase() === "L")
+        || selectedSizes.find((s: string) => s.toUpperCase() === "M")
+        || selectedSizes[0];
+      setActiveSize(preferred);
+    }
+  }, [selectedSizes, activeSize]);
+
+  // Resolve activeVariantId matching activeSize & activeColor for accurate Printify print area sizing
+  const activeVariantId = useMemo(() => {
+    if (!selectedProduct?.variants || selectedProduct.variants.length === 0) return undefined;
+
+    // 1. Match both activeSize and activeColor
+    let match = selectedProduct.variants.find((v: any) =>
+      (activeSize ? (v.size || v.options?.size) === activeSize : true) &&
+      (activeColor ? (v.color || v.options?.color) === activeColor : true) &&
+      (selectedVariants.length > 0 ? selectedVariants.includes(v.id) : true)
+    );
+
+    // 2. Match activeSize among selectedVariants
+    if (!match && activeSize) {
+      match = selectedProduct.variants.find((v: any) =>
+        (v.size || v.options?.size) === activeSize &&
+        (selectedVariants.length > 0 ? selectedVariants.includes(v.id) : true)
+      );
+    }
+
+    // 3. Match activeSize anywhere in product variants
+    if (!match && activeSize) {
+      match = selectedProduct.variants.find((v: any) =>
+        (v.size || v.options?.size) === activeSize
+      );
+    }
+
+    // 4. Default to size "L" (standard Printify editor baseline)
+    if (!match) {
+      match = selectedProduct.variants.find((v: any) =>
+        ((v.size || v.options?.size)?.toUpperCase() === "L")
+      );
+    }
+
+    // 5. Fallback: first variant from selectedVariants
+    if (!match && selectedVariants.length > 0) {
+      match = selectedProduct.variants.find((v: any) => selectedVariants.includes(v.id));
+    }
+
+    return match?.id || selectedProduct.variants[0]?.id;
+  }, [selectedProduct?.variants, activeSize, activeColor, selectedVariants]);
 
   // Auto-select variants when colors/sizes change
   useEffect(() => {
@@ -1657,7 +1716,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       currentVariants = allVariantIds;
     }
 
-    const activePrintFile = getActivePrintFile(printFiles, currentVariants, activePlacement);
+    const activePrintFile = getActivePrintFile(printFiles, currentVariants, activePlacement, activeVariantId);
     if (!activePrintFile) {
       toast.error("No print template available for this placement. Please select variants first.");
       return;
@@ -1746,7 +1805,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Fast center alignment triggers
   const handleCenterDesign = (type: "center" | "top-center" | "bottom-center" | "center-left" | "center-right") => {
-    const activePrintFile = getActivePrintFile(printFiles, selectedVariants, activePlacement);
+    const activePrintFile = getActivePrintFile(printFiles, selectedVariants, activePlacement, activeVariantId);
     if (!selectedDesignFile || !activePrintFile) return;
 
     applyQuickPosition(type, selectedDesignFile, activePrintFile, (updatedDesign) => {
@@ -2749,6 +2808,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       <div className="flex flex-wrap gap-3 pt-1">
                         {uniqueSizes.map((size: string) => {
                           const isSelected = selectedSizes.includes(size);
+                          const isActiveSize = activeSize === size;
                           const formatSizeLabel = (s: string) => {
                             const lower = s.toLowerCase().trim();
                             if (lower === "s") return "Small";
@@ -2764,16 +2824,22 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                             <button
                               key={size}
                               onClick={() => {
+                                setActiveSize(size);
                                 if (isSelected) {
-                                  setSelectedSizes(selectedSizes.filter((s) => s !== size));
+                                  if (selectedSizes.length > 1) {
+                                    setSelectedSizes(selectedSizes.filter((s) => s !== size));
+                                  }
                                 } else {
                                   setSelectedSizes([...selectedSizes, size]);
                                 }
                               }}
-                              className={`relative border-2 rounded-full px-5 py-2 min-w-[85px] text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center cursor-pointer bg-black/80 ${isSelected
-                                ? "border-white text-white shadow-sm"
-                                : "border-white/20 text-gray-300 hover:border-white/50"
-                                }`}
+                              className={`relative border-2 rounded-full px-5 py-2 min-w-[85px] text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center cursor-pointer bg-black/80 ${
+                                isActiveSize
+                                  ? "border-[#FF6D1F] text-white ring-2 ring-[#FF6D1F]/50 shadow-lg shadow-[#FF6D1F]/20"
+                                  : isSelected
+                                  ? "border-white text-white shadow-sm"
+                                  : "border-white/20 text-gray-300 hover:border-white/50"
+                              }`}
                             >
                               <span>{formatSizeLabel(size)}</span>
                               {isSelected && (
@@ -3061,12 +3127,19 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         <span className="text-[11px] font-semibold text-[#FF6D1F] bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 rounded-full capitalize">
                           {getPlacementLabel(activePlacement)}
                         </span>
+                        {activeSize && (
+                          <span className="text-[11px] font-semibold text-gray-200 bg-white/10 border border-white/20 px-2 py-0.5 rounded-full uppercase">
+                            Size {activeSize}
+                          </span>
+                        )}
                         {(() => {
-                          const apf = getActivePrintFile(printFiles, selectedVariants, activePlacement);
+                          const apf = getActivePrintFile(printFiles, selectedVariants, activePlacement, activeVariantId);
                           if (apf?.width && apf?.height) {
                             return (
-                              <span className="text-[11px] text-gray-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-mono">
-                                {apf.width} × {apf.height} px
+                              <span className="text-[11px] text-gray-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-mono flex items-center gap-1.5">
+                                <span className="text-gray-400">Print area:</span>
+                                <span className="text-[#FF6D1F] font-semibold">{apf.width} × {apf.height} px</span>
+                                {apf.dpi ? <span className="text-gray-400">({apf.dpi} DPI)</span> : null}
                               </span>
                             );
                           }
@@ -3088,7 +3161,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         setActivePlacement={setActivePlacement}
                         selectedDesignFile={selectedDesignFile}
                         setSelectedDesignFile={setSelectedDesignFile}
-                        activePrintFile={getActivePrintFile(printFiles, selectedVariants, activePlacement)}
+                        activePrintFile={getActivePrintFile(printFiles, selectedVariants, activePlacement, activeVariantId)}
                         updateDesignPosition={handleUpdateDesignPosition}
                         onAspectRatioIssues={handleSetAspectRatioIssues}
                         aspectRatioIssues={aspectRatioIssues}

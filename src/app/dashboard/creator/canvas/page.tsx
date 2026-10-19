@@ -115,10 +115,25 @@ function getPrintfilePosCode(posStr: string): number {
   return 100 + (Math.abs(hash) % 899);
 }
 
+function getVariantSortScore(v: any): number {
+  const size = (v.size || v.options?.size || '').toUpperCase().trim();
+  if (size === 'L') return 100;
+  if (size === 'M') return 90;
+  if (size === 'XL') return 80;
+  if (size === 'S') return 70;
+  if (size === '2XL' || size === 'XXL') return 60;
+  if (size === '3XL' || size === 'XXXL') return 55;
+  if (size === 'OS') return 50;
+  return 10;
+}
+
 function computePrintFilesFromVariants(variants: any[]) {
   if (!variants || variants.length === 0) return null;
 
-  const variant_printfiles = variants.map((v: any) => {
+  // Prioritize standard reference variant (Size "L" for apparel, matching Printify defaults)
+  const sortedVariants = [...variants].sort((a, b) => getVariantSortScore(b) - getVariantSortScore(a));
+
+  const variant_printfiles = sortedVariants.map((v: any) => {
     const placements: Record<string, number> = {};
     const placeholders = (v.placeholders && v.placeholders.length > 0)
       ? v.placeholders
@@ -172,7 +187,7 @@ function computePrintFilesFromVariants(variants: any[]) {
   });
 
   const printfiles: any[] = [];
-  variants.forEach((v: any) => {
+  sortedVariants.forEach((v: any) => {
     const placeholders = (v.placeholders && v.placeholders.length > 0)
       ? v.placeholders
       : [{ position: 'front', width: 4000, height: 4000 }];
