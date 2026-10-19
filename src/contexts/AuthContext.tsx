@@ -225,11 +225,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await authAPI.logout();
       // Clear the legacy shared storage key so the next user won't see this user's files
       localStorage.removeItem('uploaded_printify_images');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('loka_support_chat_history');
+        sessionStorage.removeItem('loka_support_session_id');
+        sessionStorage.removeItem('loka_support_auth_user');
+      }
       setUser(null);
       toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
       localStorage.removeItem('uploaded_printify_images');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('loka_support_chat_history');
+        sessionStorage.removeItem('loka_support_session_id');
+        sessionStorage.removeItem('loka_support_auth_user');
+      }
       setUser(null);
     }
   };
