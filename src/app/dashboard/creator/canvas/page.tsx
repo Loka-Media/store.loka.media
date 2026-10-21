@@ -396,8 +396,14 @@ function CanvasContent() {
           if (!providers || providers.length === 0) {
             console.log(`🔍 Fetching print providers for blueprint ${effectiveBlueprintId}...`);
             providers = await printifyAPI.getBlueprintProviders(effectiveBlueprintId);
-            product.providers = providers;
           }
+          if (Array.isArray(providers)) {
+            providers = providers.map((p: any) => ({
+              ...p,
+              title: p.title ? p.title.replace(/Printify Choice/gi, 'Loka Choice') : p.title
+            }));
+          }
+          product.providers = providers;
 
           // Select print provider: if existing product has saved print provider and it exists in providers, use it
           const savedProviderId = existingProductData?.printify_print_provider_id;

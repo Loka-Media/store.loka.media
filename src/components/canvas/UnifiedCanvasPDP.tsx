@@ -3115,7 +3115,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           <SelectContent>
                             {selectedProduct.providers.map((provider: any) => (
                               <SelectItem key={provider.id} value={String(provider.id)}>
-                                {provider.title} (ID: {provider.id})
+                                {(provider.title || '').replace(/Printify Choice/gi, 'Loka Choice') || provider.title} (ID: {provider.id})
                               </SelectItem>
                             ))}
                           </SelectContent>

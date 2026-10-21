@@ -133,7 +133,14 @@ export const printifyCatalogAPI = {
 
   /** Get print providers for a blueprint */
   getPrintProviders: (blueprintId: number): Promise<PrintifyPrintProvider[]> =>
-    printifyFetch<PrintifyPrintProvider[]>(`/catalog/blueprints/${blueprintId}/print_providers.json`),
+    printifyFetch<PrintifyPrintProvider[]>(`/catalog/blueprints/${blueprintId}/print_providers.json`).then(providers =>
+      Array.isArray(providers)
+        ? providers.map(p => ({
+            ...p,
+            title: p.title ? p.title.replace(/Printify Choice/gi, 'Loka Choice') : p.title
+          }))
+        : providers
+    ),
 
   /** Get variants for a blueprint + print provider combination */
   getBlueprintVariants: (blueprintId: number, printProviderId: number): Promise<{ variants: PrintifyBlueprintVariant[] }> =>
@@ -147,7 +154,14 @@ export const printifyCatalogAPI = {
 
   /** List of all available print providers worldwide */
   getPrintProvidersList: (): Promise<PrintifyPrintProvider[]> =>
-    printifyFetch<PrintifyPrintProvider[]>('/catalog/print_providers.json'),
+    printifyFetch<PrintifyPrintProvider[]>('/catalog/print_providers.json').then(providers =>
+      Array.isArray(providers)
+        ? providers.map(p => ({
+            ...p,
+            title: p.title ? p.title.replace(/Printify Choice/gi, 'Loka Choice') : p.title
+          }))
+        : providers
+    ),
 };
 
 // ============================================================
