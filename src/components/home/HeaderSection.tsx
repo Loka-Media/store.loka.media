@@ -41,7 +41,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
 
         animateValue(setPaidToCreators, 2, progress);
         animateValue(setActiveCreators, 10, progress);
-        animateValue(setYouKeep, 90, progress);
+        animateValue(setYouKeep, 100, progress);
 
         if (progress < 1) {
           animationFrameId = window.requestAnimationFrame(step);
