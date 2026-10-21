@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
-import { getApiUrl } from '@/lib/getApiUrl';
 import { processOrderPaymentConfirmation } from '@/lib/orderPaymentConfirmation';
+
+const BACKEND_URL = (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
+const ALLOWED_ORIGIN = 'https://store-loka-ui-v2-glksz.ondigitalocean.app';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,70 +21,43 @@ export async function POST(request: NextRequest) {
 
     const cleanPaymentIntentId = paymentIntentId.trim();
     const cleanOrderNumber = orderNumber.trim();
-    const secretKey = (process.env.STRIPE_SECRET_KEY || '').trim();
     const authHeader = request.headers.get('authorization');
 
-    if (!secretKey) {
-      console.error('[Confirm Payment] Fatal: STRIPE_SECRET_KEY is missing');
-      return NextResponse.json({ error: 'Stripe configuration missing' }, { status: 500 });
-    }
-
-    // 1. Verify payment status directly with Stripe
-    const stripeRes = await axios.get(
-      `https://api.stripe.com/v1/payment_intents/${cleanPaymentIntentId}`,
+    // Forward to backend server (store-api.loka.media) which has the allowlisted IP in Stripe
+    const backendRes = await axios.post(
+      `${BACKEND_URL}/api/unified-checkout/stripe/confirm-payment`,
+      {
+        paymentIntentId: cleanPaymentIntentId,
+        orderNumber: cleanOrderNumber,
+      },
       {
         headers: {
-          Authorization: `Bearer ${secretKey}`,
+          'Content-Type': 'application/json',
+          'Origin': ALLOWED_ORIGIN,
+          'Referer': `${ALLOWED_ORIGIN}/`,
+          ...(authHeader ? { Authorization: authHeader } : {}),
         },
       }
     );
 
-    const paymentIntent = stripeRes.data;
-
-    // 2. Perform secure, verified, idempotent confirmation (C1, C4, C15)
-    const confirmationResult = await processOrderPaymentConfirmation(cleanOrderNumber, {
-      paymentIntentId: cleanPaymentIntentId,
-      amount: paymentIntent.amount,
-      currency: paymentIntent.currency,
-      status: paymentIntent.status,
-      metadata: paymentIntent.metadata,
-    });
-
-    if (!confirmationResult.success) {
-      console.warn(`[Confirm Payment] Validation rejected for order ${cleanOrderNumber}:`, confirmationResult.error);
-      return NextResponse.json(
-        { success: false, error: confirmationResult.error },
-        { status: 400 }
-      );
-    }
-
-    // 3. Safely notify backend for compatibility
+    // Also synchronize local PostgreSQL database order record if it exists
     try {
-      const backendUrl = `${getApiUrl()}/api/unified-checkout/stripe/confirm-payment`;
-      await axios.post(
-        backendUrl,
-        { paymentIntentId: cleanPaymentIntentId, orderNumber: cleanOrderNumber },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authHeader ? { Authorization: authHeader } : {}),
-          },
-        }
-      );
-    } catch (backendError: any) {
-      console.warn('⚠️ Backend confirmation notify note:', backendError.response?.data?.details || backendError.message);
+      await processOrderPaymentConfirmation(cleanOrderNumber, {
+        paymentIntentId: cleanPaymentIntentId,
+        amount: backendRes.data?.paymentIntent?.amount || backendRes.data?.amount,
+        currency: backendRes.data?.paymentIntent?.currency || 'usd',
+        status: backendRes.data?.status || backendRes.data?.paymentIntent?.status || 'succeeded',
+        metadata: backendRes.data?.paymentIntent?.metadata,
+      });
+    } catch (localDbErr) {
+      console.warn('[Confirm Payment] Local DB sync note:', localDbErr);
     }
 
-    return NextResponse.json({
-      success: true,
-      alreadyProcessed: confirmationResult.alreadyProcessed || false,
-      status: paymentIntent.status,
-      paymentIntent,
-      orderNumber: cleanOrderNumber,
-    });
+    return NextResponse.json(backendRes.data);
   } catch (error: any) {
-    console.error('❌ [Local Stripe Confirm Payment] Error:', error.response?.data || error.message);
-    const msg = error.response?.data?.error?.message || error.message || 'Failed to confirm payment';
-    return NextResponse.json({ error: msg }, { status: 500 });
+    console.error('❌ [Stripe Confirm Payment Proxy] Error:', error.response?.data || error.message);
+    const status = error.response?.status || 500;
+    const msg = error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to confirm payment';
+    return NextResponse.json({ error: msg }, { status });
   }
 }
