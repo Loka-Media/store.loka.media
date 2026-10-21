@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error pg module type resolution fallback
 import { Pool } from 'pg';
 
 let pool: Pool | null = null;

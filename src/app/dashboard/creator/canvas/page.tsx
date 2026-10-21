@@ -608,6 +608,31 @@ function CanvasContent() {
                 });
               }
             }
+
+            // Restore canvas mockups and custom image uploads from localStorage & DB
+            try {
+              const savedMockupsJson = localStorage.getItem(`saved_canvas_mockups_${effectiveBlueprintId}`);
+              if (savedMockupsJson) {
+                const parsedMockups = JSON.parse(savedMockupsJson);
+                if (Array.isArray(parsedMockups) && parsedMockups.length > 0) {
+                  setMockupUrls(parsedMockups);
+                }
+              }
+              const token = localStorage.getItem('accessToken') || '';
+              fetch(
+                `/api/creator/canvas-mockups?blueprintId=${effectiveBlueprintId}&productId=${editingProductId || ''}`,
+                {
+                  headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                  }
+                }
+              ).then(r => r.ok ? r.json() : null).then(mData => {
+                if (mData?.success && Array.isArray(mData.mockups) && mData.mockups.length > 0) {
+                  setMockupUrls(mData.mockups);
+                  localStorage.setItem(`saved_canvas_mockups_${effectiveBlueprintId}`, JSON.stringify(mData.mockups));
+                }
+              }).catch(() => {});
+            } catch (_) {}
           }
 
           setStep("unified-editor");
@@ -687,10 +712,9 @@ function CanvasContent() {
     }
   }, [blueprintId, isInitialized, router]);
 
-  // NOTE: We do NOT call Printify API here.
-  // Printify API returns ALL images for the entire Printify account regardless of which user uploaded them.
-  // So we ONLY use user-scoped localStorage (`uploaded_printify_images_{userId}`) to isolate each creator's files.
-  const fetchUploadedFiles = useCallback((page: number = 1) => {
+  // Fetch user's uploaded artworks directly from PostgreSQL database (/api/creator/artworks)
+  // Strictly isolated to the authenticated user (user_id = user.id)
+  const fetchUploadedFiles = useCallback(async (page: number = 1) => {
     setIsFetchingFiles(true);
     try {
       const userId = user?.id;
@@ -702,16 +726,40 @@ function CanvasContent() {
       }
 
       const userStorageKey = `uploaded_printify_images_${userId}`;
-      const saved = localStorage.getItem(userStorageKey);
-      const userFiles: any[] = saved ? JSON.parse(saved) : [];
 
-      const paginated = userFiles.slice((page - 1) * 12, page * 12);
-      setUploadedFiles(paginated);
-      setCurrentPage(page);
-      setTotalPages(Math.ceil(userFiles.length / 12) || 1);
+      // 1. Instant optimistic render from localStorage cache if available
+      try {
+        const saved = localStorage.getItem(userStorageKey);
+        if (saved) {
+          const userFiles: any[] = JSON.parse(saved);
+          if (Array.isArray(userFiles) && userFiles.length > 0) {
+            const paginated = userFiles.slice((page - 1) * 12, page * 12);
+            setUploadedFiles(paginated);
+            setTotalPages(Math.ceil(userFiles.length / 12) || 1);
+          }
+        }
+      } catch (_) {}
+
+      // 2. Fetch authoritative artwork library from database
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+      const res = await fetch('/api/creator/artworks', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const dbFiles: any[] = Array.isArray(json?.data) ? json.data : [];
+
+        // Save fresh database records to user-scoped cache
+        localStorage.setItem(userStorageKey, JSON.stringify(dbFiles));
+
+        const paginated = dbFiles.slice((page - 1) * 12, page * 12);
+        setUploadedFiles(paginated);
+        setCurrentPage(page);
+        setTotalPages(Math.ceil(dbFiles.length / 12) || 1);
+      }
     } catch (error) {
-      console.error("Failed to load user files:", error);
-      setUploadedFiles([]);
+      console.error("Failed to load user files from database:", error);
     } finally {
       setIsFetchingFiles(false);
     }
@@ -765,31 +813,6 @@ function CanvasContent() {
     }
   }, [productForm, blueprintId, isInitialized]);
 
-  if (!selectedProduct && !loading) {
-    return (
-      <CreatorProtectedRoute>
-        <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-center p-12 gradient-border-white-top rounded-3xl bg-gray-900">
-          <div className="w-16 h-16 bg-orange-500/20 border border-orange-500/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="h-8 w-8 text-orange-400" />
-          </div>
-          <h3 className="text-xl font-bold text-white mb-2">
-            No product selected
-          </h3>
-          <p className="text-gray-400 mb-8 font-medium">
-            Please select a product from the catalog first.
-          </p>
-          <Link
-            href="/dashboard/creator/catalog"
-            className="inline-flex items-center px-8 py-4 text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-2xl font-bold transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
-          >
-            Browse Catalog
-          </Link>
-        </div>
-        </div>
-      </CreatorProtectedRoute>
-    );
-  }
 
   const handleProviderChange = async (providerId: number) => {
     if (!selectedProduct) return;
@@ -1137,7 +1160,7 @@ function CanvasContent() {
         source: updatedProductForm ? 'from form submission (fresh)' : 'from state (may be stale)'
       });
 
-      toast.loading("Step 1/3: Validating product variants...", { id: "publishing-progress" });
+      toast.loading("Validating product variants...", { id: "publishing-progress" });
 
       try {
         const unavailableVariants = selectedVariants.filter((variantId: number) => {
@@ -1195,7 +1218,7 @@ function CanvasContent() {
         thumbnailUrl: mainCoverUrl
       };
 
-      toast.loading("Step 2/3: Uploading product images to marketplace...", {
+      toast.loading("Uploading product images to marketplace...", {
         id: "publishing-progress",
       });
 
@@ -1221,7 +1244,7 @@ function CanvasContent() {
         console.log('📊 Sample availability:', availabilityData[0]);
       }
 
-      toast.loading("Step 3/3: Publishing to marketplace... Please do not refresh or navigate away!", {
+      toast.loading("Publishing to marketplace... Please do not refresh or navigate away!", {
         id: "publishing-progress",
       });
 
@@ -1290,6 +1313,32 @@ function CanvasContent() {
       setCreating(false);
     }
   };
+
+  if (!selectedProduct && !loading) {
+    return (
+      <CreatorProtectedRoute>
+        <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-center p-12 gradient-border-white-top rounded-3xl bg-gray-900">
+          <div className="w-16 h-16 bg-orange-500/20 border border-orange-500/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-8 w-8 text-orange-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">
+            No product selected
+          </h3>
+          <p className="text-gray-400 mb-8 font-medium">
+            Please select a product from the catalog first.
+          </p>
+          <Link
+            href="/dashboard/creator/catalog"
+            className="inline-flex items-center px-8 py-4 text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-2xl font-bold transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
+          >
+            Browse Catalog
+          </Link>
+        </div>
+        </div>
+      </CreatorProtectedRoute>
+    );
+  }
 
   return (
     <CreatorProtectedRoute>

@@ -7,6 +7,7 @@ import {
   deleteKnowledgeItem,
   KnowledgeCategory
 } from '@/services/support/knowledge-manager';
+import { requireAdminAuth } from '@/lib/serverAuth';
 
 /**
  * GET /api/admin/knowledge
@@ -14,6 +15,11 @@ import {
  *               ?search=keyword
  */
 export async function GET(req: NextRequest) {
+  const authResult = await requireAdminAuth(req);
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category') || undefined;
@@ -39,6 +45,11 @@ export async function GET(req: NextRequest) {
  * Body: { title, category, content, source?, tags?, id?, enabled? }
  */
 export async function POST(req: NextRequest) {
+  const authResult = await requireAdminAuth(req);
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const body = await req.json();
     const { title, category, content, source, tags, id, enabled } = body;
@@ -93,6 +104,11 @@ export async function POST(req: NextRequest) {
  * Body: { id, title?, category?, content?, source?, tags?, enabled? }
  */
 export async function PUT(req: NextRequest) {
+  const authResult = await requireAdminAuth(req);
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const body = await req.json();
     const { id, title, category, content, source, tags, enabled } = body;
@@ -147,6 +163,11 @@ export async function PUT(req: NextRequest) {
  * Query param ?id=... or JSON body { id }
  */
 export async function DELETE(req: NextRequest) {
+  const authResult = await requireAdminAuth(req);
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     let id = searchParams.get('id');

@@ -5,16 +5,23 @@
  * DELETE /api/printify/webhooks/:id      → delete webhook
  * POST   /api/printify/webhooks/receive  → receive incoming webhook events
  */
-
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { printifyWebhooksAPI } from '@/services/printify/PrintifyClient';
 import { syncPrintifyOrder } from '@/services/printify/orderSync';
+import { requireAdminAuth } from '@/lib/serverAuth';
 import type { PrintifyWebhookPayload } from '@/types/printify';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path?: string[] }> }
 ) {
+  // Security (C6): Only admins can list registered webhooks
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const webhooks = await printifyWebhooksAPI.getWebhooks();
     return NextResponse.json({ success: true, data: webhooks });
@@ -34,7 +41,33 @@ export async function POST(
 
     // POST /api/printify/webhooks/receive → handle incoming Printify event
     if (segments[0] === 'receive') {
-      const payload: PrintifyWebhookPayload = await request.json();
+      const rawBody = await request.text();
+      const webhookSecret = process.env.PRINTIFY_WEBHOOK_SECRET?.trim();
+
+      // Security (C11): Verify HMAC signature if secret is configured
+      if (webhookSecret) {
+        const signature = request.headers.get('x-pf-signature');
+        if (!signature) {
+          return NextResponse.json({ error: 'Missing Printify webhook signature header' }, { status: 401 });
+        }
+        const expectedSig = crypto.createHmac('sha256', webhookSecret).update(rawBody).digest('hex');
+        const cleanSig = signature.replace(/^sha256=/i, '').trim();
+
+        if (
+          expectedSig.length !== cleanSig.length ||
+          !crypto.timingSafeEqual(Buffer.from(expectedSig), Buffer.from(cleanSig))
+        ) {
+          return NextResponse.json({ error: 'Invalid Printify webhook signature' }, { status: 401 });
+        }
+      }
+
+      let payload: PrintifyWebhookPayload;
+      try {
+        payload = JSON.parse(rawBody);
+      } catch {
+        return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
+      }
+
       console.log('[Printify Webhook Received]', payload.type, payload.resource?.id);
 
       // 1. Direct PostgreSQL sync using Printify order ID or shop order ID
@@ -53,8 +86,11 @@ export async function POST(
       try {
         const response = await fetch(`${backendUrl}/api/printify/webhooks/receive`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          headers: {
+            'Content-Type': 'application/json',
+            ...(request.headers.get('x-pf-signature') ? { 'x-pf-signature': request.headers.get('x-pf-signature')! } : {}),
+          },
+          body: rawBody,
         });
         if (!response.ok) {
           console.error(`[Printify Webhook] Backend returned status ${response.status}`);
@@ -66,8 +102,13 @@ export async function POST(
       return NextResponse.json({ received: true, synced: true });
     }
 
-    // POST /api/printify/webhooks → register a new webhook
-    const body = await request.json();
+    // POST /api/printify/webhooks → register a new webhook (Admin only)
+    const auth = await requireAdminAuth(request);
+    if (!auth.authorized) {
+      return auth.response;
+    }
+
+    const body = await request.json().catch(() => ({}));
     const { topic, url } = body;
 
     if (!topic || !url) {
@@ -88,6 +129,12 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ path?: string[] }> }
 ) {
+  // Security (C6): Only admins can delete webhooks
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const { path } = await params;
     const segments = path || [];

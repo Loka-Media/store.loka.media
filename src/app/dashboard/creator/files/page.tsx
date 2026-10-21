@@ -110,10 +110,26 @@ function FilesPageContent() {
     return mimeMap[ext] || 'application/octet-stream';
   };
 
+  const formatFile = (file: any): UploadedFile => ({
+    id: typeof file.id === 'number' ? file.id : (file.db_id || parseInt(String(file.id).replace(/\D/g, '')) || Date.now()),
+    filename: file.filename || file.file_name || 'Artwork',
+    url: file.url || file.file_url || file.preview_url || '',
+    thumbnail_url: file.thumbnail_url || file.preview_url || file.file_url || file.url || '',
+    type: file.type || 'image',
+    file_size: Number(file.file_size || file.size || 0),
+    size: Number(file.size || file.file_size || 0),
+    status: file.status || 'active',
+    created: typeof file.created === 'number' ? file.created : (file.createdAt ? Math.floor(new Date(file.createdAt).getTime() / 1000) : Math.floor(Date.now() / 1000)),
+    mime_type: file.mime_type || 'image/png',
+    width: file.width,
+    height: file.height,
+  });
+
   // NOTE: We ONLY use user-scoped localStorage here.
   // There is no fallback to the shared 'uploaded_printify_images' key so that one creator
   // cannot see another creator's design files.
-  const fetchFiles = useCallback(() => {
+  // Fetch design files from PostgreSQL database (/api/creator/artworks)
+  const fetchFiles = useCallback(async () => {
     try {
       setLoading(true);
       const userId = user?.id;
@@ -123,27 +139,32 @@ function FilesPageContent() {
       }
 
       const userStorageKey = `uploaded_printify_images_${userId}`;
-      const saved = localStorage.getItem(userStorageKey);
-      const filesFromLS: any[] = saved ? JSON.parse(saved) : [];
 
-      const processedFiles = filesFromLS.map((file: any) => ({
-        id: file.id,
-        filename: file.filename || file.file_name || "Unknown File",
-        url: file.file_url || file.thumbnail_url || file.preview_url || "",
-        thumbnail_url: file.thumbnail_url || file.preview_url || "",
-        type: 'image',
-        file_size: file.size || 0,
-        size: file.size || 0,
-        status: 'ok',
-        created: file.created || Math.floor(Date.now() / 1000),
-        mime_type: getMimeType(file.filename || file.file_name || ""),
-        width: file.width,
-        height: file.height,
-        userId: file.userId || userId
-      }));
-      setFiles(processedFiles);
+      // 1. Optimistic instant load from cache
+      try {
+        const saved = localStorage.getItem(userStorageKey);
+        if (saved) {
+          const filesFromLS: any[] = JSON.parse(saved);
+          if (Array.isArray(filesFromLS) && filesFromLS.length > 0) {
+            setFiles(filesFromLS.map(formatFile));
+          }
+        }
+      } catch (_) {}
+
+      // 2. Authoritative fetch from database
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+      const res = await fetch('/api/creator/artworks', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const dbFiles: any[] = Array.isArray(json?.data) ? json.data : [];
+        localStorage.setItem(userStorageKey, JSON.stringify(dbFiles));
+        setFiles(dbFiles.map(formatFile));
+      }
     } catch (error) {
-      console.error('Failed to fetch files:', error);
+      console.error('Failed to fetch files from database:', error);
       toast.error('Failed to load files');
     } finally {
       setLoading(false);
@@ -231,7 +252,8 @@ function FilesPageContent() {
           const imgData = response.result || response.data || response;
           if (imgData && imgData.id) {
             toast.success(`Uploaded ${file.name}`);
-            return {
+
+            const newFileItem = {
               id: imgData.id,
               filename: imgData.file_name || file.name,
               url: imgData.preview_url,
@@ -243,8 +265,36 @@ function FilesPageContent() {
               created: Math.floor(Date.now() / 1000),
               mime_type: file.type,
               width: imgData.width,
-              height: imgData.height
+              height: imgData.height,
+              userId: user?.id,
             };
+
+            // Persist to database via /api/creator/artworks
+            try {
+              const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+              await fetch('/api/creator/artworks', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({
+                  printify_file_id: newFileItem.id,
+                  file_url: newFileItem.url,
+                  thumbnail_url: newFileItem.thumbnail_url,
+                  preview_url: newFileItem.url,
+                  filename: newFileItem.filename,
+                  width: newFileItem.width,
+                  height: newFileItem.height,
+                  size: newFileItem.size,
+                  mime_type: newFileItem.mime_type,
+                }),
+              });
+            } catch (dbErr) {
+              console.error('Failed to persist artwork to database:', dbErr);
+            }
+
+            return newFileItem;
           } else {
             toast.error(`Failed to upload ${file.name}`);
             return null;
@@ -327,8 +377,17 @@ function FilesPageContent() {
 
     setDeleteState(prev => ({ ...prev, isDeleting: true }));
     try {
-      // Call the delete API endpoint
-      await printifyAPI.deleteFile(deleteState.fileId.toString());
+      // 1. Delete from PostgreSQL database
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+      await fetch(`/api/creator/artworks?id=${encodeURIComponent(String(deleteState.fileId))}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      // 2. Call the delete API endpoint on Printify
+      try {
+        await printifyAPI.deleteFile(deleteState.fileId.toString());
+      } catch (_) {}
       
       // Update state
       setFiles(prev => prev.filter(f => f.id !== deleteState.fileId));

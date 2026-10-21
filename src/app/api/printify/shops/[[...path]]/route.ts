@@ -1,16 +1,23 @@
 /**
- * Printify Shops API Routes
+ * Printify Shops API Routes (Secured - Admin Only)
  * GET /api/printify/shops         → list all shops
  * GET /api/printify/shops/current → get current shop details
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { printifyShopAPI } from '@/services/printify/PrintifyClient';
+import { requireAdminAuth } from '@/lib/serverAuth';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path?: string[] }> }
 ) {
+  // Security (C6): Require admin authentication
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const { path } = await params;
     const segments = path || [];

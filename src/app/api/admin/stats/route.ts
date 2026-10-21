@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
 import { printifyCatalogAPI } from '@/services/printify/PrintifyClient';
+import { requireAdminAuth } from '@/lib/serverAuth';
 
 export async function GET(request: NextRequest) {
+  const authResult = await requireAdminAuth(request);
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     let publishedProductsCount = 0;
     let activeCreatorsCount = 0;

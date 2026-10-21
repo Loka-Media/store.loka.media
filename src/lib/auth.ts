@@ -23,44 +23,121 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle token refresh
+// State and queue to prevent concurrent refresh races
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string) => void> = [];
+
+const subscribeTokenRefresh = (cb: (token: string) => void) => {
+  refreshSubscribers.push(cb);
+};
+
+const onRefreshed = (token: string) => {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+};
+
+const onRefreshFailed = () => {
+  refreshSubscribers = [];
+};
+
+// Response interceptor to handle token refresh safely
 api.interceptors.response.use(
   (response) => {
-    console.log(`[API SUCCESS] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
     return response;
   },
   async (error) => {
-    console.warn(`[API ERROR] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
-      status: error.response?.status,
-      data: error.response?.data,
-      payload: error.config?.data
-    });
     const originalRequest = error.config;
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const requestUrl = (originalRequest.url || '').toLowerCase();
+    const isAuthRoute =
+      requestUrl.includes('/api/auth/login') ||
+      requestUrl.includes('/api/auth/refresh-token') ||
+      requestUrl.includes('/api/auth/logout');
+
+    // Only intercept 401 Unauthorized for non-auth endpoints and not already retried
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
       originalRequest._retry = true;
 
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const response = await axios.post(`${getApiUrl()}/api/auth/refresh-token`, {
-            refreshToken,
-          });
+      const refreshToken =
+        typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
 
-          const { accessToken, refreshToken: newRefreshToken } = response.data.tokens;
-          
-          localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', newRefreshToken);
-
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return api(originalRequest);
+      // If no refresh token available in storage, session cannot be refreshed
+      if (!refreshToken) {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          if (window.location.pathname.startsWith('/dashboard')) {
+            window.location.href = '/auth/login';
+          }
         }
-      } catch (refreshError) {
-        console.error("Token refresh failed:", refreshError);
-        // Refresh failed, clear tokens and redirect to login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/auth/login';
+        return Promise.reject(error);
+      }
+
+      // If a refresh is already in progress, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh((newToken: string) => {
+            if (!newToken) {
+              return reject(error);
+            }
+            originalRequest.headers = originalRequest.headers || {};
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            resolve(api(originalRequest));
+          });
+        });
+      }
+
+      isRefreshing = true;
+
+      try {
+        const response = await axios.post(`${getApiUrl()}/api/auth/refresh-token`, {
+          refreshToken,
+        });
+
+        const tokens = response.data?.tokens;
+        const newAccessToken = tokens?.accessToken;
+        const newRefreshToken = tokens?.refreshToken;
+
+        if (!newAccessToken) {
+          throw new Error('Refresh response missing access token');
+        }
+
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('accessToken', newAccessToken);
+          if (newRefreshToken) {
+            localStorage.setItem('refreshToken', newRefreshToken);
+          }
+        }
+
+        api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        onRefreshed(newAccessToken);
+        return api(originalRequest);
+      } catch (refreshError: any) {
+        console.error('Token refresh failed:', refreshError);
+        onRefreshFailed();
+
+        // Only redirect to /auth/login if the server explicitly rejected the refresh token (401 or 403)
+        // If it was a network timeout or 500 error, preserve tokens so user is not needlessly logged out
+        const isAuthRejection =
+          refreshError?.response?.status === 401 || refreshError?.response?.status === 403;
+
+        if (isAuthRejection && typeof window !== 'undefined') {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          if (window.location.pathname.startsWith('/dashboard')) {
+            window.location.href = '/auth/login';
+          }
+        }
+
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

@@ -1,5 +1,5 @@
 /**
- * Printify Orders API Routes
+ * Printify Orders API Routes (Secured - Admin Only)
  * GET  /api/printify/orders               → list orders
  * POST /api/printify/orders               → create order
  * GET  /api/printify/orders/:id           → get order
@@ -9,11 +9,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { printifyOrdersAPI } from '@/services/printify/PrintifyClient';
+import { requireAdminAuth } from '@/lib/serverAuth';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path?: string[] }> }
 ) {
+  // Security (C6): Require verified admin role
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const { path } = await params;
     const segments = path || [];
@@ -44,10 +51,16 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ path?: string[] }> }
 ) {
+  // Security (C7, C8): Require verified admin role for creation, production, and cancellation
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response;
+  }
+
   try {
     const { path } = await params;
     const segments = path || [];
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
 
     // POST /api/printify/orders/:id/production
     if (segments.length === 2 && segments[1] === 'production') {

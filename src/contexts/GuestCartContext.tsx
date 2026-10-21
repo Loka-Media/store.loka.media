@@ -46,6 +46,7 @@ interface GuestCartContextType {
   removeFromCart: (cartItemId: number) => Promise<boolean>;
   clearCart: () => Promise<boolean>;
   refreshCart: () => Promise<void>;
+  updateItemPrices: (updates: { variantId: number | string; newPrice: number }[]) => void;
 }
 
 const GuestCartContext = createContext<GuestCartContextType | undefined>(undefined);
@@ -623,6 +624,24 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateItemPrices = useCallback((updates: { variantId: number | string; newPrice: number }[]) => {
+    setItems(prevItems => {
+      const updated = prevItems.map(item => {
+        const match = updates.find(u => String(u.variantId) === String(item.variant_id));
+        if (match) {
+          const newPriceStr = match.newPrice.toFixed(2);
+          const total_price = (match.newPrice * item.quantity).toFixed(2);
+          return { ...item, price: newPriceStr, total_price };
+        }
+        return item;
+      });
+      const newSummary = calculateSummary(updated);
+      setSummary(newSummary);
+      saveGuestCart(updated, newSummary);
+      return updated;
+    });
+  }, [calculateSummary, saveGuestCart]);
+
   return (
     <GuestCartContext.Provider
       value={{
@@ -635,6 +654,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         removeFromCart,
         clearCart,
         refreshCart,
+        updateItemPrices,
       }}
     >
       {children}

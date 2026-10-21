@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Search, Download, Grid3X3, List, Trash2, Plus, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// @ts-ignore - OpenMoji doesn't have TypeScript definitions
 import openmojiData from 'openmoji/data/openmoji.json';
 
 interface OpenMojiData {

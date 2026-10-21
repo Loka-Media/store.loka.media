@@ -860,24 +860,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
           </div>
         )}
 
-        {/* Validation Status Badges */}
-        {allValidationResults.length > 0 && (
-          <div className="w-full max-w-2xl mx-auto">
-            {allValidationResults.filter((r) => r.message.includes("✅ GOOD")).length > 0 && (
-              <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-between text-xs text-emerald-300">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  <span className="font-semibold">
-                    Artwork aspect ratio is 100% compliant with Printify production standards
-                  </span>
-                </div>
-                <span className="text-[10px] bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono text-emerald-400">
-                  Ready
-                </span>
-              </div>
-            )}
-          </div>
-        )}
+        
       </div>
     </div>
   );

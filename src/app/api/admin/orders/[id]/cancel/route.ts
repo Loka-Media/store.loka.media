@@ -4,11 +4,17 @@ import { queryDb } from '@/lib/db';
 import { getApiUrl } from '@/lib/getApiUrl';
 import { printifyOrdersAPI } from '@/services/printify/PrintifyClient';
 import { sendOrderCancellationEmail } from '@/lib/email';
+import { requireAdminAuth } from '@/lib/serverAuth';
 
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const authResult = await requireAdminAuth(request);
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
   try {
     const { id } = await context.params;
     const authHeader = request.headers.get('authorization') || '';

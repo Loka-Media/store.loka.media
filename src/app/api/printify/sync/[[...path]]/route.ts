@@ -774,28 +774,26 @@ export async function POST(request: NextRequest) {
                 ? Math.min(...calculatedPrices) 
                 : (targetCreatorPrice > 0 ? targetCreatorPrice : ensure99Pricing(productData?.price || productData?.base_price || 14.99));
 
-              // Retrieve all mockups from created or re-fetch from Printify
+              // Retrieve all mockups from created Printify product as secondary fallback
               let productImages: string[] = [];
               if (created?.images && created.images.length > 0) {
                 productImages = created.images.map((img: any) => img.src).filter(Boolean);
               }
 
-              if (productImages.length === 0 && printifyProductId) {
-                try {
-                  const latestPrintify = await printifyProductsAPI.getProduct(printifyProductId);
-                  if (latestPrintify.images && latestPrintify.images.length > 0) {
-                    productImages = latestPrintify.images.map((img: any) => img.src).filter(Boolean);
-                  }
-                } catch (_) {}
-              }
+              // Save images strictly prioritizing creator-ordered mockups and custom uploads
+              const imagesToSave = (finalMockupUrls && finalMockupUrls.length > 0)
+                ? finalMockupUrls
+                : (productImages && productImages.length > 0)
+                  ? productImages
+                  : [];
 
-              if (productImages.length > 0) {
-                const finalThumbnail = productImages[0];
+              if (imagesToSave.length > 0) {
+                const finalThumbnail = imagesToSave[0];
                 await queryDb(
                   `UPDATE products SET base_price = $1, markup_percentage = $2, thumbnail_url = $3, images = $4, printify_product_id = $5, updated_at = NOW() WHERE id = $6`,
-                  [minRetailPrice, creatorMarkup, finalThumbnail, productImages, String(printifyProductId || ''), targetProductId]
+                  [minRetailPrice, creatorMarkup, finalThumbnail, imagesToSave, String(printifyProductId || ''), targetProductId]
                 );
-                console.log(`[Printify Sync] Successfully updated product ${targetProductId} with ${productImages.length} mockups and retail price $${minRetailPrice}`);
+                console.log(`[Printify Sync] Successfully updated product ${targetProductId} with ${imagesToSave.length} ordered images and retail price $${minRetailPrice}`);
               } else {
                 await queryDb(
                   `UPDATE products SET base_price = $1, markup_percentage = $2, printify_product_id = $3, updated_at = NOW() WHERE id = $4`,
@@ -803,7 +801,7 @@ export async function POST(request: NextRequest) {
                 );
                 console.log(`[Printify Sync] Successfully synced product ${targetProductId} to retail price $${minRetailPrice} with ${calculatedPrices.length} variants updated`);
 
-                // Background polling fallback to capture mockups as soon as Printify rendering finishes
+                // Background polling fallback ONLY if no images were available yet
                 if (printifyProductId) {
                   const bgPrintifyId = printifyProductId;
                   const bgDbId = targetProductId;
@@ -816,7 +814,7 @@ export async function POST(request: NextRequest) {
                           const urls = p.images.map((img: any) => img.src).filter(Boolean);
                           if (urls.length > 0) {
                             await queryDb(
-                              `UPDATE products SET thumbnail_url = $1, images = $2, printify_product_id = $3, updated_at = NOW() WHERE id = $4`,
+                              `UPDATE products SET thumbnail_url = $1, images = $2, printify_product_id = $3, updated_at = NOW() WHERE id = $4 AND (images IS NULL OR array_length(images, 1) IS NULL OR array_length(images, 1) = 0)`,
                               [urls[0], urls, String(bgPrintifyId), bgDbId]
                             );
                             console.log(`[Printify Sync Background] Product ${bgDbId} mockups updated (${urls.length} images).`);

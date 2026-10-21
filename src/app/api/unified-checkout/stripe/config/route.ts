@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const publishableKey = (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_51RrcfkGofdJ5lBg3bgODkRSZGgRXPccoOzctQ55xRmNmQU8tqAnu46f2d0x5cfnNtzPx3oGGuhPaStjCqHmBFxtQ00NNdS84s8').trim();
+  const publishableKey = (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '').trim();
+  if (!publishableKey) {
+    return NextResponse.json(
+      { error: 'Stripe publishable key is not configured' },
+      { status: 500 }
+    );
+  }
   const environment = publishableKey.startsWith('pk_test_') ? 'test' : 'live';
 
   return NextResponse.json({

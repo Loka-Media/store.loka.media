@@ -25,6 +25,7 @@ import { CustomerInformationForm } from '@/components/checkout/CustomerInformati
 import { ShippingAddressForm } from '@/components/checkout/ShippingAddressForm';
 import { OrderSummary } from '@/components/checkout/OrderSummary';
 import InventoryErrorDialog from '@/components/checkout/InventoryErrorDialog';
+import PriceConflictDialog, { PriceConflictItem } from '@/components/checkout/PriceConflictDialog';
 
 import { unifiedCheckoutAPI } from '@/lib/checkout-api';
 import { validateZipCode } from '@/lib/location-utils';
@@ -35,10 +36,11 @@ export default function UnifiedCheckoutPage() {
   const { user, isAuthenticated } = useAuth();
 
   // Use GuestCart for both authenticated and guest users (handles both cases)
-  const { items, summary, clearCart, removeFromCart } = useGuestCart();
+  const { items, summary, clearCart, removeFromCart, updateItemPrices } = useGuestCart();
 
-  // State for inventory error dialog
+  // State for inventory error and price conflict dialogs
   const [inventoryError, setInventoryError] = useState<{ unavailable_items: any[] } | null>(null);
+  const [priceConflicts, setPriceConflicts] = useState<PriceConflictItem[] | null>(null);
   const [incompatibleItems, setIncompatibleItems] = useState<IncompatibleItem[]>([]);
 
   const checkoutState = useCheckoutState();
@@ -431,8 +433,14 @@ export default function UnifiedCheckoutPage() {
 
       // Handle specific error types
       if (error instanceof Error) {
-        // Check if it's an inventory error with unavailable items
         const err = error as any;
+        // Check if item prices changed (C3/M4 Option 1)
+        if (err.isPriceConflict && err.conflicts) {
+          setPriceConflicts(err.conflicts);
+          toast.error("Prices have changed for items in your cart. Please review.", { duration: 6000 });
+          return;
+        }
+        // Check if it's an inventory error with unavailable items
         if (err.isInventoryError && err.unavailable_items) {
           setInventoryError({ unavailable_items: err.unavailable_items });
         } else if (error.message.includes('not available for your shipping region') ||
@@ -486,6 +494,12 @@ export default function UnifiedCheckoutPage() {
 
   const handleCloseInventoryError = () => {
     setInventoryError(null);
+  };
+
+  const handleAcceptUpdatedPrices = (conflicts: PriceConflictItem[]) => {
+    updateItemPrices(conflicts.map(c => ({ variantId: c.variantId, newPrice: c.currentPrice })));
+    setPriceConflicts(null);
+    toast.success("Cart updated with latest prices. Please review your total and proceed.");
   };
 
   const handleCheckAvailability = async () => {
@@ -653,6 +667,14 @@ export default function UnifiedCheckoutPage() {
           onRemoveItems={handleRemoveUnavailableItems}
         />
       )}
+
+      {/* Price Conflict Dialog (C3/M4) */}
+      <PriceConflictDialog
+        isOpen={Boolean(priceConflicts && priceConflicts.length > 0)}
+        conflicts={priceConflicts || []}
+        onClose={() => setPriceConflicts(null)}
+        onAcceptUpdatedPrices={handleAcceptUpdatedPrices}
+      />
     </div>
   );
 }

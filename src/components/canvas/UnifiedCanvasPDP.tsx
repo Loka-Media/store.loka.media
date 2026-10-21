@@ -277,11 +277,32 @@ const Product360Viewer: React.FC<{
   activeColorHex?: string;
   supportedPlacements?: string[];
   activeUrl?: string;
-}> = ({ mockupUrls, images = [], defaultImage, productName, designFiles, activePlacement = "front", onPlacementChange, activeColorHex, supportedPlacements, activeUrl }) => {
+  onMoveImage?: (fromIndex: number, toIndex: number) => void;
+  onSetAsCover?: (index: number) => void;
+  onRemoveImage?: (index: number) => void;
+  canReorder?: boolean;
+}> = ({
+  mockupUrls,
+  images = [],
+  defaultImage,
+  productName,
+  designFiles,
+  activePlacement = "front",
+  onPlacementChange,
+  activeColorHex,
+  supportedPlacements,
+  activeUrl,
+  onMoveImage,
+  onSetAsCover,
+  onRemoveImage,
+  canReorder = false,
+}) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
   const dragStartActiveIndex = useRef(0);
+  const [draggedThumbIdx, setDraggedThumbIdx] = useState<number | null>(null);
+  const [dragOverThumbIdx, setDragOverThumbIdx] = useState<number | null>(null);
 
   // Printable area mappings (percentage of mockup container) to overlay designs in real-time
   const MOCKUP_PRINT_AREAS: Record<string, { width: number; height: number; top: number; left: number }> = {
@@ -694,61 +715,183 @@ const Product360Viewer: React.FC<{
         </div>
       </div>
 
-      {/* Thumbnail Carousel Underneath */}
+      {/* Thumbnail Carousel Underneath with Interactive Reordering */}
       {sortedMockups.length > 1 && (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between px-1">
-            <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 capitalize bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+            <span className="text-[10px] sm:text-[11px] font-bold text-gray-700 capitalize bg-white/60 px-2 py-0.5 rounded-md border border-black/10">
               {activeMockup.title || "Product View"}
             </span>
-            <span className="text-[10px] text-gray-500">
+            <span className="text-[10px] text-gray-500 font-medium">
               {activeIndex + 1} of {sortedMockups.length}
             </span>
           </div>
 
+          {canReorder && (
+            <div className="flex items-center gap-1.5 px-1 text-[11px] text-gray-600 font-medium">
+              <GripVertical className="w-3.5 h-3.5 text-gray-500" />
+              <span>Drag thumbnails or use arrows to reorder • <strong>Image #1 is your storefront cover</strong></span>
+            </div>
+          )}
+
           <div className="relative group/carousel">
-            <div className="flex gap-2.5 overflow-x-auto pb-2 pt-1 px-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent [&::-webkit-scrollbar]:h-[5px]">
+            <div className="flex gap-2.5 overflow-x-auto pb-2.5 pt-1 px-1 scrollbar-thin scrollbar-thumb-black/20 scrollbar-track-transparent [&::-webkit-scrollbar]:h-[5px]">
               {sortedMockups.map((m, idx) => {
                 const isSelected = idx === activeIndex;
+                const isCover = idx === 0;
+                const isDraggingThis = draggedThumbIdx === idx;
+                const isDragOverThis = dragOverThumbIdx === idx;
                 const isBlueprint = !mockupUrls || mockupUrls.length === 0;
-                const design = isBlueprint ? getDesignForMockup(m.title || "", m.placement) : null;
-                const effectivePlacement = design ? design.placement : (m.placement || "front");
-                const area = MOCKUP_PRINT_AREAS[effectivePlacement] || MOCKUP_PRINT_AREAS.front;
-
-                let designStyle: React.CSSProperties = {};
-                if (design && design.position) {
-                  const w = (design.position.width / design.position.area_width) * 100;
-                  const h = (design.position.height / design.position.area_height) * 100;
-                  const t = (design.position.top / design.position.area_height) * 100;
-                  const l = (design.position.left / design.position.area_width) * 100;
-                  designStyle = {
-                    width: `${w}%`,
-                    height: `${h}%`,
-                    top: `${t}%`,
-                    left: `${l}%`,
-                    position: "absolute",
-                  };
-                }
 
                 return (
-                  <button
+                  <div
                     key={idx}
-                    type="button"
-                    onClick={() => handleThumbnailClick(idx)}
-                    className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 flex items-center justify-center ${isSelected
-                      ? "border-[#FF6D1F] scale-105 shadow-[0_0_12px_rgba(255,109,31,0.25)]"
-                      : "border-white/10 hover:border-white/30"
-                      } ${isBlueprint ? "bg-[#f4f4f5]" : "bg-black/40"}`}
+                    draggable={canReorder}
+                    onDragStart={(e) => {
+                      if (!canReorder) return;
+                      setDraggedThumbIdx(idx);
+                      e.dataTransfer.effectAllowed = "move";
+                      e.dataTransfer.setData("text/plain", String(idx));
+                    }}
+                    onDragOver={(e) => {
+                      if (!canReorder) return;
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                      if (dragOverThumbIdx !== idx) {
+                        setDragOverThumbIdx(idx);
+                      }
+                    }}
+                    onDrop={(e) => {
+                      if (!canReorder) return;
+                      e.preventDefault();
+                      if (draggedThumbIdx !== null && draggedThumbIdx !== idx) {
+                        onMoveImage?.(draggedThumbIdx, idx);
+                        setActiveIndex(idx);
+                      }
+                      setDraggedThumbIdx(null);
+                      setDragOverThumbIdx(null);
+                    }}
+                    onDragEnd={() => {
+                      setDraggedThumbIdx(null);
+                      setDragOverThumbIdx(null);
+                    }}
+                    className={`group/thumb relative rounded-xl transition-all flex-shrink-0 cursor-pointer overflow-hidden border-2 ${
+                      isDraggingThis
+                        ? "opacity-30 border-dashed border-[#FF6D1F] scale-95"
+                        : isDragOverThis
+                        ? "border-[#FF6D1F] ring-2 ring-[#FF6D1F]/50 scale-105"
+                        : isSelected
+                        ? "border-[#FF6D1F] scale-105 shadow-[0_4px_16px_rgba(255,109,31,0.35)]"
+                        : isCover
+                        ? "border-amber-500/80 hover:border-amber-400 bg-white shadow-sm"
+                        : "border-black/10 hover:border-black/30 bg-white/70"
+                    }`}
+                    style={{ width: "88px" }}
                   >
-                    <div className="relative w-full h-full flex items-center justify-center">
+                    {/* Thumbnail Image Display */}
+                    <button
+                      type="button"
+                      onClick={() => handleThumbnailClick(idx)}
+                      className="w-full h-20 relative flex items-center justify-center p-1.5 focus:outline-none bg-white"
+                    >
                       <img
                         src={m.url}
                         alt={`Thumbnail ${idx + 1}`}
-                        className="w-full h-full object-contain pointer-events-none"
+                        className="w-full h-full object-contain pointer-events-none select-none"
                       />
-                    </div>
 
-                  </button>
+                      {/* Top Badge: Cover or Order Number */}
+                      <div className="absolute top-1 left-1 pointer-events-none z-10">
+                        <span
+                          className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 leading-none ${
+                            isCover
+                              ? "bg-gradient-to-r from-amber-500 to-[#FF6D1F] text-white"
+                              : "bg-black/75 text-white"
+                          }`}
+                        >
+                          {isCover ? "★ COVER" : `#${idx + 1}`}
+                        </span>
+                      </div>
+
+                      {/* Custom Upload Badge */}
+                      {(m.isCustomUpload || m.placement === "custom") && (
+                        <div className="absolute bottom-1 right-1 pointer-events-none z-10">
+                          <span className="text-[8px] font-bold px-1 py-0.2 rounded bg-blue-600 text-white leading-none">
+                            Custom
+                          </span>
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Reorder and Cover Controls Bar */}
+                    {canReorder && (
+                      <div className="flex items-center justify-between gap-0.5 bg-black/90 p-1 border-t border-black/10 z-20">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (idx > 0) {
+                              onMoveImage?.(idx, idx - 1);
+                              if (activeIndex === idx) setActiveIndex(idx - 1);
+                            }
+                          }}
+                          disabled={idx === 0}
+                          title="Move Earlier / Left"
+                          className="p-1 text-white/70 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/20 rounded transition-all cursor-pointer"
+                        >
+                          <ChevronLeft className="w-3 h-3" />
+                        </button>
+
+                        {!isCover && onSetAsCover && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSetAsCover(idx);
+                              setActiveIndex(0);
+                            }}
+                            title="Set as Main Cover (#1)"
+                            className="p-1 text-amber-400 hover:text-amber-300 hover:bg-amber-500/20 rounded transition-all cursor-pointer"
+                          >
+                            <Star className="w-3 h-3 fill-amber-400" />
+                          </button>
+                        )}
+
+                        {sortedMockups.length > 1 && onRemoveImage && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRemoveImage(idx);
+                              if (activeIndex >= sortedMockups.length - 1) {
+                                setActiveIndex(Math.max(0, sortedMockups.length - 2));
+                              }
+                            }}
+                            title="Remove Image"
+                            className="p-1 text-red-400/80 hover:text-red-400 hover:bg-red-500/20 rounded transition-all cursor-pointer"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (idx < sortedMockups.length - 1) {
+                              onMoveImage?.(idx, idx + 1);
+                              if (activeIndex === idx) setActiveIndex(idx + 1);
+                            }
+                          }}
+                          disabled={idx === sortedMockups.length - 1}
+                          title="Move Later / Right"
+                          className="p-1 text-white/70 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/20 rounded transition-all cursor-pointer"
+                        >
+                          <ChevronRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -1750,6 +1893,31 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             height: imgData.height,
           };
           uploadedList.push(newFile);
+
+          // Persist directly to PostgreSQL database (/api/creator/artworks)
+          try {
+            const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+            await fetch('/api/creator/artworks', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({
+                printify_file_id: newFile.id,
+                file_url: newFile.file_url,
+                thumbnail_url: newFile.thumbnail_url,
+                preview_url: newFile.file_url,
+                filename: newFile.filename,
+                width: newFile.width,
+                height: newFile.height,
+                size: file.size,
+                mime_type: file.type,
+              }),
+            });
+          } catch (dbErr) {
+            console.error('Failed to save uploaded artwork to database:', dbErr);
+          }
         }
       }
 
@@ -1776,6 +1944,45 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     } finally {
       setUploadingFile(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  // Manually delete artwork from database and library
+  const handleDeleteArtwork = async (file: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const confirmed = window.confirm(`Are you sure you want to delete "${file.filename || file.file_name || 'this artwork'}" from your library?`);
+    if (!confirmed) return;
+
+    const toastId = toast.loading("Removing artwork...");
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+      const fileId = file.db_id || file.id || file.file_id;
+      const res = await fetch(`/api/creator/artworks?id=${encodeURIComponent(fileId)}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to delete artwork from database');
+      }
+
+      // Update local storage cache
+      const userId = user?.id;
+      const userStorageKey = userId ? `uploaded_printify_images_${userId}` : "uploaded_printify_images";
+      const saved = localStorage.getItem(userStorageKey);
+      if (saved) {
+        const existing = JSON.parse(saved);
+        const filtered = existing.filter(
+          (f: any) => String(f.id) !== String(file.id) && String(f.db_id) !== String(file.db_id)
+        );
+        localStorage.setItem(userStorageKey, JSON.stringify(filtered));
+      }
+
+      toast.success("Artwork deleted from your library!", { id: toastId });
+      onRefreshFiles();
+    } catch (err: any) {
+      console.error('Error deleting artwork:', err);
+      toast.error(err.message || "Failed to delete artwork", { id: toastId });
     }
   };
 
@@ -2355,8 +2562,94 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     }
   }, [activePlacement, getEffectiveMockups, isPlacementMatch]);
 
+  // Helper to persist mockups array, custom uploads, and order to PostgreSQL DB and localStorage
+  const saveMockupsToDbAndLocal = async (updatedMockups: any[]) => {
+    const bId = selectedProduct?.blueprintId || selectedProduct?.id || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("blueprintId") : null);
+    const pId = isEditing ? (selectedProduct?.id || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("productId") : null)) : null;
+
+    // 1. Instant optimistic sync in localStorage for 0ms refresh restoration
+    if (typeof window !== "undefined" && bId) {
+      try {
+        localStorage.setItem(`saved_canvas_mockups_${bId}`, JSON.stringify(updatedMockups));
+        const savedDraftKey = `loka_draft_${bId}`;
+        const savedDraftJson = localStorage.getItem(savedDraftKey);
+        if (savedDraftJson) {
+          const parsed = JSON.parse(savedDraftJson);
+          parsed.mockupUrls = updatedMockups;
+          parsed.updatedAt = new Date().toISOString();
+          localStorage.setItem(savedDraftKey, JSON.stringify(parsed));
+        }
+      } catch (_) {}
+    }
+
+    // 2. Persist to PostgreSQL via /api/creator/canvas-mockups
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") || "" : "";
+      await fetch("/api/creator/canvas-mockups", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          blueprintId: bId ? String(bId) : null,
+          productId: pId ? String(pId) : null,
+          mockups: updatedMockups,
+        }),
+      });
+    } catch (err) {
+      console.warn("[Canvas] Failed to save mockups to DB:", err);
+    }
+  };
+
+  // Load saved canvas mockups and custom image uploads from DB and localStorage on mount
+  useEffect(() => {
+    const bId = selectedProduct?.blueprintId || selectedProduct?.id || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("blueprintId") : null);
+    const pId = isEditing ? (selectedProduct?.id || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("productId") : null)) : null;
+    if (!bId && !pId) return;
+
+    // 1. Instant check from localStorage
+    if (typeof window !== "undefined" && bId) {
+      try {
+        const localSaved = localStorage.getItem(`saved_canvas_mockups_${bId}`);
+        if (localSaved) {
+          const parsed = JSON.parse(localSaved);
+          if (Array.isArray(parsed) && parsed.length > 0 && (!mockupUrls || mockupUrls.length === 0)) {
+            setMockupUrls?.(parsed);
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 2. Asynchronous fetch from PostgreSQL DB
+    const fetchSavedMockups = async () => {
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") || "" : "";
+        const res = await fetch(`/api/creator/canvas-mockups?blueprintId=${bId || ""}&productId=${pId || ""}`, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.mockups) && data.mockups.length > 0) {
+            console.log(`[UnifiedCanvasPDP] Restored ${data.mockups.length} mockups from DB`);
+            setMockupUrls?.(data.mockups);
+            if (typeof window !== "undefined" && bId) {
+              localStorage.setItem(`saved_canvas_mockups_${bId}`, JSON.stringify(data.mockups));
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[UnifiedCanvasPDP] DB mockups fetch error:", e);
+      }
+    };
+
+    fetchSavedMockups();
+  }, [selectedProduct?.id, selectedProduct?.blueprintId, isEditing]);
+
   // Reordering helpers
-  const handleMoveImage = (fromIndex: number, toIndex: number) => {
+  const handleMoveImage = async (fromIndex: number, toIndex: number) => {
     const current = getEffectiveMockups();
     if (fromIndex < 0 || fromIndex >= current.length || toIndex < 0 || toIndex >= current.length) return;
     const updated = [...current];
@@ -2365,16 +2658,17 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     if (setMockupUrls) {
       setMockupUrls(updated);
     }
+    await saveMockupsToDbAndLocal(updated);
     toast.success("Image order updated!", { id: "image-reorder" });
   };
 
-  const handleSetAsCover = (index: number) => {
+  const handleSetAsCover = async (index: number) => {
     if (index === 0) return;
-    handleMoveImage(index, 0);
-    toast.success("Set as main cover image!");
+    await handleMoveImage(index, 0);
+    toast.success("Set as main cover image!", { id: "cover-set" });
   };
 
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveImage = async (index: number) => {
     const current = getEffectiveMockups();
     if (current.length <= 1) {
       toast.error("Product must have at least 1 image.");
@@ -2384,6 +2678,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     if (setMockupUrls) {
       setMockupUrls(updated);
     }
+    await saveMockupsToDbAndLocal(updated);
     toast.success("Image removed.");
   };
 
@@ -2398,6 +2693,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     try {
       const currentList = getEffectiveMockups();
       const newItems: any[] = [];
+      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") || "" : "";
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -2409,23 +2705,50 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
         });
 
         let finalUrl = localDataUrl;
+        let printifyUploadId = `custom_${Date.now()}_${i}`;
         try {
           const uploadRes = await printifyAPI.uploadFileDirectly(file);
           const remoteUrl = uploadRes?.src || uploadRes?.preview_url || uploadRes?.url || uploadRes?.data?.src || uploadRes?.data?.preview_url;
           if (remoteUrl) {
             finalUrl = remoteUrl;
           }
+          if (uploadRes?.id || uploadRes?.data?.id) {
+            printifyUploadId = String(uploadRes?.id || uploadRes?.data?.id);
+          }
         } catch (err) {
           console.warn("Direct image upload warning, using local preview:", err);
         }
 
+        // Save to user's artwork library in PostgreSQL so it also persists in their uploaded files
+        try {
+          await fetch("/api/creator/artworks", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({
+              printify_file_id: printifyUploadId,
+              file_url: finalUrl,
+              preview_url: finalUrl,
+              thumbnail_url: finalUrl,
+              filename: file.name,
+              size: file.size,
+              mime_type: file.type || "image/png",
+            }),
+          });
+        } catch (artErr) {
+          console.warn("Artwork library sync notice:", artErr);
+        }
+
         newItems.push({
           url: finalUrl,
+          src: finalUrl,
           title: file.name.replace(/\.[^/.]+$/, "") || `Custom Image ${currentList.length + i + 1}`,
           placement: "custom",
           isCustomUpload: true,
           variant_ids: [],
-          id: `custom_${Date.now()}_${i}`
+          id: `custom_${Date.now()}_${i}`,
         });
       }
 
@@ -2433,7 +2756,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       if (setMockupUrls) {
         setMockupUrls(updated);
       }
-      toast.success(`${files.length} custom image(s) uploaded!`, { id: toastId });
+      await saveMockupsToDbAndLocal(updated);
+      toast.success(`${files.length} custom image(s) uploaded & saved to database!`, { id: toastId });
     } catch (err: any) {
       console.error("Custom image upload error:", err);
       toast.error("Failed to upload image.", { id: toastId });
@@ -2480,7 +2804,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     {
       step: 2,
       num: "02",
-      title: "Add Artwork",
+      title: "Add Design",
       subtitle: "Upload & position",
       isValid: validationSummary.designs,
     },
@@ -2988,7 +3312,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   Step 02 to 04
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold font-clash text-white">
-                  Add Artwork & Placement
+                  Add Design
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-400">
                   Upload your artwork and configure print positioning on each side.
@@ -3139,8 +3463,19 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                 alt="Artwork"
                                 className="w-full h-full object-contain p-1.5 bg-gray-900"
                               />
+
+                              {/* Manual Delete Artwork Button */}
+                              <button
+                                type="button"
+                                onClick={(e) => handleDeleteArtwork(file, e)}
+                                className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-red-600/90 hover:bg-red-600 text-white rounded-md shadow hover:scale-110 z-20"
+                                title="Remove artwork permanently from your library"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+
                               {hasAssigned ? (
-                                <div className="absolute top-1.5 right-1.5 bg-[#FF6D1F] text-white p-0.5 rounded-full shadow">
+                                <div className="absolute top-1.5 right-1.5 bg-[#FF6D1F] text-white p-0.5 rounded-full shadow z-10">
                                   <Check className="w-2.5 h-2.5 stroke-[3]" />
                                 </div>
                               ) : (
@@ -3839,6 +4174,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       activeColorHex={activeColorHex}
                       supportedPlacements={getSupportedPlacements()}
                       activeUrl={activeMockupUrl}
+                      onMoveImage={handleMoveImage}
+                      onSetAsCover={handleSetAsCover}
+                      onRemoveImage={handleRemoveImage}
+                      canReorder={true}
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-black/10 mt-3">
@@ -3847,26 +4186,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         ? `✓ ${mockupUrls.length} high-res storefront mockups ready for marketplace`
                         : "Realistic mockups previewed above with your placed artwork"}
                     </div>
-                    <Button
-                      type="button"
-                      onClick={handleManualRegenerate}
-                      disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
-                      className="bg-black/80 hover:bg-black text-white font-semibold text-xs py-2 px-3.5 rounded-xl transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer self-start sm:self-auto"
-                    >
-                      {isGeneratingPreview ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Generating...</span>
-                        </>
-                      ) : cooldown > 0 ? (
-                        <span>Wait {cooldown}s</span>
-                      ) : (
-                        <>
-                          <RotateCw className="w-3.5 h-3.5 text-[#FF6D1F]" />
-                          <span>Regenerate Previews</span>
-                        </>
-                      )}
-                    </Button>
+                   
                   </div>
                 </div>
               </div>
@@ -3968,16 +4288,21 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <Button
                   onClick={handlePublishSubmit}
                   disabled={isPublishing}
-                  className="w-full bg-gradient-to-r from-purple-700 via-[#8A3816] to-[#A3430C] border border-orange-500/30 hover:opacity-95 text-white font-extrabold text-sm sm:text-base py-4 rounded-xl transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
+                  className="group relative overflow-hidden w-full bg-gradient-to-r from-[#7C3AED] via-[#FF6D1F] to-[#FF8A3D] hover:from-[#8B5CF6] hover:via-[#FF7D30] hover:to-[#FFA05C] border border-orange-400/50 hover:border-orange-300 text-white font-black text-base sm:text-lg py-5 rounded-2xl transition-all duration-300 shadow-[0_4px_25px_rgba(255,109,31,0.35)] hover:shadow-[0_8px_40px_rgba(255,109,31,0.65)] hover:scale-[1.015] active:scale-[0.985] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer flex items-center justify-center gap-2"
                 >
+                  {/* Glowing Animated Light Streak on Hover */}
+                  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
+
                   {isPublishing ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                    <div className="flex items-center justify-center gap-2 relative z-10">
+                      <Loader2 className="w-5 h-5 animate-spin text-white" />
                       <span>{isEditing ? "Saving Changes..." : "Publishing to Marketplace..."}</span>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center gap-2">
-                      <span>🚀 Publish Live to Marketplace</span>
+                    <div className="flex items-center justify-center gap-3 relative z-10">
+                      <span className="tracking-wide drop-shadow-md">
+                        {isEditing ? "Save & Update Product" : "Publish Live to Marketplace"}
+                      </span>
                     </div>
                   )}
                 </Button>
@@ -4024,6 +4349,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 activeColorHex={activeColorHex}
                 supportedPlacements={getSupportedPlacements()}
                 activeUrl={activeMockupUrl}
+                onMoveImage={handleMoveImage}
+                onSetAsCover={handleSetAsCover}
+                onRemoveImage={handleRemoveImage}
+                canReorder={true}
               />
 
 

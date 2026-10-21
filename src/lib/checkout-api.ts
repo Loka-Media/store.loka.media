@@ -23,8 +23,23 @@ const createAuthApi = (token: string) => {
 
 export const unifiedCheckoutAPI = {
   createGuestCheckout: async (data: CheckoutData) => {
-    const response = await guestApi.post('/api/unified-checkout/guest/create', data);
-    return response.data;
+    try {
+      const response = await guestApi.post('/api/unified-checkout/guest/create', data);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 409 || error.response?.data?.code === 'PRICE_CHANGED') {
+        const customError: any = new Error(
+          error.response.data.message || error.response.data.error || 'One or more item prices have changed. Please review the updated prices before proceeding.'
+        );
+        customError.status = 409;
+        customError.code = 'PRICE_CHANGED';
+        customError.conflicts = error.response.data.conflicts || [];
+        customError.isPriceConflict = true;
+        customError.response = error.response;
+        throw customError;
+      }
+      throw error;
+    }
   },
 
   processCheckout: async (data: ProcessCheckoutData) => {
@@ -32,6 +47,17 @@ export const unifiedCheckoutAPI = {
       const response = await guestApi.post('/api/unified-checkout/process', data);
       return response.data;
     } catch (error: any) {
+      if (error.response?.status === 409 || error.response?.data?.code === 'PRICE_CHANGED') {
+        const customError: any = new Error(
+          error.response.data.message || error.response.data.error || 'One or more item prices have changed. Please review the updated prices before proceeding.'
+        );
+        customError.status = 409;
+        customError.code = 'PRICE_CHANGED';
+        customError.conflicts = error.response.data.conflicts || [];
+        customError.isPriceConflict = true;
+        customError.response = error.response;
+        throw customError;
+      }
       // Preserve error details for inventory errors
       if (error.response?.data?.unavailable_items) {
         const customError: any = new Error(
@@ -87,6 +113,18 @@ export const unifiedCheckoutAPI = {
       const response = await authApi.post('/api/unified-checkout/process-authenticated', data);
       return response.data;
     } catch (error: any) {
+      console.error('❌ [processAuthenticatedCheckout] Error:', error.response?.data || error.message);
+      if (error.response?.status === 409 || error.response?.data?.code === 'PRICE_CHANGED') {
+        const customError: any = new Error(
+          error.response.data.message || error.response.data.error || 'One or more item prices have changed. Please review the updated prices before proceeding.'
+        );
+        customError.status = 409;
+        customError.code = 'PRICE_CHANGED';
+        customError.conflicts = error.response.data.conflicts || [];
+        customError.isPriceConflict = true;
+        customError.response = error.response;
+        throw customError;
+      }
       // Preserve error details for inventory errors
       console.error('❌ [processAuthenticatedCheckout] Error:', error.response?.data || error.message);
       if (error.response?.data?.unavailable_items) {
