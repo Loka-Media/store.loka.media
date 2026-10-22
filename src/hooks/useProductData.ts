@@ -151,34 +151,51 @@ export const useProductData = (slug: string) => {
       }
 
 
-      // Trigger background real-time variant availability sync for Printify products
-      if (response && response.source === 'printify' && isValidPrintifyId) {
+      // Trigger background real-time variant availability and mockups sync for Printify products
+      if (response && isValidPrintifyId) {
         fetch(`/api/printify/products/${printifyProdId}`)
           .then(res => res.json())
           .then(data => {
-            if (data?.success && data?.data?.variants) {
-              const printifyVariants = data.data.variants;
+            if (data?.success && data?.data) {
+              const printifyVariants = data.data.variants || [];
+              const rawMockups = data.data.mockups || [];
+              
               const availabilityMap = new Map<number, boolean>();
+              const imageUrlMap = new Map<number, string>();
               printifyVariants.forEach((pv: any) => {
                 availabilityMap.set(Number(pv.id), pv.isAvailable ?? pv.is_available);
+                if (pv.imageUrl) {
+                  imageUrlMap.set(Number(pv.id), pv.imageUrl);
+                }
               });
+
+              const normalizedMockups = rawMockups.map((m: any) => ({
+                ...m,
+                permanent_url: m.src || m.url || m.permanent_url,
+                variant_ids: m.variantIds || m.variant_ids || [],
+                variantIds: m.variantIds || m.variant_ids || [],
+              }));
 
               setProduct(prevProduct => {
                 if (!prevProduct) return null;
                 const updatedVariants = prevProduct.variants.map(v => {
                   const variantPrintifyId = v.printify_variant_id || v.id;
                   const isAvailable = availabilityMap.get(Number(variantPrintifyId));
+                  const img = imageUrlMap.get(Number(variantPrintifyId));
                   return {
                     ...v,
-                    available_for_sale: isAvailable !== undefined ? isAvailable : v.available_for_sale
+                    available_for_sale: isAvailable !== undefined ? isAvailable : v.available_for_sale,
+                    image_url: v.image_url || img || undefined,
                   };
                 });
+
                 return {
                   ...prevProduct,
-                  variants: updatedVariants
+                  mockups: normalizedMockups.length > 0 ? normalizedMockups : prevProduct.mockups,
+                  variants: updatedVariants,
                 };
               });
-              console.log(`[Real-time Stock Sync] Synced ${printifyVariants.length} variants from Printify`);
+              console.log(`[Real-time Stock & Mockup Sync] Synced ${printifyVariants.length} variants and ${normalizedMockups.length} mockups from Printify`);
             }
           })
           .catch(err => {

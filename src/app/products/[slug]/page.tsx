@@ -22,6 +22,13 @@ import { PrintifyShippingDestinations } from '@/components/products/product-deta
 import { SizeGuideModal } from '@/components/products/product-detail/SizeGuideModal';
 import { getRegionName } from '@/lib/shipping-compatibility';
 
+// Helper to check if a URL belongs to a specific Printify/Shop variant ID
+const matchVariantInUrl = (url: string, id: number | string): boolean => {
+  if (!url || !id) return false;
+  const strId = String(id);
+  return new RegExp(`[/_=-]${strId}([/_=.-]|$)`).test(url) || url.includes(`/${strId}/`);
+};
+
 interface ProductPageProps {
   params: Promise<{
     slug: string;
@@ -67,22 +74,36 @@ export default function ProductPage({ params }: ProductPageProps) {
       return lower.includes('size') || lower.includes('measurement') || lower.includes('chart') || lower.includes('guide');
     };
 
-    if (selectedColor && selectedColor !== 'Default' && product.mockups && product.mockups.length > 0) {
+    if (selectedColor && selectedColor !== 'Default') {
       const colorVariants = (product.variants || []).filter(
         (v) => getVariantColorAndSize(v).color === selectedColor
       );
-      const colorVariantIds = new Set(
-        colorVariants.flatMap((v) => [v.id, (v as any).printify_variant_id].filter(Boolean))
+      const colorVariantIds = new Set<number>(
+        colorVariants.flatMap((v) => [v.id, (v as any).printify_variant_id].filter(Boolean) as number[])
       );
 
-      const matching = product.mockups.filter((m) => {
-        const mIds = m.variant_ids || [];
-        if (!mIds.length || (m as any).isCustomUpload || (m as any).placement === 'custom') return true;
-        return mIds.some((id: number) => colorVariantIds.has(id));
-      });
+      // 1. Try matching from product.mockups
+      if (product.mockups && product.mockups.length > 0) {
+        const matching = product.mockups.filter((m) => {
+          const mIds = m.variant_ids || (m as any).variantIds || [];
+          const mUrl = extractUrl(m);
+          if (mIds.some((id: number) => colorVariantIds.has(Number(id)))) return true;
+          return Array.from(colorVariantIds).some((id) => matchVariantInUrl(mUrl, id));
+        });
 
-      const colorUrls = matching.map(extractUrl).filter((u) => u && !isSizeChart(u) && !u.includes('placeholder'));
-      if (colorUrls.length > 0) return colorUrls[0];
+        const colorUrls = matching.map(extractUrl).filter((u) => u && !isSizeChart(u) && !u.includes('placeholder'));
+        if (colorUrls.length > 0) return colorUrls[0];
+      }
+
+      // 2. Try matching directly from product.images
+      if (Array.isArray(product.images) && product.images.length > 0) {
+        const matchingSaved = product.images.filter((img) => {
+          const u = extractUrl(img);
+          if (!u || isSizeChart(u) || u.includes('placeholder')) return false;
+          return Array.from(colorVariantIds).some((id) => matchVariantInUrl(u, id));
+        });
+        if (matchingSaved.length > 0) return extractUrl(matchingSaved[0]);
+      }
     }
 
     // Fallback: variant image_url or product thumbnail
@@ -97,6 +118,12 @@ export default function ProductPage({ params }: ProductPageProps) {
   useEffect(() => {
     initializeSelectedVariant();
   }, [initializeSelectedVariant]);
+
+  // Reset image gallery to first image whenever the selected color changes
+  const selectedColor = selectedVariant ? getVariantColorAndSize(selectedVariant).color : undefined;
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [selectedColor]);
 
   if (loading) {
     return <ProductPageLoader />;
@@ -132,7 +159,6 @@ export default function ProductPage({ params }: ProductPageProps) {
     ? product.mockups
     : [product.thumbnail_url || getValidImageUrl(product)];
 
-  const selectedColor = selectedVariant ? getVariantColorAndSize(selectedVariant).color : undefined;
 
   const allExtractedImages = rawImages.map(extractImageUrl).filter(Boolean);
 
@@ -179,63 +205,71 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   if (selectedColor && selectedColor !== 'Default') {
     const colorVariants = product.variants.filter((v) => getVariantColorAndSize(v).color === selectedColor);
-    const colorVariantIds = new Set(
+    const colorVariantIds = new Set<number>(
       colorVariants.flatMap((v) => [v.id, v.printify_variant_id].filter(Boolean) as number[])
     );
 
-    // 1. Try to filter using mockup metadata if available
+    const otherColorVariants = product.variants.filter((v) => {
+      const c = getVariantColorAndSize(v).color;
+      return c && c !== 'Default' && c !== selectedColor;
+    });
+    const otherColorVariantIds = new Set<number>(
+      otherColorVariants.flatMap((v) => [v.id, v.printify_variant_id].filter(Boolean) as number[])
+    );
+
+    // 1. Try mockup objects if available
+    let filteredFromMockups: string[] = [];
     if (product.mockups && product.mockups.length > 0) {
-      const filteredMockups = product.mockups.filter(mockup => {
-        const mockVariantIds = mockup.variant_ids || [];
-        // CRITICAL FIX: Custom uploaded images and general mockups (with no variant_ids restriction) MUST be included for all colors!
-        if (!mockVariantIds || mockVariantIds.length === 0 || (mockup as any).isCustomUpload || (mockup as any).placement === 'custom') {
-          return true;
-        }
-        return mockVariantIds.some(id => colorVariantIds.has(id));
+      const matched = product.mockups.filter((mockup) => {
+        const mockVariantIds = mockup.variant_ids || (mockup as any).variantIds || [];
+        const mUrl = extractImageUrl(mockup);
+        const matchesThisColor =
+          mockVariantIds.some((id: number) => colorVariantIds.has(Number(id))) ||
+          Array.from(colorVariantIds).some((id) => matchVariantInUrl(mUrl, id));
+        const matchesOtherColor =
+          mockVariantIds.some((id: number) => otherColorVariantIds.has(Number(id))) ||
+          Array.from(otherColorVariantIds).some((id) => matchVariantInUrl(mUrl, id));
+
+        if (matchesThisColor) return true;
+        if (matchesOtherColor) return false;
+        // Keep general/custom uploads that aren't tied to another color
+        return mockVariantIds.length === 0 || (mockup as any).isCustomUpload || (mockup as any).placement === 'custom';
       });
-      if (filteredMockups.length > 0) {
-        const filteredUrls = filteredMockups.map(m => extractImageUrl(m)).filter(Boolean);
-        if (hasSavedImages) {
-          // Retain all saved product.images that match the selected color PLUS all custom/general uploaded photos!
-          const filteredSet = new Set(filteredUrls);
-          const matchingSaved = allExtractedImages.filter(url => {
-            if (filteredSet.has(url)) return true;
-            // Check if this URL is a custom upload or general photo not tied to a specific color
-            const isTiedToOtherColor = product.mockups?.some(m => {
-              const mUrl = extractImageUrl(m);
-              const mIds = m.variant_ids || [];
-              return mUrl === url && mIds.length > 0 && !mIds.some(id => colorVariantIds.has(id));
-            });
-            return !isTiedToOtherColor;
-          });
-          images = matchingSaved.length > 0 ? matchingSaved : allExtractedImages;
-        } else {
-          images = filteredUrls;
-        }
+
+      if (matched.length > 0) {
+        filteredFromMockups = matched.map((m) => extractImageUrl(m)).filter(Boolean);
       }
-    } else if (hasSavedImages) {
-      // 2. If no mockup metadata, retain allExtractedImages so custom photos are never dropped
-      images = [...allExtractedImages];
-    } else {
-      // 3. Try to filter using variant image_url
-      const variantImages = colorVariants.map(v => v.image_url).filter(Boolean) as string[];
-      if (variantImages.length > 0) {
-        const matchedImages = images.filter(img => variantImages.some(vImg => vImg.includes(img) || img.includes(vImg)));
-        if (matchedImages.length > 0) {
-          images = matchedImages;
-        } else {
-          images = Array.from(new Set([...variantImages, ...images]));
-        }
-      }
+    }
+
+    // 2. Filter allExtractedImages (works directly on product.images string array from database!)
+    const matchedFromAllImages = allExtractedImages.filter((url) => {
+      const matchesThisColor = Array.from(colorVariantIds).some((id) => matchVariantInUrl(url, id));
+      const matchesOtherColor = Array.from(otherColorVariantIds).some((id) => matchVariantInUrl(url, id));
+
+      if (matchesThisColor) return true;
+      if (matchesOtherColor) return false;
+
+      // Check variant image_url
+      const variantImages = colorVariants.map((v) => v.image_url).filter(Boolean) as string[];
+      if (variantImages.some((vImg) => vImg.includes(url) || url.includes(vImg))) return true;
+
+      // Keep general/shared custom uploads
+      return true;
+    });
+
+    if (filteredFromMockups.length > 0) {
+      images = filteredFromMockups;
+    } else if (matchedFromAllImages.length > 0 && matchedFromAllImages.length < allExtractedImages.length) {
+      images = matchedFromAllImages;
     }
   }
 
   // Always push size chart / measurement guide images to the VERY END of the gallery (last image position)
-  const currentSizeChartImages = images.filter(url => isSizeChartUrl(url));
-  const missingSizeChartImages = allSizeGuideImages.filter(url => !currentSizeChartImages.includes(url));
-  const mainProductGalleryImages = images.filter(url => !isSizeChartUrl(url));
+  const currentSizeChartImages = images.filter((url) => isSizeChartUrl(url));
+  const mainProductGalleryImages = images.filter((url) => !isSizeChartUrl(url));
+  const fallbackSizeChart = currentSizeChartImages.length === 0 && allSizeGuideImages.length > 0 ? [allSizeGuideImages[0]] : [];
 
-  images = [...mainProductGalleryImages, ...currentSizeChartImages, ...missingSizeChartImages];
+  images = [...mainProductGalleryImages, ...currentSizeChartImages, ...fallbackSizeChart];
 
   const sizeGuideIndex = images.findIndex(url => isSizeChartUrl(url));
   const sizeGuideImageUrl = sizeGuideIndex !== -1 ? images[sizeGuideIndex] : (allSizeGuideImages[0] || null);

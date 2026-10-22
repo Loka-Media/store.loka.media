@@ -49,21 +49,37 @@ export const useProductCart = (
         }
 
         const vColor = (selectedVariant?.color || selectedVariant?.title?.split(' / ')[0] || '').toLowerCase().trim();
-        if (vColor && vColor !== 'default' && product?.mockups && product.mockups.length > 0) {
+        if (vColor && vColor !== 'default') {
           const matchingVariants = (product.variants || []).filter(v => {
             const c = (v.color || v.title?.split(' / ')[0] || '').toLowerCase().trim();
             return c === vColor;
           });
-          const matchingIds = new Set(matchingVariants.flatMap(v => [v.id, (v as any).printify_variant_id].filter(Boolean)));
+          const matchingIds = new Set(matchingVariants.flatMap(v => [v.id, (v as any).printify_variant_id].filter(Boolean) as number[]));
           
-          const mockupMatch = product.mockups.find(m => {
-            const ids = m.variant_ids || [];
-            return ids.some((id: number) => matchingIds.has(id));
-          });
+          if (product?.mockups && product.mockups.length > 0) {
+            const mockupMatch = product.mockups.find(m => {
+              const ids = m.variant_ids || (m as any).variantIds || [];
+              if (ids.some((id: number) => matchingIds.has(Number(id)))) return true;
+              const mUrl = (m as any).permanent_url || (m as any).url || (m as any).src || (m as any).image_url || '';
+              return Array.from(matchingIds).some(id => new RegExp(`[/_=-]${id}([/_=.-]|$)`).test(mUrl) || mUrl.includes(`/${id}/`));
+            });
 
-          if (mockupMatch) {
-            const url = (mockupMatch as any).permanent_url || (mockupMatch as any).url || (mockupMatch as any).src || (mockupMatch as any).image_url;
-            if (url) return url;
+            if (mockupMatch) {
+              const url = (mockupMatch as any).permanent_url || (mockupMatch as any).url || (mockupMatch as any).src || (mockupMatch as any).image_url;
+              if (url) return url;
+            }
+          }
+
+          // Direct check on product.images
+          if (Array.isArray(product?.images) && product.images.length > 0) {
+            const imgMatch = product.images.find(img => {
+              const u = typeof img === 'string' ? img : (img as any)?.permanent_url || (img as any)?.src || '';
+              if (!u || u.toLowerCase().includes('size') || u.includes('placeholder')) return false;
+              return Array.from(matchingIds).some(id => new RegExp(`[/_=-]${id}([/_=.-]|$)`).test(u) || u.includes(`/${id}/`));
+            });
+            if (imgMatch) {
+              return typeof imgMatch === 'string' ? imgMatch : (imgMatch as any)?.permanent_url || (imgMatch as any)?.src || '';
+            }
           }
         }
 
