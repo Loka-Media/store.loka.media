@@ -5,6 +5,9 @@
  * 1. Live Printify Premium pricing as base cost.
  * 2. Dynamic Global Markup setting or Category-specific settings override.
  */
+import defaultSettings from '@/config/global_settings.json';
+import { CATEGORIES_MAP } from '@/config/categories';
+import { ensure99Pricing, calculateRetailPriceFromMarkup } from './pricing-utils';
 
 /**
  * Converts a standard Printify catalog price into its Printify Premium counterpart.
@@ -18,6 +21,94 @@ export function calculatePremiumPrice(regularPrice: number): number {
 }
 
 /**
+ * Determines the effective markup percentage to apply.
+ * 
+ * STRICT PRIORITY RULES:
+ * 1. Category Markups have FIRST PRIORITY. If a category markup is configured (> 0%), it always wins.
+ * 2. If no category markup is found or it is 0%, falls back to the Global Platform Markup.
+ */
+export function getEffectiveMarkupRate(
+  categoryOrProductOrMarkup: any,
+  categoryMarkups?: Record<string, number>,
+  globalMarkup?: number
+): number {
+  // 1. Direct markup percentage passed (backward compatibility)
+  if (typeof categoryOrProductOrMarkup === 'number') {
+    return categoryOrProductOrMarkup;
+  }
+
+  // Determine fallback global markup
+  const fallbackGlobal =
+    globalMarkup !== undefined
+      ? globalMarkup
+      : defaultSettings?.globalMarkup !== undefined
+      ? (defaultSettings.globalMarkup as number)
+      : 35;
+
+  // Merge category markups with defaults
+  const mergedCategoryMarkups: Record<string, number> = {
+    ...((defaultSettings?.categoryMarkup as Record<string, number>) || {}),
+    ...(categoryMarkups || {})
+  };
+
+  // Collect candidate category/product strings to test
+  const candidates: string[] = [];
+
+  if (typeof categoryOrProductOrMarkup === 'string') {
+    const trimmed = categoryOrProductOrMarkup.trim();
+    if (trimmed) candidates.push(trimmed);
+  } else if (categoryOrProductOrMarkup && typeof categoryOrProductOrMarkup === 'object') {
+    const obj = categoryOrProductOrMarkup;
+    if (typeof obj.category === 'string' && obj.category.trim()) candidates.push(obj.category.trim());
+    if (typeof obj.sourceCategory === 'string' && obj.sourceCategory.trim()) candidates.push(obj.sourceCategory.trim());
+    if (typeof obj.type_name === 'string' && obj.type_name.trim()) candidates.push(obj.type_name.trim());
+    if (typeof obj.type === 'string' && obj.type.trim()) candidates.push(obj.type.trim());
+    if (Array.isArray(obj.categoryIds)) {
+      for (const id of obj.categoryIds) {
+        const found = CATEGORIES_MAP.find((c) => c.id === id);
+        if (found) candidates.push(found.title);
+      }
+    }
+    const resolved = resolveProductCategoryName(obj);
+    if (resolved && resolved !== 'Other') candidates.push(resolved);
+    if (typeof obj.title === 'string' && obj.title.trim()) candidates.push(obj.title.trim());
+    if (typeof obj.name === 'string' && obj.name.trim()) candidates.push(obj.name.trim());
+  }
+
+  const clean = (s: string) => s.toLowerCase().trim().replace(/[-_&]/g, ' ');
+
+  // PRIORITY 1: Exact / Normalized Match on Category Markups (val > 0)
+  for (const candidate of candidates) {
+    const targetClean = clean(candidate);
+    for (const [key, val] of Object.entries(mergedCategoryMarkups)) {
+      if (typeof val === 'number' && val > 0 && clean(key) === targetClean) {
+        return val;
+      }
+    }
+  }
+
+  // PRIORITY 1 (Step 2): Word boundary / Substring Match on Category Markups (val > 0)
+  for (const candidate of candidates) {
+    const targetClean = clean(candidate);
+    for (const [key, val] of Object.entries(mergedCategoryMarkups)) {
+      if (typeof val !== 'number' || val <= 0) continue;
+      const keyClean = clean(key);
+      // Guard against false positive: "men" inside "women"
+      if (keyClean === 'men' && (targetClean === 'women' || targetClean.includes('women'))) {
+        continue;
+      }
+      const wordRegex = new RegExp(`(^|\\s)${keyClean}(\\s|$)`, 'i');
+      if (wordRegex.test(targetClean) || targetClean.includes(keyClean) || keyClean.includes(targetClean)) {
+        return val;
+      }
+    }
+  }
+
+  // PRIORITY 2: Fallback to Global Platform Markup
+  return fallbackGlobal;
+}
+
+/**
  * Calculates the customer selling price from base cost, dynamic category, and markup configuration.
  * Supports backward compatibility where the second argument is the direct markup percentage.
  * 
@@ -25,60 +116,14 @@ export function calculatePremiumPrice(regularPrice: number): number {
  */
 export function calculateSellingPrice(
   baseCost: number, 
-  categoryOrMarkup: string | number | undefined, 
+  categoryOrMarkup?: string | number | any, 
   categoryMarkups?: Record<string, number>, 
   globalMarkup?: number
 ): number {
   const parsedCost = typeof baseCost === 'string' ? parseFloat(baseCost) : baseCost;
   if (isNaN(parsedCost) || parsedCost <= 0) return 0;
   
-  let markupRate = 35; // Default fallback
-
-  if (typeof categoryOrMarkup === 'number') {
-    // Direct markup percentage passed (backward compatibility)
-    markupRate = categoryOrMarkup;
-  } else if (typeof categoryOrMarkup === 'string') {
-    // Category name string passed
-    const globalRate = globalMarkup !== undefined ? globalMarkup : 35;
-    markupRate = globalRate;
-
-    if (categoryMarkups) {
-      // Normalize category name for matching
-      const clean = (s: string) => s.toLowerCase().trim().replace(/[-_&]/g, ' ');
-      const targetClean = clean(categoryOrMarkup);
-
-      // 1. Direct match or key check
-      let matchedVal = undefined;
-      for (const [key, val] of Object.entries(categoryMarkups)) {
-        if (clean(key) === targetClean) {
-          matchedVal = val;
-          break;
-        }
-      }
-
-      // 2. Substring/parent matches if not directly found or if direct value is 0 (e.g., "Socks" matches "Shoes & Socks")
-      if (matchedVal === undefined || matchedVal === 0) {
-        for (const [key, val] of Object.entries(categoryMarkups)) {
-          if (val === 0) continue;
-          const keyClean = clean(key);
-          if (keyClean === 'men' && (targetClean === 'women' || targetClean.includes('women'))) {
-            continue;
-          }
-          if (targetClean.includes(keyClean) || keyClean.includes(targetClean)) {
-            matchedVal = val;
-            break;
-          }
-        }
-      }
-
-      if (matchedVal !== undefined && matchedVal !== 0) {
-        markupRate = matchedVal;
-      }
-    }
-  } else if (globalMarkup !== undefined) {
-    // If first markup param is undefined but globalMarkup is provided
-    markupRate = globalMarkup;
-  }
+  const markupRate = getEffectiveMarkupRate(categoryOrMarkup, categoryMarkups, globalMarkup);
   
   // Calculate selling price
   const sellingPrice = parsedCost * (1 + markupRate / 100);
@@ -86,8 +131,6 @@ export function calculateSellingPrice(
   // Round to nearest .99 (X.99 pricing)
   return Math.ceil(sellingPrice) - 0.01;
 }
-
-import { ensure99Pricing, calculateRetailPriceFromMarkup } from './pricing-utils';
 
 /**
  * Get dynamic retail price range for a product.

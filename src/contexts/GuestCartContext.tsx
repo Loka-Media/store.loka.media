@@ -75,7 +75,7 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
       const finalPrice = itemPrice !== null
         ? itemPrice
         : (item.cost !== undefined && item.cost !== null && !isNaN(Number(item.cost))
-            ? calculateSellingPrice(Number(item.cost))
+            ? calculateSellingPrice(Number(item.cost), (item as any).category || (item as any).product_name || (item as any).title)
             : 20.00);
 
       return {

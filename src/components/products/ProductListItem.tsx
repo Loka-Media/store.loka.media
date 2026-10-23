@@ -152,7 +152,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
           ? parseFloat(String(selectedVariant.price))
           : (product.base_price ? parseFloat(String(product.base_price)) : 0);
         const vCost = selectedVariant.cost || (vPrice > 0 ? vPrice / 1.35 : 20.00);
-        const finalPrice = vPrice > 0 ? vPrice : calculateSellingPrice(vCost);
+        const finalPrice = vPrice > 0 ? vPrice : calculateSellingPrice(vCost, product.category || (product as any).category_name || product.name);
         const variantCacheData = {
           product_id: product.id,
           product_name: product.name,

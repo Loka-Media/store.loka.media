@@ -56,6 +56,7 @@ import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { CATEGORIES_MAP } from "@/config/categories";
+import { resolveProductCategoryName } from "@/lib/pricing";
 import { calculateFinalRetailPrice, calculateRetailPriceFromMarkup, ensure99Pricing } from "@/lib/pricing-utils";
 
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition, calculateAspectRatioAwareDimensions } from "./utils";
@@ -1748,9 +1749,46 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     return { min: fallbackBase, max: fallbackBase, hasRange: false };
   }, [selectedProduct, selectedVariants, parseVariantCostToDollars]);
 
+  // Determine effective category for category-specific markup (Priority 1)
+  const effectiveCategory = useMemo(() => {
+    if (productForm?.category && productForm.category !== "placeholder" && productForm.category.trim() !== "") {
+      return productForm.category.trim();
+    }
+    if (typeof window !== "undefined") {
+      try {
+        const savedSourceCat = localStorage.getItem("sourceCatalogCategory");
+        if (savedSourceCat) {
+          const parsed = JSON.parse(savedSourceCat);
+          if (parsed?.title && parsed.title.trim() !== "") {
+            return parsed.title.trim();
+          }
+        }
+      } catch (e) {}
+    }
+    if (selectedProduct) {
+      if (selectedProduct.category && typeof selectedProduct.category === "string" && selectedProduct.category.trim() !== "") {
+        return selectedProduct.category.trim();
+      }
+      if (selectedProduct.type_name && typeof selectedProduct.type_name === "string" && selectedProduct.type_name.trim() !== "") {
+        return selectedProduct.type_name.trim();
+      }
+      if (selectedProduct.type && typeof selectedProduct.type === "string" && selectedProduct.type.trim() !== "") {
+        return selectedProduct.type.trim();
+      }
+      if (Array.isArray(selectedProduct.categoryIds) && selectedProduct.categoryIds.length > 0) {
+        const catId = selectedProduct.categoryIds[0];
+        const mapEntry = CATEGORIES_MAP.find((c) => c.id === catId);
+        if (mapEntry) return mapEntry.title;
+      }
+      const resolved = resolveProductCategoryName(selectedProduct);
+      if (resolved && resolved !== "Other") return resolved;
+    }
+    return "";
+  }, [productForm?.category, selectedProduct]);
+
   // Platform selling price = admin/category markup applied (no creator markup yet)
-  const platformMinSellingPrice = calculateSellingPrice(pricingRange.min);
-  const platformMaxSellingPrice = calculateSellingPrice(pricingRange.max);
+  const platformMinSellingPrice = calculateSellingPrice(pricingRange.min, effectiveCategory);
+  const platformMaxSellingPrice = calculateSellingPrice(pricingRange.max, effectiveCategory);
 
   // Calculate dynamic minimum required markup to keep Net Creator Profit > $0.00 after Stripe fee
   const minMarkup = useMemo(() => {
@@ -2357,7 +2395,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       parseVariantCostToDollars(v.cost) ||
                       parseVariantCostToDollars(v.price) ||
                       pricingRange.min;
-        const vPlatform = calculateSellingPrice(vCost);
+        const vPlatform = calculateSellingPrice(vCost, effectiveCategory);
         const vSelling = calculateRetailPriceFromMarkup(vPlatform, creatorMarkup);
         return {
           id: v.id,

@@ -37,7 +37,7 @@ export const useProductCart = (
         ? parseFloat(String(selectedVariant.price))
         : (product.base_price ? parseFloat(String(product.base_price)) : 0);
       const vCost = selectedVariant.cost || (vPrice > 0 ? vPrice / 1.35 : 20.00);
-      const finalSellingPrice = ensure99Pricing(vPrice > 0 ? vPrice : calculateSellingPrice(vCost));
+      const finalSellingPrice = ensure99Pricing(vPrice > 0 ? vPrice : calculateSellingPrice(vCost, product?.category || product?.name));
       
       // Determine the exact image for the selected variant/color
       const getResolvedColorImage = (): string => {

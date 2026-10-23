@@ -9,7 +9,8 @@ import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Search, Package, Plus, ArrowLeft, X, Loader2, Folder, Tag, ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { SUBCATEGORIES_CONFIG } from "@/config/categories";
+import { SUBCATEGORIES_CONFIG, CATEGORIES_MAP } from "@/config/categories";
+import { resolveProductCategoryName } from "@/lib/pricing";
 
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import toast from "react-hot-toast";
@@ -39,6 +40,7 @@ interface PrintfulProduct {
   variant_count: number;
   currency: string;
   title: string;
+  category?: string;
   description?: string;
   main_category_id: number;
   is_discontinued: boolean;
@@ -413,6 +415,7 @@ export default function CreatorCatalogPage() {
               setSelectedProduct={setSelectedProduct}
               onBackToCategories={handleBackToSubcategories}
               subcategoryTitle={selectedSubcategory.title}
+              categoryName={selectedCategory?.title}
             />
           )}
         </div>
@@ -421,6 +424,7 @@ export default function CreatorCatalogPage() {
         {selectedProduct && (
           <ProductDetailsModal
             product={selectedProduct}
+            categoryName={selectedCategory?.title}
             onClose={() => setSelectedProduct(null)}
             onCreateProduct={handleCreateProduct}
           />
@@ -737,9 +741,16 @@ function GlobalCatalogSearch({
                         product.price ||
                         '0'
                     ).toFixed(2);
+                    const resolvedCategory =
+                      (Array.isArray(product.categoryIds) && product.categoryIds.length > 0
+                        ? CATEGORIES_MAP.find((c) => c.id === product.categoryIds![0])?.title
+                        : null) ||
+                      product.category ||
+                      resolveProductCategoryName(product) ||
+                      product.title;
                     const lokaPrice = calculateSellingPrice(
                       parseFloat(pppPrice),
-                      product.title
+                      resolvedCategory
                     ).toFixed(2);
 
                     return (
@@ -1053,6 +1064,7 @@ function ProductView({
   handleCreateProduct,
   onBackToCategories,
   subcategoryTitle,
+  categoryName,
 }: any) {
   // Client-side search filtering — no API call needed since products are already loaded
   const filteredProducts = useMemo(() => {
@@ -1147,6 +1159,7 @@ function ProductView({
               <PrintfulProductCard
                 key={product.id}
                 product={product}
+                categoryName={categoryName}
                 onCreateProduct={handleCreateProduct}
               />
             ))}
@@ -1159,15 +1172,28 @@ function ProductView({
 
 function PrintfulProductCard({
   product,
+  categoryName,
   onCreateProduct,
 }: {
   product: PrintfulProduct;
+  categoryName?: string;
   onCreateProduct: (product: PrintfulProduct) => void;
 }) {
   const { calculateSellingPrice } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
   const pppPrice = parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0').toFixed(2);
-  const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), product.title).toFixed(2);
+  const effectiveCategory = useMemo(() => {
+    if (categoryName && categoryName.trim() !== '') return categoryName;
+    if (product.category && typeof product.category === 'string') return product.category;
+    if (Array.isArray(product.categoryIds) && product.categoryIds.length > 0) {
+      const match = CATEGORIES_MAP.find((c) => c.id === product.categoryIds![0]);
+      if (match) return match.title;
+    }
+    const resolved = resolveProductCategoryName(product);
+    if (resolved && resolved !== 'Other') return resolved;
+    return product.title;
+  }, [categoryName, product]);
+  const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), effectiveCategory).toFixed(2);
 
   return (
     <div className="bg-black border border-white/15 hover:border-orange-500/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,109,31,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 flex flex-col">
@@ -1238,14 +1264,27 @@ function PrintfulProductCard({
 
 function ProductDetailsModal({
   product,
+  categoryName,
   onClose,
   onCreateProduct,
 }: {
   product: PrintfulProduct;
+  categoryName?: string;
   onClose: () => void;
   onCreateProduct: (product: PrintfulProduct) => void;
 }) {
   const { calculateSellingPrice } = useGlobalMarkup();
+  const effectiveCategory = useMemo(() => {
+    if (categoryName && categoryName.trim() !== '') return categoryName;
+    if (product.category && typeof product.category === 'string') return product.category;
+    if (Array.isArray(product.categoryIds) && product.categoryIds.length > 0) {
+      const match = CATEGORIES_MAP.find((c) => c.id === product.categoryIds![0]);
+      if (match) return match.title;
+    }
+    const resolved = resolveProductCategoryName(product);
+    if (resolved && resolved !== 'Other') return resolved;
+    return product.title;
+  }, [categoryName, product]);
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -1323,7 +1362,7 @@ function ProductDetailsModal({
                     </div>
                     <div className="flex justify-between items-center pt-2">
                       <span className="text-gray-400">Estimated Retail Price:</span>{" "}
-                      <span className="text-orange-400 font-extrabold text-base">${calculateSellingPrice(parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0'), product.title).toFixed(2)}</span>
+                      <span className="text-orange-400 font-extrabold text-base">${calculateSellingPrice(parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0'), effectiveCategory).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

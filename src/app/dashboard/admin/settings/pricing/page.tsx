@@ -64,8 +64,8 @@ export default function AdminPricingSettings() {
                 data.categoryMarkup[cat] !== undefined
                   ? data.categoryMarkup[cat]
                   : data.categoryMarkup[cat.toLowerCase()] !== undefined
-                  ? data.categoryMarkup[cat.toLowerCase()]
-                  : 0;
+                    ? data.categoryMarkup[cat.toLowerCase()]
+                    : 0;
               initialSliders[cat] = savedVal;
               console.log(`[PricingPage] Loaded ${cat}: ${savedVal}`);
             });
@@ -113,8 +113,8 @@ export default function AdminPricingSettings() {
         categoryMarkup[cat] !== undefined
           ? categoryMarkup[cat]
           : categoryMarkup[cat.toLowerCase()] !== undefined
-          ? categoryMarkup[cat.toLowerCase()]
-          : 0;
+            ? categoryMarkup[cat.toLowerCase()]
+            : 0;
       return categorySliderValues[cat] !== savedVal;
     });
 
@@ -204,11 +204,10 @@ export default function AdminPricingSettings() {
                       <button
                         key={preset}
                         onClick={() => handlePresetClick(preset)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
-                          sliderValue === preset
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${sliderValue === preset
                             ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_15px_rgba(255,109,31,0.4)]'
                             : 'bg-gray-900 text-gray-300 border-white/10 hover:border-orange-500/30 hover:text-orange-300'
-                        }`}
+                          }`}
                       >
                         {preset}%
                       </button>
@@ -281,11 +280,10 @@ export default function AdminPricingSettings() {
                           <button
                             key={preset}
                             onClick={() => handleCategoryPresetClick(category, preset)}
-                            className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
-                              currentVal === preset
+                            className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${currentVal === preset
                                 ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)]'
                                 : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200'
-                            }`}
+                              }`}
                           >
                             {preset}%
                           </button>
