@@ -718,7 +718,7 @@ export async function POST(request: NextRequest) {
               );
 
               const dbVariants = await queryDb(
-                `SELECT id, printify_variant_id, price, base_cost FROM product_variants WHERE product_id = $1`,
+                `SELECT id, printify_variant_id, price, base_cost, title, size, color FROM product_variants WHERE product_id = $1`,
                 [targetProductId]
               );
 
@@ -731,14 +731,23 @@ export async function POST(request: NextRequest) {
 
                 // 1. Match by variant ID or printify_variant_id from client's variantPrices
                 let matchingVP = variantPricesList.find(
-                  (vp: any) => Number(vp.id) === Number(dbV.id) || 
-                               Number(vp.printify_variant_id) === Number(dbV.printify_variant_id) || 
-                               Number(vp.id) === Number(dbV.printify_variant_id)
+                  (vp: any) =>
+                    (vp.id != null && (Number(vp.id) === Number(dbV.id) || Number(vp.id) === Number(dbV.printify_variant_id))) ||
+                    (vp.printify_variant_id != null && (Number(vp.printify_variant_id) === Number(dbV.printify_variant_id) || Number(vp.printify_variant_id) === Number(dbV.id)))
                 );
 
-                // 2. If blueprint variant IDs differ from newly generated shop variant IDs, match by index
-                if (!matchingVP && variantPricesList[i]?.price) {
-                  matchingVP = variantPricesList[i];
+                // 2. Match by size & color or title if IDs did not match
+                if (!matchingVP) {
+                  matchingVP = variantPricesList.find(
+                    (vp: any) =>
+                      (vp.size && dbV.size && String(vp.size).toLowerCase() === String(dbV.size).toLowerCase() &&
+                       (!vp.color || !dbV.color || String(vp.color).toLowerCase() === String(dbV.color).toLowerCase())) ||
+                      (vp.title && dbV.title && (
+                        String(vp.title).toLowerCase() === String(dbV.title).toLowerCase() ||
+                        String(vp.title).toLowerCase().includes(String(dbV.title).toLowerCase()) ||
+                        String(dbV.title).toLowerCase().includes(String(vp.title).toLowerCase())
+                      ))
+                  );
                 }
 
                 // 3. Match from Printify API created product variants
@@ -761,6 +770,11 @@ export async function POST(request: NextRequest) {
                   }
                 }
 
+                // Crucial: no variant retail price may ever fall below targetCreatorPrice (Canvas Final Product Price)
+                if (targetCreatorPrice > 0 && (!finalPrice || finalPrice < targetCreatorPrice)) {
+                  finalPrice = targetCreatorPrice;
+                }
+
                 if (finalPrice && finalPrice > 0) {
                   calculatedPrices.push(finalPrice);
                   await queryDb(
@@ -770,9 +784,11 @@ export async function POST(request: NextRequest) {
                 }
               }
 
-              const minRetailPrice = calculatedPrices.length > 0 
-                ? Math.min(...calculatedPrices) 
-                : (targetCreatorPrice > 0 ? targetCreatorPrice : ensure99Pricing(productData?.price || productData?.base_price || 14.99));
+              const minRetailPrice = targetCreatorPrice > 0 
+                ? targetCreatorPrice 
+                : (calculatedPrices.length > 0 
+                  ? Math.min(...calculatedPrices) 
+                  : ensure99Pricing(productData?.price || productData?.base_price || 14.99));
 
               // Retrieve all mockups from created Printify product as secondary fallback
               let productImages: string[] = [];

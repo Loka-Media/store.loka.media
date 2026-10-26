@@ -435,7 +435,7 @@ function ProductsContent() {
     }
 
     if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-      const { minPrice: baseMinSellingPrice } = getProductPriceRange(product);
+      const { minPrice: baseMinSellingPrice } = getProductPriceRange(product, product.category);
       const displayPrice = convertPrice(baseMinSellingPrice);
 
       if (filters.minPrice !== undefined && displayPrice < filters.minPrice) {
@@ -495,7 +495,7 @@ function ProductsContent() {
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     // Helper to get effective converted display selling price for accurate price sorting
     const getEffectivePrice = (product: ExtendedProduct) => {
-      const { minPrice: baseMinSellingPrice } = getProductPriceRange(product);
+      const { minPrice: baseMinSellingPrice } = getProductPriceRange(product, product.category);
       return convertPrice(baseMinSellingPrice);
     };
 

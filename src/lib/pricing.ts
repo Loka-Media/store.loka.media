@@ -144,7 +144,23 @@ export function getProductPriceRange(
 ): { minPrice: number; maxPrice: number } {
   if (!product) return { minPrice: 0, maxPrice: 0 };
 
-  // 1. Check direct retail prices calculated by backend API / Database
+  // 1. Gather variant retail prices if available (takes priority for accurate variant price ranges)
+  if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+    const activeVariants = product.variants.filter((v: any) => v.is_enabled !== false && v.available_for_sale !== false);
+    const variantsToCheck = activeVariants.length > 0 ? activeVariants : product.variants;
+    const prices = variantsToCheck
+      .map((v: any) => parseFloat(v.price || v.selling_price || v.retail_price || 0))
+      .filter((p: number) => !isNaN(p) && p > 0);
+    
+    if (prices.length > 0) {
+      return {
+        minPrice: ensure99Pricing(Math.min(...prices)),
+        maxPrice: ensure99Pricing(Math.max(...prices))
+      };
+    }
+  }
+
+  // 2. Check direct retail prices calculated by backend API / Database
   const directMin = parseFloat(
     product.min_price ?? 
     product.minPrice ?? 
@@ -152,6 +168,8 @@ export function getProductPriceRange(
     product.price ?? 
     product.selling_price ?? 
     product.retail_price ?? 
+    product.base_price ??
+    product.basePrice ??
     0
   );
   const directMax = parseFloat(
@@ -161,6 +179,8 @@ export function getProductPriceRange(
     product.price ?? 
     product.selling_price ?? 
     product.retail_price ?? 
+    product.base_price ??
+    product.basePrice ??
     directMin
   );
 
@@ -173,21 +193,9 @@ export function getProductPriceRange(
     };
   }
 
-  // 2. Gather variant retail prices if available
-  if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
-    const prices = product.variants
-      .map((v: any) => parseFloat(v.price || v.selling_price || v.retail_price || v.cost || 0))
-      .filter((p: number) => !isNaN(p) && p > 0);
-    
-    if (prices.length > 0) {
-      return {
-        minPrice: ensure99Pricing(Math.min(...prices)),
-        maxPrice: ensure99Pricing(Math.max(...prices))
-      };
-    }
-  }
-
   // 3. Fallback to calculating selling price from base cost & markup
+  const categoryName = typeof categoryOrMarkup === 'string' ? categoryOrMarkup : (product.category || resolveProductCategoryName(product));
+  const markupRateInput = categoryOrMarkup !== undefined ? categoryOrMarkup : categoryName;
   const rawCost = parseFloat(product.cost || product.min_base_cost || '0');
   const baseCost = !isNaN(rawCost) && rawCost > 0 
     ? rawCost 
@@ -197,7 +205,7 @@ export function getProductPriceRange(
   if (!isNaN(baseCost) && baseCost > 0) {
     if (!isNaN(creatorMarkup) && creatorMarkup > 0) {
       if (!isNaN(rawCost) && rawCost > 0) {
-        const platformPrice = calculateSellingPrice(rawCost, categoryOrMarkup, categoryMarkups, globalMarkup);
+        const platformPrice = calculateSellingPrice(rawCost, markupRateInput, categoryMarkups, globalMarkup);
         const creatorPrice = calculateRetailPriceFromMarkup(platformPrice, creatorMarkup);
         return { minPrice: ensure99Pricing(creatorPrice), maxPrice: ensure99Pricing(creatorPrice) };
       }
@@ -214,8 +222,6 @@ export function getProductPriceRange(
       const calculated = calculateSellingPrice(baseCost, categoryOrMarkup);
       return { minPrice: ensure99Pricing(calculated), maxPrice: ensure99Pricing(calculated) };
     }
-    const categoryName = typeof categoryOrMarkup === 'string' ? categoryOrMarkup : resolveProductCategoryName(product);
-    const markupRateInput = categoryOrMarkup !== undefined ? categoryOrMarkup : categoryName;
     const calculated = calculateSellingPrice(baseCost, markupRateInput, categoryMarkups, globalMarkup);
     return { minPrice: ensure99Pricing(calculated), maxPrice: ensure99Pricing(calculated) };
   }
@@ -235,25 +241,44 @@ export function getVariantSellingPrice(
 ): number {
   if (!variant) return 0;
 
+  // 1. Direct finalized retail price on variant
+  const directVariantPrice = parseFloat(variant.price || variant.selling_price || variant.retail_price || 0);
+  if (!isNaN(directVariantPrice) && directVariantPrice > 0) {
+    const cents = Math.round(directVariantPrice * 100);
+    if (cents % 100 === 99 && directVariantPrice >= 5) {
+      return directVariantPrice;
+    }
+  }
+
   // Determine category name
-  const categoryName = typeof categoryOrMarkup === 'string' ? categoryOrMarkup : resolveProductCategoryName(product);
+  const categoryName = typeof categoryOrMarkup === 'string' ? categoryOrMarkup : (product?.category || resolveProductCategoryName(product));
   
   // Get base cost
   let baseCost = 0;
   if (variant.cost !== undefined && variant.cost !== null && !isNaN(parseFloat(variant.cost))) {
     baseCost = parseFloat(variant.cost);
+  } else if (variant.base_cost !== undefined && variant.base_cost !== null && !isNaN(parseFloat(variant.base_cost))) {
+    baseCost = parseFloat(variant.base_cost);
   } else if (variant.price !== undefined && variant.price !== null && !isNaN(parseFloat(variant.price))) {
     baseCost = parseFloat(variant.price);
   } else {
     baseCost = parseFloat(product?.base_price || product?.cost || '0');
   }
 
+  const creatorMarkup = parseFloat(product?.markup_percentage || product?.markupPercentage || '0');
+
   if (typeof categoryOrMarkup === 'number') {
-    return ensure99Pricing(calculateSellingPrice(baseCost, categoryOrMarkup));
+    const pPrice = calculateSellingPrice(baseCost, categoryOrMarkup);
+    return !isNaN(creatorMarkup) && creatorMarkup > 0
+      ? calculateRetailPriceFromMarkup(pPrice, creatorMarkup)
+      : ensure99Pricing(pPrice);
   }
 
   const markupRateInput = categoryOrMarkup !== undefined ? categoryOrMarkup : categoryName;
-  return ensure99Pricing(calculateSellingPrice(baseCost, markupRateInput, categoryMarkups, globalMarkup));
+  const platformPrice = calculateSellingPrice(baseCost, markupRateInput, categoryMarkups, globalMarkup);
+  return !isNaN(creatorMarkup) && creatorMarkup > 0
+    ? calculateRetailPriceFromMarkup(platformPrice, creatorMarkup)
+    : ensure99Pricing(platformPrice);
 }
 
 /**

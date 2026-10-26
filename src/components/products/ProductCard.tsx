@@ -27,7 +27,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { getProductPriceRange } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
 
-  const { minPrice, maxPrice } = getProductPriceRange(product);
+  const { minPrice, maxPrice } = getProductPriceRange(product, product.category);
 
   useEffect(() => {
     if (isAuthenticated) {

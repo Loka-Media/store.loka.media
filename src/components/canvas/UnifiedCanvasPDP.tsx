@@ -2391,17 +2391,29 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       minPrice: minSellingPrice,
       maxPrice: maxSellingPrice,
       variantPrices: (selectedProduct?.variants || []).map((v: any) => {
+        const isSelected = selectedVariants.length === 0 || selectedVariants.includes(v.id);
         const vCost = parseVariantCostToDollars(v.premiumPrice) ||
                       parseVariantCostToDollars(v.cost) ||
                       parseVariantCostToDollars(v.price) ||
                       pricingRange.min;
         const vPlatform = calculateSellingPrice(vCost, effectiveCategory);
-        const vSelling = calculateRetailPriceFromMarkup(vPlatform, creatorMarkup);
+        let vSelling = calculateRetailPriceFromMarkup(vPlatform, creatorMarkup);
+
+        // If no price range across variants, or if this variant is at the minimum base cost tier,
+        // it must match minSellingPrice exactly. Also, no variant should ever sell below minSellingPrice.
+        if (!hasPriceRange || vCost <= pricingRange.min || vSelling < minSellingPrice) {
+          vSelling = minSellingPrice;
+        }
+
         return {
           id: v.id,
           printify_variant_id: v.printify_variant_id || v.id,
+          title: v.title || `${v.size || v.options?.size || ''} - ${v.color || v.options?.color || ''}`.trim(),
+          size: v.size || v.options?.size || '',
+          color: v.color || v.options?.color || '',
           price: vSelling,
-          cost: vCost
+          cost: vCost,
+          is_enabled: isSelected
         };
       })
     };

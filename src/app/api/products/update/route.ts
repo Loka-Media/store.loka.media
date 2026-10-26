@@ -37,15 +37,15 @@ async function handleUpdate(req: NextRequest) {
       return NextResponse.json({ error: 'Valid productId is required' }, { status: 400 });
     }
 
-    // Determine final retail price with uniform .99 rule (e.g. 14.99)
-    const rawRetailPrice = price || base_price || basePrice || 14.99;
-    const finalRetailPrice = ensure99Pricing(rawRetailPrice);
-    const markupVal = parseFloat(String(markupPercentage || 30));
+    // Determine final retail price with uniform .99 rule
+    const rawRetailPrice = price || base_price || basePrice || null;
+    const finalRetailPrice = rawRetailPrice != null ? ensure99Pricing(rawRetailPrice) : null;
+    const markupVal = markupPercentage !== undefined ? parseFloat(String(markupPercentage)) : null;
     const coverUrl = thumbnailUrl || thumbnail_url || (Array.isArray(images) && images[0]) || '';
     const imagesArr = Array.isArray(images) ? images : [];
     const tagsArr = Array.isArray(tags) ? tags : [];
 
-    console.log(`[Product Update Route] Updating product ${id} with uniform retail price: $${finalRetailPrice}`);
+    console.log(`[Product Update Route] Updating product ${id} with uniform retail price: $${finalRetailPrice ?? 'unchanged'}`);
 
     // 1. Direct PostgreSQL Update on products table
     try {
@@ -66,7 +66,7 @@ async function handleUpdate(req: NextRequest) {
         [
           name || null,
           description || null,
-          markupVal || null,
+          markupVal,
           finalRetailPrice,
           category || null,
           tagsArr,
@@ -80,18 +80,35 @@ async function handleUpdate(req: NextRequest) {
       // 2. Direct PostgreSQL Update on product_variants table
       if (Array.isArray(variantPrices) && variantPrices.length > 0) {
         for (const vp of variantPrices) {
-          const vpPrice = ensure99Pricing(vp.price || finalRetailPrice);
+          const rawVpPrice = vp.price ? ensure99Pricing(vp.price) : (finalRetailPrice || 0);
+          const vpPrice = (finalRetailPrice && rawVpPrice < finalRetailPrice) ? finalRetailPrice : rawVpPrice;
+          if (vpPrice > 0) {
+            let updateRes = await queryDb(
+              `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE (id = $2 OR printify_variant_id = $2) AND product_id = $3 RETURNING id`,
+              [vpPrice, vp.id || vp.printify_variant_id, id]
+            );
+            if ((!updateRes || updateRes.length === 0) && (vp.size || vp.title)) {
+              if (vp.size && vp.color) {
+                await queryDb(
+                  `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE product_id = $2 AND LOWER(size) = LOWER($3) AND LOWER(color) = LOWER($4)`,
+                  [vpPrice, id, vp.size, vp.color]
+                );
+              } else if (vp.title) {
+                await queryDb(
+                  `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE product_id = $2 AND LOWER(title) = LOWER($3)`,
+                  [vpPrice, id, vp.title]
+                );
+              }
+            }
+          }
+        }
+        if (finalRetailPrice != null && finalRetailPrice > 0) {
           await queryDb(
-            `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE (id = $2 OR printify_variant_id = $2) AND product_id = $3`,
-            [vpPrice, vp.id || vp.printify_variant_id, id]
+            `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE product_id = $2 AND (price IS NULL OR price = 0 OR price < $1)`,
+            [finalRetailPrice, id]
           );
         }
-        // Fallback: If blueprint variant IDs did not match shop variant IDs, ensure all variants have finalRetailPrice
-        await queryDb(
-          `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE product_id = $2 AND (price IS NULL OR price = 0 OR price != $1)`,
-          [finalRetailPrice, id]
-        );
-      } else {
+      } else if (finalRetailPrice != null && finalRetailPrice > 0) {
         // Uniformly update all variants of this product to the exact final retail price
         await queryDb(
           `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE product_id = $2`,
@@ -152,7 +169,9 @@ async function handleUpdate(req: NextRequest) {
       success: true,
       productId: id,
       price: finalRetailPrice,
-      message: `Product ${id} updated to $${finalRetailPrice.toFixed(2)} successfully`,
+      message: finalRetailPrice != null 
+        ? `Product ${id} updated to $${finalRetailPrice.toFixed(2)} successfully`
+        : `Product ${id} updated successfully`,
     });
   } catch (err: any) {
     console.error(`[Product Update Route] Unexpected error:`, err);

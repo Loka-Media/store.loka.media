@@ -233,7 +233,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
       setFormData({
         name: productData.name || '',
         description: productData.description || '',
-        basePrice: productData.min_base_cost?.toString() || productData.base_price?.toString() || '',
+        basePrice: productData.base_price?.toString() || productData.min_base_cost?.toString() || '',
         markupPercentage: productData.markup_percentage?.toString() || '0',
         category: productData.category || '',
         tags: productData.tags || [],

@@ -29,6 +29,7 @@ interface CreatorProduct {
   creator_username?: string;
   base_price?: number | string;
   markup_percentage?: number;
+  category?: string;
 }
 
 export default function EnhancedProductCard({ product, onDelete }: { product: CreatorProduct, onDelete: (productId: number) => void }) {
@@ -36,7 +37,7 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
   const { getProductPriceRange } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
   
-  const { minPrice: minSellingPrice, maxPrice: maxSellingPrice } = getProductPriceRange(product);
+  const { minPrice: minSellingPrice, maxPrice: maxSellingPrice } = getProductPriceRange(product, product.category);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showStatusConfirmDialog, setShowStatusConfirmDialog] = useState(false);

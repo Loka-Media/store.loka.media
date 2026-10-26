@@ -34,7 +34,7 @@ export function ProductCard({
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const { formatPrice } = useCurrency();
-  const { minPrice, maxPrice } = getProductPriceRange(product);
+  const { minPrice, maxPrice } = getProductPriceRange(product, product.category);
   const imageUrl = getValidImageUrl(product);
 
   const handleWishlistClick = (e: React.MouseEvent) => {

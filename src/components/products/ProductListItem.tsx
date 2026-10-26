@@ -31,7 +31,7 @@ interface ProductListItemProps {
 export function ProductListItem({ product }: ProductListItemProps) {
   const { getProductPriceRange, calculateSellingPrice } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
-  const { minPrice, maxPrice } = getProductPriceRange(product);
+  const { minPrice, maxPrice } = getProductPriceRange(product, product.category);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [inventoryStatus, setInventoryStatus] = useState<{
     isAvailable: boolean;

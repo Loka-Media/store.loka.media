@@ -833,7 +833,7 @@ function ProductGridCard({
   const { getProductPriceRange } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
 
-  const { minPrice: minSellingPrice, maxPrice: maxSellingPrice } = getProductPriceRange(product);
+  const { minPrice: minSellingPrice, maxPrice: maxSellingPrice } = getProductPriceRange(product, product.category);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -974,7 +974,7 @@ function ProductListRow({
   const { getProductPriceRange } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
 
-  const { minPrice: minSellingPrice, maxPrice: maxSellingPrice } = getProductPriceRange(product);
+  const { minPrice: minSellingPrice, maxPrice: maxSellingPrice } = getProductPriceRange(product, product.category);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {

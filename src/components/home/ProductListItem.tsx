@@ -22,7 +22,7 @@ export function ProductListItem({
   onAddToWishlist,
 }: ProductListItemProps) {
   const { formatPrice } = useCurrency();
-  const { minPrice, maxPrice } = getProductPriceRange(product);
+  const { minPrice, maxPrice } = getProductPriceRange(product, product.category);
   const imageUrl =
     product.thumbnail_url || product.images?.[0] || "/placeholder-product.svg";
 
