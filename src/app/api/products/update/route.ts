@@ -124,11 +124,9 @@ async function handleUpdate(req: NextRequest) {
     // 3. Forward update to backend API (catalog.loka.media)
     const authHeader = req.headers.get('authorization');
     try {
-      const backendPayload = {
+      const backendPayload: any = {
         name,
         description,
-        markupPercentage: markupVal,
-        markup_percentage: markupVal,
         basePrice: finalRetailPrice,
         base_price: finalRetailPrice,
         price: finalRetailPrice,
@@ -148,6 +146,12 @@ async function handleUpdate(req: NextRequest) {
         isActive: true,
         variantPrices: variantPrices || [],
       };
+      // Only send markupPercentage to backend PUT if no retail price was specified,
+      // to avoid triggering legacy backend recalculation
+      if (finalRetailPrice == null && markupVal !== null) {
+        backendPayload.markupPercentage = markupVal;
+        backendPayload.markup_percentage = markupVal;
+      }
 
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (authHeader) headers['Authorization'] = authHeader;
