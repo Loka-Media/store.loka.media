@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { Search, Package, Plus, ArrowLeft, X, Loader2, Folder, Tag, ArrowRight } from "lucide-react";
+import { Search, Package, Plus, ArrowLeft, X, Loader2, Folder, Tag, ArrowRight, RotateCcw } from "lucide-react";
 import Image from "next/image";
 import { SUBCATEGORIES_CONFIG, CATEGORIES_MAP } from "@/config/categories";
 import { resolveProductCategoryName } from "@/lib/pricing";
@@ -460,17 +460,6 @@ function GlobalCatalogSearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownScrollRef = useRef<HTMLDivElement>(null);
 
-  // Prevent background page from scrolling while search dropdown is open
-  useEffect(() => {
-    if (isOpen && searchQuery.trim().length > 0) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
-    }
-  }, [isOpen, searchQuery]);
-
   // Ensure mouse wheel scrolls the dropdown smoothly and never leaks to the page
   useEffect(() => {
     const el = dropdownScrollRef.current;
@@ -598,6 +587,17 @@ function GlobalCatalogSearch({
     matchingSubcategories.length > 0 ||
     productResults.length > 0;
 
+  // Prevent background page from scrolling only when search dropdown is actively open with results
+  useEffect(() => {
+    if (isOpen && searchQuery.trim().length > 0 && hasAnyResults) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen, searchQuery, hasAnyResults]);
+
   return (
     <div
       ref={containerRef}
@@ -656,7 +656,7 @@ function GlobalCatalogSearch({
       </div>
 
       {/* Floating Interactive Dropdown Results */}
-      {isOpen && searchQuery.trim().length > 0 && (
+      {isOpen && searchQuery.trim().length > 0 && hasAnyResults && (
         <div
           onWheel={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
@@ -983,19 +983,24 @@ function CategorySelection({
             </div>
           )}
 
-          {/* Matched Products in Grid */}
-          <div>
-            <h3 className="text-base sm:text-lg font-bold text-white mb-3 flex items-center gap-2">
-              <Package className="w-4 h-4 text-orange-400" />
-              <span>Matching Products & Catalogs ({searchResults.length})</span>
-            </h3>
-
-            {isSearchingCatalog ? (
+          {/* Matched Products in Grid OR Loading OR Empty State */}
+          {isSearchingCatalog ? (
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-white mb-3 flex items-center gap-2">
+                <Package className="w-4 h-4 text-orange-400" />
+                <span>Searching Products & Catalogs...</span>
+              </h3>
               <CreativeLoader
                 variant="product"
                 message={`Searching catalog for "${searchQuery}"...`}
               />
-            ) : searchResults.length > 0 ? (
+            </div>
+          ) : searchResults.length > 0 ? (
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-white mb-3 flex items-center gap-2">
+                <Package className="w-4 h-4 text-orange-400" />
+                <span>Matching Products & Catalogs ({searchResults.length})</span>
+              </h3>
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                 {searchResults.map((product: PrintfulProduct) => (
                   <PrintfulProductCard
@@ -1005,24 +1010,59 @@ function CategorySelection({
                   />
                 ))}
               </div>
-            ) : matchingCategories.length === 0 ? (
-              <div className="text-center py-12 gradient-border-white-top rounded-2xl bg-gray-900/60 p-8 border border-white/10">
-                <Package className="mx-auto h-12 w-12 text-gray-500 mb-3" />
-                <span className="text-lg sm:text-xl font-bold text-white block mb-2">
-                  No matching categories or products found
-                </span>
-                <p className="text-sm text-gray-400 max-w-md mx-auto mb-6">
-                  We couldn&apos;t find anything matching &quot;{searchQuery}&quot;. Try searching with a different term like &quot;T-Shirt&quot;, &quot;Bella Canvas&quot;, &quot;Mug&quot;, or &quot;Hoodie&quot;.
-                </p>
+            </div>
+          ) : matchingCategories.length === 0 ? (
+            /* Premium Empty State when BOTH categories and products have 0 results */
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#141419] via-[#0f0f13] to-[#0a0a0d] border border-white/10 p-8 sm:p-14 text-center shadow-2xl">
+              {/* Background ambient lighting */}
+              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+
+              {/* Glowing Icon Badge */}
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-orange-500/20 via-orange-500/10 to-transparent border border-orange-500/30 flex items-center justify-center mx-auto mb-5 shadow-[0_0_30px_rgba(255,109,31,0.2)]">
+                <Package className="h-8 w-8 sm:h-10 sm:w-10 text-orange-400" />
+              </div>
+
+              <span className="text-xl sm:text-2xl font-bold text-white block mb-2 tracking-tight">
+                No matching categories or products found
+              </span>
+              <p className="text-sm sm:text-base text-gray-400 max-w-lg mx-auto mb-6 leading-relaxed">
+                We couldn&apos;t find anything matching <span className="text-orange-400 font-semibold">&quot;{searchQuery}&quot;</span>. Try searching with a different term or choose a popular suggestion below:
+              </p>
+
+              {/* Interactive Suggestion Pills */}
+              <div className="flex flex-wrap items-center justify-center gap-2 max-w-xl mx-auto mb-8">
+                {["T-Shirt", "Hoodie", "Mug", "Bella Canvas", "Gildan", "Men", "Phone Cases"].map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setSearchQuery(tag)}
+                    className="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold bg-white/[0.04] hover:bg-orange-500/15 border border-white/10 hover:border-orange-500/40 text-gray-300 hover:text-white transition-all duration-200 cursor-pointer flex items-center gap-1.5 group"
+                  >
+                    <span className="text-orange-400 opacity-60 group-hover:opacity-100">🔍</span>
+                    <span>{tag}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Action Button */}
+              <div className="flex items-center justify-center gap-3">
                 <Button
                   onClick={() => setSearchQuery("")}
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg shadow-orange-500/20 hover:shadow-orange-500/35 transition-all duration-300 cursor-pointer"
                 >
+                  <RotateCcw className="w-4 h-4 mr-2" />
                   Clear Search and Browse Categories
                 </Button>
               </div>
-            ) : null}
-          </div>
+            </div>
+          ) : (
+            /* When categories match but no products */
+            <div className="text-center py-8 rounded-2xl bg-white/[0.02] border border-white/10 p-6">
+              <p className="text-sm text-gray-400">
+                No direct catalog products found for &quot;{searchQuery}&quot;, but matching categories are available above.
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
