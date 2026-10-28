@@ -5,31 +5,51 @@ let pool: Pool | null = null;
 
 export function getDbPool(): Pool {
   if (!pool) {
-    if (process.env.DATABASE_URL) {
-      const rawUrl = process.env.DATABASE_URL.replace(/^["']|["']$/g, '').trim();
+    const rawUrl = process.env.DATABASE_URL?.replace(/^["']|["']$/g, '').trim();
+
+    // Avoid dead Supabase URL if present in legacy env
+    const isSupabase =
+      Boolean((rawUrl && rawUrl.includes('supabase.com')) ||
+      (process.env.DATABASE_HOST && process.env.DATABASE_HOST.includes('supabase.com')));
+
+    if (rawUrl && !isSupabase) {
       const url = rawUrl.split('?')[0];
       pool = new Pool({
         connectionString: url,
         ssl: { rejectUnauthorized: false },
-        max: 10,
+        max: 20,
         idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
       });
     } else {
-      const host = process.env.DB_HOST || process.env.DATABASE_HOST || 'localhost';
-      const port = parseInt(process.env.DB_PORT || process.env.DATABASE_PORT || '5432', 10);
-      const database = process.env.DB_NAME || process.env.DATABASE_NAME || 'defaultdb';
-      const user = process.env.DB_USER || process.env.DATABASE_USERNAME || 'doadmin';
+      const host =
+        !isSupabase && (process.env.DB_HOST || process.env.DATABASE_HOST)
+          ? (process.env.DB_HOST || process.env.DATABASE_HOST)!
+          : 'db-postgresql-blr1-57746-do-user-12834989-0.g.db.ondigitalocean.com';
+      const port = parseInt(
+        (!isSupabase && (process.env.DB_PORT || process.env.DATABASE_PORT)) || '25060',
+        10
+      );
+      const database =
+        !isSupabase && (process.env.DB_NAME || process.env.DATABASE_NAME)
+          ? (process.env.DB_NAME || process.env.DATABASE_NAME)!
+          : 'defaultdb';
+      const user =
+        !isSupabase && (process.env.DB_USER || process.env.DATABASE_USERNAME)
+          ? (process.env.DB_USER || process.env.DATABASE_USERNAME)!
+          : 'doadmin';
       const password = process.env.DB_PASSWORD || process.env.DATABASE_PASSWORD;
-      const ssl = process.env.DATABASE_SSL === 'false' ? false : { rejectUnauthorized: false };
+
       pool = new Pool({
         host,
         port,
         database,
         user,
         password,
-        ssl,
-        max: 10,
+        ssl: { rejectUnauthorized: false },
+        max: 20,
         idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
       });
     }
   }

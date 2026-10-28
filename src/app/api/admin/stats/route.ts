@@ -58,11 +58,26 @@ export async function GET(request: NextRequest) {
     // 2. Fallbacks if database query was incomplete or failed
     if (!dbSuccess || publishedProductsCount === 0) {
       try {
-        const blueprints = await printifyCatalogAPI.getBlueprints();
-        publishedProductsCount = Array.isArray(blueprints) ? blueprints.length : publishedProductsCount || 91;
+        const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
+        const productsRes = await fetch(`${backendUrl}/api/products?limit=1`).catch(() => null);
+        if (productsRes && productsRes.ok) {
+          const prodsData = await productsRes.json();
+          if (prodsData?.pagination?.total) {
+            publishedProductsCount = parseInt(prodsData.pagination.total, 10);
+          }
+        }
       } catch (e) {
-        console.warn('Failed to fetch catalog blueprints for admin stats:', e);
-        if (publishedProductsCount === 0) publishedProductsCount = 91;
+        console.warn('Failed to fetch store products count for admin stats:', e);
+      }
+
+      if (publishedProductsCount === 0) {
+        try {
+          const blueprints = await printifyCatalogAPI.getBlueprints();
+          publishedProductsCount = Array.isArray(blueprints) ? blueprints.length : publishedProductsCount || 122;
+        } catch (e) {
+          console.warn('Failed to fetch catalog blueprints for admin stats:', e);
+          if (publishedProductsCount === 0) publishedProductsCount = 122;
+        }
       }
     }
 
@@ -74,23 +89,62 @@ export async function GET(request: NextRequest) {
         const headers: Record<string, string> = {};
         if (authHeader) headers['Authorization'] = authHeader;
 
-        const [creatorsRes, overviewRes] = await Promise.all([
+        const [creatorsRes, overviewRes, checkoutStatsRes, prodCreatorsRes] = await Promise.all([
           fetch(`${backendUrl}/api/admin/creators/earnings`, { headers }).catch(() => null),
           fetch(`${backendUrl}/api/admin/commissions/overview`, { headers }).catch(() => null),
+          fetch(`${backendUrl}/api/unified-checkout/admin/dashboard/stats`, { headers }).catch(() => null),
+          fetch(`${backendUrl}/api/products/creators`).catch(() => null),
         ]);
 
+        if (prodCreatorsRes && prodCreatorsRes.ok && activeCreatorsCount === 0) {
+          const pCreators = await prodCreatorsRes.json().catch(() => null);
+          if (Array.isArray(pCreators?.creators)) {
+            activeCreatorsCount = pCreators.creators.length;
+          }
+        }
+
         if (creatorsRes && creatorsRes.ok && activeCreatorsCount === 0) {
-          const creatorsData = await creatorsRes.json();
+          const creatorsData = await creatorsRes.json().catch(() => null);
           const list = creatorsData?.data?.creators || creatorsData?.data || [];
           activeCreatorsCount = Array.isArray(list) ? list.length : 0;
         }
 
-        if (overviewRes && overviewRes.ok && totalOrdersCount === 0) {
-          const overviewData = await overviewRes.json();
-          const overview = overviewData?.data || {};
-          totalOrdersCount = overview.totalCommissionsTracked || overview.totalPayouts || 0;
+        if (checkoutStatsRes && checkoutStatsRes.ok) {
+          const checkoutData = await checkoutStatsRes.json().catch(() => null);
+          const checkoutStats = checkoutData?.stats || checkoutData;
+          if (checkoutStats?.orders?.total && totalOrdersCount === 0) {
+            totalOrdersCount = parseInt(checkoutStats.orders.total, 10);
+          }
+          if (checkoutStats?.payments?.totalEscrowed && totalRevenue === 0) {
+            totalRevenue = parseFloat(checkoutStats.payments.totalEscrowed);
+          }
+        }
+
+        if (overviewRes && overviewRes.ok) {
+          const overviewData = await overviewRes.json().catch(() => null);
+          const overview = overviewData?.data?.overview || overviewData?.data || overviewData || {};
+
+          if (totalOrdersCount === 0) {
+            totalOrdersCount = parseInt(
+              overview.total_orders ||
+              overview.totalOrders ||
+              overview.totalCommissionsTracked ||
+              overview.totalPayouts ||
+              '0',
+              10
+            );
+          }
           if (totalRevenue === 0) {
-            totalRevenue = overview.totalCommissionsAmount || overview.totalPayoutAmount || 0;
+            totalRevenue = parseFloat(
+              overview.total_commissions ||
+              overview.totalRevenue ||
+              overview.totalCommissionsAmount ||
+              overview.totalPayoutAmount ||
+              '0'
+            );
+          }
+          if (activeCreatorsCount === 0 && overview.total_creators) {
+            activeCreatorsCount = parseInt(overview.total_creators, 10);
           }
         }
       } catch (e) {
