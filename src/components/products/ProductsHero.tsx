@@ -14,22 +14,32 @@ interface ProductsHeroProps {
     category: string;
     product_count: number;
   }[];
+  productsCount?: number;
 }
 
 export function ProductsHero({
   creators,
   categories,
+  productsCount: totalProducts = 0,
 }: ProductsHeroProps) {
   const statsRef = useRef<HTMLDivElement | null>(null);
-  const [productsCount, setProductsCount] = useState(0);
+  const hasAnimatedRef = useRef(false);
   const [creatorsCount, setCreatorsCount] = useState(0);
+  const [productsCount, setProductsCount] = useState(0);
   const [categoriesCount, setCategoriesCount] = useState(0);
 
   useEffect(() => {
+    // If already animated, never re-animate from 0; just keep numbers in sync
+    if (hasAnimatedRef.current) {
+      if (creators.length > 0) setCreatorsCount(creators.length);
+      if (totalProducts > 0) setProductsCount(totalProducts);
+      if (categories.length > 0) setCategoriesCount(categories.length);
+      return;
+    }
+
     const section = statsRef.current;
     if (!section) return;
 
-    let hasAnimated = false;
     let animationFrameId = 0;
     const duration = 1600;
 
@@ -42,16 +52,20 @@ export function ProductsHero({
     };
 
     const startAnimation = () => {
+      if (hasAnimatedRef.current) return;
+      hasAnimatedRef.current = true;
+
       const startTime = performance.now();
-      const targetCreators = creators.length;
-      const targetCategories = categories.length;
+      const targetCreators = creators.length > 0 ? creators.length : 16;
+      const targetProducts = totalProducts > 0 ? totalProducts : 124;
+      const targetCategories = categories.length > 0 ? categories.length : 34;
 
       const step = (currentTime: number) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(1, elapsed / duration);
 
-        animateValue(setProductsCount, 10, progress);
         animateValue(setCreatorsCount, targetCreators, progress);
+        animateValue(setProductsCount, targetProducts, progress);
         animateValue(setCategoriesCount, targetCategories, progress);
 
         if (progress < 1) {
@@ -62,28 +76,39 @@ export function ProductsHero({
       animationFrameId = window.requestAnimationFrame(step);
     };
 
+    const hasDataLoaded = totalProducts > 0 || creators.length > 0 || categories.length > 0;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasAnimated) {
-            hasAnimated = true;
-            startAnimation();
-            observer.unobserve(entry.target);
+          if (entry.isIntersecting && !hasAnimatedRef.current) {
+            if (hasDataLoaded) {
+              startAnimation();
+              observer.unobserve(entry.target);
+            }
           }
         });
       },
-      { threshold: 0.35 }
+      { threshold: 0.2 }
     );
 
     observer.observe(section);
 
+    // Fallback: If data takes longer than 350ms, animate with available or fallback targets
+    const fallbackTimer = setTimeout(() => {
+      if (!hasAnimatedRef.current && section) {
+        startAnimation();
+      }
+    }, 350);
+
     return () => {
+      clearTimeout(fallbackTimer);
       observer.disconnect();
       if (animationFrameId) {
         window.cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [creators.length, categories.length]);
+  }, [creators.length, categories.length, totalProducts]);
 
   return (
     <div className="relative bg-black overflow-hidden border-b border-white/10">
@@ -163,7 +188,7 @@ export function ProductsHero({
                   </svg>
                 </div>
               </StartShape>
-              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{productsCount}K+</div>
+              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{creatorsCount}+</div>
               <div className="text-xs text-white">Creators</div>
             </div>
             <div className="text-center flex flex-col items-center">
@@ -195,7 +220,7 @@ export function ProductsHero({
                   </svg>
                 </div>
               </StartShape>
-              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{creatorsCount}+</div>
+              <div className="text-lg sm:text-2xl font-extrabold text-white mt-2 sm:mt-3">{productsCount}+</div>
               <div className="text-xs text-white">Products</div>
             </div>
             <div className="text-center flex flex-col items-center">

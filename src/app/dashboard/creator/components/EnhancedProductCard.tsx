@@ -173,11 +173,11 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
 
           {/* Status badge */}
           <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">
-            <span className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-medium ${localStatus
+            <span className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-semibold shadow-sm ${localStatus
               ? 'bg-[#00D953] border border-green-500 text-black'
-              : 'bg-gray-500/20 border border-gray-500 text-gray-400'
+              : 'bg-red-500 border border-red-600 text-white'
               }`}>
-              <span className="sm:hidden">{localStatus ? '✓' : '○'}</span>
+              <span className="sm:hidden">{localStatus ? '✓' : '✕'}</span>
               <span className="hidden sm:inline">{localStatus ? 'Active' : 'Inactive'}</span>
             </span>
           </div>
@@ -227,7 +227,7 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
               />
               <label
                 htmlFor={`status-switch-${product.id}`}
-                className="text-sm font-bold text-white cursor-pointer"
+                className={`text-sm font-bold cursor-pointer ${localStatus ? "text-green-400" : "text-red-400"}`}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

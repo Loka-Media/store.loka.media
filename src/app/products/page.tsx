@@ -595,6 +595,7 @@ function ProductsContent() {
       <ProductsHero
         creators={creators}
         categories={categories}
+        productsCount={products.length}
       />
 
       <div className="bg-black border-b border-white/10 relative z-40 filter-section-animate">
