@@ -165,6 +165,29 @@ async function handleUpdate(req: NextRequest) {
       if (!backendRes.ok) {
         console.warn(`[Product Update Route] Backend PUT returned ${backendRes.status}:`, await backendRes.text().catch(() => ''));
       }
+
+      // Re-affirm PostgreSQL update to prevent any backend overwrite
+      try {
+        if (finalRetailPrice != null && finalRetailPrice > 0) {
+          await queryDb(
+            `UPDATE products SET base_price = $1, markup_percentage = COALESCE($2, markup_percentage), updated_at = NOW() WHERE id = $3`,
+            [finalRetailPrice, markupVal, id]
+          );
+          if (Array.isArray(variantPrices) && variantPrices.length > 0) {
+            for (const vp of variantPrices) {
+              const vpPrice = vp.price ? ensure99Pricing(vp.price) : finalRetailPrice;
+              if (vpPrice > 0) {
+                await queryDb(
+                  `UPDATE product_variants SET price = $1, updated_at = NOW() WHERE (id = $2 OR printify_variant_id = $2) AND product_id = $3`,
+                  [vpPrice, vp.id || vp.printify_variant_id, id]
+                );
+              }
+            }
+          }
+        }
+      } catch (reaffirmErr: any) {
+        console.warn(`[Product Update Route] Post-sync reaffirm notice:`, reaffirmErr.message);
+      }
     } catch (backendErr: any) {
       console.warn(`[Product Update Route] Backend forward error:`, backendErr.message);
     }

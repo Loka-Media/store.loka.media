@@ -1093,25 +1093,23 @@ function CanvasContent() {
 
         console.log(`💾 Updating product ${editingProductId} in database:`, updateData);
 
-        // Direct sync with internal API route to ensure PostgreSQL product and variants are updated to .99 price
-        try {
-          await fetch('/api/products/update', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`
-            },
-            body: JSON.stringify({
-              productId: editingProductId,
-              ...updateData
-            })
-          });
-        } catch (syncErr) {
-          console.warn('[Canvas] /api/products/update sync notice:', syncErr);
-        }
+        // Update product via internal API route (handles direct PostgreSQL .99 pricing sync and backend catalog sync)
+        const updateRes = await fetch('/api/products/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`
+          },
+          body: JSON.stringify({
+            productId: editingProductId,
+            ...updateData
+          })
+        });
 
-        // Also call backend updateProduct API
-        await productAPI.updateProduct(editingProductId, updateData);
+        if (!updateRes.ok) {
+          const errData = await updateRes.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to update product in database');
+        }
 
         toast.dismiss("publishing-progress");
         toast.success(`"${formDataToUse.name}" updated successfully!`, { duration: 4000 });
