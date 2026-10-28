@@ -154,7 +154,7 @@ export function ProductsFilterTopBar({
                 { value: "", label: "All Categories" },
                 ...categories.map(cat => ({
                   value: cat.category,
-                  label: `${cat.category} (${cat.product_count})`
+                  label: cat.category
                 }))
               ]}
               onSelect={(value) => handleFilterChange("category", value)}
@@ -179,7 +179,7 @@ export function ProductsFilterTopBar({
                 { value: "", label: "All Creators" },
                 ...creators.map(creator => ({
                   value: creator.name,
-                  label: `${creator.name} (${creator.product_count})`
+                  label: creator.name
                 }))
               ]}
               onSelect={(value) => handleFilterChange("creator", value)}

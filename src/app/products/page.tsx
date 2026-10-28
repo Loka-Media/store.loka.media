@@ -646,7 +646,7 @@ function ProductsContent() {
                           value={cat.category}
                           className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3"
                         >
-                          {cat.category} ({cat.product_count})
+                          {cat.category}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -675,7 +675,7 @@ function ProductsContent() {
                           value={creator.username || creator.name}
                           className="hover:bg-orange-500/20 focus:bg-orange-500/20 rounded-xl cursor-pointer py-2.5 pl-9 pr-3"
                         >
-                          {creator.name} ({creator.product_count})
+                          {creator.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

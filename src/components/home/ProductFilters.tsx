@@ -70,7 +70,7 @@ export function ProductFilters({
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat.category} value={cat.category}>
-                  {cat.category} ({cat.product_count})
+                  {cat.category}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -96,7 +96,7 @@ export function ProductFilters({
               <SelectItem value="all">All Creators</SelectItem>
               {creators.map((creator) => (
                 <SelectItem key={creator.id} value={creator.name}>
-                  {creator.name} ({creator.product_count})
+                  {creator.name}
                 </SelectItem>
               ))}
             </SelectContent>
