@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email (to) and notification type are required' }, { status: 400 });
     }
 
-    if (!['pending_approval', 'approved', 'rejected'].includes(type)) {
+    if (!['pending_approval', 'approved', 'rejected', 'password_reset', 'email_verification'].includes(type)) {
       return NextResponse.json({ error: 'Invalid notification type' }, { status: 400 });
     }
 
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const origin = request.headers.get('origin') || (host ? `${proto}://${host}` : undefined);
     const appUrl = body.appUrl || origin;
 
-    const result = await sendResendEmail({ to, name, type, appUrl });
+    const result = await sendResendEmail({ to, name, type, appUrl, otp: body.otp });
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 500 });

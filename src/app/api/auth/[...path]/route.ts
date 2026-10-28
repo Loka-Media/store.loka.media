@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
+import { sendOtpEmail } from '@/lib/email';
 
 const BACKEND_URL = (process.env.BACKEND_URL || 'https://catalog.loka.media').replace(/\/$/, '');
 const ALLOWED_ORIGIN = 'https://store-loka-ui-v2-glksz.ondigitalocean.app';
@@ -32,20 +33,22 @@ async function handler(
   }
 
   let body: BodyInit | null = null;
+  let parsedPayload: any = null;
   let incomingCreatorUrl: string | null | undefined = undefined;
 
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     const text = await request.text();
     if (text) {
       body = text;
+      try {
+        parsedPayload = JSON.parse(text);
+      } catch {}
+
       // If updating profile via PUT /api/auth/me, inspect and extract creatorUrl
-      if (targetPath === 'me' && request.method === 'PUT') {
-        try {
-          const parsed = JSON.parse(text);
-          if (parsed.creatorUrl !== undefined || parsed.creator_url !== undefined) {
-            incomingCreatorUrl = parsed.creatorUrl !== undefined ? parsed.creatorUrl : parsed.creator_url;
-          }
-        } catch {}
+      if (targetPath === 'me' && request.method === 'PUT' && parsedPayload) {
+        if (parsedPayload.creatorUrl !== undefined || parsedPayload.creator_url !== undefined) {
+          incomingCreatorUrl = parsedPayload.creatorUrl !== undefined ? parsedPayload.creatorUrl : parsedPayload.creator_url;
+        }
       }
     }
   }
@@ -131,6 +134,121 @@ async function handler(
         }
       } catch {
         // Fall back to raw text response if JSON parse fails
+      }
+    }
+
+    // Process OTP dispatch for forgot-password, resend-otp, and register
+    if (request.method === 'POST') {
+      if (targetPath === 'forgot-password') {
+        const userEmail = parsedPayload?.email ? String(parsedPayload.email).trim().toLowerCase() : '';
+        if (userEmail) {
+          try {
+            // Check if user exists in database
+            const userRows = await queryDb<any>(
+              `SELECT name FROM users WHERE LOWER(email) = $1 LIMIT 1`,
+              [userEmail]
+            );
+
+            // Fetch the latest active OTP from database (created by backend)
+            let otpRows = await queryDb<any>(
+              `SELECT otp FROM otps WHERE LOWER(email) = $1 AND is_used = false AND expires_at > NOW() ORDER BY id DESC LIMIT 1`,
+              [userEmail]
+            );
+
+            let otp = otpRows[0]?.otp;
+            // Fallback: If backend didn't generate one, generate and insert it
+            if (!otp && userRows.length > 0) {
+              otp = Math.floor(100000 + Math.random() * 900000).toString();
+              await queryDb(
+                `INSERT INTO otps (email, otp, expires_at, is_used, created_at) VALUES ($1, $2, NOW() + INTERVAL '10 minutes', false, NOW())`,
+                [userEmail, otp]
+              );
+            }
+
+            if (otp) {
+              const recipientName = userRows[0]?.name;
+              await sendOtpEmail({
+                to: userEmail,
+                name: recipientName,
+                otp,
+                type: 'password_reset',
+              });
+            }
+
+            // Always ensure client gets success response if we have handled/generated OTP
+            if (!response.ok && userRows.length > 0) {
+              return NextResponse.json(
+                { message: 'Password reset OTP sent to your email', email: userEmail },
+                { status: 200, headers: responseHeaders }
+              );
+            }
+          } catch (otpErr) {
+            console.error('[Auth Proxy] Error handling forgot-password OTP email:', otpErr);
+          }
+        }
+      } else if (targetPath === 'resend-otp') {
+        const userEmail = parsedPayload?.email ? String(parsedPayload.email).trim().toLowerCase() : '';
+        if (userEmail) {
+          try {
+            let otpRows = await queryDb<any>(
+              `SELECT otp FROM otps WHERE LOWER(email) = $1 AND is_used = false AND expires_at > NOW() ORDER BY id DESC LIMIT 1`,
+              [userEmail]
+            );
+
+            let otp = otpRows[0]?.otp;
+            if (!otp) {
+              otp = Math.floor(100000 + Math.random() * 900000).toString();
+              await queryDb(
+                `INSERT INTO otps (email, otp, expires_at, is_used, created_at) VALUES ($1, $2, NOW() + INTERVAL '10 minutes', false, NOW())`,
+                [userEmail, otp]
+              );
+            }
+
+            const userRows = await queryDb<any>(
+              `SELECT name FROM users WHERE LOWER(email) = $1 LIMIT 1`,
+              [userEmail]
+            );
+            const recipientName = userRows[0]?.name;
+
+            await sendOtpEmail({
+              to: userEmail,
+              name: recipientName,
+              otp,
+              type: 'email_verification',
+            });
+          } catch (otpErr) {
+            console.error('[Auth Proxy] Error handling resend-otp email:', otpErr);
+          }
+        }
+      } else if (targetPath === 'register' && response.ok) {
+        const userEmail = parsedPayload?.email ? String(parsedPayload.email).trim().toLowerCase() : '';
+        const userName = parsedPayload?.name || '';
+        if (userEmail) {
+          try {
+            let otpRows = await queryDb<any>(
+              `SELECT otp FROM otps WHERE LOWER(email) = $1 AND is_used = false AND expires_at > NOW() ORDER BY id DESC LIMIT 1`,
+              [userEmail]
+            );
+
+            let otp = otpRows[0]?.otp;
+            if (!otp) {
+              otp = Math.floor(100000 + Math.random() * 900000).toString();
+              await queryDb(
+                `INSERT INTO otps (email, otp, expires_at, is_used, created_at) VALUES ($1, $2, NOW() + INTERVAL '10 minutes', false, NOW())`,
+                [userEmail, otp]
+              );
+            }
+
+            await sendOtpEmail({
+              to: userEmail,
+              name: userName,
+              otp,
+              type: 'email_verification',
+            });
+          } catch (otpErr) {
+            console.error('[Auth Proxy] Error handling register OTP email:', otpErr);
+          }
+        }
       }
     }
 

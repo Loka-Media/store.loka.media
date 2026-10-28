@@ -322,18 +322,10 @@ function ProductsContent() {
   const displayCategories = useMemo(() => {
     if (!products || products.length === 0) return categories;
 
-    // If a creator is actively selected, compute categories for that creator so user sees relevant categories & counts
-    let sourceProducts = products.filter((p) => {
+    const sourceProducts = products.filter((p) => {
       if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
       return true;
     });
-
-    if (filters.creator) {
-      const creatorOnlyProducts = sourceProducts.filter(p => isCreatorMatch(p, filters.creator));
-      if (creatorOnlyProducts.length > 0) {
-        sourceProducts = creatorOnlyProducts;
-      }
-    }
 
     const counts: Record<string, { category: string; count: number }> = {};
     sourceProducts.forEach((p) => {
@@ -352,21 +344,16 @@ function ProductsContent() {
     }));
 
     return list.sort((a, b) => b.product_count - a.product_count);
-  }, [products, categories, filters.creator]);
+  }, [products, categories]);
 
-  // Compute accurate creator list dynamically from active products list (scoped to active category if selected)
+  // Compute accurate creator list dynamically from active products list
   const displayCreators = useMemo(() => {
     if (!products || products.length === 0) return creators;
 
-    // Filter by active category if selected so counts match the chosen category!
-    let sourceProducts = products.filter((p) => {
+    const sourceProducts = products.filter((p) => {
       if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
       return true;
     });
-
-    if (filters.category) {
-      sourceProducts = sourceProducts.filter(p => isCategoryMatch(p, filters.category));
-    }
 
     const creatorMap: Record<string, { id: number; name: string; username: string; product_count: number }> = {};
 
@@ -392,31 +379,8 @@ function ProductsContent() {
 
     const list = Object.values(creatorMap).filter(c => c.product_count > 0);
     return list.sort((a, b) => b.product_count - a.product_count);
-  }, [products, creators, filters.category]);
+  }, [products, creators]);
 
-  // Auto-resolve conflicting URL parameters (e.g. Category=Hat & Creator=Sneh where creator has 0 hats)
-  useEffect(() => {
-    if (products.length > 0 && filters.creator && filters.category) {
-      const matchBoth = products.some((p) => {
-        if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
-        return isCreatorMatch(p, filters.creator) && isCategoryMatch(p, filters.category);
-      });
-      if (!matchBoth) {
-        const matchCreator = products.some((p) => {
-          if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
-          return isCreatorMatch(p, filters.creator);
-        });
-        if (matchCreator) {
-          // Gracefully reset category to "" so that the creator's products are displayed immediately!
-          setFilters(prev => {
-            const updated = { ...prev, category: "" };
-            updateURL(updated);
-            return updated;
-          });
-        }
-      }
-    }
-  }, [products, filters.creator, filters.category]);
 
   // 4. Instant client-side character-by-character priority search filtering
   const query = searchInput.toLowerCase().trim();
@@ -525,7 +489,8 @@ function ProductsContent() {
   const updateURL = (updatedFilters: typeof filters) => {
     const params = new URLSearchParams();
     if (updatedFilters.category) params.set("category", updatedFilters.category);
-    if (updatedFilters.search) params.set("search", updatedFilters.search);
+    const searchVal = searchInput.trim() || updatedFilters.search;
+    if (searchVal) params.set("search", searchVal);
     if (updatedFilters.creator) params.set("creator", updatedFilters.creator);
     if (updatedFilters.source && updatedFilters.source !== "all")
       params.set("source", updatedFilters.source);
@@ -537,43 +502,14 @@ function ProductsContent() {
   };
 
   const handleFilterChange = (key: string, value: string | number | undefined) => {
-    let newCategory = filters.category;
-    let newCreator = filters.creator;
-
-    if (key === "creator") {
-      newCreator = String(value || "");
-      // If user picks a creator and that creator has 0 products in current category, reset category to ""
-      if (newCreator && newCategory) {
-        const creatorHasCategory = products.some((p) => {
-          if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
-          return isCreatorMatch(p, newCreator) && isCategoryMatch(p, newCategory);
-        });
-        if (!creatorHasCategory) {
-          newCategory = "";
-        }
-      }
-    } else if (key === "category") {
-      newCategory = String(value || "");
-      // If user picks a category and active creator has 0 products in that category, reset creator to ""
-      if (newCategory && newCreator) {
-        const categoryHasCreator = products.some((p) => {
-          if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return false;
-          return isCreatorMatch(p, newCreator) && isCategoryMatch(p, newCategory);
-        });
-        if (!categoryHasCreator) {
-          newCreator = "";
-        }
-      }
-    }
-
-    const newFilters = {
+    const cleanValue = value === "all" ? "" : (value ?? "");
+    const updatedFilters = {
       ...filters,
-      [key]: value,
-      category: newCategory,
-      creator: newCreator,
+      [key]: cleanValue,
+      search: searchInput.trim(),
     };
-    setFilters(newFilters);
-    updateURL(newFilters);
+    setFilters(updatedFilters);
+    updateURL(updatedFilters);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -689,11 +625,7 @@ function ProductsContent() {
                   <Select
                     value={filters.category || "all"}
                     onValueChange={(val) => {
-                      const valueToSet = val === "all" ? "" : val;
-                      if (valueToSet && searchInput) {
-                        setSearchInput("");
-                      }
-                      handleFilterChange("category", valueToSet);
+                      handleFilterChange("category", val === "all" ? "" : val);
                     }}
                   >
                     <SelectTrigger

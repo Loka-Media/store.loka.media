@@ -1,23 +1,54 @@
+import nodemailer from 'nodemailer';
+
 /**
- * Resend Email Service for Loka Media
+ * Nodemailer Email Service for Loka Media
  */
+
+// Helper to get transporter instance
+export const getMailTransporter = () => {
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const port = parseInt(process.env.SMTP_PORT || '465', 10);
+  const secure = process.env.SMTP_SECURE !== undefined ? process.env.SMTP_SECURE === 'true' : port === 465;
+  const user = process.env.SMTP_USER || '';
+  const pass = process.env.SMTP_PASS || '';
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: {
+      user,
+      pass,
+    },
+  });
+};
+
+const getSenderAddress = () => {
+  const fromConfig = process.env.EMAIL_FROM || 'Loka Media';
+  const userEmail = process.env.SMTP_USER || 'noreply@loka.media';
+
+  if (fromConfig.includes('<') && fromConfig.includes('>')) {
+    return fromConfig;
+  }
+  return `"${fromConfig}" <${userEmail}>`;
+};
 
 export interface SendEmailOptions {
   to: string;
   name?: string;
-  type: 'pending_approval' | 'approved' | 'rejected';
+  type: 'pending_approval' | 'approved' | 'rejected' | 'password_reset' | 'email_verification';
   appUrl?: string;
+  otp?: string;
 }
 
-export const sendResendEmail = async ({ to, name, type, appUrl }: SendEmailOptions) => {
-  const apiKey = process.env.RESEND_API_KEY || '';
-  const fromEmail = process.env.EMAIL_FROM || 'Loka Media <noreply@loka.media>';
+export interface SendOtpEmailOptions {
+  to: string;
+  name?: string;
+  otp: string;
+  type: 'password_reset' | 'email_verification';
+}
 
-  if (!apiKey) {
-    console.warn('[Resend Email] RESEND_API_KEY is not defined');
-    return { success: false, error: 'RESEND_API_KEY missing' };
-  }
-
+export const sendNodemailerEmail = async ({ to, name, type, appUrl, otp }: SendEmailOptions) => {
   const recipientName = name || 'Creator';
   const rawBaseUrl = appUrl || process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://store-loka-ui-v2-glksz.ondigitalocean.app';
   const baseUrl = rawBaseUrl.replace(/\/$/, '');
@@ -118,37 +149,98 @@ export const sendResendEmail = async ({ to, name, type, appUrl }: SendEmailOptio
         </p>
       </div>
     `;
+  } else if (type === 'password_reset' || type === 'email_verification') {
+    return sendOtpEmail({
+      to,
+      name,
+      otp: otp || '',
+      type,
+    });
   }
 
   try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [to],
-        subject,
-        html,
-      }),
+    const transporter = getMailTransporter();
+    const info = await transporter.sendMail({
+      from: getSenderAddress(),
+      to,
+      subject,
+      html,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('[Resend Error]', data);
-      return { success: false, error: data };
-    }
-
-    console.log(`[Resend Email Sent] Type: ${type}, To: ${to}`, data);
-    return { success: true, data };
+    console.log(`[Nodemailer Email Sent] Type: ${type}, To: ${to}, MessageId: ${info.messageId}`);
+    return { success: true, data: info };
   } catch (error: any) {
-    console.error('[Resend Exception]', error);
+    console.error('[Nodemailer Exception]', error);
     return { success: false, error: error?.message || 'Failed to send email' };
   }
 };
+
+export const sendOtpEmail = async ({ to, name, otp, type }: SendOtpEmailOptions) => {
+  const recipientName = name || 'there';
+  const isPasswordReset = type === 'password_reset';
+  const subject = isPasswordReset
+    ? 'Your Password Reset OTP - Loka Media'
+    : 'Verify Your Email Address - Loka Media';
+
+  const title = isPasswordReset ? 'Password Reset Verification' : 'Email Verification Code';
+  const description = isPasswordReset
+    ? 'We received a request to reset your password for your Loka Media account. Use the 6-digit OTP code below to securely set a new password.'
+    : 'Welcome to Loka Media! Please use the 6-digit OTP code below to verify your email address and activate your account.';
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0a0a0a; color: #ffffff; padding: 36px 20px; max-width: 580px; margin: 0 auto; border-radius: 16px; border: 1px solid #222;">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <h1 style="color: #FF6D1F; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0;">LOKA MEDIA</h1>
+        <p style="color: #888888; font-size: 12px; margin-top: 4px; letter-spacing: 0.5px;">Monetization Made Easy</p>
+      </div>
+
+      <div style="background-color: #141414; border: 1px solid #262626; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+        <h2 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0 0 10px 0;">${title}</h2>
+        <p style="color: #cccccc; font-size: 14px; line-height: 1.5; margin: 0 0 20px 0;">
+          Hi ${recipientName},<br />
+          ${description}
+        </p>
+
+        <div style="background-color: #0a0a0a; border: 2px dashed #FF6D1F; border-radius: 12px; padding: 18px; margin: 20px auto; display: inline-block;">
+          <span style="font-family: monospace, 'Courier New', Courier; font-size: 34px; font-weight: 800; letter-spacing: 10px; color: #FF6D1F; padding-left: 10px;">${otp}</span>
+        </div>
+
+        <p style="color: #888888; font-size: 12px; margin: 12px 0 0 0;">
+          ⏳ This code is valid for <strong>10 minutes</strong>. Never share this code with anyone.
+        </p>
+      </div>
+
+      <p style="color: #777777; font-size: 12px; line-height: 1.5; margin: 0 0 16px 0; text-align: center;">
+        If you did not request this OTP, you can safely ignore this email.
+      </p>
+
+      <hr style="border: none; border-top: 1px solid #1f1f1f; margin: 24px 0 16px 0;" />
+      <p style="font-size: 11px; color: #555555; text-align: center; margin: 0;">
+        © ${new Date().getFullYear()} Loka Media. All rights reserved.
+      </p>
+    </div>
+  `;
+
+  try {
+    const transporter = getMailTransporter();
+    const info = await transporter.sendMail({
+      from: getSenderAddress(),
+      to,
+      subject,
+      html,
+    });
+
+    console.log(`[Nodemailer OTP Email Sent] Type: ${type}, To: ${to}, MessageId: ${info.messageId}`);
+    return { success: true, data: info };
+  } catch (error: any) {
+    console.error('[Nodemailer OTP Exception]', error);
+    return { success: false, error: error?.message || 'Failed to send OTP email' };
+  }
+};
+
+// Alias sendResendEmail for backward compatibility with existing imports
+export const sendResendEmail = sendNodemailerEmail;
+export const sendEmail = sendNodemailerEmail;
 
 export interface OrderCancellationEmailOptions {
   to: string;
@@ -175,14 +267,6 @@ export const sendOrderCancellationEmail = async ({
   isRefunded = false,
   cancelReason,
 }: OrderCancellationEmailOptions) => {
-  const apiKey = process.env.RESEND_API_KEY || '';
-  const fromEmail = process.env.EMAIL_FROM || 'Loka Media <noreply@loka.media>';
-
-  if (!apiKey) {
-    console.warn('[Resend Email] RESEND_API_KEY is not defined');
-    return { success: false, error: 'RESEND_API_KEY missing' };
-  }
-
   const name = customerName || 'Valued Customer';
   const subject = `Order #${orderNumber} Cancelled - Loka Media`;
 
@@ -290,32 +374,18 @@ export const sendOrderCancellationEmail = async ({
   `;
 
   try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [to],
-        subject,
-        html,
-      }),
+    const transporter = getMailTransporter();
+    const info = await transporter.sendMail({
+      from: getSenderAddress(),
+      to,
+      subject,
+      html,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('[Resend Cancellation Error]', data);
-      return { success: false, error: data };
-    }
-
-    console.log(`[Resend Cancellation Email Sent] Order: ${orderNumber}, To: ${to}`, data);
-    return { success: true, data };
+    console.log(`[Nodemailer Cancellation Email Sent] Order: ${orderNumber}, To: ${to}, MessageId: ${info.messageId}`);
+    return { success: true, data: info };
   } catch (error: any) {
-    console.error('[Resend Cancellation Exception]', error);
+    console.error('[Nodemailer Cancellation Exception]', error);
     return { success: false, error: error?.message || 'Failed to send cancellation email' };
   }
 };
-
