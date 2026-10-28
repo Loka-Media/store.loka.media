@@ -1,0 +1,33 @@
+# Deploys to the Hostinger VPS on every push:
+#   main    -> production
+#   staging -> staging
+# The server pulls the branch, installs, builds and restarts PM2 (/home/loka/deploy.sh).
+# Needs repo (or org) secret VPS_DEPLOY_KEY: an SSH key that can only run "deploy <app> <branch>".
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main, staging]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy shop (${{ github.ref_name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Deploy over SSH
+        env:
+          SSH_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+        run: |
+          if [ -z "$SSH_KEY" ]; then echo "::error::Secret VPS_DEPLOY_KEY is not set"; exit 1; fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "72.62.134.4 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM9D99XrnwPvmWeLe+AxGi5SUfk6rzli5brm4jB+3D3c" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
+            loka@72.62.134.4 "deploy shop ${{ github.ref_name }}"
