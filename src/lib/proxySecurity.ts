@@ -22,6 +22,8 @@ const TRUSTED_DOMAINS = new Set([
   'mockup-api.printify.com',
   'pf-images-production.s3.amazonaws.com',
   'pfy-prod-image-storage.s3.us-east-2.amazonaws.com',
+  // Cloudflare R2 public bucket (exact host only: anyone can create *.r2.dev buckets)
+  'pub-774054799d404a649de54be9ae81a7bd.r2.dev',
 ]);
 
 const TRUSTED_DOMAIN_SUFFIXES = [

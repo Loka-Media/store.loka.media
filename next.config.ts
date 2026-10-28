@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
       'burst.shopifycdn.com',
       'cdn.shopify.com',
       'allbuckets-1754371568222.nyc3.digitaloceanspaces.com',
+      'pub-774054799d404a649de54be9ae81a7bd.r2.dev',
       'images.printify.com',
       'images-api.printify.com',
       'mockup-api.printify.com',
@@ -54,6 +55,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'allbuckets-1754371568222.nyc3.digitaloceanspaces.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pub-774054799d404a649de54be9ae81a7bd.r2.dev',
         port: '',
         pathname: '/**',
       },
