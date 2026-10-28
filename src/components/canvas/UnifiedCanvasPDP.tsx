@@ -3584,11 +3584,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         <span className="text-[11px] font-semibold text-[#FF6D1F] bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 rounded-full capitalize">
                           {getPlacementLabel(activePlacement)}
                         </span>
-                        {activeSize && (
-                          <span className="text-[11px] font-semibold text-gray-200 bg-white/10 border border-white/20 px-2 py-0.5 rounded-full uppercase">
-                            Size {activeSize}
-                          </span>
-                        )}
+
                         {(() => {
                           const apf = getActivePrintFile(printFiles, selectedVariants, activePlacement, activeVariantId);
                           if (apf?.width && apf?.height) {
