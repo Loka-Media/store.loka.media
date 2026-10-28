@@ -114,27 +114,28 @@ export const applyQuickPosition = (
   const maxFitWidth = (areaWidth / areaHeight > designRatio) ? (areaHeight * designRatio) : areaWidth;
   const maxFitHeight = maxFitWidth / designRatio;
 
-  if (position === 'fit') {
-    // Fit cleanly inside print area with comfortable safe margins (85% of max fit)
-    width = Math.round(maxFitWidth * 0.85);
-    height = Math.round(maxFitHeight * 0.85);
-    left = Math.round((areaWidth - width) / 2);
-    top = Math.round((areaHeight - height) / 2);
-  } else if (position === 'fill') {
-    // Fill print area completely (covering full width or height)
-    width = Math.round(maxFitWidth);
-    height = Math.round(maxFitHeight);
-    left = Math.round((areaWidth - width) / 2);
-    top = Math.round((areaHeight - height) / 2);
+  if (position === 'fit' || position === 'fill') {
+    // 100% of the print area with no empty spacing on sides or top/bottom
+    width = areaWidth;
+    height = areaHeight;
+    left = 0;
+    top = 0;
   } else if (position === 'scale' && typeof customScaleRatio === 'number') {
-    // Scale around the current center point
-    const currentCenterX = left + width / 2;
-    const currentCenterY = top + height / 2;
     const clampedScale = Math.max(0.1, Math.min(customScaleRatio, 1.25));
-    width = Math.round(maxFitWidth * clampedScale);
-    height = Math.round(maxFitHeight * clampedScale);
-    left = Math.round(currentCenterX - width / 2);
-    top = Math.round(currentCenterY - height / 2);
+    if (clampedScale >= 0.99) {
+      width = areaWidth;
+      height = areaHeight;
+      left = 0;
+      top = 0;
+    } else {
+      // Scale around the current center point
+      const currentCenterX = left + width / 2;
+      const currentCenterY = top + height / 2;
+      width = Math.round(areaWidth * clampedScale);
+      height = Math.round(areaHeight * clampedScale);
+      left = Math.round(currentCenterX - width / 2);
+      top = Math.round(currentCenterY - height / 2);
+    }
   } else {
     // Standard alignment presets
     switch (position) {

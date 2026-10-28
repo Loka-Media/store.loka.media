@@ -173,6 +173,12 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
     }
     const dWidth = activeDesign.position.width || 100;
     const dHeight = activeDesign.position.height || 100;
+
+    // If design fills the print area width and height (or either is 100%), scale is 100%
+    if (dWidth >= printAreaWidth && dHeight >= printAreaHeight) {
+      return { currentScalePercent: 100, maxFitWidth: printAreaWidth, maxFitHeight: printAreaHeight };
+    }
+
     const designRatio = dWidth / dHeight;
 
     const fitW = (printAreaWidth / printAreaHeight > designRatio)
@@ -187,6 +193,11 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   // Handle scale change from slider or preset buttons
   const handleScaleChange = (targetPercent: number) => {
     if (!activeDesign || !activePrintFile) return;
+
+    if (targetPercent >= 100) {
+      handleQuickAlign("fit");
+      return;
+    }
 
     applyQuickPosition(
       "scale",
@@ -620,17 +631,17 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                                 <img
                                   src={design.url ? design.url.replace(/%25/g, "%") : ""}
                                   alt={design.filename}
-                                  className="w-full h-full object-contain pointer-events-none select-none"
+                                  className="w-full h-full object-fill pointer-events-none select-none"
                                   draggable={false}
                                 />
                               )}
 
-                              {/* Floating Remove Button - Anchored OUTSIDE the artwork corner */}
+                              {/* Floating Remove Button - Positioned safely inside top-right corner to prevent overflow clipping */}
                               {isSelected && (
                                 <button
                                   type="button"
                                   onClick={(e) => handleRemoveDesign(design, e)}
-                                  className="absolute -top-3.5 -right-3.5 z-30 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 cursor-pointer border border-white/80"
+                                  className="absolute top-2 right-2 z-30 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 cursor-pointer border border-white/80"
                                   title="Remove design from this placement"
                                 >
                                   <X className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -639,7 +650,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
 
                               {/* Floating Dimensions Tag (Only when selected) */}
                               {isSelected && (
-                                <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-30 pointer-events-none whitespace-nowrap bg-black/90 backdrop-blur-md text-[10px] text-white font-medium px-2 py-0.5 rounded-full border border-orange-500/40 shadow-lg flex items-center gap-1.5">
+                                <div className={`absolute left-1/2 -translate-x-1/2 z-30 pointer-events-none whitespace-nowrap bg-black/90 backdrop-blur-md text-[10px] text-white font-medium px-2 py-0.5 rounded-full border border-orange-500/40 shadow-lg flex items-center gap-1.5 ${
+                                  scaledPosition.y < 32 ? "top-2.5" : "-top-7"
+                                }`}>
                                   <span className="text-orange-400 font-bold">
                                     {Math.round(design.position.width)} × {Math.round(design.position.height)}px
                                   </span>
@@ -756,8 +769,12 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       <button
                         type="button"
                         onClick={() => handleQuickAlign("fit")}
-                        className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-orange-300 transition-colors cursor-pointer flex items-center gap-1"
-                        title="Fit artwork to print area safely"
+                        className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg border transition-colors cursor-pointer flex items-center gap-1 ${
+                          currentScalePercent === 100
+                            ? "bg-orange-500 text-white border-orange-500"
+                            : "bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-orange-300"
+                        }`}
+                        title="Fit artwork to 100% of print area"
                       >
                         <Maximize2 className="w-3 h-3" />
                         Fit
