@@ -3552,7 +3552,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <div className="space-y-2 pt-1">
                       <div className="flex items-center justify-between text-xs text-gray-400">
                         <span>Your Artwork Library ({uploadedFiles.length})</span>
-                        <span className="text-[11px] text-[#FF6D1F]">Click to place on product</span>
+                      
                       </div>
                       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 max-h-[260px] overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-orange-500/30 scrollbar-track-transparent">
                         {uploadedFiles.map((file) => {
