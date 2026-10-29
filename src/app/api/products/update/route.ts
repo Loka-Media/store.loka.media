@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
 import { ensure99Pricing } from '@/lib/pricing-utils';
+import { requireCreatorOrAdminAuth } from '@/lib/serverAuth';
 
 const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
 
@@ -13,6 +14,10 @@ export async function PUT(req: NextRequest) {
 }
 
 async function handleUpdate(req: NextRequest) {
+  // This route writes straight to PostgreSQL, so only the product's creator (or an admin) may call it
+  const auth = await requireCreatorOrAdminAuth(req);
+  if (!auth.authorized) return auth.response;
+
   try {
     const body = await req.json();
     const {
@@ -35,6 +40,14 @@ async function handleUpdate(req: NextRequest) {
     const id = Number(productId);
     if (!id || isNaN(id)) {
       return NextResponse.json({ error: 'Valid productId is required' }, { status: 400 });
+    }
+
+    const owner = await queryDb(`SELECT created_by FROM products WHERE id = $1`, [id]);
+    if (!owner || owner.length === 0) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+    if (auth.user.role !== 'admin' && Number(owner[0].created_by) !== auth.user.id) {
+      return NextResponse.json({ error: 'Forbidden: you can only update your own products' }, { status: 403 });
     }
 
     // Determine final retail price with uniform .99 rule
