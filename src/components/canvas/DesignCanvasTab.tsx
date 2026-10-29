@@ -527,6 +527,17 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                           const isOtherPlacement = design.placement !== activePlacement;
                           const isSelected = selectedDesignFile?.id === design.id || activeDesign?.id === design.id;
 
+                          // Check if design is fit to 100% of the print area
+                          const isFit = Boolean(
+                            (printAreaWidth > 0 &&
+                             printAreaHeight > 0 &&
+                             design.position.width >= printAreaWidth - 2 &&
+                             design.position.height >= printAreaHeight - 2 &&
+                             Math.abs(design.position.left) <= 2 &&
+                             Math.abs(design.position.top) <= 2) ||
+                            (isSelected && currentScalePercent >= 100)
+                          );
+
                           const scaledSize = {
                             width: Math.max(20, design.position.width * designScale),
                             height: Math.max(20, design.position.height * designScale),
@@ -572,6 +583,8 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                               position={scaledPosition}
                               scale={scale}
                               lockAspectRatio={true}
+                              disableDragging={isFit}
+                              enableResizing={isFit ? false : undefined}
                               onDragStop={(_e, data) => {
                                 updateDesignPosition(design.id, {
                                   left: Math.round(data.x / designScale),
@@ -589,13 +602,13 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                               bounds="parent"
                               minWidth={20}
                               minHeight={20}
-                              className={`rounded-lg relative group transition-shadow ${
-                                isSelected
-                                  ? "border-2 border-[#FF6D1F] shadow-[0_0_15px_rgba(255,109,31,0.4)]"
-                                  : "border border-white/40 hover:border-white/70"
+                              className={`relative group transition-shadow ${
+                                isFit
+                                  ? "border-0 shadow-none rounded-none"
+                                  : `${isSelected ? "border-2 border-[#FF6D1F] shadow-[0_0_15px_rgba(255,109,31,0.4)]" : "border border-white/40 hover:border-white/70"} rounded-lg`
                               } ${design.id === -1 ? "bg-blue-100/20" : "bg-transparent"}`}
                               onClick={() => setSelectedDesignFile(design)}
-                              resizeHandleComponent={{
+                              resizeHandleComponent={isFit ? {} : {
                                 topLeft: (
                                   <div
                                     className="w-3.5 h-3.5 bg-[#FF6D1F] border-2 border-white rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize hover:scale-125 transition-transform"
@@ -648,8 +661,8 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                                 </button>
                               )}
 
-                              {/* Floating Dimensions Tag (Only when selected) */}
-                              {isSelected && (
+                              {/* Floating Dimensions Tag (Only when selected and not full fit) */}
+                              {isSelected && !isFit && (
                                 <div className={`absolute left-1/2 -translate-x-1/2 z-30 pointer-events-none whitespace-nowrap bg-black/90 backdrop-blur-md text-[10px] text-white font-medium px-2 py-0.5 rounded-full border border-orange-500/40 shadow-lg flex items-center gap-1.5 ${
                                   scaledPosition.y < 32 ? "top-2.5" : "-top-7"
                                 }`}>
