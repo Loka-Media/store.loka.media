@@ -1847,6 +1847,44 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 - Creator Profit shown in UI: $${creatorProfit.toFixed(2)}`);
   }, [selectedProduct, pricingRange.min, platformMinSellingPrice, minSellingPrice, creatorProfit, creatorMarkup]);
 
+  // Check if user has uploaded and placed a design onto the product
+  const hasUploadedDesign = Boolean(
+    (designFiles && designFiles.some((d: any) => d && d.url && typeof d.url === "string" && d.url.trim().length > 0)) ||
+    (isEditing && (mockupUrls?.length > 0 || (selectedProduct?.images && selectedProduct.images.length > 0)))
+  );
+
+  // Track if user clicked Generate Preview for current design
+  const [hasClickedGeneratePreview, setHasClickedGeneratePreview] = useState(false);
+
+  // Compute signature of current design placements & URLs to detect artwork changes
+  const designUrlsSignature = useMemo(() => {
+    return (designFiles || [])
+      .filter((d: any) => d && d.url)
+      .map((d: any) => `${d.placement}:${d.url}`)
+      .sort()
+      .join("|");
+  }, [designFiles]);
+
+  const lastGeneratedDesignSigRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!hasUploadedDesign) {
+      setHasClickedGeneratePreview(false);
+      lastGeneratedDesignSigRef.current = "";
+    } else if (lastGeneratedDesignSigRef.current && lastGeneratedDesignSigRef.current !== designUrlsSignature) {
+      // Artwork was changed/replaced, user should generate preview again
+      setHasClickedGeneratePreview(false);
+    }
+  }, [hasUploadedDesign, designUrlsSignature]);
+
+  // Step 2 Next Page disabled condition:
+  // Must have uploaded design, must NOT be generating, and must have clicked Generate Preview or already have mockups
+  const isStep2NextDisabled = Boolean(
+    !hasUploadedDesign ||
+    isGeneratingPreview ||
+    (!hasClickedGeneratePreview && (!mockupUrls || mockupUrls.length === 0))
+  );
+
   // Cooldown state for manual preview regeneration
   const [cooldown, setCooldown] = useState(0);
 
@@ -1860,11 +1898,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   const handleManualRegenerate = async () => {
     if (cooldown > 0 || isGeneratingPreview) return;
-    if (!designFiles || designFiles.length === 0) {
+    if (!hasUploadedDesign) {
       toast.error("Please add at least one design or image to the product first!");
       return;
     }
     setCooldown(30); // Set 30-second cooldown to avoid API rate limits
+    lastGeneratedDesignSigRef.current = designUrlsSignature;
+    setHasClickedGeneratePreview(true);
     try {
       await onGeneratePreview();
     } catch (err: any) {
@@ -1976,6 +2016,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
       toast.success("Files uploaded successfully!", { id: toastId });
       onRefreshFiles();
+
+      // Automatically place the newly uploaded design onto the product canvas
+      if (uploadedList[0]) {
+        await handleAddDesign(uploadedList[0]);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Upload failed. Please try again.", { id: toastId });
@@ -2206,15 +2251,25 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       }
     }
 
-    // Check Step 2: Artwork
+    // Check Step 2: Artwork & Preview Generation
     if (!targetStep || targetStep === 2) {
       const hasExistingImages = isEditing && (mockupUrls?.length > 0 || (selectedProduct?.images && selectedProduct.images.length > 0));
-      if (designFiles.length === 0 && !hasExistingImages) {
+      if (!hasUploadedDesign && !hasExistingImages) {
         scrollToFieldAndFocus("section-artwork", {
           step: 2,
           accordion: "design",
           errorMessage: "Step 2 incomplete: Please upload and place your artwork on the canvas",
         });
+        return false;
+      }
+
+      if (!hasExistingImages && !hasClickedGeneratePreview && (!mockupUrls || mockupUrls.length === 0)) {
+        toast.error("Please click 'Generate Preview' before proceeding to the next page!");
+        return false;
+      }
+
+      if (isGeneratingPreview) {
+        toast.loading("Generating realistic mockups, please wait a moment...", { duration: 2500 });
         return false;
       }
     }
@@ -2993,7 +3048,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <button
                     key={s.step}
                     type="button"
-                    onClick={() => goToStep(s.step)}
+                    onClick={() => {
+                      if (s.step <= activeStep) {
+                        goToStep(s.step);
+                      } else if (validateAndRedirect(activeStep)) {
+                        goToStep(s.step);
+                      }
+                    }}
                     className="flex flex-col items-center text-center cursor-pointer group transition-all"
                   >
                     {/* Circle badge */}
@@ -3649,14 +3710,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           ? mockupStatus || "Generating high-resolution mockups from Printify..."
                           : mockupUrls && mockupUrls.length > 0
                             ? "Mockups loaded. Click to regenerate if you updated your design."
-                            : "Click 'Generate Preview' to render high-res mockups with your uploaded artwork"}
+                            : !hasUploadedDesign
+                              ? "Upload an artwork above to enable preview generation"
+                              : "Click 'Generate Preview' to render high-res mockups with your uploaded artwork"}
                       </p>
                     </div>
                   </div>
                   <Button
                     type="button"
                     onClick={handleManualRegenerate}
-                    disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
+                    disabled={!hasUploadedDesign || isGeneratingPreview || cooldown > 0}
                     className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_16px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer flex-shrink-0"
                   >
                     {isGeneratingPreview ? (
@@ -3693,14 +3756,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                     return cardsToDisplay.map((mockup: any, idx: number) => {
                       const isMockupActive = idx === activeMockupCardIndex;
-                      const isBlueprint = !mockupUrls || mockupUrls.length === 0;
-                      const cardDesign = isBlueprint ? designFiles.find(
-                        (d) => d.placement === mockup.placement || 
-                        (mockup.placement === 'sleeve_left' && (d.placement === 'left' || d.placement === 'sleeve_left')) || 
-                        (mockup.placement === 'sleeve_right' && (d.placement === 'right' || d.placement === 'sleeve_right')) ||
-                        (mockup.placement === 'back' && d.placement === 'back') ||
-                        (mockup.placement === 'front' && (d.placement === 'front' || !d.placement))
-                      ) : null;
 
                       return (
                         <div
@@ -3735,13 +3790,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                             ) : (
                               <ShoppingBag className="w-8 h-8 text-gray-600" />
                             )}
-                            {cardDesign && cardDesign.url && (
-                              <div className="absolute pointer-events-none inset-0 flex items-center justify-center p-3">
-                                <img
-                                  src={cardDesign.url}
-                                  alt="Artwork"
-                                  className="w-[42%] h-[42%] object-contain"
-                                />
+                            {isGeneratingPreview && (
+                              <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center gap-1.5 z-20 rounded-xl">
+                                <Loader2 className="w-5 h-5 text-[#FF6D1F] animate-spin" />
+                                <span className="text-[9px] text-orange-200 font-medium">Rendering...</span>
                               </div>
                             )}
                           </div>
@@ -3772,18 +3824,34 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <span>Back</span>
                   </button>
 
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (validateAndRedirect(2)) {
-                        goToStep(3);
-                      }
-                    }}
-                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <span>Next Page</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    {isStep2NextDisabled && (
+                      <span className="hidden sm:inline-block text-[11px] text-orange-400/90 font-medium bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-lg">
+                        {!hasUploadedDesign
+                          ? "Upload artwork to continue"
+                          : isGeneratingPreview
+                          ? "Generating preview..."
+                          : "Click 'Generate Preview' above to continue"}
+                      </span>
+                    )}
+                    <Button
+                      type="button"
+                      disabled={isStep2NextDisabled}
+                      onClick={() => {
+                        if (validateAndRedirect(2)) {
+                          goToStep(3);
+                        }
+                      }}
+                      className={`font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${
+                        isStep2NextDisabled
+                          ? "bg-gray-800/80 text-gray-500 border border-white/10 cursor-not-allowed shadow-none"
+                          : "bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white shadow-[0_4px_20px_rgba(255,109,31,0.3)] cursor-pointer"
+                      }`}
+                    >
+                      <span>Next Page</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -4533,12 +4601,17 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           {activeStep < 4 ? (
             <button
               type="button"
+              disabled={activeStep === 2 && isStep2NextDisabled}
               onClick={() => {
                 if (validateAndRedirect(activeStep)) {
                   goToStep(activeStep + 1);
                 }
               }}
-              className="h-9 bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs px-3.5 rounded-xl flex items-center gap-1.5 shadow-[0_0_10px_rgba(255,109,31,0.3)] cursor-pointer transition-all"
+              className={`h-9 font-bold text-xs px-3.5 rounded-xl flex items-center gap-1.5 transition-all ${
+                activeStep === 2 && isStep2NextDisabled
+                  ? "bg-gray-800 text-gray-500 border border-white/10 cursor-not-allowed shadow-none"
+                  : "bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white shadow-[0_0_10px_rgba(255,109,31,0.3)] cursor-pointer"
+              }`}
             >
               <span>Next</span>
               <ArrowRight className="w-3.5 h-3.5" />
