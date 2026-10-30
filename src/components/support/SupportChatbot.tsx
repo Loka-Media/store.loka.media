@@ -66,7 +66,50 @@ const getWelcomeMessage = (currentUser?: { name?: string; username?: string } | 
 
 const DEFAULT_WELCOME_MESSAGE: ChatMessage = getWelcomeMessage(null, false);
 
-const ORDER_INTENT_REGEX = /\b(track|tracking|order|orders|parcel|package|shipment|delivery|kaha hai|status)\b/i;
+function isOrderTrackingIntent(text: string): boolean {
+  const clean = text.trim().toLowerCase();
+
+  // 1. Explicit Order ID match (e.g. ORD-1793276542745-K17TV9 or #ORD-...)
+  if (/ORD-[A-Za-z0-9_-]+/i.test(text) || /#([A-Za-z0-9_-]{5,})/i.test(text)) {
+    return true;
+  }
+
+  // 2. Questions asking for policies, timelines, cancellations, returns, how-to-buy must NOT be treated as order tracking
+  const isGeneralQuestion = /\b(how\s+(long|to|do|can|much)|what\s+(is|are|if|happens)|when\s+will|policy|cancel|cancellation|change\s+address|edit\s+address|wrong\s+address|return|refund|exchange|damaged|defect|misprint|size|sizing|cost|shipping\s+(time|cost|option|method|rate)|international|kaise|kese|kya|kyun|kyu|kitna|kitne|kab|change\s+order)\b/i.test(clean);
+  if (isGeneralQuestion) {
+    return false;
+  }
+
+  // 3. Explicit tracking / order status phrases
+  const trackingPhrases = [
+    'where is my order',
+    "where's my order",
+    'where is my package',
+    "where's my package",
+    'where is my shipment',
+    'where is my parcel',
+    'track my order',
+    'track my orders',
+    'track my package',
+    'track my shipment',
+    'track my parcel',
+    'track order',
+    'track orders',
+    'show my order',
+    'show my orders',
+    'my order status',
+    'check my order',
+    'check order status',
+    'order status',
+    'view my orders',
+    'list my orders',
+    'kaha hai mera order',
+    'mera order kaha hai',
+    'order track'
+  ];
+
+  return trackingPhrases.some(phrase => clean.includes(phrase));
+}
 
 function renderInlineText(text: string, baseKey: string) {
   // Matches markdown links [label](url), email addresses, and web URLs
@@ -521,17 +564,52 @@ export default function SupportChatbot() {
       ? (orderNumberMatch[0].startsWith('#') ? orderNumberMatch[0].slice(1) : orderNumberMatch[0])
       : null;
 
-    const isOrderIntent = ORDER_INTENT_REGEX.test(text) || !!extractedOrderNum;
+    const isTrackingIntent = isOrderTrackingIntent(text);
 
     try {
-      // 1. If user is asking about order tracking
-      if (isOrderIntent) {
+      // 1. If user is explicitly looking up order tracking or entered an Order ID
+      if (isTrackingIntent) {
+        // If an explicit order number is provided, try fetching direct details (works for both guests and members)
+        if (extractedOrderNum) {
+          try {
+            const res = await checkoutAPI.getOrderDetails(extractedOrderNum);
+            if (res) {
+              const ordData = res.order || res;
+              const fulfillment = res.fulfillment || {};
+              const detailed: UserOrderSummary = {
+                id: ordData.id || extractedOrderNum,
+                order_number: ordData.order_number || extractedOrderNum,
+                status: (ordData.status || 'placed').toLowerCase(),
+                total_amount: ordData.total_amount || 0,
+                created_at: ordData.created_at || new Date().toISOString(),
+                item_count: (ordData.items || []).length,
+                items: ordData.items || [],
+                tracking_number: fulfillment.tracking_number || ordData.tracking_number,
+                carrier: fulfillment.carrier || ordData.carrier,
+                tracking_url: fulfillment.tracking_url || ordData.tracking_url,
+                shipping_address: ordData.shipping_address,
+              };
+
+              setMessages(prev => [...prev, {
+                id: 'ast_' + Date.now(),
+                role: 'assistant',
+                content: `Here is the live status & tracking timeline for order **#${detailed.order_number}**:`,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                specificOrder: detailed,
+              }]);
+              if (!isOpen) setUnreadCount(prev => prev + 1);
+              setIsLoading(false);
+              return;
+            }
+          } catch { }
+        }
+
         if (!isAuthenticated) {
           // Guest User asking for order tracking -> Prompt to log in or enter order number
           setMessages(prev => [...prev, {
             id: 'ast_' + Date.now(),
             role: 'assistant',
-            content: "To automatically view your live order status and tracking details, please **sign in to your account**.\n\nIf you placed an order as a guest, you can also track it directly using your confirmation email or enter your **Order Number** (e.g. `ORD-10824`)!",
+            content: "To automatically view your live order status and tracking details, please **sign in to your account**.\n\nIf you placed an order as a guest, you can also track it directly using your confirmation email or enter your **Order Number** (e.g. `ORD-1793276542745-K17TV9`)!",
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             showAuthPrompt: true,
           }]);
@@ -543,7 +621,7 @@ export default function SupportChatbot() {
         // Authenticated user -> Fetch orders
         const fetchedOrders = await fetchUserOrders();
 
-        // CASE 1A: Specific Order requested!
+        // CASE 1A: Specific Order requested from account
         if (extractedOrderNum) {
           const matchedOrder = fetchedOrders.find(o =>
             o.order_number.toLowerCase().includes(extractedOrderNum.toLowerCase()) ||

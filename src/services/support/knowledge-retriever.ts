@@ -68,6 +68,23 @@ const GREETING_PATTERNS = [
   /^(who are you|what can you do|help me)[\s!?.]*$/i
 ];
 
+// Explicit out-of-scope patterns (general knowledge, politics, weather, cooking, third-party platforms, coding, etc.)
+const OUT_OF_SCOPE_PATTERNS = [
+  /\b(president|prime minister|narendra modi|donald trump|biden|putin|election|parliament|governor|mla|mp|minister)\b/i,
+  /\b(capital of|population of|distance between|currency of [a-z]+|geography|solar system|planet|galaxy|earth|gravity)\b/i,
+  /\b(weather|temperature|forecast|rain|rainfall|monsoon|climate|aaj ka mausam|garmi|sardi|baarish)\b/i,
+  /\b(recipe|how to cook|how to bake|make tea|make coffee|ingredients for|biryani|paneer|curry|pizza dough)\b/i,
+  /\b(cricket|football|fifa|world cup|ipl|match score|sports score|messi|ronaldo|virat kohli|dhoni|rohit)\b/i,
+  /\b(movie|cinema|netflix|actor|actress|hollywood|bollywood|song|lyrics|singer|web series)\b/i,
+  /\b(crypto|cryptocurrency|bitcoin|ethereum|stock market|share price|invest in stocks|nasdaq|sensex|nifty)\b/i,
+  /\b(write (a )?(code|script|program|poem|essay|story)|python|javascript|typescript|c\+\+|html|css|java|debug my code)\b/i,
+  /\b(solve (this )?(math|equation)|calculate|algebra|geometry)\b/i,
+  /\b(joke|tell me a joke|riddle|funny story|shayari)\b/i,
+  /\b(dating|girlfriend|boyfriend|love advice|horoscope|zodiac|astrology|kundali)\b/i,
+  /\b(amazon prime|flipkart|aliexpress|ebay|walmart|shein|temu|meesho)\b/i,
+  /\b(nike shoes|adidas shoes|sneakers|jordans|puma shoes)\b/i
+];
+
 /**
  * Fast Levenshtein distance computation for fuzzy string matching
  */
@@ -147,7 +164,34 @@ const COMMON_TYPOS: Record<string, string> = {
   kaise: 'how',
   kharide: 'buy',
   kharidna: 'buy',
-  kharid: 'buy'
+  kharid: 'buy',
+  lena: 'buy',
+  kaha: 'where',
+  kahan: 'where',
+  kitna: 'how much',
+  kitne: 'how many',
+  kitni: 'how much',
+  kab: 'when',
+  kyu: 'why',
+  kyun: 'why',
+  wapas: 'return',
+  lautana: 'return',
+  badalna: 'change',
+  aayega: 'delivery',
+  aayegi: 'delivery',
+  milega: 'delivery',
+  milegi: 'delivery',
+  pahuchega: 'delivery',
+  bhejo: 'send',
+  bhejna: 'send',
+  banaye: 'design',
+  banana: 'design',
+  madad: 'support',
+  baat: 'contact',
+  sampark: 'contact',
+  malik: 'founder',
+  paise: 'refund',
+  rupaye: 'refund'
 };
 
 const CORE_SUPPORT_KEYWORDS = [
@@ -274,10 +318,25 @@ export function retrieveKnowledge(query: string, customKnowledgeBase?: Knowledge
     }
   }
 
-  // 6. Defect / damage indicator check (on both original and normalized query)
+  // 6. Explicit out-of-scope check (general trivia, politics, recipes, weather, coding, etc.)
+  const isLokaSpecific = /\b(loka|media|store|creator|creators|perry|mangat|rupan|bal|t-shirt|tee|hoodie|sweatshirt|mug|drinkware|suitcase|luggage|case|cover|phone case|poster|canvas|canvas studio|order|shipping|delivery|return|refund|defective|damaged|checkout|cart)\b/i.test(cleanQuery);
+  if (!isLokaSpecific) {
+    for (const pattern of OUT_OF_SCOPE_PATTERNS) {
+      if (pattern.test(cleanQuery) || pattern.test(normalizedQuery)) {
+        return {
+          items: [],
+          intent: 'unsupported_query',
+          directAnswer: CANNED_RESPONSES.UNKNOWN_FALLBACK,
+          confidence: 1.0
+        };
+      }
+    }
+  }
+
+  // 7. Defect / damage indicator check (on both original and normalized query)
   const isDefectClaim = /\b(tear|torn|damaged?|defects?|defective|smudge[d]?|broken|misprints?|stained?|ripped|cracked)\b/i.test(normalizedQuery);
 
-  // 7. Hybrid Search Ranking across Knowledge Base with Fuzzy Intelligence
+  // 8. Hybrid Search Ranking across Knowledge Base with Fuzzy Intelligence
   const scoredItems = knowledgeBase.map(item => {
     let score = 0;
     const itemText = (item.title + ' ' + item.content).toLowerCase();
