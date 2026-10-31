@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { printifyProductsAPI, printifyCatalogAPI } from '@/services/printify/PrintifyClient';
+import { printifyProductsAPI, printifyCatalogAPI, HIDDEN_BLUEPRINT_IDS } from '@/services/printify/PrintifyClient';
 import { transformProductForStorefront } from '@/services/printify/PrintifyProductService';
 import { queryDb } from '@/lib/db';
 import { calculateSellingPrice } from '@/lib/pricing';
@@ -464,6 +464,16 @@ export async function POST(request: NextRequest) {
     ) {
       const body = await request.json();
       const { mockupUrls = [], productData, designFiles = [], mockupInputs = null, availabilityData = [], isPreview = false } = body;
+
+      // Printify returns only a flat print-file template for these blueprints, so they are not offered
+      const baseProduct = productData?.base_product;
+      const requestedBlueprintId = Number(baseProduct?.blueprint_id ?? baseProduct?.blueprintId ?? baseProduct?.id);
+      if (HIDDEN_BLUEPRINT_IDS.has(requestedBlueprintId)) {
+        return NextResponse.json(
+          { error: 'This product is not available right now. Please choose a different product.' },
+          { status: 400 }
+        );
+      }
 
       let printifyProductId: string | null = null;
       let printifyError: string | null = null;
