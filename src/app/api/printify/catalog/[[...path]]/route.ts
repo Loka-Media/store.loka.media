@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { printifyCatalogAPI } from '@/services/printify/PrintifyClient';
+import { printifyCatalogAPI, HIDDEN_BLUEPRINT_IDS } from '@/services/printify/PrintifyClient';
 import { printifyPricingService } from '@/services/printify/PrintifyPricingService';
 import fs from 'fs';
 import path from 'path';
@@ -559,6 +559,13 @@ const SEARCH_SYNONYMS: Record<string, RegExp> = {
     const blueprintId = parseInt(segments[0]);
     if (isNaN(blueprintId)) {
       return NextResponse.json({ error: 'Invalid blueprint ID' }, { status: 400 });
+    }
+
+    if (HIDDEN_BLUEPRINT_IDS.has(blueprintId)) {
+      return NextResponse.json(
+        { error: 'Blueprint not available', message: 'This product is not available right now. Please select a different product.' },
+        { status: 404 }
+      );
     }
 
     // Check if blueprintId details are cached
