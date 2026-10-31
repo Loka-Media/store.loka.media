@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContext"; 
 import { printifyAPI, productAPI } from "@/lib/api";
 import { mockupAPI } from "@/lib/MockupAPI";
+import { isHiddenBlueprint } from "@/config/hiddenBlueprints";
 import { retryWithExponentialBackoff } from "@/lib/retryWithBackoff";
 import CreatorProtectedRoute from "@/components/CreatorProtectedRoute";
 import { useDebouncePreview } from "@/hooks/useDebouncePreview";
@@ -383,6 +384,12 @@ function CanvasContent() {
       }
 
       // Check if blueprintId is provided or derived from product
+      if (effectiveBlueprintId && isHiddenBlueprint(effectiveBlueprintId)) {
+        toast.error('This product is not available right now. Please select a different product.', { duration: 5000 });
+        router.replace('/dashboard/creator/catalog');
+        return;
+      }
+
       if (effectiveBlueprintId) {
         try {
           // Fetch blueprint details

@@ -21,6 +21,7 @@ import type {
   PrintifyWebhookTopic,
   PrintifyShop,
 } from '@/types/printify';
+import { HIDDEN_BLUEPRINT_IDS } from '@/config/hiddenBlueprints';
 
 const PRINTIFY_BASE_URL = 'https://api.printify.com/v1';
 
@@ -122,11 +123,7 @@ export const printifyShopAPI = {
 // CATALOG / BLUEPRINTS
 // ============================================================
 
-/**
- * Blueprints hidden from creators: for these "Early Access" products the Printify API only
- * returns a flat print-file template (cut panels), never real product mockups.
- */
-export const HIDDEN_BLUEPRINT_IDS = new Set<number>([1485, 1486, 1700, 10722, 12670]);
+export { HIDDEN_BLUEPRINT_IDS };
 
 export const printifyCatalogAPI = {
   /** List all available blueprints (product templates) */
