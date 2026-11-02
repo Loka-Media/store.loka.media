@@ -554,8 +554,8 @@ export default function UnifiedCheckoutPage() {
   // Main checkout form
   return (
     <div className="min-h-screen bg-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8 pt-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 md:pt-20 pb-12">
+        <div className="flex items-center justify-between mb-8">
           <GradientTitle text="Checkout" size="sm" />
           <Link href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-900 hover:bg-gray-800 hover:border-gray-600 transition-all duration-300">
             <ArrowLeft className="w-4 h-4 mr-2" />

@@ -95,7 +95,7 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 md:pt-20 pb-12">
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <GradientTitle text="Complete Payment" size="sm" />
