@@ -427,6 +427,11 @@ export default function UnifiedCheckoutPage() {
       console.log('✅ [CHECKOUT] Order processed successfully in database');
       setOrderData(orderResult.order);
       setClientSecret(paymentIntentResult.clientSecret);
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.set('step', 'payment');
+        window.history.pushState({ step: 'payment' }, '', url.toString());
+      }
       setCurrentStep("payment");
     } catch (error: unknown) {
       console.error("❌ [CHECKOUT] Order creation error:", error);
@@ -470,6 +475,28 @@ export default function UnifiedCheckoutPage() {
       console.error("Payment success handling error:", error);
     }
   };
+
+  const handleBackToCheckout = () => {
+    checkoutState.setCurrentStep('info');
+    if (typeof window !== 'undefined' && window.location.search.includes('step=payment')) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('step');
+      window.history.pushState(null, '', url.pathname + (url.search ? url.search : ''));
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (checkoutState.currentStep === 'payment') {
+        checkoutState.setCurrentStep('info');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [checkoutState.currentStep]);
 
   const handleRemoveUnavailableItems = async (variantIds: number[]) => {
     try {
@@ -534,6 +561,7 @@ export default function UnifiedCheckoutPage() {
       orderData={checkoutState.orderData}
       clientSecret={checkoutState.clientSecret}
       onPaymentSuccess={handlePaymentSuccess}
+      onBackToCheckout={handleBackToCheckout}
       totalAmount={checkoutState.calculateTotal(summary.subtotal)}
       loading={checkoutState.loading}
       setLoading={checkoutState.setLoading}

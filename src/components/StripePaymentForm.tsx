@@ -21,13 +21,14 @@ interface StripePaymentFormProps {
   orderData: OrderData;
   clientSecret: string;
   onPaymentSuccess: () => void;
+  onBackToCheckout?: () => void;
   totalAmount: number;
   loading: boolean;
   setLoading: (loading: boolean) => void;
 }
 
 // Payment form component that uses Stripe hooks
-function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoading }: Omit<StripePaymentFormProps, 'clientSecret'>) {
+function PaymentForm({ orderData, onPaymentSuccess, onBackToCheckout, totalAmount, loading, setLoading }: Omit<StripePaymentFormProps, 'clientSecret'>) {
   const stripe = useStripe();
   const elements = useElements();
   const { formatPrice } = useCurrency();
@@ -99,10 +100,24 @@ function PaymentForm({ orderData, onPaymentSuccess, totalAmount, loading, setLoa
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <GradientTitle text="Complete Payment" size="sm" />
-          <Link href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-900 hover:bg-gray-800 hover:border-gray-600 transition-all duration-300">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Cart
-          </Link>
+          {onBackToCheckout ? (
+            <button
+              type="button"
+              onClick={onBackToCheckout}
+              className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-900 hover:bg-gray-800 hover:border-gray-600 transition-all duration-300 cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Checkout
+            </button>
+          ) : (
+            <Link
+              href="/checkout-unified"
+              className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-900 hover:bg-gray-800 hover:border-gray-600 transition-all duration-300"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Checkout
+            </Link>
+          )}
         </div>
 
         {/* Payment Card */}
