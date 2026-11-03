@@ -309,15 +309,29 @@ export async function DELETE(
   const headers: Record<string, string> = {};
   if (authHeader) headers['Authorization'] = authHeader;
 
+  // Sync with PostgreSQL DB
+  const numericId = parseInt(id, 10);
+  if (!isNaN(numericId) && numericId > 0) {
+    await queryDb(
+      `UPDATE products SET status = 'deleted', updated_at = NOW() WHERE id = $1`,
+      [numericId]
+    ).catch(() => null);
+  }
+
   const res = await fetch(`${BACKEND_URL}/api/products/${id}`, {
     method: 'DELETE',
     headers,
     cache: 'no-store',
-  });
-  const data = await res.text();
-  return new NextResponse(data, {
-    status: res.status,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  }).catch(() => null);
+
+  if (res) {
+    const data = await res.text();
+    return new NextResponse(data, {
+      status: res.status,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return NextResponse.json({ success: true, message: 'Product deleted' }, { status: 200 });
 }
 

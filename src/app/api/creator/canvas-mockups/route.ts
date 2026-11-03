@@ -140,6 +140,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Also update products table if editing an existing product
+    if (pId && Array.isArray(mockups) && mockups.length > 0) {
+      try {
+        const numPid = parseInt(pId, 10);
+        if (!isNaN(numPid)) {
+          const firstUrl = typeof mockups[0] === 'string' ? mockups[0] : (mockups[0]?.url || mockups[0]?.src || mockups[0]?.preview_url);
+          const imagesList = mockups.map((m: any) => typeof m === 'string' ? m : (m?.url || m?.src || m?.preview_url)).filter(Boolean);
+          if (firstUrl) {
+            await queryDb(
+              `UPDATE products
+               SET thumbnail_url = $1, images = $2, updated_at = NOW()
+               WHERE id = $3`,
+              [firstUrl, imagesList, numPid]
+            );
+          }
+        }
+      } catch (syncErr) {
+        console.warn('[POST /api/creator/canvas-mockups] Warning updating products table:', syncErr);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Canvas mockups saved successfully',

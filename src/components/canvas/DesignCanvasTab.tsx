@@ -80,9 +80,34 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
-  const canvasDims = getCanvasDimensions(activePrintFile, 620, 380);
-  const printAreaWidth = activePrintFile?.width || canvasDims.printWidth || 0;
-  const printAreaHeight = activePrintFile?.height || canvasDims.printHeight || 0;
+  // Check if active print file is a wide wraparound template (> 1.25 aspect ratio and >= 2800px)
+  const isWideWraparound = Boolean(
+    activePrintFile &&
+    activePrintFile.width &&
+    activePrintFile.height &&
+    activePrintFile.width / activePrintFile.height > 1.25 &&
+    activePrintFile.width >= 2800 &&
+    (activePlacement === "front_cover" || activePlacement === "back_cover")
+  );
+
+  const coverWidth = isWideWraparound && activePrintFile ? Math.round(activePrintFile.width * 0.47) : 0;
+  const frontOffsetLeft = isWideWraparound && activePrintFile ? Math.round(activePrintFile.width * 0.53) : 0;
+
+  const effectivePrintFile = useMemo<PrintFile | null>(() => {
+    if (!activePrintFile) return null;
+    if (isWideWraparound) {
+      return {
+        ...activePrintFile,
+        width: coverWidth,
+        height: activePrintFile.height,
+      };
+    }
+    return activePrintFile;
+  }, [activePrintFile, isWideWraparound, coverWidth]);
+
+  const canvasDims = getCanvasDimensions(effectivePrintFile, 620, 380);
+  const printAreaWidth = effectivePrintFile?.width || canvasDims.printWidth || 0;
+  const printAreaHeight = effectivePrintFile?.height || canvasDims.printHeight || 0;
 
   // Active design for current placement
   const activeDesign = useMemo(() => {
@@ -146,25 +171,18 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
     const isApparel = /\b(hoodie|sweatshirt|shirt|tee|t-shirt|apparel|pullover|jacket|tank|top|sweater|fleece|jogger|pant|pants|sock|socks|hat|cap|beanie)\b/i.test(searchString);
     if (isApparel) return false;
     const isBookProduct = /\b(journal|notebook|hardcover|spiral|planner|diary)\b/i.test(searchString);
-    const isCoverPlacement = activePlacement === "front_cover" || activePlacement === "back_cover" || activePlacement === "full_wrap";
-    return isBookProduct && isCoverPlacement;
-  }, [productTitle, productType, activePlacement]);
+    return isBookProduct;
+  }, [productTitle, productType]);
 
-  const showBookGuides = useMemo(() => {
-    return (
-      isBookOrJournal &&
-      (activePlacement === "front_cover" ||
-        activePlacement === "back_cover" ||
-        activePlacement === "full_wrap")
-    );
+  // Full-wrap template guides ONLY when viewing the full wraparound panoramic canvas
+  const showFullWrapGuides = useMemo(() => {
+    return isBookOrJournal && activePlacement === "full_wrap";
   }, [isBookOrJournal, activePlacement]);
 
   // Design scale factors for canvas (strictly preserving aspect ratio)
   const canvasWidth = canvasDims.width;
   const canvasHeight = canvasDims.height;
-  const designScale = activePrintFile && activePrintFile.width > 0
-    ? canvasWidth / activePrintFile.width
-    : 0.5;
+  const designScale = printAreaWidth > 0 ? canvasWidth / printAreaWidth : 0.5;
 
   // Calculate natural aspect ratio and max fit size of the active design
   const { currentScalePercent, maxFitWidth, maxFitHeight } = useMemo(() => {
@@ -192,7 +210,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
 
   // Handle scale change from slider or preset buttons
   const handleScaleChange = (targetPercent: number) => {
-    if (!activeDesign || !activePrintFile) return;
+    if (!activeDesign || !effectivePrintFile) return;
 
     if (targetPercent >= 100) {
       handleQuickAlign("fit");
@@ -202,15 +220,22 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
     applyQuickPosition(
       "scale",
       activeDesign,
-      activePrintFile,
+      effectivePrintFile,
       (updatedDesign) => {
+        let finalLeft = updatedDesign.position.left;
+        if (isWideWraparound && activePlacement === "front_cover") {
+          finalLeft += frontOffsetLeft;
+        }
         updateDesignPosition(activeDesign.id, {
           width: updatedDesign.position.width,
           height: updatedDesign.position.height,
-          left: updatedDesign.position.left,
+          left: finalLeft,
           top: updatedDesign.position.top,
         });
-        setSelectedDesignFile(updatedDesign);
+        setSelectedDesignFile({
+          ...updatedDesign,
+          position: { ...updatedDesign.position, left: finalLeft },
+        });
       },
       targetPercent / 100
     );
@@ -218,20 +243,27 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
 
   // Handle quick alignment (Center, Top, Bottom, Left, Right, Fit)
   const handleQuickAlign = (alignType: string) => {
-    if (!activeDesign || !activePrintFile) return;
+    if (!activeDesign || !effectivePrintFile) return;
 
     applyQuickPosition(
       alignType,
       activeDesign,
-      activePrintFile,
+      effectivePrintFile,
       (updatedDesign) => {
+        let finalLeft = updatedDesign.position.left;
+        if (isWideWraparound && activePlacement === "front_cover") {
+          finalLeft += frontOffsetLeft;
+        }
         updateDesignPosition(activeDesign.id, {
           width: updatedDesign.position.width,
           height: updatedDesign.position.height,
-          left: updatedDesign.position.left,
+          left: finalLeft,
           top: updatedDesign.position.top,
         });
-        setSelectedDesignFile(updatedDesign);
+        setSelectedDesignFile({
+          ...updatedDesign,
+          position: { ...updatedDesign.position, left: finalLeft },
+        });
       }
     );
   };
@@ -429,18 +461,45 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       </span>
                     </div>
 
-                    {/* Empty Canvas Placeholder */}
-                    {designFiles.length === 0 ? (
-                      <div className="absolute inset-0 flex items-center justify-center p-4">
+                    {/* Placement Badge on Canvas */}
+                    <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                      <span className="text-[10px] font-extrabold tracking-widest uppercase px-2.5 py-1 rounded-md bg-[#FF6D1F] text-white shadow-lg shadow-orange-500/40">
+                        {activePlacement === "front_cover"
+                          ? "Front Cover"
+                          : activePlacement === "back_cover"
+                          ? "Back Cover"
+                          : activePlacement === "full_wrap"
+                          ? "Full Wrap"
+                          : activePlacement.replace(/_/g, " ")}
+                      </span>
+                    </div>
+
+                    {/* Barcode Area Indicator (Only for Back Cover) */}
+                    {activePlacement === "back_cover" && (
+                      <div className="absolute bottom-3 right-3 w-16 h-8 border border-white/20 bg-black/60 rounded flex flex-col items-center justify-center p-0.5 opacity-60 pointer-events-none z-10">
+                        <div className="text-[7px] text-gray-400 font-mono tracking-tighter">||||||||||||</div>
+                        <span className="text-[6px] text-gray-400">Barcode</span>
+                      </div>
+                    )}
+
+                    {/* Empty Canvas Placeholder (placement specific) */}
+                    {designFiles.filter(d => d.placement === activePlacement || (activePlacement === "full_wrap" && (d.placement === "front_cover" || d.placement === "back_cover"))).length === 0 ? (
+                      <div className="absolute inset-0 flex items-center justify-center p-4 z-10">
                         <div className="text-center text-gray-400">
                           <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner border border-white/10">
                             <Crosshair className="w-7 h-7 text-[#FF6D1F]" />
                           </div>
-                          <p className="text-sm font-semibold text-white">
-                            Print Area Canvas
+                          <p className="text-sm font-semibold text-white capitalize">
+                            {activePlacement === "front_cover"
+                              ? "Front Cover Canvas"
+                              : activePlacement === "back_cover"
+                              ? "Back Cover Canvas"
+                              : activePlacement === "full_wrap"
+                              ? "Full Wrap Canvas"
+                              : `${activePlacement.replace(/_/g, " ")} Canvas`}
                           </p>
                           <p className="text-xs text-gray-400 mt-0.5">
-                            Select artwork above to place on this placement
+                            Select artwork above to place on {activePlacement === "front_cover" ? "front cover" : activePlacement === "back_cover" ? "back cover" : activePlacement.replace(/_/g, " ")}
                           </p>
                           <p className="text-[11px] text-orange-400/80 mt-1 font-mono">
                             {printAreaWidth} × {printAreaHeight} px
@@ -449,29 +508,16 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       </div>
                     ) : null}
 
-                    {/* Visual Template Guides (ONLY for actual journals/books/notebooks) */}
-                    {showBookGuides && (
+                    {/* Visual Template Guides (ONLY for explicit full_wrap placement) */}
+                    {showFullWrapGuides && (
                       <div className="absolute inset-0 pointer-events-none select-none z-0">
                         {/* Left Half: BACK COVER */}
-                        <div
-                          className={`absolute top-0 bottom-0 left-0 w-[47%] border-r border-dashed transition-all ${
-                            activePlacement === "back_cover"
-                              ? "border-orange-500 bg-orange-500/10 ring-1 ring-orange-500/30"
-                              : "border-white/20 bg-white/[0.02]"
-                          }`}
-                        >
+                        <div className="absolute top-0 bottom-0 left-0 w-[47%] border-r border-dashed border-white/20 bg-white/[0.02]">
                           <div className="p-3">
-                            <span
-                              className={`text-[10px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded ${
-                                activePlacement === "back_cover"
-                                  ? "bg-orange-500 text-white shadow-md shadow-orange-500/40"
-                                  : "bg-white/10 text-gray-400"
-                              }`}
-                            >
+                            <span className="text-[10px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded bg-white/10 text-gray-400">
                               Back Cover
                             </span>
                           </div>
-
                           <div className="absolute bottom-2 right-2 w-12 h-7 border border-white/20 bg-black/60 rounded flex flex-col items-center justify-center p-0.5 opacity-60">
                             <div className="text-[7px] text-gray-400 font-mono tracking-tighter">|||||||||</div>
                             <span className="text-[6px] text-gray-400">Barcode</span>
@@ -486,21 +532,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                         </div>
 
                         {/* Right Half: FRONT COVER */}
-                        <div
-                          className={`absolute top-0 bottom-0 right-0 w-[47%] transition-all ${
-                            activePlacement === "front_cover"
-                              ? "border-l border-dashed border-orange-500 bg-orange-500/10 ring-1 ring-orange-500/30"
-                              : "border-l border-dashed border-white/20 bg-white/[0.02]"
-                          }`}
-                        >
+                        <div className="absolute top-0 bottom-0 right-0 w-[47%] border-l border-dashed border-white/20 bg-white/[0.02]">
                           <div className="p-3 text-right">
-                            <span
-                              className={`text-[10px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded ${
-                                activePlacement === "front_cover"
-                                  ? "bg-orange-500 text-white shadow-md shadow-orange-500/40"
-                                  : "bg-white/10 text-gray-400"
-                              }`}
-                            >
+                            <span className="text-[10px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded bg-white/10 text-gray-400">
                               Front Cover
                             </span>
                           </div>
@@ -514,10 +548,8 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                         .filter((design) => {
                           if (design.placement === activePlacement) return true;
                           if (
-                            showBookGuides &&
-                            ((activePlacement === "front_cover" && design.placement === "back_cover") ||
-                              (activePlacement === "back_cover" && design.placement === "front_cover") ||
-                              (activePlacement === "full_wrap" && (design.placement === "front_cover" || design.placement === "back_cover")))
+                            activePlacement === "full_wrap" &&
+                            (design.placement === "front_cover" || design.placement === "back_cover")
                           ) {
                             return true;
                           }
@@ -527,14 +559,20 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                           const isOtherPlacement = design.placement !== activePlacement;
                           const isSelected = selectedDesignFile?.id === design.id || activeDesign?.id === design.id;
 
+                          // Compute local left relative to this cover's canvas
+                          let localLeft = design.position.left;
+                          if (isWideWraparound && activePlacement === "front_cover" && localLeft >= frontOffsetLeft) {
+                            localLeft -= frontOffsetLeft;
+                          }
+
                           // Check if design is fit to 100% of the print area
                           const isFit = Boolean(
                             (printAreaWidth > 0 &&
                              printAreaHeight > 0 &&
-                             design.position.width >= printAreaWidth - 2 &&
-                             design.position.height >= printAreaHeight - 2 &&
-                             Math.abs(design.position.left) <= 2 &&
-                             Math.abs(design.position.top) <= 2) ||
+                             design.position.width >= printAreaWidth - 4 &&
+                             design.position.height >= printAreaHeight - 4 &&
+                             Math.abs(localLeft) <= 4 &&
+                             Math.abs(design.position.top) <= 4) ||
                             (isSelected && currentScalePercent >= 100)
                           );
 
@@ -544,7 +582,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                           };
 
                           const scaledPosition = {
-                            x: design.position.left * designScale,
+                            x: localLeft * designScale,
                             y: design.position.top * designScale,
                           };
 
@@ -586,16 +624,26 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                               disableDragging={isFit}
                               enableResizing={isFit ? false : undefined}
                               onDragStop={(_e, data) => {
+                                const newLocalLeft = Math.round(data.x / designScale);
+                                const actualLeft = isWideWraparound && activePlacement === "front_cover"
+                                  ? newLocalLeft + frontOffsetLeft
+                                  : newLocalLeft;
+
                                 updateDesignPosition(design.id, {
-                                  left: Math.round(data.x / designScale),
+                                  left: actualLeft,
                                   top: Math.round(data.y / designScale),
                                 });
                               }}
                               onResizeStop={(_e, _direction, ref, _delta, position) => {
+                                const newLocalLeft = Math.round(position.x / designScale);
+                                const actualLeft = isWideWraparound && activePlacement === "front_cover"
+                                  ? newLocalLeft + frontOffsetLeft
+                                  : newLocalLeft;
+
                                 updateDesignPosition(design.id, {
                                   width: Math.max(1, Math.round(parseFloat(ref.style.width) / designScale)),
                                   height: Math.max(1, Math.round(parseFloat(ref.style.height) / designScale)),
-                                  left: Math.round(position.x / designScale),
+                                  left: actualLeft,
                                   top: Math.round(position.y / designScale),
                                 });
                               }}

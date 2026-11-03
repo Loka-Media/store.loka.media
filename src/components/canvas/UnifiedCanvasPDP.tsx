@@ -3649,10 +3649,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         {(() => {
                           const apf = getActivePrintFile(printFiles, selectedVariants, activePlacement, activeVariantId);
                           if (apf?.width && apf?.height) {
+                            const isWideWrap = (apf.width / apf.height > 1.25) && apf.width >= 2800 && (activePlacement === "front_cover" || activePlacement === "back_cover");
+                            const displayW = isWideWrap ? Math.round(apf.width * 0.47) : apf.width;
+                            const displayH = apf.height;
                             return (
                               <span className="text-[11px] text-gray-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-mono flex items-center gap-1.5">
                                 <span className="text-gray-400">Print area:</span>
-                                <span className="text-[#FF6D1F] font-semibold">{apf.width} × {apf.height} px</span>
+                                <span className="text-[#FF6D1F] font-semibold">{displayW} × {displayH} px</span>
                                 {apf.dpi ? <span className="text-gray-400">({apf.dpi} DPI)</span> : null}
                               </span>
                             );
