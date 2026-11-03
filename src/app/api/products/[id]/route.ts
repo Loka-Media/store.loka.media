@@ -30,39 +30,42 @@ export async function GET(
       try {
         const product = JSON.parse(data);
 
-        try {
-          const dbRows = await queryDb(
-            `SELECT p.base_price, p.markup_percentage,
-                    json_agg(json_build_object('id', pv.id, 'price', pv.price, 'printify_variant_id', pv.printify_variant_id)) as db_variants
-             FROM products p
-             LEFT JOIN product_variants pv ON pv.product_id = p.id
-             WHERE p.id = $1
-             GROUP BY p.id, p.base_price, p.markup_percentage`,
-            [productId]
-          );
+        const numericId = parseInt(productId, 10);
+        if (!isNaN(numericId) && numericId > 0) {
+          try {
+            const dbRows = await queryDb(
+              `SELECT p.base_price, p.markup_percentage,
+                      json_agg(json_build_object('id', pv.id, 'price', pv.price, 'printify_variant_id', pv.printify_variant_id)) as db_variants
+               FROM products p
+               LEFT JOIN product_variants pv ON pv.product_id = p.id
+               WHERE p.id = $1
+               GROUP BY p.id, p.base_price, p.markup_percentage`,
+              [numericId]
+            );
 
-          if (dbRows && dbRows.length > 0) {
-            const dbP = dbRows[0];
-            const realBase = dbP.base_price != null ? ensure99Pricing(dbP.base_price) : null;
-            if (realBase && realBase > 0) {
-              product.base_price = realBase;
-              product.min_price = realBase;
+            if (dbRows && dbRows.length > 0) {
+              const dbP = dbRows[0];
+              const realBase = dbP.base_price != null ? ensure99Pricing(dbP.base_price) : null;
+              if (realBase && realBase > 0) {
+                product.base_price = realBase;
+                product.min_price = realBase;
+              }
+              if (Array.isArray(dbP.db_variants) && Array.isArray(product.variants)) {
+                product.variants.forEach((v: any) => {
+                  const match = dbP.db_variants.find((dv: any) => 
+                    dv.id === v.id || (dv.printify_variant_id != null && dv.printify_variant_id === v.printify_variant_id)
+                  );
+                  if (match && match.price) {
+                    v.price = ensure99Pricing(match.price);
+                  } else if (realBase) {
+                    v.price = realBase;
+                  }
+                });
+              }
             }
-            if (Array.isArray(dbP.db_variants) && Array.isArray(product.variants)) {
-              product.variants.forEach((v: any) => {
-                const match = dbP.db_variants.find((dv: any) => 
-                  dv.id === v.id || (dv.printify_variant_id != null && dv.printify_variant_id === v.printify_variant_id)
-                );
-                if (match && match.price) {
-                  v.price = ensure99Pricing(match.price);
-                } else if (realBase) {
-                  v.price = realBase;
-                }
-              });
-            }
+          } catch (_dbErr) {
+            // If direct DB query fails, fallback to backend API data
           }
-        } catch (_dbErr) {
-          // If direct DB query fails, fallback to backend API data
         }
 
         if (product && product.base_price == null && product.min_price != null) {
