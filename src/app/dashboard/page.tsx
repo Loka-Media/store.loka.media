@@ -1,37 +1,87 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import CreatorApprovalStatus from "@/components/CreatorApprovalStatus";
 import {
   LogOut,
+  ShoppingBag,
+  User,
+  Sparkles,
+  ArrowRight,
+  Package,
+  Instagram,
+  CheckCircle2,
+  Loader2,
+  Palette,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function DashboardPage() {
-  const { user, loading, logout, isAuthenticated } = useAuth();
+  const { user, loading, logout, isAuthenticated, refreshUser } = useAuth();
   const router = useRouter();
+
+  // Creator application inline form state
+  const [creatorUrl, setCreatorUrl] = useState("");
+  const [submittingApp, setSubmittingApp] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.replace("/auth/login");
     } else if (!loading && user) {
-      // Redirect to role-specific dashboard
+      // Redirect to role-specific dashboard if user is an approved creator or admin
       if (user.role === "creator" && user.creatorStatus === "approved") {
         router.replace("/dashboard/creator");
       } else if (user.role === "admin") {
         router.replace("/dashboard/admin");
-      } else if (user.role === "user" && !user.creatorStatus) {
-        router.replace("/");
       }
-      // Users with pending/rejected creator status stay on main dashboard
+      // Note: Regular customers & users with pending/rejected creator status stay on customer dashboard
     }
   }, [loading, isAuthenticated, user, router]);
 
   const handleLogout = async () => {
     await logout();
     router.push("/auth/login");
+  };
+
+  const handleApplyCreator = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!creatorUrl.trim()) {
+      toast.error("Please enter your Instagram or social media profile link.");
+      return;
+    }
+
+    setSubmittingApp(true);
+    try {
+      const token = localStorage.getItem("accessToken") || "";
+      const res = await fetch("/api/creator/apply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ creatorUrl: creatorUrl.trim() }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to submit application");
+      }
+
+      toast.success(
+        data.message || "Creator application submitted! Our team will review it shortly."
+      );
+      setCreatorUrl("");
+      if (refreshUser) {
+        await refreshUser();
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setSubmittingApp(false);
+    }
   };
 
   if (loading) {
@@ -46,6 +96,9 @@ export default function DashboardPage() {
     return null;
   }
 
+  const isPendingCreator = user.creatorStatus === "pending";
+  const isApprovedCreator = user.role === "creator" && user.creatorStatus === "approved";
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -53,9 +106,14 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 py-6 sm:py-8">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Dashboard
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  Dashboard
+                </h1>
+                <span className="text-[11px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10">
+                  {user.role === "creator" ? "Creator" : "Customer"}
+                </span>
+              </div>
               <p className="mt-1 text-sm text-gray-400 font-medium">
                 Welcome back, {user.name}!
               </p>
@@ -72,29 +130,136 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8 space-y-8">
+        {/* Creator Approval Status Banner (shown when pending or rejected) */}
         <CreatorApprovalStatus />
 
-        {/* Dashboard Content */}
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700/50 rounded-lg p-6 mt-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Your Dashboard</h2>
-          <p className="text-gray-400">
-            Welcome to your dashboard. You can browse products, manage your profile, and track your orders from here.
-          </p>
+        {/* Creator Onboarding / Application Card (Shown to regular customers who have not yet applied) */}
+        {!user.creatorStatus && user.role !== "creator" && user.role !== "admin" && (
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-950/40 via-neutral-900 to-black border border-orange-500/30 p-6 sm:p-8 shadow-2xl">
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="relative z-10 max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-xs font-bold mb-4 uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Create & Sell on Loka</span>
+              </div>
 
-          <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <Link
-              href="/products"
-              className="inline-flex items-center px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors"
-            >
-              Browse Products
-            </Link>
-            <Link
-              href="/profile"
-              className="inline-flex items-center px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors border border-gray-700"
-            >
-              Manage Profile
-            </Link>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3">
+                Create Your Own Products & Sell Online
+              </h2>
+
+              <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-6">
+                Turn your designs and ideas into premium custom merchandise with zero upfront costs!
+                Apply for creator access to unlock our built-in <strong>Canvas Studio</strong>, interactive 360° product previews, and earn up to <strong>90% profit markup</strong> on every sale.
+              </p>
+
+              {/* Inline Application Form */}
+              <form onSubmit={handleApplyCreator} className="flex flex-col sm:flex-row gap-3 max-w-xl">
+                <div className="relative flex-1">
+                  <Instagram className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
+                  <input
+                    type="text"
+                    value={creatorUrl}
+                    onChange={(e) => setCreatorUrl(e.target.value)}
+                    placeholder="Instagram link or portfolio URL (e.g. instagram.com/you)"
+                    className="w-full pl-10 pr-4 py-3 bg-black/60 border border-white/20 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={submittingApp}
+                  className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {submittingApp ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      Apply for Creator Access
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6 text-xs text-gray-400 font-medium">
+                <span className="flex items-center gap-1.5 text-white/90">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Free to join
+                </span>
+                <span className="flex items-center gap-1.5 text-white/90">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> No inventory risk
+                </span>
+                <span className="flex items-center gap-1.5 text-white/90">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Worldwide fulfillment
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Customer Portal Action Cards */}
+        <div>
+          <h2 className="text-xl font-bold text-white mb-4">Quick Navigation</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            {/* Card 1: Explore Products */}
+            <div className="bg-gradient-to-br from-neutral-900 to-black border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-white/20 transition-all group">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 mb-4 group-hover:scale-105 transition-transform">
+                  <ShoppingBag className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Explore Marketplace</h3>
+                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                  Discover curated designs, apparel, coffee mugs, and creator merchandise lines.
+                </p>
+              </div>
+              <Link
+                href="/products"
+                className="inline-flex items-center text-orange-400 hover:text-orange-300 font-bold text-sm group-hover:translate-x-1 transition-all"
+              >
+                Browse Catalog <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Link>
+            </div>
+
+            {/* Card 2: Track Orders */}
+            <div className="bg-gradient-to-br from-neutral-900 to-black border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-white/20 transition-all group">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 mb-4 group-hover:scale-105 transition-transform">
+                  <Package className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Track Your Orders</h3>
+                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                  Check live shipping status, carrier tracking numbers, and view your purchase receipts.
+                </p>
+              </div>
+              <Link
+                href="/profile"
+                className="inline-flex items-center text-sky-400 hover:text-sky-300 font-bold text-sm group-hover:translate-x-1 transition-all"
+              >
+                View Live Orders <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Link>
+            </div>
+
+            {/* Card 3: Account Profile */}
+            <div className="bg-gradient-to-br from-neutral-900 to-black border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-white/20 transition-all group">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-105 transition-transform">
+                  <User className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Profile & Settings</h3>
+                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                  Update your contact details, shipping addresses, password, and preferences.
+                </p>
+              </div>
+              <Link
+                href="/profile/edit"
+                className="inline-flex items-center text-purple-400 hover:text-purple-300 font-bold text-sm group-hover:translate-x-1 transition-all"
+              >
+                Manage Profile <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Link>
+            </div>
           </div>
         </div>
       </main>
