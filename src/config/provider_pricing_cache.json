@@ -6500,5 +6500,15 @@
       "252281": 10.81
     },
     "updatedAt": 1793693171277
+  },
+  "75_1": {
+    "blueprintId": 75,
+    "providerId": 1,
+    "minCost": 10.73,
+    "maxCost": 10.73,
+    "variants": {
+      "34242": 10.73
+    },
+    "updatedAt": 1793700115227
   }
 }

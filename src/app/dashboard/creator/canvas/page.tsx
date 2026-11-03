@@ -167,6 +167,8 @@ function computePrintFilesFromVariants(variants: any[], productTitle?: string) {
       if (isWraparoundCover) {
         placements['front_cover'] = printfile_id;
         placements['back_cover'] = v.id * 1000 + POS_CODE_MAP.back_cover;
+      } else if (isGenuineBookProduct && rawPos === 'front') {
+        placements['front_cover'] = printfile_id;
       }
 
       // Also set aliases so standard lookups work seamlessly
