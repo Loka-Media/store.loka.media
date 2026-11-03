@@ -199,70 +199,8 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-
-        {/* Customer Portal Action Cards */}
-        <div>
-          <h2 className="text-xl font-bold text-white mb-4">Quick Navigation</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            {/* Card 1: Explore Products */}
-            <div className="bg-gradient-to-br from-neutral-900 to-black border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-white/20 transition-all group">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 mb-4 group-hover:scale-105 transition-transform">
-                  <ShoppingBag className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Explore Marketplace</h3>
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  Discover curated designs, apparel, coffee mugs, and creator merchandise lines.
-                </p>
-              </div>
-              <Link
-                href="/products"
-                className="inline-flex items-center text-orange-400 hover:text-orange-300 font-bold text-sm group-hover:translate-x-1 transition-all"
-              >
-                Browse Catalog <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Link>
-            </div>
-
-            {/* Card 2: Track Orders */}
-            <div className="bg-gradient-to-br from-neutral-900 to-black border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-white/20 transition-all group">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 mb-4 group-hover:scale-105 transition-transform">
-                  <Package className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Track Your Orders</h3>
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  Check live shipping status, carrier tracking numbers, and view your purchase receipts.
-                </p>
-              </div>
-              <Link
-                href="/profile"
-                className="inline-flex items-center text-sky-400 hover:text-sky-300 font-bold text-sm group-hover:translate-x-1 transition-all"
-              >
-                View Live Orders <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Link>
-            </div>
-
-            {/* Card 3: Account Profile */}
-            <div className="bg-gradient-to-br from-neutral-900 to-black border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:border-white/20 transition-all group">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-105 transition-transform">
-                  <User className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Profile & Settings</h3>
-                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  Update your contact details, shipping addresses, password, and preferences.
-                </p>
-              </div>
-              <Link
-                href="/profile/edit"
-                className="inline-flex items-center text-purple-400 hover:text-purple-300 font-bold text-sm group-hover:translate-x-1 transition-all"
-              >
-                Manage Profile <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
       </main>
     </div>
   );
 }
+

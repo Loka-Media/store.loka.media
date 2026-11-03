@@ -1239,42 +1239,15 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
     // 3. Stationery / books / journals detection (Spiral notebooks, hardcovers, journals, etc.)
     const title = ((selectedProduct?.title || selectedProduct?.name || "") as string).toLowerCase();
-    const isStationery = /\b(journal|notebook|diary|planner|hardcover|spiral)\b/i.test(title);
+    const categoryStr = ((selectedProduct?.category || "") as string).toLowerCase();
+    const isStationery = /\b(journal|notebook|diary|planner|hardcover|spiral|softcover|wirobound|stationery)\b/i.test(title) || /\b(journal|notebook|stationery|paper)\b/i.test(categoryStr);
     const isApparelOrOther = /\b(hoodie|sweatshirt|shirt|tee|t-shirt|apparel|pullover|jacket|tank|top|sweater|fleece|jogger|pant|pants|sock|socks|hat|cap|beanie|mug|mugs|tumbler|bottle|poster|posters|canvas|banner|pillow|blanket|tote|bag)\b/i.test(title);
-    const hasBackPlacement = discoveredPlacements.has("back") || discoveredPlacements.has("rear");
 
-    if (isStationery && !isApparelOrOther && !hasBackPlacement) {
-      // Check if any variant placeholder or printfile has a wide panoramic wraparound print area (> 1.25 aspect ratio and >= 2800px)
-      let isWideWraparound = false;
-      if (selectedProduct?.variants && Array.isArray(selectedProduct.variants)) {
-        for (const v of selectedProduct.variants) {
-          if (Array.isArray(v.placeholders)) {
-            for (const p of v.placeholders) {
-              if (p.width && p.height && (p.width / p.height > 1.25) && p.width >= 2800) {
-                isWideWraparound = true;
-                break;
-              }
-            }
-          }
-          if (isWideWraparound) break;
-        }
-      }
-
-      if (!isWideWraparound && printFiles?.printfiles && Array.isArray(printFiles.printfiles)) {
-        for (const pf of printFiles.printfiles) {
-          if (pf.width && pf.height && (pf.width / pf.height > 1.25) && pf.width >= 2800) {
-            isWideWraparound = true;
-            break;
-          }
-        }
-      }
-
+    if (isStationery && !isApparelOrOther) {
+      // In Printify, all 15 notebooks / journals strictly only allow designing the front cover
       discoveredPlacements.clear();
       discoveredPlacements.add("front_cover");
-      if (isWideWraparound) {
-        // Only wide panoramic covers (Hardcover Journal 485, etc.) support back cover
-        discoveredPlacements.add("back_cover");
-      }
+      return ["front_cover"];
     }
 
     // 4. Fallback ONLY if no placeholders were discovered from Printify API data

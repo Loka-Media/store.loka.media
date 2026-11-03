@@ -81,14 +81,11 @@ export async function POST(request: NextRequest) {
       );
     } else {
       await queryDb(
-        `INSERT INTO creator_requests (user_id, name, username, email, phone, creator_url, status, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, 'pending', NOW(), NOW())`,
+        `INSERT INTO creator_requests (user_id, email, creator_url, status, created_at, updated_at)
+         VALUES ($1, $2, $3, 'pending', NOW(), NOW())`,
         [
           currentUser.id,
-          currentUser.name || currentUser.username || 'Creator',
-          currentUser.username || (currentUser.name ? currentUser.name.toLowerCase().replace(/\s+/g, '') : 'creator'),
           currentUser.email,
-          currentUser.phone || '',
           cleanUrl
         ]
       );
