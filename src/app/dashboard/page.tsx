@@ -134,24 +134,25 @@ export default function DashboardPage() {
         {/* Creator Approval Status Banner (shown when pending or rejected) */}
         <CreatorApprovalStatus />
 
-        {/* Creator Onboarding / Application Card (Shown to regular customers who have not yet applied) */}
-        {!user.creatorStatus && user.role !== "creator" && user.role !== "admin" && (
+        {/* Creator Onboarding / Application Card (Shown to regular customers who have not yet applied or whose application was rejected) */}
+        {(!user.creatorStatus || user.creatorStatus === "rejected") && user.role !== "creator" && user.role !== "admin" && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-950/40 via-neutral-900 to-black border border-orange-500/30 p-6 sm:p-8 shadow-2xl">
             <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
             
             <div className="relative z-10 max-w-3xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-xs font-bold mb-4 uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Create & Sell on Loka</span>
+                <span>{user.creatorStatus === "rejected" ? "Re-apply For Creator Access" : "Create & Sell on Loka"}</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3">
-                Create Your Own Products & Sell Online
+                {user.creatorStatus === "rejected" ? "Re-apply for Creator Access" : "Create Your Own Products & Sell Online"}
               </h2>
 
               <p className="text-gray-300 text-sm sm:text-base leading-relaxed mb-6">
-                Turn your designs and ideas into premium custom merchandise with zero upfront costs!
-                Apply for creator access to unlock our built-in <strong>Canvas Studio</strong>, interactive 360° product previews, and earn up to <strong>90% profit markup</strong> on every sale.
+                {user.creatorStatus === "rejected"
+                  ? "Update your Instagram or social media profile link below to re-submit your application for admin review."
+                  : "Turn your designs and ideas into premium custom merchandise with zero upfront costs! Apply for creator access to unlock our built-in Canvas Studio, interactive 360° product previews, and earn up to 90% profit markup on every sale."}
               </p>
 
               {/* Inline Application Form */}
@@ -178,7 +179,7 @@ export default function DashboardPage() {
                     </>
                   ) : (
                     <>
-                      Apply for Creator Access
+                      {user.creatorStatus === "rejected" ? "Re-apply for Creator Access" : "Apply for Creator Access"}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   )}

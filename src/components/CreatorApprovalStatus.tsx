@@ -37,7 +37,7 @@ export default function CreatorApprovalStatus() {
         return {
           icon: XCircle,
           title: 'Creator Application Not Approved',
-          message: 'Unfortunately, your creator application was not approved at this time. You can continue using the platform as a regular user.',
+          message: 'Your previous creator application was not approved. You can update your social media profile link below and submit a new request anytime.',
           bgColor: 'bg-red-900/30',
           borderColor: 'border-red-500/30',
           iconColor: 'text-red-400',

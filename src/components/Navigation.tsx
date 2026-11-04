@@ -159,10 +159,13 @@ export default function Navigation() {
                         <span>Login as creator (1/2): Waiting for approval</span>
                       </div>
                     ) : user?.creatorStatus === "rejected" ? (
-                      <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-red-300">
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-red-300 hover:bg-red-500/20 transition-colors"
+                      >
                         <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
-                        <span>Creator Application: Rejected</span>
-                      </div>
+                        <span>Application Rejected • Re-apply</span>
+                      </Link>
                     ) : null}
 
                     {user?.role === "admin" && (
@@ -388,10 +391,17 @@ export default function Navigation() {
                             </div>
                           )}
                           {user?.creatorStatus === "rejected" && (
-                            <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200 space-y-1">
-                              <div className="font-bold text-red-300">Creator Application</div>
-                              <div className="text-[11px] text-red-400 font-semibold">❌ Rejected</div>
-                            </div>
+                            <Link
+                              href="/dashboard"
+                              onClick={() => setIsProfileHovered(false)}
+                              className="block p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200 space-y-1 hover:bg-red-500/20 transition-colors"
+                            >
+                              <div className="font-bold text-red-300 flex justify-between items-center">
+                                <span>Creator Application</span>
+                                <span className="text-[10px] bg-red-400/20 text-red-300 px-1.5 py-0.5 rounded font-mono font-bold">Rejected</span>
+                              </div>
+                              <div className="text-[11px] text-red-400 font-semibold">Click here to re-apply →</div>
+                            </Link>
                           )}
                         </div>
                       </div>
@@ -657,9 +667,14 @@ export default function Navigation() {
                   </div>
                 </div>
               ) : user?.creatorStatus === "rejected" ? (
-                <div className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold">
-                  Creator Application: Rejected
-                </div>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold flex items-center justify-between hover:bg-red-500/20 transition-colors"
+                >
+                  <span>Creator Application: Rejected</span>
+                  <span className="text-[10px] text-red-400 font-bold underline">Re-apply →</span>
+                </Link>
               ) : null}
 
               {user?.role === "admin" && (

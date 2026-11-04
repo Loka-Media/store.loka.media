@@ -99,26 +99,38 @@ async function handler(
             json.user.creator_url = cleanUrl;
             json.user.creatorUrl = cleanUrl;
           } else {
-            // For GET /api/auth/me or login, load creator_url from DB if not already present
+            // For GET /api/auth/me or login, load role, creator_status and creator_url from DB
             let creatorUrl = json.user.creator_url || json.user.creatorUrl;
-            if (!creatorUrl && (userId || userEmail)) {
+            if (userId || userEmail) {
               try {
                 if (userId) {
                   const userRows = await queryDb<any>(
-                    `SELECT creator_url FROM users WHERE id = $1 LIMIT 1`,
+                    `SELECT role, creator_status, creator_url FROM users WHERE id = $1 LIMIT 1`,
                     [userId]
                   );
-                  creatorUrl = userRows[0]?.creator_url;
+                  if (userRows && userRows.length > 0) {
+                    const dbUser = userRows[0];
+                    if (dbUser.role) json.user.role = dbUser.role;
+                    json.user.creator_status = dbUser.creator_status;
+                    json.user.creatorStatus = dbUser.creator_status;
+                    if (dbUser.creator_url) creatorUrl = dbUser.creator_url;
+                  }
                 }
                 if (!creatorUrl && (userId || userEmail)) {
                   const crRows = await queryDb<any>(
-                    `SELECT creator_url FROM creator_requests WHERE (user_id = $1 OR email = $2) AND creator_url IS NOT NULL AND creator_url != '' ORDER BY id DESC LIMIT 1`,
+                    `SELECT creator_url, status FROM creator_requests WHERE (user_id = $1 OR email = $2) AND creator_url IS NOT NULL AND creator_url != '' ORDER BY id DESC LIMIT 1`,
                     [userId || 0, userEmail || '']
                   );
-                  creatorUrl = crRows[0]?.creator_url;
+                  if (crRows && crRows.length > 0) {
+                    creatorUrl = crRows[0]?.creator_url;
+                    if (json.user.creatorStatus === undefined) {
+                      json.user.creator_status = crRows[0]?.status;
+                      json.user.creatorStatus = crRows[0]?.status;
+                    }
+                  }
                 }
               } catch (dbErr) {
-                console.error('[Auth Proxy] Error fetching creator_url from DB:', dbErr);
+                console.error('[Auth Proxy] Error fetching creator info from DB:', dbErr);
               }
             }
             if (creatorUrl) {

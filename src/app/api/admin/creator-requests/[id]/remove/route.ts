@@ -182,12 +182,15 @@ export async function DELETE(
     // Delete request
     await queryDb(`DELETE FROM creator_requests WHERE id::text = $1`, [id]);
 
-    // Revert user if needed
+    // Revert user if needed - reset creator_status & creator_url so user is back to a clean customer state
     if (targetUserId) {
       await queryDb(
         `UPDATE users 
-         SET role = 'user', creator_status = NULL, updated_at = NOW() 
-         WHERE id = $1 AND role = 'creator'`,
+         SET role = CASE WHEN role = 'creator' THEN 'user' ELSE role END,
+             creator_status = NULL,
+             creator_url = NULL,
+             updated_at = NOW() 
+         WHERE id = $1`,
         [targetUserId]
       );
     }
