@@ -15,7 +15,7 @@ import GradientTitle from "@/components/ui/GradientTitle";
 import { Button } from "@/components/ui/button";
 
 export default function WishlistPage() {
-  const { items, loading, removeFromWishlist, clearWishlist } = useWishlist();
+  const { items, loading, removeFromWishlist, clearWishlist, wishlistCount } = useWishlist();
   const { addToCart } = useGuestCart();
   const { isAuthenticated } = useAuth();
   const { formatPrice } = useCurrency();
@@ -71,9 +71,15 @@ export default function WishlistPage() {
           <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl inline-flex items-center justify-center mb-6">
             <Heart className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Sign In to Continue</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {wishlistCount > 0
+              ? `You Have ${wishlistCount} Saved Item${wishlistCount > 1 ? "s" : ""}`
+              : "Sign In to Continue"}
+          </h2>
           <p className="text-gray-400 font-medium mb-8">
-            Please log in to access your wishlist and view your saved items.
+            {wishlistCount > 0
+              ? "Your wishlisted items are saved in your guest session. Please sign in to sync them to your account and keep them permanently."
+              : "Please log in to access your wishlist and view your saved items."}
           </p>
           <div className="flex flex-col gap-3">
             <Button
@@ -81,7 +87,7 @@ export default function WishlistPage() {
               variant="primary"
               className="w-full"
             >
-              Sign In
+              Sign In to View & Sync
             </Button>
             <Button
               onClick={() => router.push('/products')}

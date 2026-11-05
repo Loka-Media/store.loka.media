@@ -22,7 +22,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const { addToWishlist, removeFromWishlist, items: wishlistItems } = useWishlist();
+  const { addToWishlist, removeFromWishlist, items: wishlistItems, isInWishlist, wishlistCount } = useWishlist();
   const { isAuthenticated } = useAuth();
   const { getProductPriceRange } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
@@ -34,9 +34,9 @@ export function ProductCard({ product }: ProductCardProps) {
       const inWishlist = wishlistItems.some(item => item.product_id === product.id);
       setIsWishlisted(inWishlist);
     } else {
-      setIsWishlisted(false);
+      setIsWishlisted(isInWishlist(product.id));
     }
-  }, [isAuthenticated, product.id, wishlistItems]);
+  }, [isAuthenticated, product.id, wishlistItems, isInWishlist, wishlistCount]);
 
   const imageUrl = getValidImageUrl(product);
 
@@ -193,18 +193,14 @@ export function ProductCard({ product }: ProductCardProps) {
               onClick={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!isAuthenticated) {
-                  addPendingWishlistItem(product.id);
-                  toast.success("Product saved! Please sign in to view your wishlist");
-                  router.push('/auth/login?redirect=/wishlist');
-                  return;
-                }
 
                 try {
                   if (isWishlisted) {
                     await removeFromWishlist(product.id);
+                    setIsWishlisted(false);
                   } else {
                     await addToWishlist(product.id);
+                    setIsWishlisted(true);
                   }
                 } catch (error) {
                   console.error('Wishlist operation failed:', error);
