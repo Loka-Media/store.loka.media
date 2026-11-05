@@ -729,8 +729,8 @@ const Product360Viewer: React.FC<{
           </div>
 
           {canReorder && (
-            <div className="flex items-center gap-1.5 px-1 text-[11px] text-gray-600 font-medium">
-              <GripVertical className="w-3.5 h-3.5 text-gray-500" />
+            <div className="flex items-center gap-1.5 px-1 text-[10px] sm:text-[11px] text-gray-600 font-medium flex-wrap">
+              <GripVertical className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
               <span>Drag thumbnails or use arrows to reorder • <strong>Image #1 is your storefront cover</strong></span>
             </div>
           )}
@@ -2918,6 +2918,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       step: 1,
       num: "01",
       title: "Color & Sizes",
+      mobileTitle: "Colors",
       subtitle: "Product options",
       isValid: validationSummary.variants,
     },
@@ -2925,6 +2926,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       step: 2,
       num: "02",
       title: "Add Design",
+      mobileTitle: "Design",
       subtitle: "Upload & position",
       isValid: validationSummary.designs,
     },
@@ -2932,6 +2934,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       step: 3,
       num: "03",
       title: "Title & Price",
+      mobileTitle: "Pricing",
       subtitle: "Product options",
       isValid: validationSummary.details,
     },
@@ -2939,13 +2942,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       step: 4,
       num: "04",
       title: "Review & Launch",
+      mobileTitle: "Review",
       subtitle: "Final checklist",
       isValid: validationSummary.allValid,
     },
   ];
 
   return (
-    <div className="bg-[#050505] min-h-screen text-white relative pt-[96px] md:pt-[104px] w-full max-w-full overflow-x-clip">
+    <div className="bg-[#050505] min-h-screen text-white relative pt-2 sm:pt-4 md:pt-8 w-full max-w-full overflow-x-clip">
       {/* Hidden input for custom image uploads */}
       <input
         type="file"
@@ -2957,9 +2961,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       />
 
       {/* Sticky Header with Product Info & Continue Button - sits perfectly flush below fixed navbar */}
-      <div className="sticky top-[96px] md:top-[104px] z-40 bg-[#080808]/95 backdrop-blur-md border-b border-white/10 shadow-2xl py-2.5 sm:py-3 px-3 sm:px-6 w-full">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4 w-full">
-          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 flex-1">
+      <div className="sticky top-[74px] sm:top-[88px] md:top-[104px] z-40 bg-[#080808]/95 backdrop-blur-md border-b border-white/10 shadow-2xl py-2 sm:py-2.5 md:py-3 px-3 sm:px-6 w-full">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 w-full">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
             <button
               type="button"
               onClick={handleBack}
@@ -2969,33 +2973,34 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-0.5 transition-transform" />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="text-sm sm:text-base md:text-lg font-bold font-clash text-white line-clamp-1">
+              <div className="text-xs sm:text-base md:text-lg font-bold font-clash text-white truncate">
                 {selectedProduct?.title || selectedProduct?.name}
               </div>
-              <p className="text-[10px] sm:text-xs text-gray-400 truncate">
+              <p className="text-[10px] sm:text-xs text-gray-400 truncate hidden xs:block">
                 SKU: {selectedProduct?.model || selectedProduct?.id} | {selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}
               </p>
             </div>
           </div>
-          <div className="flex-shrink-0 flex items-center gap-1.5 sm:gap-3">
+          <div className="flex-shrink-0 flex items-center gap-1 sm:gap-2.5">
             {activeStep === 2 && (
               <button
                 type="button"
                 onClick={handleManualRegenerate}
                 disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
-                className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_16px_rgba(255,109,31,0.25)] flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed leading-none"
+                className="h-8 sm:h-10 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_16px_rgba(255,109,31,0.25)] flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed leading-none"
               >
                 {isGeneratingPreview ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
-                    <span className="leading-none">Generating...</span>
+                    <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin flex-shrink-0" />
+                    <span className="leading-none text-[10px] sm:text-sm">Generating...</span>
                   </>
                 ) : cooldown > 0 ? (
-                  <span className="leading-none">Wait {cooldown}s</span>
+                  <span className="leading-none text-[10px] sm:text-sm">Wait {cooldown}s</span>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="leading-none">{mockupUrls && mockupUrls.length > 0 ? "Regenerate Preview" : "Generate Preview"}</span>
+                    <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                    <span className="leading-none hidden sm:inline">{mockupUrls && mockupUrls.length > 0 ? "Regenerate Preview" : "Generate Preview"}</span>
+                    <span className="leading-none sm:hidden">{mockupUrls && mockupUrls.length > 0 ? "Regen" : "Preview"}</span>
                   </>
                 )}
               </button>
@@ -3003,28 +3008,30 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold border border-white/20 bg-black/40 hover:bg-white/10 text-white transition-all cursor-pointer whitespace-nowrap flex items-center justify-center leading-none"
+              className="h-8 sm:h-10 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold border border-white/20 bg-black/40 hover:bg-white/10 text-white transition-all cursor-pointer whitespace-nowrap flex items-center justify-center leading-none"
             >
-              Save Draft
+              <span className="hidden sm:inline">Save Draft</span>
+              <span className="sm:hidden">Draft</span>
             </button>
             <button
               type="button"
               onClick={handleContinueNext}
               disabled={isPublishing || isGeneratingPreview}
-              className="h-9 sm:h-10 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 leading-none"
+              className="h-8 sm:h-10 px-2.5 sm:px-5 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 leading-none"
             >
               {isPublishing ? (
-                <div className="flex items-center gap-2 whitespace-nowrap">
-                  <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
                   <span className="leading-none">{isEditing ? "Updating..." : "Publishing..."}</span>
                 </div>
               ) : activeStep < 4 ? (
                 <>
-                  <span className="leading-none">Continue</span>
-                  <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="leading-none hidden xs:inline">Continue</span>
+                  <span className="leading-none xs:hidden">Next</span>
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
                 </>
               ) : (
-                <span className="leading-none">{isEditing ? "Update Product" : "Publish Product"}</span>
+                <span className="leading-none">{isEditing ? "Update" : "Publish"}</span>
               )}
             </button>
           </div>
@@ -3032,8 +3039,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       </div>
 
       {/* FULL-WIDTH STEPPER BAR (Figma Design) */}
-      <div ref={topStepperRef} className="max-w-7xl mx-auto px-3 sm:px-6 pt-5 sm:pt-7">
-        <div className="bg-[#0B132B]/85 border border-white/10 rounded-2xl md:rounded-3xl p-5 sm:p-6 md:px-10 backdrop-blur-md shadow-2xl relative">
+      <div ref={topStepperRef} className="max-w-7xl mx-auto px-3 sm:px-6 pt-3 sm:pt-5 md:pt-7">
+        <div className="bg-[#0B132B]/85 border border-white/10 rounded-2xl md:rounded-3xl p-3.5 sm:p-5 md:p-6 md:px-10 backdrop-blur-md shadow-2xl relative">
           <div className="relative">
             {/* Background connecting track line running between 01 and 04 */}
             <div className="absolute top-4 sm:top-4 left-[12.5%] right-[12.5%] h-[2px] bg-white/20 -translate-y-1/2 pointer-events-none" />
@@ -3086,17 +3093,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     </div>
 
                     {/* Step Title & Subtitle */}
-                    <div className="mt-2.5 space-y-0.5">
+                    <div className="mt-2 space-y-0.5">
                       <div
-                        className={`text-xs sm:text-sm font-bold font-clash leading-tight transition-colors ${
+                        className={`text-[11px] sm:text-sm font-bold font-clash leading-tight transition-colors ${
                           isActive
                             ? "text-white"
                             : "text-gray-300 group-hover:text-white"
                         }`}
                       >
-                        {s.title}
+                        <span className="sm:hidden">{s.mobileTitle || s.title}</span>
+                        <span className="hidden sm:inline">{s.title}</span>
                       </div>
-                      <div className="text-[10px] sm:text-xs text-gray-400">
+                      <div className="hidden sm:block text-[10px] sm:text-xs text-gray-400">
                         {s.subtitle}
                       </div>
                     </div>
@@ -3135,7 +3143,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               {/* Section 1: Product Information */}
               <div className="gradient-border-white-top p-5 sm:p-6 bg-gray-900/60 rounded-3xl backdrop-blur-sm border border-white/5">
                 <div className="flex flex-col md:flex-row gap-5">
-                  <div className="w-full md:w-1/3 aspect-square relative bg-[#f4f4f5] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-4">
+                  <div className="w-32 h-32 sm:w-44 sm:h-44 md:w-1/3 md:aspect-square mx-auto md:mx-0 relative bg-[#f4f4f5] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3 sm:p-4">
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
@@ -3277,7 +3285,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                   setSelectedColors([...selectedColors, color.name]);
                                 }
                               }}
-                              className={`relative border-2 rounded-full px-5 py-2 min-w-[85px] flex items-center justify-center transition-all duration-200 cursor-pointer ${isSelected
+                              className={`relative border-2 rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 min-w-[70px] sm:min-w-[85px] flex items-center justify-center transition-all duration-200 cursor-pointer ${isSelected
                                 ? isActive
                                   ? "border-[#FF6D1F] shadow-[0_0_12px_rgba(255,109,31,0.35)]"
                                   : "border-white"
@@ -3355,7 +3363,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                   setSelectedSizes([...selectedSizes, size]);
                                 }
                               }}
-                              className={`relative border-2 rounded-full px-5 py-2 min-w-[85px] text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center cursor-pointer bg-black/80 ${
+                              className={`relative border-2 rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 min-w-[70px] sm:min-w-[85px] text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center cursor-pointer bg-black/80 ${
                                 isActiveSize
                                   ? "border-[#FF6D1F] text-white ring-2 ring-[#FF6D1F]/50 shadow-lg shadow-[#FF6D1F]/20"
                                   : isSelected
@@ -3448,7 +3456,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               {/* Base Catalog Item Card */}
               <div className="p-5 sm:p-6 bg-gray-900/60 rounded-3xl border border-white/10 shadow-lg">
                 <div className="flex flex-col sm:flex-row gap-5 items-start">
-                  <div className="w-full sm:w-[150px] aspect-square relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
+                  <div className="w-28 h-28 sm:w-[150px] aspect-square mx-auto sm:mx-0 relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
@@ -3652,7 +3660,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <div className="space-y-3 pt-3 border-t border-white/5">
                   <div className="bg-gradient-to-b from-gray-900/80 to-black/90 rounded-2xl border border-white/10 p-3 sm:p-5 shadow-2xl">
                     <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10 text-xs">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                         <span className="font-clash font-bold text-white text-sm sm:text-base tracking-wide flex items-center gap-1.5">
                           <Sliders className="w-4 h-4 text-[#FF6D1F]" />
                           Adjust & Resize Artwork
@@ -3899,7 +3907,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               {/* Base Catalog Item Card (Figma Design) */}
               <div className="p-5 sm:p-6 bg-gray-900/60 rounded-3xl border border-white/10 shadow-lg">
                 <div className="flex flex-col sm:flex-row gap-5 items-start">
-                  <div className="w-full sm:w-[150px] aspect-square relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
+                  <div className="w-28 h-28 sm:w-[150px] aspect-square mx-auto sm:mx-0 relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
@@ -4071,7 +4079,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
               {/* Card 2: Your Creator Profit Markup (Figma Design) */}
               <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-xl font-bold font-clash text-white">
                       Your Creator Profit Markup
@@ -4122,7 +4130,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 </div>
 
                 {/* 3 Summary Cards */}
-                <div className="grid grid-cols-3 gap-3 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-2">
                   {/* Card 1: Base Cost */}
                   <div className="border border-white/10 bg-black/40 rounded-2xl p-3.5 space-y-1">
                     <span className="text-xs text-gray-400 font-medium block">Base Cost</span>
@@ -4202,7 +4210,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               {/* Base Catalog Item Card (Figma Design) */}
               <div className="p-5 sm:p-6 bg-gray-900/60 rounded-3xl border border-white/10 shadow-lg">
                 <div className="flex flex-col sm:flex-row gap-5 items-start">
-                  <div className="w-full sm:w-[150px] aspect-square relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
+                  <div className="w-28 h-28 sm:w-[150px] aspect-square mx-auto sm:mx-0 relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
@@ -4268,7 +4276,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
               {/* Card 1: Review & Publish Live (Figma Design) */}
               <div id="field-mockup-studio" className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-4 scroll-mt-48 transition-all">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
                   <h3 className="text-xl font-bold font-clash text-white">
                     Review & Publish Live
                   </h3>
@@ -4399,7 +4407,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
               {/* Card 3: Big Ready to Go Live Card (Figma Design) */}
               <div className="p-6 rounded-3xl bg-gradient-to-br from-[#1C1229] via-[#0E1322] to-[#0A0D18] border border-purple-500/30 space-y-4 shadow-2xl">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
                   <div>
                     <h4 className="text-lg sm:text-xl font-bold font-clash text-white flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-purple-400" />

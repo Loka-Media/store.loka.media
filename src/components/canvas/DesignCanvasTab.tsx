@@ -751,7 +751,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                 </div>
 
                 {/* Row 1: Interactive Size / Scale Slider */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-gray-300 font-medium flex items-center gap-1.5">
                       <Sliders className="w-3.5 h-3.5 text-orange-400" />
@@ -762,44 +762,47 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => handleScaleChange(Math.max(10, currentScalePercent - 5))}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-gray-200 transition-colors cursor-pointer"
-                      title="Decrease size by 5%"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5">
+                    {/* Slider row (takes full width on mobile) */}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => handleScaleChange(Math.max(10, currentScalePercent - 5))}
+                        className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-gray-200 transition-colors cursor-pointer"
+                        title="Decrease size by 5%"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
 
-                    <input
-                      type="range"
-                      min={10}
-                      max={100}
-                      step={1}
-                      value={currentScalePercent}
-                      onChange={(e) => handleScaleChange(Number(e.target.value))}
-                      className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#FF6D1F]"
-                      title="Drag to resize artwork"
-                    />
+                      <input
+                        type="range"
+                        min={10}
+                        max={100}
+                        step={1}
+                        value={currentScalePercent}
+                        onChange={(e) => handleScaleChange(Number(e.target.value))}
+                        className="flex-1 min-w-0 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#FF6D1F]"
+                        title="Drag to resize artwork"
+                      />
 
-                    <button
-                      type="button"
-                      onClick={() => handleScaleChange(Math.min(100, currentScalePercent + 5))}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-gray-200 transition-colors cursor-pointer"
-                      title="Increase size by 5%"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleScaleChange(Math.min(100, currentScalePercent + 5))}
+                        className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-gray-200 transition-colors cursor-pointer"
+                        title="Increase size by 5%"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
 
-                    {/* Quick Presets */}
-                    <div className="flex items-center gap-1 pl-1">
+                    {/* Quick Presets: 4 columns grid on mobile, flex row on sm+ */}
+                    <div className="grid grid-cols-4 sm:flex items-center gap-1 sm:pl-1">
                       <button
                         type="button"
                         onClick={() => handleScaleChange(25)}
-                        className={`px-2 py-1 text-[11px] rounded-lg border transition-colors cursor-pointer ${
+                        className={`px-2 py-1 text-center text-[11px] rounded-lg border transition-colors cursor-pointer ${
                           currentScalePercent === 25
-                            ? "bg-orange-500 text-white border-orange-500"
+                            ? "bg-orange-500 text-white border-orange-500 font-semibold"
                             : "bg-white/5 hover:bg-white/10 border-white/10 text-gray-300"
                         }`}
                       >
@@ -808,9 +811,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       <button
                         type="button"
                         onClick={() => handleScaleChange(50)}
-                        className={`px-2 py-1 text-[11px] rounded-lg border transition-colors cursor-pointer ${
+                        className={`px-2 py-1 text-center text-[11px] rounded-lg border transition-colors cursor-pointer ${
                           currentScalePercent === 50
-                            ? "bg-orange-500 text-white border-orange-500"
+                            ? "bg-orange-500 text-white border-orange-500 font-semibold"
                             : "bg-white/5 hover:bg-white/10 border-white/10 text-gray-300"
                         }`}
                       >
@@ -819,9 +822,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       <button
                         type="button"
                         onClick={() => handleScaleChange(75)}
-                        className={`px-2 py-1 text-[11px] rounded-lg border transition-colors cursor-pointer ${
+                        className={`px-2 py-1 text-center text-[11px] rounded-lg border transition-colors cursor-pointer ${
                           currentScalePercent === 75
-                            ? "bg-orange-500 text-white border-orange-500"
+                            ? "bg-orange-500 text-white border-orange-500 font-semibold"
                             : "bg-white/5 hover:bg-white/10 border-white/10 text-gray-300"
                         }`}
                       >
@@ -830,7 +833,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       <button
                         type="button"
                         onClick={() => handleQuickAlign("fit")}
-                        className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg border transition-colors cursor-pointer flex items-center gap-1 ${
+                        className={`px-2.5 py-1 text-center text-[11px] font-semibold rounded-lg border transition-colors cursor-pointer flex items-center justify-center gap-1 ${
                           currentScalePercent === 100
                             ? "bg-orange-500 text-white border-orange-500"
                             : "bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-orange-300"
@@ -845,14 +848,14 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                 </div>
 
                 {/* Row 2: Alignment & Action Buttons */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-white/10 text-xs">
                   {/* Position Alignment Buttons */}
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                     <span className="text-gray-400 text-[11px] mr-1">Align:</span>
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("center")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Center horizontally and vertically"
                     >
                       <Crosshair className="w-3 h-3 text-orange-400" />
@@ -861,7 +864,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("top-center")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Align to top center"
                     >
                       <ArrowUp className="w-3 h-3 text-gray-400" />
@@ -870,7 +873,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("bottom-center")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Align to bottom center"
                     >
                       <ArrowDown className="w-3 h-3 text-gray-400" />
@@ -879,7 +882,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("center-left")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Align to left"
                     >
                       <ArrowLeft className="w-3 h-3 text-gray-400" />
@@ -888,7 +891,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("center-right")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Align to right"
                     >
                       <ArrowRight className="w-3 h-3 text-gray-400" />
@@ -897,13 +900,13 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                   </div>
 
                   {/* Actions: AI BG, Auto-Fix Ratio, Remove */}
-                  <div className="flex items-center gap-2 ml-auto">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:ml-auto">
                     {onRemoveBackground && (
                       <button
                         type="button"
                         onClick={onRemoveBackground}
                         disabled={isRemovingBackground}
-                        className="px-2.5 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1 text-[11px]"
+                        className="px-2 sm:px-2.5 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1 text-[11px]"
                         title="Remove white/solid background using AI"
                       >
                         <Sparkles className="w-3 h-3 text-orange-400" />
@@ -916,7 +919,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       activePlacement={activePlacement}
                       activePrintFile={activePrintFile}
                       updateDesignPosition={updateDesignPosition}
-                      className="px-2.5 py-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                     >
                       <Zap className="w-3 h-3 text-blue-400" />
                       <span>Fix Ratio</span>
@@ -925,7 +928,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleRemoveDesign(activeDesign)}
-                      className="px-2.5 py-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Remove artwork from placement"
                     >
                       <Trash2 className="w-3 h-3" />

@@ -146,11 +146,11 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 pb-4 bg-[#050505]/60 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 py-2.5 sm:py-4 bg-[#050505]/60 backdrop-blur-md border-b border-white/5 transition-all duration-300">
       <div className="container mx-auto">
         {/* Rounded pill container */}
         <div className="bg-[#1a1a1a]/95 backdrop-blur-lg rounded-full border border-white/10 shadow-2xl">
-          <div className="flex items-center justify-between px-6 md:px-8 h-16 md:h-[72px]">
+          <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 h-14 sm:h-16 md:h-[72px]">
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/">
