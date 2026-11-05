@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
@@ -47,6 +48,12 @@ export default function Navigation() {
   const { cartCount } = useGuestCart();
   const { wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close mobile menu whenever navigation/route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
   const { currency, setCurrency } = useCurrency();
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
   const [copiedStoreLink, setCopiedStoreLink] = useState(false);
@@ -593,6 +600,7 @@ export default function Navigation() {
                   href="/auth/signup"
                   className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
                   style={{ background: "#FF6D1F", fontWeight: 500 }}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Join Now
                 </Link>
@@ -891,8 +899,9 @@ export default function Navigation() {
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                  className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer text-center block"
                   style={{ background: "#FF6D1F", fontWeight: 500 }}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Join Now
                 </Link>
