@@ -16,7 +16,8 @@ import {
   Grid,
   List,
   ChevronLeft,
-  ArrowLeft
+  ArrowLeft,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -453,38 +454,40 @@ function FilesPageContent() {
       {/* Header */}
       <div className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 sm:py-8 gap-4 sm:gap-0">
-            <div className="flex-1 mt-4">
+          <div className="flex items-center justify-between py-3 sm:py-6">
+            <div className="flex items-center gap-4 w-full justify-between">
               <Link
                 href="/dashboard/creator"
-                className="inline-flex items-center px-3 sm:px-6 py-1.5 sm:py-3 text-white/70 hover:text-white border border-white/20 rounded-lg font-bold hover:bg-white/5 transition-all text-xs sm:text-sm gap-2 mb-3 sm:mb-4"
+                className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/5 -ml-2 sm:ml-0"
               >
-                <ArrowLeft className="w-3 h-3 sm:w-5 sm:h-5" />
-                <span>Dashboard</span>
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+                <span className="text-sm sm:text-base font-medium">Dashboard</span>
               </Link>
-              <div className="flex flex-col">
-                <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">
-                  Design Files
-                </h1>
-                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-400 font-medium">
-                  Manage your uploaded design files
-                </p>
-              </div>
+            </div>
+          </div>
+          <div className="pb-5 sm:pb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div>
+              <GradientTitle
+                text="Design Files"
+                size="sm"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
+              />
+              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-400 font-medium">
+                Manage your uploaded design files
+              </p>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
-              <label className="inline-flex items-center px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all cursor-pointer text-xs sm:text-sm gap-1 sm:gap-2 whitespace-nowrap">
+            <div className="flex flex-col sm:items-end gap-1.5 w-full sm:w-auto">
+              <label className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all cursor-pointer text-sm w-full sm:w-fit">
                 {uploading ? (
                   <>
-                    <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
-                    <span className="hidden sm:inline">Uploading...</span>
-                    <span className="sm:hidden">Upload</span>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Uploading...</span>
                   </>
                 ) : (
                   <>
-                    <Upload className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                    <span className="hidden sm:inline">Upload Files</span>
-                    <span className="sm:hidden">Upload</span>
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Design Files</span>
                   </>
                 )}
                 <input
@@ -496,90 +499,105 @@ function FilesPageContent() {
                   className="hidden"
                 />
               </label>
+              <p className="text-[11px] sm:text-xs text-gray-400 font-medium text-center sm:text-right">
+                Accepted formats: PNG, JPG, SVG, WebP
+              </p>
             </div>
-          </div>
-          <div className="mt-2 sm:mt-3">
-            <p className="text-xs text-gray-400 font-medium">
-              Accepted formats: PNG, JPG, SVG, WebP
-            </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
         {/* Filters and Controls */}
-        <div className="gradient-border-white-top p-6 sm:p-8 mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 flex-1">
+        <div className="gradient-border-white-top p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Search */}
-              <div className="relative flex-1 max-w-sm">
+              <div className="relative flex-1">
                 <input
                   type="text"
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
+                  className="w-full pl-10 pr-10 py-2 sm:py-2.5 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
                   placeholder="Search files..."
                 />
-                <Search className="absolute left-3 top-3 sm:top-3.5 h-4 w-4 sm:h-5 sm:w-5 text-white/70" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-white/70 pointer-events-none" />
+                {filters.search && (
+                  <button
+                    type="button"
+                    onClick={() => setFilters(prev => ({ ...prev, search: "" }))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
+                    title="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
 
-              {/* Type Filter */}
-              <Select
-                value={filters.type || "all"}
-                onValueChange={(val) => setFilters(prev => ({ ...prev, type: val === "all" ? "" : val }))}
-              >
-                <SelectTrigger className="w-[140px] h-[42px] sm:h-[46px] bg-white/5 border-white/20 rounded-lg">
-                  <SelectValue placeholder="All Types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="image/png">PNG</SelectItem>
-                  <SelectItem value="image/jpeg">JPG</SelectItem>
-                  <SelectItem value="image/svg">SVG</SelectItem>
-                  <SelectItem value="image/webp">WebP</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* 2-Column Grid on Mobile for Filters */}
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 sm:gap-4">
+                {/* Type Filter */}
+                <Select
+                  value={filters.type || "all"}
+                  onValueChange={(val) => setFilters(prev => ({ ...prev, type: val === "all" ? "" : val }))}
+                >
+                  <SelectTrigger className="w-full sm:w-[140px] h-[38px] sm:h-[46px] bg-white/5 border-white/20 rounded-lg text-xs sm:text-sm">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="image/png">PNG</SelectItem>
+                    <SelectItem value="image/jpeg">JPG</SelectItem>
+                    <SelectItem value="image/svg">SVG</SelectItem>
+                    <SelectItem value="image/webp">WebP</SelectItem>
+                  </SelectContent>
+                </Select>
 
-              {/* Status Filter */}
-              <Select
-                value={filters.status || "all"}
-                onValueChange={(val) => setFilters(prev => ({ ...prev, status: val === "all" ? "" : val }))}
-              >
-                <SelectTrigger className="w-[140px] h-[42px] sm:h-[46px] bg-white/5 border-white/20 rounded-lg">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="ok">Ready</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                </SelectContent>
-              </Select>
+                {/* Status Filter */}
+                <Select
+                  value={filters.status || "all"}
+                  onValueChange={(val) => setFilters(prev => ({ ...prev, status: val === "all" ? "" : val }))}
+                >
+                  <SelectTrigger className="w-full sm:w-[140px] h-[38px] sm:h-[46px] bg-white/5 border-white/20 rounded-lg text-xs sm:text-sm">
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="ok">Ready</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-3 sm:space-x-4">
+            {/* Bottom Row: View Mode + Files Count */}
+            <div className="flex items-center justify-between pt-3 border-t border-white/10">
               {/* View Mode */}
               <div className="flex border border-white/20 rounded-lg overflow-hidden">
                 <button
                   type="button"
                   onClick={() => handleViewModeChange('grid')}
-                  className={`p-2 sm:p-3 transition-all font-bold text-sm ${viewMode === 'grid' ? 'bg-white/20 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
+                  className={`p-2 sm:p-2.5 transition-all text-sm font-medium ${viewMode === 'grid' ? 'bg-white/20 text-white' : 'bg-transparent text-white/70 hover:text-white'}`}
+                  title="Grid view"
                 >
-                  <Grid className="w-4 h-4" />
+                  <Grid className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleViewModeChange('list')}
-                  className={`p-2 sm:p-3 transition-all font-bold text-sm ${viewMode === 'list' ? 'bg-white/20 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
+                  className={`p-2 sm:p-2.5 transition-all text-sm font-medium border-l border-white/20 ${viewMode === 'list' ? 'bg-white/20 text-white' : 'bg-transparent text-white/70 hover:text-white'}`}
+                  title="List view"
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
-            </div>
-          </div>
 
-          <div className="mt-6 text-xs sm:text-sm font-bold text-white/80 bg-white/5 border border-white/20 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 inline-block">
-            {filteredFiles.length} files found
+              {/* Files Count Badge */}
+              <div className="text-xs sm:text-sm font-medium text-gray-400">
+                <span className="text-white font-bold">{filteredFiles.length}</span> files found
+              </div>
+            </div>
           </div>
         </div>
 
@@ -618,7 +636,7 @@ function FilesPageContent() {
             )}
           </div>
         ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
             {filteredFiles.map((file) => (
               <FileGridItem
                 key={file.id}
@@ -706,118 +724,92 @@ function FileGridItem({
   };
 
   return (
-    <div className="gradient-border-white-top p-4 transition-all bg-white/5 hover:bg-white/10">
+    <div className="gradient-border-white-top p-2.5 sm:p-4 transition-all bg-white/5 hover:bg-white/10 rounded-xl group flex flex-col justify-between">
+      <div>
+        {file.mime_type?.startsWith('image/') && file.url ? (
+          <div className="relative aspect-square w-full bg-black/40 rounded-lg overflow-hidden mb-2.5 sm:mb-3 border border-white/10">
+            <Image
+              src={file.thumbnail_url || file.url}
+              alt={file.filename}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              priority={false}
+            />
+            {/* Overlay with buttons on hover for desktop */}
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex items-center justify-center gap-2">
+              <a
+                href={file.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white"
+                title="View original"
+              >
+                <Eye className="w-4 h-4" />
+              </a>
+              <button
+                type="button"
+                onClick={onDownload}
+                className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white cursor-pointer"
+                title="Download file"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={onDelete}
+                className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors text-red-400 cursor-pointer"
+                title="Delete file"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="relative aspect-square flex flex-col items-center justify-center bg-white/10 rounded-lg mb-2.5 sm:mb-3 border border-white/10">
+            <div className="mb-2">
+              {getFileIcon(file)}
+            </div>
+            <p className="text-xs text-white/70 text-center px-2">
+              {file.type || 'File'}
+            </p>
+          </div>
+        )}
 
-      {file.mime_type?.startsWith('image/') && file.url ? (
-        <div className="relative aspect-square w-full bg-white/10 rounded-lg overflow-hidden mb-4 border border-white/10 group">
-          <Image
-            src={file.thumbnail_url || file.url}
-            alt={file.filename}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-            className="object-cover"
-            priority={false}
-          />
-          {/* Overlay with buttons - always visible on mobile, hover on desktop */}
-          <div className="absolute inset-0 bg-black/50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-            <a
-              href={file.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-              title="View file"
-            >
-              <Eye className="w-5 h-5 text-white" />
-            </a>
-            <button
-              type="button"
-              onClick={onDownload}
-              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white cursor-pointer"
-              title="Download file"
-            >
-              <Download className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors text-red-400 cursor-pointer"
-              title="Delete file"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="relative aspect-square flex flex-col items-center justify-center bg-white/10 rounded-lg mb-4 border border-white/10 group">
-          <div className="mb-3">
-            {getFileIcon(file)}
-          </div>
-          <p className="text-xs text-white/70 text-center px-2">
-            {file.type || 'File'}
-          </p>
-          {/* Overlay with buttons for non-image files - always visible on mobile, hover on desktop */}
-          <div className="absolute inset-0 bg-black/50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 rounded-lg">
-            <a
-              href={file.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-              title="View file"
-            >
-              <Eye className="w-5 h-5 text-white" />
-            </a>
-            <button
-              type="button"
-              onClick={onDownload}
-              className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors text-white cursor-pointer"
-              title="Download file"
-            >
-              <Download className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition-colors text-red-400 cursor-pointer"
-              title="Delete file"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      )}
+        <p className="text-xs sm:text-sm font-semibold text-white truncate group-hover:text-orange-400 transition-colors" title={file.filename}>
+          {file.filename}
+        </p>
+      </div>
 
-      <p className="text-xs sm:text-sm font-medium text-white truncate" title={file.filename}>
-        {file.filename}
-      </p>
       <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10">
-        <span className="text-xs text-white/60 font-medium">
+        <span className="text-[10px] sm:text-xs text-gray-400 font-medium">
           {formatFileSize(file.size)}
         </span>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <a
             href={file.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-1.5 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1 sm:p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors"
             title="View image"
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </a>
           <button
             type="button"
             onClick={onDownload}
-            className="p-1.5 rounded-md text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 transition-colors cursor-pointer"
+            className="p-1 sm:p-1.5 rounded-md text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 transition-colors cursor-pointer"
             title="Download file"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="p-1.5 rounded-md text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors cursor-pointer"
+            className="p-1 sm:p-1.5 rounded-md text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors cursor-pointer"
             title="Delete file"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
