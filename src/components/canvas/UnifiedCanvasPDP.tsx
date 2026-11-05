@@ -2715,9 +2715,20 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   useEffect(() => {
     const bId = selectedProduct?.blueprintId || selectedProduct?.id || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("blueprintId") : null);
     const pId = isEditing ? (selectedProduct?.id || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("productId") : null)) : null;
-    if (!bId && !pId) return;
 
-    // 1. Instant check from localStorage
+    if (!isEditing) {
+      // Creating a brand new product:
+      // Ensure custom image uploads from any previously published product are stripped out
+      if (typeof window !== "undefined" && bId) {
+        localStorage.removeItem(`saved_canvas_mockups_${bId}`);
+      }
+      setMockupUrls?.((prev: any[]) => (prev || []).filter((m: any) => !m?.isCustomUpload && m?.placement !== "custom"));
+      return;
+    }
+
+    if (!pId) return;
+
+    // When editing an existing product: restore mockups specifically for this productId
     if (typeof window !== "undefined" && bId) {
       try {
         const localSaved = localStorage.getItem(`saved_canvas_mockups_${bId}`);
@@ -2730,19 +2741,19 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       } catch (_) {}
     }
 
-    // 2. Asynchronous fetch from PostgreSQL DB
+    // Fetch from DB specifically for this productId
     const fetchSavedMockups = async () => {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") || "" : "";
-        const res = await fetch(`/api/creator/canvas-mockups?blueprintId=${bId || ""}&productId=${pId || ""}`, {
+        const res = await fetch(`/api/creator/canvas-mockups?productId=${pId}`, {
           headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
           },
         });
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.mockups) && data.mockups.length > 0) {
-            console.log(`[UnifiedCanvasPDP] Restored ${data.mockups.length} mockups from DB`);
+            console.log(`[UnifiedCanvasPDP] Restored ${data.mockups.length} mockups for product ${pId}`);
             setMockupUrls?.(data.mockups);
             if (typeof window !== "undefined" && bId) {
               localStorage.setItem(`saved_canvas_mockups_${bId}`, JSON.stringify(data.mockups));

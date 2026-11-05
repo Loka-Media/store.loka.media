@@ -181,6 +181,16 @@ export default function AdminProductsPage() {
                     </div>
                     <Link
                       href={`/dashboard/creator/canvas?blueprintId=${product.id}`}
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          try {
+                            localStorage.removeItem(`saved_canvas_mockups_${product.id}`);
+                            localStorage.removeItem(`mockup_request_${product.id}`);
+                            localStorage.removeItem(`productForm_${product.id}`);
+                            localStorage.removeItem(`loka_draft_${product.id}`);
+                          } catch (_) {}
+                        }
+                      }}
                       className="mt-2.5 w-full py-1.5 px-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white text-[11px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition-opacity shadow-sm"
                     >
                       <Plus className="w-3 h-3" />

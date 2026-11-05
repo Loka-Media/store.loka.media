@@ -48,18 +48,31 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, mockups: [] });
     }
 
-    const rows = await queryDb<any>(
-      `SELECT id, user_id, blueprint_id, product_id, mockups, updated_at
-       FROM creator_canvas_mockups
-       WHERE user_id = $1
-         AND (
-           ($2::varchar IS NOT NULL AND blueprint_id = $2)
-           OR ($3::varchar IS NOT NULL AND product_id = $3)
-         )
-       ORDER BY updated_at DESC
-       LIMIT 1`,
-      [userId, blueprintId, productId]
-    );
+    let rows: any[] = [];
+    if (productId) {
+      // Editing a specific existing product: return mockups assigned to this productId
+      rows = await queryDb<any>(
+        `SELECT id, user_id, blueprint_id, product_id, mockups, updated_at
+         FROM creator_canvas_mockups
+         WHERE user_id = $1 AND product_id = $2
+         ORDER BY updated_at DESC
+         LIMIT 1`,
+        [userId, productId]
+      );
+    } else if (blueprintId) {
+      // Creating a new product from blueprint: ONLY return unassigned in-progress drafts,
+      // NEVER mockups from an already published product (where product_id IS NOT NULL)
+      rows = await queryDb<any>(
+        `SELECT id, user_id, blueprint_id, product_id, mockups, updated_at
+         FROM creator_canvas_mockups
+         WHERE user_id = $1
+           AND blueprint_id = $2
+           AND (product_id IS NULL OR product_id = '')
+         ORDER BY updated_at DESC
+         LIMIT 1`,
+        [userId, blueprintId]
+      );
+    }
 
     if (rows && rows.length > 0 && Array.isArray(rows[0].mockups)) {
       return NextResponse.json({
@@ -114,16 +127,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for existing record
-    const existing = await queryDb<any>(
-      `SELECT id FROM creator_canvas_mockups
-       WHERE user_id = $1
-         AND (
-           ($2::varchar IS NOT NULL AND blueprint_id = $2)
-           OR ($3::varchar IS NOT NULL AND product_id = $3)
-         )
-       LIMIT 1`,
-      [userId, bId, pId]
-    );
+    let existing: any[] = [];
+    if (pId) {
+      existing = await queryDb<any>(
+        `SELECT id FROM creator_canvas_mockups
+         WHERE user_id = $1 AND product_id = $2
+         LIMIT 1`,
+        [userId, pId]
+      );
+    } else if (bId) {
+      existing = await queryDb<any>(
+        `SELECT id FROM creator_canvas_mockups
+         WHERE user_id = $1 AND blueprint_id = $2 AND (product_id IS NULL OR product_id = '')
+         LIMIT 1`,
+        [userId, bId]
+      );
+    }
 
     if (existing && existing.length > 0) {
       await queryDb(
@@ -192,6 +211,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const blueprintId = searchParams.get('blueprintId')?.trim() || null;
     const productId = searchParams.get('productId')?.trim() || null;
+    const unassignedOnly = searchParams.get('unassignedOnly') === 'true';
 
     if (!blueprintId && !productId) {
       return NextResponse.json(
@@ -200,15 +220,29 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await queryDb(
-      `DELETE FROM creator_canvas_mockups
-       WHERE user_id = $1
-         AND (
-           ($2::varchar IS NOT NULL AND blueprint_id = $2)
-           OR ($3::varchar IS NOT NULL AND product_id = $3)
-         )`,
-      [userId, blueprintId, productId]
-    );
+    if (unassignedOnly && blueprintId) {
+      await queryDb(
+        `DELETE FROM creator_canvas_mockups
+         WHERE user_id = $1
+           AND blueprint_id = $2
+           AND (product_id IS NULL OR product_id = '')`,
+        [userId, blueprintId]
+      );
+    } else if (productId) {
+      await queryDb(
+        `DELETE FROM creator_canvas_mockups
+         WHERE user_id = $1 AND product_id = $2`,
+        [userId, productId]
+      );
+    } else {
+      await queryDb(
+        `DELETE FROM creator_canvas_mockups
+         WHERE user_id = $1
+           AND blueprint_id = $2
+           AND (product_id IS NULL OR product_id = '')`,
+        [userId, blueprintId]
+      );
+    }
 
     return NextResponse.json({ success: true, message: 'Canvas mockups cleared' });
   } catch (error: any) {

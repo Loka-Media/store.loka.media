@@ -622,27 +622,37 @@ function CanvasContent() {
 
             // Restore canvas mockups and custom image uploads from localStorage & DB
             try {
-              const savedMockupsJson = localStorage.getItem(`saved_canvas_mockups_${effectiveBlueprintId}`);
-              if (savedMockupsJson) {
-                const parsedMockups = JSON.parse(savedMockupsJson);
-                if (Array.isArray(parsedMockups) && parsedMockups.length > 0) {
-                  setMockupUrls(parsedMockups);
-                }
-              }
-              const token = localStorage.getItem('accessToken') || '';
-              fetch(
-                `/api/creator/canvas-mockups?blueprintId=${effectiveBlueprintId}&productId=${editingProductId || ''}`,
-                {
-                  headers: {
-                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+              if (urlProductId) {
+                // When editing an existing product: restore mockups specifically saved for this productId
+                const savedMockupsJson = localStorage.getItem(`saved_canvas_mockups_${effectiveBlueprintId}`);
+                if (savedMockupsJson) {
+                  const parsedMockups = JSON.parse(savedMockupsJson);
+                  if (Array.isArray(parsedMockups) && parsedMockups.length > 0) {
+                    setMockupUrls(parsedMockups);
                   }
                 }
-              ).then(r => r.ok ? r.json() : null).then(mData => {
-                if (mData?.success && Array.isArray(mData.mockups) && mData.mockups.length > 0) {
-                  setMockupUrls(mData.mockups);
-                  localStorage.setItem(`saved_canvas_mockups_${effectiveBlueprintId}`, JSON.stringify(mData.mockups));
+                const token = localStorage.getItem('accessToken') || '';
+                fetch(
+                  `/api/creator/canvas-mockups?productId=${urlProductId}`,
+                  {
+                    headers: {
+                      ...(token ? { Authorization: `Bearer ${token}` } : {})
+                    }
+                  }
+                ).then(r => r.ok ? r.json() : null).then(mData => {
+                  if (mData?.success && Array.isArray(mData.mockups) && mData.mockups.length > 0) {
+                    setMockupUrls(mData.mockups);
+                    localStorage.setItem(`saved_canvas_mockups_${effectiveBlueprintId}`, JSON.stringify(mData.mockups));
+                  }
+                }).catch(() => {});
+              } else {
+                // Creating a brand new product from blueprint:
+                // Ensure no previous custom upload / mockups from past published products are loaded
+                if (effectiveBlueprintId) {
+                  localStorage.removeItem(`saved_canvas_mockups_${effectiveBlueprintId}`);
                 }
-              }).catch(() => {});
+                setMockupUrls((prev: any) => (prev || []).filter((m: any) => !m?.isCustomUpload && m?.placement !== "custom"));
+              }
             } catch (_) {}
           }
 
@@ -1269,9 +1279,12 @@ function CanvasContent() {
 
       if (result.success) {
         localStorage.removeItem(`mockup_request_${selectedProduct.id}`);
-        // Note: Publishing is handled server-side in the background during storeMockupsPermanently (sync route)
-        if (blueprintId) {
-          localStorage.removeItem(`productForm_${blueprintId}`);
+        const bId = selectedProduct?.blueprintId || selectedProduct?.id || blueprintId;
+        if (bId) {
+          localStorage.removeItem(`productForm_${bId}`);
+          localStorage.removeItem(`saved_canvas_mockups_${bId}`);
+          localStorage.removeItem(`loka_draft_${bId}`);
+          localStorage.removeItem(`mockup_request_${bId}`);
         }
       }
 
@@ -1279,21 +1292,53 @@ function CanvasContent() {
 
       if (result.success && result.marketplace_ready) {
         const createdId = result.product_id || result.productId;
+        const bId = selectedProduct?.blueprintId || selectedProduct?.id || blueprintId;
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') || '' : '';
+
         if (createdId) {
           try {
             await fetch('/api/products/update', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`
+                'Authorization': `Bearer ${token}`
               },
               body: JSON.stringify({
                 productId: createdId,
                 ...productData
               })
             });
+
+            // Save and link canvas mockups (including any custom uploads) to the new product ID
+            // so editing this specific product later will properly restore them
+            await fetch('/api/creator/canvas-mockups', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+              },
+              body: JSON.stringify({
+                productId: String(createdId),
+                blueprintId: bId ? String(bId) : null,
+                mockups: mockupUrls
+              })
+            });
           } catch (syncErr) {
             console.warn('[Canvas Publish] Post-publish sync notice:', syncErr);
+          }
+        }
+
+        // Clean up unassigned blueprint draft from DB so creating a new product for this blueprint starts fresh
+        if (bId) {
+          try {
+            await fetch(`/api/creator/canvas-mockups?blueprintId=${bId}&unassignedOnly=true`, {
+              method: 'DELETE',
+              headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+              }
+            });
+          } catch (delErr) {
+            console.warn('[Canvas Publish] Error clearing blueprint draft from DB:', delErr);
           }
         }
 
