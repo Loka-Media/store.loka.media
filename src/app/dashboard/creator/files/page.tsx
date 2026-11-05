@@ -855,7 +855,7 @@ function FileListItem({
 
   return (
     <tr>
-      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div className="flex-shrink-0 h-10 w-10">
             {file.mime_type?.startsWith('image/') ? (
@@ -873,10 +873,17 @@ function FileListItem({
               </div>
             )}
           </div>
-          <div className="ml-4">
-            <div className="text-xs sm:text-sm font-medium text-white">{file.filename}</div>
+          <div className="min-w-0 ml-3 sm:ml-4">
+            <div
+              className="text-xs sm:text-sm font-medium text-white truncate max-w-[110px] sm:max-w-[200px] md:max-w-xs lg:max-w-sm"
+              title={file.filename}
+            >
+              {file.filename}
+            </div>
             {file.width && file.height && (
-              <div className="text-xs sm:text-sm text-white/60">{file.width} × {file.height}</div>
+              <div className="text-[11px] sm:text-xs text-white/60">
+                {file.width} × {file.height}
+              </div>
             )}
           </div>
         </div>
