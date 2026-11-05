@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Camera,
   Edit3,
+  Plus,
 } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -144,7 +145,7 @@ export default function Navigation() {
 
                 {isAuthenticated ? (
                   <>
-                    {user?.role === "creator" || user?.creatorStatus === "approved" ? (
+                    {user?.role === "creator" || user?.creatorStatus === "approved" || user?.role === "admin" ? (
                       <Link
                         href="/dashboard/creator"
                         className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center gap-1.5"
@@ -339,15 +340,26 @@ export default function Navigation() {
                               <div className="text-[10px] text-gray-400">Admin review in progress. Creator Hub will unlock upon approval.</div>
                             </div>
                           )}
-                          {(user?.role === "creator" || user?.creatorStatus === "approved") && (
+                          {(user?.role === "creator" || user?.creatorStatus === "approved" || user?.role === "admin") && (
                             <div className="space-y-2">
                               <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-200 space-y-1">
                                 <div className="font-bold text-green-300 flex justify-between items-center">
                                   <span>Creator Hub</span>
                                   <span className="text-[10px] bg-green-400/20 text-green-300 px-1.5 py-0.5 rounded font-mono font-bold">2/2 ✓</span>
                                 </div>
-                                <div className="text-[11px] text-green-400 font-semibold">✅ Approved & Active</div>
+                                <div className="text-[11px] text-green-400 font-semibold">
+                                  {user?.role === "admin" ? "⚡ Full Creator & Admin Access" : "✅ Approved & Active"}
+                                </div>
                               </div>
+
+                              <Link
+                                href="/dashboard/creator/catalog"
+                                onClick={() => setIsProfileHovered(false)}
+                                className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 rounded-lg text-white font-bold text-xs transition-opacity shadow-sm"
+                              >
+                                <span>Create / Design Product</span>
+                                <Plus className="w-3.5 h-3.5" />
+                              </Link>
 
                               {/* Creator Store Link Section */}
                               {creatorSlug && (
@@ -578,7 +590,7 @@ export default function Navigation() {
 
           {isAuthenticated ? (
             <>
-              {user?.role === "creator" || user?.creatorStatus === "approved" ? (
+              {user?.role === "creator" || user?.creatorStatus === "approved" || user?.role === "admin" ? (
                 <>
                   <Link
                     href="/dashboard/creator"
@@ -587,7 +599,18 @@ export default function Navigation() {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span>Creator Hub</span>
-                    <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">2/2 Approved ✓</span>
+                    <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">
+                      {user?.role === "admin" ? "Admin Access ✓" : "2/2 Approved ✓"}
+                    </span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/creator/catalog"
+                    className="text-white font-medium flex items-center justify-between px-4 py-2 rounded-lg hover:opacity-80 transition-opacity bg-gradient-to-r from-orange-500/20 to-pink-500/20 border border-orange-500/30 text-orange-400"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span>Create / Design Product</span>
+                    <Plus className="w-4 h-4" />
                   </Link>
 
                   {creatorSlug && (

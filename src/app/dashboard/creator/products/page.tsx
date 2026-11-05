@@ -477,15 +477,24 @@ export default function CreatorProductsPage() {
               </Link>
             </div>
           </div>
-          <div className="pb-6 sm:pb-8">
-            <GradientTitle
-              text="Your Products"
-              size="sm"
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
-            />
-            <p className="mt-2 text-xs sm:text-sm text-gray-400 font-medium">
-              Manage your complete product catalog
-            </p>
+          <div className="pb-6 sm:pb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <GradientTitle
+                text="Your Products"
+                size="sm"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
+              />
+              <p className="mt-2 text-xs sm:text-sm text-gray-400 font-medium">
+                Manage your complete product catalog
+              </p>
+            </div>
+            <Link
+              href="/dashboard/creator/catalog"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all text-sm w-fit"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Design New Product</span>
+            </Link>
           </div>
         </div>
       </div>

@@ -351,6 +351,15 @@ export default function ProfilePage() {
               </svg>
             </div>
             <div className="flex items-center gap-2">
+              {(user?.role === 'admin' || user?.role === 'creator' || user?.creatorStatus === 'approved') && (
+                <Link
+                  href="/dashboard/creator/catalog"
+                  className="inline-flex items-center px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:opacity-90 transition-all text-xs sm:text-sm gap-1.5 whitespace-nowrap shadow-md shadow-orange-500/20"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create Product</span>
+                </Link>
+              )}
               <Link
                 href="/profile/edit"
                 className="inline-flex items-center px-3 py-1.5 text-white font-medium rounded-lg hover:bg-white/10 transition-all text-xs sm:text-sm gap-1.5 whitespace-nowrap"

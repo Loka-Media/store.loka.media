@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Users, Package, ShoppingCart, Settings, DollarSign, Wallet, Loader2, BookOpen } from 'lucide-react';
+import { Users, Package, ShoppingCart, Settings, DollarSign, Wallet, Loader2, BookOpen, Plus, Palette } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { api } from '@/lib/auth';
 
@@ -97,6 +97,14 @@ export default function AdminDashboard() {
 
   const adminFeatures = [
     {
+      title: 'Design & Create Products',
+      description: 'Open Canvas Studio to customize 2,300+ blueprints and publish new products',
+      icon: Palette,
+      href: '/dashboard/creator/catalog',
+      color: 'bg-gradient-to-br from-orange-500 to-pink-500',
+      stats: 'Canvas Studio & Catalog'
+    },
+    {
       title: 'Creator Requests',
       description: 'Review and approve creator account applications',
       icon: Users,
@@ -152,12 +160,28 @@ export default function AdminDashboard() {
 
       <div className="max-w-7xl mt-16 mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
             <p className="mt-2 text-gray-400">
               Manage your marketplace, sync products, and oversee all platform operations
             </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/dashboard/creator/catalog"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Product</span>
+            </Link>
+            <Link
+              href="/dashboard/creator"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-neutral-900 border border-white/20 text-white font-bold rounded-xl hover:bg-neutral-800 transition-all text-sm"
+            >
+              <Palette className="w-4 h-4 text-orange-400" />
+              <span>Creator Hub</span>
+            </Link>
           </div>
         </div>
 
