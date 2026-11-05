@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGuestCart } from "@/contexts/GuestCartContext";
@@ -52,6 +52,39 @@ export default function Navigation() {
   const [copiedStoreLink, setCopiedStoreLink] = useState(false);
   const [isProfileHovered, setIsProfileHovered] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isMenuOpen]);
+
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMenuOpen]);
+
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
 
   const handleProfileMouseEnter = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -105,7 +138,8 @@ export default function Navigation() {
   const activeCurrency = availableCurrencies.find(c => c.code === currency) || availableCurrencies[0];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 pb-4 bg-[#050505]/60 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 pb-4 bg-[#050505]/60 backdrop-blur-md border-b border-white/5 transition-all duration-300">
       <div className="container mx-auto">
         {/* Rounded pill container */}
         <div className="bg-[#1a1a1a]/95 backdrop-blur-lg rounded-full border border-white/10 shadow-2xl">
@@ -570,7 +604,16 @@ export default function Navigation() {
 
       {/* Mobile menu - Glassmorphism design */}
       {isMenuOpen && (
-        <div className="md:hidden mt-2 mx-4 rounded-2xl p-4 space-y-3 bg-[#1a1a1a]/95 backdrop-blur-lg border border-white/10">
+        <div className="container mx-auto">
+          <div
+            data-lenis-prevent="true"
+            className="md:hidden mt-2 rounded-2xl p-4 pb-8 space-y-3 bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-y-auto max-h-[calc(100dvh-110px)] overscroll-contain"
+            style={{
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "thin",
+              touchAction: "pan-y",
+            }}
+          >
           <Link
             href="/products"
             className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
@@ -878,7 +921,17 @@ export default function Navigation() {
             </div>
           </div>
         </div>
+      </div>
       )}
     </nav>
+
+    {/* Mobile menu backdrop */}
+    {isMenuOpen && (
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
+        onClick={() => setIsMenuOpen(false)}
+      />
+    )}
+  </>
   );
 }
