@@ -933,6 +933,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const { user } = useAuth();
 
   const handleBack = () => {
+    if (isPublishing) {
+      toast.error("Publishing in progress. Please do not navigate away.");
+      return;
+    }
+    if (isUploadingCustomImage) {
+      toast.error("Custom image upload in progress. Please wait until finished.");
+      return;
+    }
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back();
     } else {
@@ -2365,6 +2373,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Save Draft action
   const handleSaveDraft = () => {
+    if (isPublishing) {
+      toast.error("Product is currently publishing. Please wait.");
+      return;
+    }
+    if (isUploadingCustomImage) {
+      toast.error("Custom image upload is in progress. Please wait until finished.");
+      return;
+    }
     try {
       const bId = selectedProduct?.id || selectedProduct?.blueprintId || "custom";
       const draftId = `draft_${bId}`;
@@ -2420,6 +2436,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Continue to next step helper
   const handleContinueNext = () => {
+    if (isUploadingCustomImage) {
+      toast.error("Please wait until custom image upload is finished before continuing!");
+      return;
+    }
+    if (isPublishing) return;
+    if (isGeneratingPreview) {
+      toast.error("Please wait until preview generation is finished!");
+      return;
+    }
+
     if (activeStep < 4) {
       if (validateAndRedirect(activeStep)) {
         goToStep(activeStep + 1);
@@ -2431,6 +2457,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Publish submit action
   const handlePublishSubmit = async () => {
+    if (isUploadingCustomImage) {
+      toast.error("Please wait until custom image upload is finished before publishing!");
+      return;
+    }
+    if (isPublishing) {
+      return;
+    }
+    if (isGeneratingPreview) {
+      toast.error("Please wait until preview generation is finished before publishing!");
+      return;
+    }
+
     // Automatically validate and redirect user to first incomplete field
     if (!validateAndRedirect()) {
       return;
@@ -2807,6 +2845,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    if (isPublishing) {
+      toast.error("Product is currently publishing. Please wait until publishing is complete.");
+      if (customFileInputRef.current) customFileInputRef.current.value = "";
+      return;
+    }
+    if (isUploadingCustomImage) {
+      toast.error("Another image upload is already in progress. Please wait.");
+      return;
+    }
+
     setIsUploadingCustomImage(true);
     const toastId = toast.loading(`Uploading ${files.length} custom image(s)...`);
 
@@ -2956,6 +3004,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
         ref={customFileInputRef}
         accept="image/*"
         multiple
+        disabled={isUploadingCustomImage || isPublishing}
         onChange={handleCustomImageUpload}
         className="hidden"
       />
@@ -2967,7 +3016,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-orange-500/50 text-gray-300 hover:text-white transition-all duration-200 flex-shrink-0 group cursor-pointer"
+              disabled={isPublishing || isUploadingCustomImage}
+              className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-orange-500/50 text-gray-300 hover:text-white transition-all duration-200 flex-shrink-0 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               title="Go back to previous page"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-0.5 transition-transform" />
@@ -2986,7 +3036,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               <button
                 type="button"
                 onClick={handleManualRegenerate}
-                disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
+                disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0 || isPublishing || isUploadingCustomImage}
                 className="h-8 sm:h-10 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_16px_rgba(255,109,31,0.25)] flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed leading-none"
               >
                 {isGeneratingPreview ? (
@@ -3008,7 +3058,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="h-8 sm:h-10 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold border border-white/20 bg-black/40 hover:bg-white/10 text-white transition-all cursor-pointer whitespace-nowrap flex items-center justify-center leading-none"
+              disabled={isPublishing || isUploadingCustomImage || isGeneratingPreview}
+              className="h-8 sm:h-10 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold border border-white/20 bg-black/40 hover:bg-white/10 text-white transition-all cursor-pointer whitespace-nowrap flex items-center justify-center leading-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="hidden sm:inline">Save Draft</span>
               <span className="sm:hidden">Draft</span>
@@ -3016,13 +3067,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <button
               type="button"
               onClick={handleContinueNext}
-              disabled={isPublishing || isGeneratingPreview}
+              disabled={isPublishing || isGeneratingPreview || isUploadingCustomImage}
               className="h-8 sm:h-10 px-2.5 sm:px-5 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 leading-none"
             >
               {isPublishing ? (
                 <div className="flex items-center gap-1.5 whitespace-nowrap">
                   <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
                   <span className="leading-none">{isEditing ? "Updating..." : "Publishing..."}</span>
+                </div>
+              ) : isUploadingCustomImage ? (
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+                  <span className="leading-none">Uploading...</span>
                 </div>
               ) : activeStep < 4 ? (
                 <>
@@ -3070,14 +3126,21 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <button
                     key={s.step}
                     type="button"
+                    disabled={isPublishing || isUploadingCustomImage}
                     onClick={() => {
+                      if (isPublishing || isUploadingCustomImage) {
+                        toast.error("Please wait until current process is completed.");
+                        return;
+                      }
                       if (s.step <= activeStep) {
                         goToStep(s.step);
                       } else if (validateAndRedirect(activeStep)) {
                         goToStep(s.step);
                       }
                     }}
-                    className="flex flex-col items-center text-center cursor-pointer group transition-all"
+                    className={`flex flex-col items-center text-center group transition-all ${
+                      isPublishing || isUploadingCustomImage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                    }`}
                   >
                     {/* Circle badge */}
                     <div
@@ -4283,11 +4346,20 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <button
                     type="button"
                     onClick={() => customFileInputRef.current?.click()}
-                    disabled={isUploadingCustomImage}
-                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_4px_16px_rgba(255,109,31,0.3)] transition-all cursor-pointer disabled:opacity-50"
+                    disabled={isUploadingCustomImage || isPublishing}
+                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_4px_16px_rgba(255,109,31,0.3)] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span>Upload Image</span>
-                    <ArrowRight className="w-4 h-4" />
+                    {isUploadingCustomImage ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Upload Image</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 </div>
 
@@ -4296,6 +4368,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   ref={customFileInputRef}
                   type="file"
                   accept="image/*"
+                  multiple
+                  disabled={isUploadingCustomImage || isPublishing}
                   className="hidden"
                   onChange={handleCustomImageUpload}
                 />
@@ -4427,7 +4501,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                 <Button
                   onClick={handlePublishSubmit}
-                  disabled={isPublishing}
+                  disabled={isPublishing || isUploadingCustomImage || isGeneratingPreview}
                   className="group relative overflow-hidden w-full bg-gradient-to-r from-[#7C3AED] via-[#FF6D1F] to-[#FF8A3D] hover:from-[#8B5CF6] hover:via-[#FF7D30] hover:to-[#FFA05C] border border-orange-400/50 hover:border-orange-300 text-white font-black text-base sm:text-lg py-5 rounded-2xl transition-all duration-300 shadow-[0_4px_25px_rgba(255,109,31,0.35)] hover:shadow-[0_8px_40px_rgba(255,109,31,0.65)] hover:scale-[1.015] active:scale-[0.985] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {/* Glowing Animated Light Streak on Hover */}
@@ -4437,6 +4511,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <div className="flex items-center justify-center gap-2 relative z-10">
                       <Loader2 className="w-5 h-5 animate-spin text-white" />
                       <span>{isEditing ? "Saving Changes..." : "Publishing to Marketplace..."}</span>
+                    </div>
+                  ) : isUploadingCustomImage ? (
+                    <div className="flex items-center justify-center gap-2 relative z-10">
+                      <Loader2 className="w-5 h-5 animate-spin text-white" />
+                      <span>Uploading Custom Image... Please wait</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-3 relative z-10">
@@ -4453,7 +4532,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <button
                   type="button"
                   onClick={() => goToStep(3)}
-                  className="px-5 py-2.5 rounded-xl border border-white/20 bg-transparent hover:bg-white/10 text-white font-medium text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-colors"
+                  disabled={isPublishing || isUploadingCustomImage}
+                  className="px-5 py-2.5 rounded-xl border border-white/20 bg-transparent hover:bg-white/10 text-white font-medium text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -4618,7 +4698,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <button
               type="button"
               onClick={() => goToStep(activeStep - 1)}
-              className="h-9 px-2.5 text-xs text-gray-300 border border-white/10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center cursor-pointer transition-colors"
+              disabled={isPublishing || isUploadingCustomImage}
+              className="h-9 px-2.5 text-xs text-gray-300 border border-white/10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
             </button>
@@ -4627,14 +4708,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           {activeStep < 4 ? (
             <button
               type="button"
-              disabled={activeStep === 2 && isStep2NextDisabled}
+              disabled={(activeStep === 2 && isStep2NextDisabled) || isPublishing || isUploadingCustomImage}
               onClick={() => {
                 if (validateAndRedirect(activeStep)) {
                   goToStep(activeStep + 1);
                 }
               }}
               className={`h-9 font-bold text-xs px-3.5 rounded-xl flex items-center gap-1.5 transition-all ${
-                activeStep === 2 && isStep2NextDisabled
+                (activeStep === 2 && isStep2NextDisabled) || isPublishing || isUploadingCustomImage
                   ? "bg-gray-800 text-gray-500 border border-white/10 cursor-not-allowed shadow-none"
                   : "bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white shadow-[0_0_10px_rgba(255,109,31,0.3)] cursor-pointer"
               }`}
@@ -4645,10 +4726,22 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           ) : (
             <Button
               onClick={handlePublishSubmit}
-              disabled={isPublishing}
-              className="h-9 bg-gradient-to-r from-purple-600 to-[#FF6D1F] text-white font-extrabold text-xs px-3.5 rounded-xl shadow-[0_0_12px_rgba(255,109,31,0.4)] disabled:opacity-50 cursor-pointer"
+              disabled={isPublishing || isUploadingCustomImage || isGeneratingPreview}
+              className="h-9 bg-gradient-to-r from-purple-600 to-[#FF6D1F] text-white font-extrabold text-xs px-3.5 rounded-xl shadow-[0_0_12px_rgba(255,109,31,0.4)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
             >
-              {isPublishing ? "Publishing..." : "Publish 🚀"}
+              {isPublishing ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Publishing...</span>
+                </>
+              ) : isUploadingCustomImage ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                <span>Publish 🚀</span>
+              )}
             </Button>
           )}
         </div>
