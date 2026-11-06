@@ -25,6 +25,20 @@ export const useProductWishlist = (product: ProductDetails | null) => {
   const handleWishlistToggle = useCallback(async () => {
     if (!product) return;
 
+    // If user is not logged in, add to pending wishlist and redirect to Sign In page
+    if (!isAuthenticated) {
+      if (!isWishlisted) {
+        addPendingWishlistItem(product.id);
+        setIsWishlisted(true);
+        toast.success('Added to wishlist! Redirecting to sign in...');
+      }
+      const currentUrl = typeof window !== 'undefined'
+        ? `${window.location.pathname}${window.location.search}`
+        : `/products/${product.id}`;
+      router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
+      return;
+    }
+
     try {
       setIsLoading(true);
       if (isWishlisted) {
@@ -39,7 +53,7 @@ export const useProductWishlist = (product: ProductDetails | null) => {
     } finally {
       setIsLoading(false);
     }
-  }, [product, isWishlisted, removeFromWishlist, addToWishlist]);
+  }, [product, isAuthenticated, isWishlisted, removeFromWishlist, addToWishlist, router]);
 
   return {
     isWishlisted,
