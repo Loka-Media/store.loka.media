@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import GradientTitle from '@/components/ui/GradientTitle';
-import { Package, Search, ChevronLeft, ChevronRight, ArrowLeft, Plus, Palette } from 'lucide-react';
+import { Package, Search, ChevronLeft, ChevronRight, ArrowLeft, Plus, Palette, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import CreativeLoader from '@/components/CreativeLoader';
@@ -104,17 +104,8 @@ export default function AdminProductsPage() {
             </div>
           </div>
 
-          {/* Actions & Search */}
+          {/* Search Box */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <Link
-              href="/dashboard/creator/catalog"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all text-xs sm:text-sm whitespace-nowrap"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create New Product</span>
-            </Link>
-
-            {/* Search Box */}
             <div className="relative min-w-[240px] sm:min-w-[300px]">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -180,21 +171,12 @@ export default function AdminProductsPage() {
                       )}
                     </div>
                     <Link
-                      href={`/dashboard/creator/canvas?blueprintId=${product.id}`}
-                      onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          try {
-                            localStorage.removeItem(`saved_canvas_mockups_${product.id}`);
-                            localStorage.removeItem(`mockup_request_${product.id}`);
-                            localStorage.removeItem(`productForm_${product.id}`);
-                            localStorage.removeItem(`loka_draft_${product.id}`);
-                          } catch (_) {}
-                        }
-                      }}
+                      href={`/products/${product.id}`}
+                      target="_blank"
                       className="mt-2.5 w-full py-1.5 px-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white text-[11px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition-opacity shadow-sm"
                     >
-                      <Plus className="w-3 h-3" />
-                      <span>Design in Canvas</span>
+                      <ExternalLink className="w-3 h-3" />
+                      <span>View in Store</span>
                     </Link>
                   </div>
                 </div>

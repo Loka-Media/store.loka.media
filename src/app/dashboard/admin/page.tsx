@@ -97,12 +97,12 @@ export default function AdminDashboard() {
 
   const adminFeatures = [
     {
-      title: 'Design & Create Products',
-      description: 'Open Canvas Studio to customize 2,300+ blueprints and publish new products',
-      icon: Palette,
-      href: '/dashboard/creator/catalog',
+      title: 'Platform Products',
+      description: 'Manage and review published products across all platform categories',
+      icon: Package,
+      href: '/dashboard/admin/products',
       color: 'bg-gradient-to-br from-orange-500 to-pink-500',
-      stats: 'Canvas Studio & Catalog'
+      stats: 'Manage Products'
     },
     {
       title: 'Creator Requests',
@@ -169,18 +169,11 @@ export default function AdminDashboard() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link
-              href="/dashboard/creator/catalog"
+              href="/dashboard/admin/products"
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all text-sm"
             >
-              <Plus className="w-4 h-4" />
-              <span>Create Product</span>
-            </Link>
-            <Link
-              href="/dashboard/creator"
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-neutral-900 border border-white/20 text-white font-bold rounded-xl hover:bg-neutral-800 transition-all text-sm"
-            >
-              <Palette className="w-4 h-4 text-orange-400" />
-              <span>Creator Hub</span>
+              <Package className="w-4 h-4" />
+              <span>Manage Products</span>
             </Link>
           </div>
         </div>

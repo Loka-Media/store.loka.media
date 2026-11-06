@@ -127,7 +127,7 @@ export default function StickyHeader() {
 
                 {isAuthenticated ? (
                   <>
-                    {(user?.role === "creator" || user?.role === "admin" || user?.creatorStatus === "approved") && (
+                    {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && (
                       <Link
                         href="/dashboard/creator"
                         className="text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-300"
@@ -271,7 +271,7 @@ export default function StickyHeader() {
 
               {isAuthenticated ? (
                 <>
-                  {(user?.role === "creator" || user?.role === "admin" || user?.creatorStatus === "approved") && (
+                  {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && (
                     <Link
                       href="/dashboard/creator"
                       className="text-gray-300 hover:text-white hover:bg-white/10 block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300"

@@ -21,6 +21,7 @@ import {
   Camera,
   Edit3,
   Plus,
+  Shield,
 } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -186,29 +187,31 @@ export default function Navigation() {
 
                 {isAuthenticated ? (
                   <>
-                    {user?.role === "creator" || user?.creatorStatus === "approved" || user?.role === "admin" ? (
-                      <Link
-                        href="/dashboard/creator"
-                        className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center gap-1.5"
-                        style={{ color: "var(--nav-text)" }}
-                      >
-                        <span>Creator Hub</span>
-                        <span className="text-[10px] bg-green-500/20 text-green-400 border border-green-500/30 px-1.5 py-0.5 rounded-full font-extrabold">2/2 ✓</span>
-                      </Link>
-                    ) : user?.creatorStatus === "pending" ? (
-                      <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-yellow-300">
-                        <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
-                        <span>Login as creator (1/2): Waiting for approval</span>
-                      </div>
-                    ) : user?.creatorStatus === "rejected" ? (
-                      <Link
-                        href="/dashboard"
-                        className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-red-300 hover:bg-red-500/20 transition-colors"
-                      >
-                        <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
-                        <span>Application Rejected • Re-apply</span>
-                      </Link>
-                    ) : null}
+                    {user?.role !== "admin" && (
+                      user?.role === "creator" || user?.creatorStatus === "approved" ? (
+                        <Link
+                          href="/dashboard/creator"
+                          className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center gap-1.5"
+                          style={{ color: "var(--nav-text)" }}
+                        >
+                          <span>Creator Hub</span>
+                          <span className="text-[10px] bg-green-500/20 text-green-400 border border-green-500/30 px-1.5 py-0.5 rounded-full font-extrabold">2/2 ✓</span>
+                        </Link>
+                      ) : user?.creatorStatus === "pending" ? (
+                        <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-yellow-300">
+                          <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+                          <span>Login as creator (1/2): Waiting for approval</span>
+                        </div>
+                      ) : user?.creatorStatus === "rejected" ? (
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-red-300 hover:bg-red-500/20 transition-colors"
+                        >
+                          <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
+                          <span>Application Rejected • Re-apply</span>
+                        </Link>
+                      ) : null
+                    )}
 
                     {user?.role === "admin" && (
                       <Link
@@ -345,7 +348,7 @@ export default function Navigation() {
                           </div>
 
                           {/* Missing Photo Prompt for Creators */}
-                          {(user?.role === "creator" || user?.creatorStatus === "approved") && !user?.profileImg && (
+                          {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && !user?.profileImg && (
                             <Link
                               href="/profile/edit"
                               className="p-2.5 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:bg-orange-500/25 transition-all flex items-center justify-between group/photo block cursor-pointer"
@@ -368,7 +371,7 @@ export default function Navigation() {
                             </Link>
                           )}
 
-                          {user?.creatorStatus === "pending" && (
+                          {user?.role !== "admin" && user?.creatorStatus === "pending" && (
                             <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 space-y-1">
                               <div className="font-bold text-yellow-300 flex justify-between items-center">
                                 <span>Login as creator</span>
@@ -381,7 +384,7 @@ export default function Navigation() {
                               <div className="text-[10px] text-gray-400">Admin review in progress. Creator Hub will unlock upon approval.</div>
                             </div>
                           )}
-                          {(user?.role === "creator" || user?.creatorStatus === "approved" || user?.role === "admin") && (
+                          {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && (
                             <div className="space-y-2">
                               <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-200 space-y-1">
                                 <div className="font-bold text-green-300 flex justify-between items-center">
@@ -389,7 +392,7 @@ export default function Navigation() {
                                   <span className="text-[10px] bg-green-400/20 text-green-300 px-1.5 py-0.5 rounded font-mono font-bold">2/2 ✓</span>
                                 </div>
                                 <div className="text-[11px] text-green-400 font-semibold">
-                                  {user?.role === "admin" ? "⚡ Full Creator & Admin Access" : "✅ Approved & Active"}
+                                  ✅ Approved & Active
                                 </div>
                               </div>
 
@@ -443,7 +446,7 @@ export default function Navigation() {
                               )}
                             </div>
                           )}
-                          {user?.creatorStatus === "rejected" && (
+                          {user?.role !== "admin" && user?.creatorStatus === "rejected" && (
                             <Link
                               href="/dashboard"
                               onClick={() => setIsProfileHovered(false)}
@@ -454,6 +457,16 @@ export default function Navigation() {
                                 <span className="text-[10px] bg-red-400/20 text-red-300 px-1.5 py-0.5 rounded font-mono font-bold">Rejected</span>
                               </div>
                               <div className="text-[11px] text-red-400 font-semibold">Click here to re-apply →</div>
+                            </Link>
+                          )}
+                          {user?.role === "admin" && (
+                            <Link
+                              href="/dashboard/admin"
+                              onClick={() => setIsProfileHovered(false)}
+                              className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 rounded-lg text-white font-bold text-xs transition-opacity shadow-sm"
+                            >
+                              <span>Admin Dashboard</span>
+                              <Shield className="w-3.5 h-3.5" />
                             </Link>
                           )}
                         </div>
@@ -641,7 +654,7 @@ export default function Navigation() {
 
           {isAuthenticated ? (
             <>
-              {user?.role === "creator" || user?.creatorStatus === "approved" || user?.role === "admin" ? (
+              {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") ? (
                 <>
                   <Link
                     href="/dashboard/creator"
@@ -651,7 +664,7 @@ export default function Navigation() {
                   >
                     <span>Creator Hub</span>
                     <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">
-                      {user?.role === "admin" ? "Admin Access ✓" : "2/2 Approved ✓"}
+                      2/2 Approved ✓
                     </span>
                   </Link>
 
@@ -729,7 +742,7 @@ export default function Navigation() {
                     </Link>
                   )}
                 </>
-              ) : user?.creatorStatus === "pending" ? (
+              ) : user?.role !== "admin" && user?.creatorStatus === "pending" ? (
                 <div className="px-4 py-2.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs font-semibold space-y-1">
                   <div className="flex justify-between items-center font-bold">
                     <span>Login as creator</span>
@@ -740,7 +753,7 @@ export default function Navigation() {
                     Waiting for approval
                   </div>
                 </div>
-              ) : user?.creatorStatus === "rejected" ? (
+              ) : user?.role !== "admin" && user?.creatorStatus === "rejected" ? (
                 <Link
                   href="/dashboard"
                   onClick={() => setIsMenuOpen(false)}

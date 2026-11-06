@@ -31,10 +31,10 @@ export const ACCESS_CONTROL_CONFIG: Record<string, RouteConfig> = {
 
   "/dashboard/creator": {
     path: "/dashboard/creator",
-    allowedRoles: ["creator", "admin"],
+    allowedRoles: ["creator"],
     requiresAuth: true,
     bypassEnabled: false,
-    redirectTo: "/auth/login",
+    redirectTo: "/dashboard",
   },
 
   "/dashboard/admin": {

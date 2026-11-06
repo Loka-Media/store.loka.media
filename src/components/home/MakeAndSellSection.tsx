@@ -13,7 +13,7 @@ export function MakeAndSellSection() {
   const [isHovered, setIsHovered] = useState(false);
 
   const startNowHref = isAuthenticated
-    ? (user?.role === 'creator' || user?.role === 'admin' ? "/dashboard/creator/catalog" : "/dashboard")
+    ? (user?.role === 'admin' ? "/dashboard/admin" : user?.role === 'creator' ? "/dashboard/creator/catalog" : "/dashboard")
     : "/auth/login?redirect=/dashboard/creator/catalog";
 
   return (

@@ -21,7 +21,7 @@ export function QualityProductsSection() {
   const [checkingProducts, setCheckingProducts] = useState<boolean>(true);
 
   const createProductHref = isAuthenticated
-    ? (user?.role === 'creator' || user?.role === 'admin' ? "/dashboard/creator/catalog" : "/dashboard")
+    ? (user?.role === 'admin' ? "/dashboard/admin" : user?.role === 'creator' ? "/dashboard/creator/catalog" : "/dashboard")
     : "/auth/login?redirect=/dashboard/creator/catalog";
 
   const [expandedSection, setExpandedSection] = useState<string | null>(
