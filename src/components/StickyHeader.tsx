@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
@@ -22,6 +23,12 @@ export default function StickyHeader() {
   const { wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const pathname = usePathname();
+
+  // Close mobile menu whenever navigation/route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,6 +40,39 @@ export default function StickyHeader() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isMenuOpen]);
+
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMenuOpen]);
+
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
 
   return (
     <div className={`w-3/5 max-w-4xl fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 ease-out ${
@@ -87,7 +127,7 @@ export default function StickyHeader() {
 
                 {isAuthenticated ? (
                   <>
-                    {user?.role === "creator" && (
+                    {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && (
                       <Link
                         href="/dashboard/creator"
                         className="text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-300"
@@ -178,7 +218,7 @@ export default function StickyHeader() {
                       Sign In
                     </Link>
                     <Link
-                      href="/auth/signup"
+                      href="/auth/signup/customer"
                       className="bg-accent hover:bg-accent/90 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300"
                     >
                       Sign Up
@@ -208,13 +248,17 @@ export default function StickyHeader() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-white/10 animate-in slide-in-from-top-2 duration-300 ease-out">
             <div 
-              className="px-4 pt-2 pb-3 space-y-1 rounded-b-3xl"
+              data-lenis-prevent="true"
+              className="px-4 pt-2 pb-6 space-y-1 rounded-b-3xl overflow-y-auto max-h-[calc(100dvh-120px)] overscroll-contain"
               style={{
                 background: 'rgba(255, 255, 255, 0.08)',
                 backdropFilter: 'blur(20px) saturate(1.8) brightness(1.2)',
                 WebkitBackdropFilter: 'blur(20px) saturate(1.8) brightness(1.2)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderTop: 'none',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'thin',
+                touchAction: 'pan-y'
               }}
             >
               <Link
@@ -227,7 +271,7 @@ export default function StickyHeader() {
 
               {isAuthenticated ? (
                 <>
-                  {user?.role === "creator" && (
+                  {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && (
                     <Link
                       href="/dashboard/creator"
                       className="text-gray-300 hover:text-white hover:bg-white/10 block px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300"
@@ -319,7 +363,7 @@ export default function StickyHeader() {
                     Sign In
                   </Link>
                   <Link
-                    href="/auth/signup"
+                    href="/auth/signup/customer"
                     className="bg-accent hover:bg-accent/90 text-white block px-4 py-3 rounded-lg text-base font-bold transition-all duration-300 mt-2"
                     onClick={() => setIsMenuOpen(false)}
                   >

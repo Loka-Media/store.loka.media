@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { productAPI } from "@/lib/api";
 import { createProductSlug, getValidImageUrl } from "@/lib/utils";
 import { resolveProductCategoryName } from "@/lib/pricing";
-import { ArrowLeft, Edit, ExternalLink, Grid, List, Plus, Search, Trash2, Package, Loader2, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Edit, ExternalLink, Grid, List, Plus, Search, Trash2, Package, Loader2, Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -267,12 +267,14 @@ export default function CreatorProductsPage() {
     return products.filter((product) => {
       // 1. Search filter
       if (filters.search) {
-        const q = filters.search.toLowerCase();
-        const matchesName = product.name && product.name.toLowerCase().includes(q);
+        const q = filters.search.toLowerCase().trim();
+        const productName = (product.name || (product as any).title || "").toLowerCase();
+        const matchesName = productName.includes(q);
         const matchesDesc = product.description && product.description.toLowerCase().includes(q);
         const matchesCat = product.category && product.category.toLowerCase().includes(q);
         const matchesTags = Array.isArray(product.tags) && product.tags.some(t => t && t.toLowerCase().includes(q));
-        if (!matchesName && !matchesDesc && !matchesCat && !matchesTags) {
+        const matchesId = String(product.id || "").includes(q);
+        if (!matchesName && !matchesDesc && !matchesCat && !matchesTags && !matchesId) {
           return false;
         }
       }
@@ -464,44 +466,56 @@ export default function CreatorProductsPage() {
       {/* Header */}
       <div className="border-b border-white/10 bg-gradient-to-b from-white/5 to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6 sm:py-8">
+          <div className="flex items-center justify-between py-3 sm:py-6">
             <div className="flex items-center gap-4 w-full justify-between">
               <Link
                 href="/dashboard/creator"
-                className="inline-flex items-center px-4 py-2 text-white/70 hover:text-white transition-colors"
+                className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/5 -ml-2 sm:ml-0"
               >
-                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
                 <span className="text-sm sm:text-base font-medium">Back</span>
               </Link>
             </div>
           </div>
-          <div className="pb-6 sm:pb-8">
-            <GradientTitle
-              text="Your Products"
-              size="sm"
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
-            />
-            <p className="mt-2 text-xs sm:text-sm text-gray-400 font-medium">
-              Manage your complete product catalog
-            </p>
+          <div className="pb-5 sm:pb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div>
+              <GradientTitle
+                text="Your Products"
+                size="sm"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
+              />
+              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-400 font-medium">
+                Manage your complete product catalog
+              </p>
+            </div>
+            <Link
+              href="/dashboard/creator/catalog"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all text-sm w-full sm:w-fit"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Design New Product</span>
+            </Link>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
         {/* Status Tabs */}
-        <div className="flex border-b border-white/10 mb-6 gap-6">
+        <div 
+          className="flex border-b border-white/10 mb-6 gap-3 sm:gap-6 overflow-x-auto scrollbar-none pb-0.5 -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
           <button
             onClick={() => setFilters(prev => ({ ...prev, status: "active" }))}
-            className={`pb-3 text-sm font-semibold relative transition-all ${filters.status === "active"
+            className={`pb-3 text-xs sm:text-sm font-semibold relative transition-all whitespace-nowrap flex-shrink-0 cursor-pointer ${filters.status === "active"
                 ? "text-white"
                 : "text-gray-400 hover:text-white"
               }`}
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 sm:gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500"></span>
-              Active Products
-              <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs font-normal text-gray-400">
+              <span>Active<span className="hidden sm:inline"> Products</span></span>
+              <span className="bg-white/10 px-1.5 sm:px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-normal text-gray-400">
                 {products.filter(p => p.is_active).length}
               </span>
             </span>
@@ -512,15 +526,15 @@ export default function CreatorProductsPage() {
 
           <button
             onClick={() => setFilters(prev => ({ ...prev, status: "inactive" }))}
-            className={`pb-3 text-sm font-semibold relative transition-all ${filters.status === "inactive"
+            className={`pb-3 text-xs sm:text-sm font-semibold relative transition-all whitespace-nowrap flex-shrink-0 cursor-pointer ${filters.status === "inactive"
                 ? "text-white"
                 : "text-gray-400 hover:text-white"
               }`}
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 sm:gap-2">
               <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
-              Inactive Products
-              <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs font-normal text-gray-400">
+              <span>Inactive<span className="hidden sm:inline"> Products</span></span>
+              <span className="bg-white/10 px-1.5 sm:px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-normal text-gray-400">
                 {products.filter(p => !p.is_active).length}
               </span>
             </span>
@@ -531,15 +545,15 @@ export default function CreatorProductsPage() {
 
           <button
             onClick={() => setFilters(prev => ({ ...prev, status: "drafts" }))}
-            className={`pb-3 text-sm font-semibold relative transition-all ${filters.status === "drafts"
+            className={`pb-3 text-xs sm:text-sm font-semibold relative transition-all whitespace-nowrap flex-shrink-0 cursor-pointer ${filters.status === "drafts"
                 ? "text-white"
                 : "text-gray-400 hover:text-white"
               }`}
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 sm:gap-2">
               <span className="w-2 h-2 rounded-full bg-[#FF6D1F]"></span>
-              Saved Drafts
-              <span className="bg-[#FF6D1F]/20 text-[#FF6D1F] px-2 py-0.5 rounded-full text-xs font-bold">
+              <span><span className="hidden sm:inline">Saved </span>Drafts</span>
+              <span className="bg-[#FF6D1F]/20 text-[#FF6D1F] px-1.5 sm:px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-bold">
                 {drafts.length}
               </span>
             </span>
@@ -549,15 +563,21 @@ export default function CreatorProductsPage() {
           </button>
 
           <button
-            onClick={() => setFilters(prev => ({ ...prev, status: "" }))}
-            className={`pb-3 text-sm font-semibold relative transition-all ${filters.status === ""
+            onClick={() =>
+              setFilters((prev) => ({
+                ...prev,
+                status: "",
+                search: sortedAndFilteredProducts.length === 0 ? "" : prev.search,
+              }))
+            }
+            className={`pb-3 text-xs sm:text-sm font-semibold relative transition-all whitespace-nowrap flex-shrink-0 cursor-pointer ${filters.status === ""
                 ? "text-white"
                 : "text-gray-400 hover:text-white"
               }`}
           >
-            <span className="flex items-center gap-2">
-              All Products
-              <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs font-normal text-gray-400">
+            <span className="flex items-center gap-1.5 sm:gap-2">
+              <span>All<span className="hidden sm:inline"> Products</span></span>
+              <span className="bg-white/10 px-1.5 sm:px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-normal text-gray-400">
                 {products.length}
               </span>
             </span>
@@ -568,9 +588,9 @@ export default function CreatorProductsPage() {
         </div>
 
         {/* Filters and Controls */}
-        <div className="gradient-border-white-bottom p-6 sm:p-8 mb-8">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row gap-4">
+        <div className="gradient-border-white-bottom p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
+          <div className="flex flex-col gap-4 sm:gap-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Search */}
               <div className="relative flex-1">
                 <input
@@ -579,60 +599,73 @@ export default function CreatorProductsPage() {
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, search: e.target.value }))
                   }
-                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
+                  className="w-full pl-10 pr-10 py-2 sm:py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-all text-sm sm:text-base"
                   placeholder="Search products..."
                 />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400 pointer-events-none" />
+                {filters.search && (
+                  <button
+                    type="button"
+                    onClick={() => setFilters((prev) => ({ ...prev, search: "" }))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
+                    title="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
 
-              {/* Category Filter */}
-              <Select
-                value={filters.category || "all"}
-                onValueChange={(val) => setFilters((prev) => ({ ...prev, category: val === "all" ? "" : val }))}
-              >
-                <SelectTrigger className="w-[160px] h-[42px] sm:h-[46px] bg-white/10 border-white/20 rounded-lg">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {availableCategories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Sort */}
-              <Select
-                value={`${filters.sortBy}-${filters.sortOrder}`}
-                onValueChange={(val) => {
-                  const [sortBy, sortOrder] = val.split("-");
-                  setFilters((prev) => ({ ...prev, sortBy, sortOrder }));
-                }}
-              >
-                <SelectTrigger className="w-[180px] h-[42px] sm:h-[46px] bg-white/10 border-white/20 rounded-lg">
-                  <SelectValue placeholder="Sort By" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="created_at-DESC">Newest First</SelectItem>
-                  <SelectItem value="created_at-ASC">Oldest First</SelectItem>
-                  <SelectItem value="name-ASC">Name: A to Z</SelectItem>
-                  <SelectItem value="name-DESC">Name: Z to A</SelectItem>
-                  <SelectItem value="base_price-ASC">Price: Low to High</SelectItem>
-                  <SelectItem value="base_price-DESC">Price: High to Low</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Clear Filters Button */}
-              {(filters.search || filters.category || filters.sortBy !== "created_at" || filters.sortOrder !== "DESC") && (
-                <button
-                  onClick={() => setFilters(prev => ({ ...prev, search: "", category: "", sortBy: "created_at", sortOrder: "DESC" }))}
-                  className="h-[42px] sm:h-[46px] px-4 rounded-lg bg-white/5 border border-white/20 hover:bg-white/10 text-white text-sm font-medium transition-colors"
+              {/* Category & Sort filters (2-column grid on mobile, row on desktop) */}
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 sm:gap-4">
+                {/* Category Filter */}
+                <Select
+                  value={filters.category || "all"}
+                  onValueChange={(val) => setFilters((prev) => ({ ...prev, category: val === "all" ? "" : val }))}
                 >
-                  Clear
-                </button>
-              )}
+                  <SelectTrigger className="w-full sm:w-[160px] h-[38px] sm:h-[46px] bg-white/10 border-white/20 rounded-lg text-xs sm:text-sm">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {availableCategories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Sort */}
+                <Select
+                  value={`${filters.sortBy}-${filters.sortOrder}`}
+                  onValueChange={(val) => {
+                    const [sortBy, sortOrder] = val.split("-");
+                    setFilters((prev) => ({ ...prev, sortBy, sortOrder }));
+                  }}
+                >
+                  <SelectTrigger className="w-full sm:w-[175px] h-[38px] sm:h-[46px] bg-white/10 border-white/20 rounded-lg text-xs sm:text-sm">
+                    <SelectValue placeholder="Sort By" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="created_at-DESC">Newest First</SelectItem>
+                    <SelectItem value="created_at-ASC">Oldest First</SelectItem>
+                    <SelectItem value="name-ASC">Name: A to Z</SelectItem>
+                    <SelectItem value="name-DESC">Name: Z to A</SelectItem>
+                    <SelectItem value="base_price-ASC">Price: Low to High</SelectItem>
+                    <SelectItem value="base_price-DESC">Price: High to Low</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Clear Filters Button */}
+                {(filters.search || filters.category || filters.sortBy !== "created_at" || filters.sortOrder !== "DESC") && (
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, search: "", category: "", sortBy: "created_at", sortOrder: "DESC" }))}
+                    className="col-span-2 sm:col-span-1 h-[36px] sm:h-[46px] px-3 sm:px-4 rounded-lg bg-white/5 border border-white/20 hover:bg-white/10 text-white text-xs sm:text-sm font-medium transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center justify-between">
@@ -740,19 +773,37 @@ export default function CreatorProductsPage() {
               <Package className="mx-auto h-16 w-16 sm:h-20 sm:w-20" />
             </div>
             <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-              No products found
+              {filters.search
+                ? `No products found matching "${filters.search}"`
+                : "No products found"}
             </h3>
             <p className="text-sm sm:text-base text-gray-400 max-w-md mb-8">
-              {filters.search || filters.category || filters.status
-                ? "Try adjusting your filters to find what you're looking for"
+              {filters.search
+                ? "We couldn't find any products matching your search term. Try clearing your search or resetting filters."
+                : filters.category || filters.status
+                ? "Try adjusting your category or status filters to find what you're looking for."
                 : "Get started by creating your first product"}
             </p>
-            {!filters.search && !filters.category && !filters.status && (
+            {filters.search || filters.category ? (
+              <button
+                type="button"
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    search: "",
+                    category: "",
+                  }))
+                }
+                className="px-6 py-2.5 bg-[#FF6D1F] hover:bg-[#FF6D1F]/90 text-white rounded-lg font-semibold text-sm transition-colors shadow-lg shadow-[#FF6D1F]/20 cursor-pointer"
+              >
+                Clear Search & Show All Products
+              </button>
+            ) : !filters.search && !filters.category && !filters.status ? (
               <Button href="/dashboard/creator/catalog" variant="primary">
                 <Plus className="w-5 h-5 sm:w-6 sm:h-6 mr-2 inline" />
                 Create Your First Product
               </Button>
-            )}
+            ) : null}
           </div>
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
@@ -884,11 +935,11 @@ function ProductGridCard({
 
           <button
             onClick={handleToggle}
-            className="absolute top-3 right-3 z-10"
+            className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10"
             title={product.is_active ? "Deactivate product" : "Activate product"}
           >
             <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold transition-all hover:scale-105 ${product.is_active
+              className={`inline-flex items-center px-1.5 py-0.5 sm:px-2 rounded-full text-[10px] sm:text-xs font-bold transition-all hover:scale-105 backdrop-blur-md ${product.is_active
                 ? "bg-green-500/20 text-green-400 border border-green-500/50"
                 : "bg-red-500/20 text-red-400 border border-red-500/50"
                 }`}
@@ -898,53 +949,53 @@ function ProductGridCard({
           </button>
 
           {/* Action buttons overlay */}
-          <div className="absolute bottom-3 right-3 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 flex gap-1.5 sm:gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={handleToggle}
-              className="p-2 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
+              className="p-1.5 sm:p-2 bg-black/60 sm:bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
               title={product.is_active ? "Deactivate product" : "Activate product"}
             >
-              {product.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {product.is_active ? <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
             </button>
             <Link
               href={`/dashboard/creator/canvas?productId=${product.id}`}
-              className="p-2 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
+              className="p-1.5 sm:p-2 bg-black/60 sm:bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
               title="Edit product"
               onClick={handleEdit}
             >
-              <Edit className="w-4 h-4" />
+              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Link>
             <button
               onClick={handleDelete}
-              className="p-2 bg-white/10 border border-white/20 text-white hover:bg-red-500/20 rounded-lg transition-all backdrop-blur-sm"
+              className="p-1.5 sm:p-2 bg-black/60 sm:bg-white/10 border border-white/20 text-white hover:bg-red-500/20 rounded-lg transition-all backdrop-blur-sm"
               title="Delete product"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>
 
-        <div className="p-4 sm:p-6">
-          <h3 className="font-bold text-sm sm:text-base text-white mb-2 truncate group-hover:text-white/80 transition-colors">
+        <div className="p-3 sm:p-5">
+          <h3 className="font-bold text-xs sm:text-base text-white mb-1 sm:mb-2 truncate group-hover:text-white/80 transition-colors">
             {product.name}
           </h3>
 
-          <p className="text-xs sm:text-sm text-gray-400 font-medium mb-3">
+          <p className="text-[11px] sm:text-sm text-gray-400 font-medium mb-2 sm:mb-3">
             {product.category || "Uncategorized"}
           </p>
 
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-lg sm:text-xl font-bold text-white">
+              <div className="text-sm sm:text-xl font-bold text-white">
                 {formatPrice(minSellingPrice)}
               </div>
               {maxSellingPrice > minSellingPrice && (
-                <div className="text-xs text-gray-400">
+                <div className="text-[10px] sm:text-xs text-gray-400">
                   to {formatPrice(maxSellingPrice)}
                 </div>
               )}
             </div>
-            <span className="text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/50 px-2.5 py-1 rounded-full">
+            <span className="text-[10px] sm:text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/50 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
               {product.variant_count}
             </span>
           </div>
@@ -1153,8 +1204,8 @@ function DraftGridCard({
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           {/* Status badge */}
-          <div className="absolute top-3 left-3 z-10">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FF6D1F]/20 text-[#FF6D1F] border border-[#FF6D1F]/40 backdrop-blur-md">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10">
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 rounded-full text-[10px] sm:text-xs font-bold bg-[#FF6D1F]/20 text-[#FF6D1F] border border-[#FF6D1F]/40 backdrop-blur-md">
               <span className="w-1.5 h-1.5 rounded-full bg-[#FF6D1F] animate-pulse"></span>
               Draft
             </span>
@@ -1162,49 +1213,49 @@ function DraftGridCard({
 
           {/* Artworks count badge */}
           {artworksCount > 0 && (
-            <div className="absolute top-3 right-3 z-10">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white/15 text-white/90 border border-white/20 backdrop-blur-md">
+            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
+              <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2 rounded-full text-[10px] sm:text-[11px] font-semibold bg-white/15 text-white/90 border border-white/20 backdrop-blur-md">
                 {artworksCount} {artworksCount === 1 ? "design" : "designs"}
               </span>
             </div>
           )}
 
           {/* Action buttons overlay */}
-          <div className="absolute bottom-3 right-3 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-10">
+          <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 flex gap-1.5 sm:gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 z-10">
             <button
               onClick={handleResume}
-              className="p-2 bg-[#FF6D1F] text-white hover:bg-[#FF7A1A] rounded-lg transition-all shadow-lg flex items-center gap-1 text-xs font-bold cursor-pointer"
+              className="p-1.5 sm:p-2 bg-[#FF6D1F] text-white hover:bg-[#FF7A1A] rounded-lg transition-all shadow-lg flex items-center gap-1 text-xs font-bold cursor-pointer"
               title="Resume editing in Canvas"
             >
-              <Edit className="w-4 h-4" />
+              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Resume</span>
             </button>
             <button
               onClick={(e) => onDelete(draft, e)}
-              className="p-2 bg-white/10 border border-white/20 text-white hover:bg-red-500/30 hover:border-red-500/50 rounded-lg transition-all backdrop-blur-sm cursor-pointer"
+              className="p-1.5 sm:p-2 bg-black/60 sm:bg-white/10 border border-white/20 text-white hover:bg-red-500/30 hover:border-red-500/50 rounded-lg transition-all backdrop-blur-sm cursor-pointer"
               title="Delete draft"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>
 
-        <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+        <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-sm sm:text-base text-white mb-1.5 truncate group-hover:text-[#FF6D1F] transition-colors">
+            <h3 className="font-bold text-xs sm:text-base text-white mb-1 sm:mb-1.5 truncate group-hover:text-[#FF6D1F] transition-colors">
               {draft.name || draft.title || `Draft #${draft.blueprintId}`}
             </h3>
-            <p className="text-xs text-gray-400 font-medium mb-3">
+            <p className="text-[11px] sm:text-xs text-gray-400 font-medium mb-2 sm:mb-3">
               Blueprint #{draft.blueprintId}
             </p>
           </div>
 
-          <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-            <span className="text-[11px] text-gray-500">
+          <div className="pt-2 sm:pt-3 border-t border-white/10 flex items-center justify-between">
+            <span className="text-[10px] sm:text-[11px] text-gray-500">
               Saved {formattedDate}
             </span>
-            <span className="text-xs font-semibold text-[#FF6D1F] group-hover:underline flex items-center gap-1">
-              Open Canvas →
+            <span className="text-[11px] sm:text-xs font-semibold text-[#FF6D1F] group-hover:underline flex items-center gap-1">
+              Canvas →
             </span>
           </div>
         </div>

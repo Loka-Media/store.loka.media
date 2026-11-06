@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import GradientTitle from '@/components/ui/GradientTitle';
-import { Package, Search, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Package, Search, ChevronLeft, ChevronRight, ArrowLeft, Plus, Palette, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import CreativeLoader from '@/components/CreativeLoader';
@@ -105,15 +105,17 @@ export default function AdminProductsPage() {
           </div>
 
           {/* Search Box */}
-          <div className="relative min-w-[280px] sm:min-w-[340px]">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search products by title or brand..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
-            />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative min-w-[240px] sm:min-w-[300px]">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search products by title or brand..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+              />
+            </div>
           </div>
         </div>
 
@@ -168,6 +170,14 @@ export default function AdminProductsPage() {
                         </span>
                       )}
                     </div>
+                    <Link
+                      href={`/products/${product.id}`}
+                      target="_blank"
+                      className="mt-2.5 w-full py-1.5 px-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white text-[11px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition-opacity shadow-sm"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span>View in Store</span>
+                    </Link>
                   </div>
                 </div>
               ))}

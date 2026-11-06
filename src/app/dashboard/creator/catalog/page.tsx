@@ -326,6 +326,16 @@ export default function CreatorCatalogPage() {
   };
 
   const handleCreateProduct = (printfulProduct: PrintfulProduct) => {
+    // Clear any leftover saved mockups from previous sessions for this blueprint so new design starts completely clean
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(`saved_canvas_mockups_${printfulProduct.id}`);
+        localStorage.removeItem(`mockup_request_${printfulProduct.id}`);
+        localStorage.removeItem(`productForm_${printfulProduct.id}`);
+        localStorage.removeItem(`loka_draft_${printfulProduct.id}`);
+      } catch (_) {}
+    }
+
     // Store selected product in localStorage and navigate to design workflow
     console.log("Storing product and navigating:", printfulProduct);
     localStorage.setItem(

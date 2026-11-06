@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 import { createProductSlug, isVariantAvailable, cleanDescription } from "@/lib/utils";
 import { useGuestCart } from "@/contexts/GuestCartContext";
@@ -41,9 +41,13 @@ export function ProductListItem({ product }: ProductListItemProps) {
   }>({ isAvailable: true, availableCount: 0, totalCount: 0, loading: false });
 
   const { addToCart } = useGuestCart();
-  const { addToWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, isInWishlist, wishlistCount } = useWishlist();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    setIsWishlisted(isInWishlist(product.id));
+  }, [product.id, isInWishlist, wishlistCount]);
 
   const imageUrl =
     product.thumbnail_url ||
@@ -365,20 +369,18 @@ export function ProductListItem({ product }: ProductListItemProps) {
                       : "bg-gray-800/80 text-gray-400 hover:text-red-400 hover:bg-gray-700/80"
                   }`}
                   title="Add to wishlist"
-                  onClick={() => {
-                    if (!isAuthenticated) {
-                      addPendingWishlistItem(product.id);
-                      toast.success("Product saved! Please sign in to view your wishlist");
-                      router.push('/auth/login?redirect=/wishlist');
-                      return;
+                  onClick={async () => {
+                    try {
+                      if (isWishlisted) {
+                        await removeFromWishlist(product.id);
+                        setIsWishlisted(false);
+                      } else {
+                        await addToWishlist(product.id);
+                        setIsWishlisted(true);
+                      }
+                    } catch (error) {
+                      console.error('Wishlist operation failed:', error);
                     }
-                    setIsWishlisted(!isWishlisted);
-                    addToWishlist(product.id);
-                    toast.success(
-                      isWishlisted
-                        ? "Removed from wishlist!"
-                        : "Added to wishlist!"
-                    );
                   }}
                 >
                   <Heart

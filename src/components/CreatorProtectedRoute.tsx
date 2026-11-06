@@ -15,17 +15,19 @@ export default function CreatorProtectedRoute({ children }: CreatorProtectedRout
   useEffect(() => {
     if (loading) return;
 
-    // Only allow access if user is admin OR is a creator with approved status
+    // Redirect unauthenticated users to login
     if (!user) {
       router.replace('/auth/login');
       return;
     }
 
+    // Admin is NOT allowed in Creator Hub - redirect directly to Admin Dashboard
     if (user.role === 'admin') {
-      // Admin can always access creator features
+      router.replace('/dashboard/admin');
       return;
     }
     
+    // Only approved creators can access creator routes
     if (user.role !== 'creator' || user.creatorStatus !== 'approved') {
       router.replace('/dashboard');
       return;
@@ -41,8 +43,8 @@ export default function CreatorProtectedRoute({ children }: CreatorProtectedRout
     );
   }
 
-  // Don't render children if user is not authorized
-  if (!user || (user.role !== 'admin' && (user.role !== 'creator' || user.creatorStatus !== 'approved'))) {
+  // Don't render children if user is admin, unauthenticated, or not an approved creator
+  if (!user || user.role === 'admin' || user.role !== 'creator' || user.creatorStatus !== 'approved') {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-12 h-12 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>

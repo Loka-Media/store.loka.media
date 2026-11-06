@@ -427,6 +427,11 @@ export default function UnifiedCheckoutPage() {
       console.log('✅ [CHECKOUT] Order processed successfully in database');
       setOrderData(orderResult.order);
       setClientSecret(paymentIntentResult.clientSecret);
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.set('step', 'payment');
+        window.history.pushState({ step: 'payment' }, '', url.toString());
+      }
       setCurrentStep("payment");
     } catch (error: unknown) {
       console.error("❌ [CHECKOUT] Order creation error:", error);
@@ -470,6 +475,28 @@ export default function UnifiedCheckoutPage() {
       console.error("Payment success handling error:", error);
     }
   };
+
+  const handleBackToCheckout = () => {
+    checkoutState.setCurrentStep('info');
+    if (typeof window !== 'undefined' && window.location.search.includes('step=payment')) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('step');
+      window.history.pushState(null, '', url.pathname + (url.search ? url.search : ''));
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (checkoutState.currentStep === 'payment') {
+        checkoutState.setCurrentStep('info');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [checkoutState.currentStep]);
 
   const handleRemoveUnavailableItems = async (variantIds: number[]) => {
     try {
@@ -534,6 +561,7 @@ export default function UnifiedCheckoutPage() {
       orderData={checkoutState.orderData}
       clientSecret={checkoutState.clientSecret}
       onPaymentSuccess={handlePaymentSuccess}
+      onBackToCheckout={handleBackToCheckout}
       totalAmount={checkoutState.calculateTotal(summary.subtotal)}
       loading={checkoutState.loading}
       setLoading={checkoutState.setLoading}
@@ -554,8 +582,8 @@ export default function UnifiedCheckoutPage() {
   // Main checkout form
   return (
     <div className="min-h-screen bg-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8 pt-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 md:pt-20 pb-12">
+        <div className="flex items-center justify-between mb-8">
           <GradientTitle text="Checkout" size="sm" />
           <Link href="/cart" className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-gray-300 bg-gray-900 hover:bg-gray-800 hover:border-gray-600 transition-all duration-300">
             <ArrowLeft className="w-4 h-4 mr-2" />

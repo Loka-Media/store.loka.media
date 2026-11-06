@@ -30,39 +30,42 @@ export async function GET(
       try {
         const product = JSON.parse(data);
 
-        try {
-          const dbRows = await queryDb(
-            `SELECT p.base_price, p.markup_percentage,
-                    json_agg(json_build_object('id', pv.id, 'price', pv.price, 'printify_variant_id', pv.printify_variant_id)) as db_variants
-             FROM products p
-             LEFT JOIN product_variants pv ON pv.product_id = p.id
-             WHERE p.id = $1
-             GROUP BY p.id, p.base_price, p.markup_percentage`,
-            [productId]
-          );
+        const numericId = parseInt(productId, 10);
+        if (!isNaN(numericId) && numericId > 0) {
+          try {
+            const dbRows = await queryDb(
+              `SELECT p.base_price, p.markup_percentage,
+                      json_agg(json_build_object('id', pv.id, 'price', pv.price, 'printify_variant_id', pv.printify_variant_id)) as db_variants
+               FROM products p
+               LEFT JOIN product_variants pv ON pv.product_id = p.id
+               WHERE p.id = $1
+               GROUP BY p.id, p.base_price, p.markup_percentage`,
+              [numericId]
+            );
 
-          if (dbRows && dbRows.length > 0) {
-            const dbP = dbRows[0];
-            const realBase = dbP.base_price != null ? ensure99Pricing(dbP.base_price) : null;
-            if (realBase && realBase > 0) {
-              product.base_price = realBase;
-              product.min_price = realBase;
+            if (dbRows && dbRows.length > 0) {
+              const dbP = dbRows[0];
+              const realBase = dbP.base_price != null ? ensure99Pricing(dbP.base_price) : null;
+              if (realBase && realBase > 0) {
+                product.base_price = realBase;
+                product.min_price = realBase;
+              }
+              if (Array.isArray(dbP.db_variants) && Array.isArray(product.variants)) {
+                product.variants.forEach((v: any) => {
+                  const match = dbP.db_variants.find((dv: any) => 
+                    dv.id === v.id || (dv.printify_variant_id != null && dv.printify_variant_id === v.printify_variant_id)
+                  );
+                  if (match && match.price) {
+                    v.price = ensure99Pricing(match.price);
+                  } else if (realBase) {
+                    v.price = realBase;
+                  }
+                });
+              }
             }
-            if (Array.isArray(dbP.db_variants) && Array.isArray(product.variants)) {
-              product.variants.forEach((v: any) => {
-                const match = dbP.db_variants.find((dv: any) => 
-                  dv.id === v.id || (dv.printify_variant_id != null && dv.printify_variant_id === v.printify_variant_id)
-                );
-                if (match && match.price) {
-                  v.price = ensure99Pricing(match.price);
-                } else if (realBase) {
-                  v.price = realBase;
-                }
-              });
-            }
+          } catch (_dbErr) {
+            // If direct DB query fails, fallback to backend API data
           }
-        } catch (_dbErr) {
-          // If direct DB query fails, fallback to backend API data
         }
 
         if (product && product.base_price == null && product.min_price != null) {
@@ -306,15 +309,29 @@ export async function DELETE(
   const headers: Record<string, string> = {};
   if (authHeader) headers['Authorization'] = authHeader;
 
+  // Sync with PostgreSQL DB
+  const numericId = parseInt(id, 10);
+  if (!isNaN(numericId) && numericId > 0) {
+    await queryDb(
+      `UPDATE products SET status = 'deleted', updated_at = NOW() WHERE id = $1`,
+      [numericId]
+    ).catch(() => null);
+  }
+
   const res = await fetch(`${BACKEND_URL}/api/products/${id}`, {
     method: 'DELETE',
     headers,
     cache: 'no-store',
-  });
-  const data = await res.text();
-  return new NextResponse(data, {
-    status: res.status,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  }).catch(() => null);
+
+  if (res) {
+    const data = await res.text();
+    return new NextResponse(data, {
+      status: res.status,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return NextResponse.json({ success: true, message: 'Product deleted' }, { status: 200 });
 }
 

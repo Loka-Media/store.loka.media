@@ -729,8 +729,8 @@ const Product360Viewer: React.FC<{
           </div>
 
           {canReorder && (
-            <div className="flex items-center gap-1.5 px-1 text-[11px] text-gray-600 font-medium">
-              <GripVertical className="w-3.5 h-3.5 text-gray-500" />
+            <div className="flex items-center gap-1.5 px-1 text-[10px] sm:text-[11px] text-gray-600 font-medium flex-wrap">
+              <GripVertical className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
               <span>Drag thumbnails or use arrows to reorder • <strong>Image #1 is your storefront cover</strong></span>
             </div>
           )}
@@ -933,6 +933,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const { user } = useAuth();
 
   const handleBack = () => {
+    if (isPublishing) {
+      toast.error("Publishing in progress. Please do not navigate away.");
+      return;
+    }
+    if (isUploadingCustomImage) {
+      toast.error("Custom image upload in progress. Please wait until finished.");
+      return;
+    }
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back();
     } else {
@@ -1237,19 +1245,17 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       });
     }
 
-    // 3. Wraparound books / journals detection (Hardcover Journal 485, notebooks, etc.)
-    // In Printify, a wraparound book/journal is split into Front Cover and Back Cover (strictly 2 options)
+    // 3. Stationery / books / journals detection (Spiral notebooks, hardcovers, journals, etc.)
     const title = ((selectedProduct?.title || selectedProduct?.name || "") as string).toLowerCase();
-    const isStationery = /\b(journal|notebook|diary|planner|hardcover)\b/i.test(title);
+    const categoryStr = ((selectedProduct?.category || "") as string).toLowerCase();
+    const isStationery = /\b(journal|notebook|diary|planner|hardcover|spiral|softcover|wirobound|stationery)\b/i.test(title) || /\b(journal|notebook|stationery|paper)\b/i.test(categoryStr);
     const isApparelOrOther = /\b(hoodie|sweatshirt|shirt|tee|t-shirt|apparel|pullover|jacket|tank|top|sweater|fleece|jogger|pant|pants|sock|socks|hat|cap|beanie|mug|mugs|tumbler|bottle|poster|posters|canvas|banner|pillow|blanket|tote|bag)\b/i.test(title);
-    const hasBackPlacement = discoveredPlacements.has("back") || discoveredPlacements.has("rear");
 
-    const isWraparoundBookOrJournal = isStationery && !isApparelOrOther && !hasBackPlacement;
-
-    if (isWraparoundBookOrJournal) {
+    if (isStationery && !isApparelOrOther) {
+      // In Printify, all 15 notebooks / journals strictly only allow designing the front cover
       discoveredPlacements.clear();
       discoveredPlacements.add("front_cover");
-      discoveredPlacements.add("back_cover");
+      return ["front_cover"];
     }
 
     // 4. Fallback ONLY if no placeholders were discovered from Printify API data
@@ -1348,6 +1354,12 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           setActivePlacement(supported[0]);
         }
       }
+
+      // Remove any designs on placements not supported for this product
+      setDesignFiles((prev) => {
+        const filtered = prev.filter((d) => supported.includes(d.placement));
+        return filtered.length !== prev.length ? filtered : prev;
+      });
 
       // Auto-migrate legacy front_cover / back_cover designs for products that use standard front / back
       if (supported.includes("front") && !supported.includes("front_cover")) {
@@ -1847,6 +1859,44 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 - Creator Profit shown in UI: $${creatorProfit.toFixed(2)}`);
   }, [selectedProduct, pricingRange.min, platformMinSellingPrice, minSellingPrice, creatorProfit, creatorMarkup]);
 
+  // Check if user has uploaded and placed a design onto the product
+  const hasUploadedDesign = Boolean(
+    (designFiles && designFiles.some((d: any) => d && d.url && typeof d.url === "string" && d.url.trim().length > 0)) ||
+    (isEditing && (mockupUrls?.length > 0 || (selectedProduct?.images && selectedProduct.images.length > 0)))
+  );
+
+  // Track if user clicked Generate Preview for current design
+  const [hasClickedGeneratePreview, setHasClickedGeneratePreview] = useState(false);
+
+  // Compute signature of current design placements & URLs to detect artwork changes
+  const designUrlsSignature = useMemo(() => {
+    return (designFiles || [])
+      .filter((d: any) => d && d.url)
+      .map((d: any) => `${d.placement}:${d.url}`)
+      .sort()
+      .join("|");
+  }, [designFiles]);
+
+  const lastGeneratedDesignSigRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!hasUploadedDesign) {
+      setHasClickedGeneratePreview(false);
+      lastGeneratedDesignSigRef.current = "";
+    } else if (lastGeneratedDesignSigRef.current && lastGeneratedDesignSigRef.current !== designUrlsSignature) {
+      // Artwork was changed/replaced, user should generate preview again
+      setHasClickedGeneratePreview(false);
+    }
+  }, [hasUploadedDesign, designUrlsSignature]);
+
+  // Step 2 Next Page disabled condition:
+  // Must have uploaded design, must NOT be generating, and must have clicked Generate Preview or already have mockups
+  const isStep2NextDisabled = Boolean(
+    !hasUploadedDesign ||
+    isGeneratingPreview ||
+    (!hasClickedGeneratePreview && (!mockupUrls || mockupUrls.length === 0))
+  );
+
   // Cooldown state for manual preview regeneration
   const [cooldown, setCooldown] = useState(0);
 
@@ -1860,11 +1910,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   const handleManualRegenerate = async () => {
     if (cooldown > 0 || isGeneratingPreview) return;
-    if (!designFiles || designFiles.length === 0) {
+    if (!hasUploadedDesign) {
       toast.error("Please add at least one design or image to the product first!");
       return;
     }
     setCooldown(30); // Set 30-second cooldown to avoid API rate limits
+    lastGeneratedDesignSigRef.current = designUrlsSignature;
+    setHasClickedGeneratePreview(true);
     try {
       await onGeneratePreview();
     } catch (err: any) {
@@ -1976,6 +2028,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
       toast.success("Files uploaded successfully!", { id: toastId });
       onRefreshFiles();
+
+      // Automatically place the newly uploaded design onto the product canvas
+      if (uploadedList[0]) {
+        await handleAddDesign(uploadedList[0]);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Upload failed. Please try again.", { id: toastId });
@@ -2206,15 +2263,25 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       }
     }
 
-    // Check Step 2: Artwork
+    // Check Step 2: Artwork & Preview Generation
     if (!targetStep || targetStep === 2) {
       const hasExistingImages = isEditing && (mockupUrls?.length > 0 || (selectedProduct?.images && selectedProduct.images.length > 0));
-      if (designFiles.length === 0 && !hasExistingImages) {
+      if (!hasUploadedDesign && !hasExistingImages) {
         scrollToFieldAndFocus("section-artwork", {
           step: 2,
           accordion: "design",
           errorMessage: "Step 2 incomplete: Please upload and place your artwork on the canvas",
         });
+        return false;
+      }
+
+      if (!hasExistingImages && !hasClickedGeneratePreview && (!mockupUrls || mockupUrls.length === 0)) {
+        toast.error("Please click 'Generate Preview' before proceeding to the next page!");
+        return false;
+      }
+
+      if (isGeneratingPreview) {
+        toast.loading("Generating realistic mockups, please wait a moment...", { duration: 2500 });
         return false;
       }
     }
@@ -2306,6 +2373,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Save Draft action
   const handleSaveDraft = () => {
+    if (isPublishing) {
+      toast.error("Product is currently publishing. Please wait.");
+      return;
+    }
+    if (isUploadingCustomImage) {
+      toast.error("Custom image upload is in progress. Please wait until finished.");
+      return;
+    }
     try {
       const bId = selectedProduct?.id || selectedProduct?.blueprintId || "custom";
       const draftId = `draft_${bId}`;
@@ -2361,6 +2436,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Continue to next step helper
   const handleContinueNext = () => {
+    if (isUploadingCustomImage) {
+      toast.error("Please wait until custom image upload is finished before continuing!");
+      return;
+    }
+    if (isPublishing) return;
+    if (isGeneratingPreview) {
+      toast.error("Please wait until preview generation is finished!");
+      return;
+    }
+
     if (activeStep < 4) {
       if (validateAndRedirect(activeStep)) {
         goToStep(activeStep + 1);
@@ -2372,6 +2457,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
   // Publish submit action
   const handlePublishSubmit = async () => {
+    if (isUploadingCustomImage) {
+      toast.error("Please wait until custom image upload is finished before publishing!");
+      return;
+    }
+    if (isPublishing) {
+      return;
+    }
+    if (isGeneratingPreview) {
+      toast.error("Please wait until preview generation is finished before publishing!");
+      return;
+    }
+
     // Automatically validate and redirect user to first incomplete field
     if (!validateAndRedirect()) {
       return;
@@ -2656,9 +2753,20 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   useEffect(() => {
     const bId = selectedProduct?.blueprintId || selectedProduct?.id || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("blueprintId") : null);
     const pId = isEditing ? (selectedProduct?.id || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("productId") : null)) : null;
-    if (!bId && !pId) return;
 
-    // 1. Instant check from localStorage
+    if (!isEditing) {
+      // Creating a brand new product:
+      // Ensure custom image uploads from any previously published product are stripped out
+      if (typeof window !== "undefined" && bId) {
+        localStorage.removeItem(`saved_canvas_mockups_${bId}`);
+      }
+      setMockupUrls?.((prev: any[]) => (prev || []).filter((m: any) => !m?.isCustomUpload && m?.placement !== "custom"));
+      return;
+    }
+
+    if (!pId) return;
+
+    // When editing an existing product: restore mockups specifically for this productId
     if (typeof window !== "undefined" && bId) {
       try {
         const localSaved = localStorage.getItem(`saved_canvas_mockups_${bId}`);
@@ -2671,19 +2779,19 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       } catch (_) {}
     }
 
-    // 2. Asynchronous fetch from PostgreSQL DB
+    // Fetch from DB specifically for this productId
     const fetchSavedMockups = async () => {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") || "" : "";
-        const res = await fetch(`/api/creator/canvas-mockups?blueprintId=${bId || ""}&productId=${pId || ""}`, {
+        const res = await fetch(`/api/creator/canvas-mockups?productId=${pId}`, {
           headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
           },
         });
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.mockups) && data.mockups.length > 0) {
-            console.log(`[UnifiedCanvasPDP] Restored ${data.mockups.length} mockups from DB`);
+            console.log(`[UnifiedCanvasPDP] Restored ${data.mockups.length} mockups for product ${pId}`);
             setMockupUrls?.(data.mockups);
             if (typeof window !== "undefined" && bId) {
               localStorage.setItem(`saved_canvas_mockups_${bId}`, JSON.stringify(data.mockups));
@@ -2736,6 +2844,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const handleCustomImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    if (isPublishing) {
+      toast.error("Product is currently publishing. Please wait until publishing is complete.");
+      if (customFileInputRef.current) customFileInputRef.current.value = "";
+      return;
+    }
+    if (isUploadingCustomImage) {
+      toast.error("Another image upload is already in progress. Please wait.");
+      return;
+    }
 
     setIsUploadingCustomImage(true);
     const toastId = toast.loading(`Uploading ${files.length} custom image(s)...`);
@@ -2848,6 +2966,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       step: 1,
       num: "01",
       title: "Color & Sizes",
+      mobileTitle: "Colors",
       subtitle: "Product options",
       isValid: validationSummary.variants,
     },
@@ -2855,6 +2974,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       step: 2,
       num: "02",
       title: "Add Design",
+      mobileTitle: "Design",
       subtitle: "Upload & position",
       isValid: validationSummary.designs,
     },
@@ -2862,6 +2982,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       step: 3,
       num: "03",
       title: "Title & Price",
+      mobileTitle: "Pricing",
       subtitle: "Product options",
       isValid: validationSummary.details,
     },
@@ -2869,63 +2990,67 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       step: 4,
       num: "04",
       title: "Review & Launch",
+      mobileTitle: "Review",
       subtitle: "Final checklist",
       isValid: validationSummary.allValid,
     },
   ];
 
   return (
-    <div className="bg-[#050505] min-h-screen text-white relative pt-[96px] md:pt-[104px] w-full max-w-full overflow-x-clip">
+    <div className="bg-[#050505] min-h-screen text-white relative pt-2 sm:pt-4 md:pt-8 w-full max-w-full overflow-x-clip">
       {/* Hidden input for custom image uploads */}
       <input
         type="file"
         ref={customFileInputRef}
         accept="image/*"
         multiple
+        disabled={isUploadingCustomImage || isPublishing}
         onChange={handleCustomImageUpload}
         className="hidden"
       />
 
       {/* Sticky Header with Product Info & Continue Button - sits perfectly flush below fixed navbar */}
-      <div className="sticky top-[96px] md:top-[104px] z-40 bg-[#080808]/95 backdrop-blur-md border-b border-white/10 shadow-2xl py-2.5 sm:py-3 px-3 sm:px-6 w-full">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4 w-full">
-          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 flex-1">
+      <div className="sticky top-[74px] sm:top-[88px] md:top-[104px] z-40 bg-[#080808]/95 backdrop-blur-md border-b border-white/10 shadow-2xl py-2 sm:py-2.5 md:py-3 px-3 sm:px-6 w-full">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 w-full">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-orange-500/50 text-gray-300 hover:text-white transition-all duration-200 flex-shrink-0 group cursor-pointer"
+              disabled={isPublishing || isUploadingCustomImage}
+              className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-orange-500/50 text-gray-300 hover:text-white transition-all duration-200 flex-shrink-0 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               title="Go back to previous page"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-0.5 transition-transform" />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="text-sm sm:text-base md:text-lg font-bold font-clash text-white line-clamp-1">
+              <div className="text-xs sm:text-base md:text-lg font-bold font-clash text-white truncate">
                 {selectedProduct?.title || selectedProduct?.name}
               </div>
-              <p className="text-[10px] sm:text-xs text-gray-400 truncate">
+              <p className="text-[10px] sm:text-xs text-gray-400 truncate hidden xs:block">
                 SKU: {selectedProduct?.model || selectedProduct?.id} | {selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}
               </p>
             </div>
           </div>
-          <div className="flex-shrink-0 flex items-center gap-1.5 sm:gap-3">
+          <div className="flex-shrink-0 flex items-center gap-1 sm:gap-2.5">
             {activeStep === 2 && (
               <button
                 type="button"
                 onClick={handleManualRegenerate}
-                disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
-                className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_16px_rgba(255,109,31,0.25)] flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed leading-none"
+                disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0 || isPublishing || isUploadingCustomImage}
+                className="h-8 sm:h-10 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_16px_rgba(255,109,31,0.25)] flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed leading-none"
               >
                 {isGeneratingPreview ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
-                    <span className="leading-none">Generating...</span>
+                    <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin flex-shrink-0" />
+                    <span className="leading-none text-[10px] sm:text-sm">Generating...</span>
                   </>
                 ) : cooldown > 0 ? (
-                  <span className="leading-none">Wait {cooldown}s</span>
+                  <span className="leading-none text-[10px] sm:text-sm">Wait {cooldown}s</span>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="leading-none">{mockupUrls && mockupUrls.length > 0 ? "Regenerate Preview" : "Generate Preview"}</span>
+                    <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                    <span className="leading-none hidden sm:inline">{mockupUrls && mockupUrls.length > 0 ? "Regenerate Preview" : "Generate Preview"}</span>
+                    <span className="leading-none sm:hidden">{mockupUrls && mockupUrls.length > 0 ? "Regen" : "Preview"}</span>
                   </>
                 )}
               </button>
@@ -2933,28 +3058,36 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <button
               type="button"
               onClick={handleSaveDraft}
-              className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold border border-white/20 bg-black/40 hover:bg-white/10 text-white transition-all cursor-pointer whitespace-nowrap flex items-center justify-center leading-none"
+              disabled={isPublishing || isUploadingCustomImage || isGeneratingPreview}
+              className="h-8 sm:h-10 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold border border-white/20 bg-black/40 hover:bg-white/10 text-white transition-all cursor-pointer whitespace-nowrap flex items-center justify-center leading-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Draft
+              <span className="hidden sm:inline">Save Draft</span>
+              <span className="sm:hidden">Draft</span>
             </button>
             <button
               type="button"
               onClick={handleContinueNext}
-              disabled={isPublishing || isGeneratingPreview}
-              className="h-9 sm:h-10 px-3.5 sm:px-5 rounded-xl text-xs sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 leading-none"
+              disabled={isPublishing || isGeneratingPreview || isUploadingCustomImage}
+              className="h-8 sm:h-10 px-2.5 sm:px-5 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 leading-none"
             >
               {isPublishing ? (
-                <div className="flex items-center gap-2 whitespace-nowrap">
-                  <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
                   <span className="leading-none">{isEditing ? "Updating..." : "Publishing..."}</span>
+                </div>
+              ) : isUploadingCustomImage ? (
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+                  <span className="leading-none">Uploading...</span>
                 </div>
               ) : activeStep < 4 ? (
                 <>
-                  <span className="leading-none">Continue</span>
-                  <ArrowRight className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="leading-none hidden xs:inline">Continue</span>
+                  <span className="leading-none xs:hidden">Next</span>
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
                 </>
               ) : (
-                <span className="leading-none">{isEditing ? "Update Product" : "Publish Product"}</span>
+                <span className="leading-none">{isEditing ? "Update" : "Publish"}</span>
               )}
             </button>
           </div>
@@ -2962,8 +3095,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
       </div>
 
       {/* FULL-WIDTH STEPPER BAR (Figma Design) */}
-      <div ref={topStepperRef} className="max-w-7xl mx-auto px-3 sm:px-6 pt-5 sm:pt-7">
-        <div className="bg-[#0B132B]/85 border border-white/10 rounded-2xl md:rounded-3xl p-5 sm:p-6 md:px-10 backdrop-blur-md shadow-2xl relative">
+      <div ref={topStepperRef} className="max-w-7xl mx-auto px-3 sm:px-6 pt-3 sm:pt-5 md:pt-7">
+        <div className="bg-[#0B132B]/85 border border-white/10 rounded-2xl md:rounded-3xl p-3.5 sm:p-5 md:p-6 md:px-10 backdrop-blur-md shadow-2xl relative">
           <div className="relative">
             {/* Background connecting track line running between 01 and 04 */}
             <div className="absolute top-4 sm:top-4 left-[12.5%] right-[12.5%] h-[2px] bg-white/20 -translate-y-1/2 pointer-events-none" />
@@ -2993,8 +3126,21 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <button
                     key={s.step}
                     type="button"
-                    onClick={() => goToStep(s.step)}
-                    className="flex flex-col items-center text-center cursor-pointer group transition-all"
+                    disabled={isPublishing || isUploadingCustomImage}
+                    onClick={() => {
+                      if (isPublishing || isUploadingCustomImage) {
+                        toast.error("Please wait until current process is completed.");
+                        return;
+                      }
+                      if (s.step <= activeStep) {
+                        goToStep(s.step);
+                      } else if (validateAndRedirect(activeStep)) {
+                        goToStep(s.step);
+                      }
+                    }}
+                    className={`flex flex-col items-center text-center group transition-all ${
+                      isPublishing || isUploadingCustomImage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                    }`}
                   >
                     {/* Circle badge */}
                     <div
@@ -3010,17 +3156,18 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     </div>
 
                     {/* Step Title & Subtitle */}
-                    <div className="mt-2.5 space-y-0.5">
+                    <div className="mt-2 space-y-0.5">
                       <div
-                        className={`text-xs sm:text-sm font-bold font-clash leading-tight transition-colors ${
+                        className={`text-[11px] sm:text-sm font-bold font-clash leading-tight transition-colors ${
                           isActive
                             ? "text-white"
                             : "text-gray-300 group-hover:text-white"
                         }`}
                       >
-                        {s.title}
+                        <span className="sm:hidden">{s.mobileTitle || s.title}</span>
+                        <span className="hidden sm:inline">{s.title}</span>
                       </div>
-                      <div className="text-[10px] sm:text-xs text-gray-400">
+                      <div className="hidden sm:block text-[10px] sm:text-xs text-gray-400">
                         {s.subtitle}
                       </div>
                     </div>
@@ -3059,7 +3206,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               {/* Section 1: Product Information */}
               <div className="gradient-border-white-top p-5 sm:p-6 bg-gray-900/60 rounded-3xl backdrop-blur-sm border border-white/5">
                 <div className="flex flex-col md:flex-row gap-5">
-                  <div className="w-full md:w-1/3 aspect-square relative bg-[#f4f4f5] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-4">
+                  <div className="w-32 h-32 sm:w-44 sm:h-44 md:w-1/3 md:aspect-square mx-auto md:mx-0 relative bg-[#f4f4f5] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3 sm:p-4">
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
@@ -3201,7 +3348,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                   setSelectedColors([...selectedColors, color.name]);
                                 }
                               }}
-                              className={`relative border-2 rounded-full px-5 py-2 min-w-[85px] flex items-center justify-center transition-all duration-200 cursor-pointer ${isSelected
+                              className={`relative border-2 rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 min-w-[70px] sm:min-w-[85px] flex items-center justify-center transition-all duration-200 cursor-pointer ${isSelected
                                 ? isActive
                                   ? "border-[#FF6D1F] shadow-[0_0_12px_rgba(255,109,31,0.35)]"
                                   : "border-white"
@@ -3279,7 +3426,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                   setSelectedSizes([...selectedSizes, size]);
                                 }
                               }}
-                              className={`relative border-2 rounded-full px-5 py-2 min-w-[85px] text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center cursor-pointer bg-black/80 ${
+                              className={`relative border-2 rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 min-w-[70px] sm:min-w-[85px] text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center cursor-pointer bg-black/80 ${
                                 isActiveSize
                                   ? "border-[#FF6D1F] text-white ring-2 ring-[#FF6D1F]/50 shadow-lg shadow-[#FF6D1F]/20"
                                   : isSelected
@@ -3372,7 +3519,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               {/* Base Catalog Item Card */}
               <div className="p-5 sm:p-6 bg-gray-900/60 rounded-3xl border border-white/10 shadow-lg">
                 <div className="flex flex-col sm:flex-row gap-5 items-start">
-                  <div className="w-full sm:w-[150px] aspect-square relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
+                  <div className="w-28 h-28 sm:w-[150px] aspect-square mx-auto sm:mx-0 relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
@@ -3491,7 +3638,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <div className="space-y-2 pt-1">
                       <div className="flex items-center justify-between text-xs text-gray-400">
                         <span>Your Artwork Library ({uploadedFiles.length})</span>
-                        <span className="text-[11px] text-[#FF6D1F]">Click to place on product</span>
+                      
                       </div>
                       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 max-h-[260px] overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-orange-500/30 scrollbar-track-transparent">
                         {uploadedFiles.map((file) => {
@@ -3576,7 +3723,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <div className="space-y-3 pt-3 border-t border-white/5">
                   <div className="bg-gradient-to-b from-gray-900/80 to-black/90 rounded-2xl border border-white/10 p-3 sm:p-5 shadow-2xl">
                     <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10 text-xs">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                         <span className="font-clash font-bold text-white text-sm sm:text-base tracking-wide flex items-center gap-1.5">
                           <Sliders className="w-4 h-4 text-[#FF6D1F]" />
                           Adjust & Resize Artwork
@@ -3588,10 +3735,13 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         {(() => {
                           const apf = getActivePrintFile(printFiles, selectedVariants, activePlacement, activeVariantId);
                           if (apf?.width && apf?.height) {
+                            const isWideWrap = (apf.width / apf.height > 1.25) && apf.width >= 2800 && (activePlacement === "front_cover" || activePlacement === "back_cover");
+                            const displayW = isWideWrap ? Math.round(apf.width * 0.47) : apf.width;
+                            const displayH = apf.height;
                             return (
                               <span className="text-[11px] text-gray-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-mono flex items-center gap-1.5">
                                 <span className="text-gray-400">Print area:</span>
-                                <span className="text-[#FF6D1F] font-semibold">{apf.width} × {apf.height} px</span>
+                                <span className="text-[#FF6D1F] font-semibold">{displayW} × {displayH} px</span>
                                 {apf.dpi ? <span className="text-gray-400">({apf.dpi} DPI)</span> : null}
                               </span>
                             );
@@ -3649,14 +3799,16 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                           ? mockupStatus || "Generating high-resolution mockups from Printify..."
                           : mockupUrls && mockupUrls.length > 0
                             ? "Mockups loaded. Click to regenerate if you updated your design."
-                            : "Click 'Generate Preview' to render high-res mockups with your uploaded artwork"}
+                            : !hasUploadedDesign
+                              ? "Upload an artwork above to enable preview generation"
+                              : "Click 'Generate Preview' to render high-res mockups with your uploaded artwork"}
                       </p>
                     </div>
                   </div>
                   <Button
                     type="button"
                     onClick={handleManualRegenerate}
-                    disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0}
+                    disabled={!hasUploadedDesign || isGeneratingPreview || cooldown > 0}
                     className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_16px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer flex-shrink-0"
                   >
                     {isGeneratingPreview ? (
@@ -3693,14 +3845,6 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                     return cardsToDisplay.map((mockup: any, idx: number) => {
                       const isMockupActive = idx === activeMockupCardIndex;
-                      const isBlueprint = !mockupUrls || mockupUrls.length === 0;
-                      const cardDesign = isBlueprint ? designFiles.find(
-                        (d) => d.placement === mockup.placement || 
-                        (mockup.placement === 'sleeve_left' && (d.placement === 'left' || d.placement === 'sleeve_left')) || 
-                        (mockup.placement === 'sleeve_right' && (d.placement === 'right' || d.placement === 'sleeve_right')) ||
-                        (mockup.placement === 'back' && d.placement === 'back') ||
-                        (mockup.placement === 'front' && (d.placement === 'front' || !d.placement))
-                      ) : null;
 
                       return (
                         <div
@@ -3735,13 +3879,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                             ) : (
                               <ShoppingBag className="w-8 h-8 text-gray-600" />
                             )}
-                            {cardDesign && cardDesign.url && (
-                              <div className="absolute pointer-events-none inset-0 flex items-center justify-center p-3">
-                                <img
-                                  src={cardDesign.url}
-                                  alt="Artwork"
-                                  className="w-[42%] h-[42%] object-contain"
-                                />
+                            {isGeneratingPreview && (
+                              <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center gap-1.5 z-20 rounded-xl">
+                                <Loader2 className="w-5 h-5 text-[#FF6D1F] animate-spin" />
+                                <span className="text-[9px] text-orange-200 font-medium">Rendering...</span>
                               </div>
                             )}
                           </div>
@@ -3772,18 +3913,34 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <span>Back</span>
                   </button>
 
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (validateAndRedirect(2)) {
-                        goToStep(3);
-                      }
-                    }}
-                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <span>Next Page</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    {isStep2NextDisabled && (
+                      <span className="hidden sm:inline-block text-[11px] text-orange-400/90 font-medium bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-lg">
+                        {!hasUploadedDesign
+                          ? "Upload artwork to continue"
+                          : isGeneratingPreview
+                          ? "Generating preview..."
+                          : "Click 'Generate Preview' above to continue"}
+                      </span>
+                    )}
+                    <Button
+                      type="button"
+                      disabled={isStep2NextDisabled}
+                      onClick={() => {
+                        if (validateAndRedirect(2)) {
+                          goToStep(3);
+                        }
+                      }}
+                      className={`font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${
+                        isStep2NextDisabled
+                          ? "bg-gray-800/80 text-gray-500 border border-white/10 cursor-not-allowed shadow-none"
+                          : "bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white shadow-[0_4px_20px_rgba(255,109,31,0.3)] cursor-pointer"
+                      }`}
+                    >
+                      <span>Next Page</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3813,7 +3970,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               {/* Base Catalog Item Card (Figma Design) */}
               <div className="p-5 sm:p-6 bg-gray-900/60 rounded-3xl border border-white/10 shadow-lg">
                 <div className="flex flex-col sm:flex-row gap-5 items-start">
-                  <div className="w-full sm:w-[150px] aspect-square relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
+                  <div className="w-28 h-28 sm:w-[150px] aspect-square mx-auto sm:mx-0 relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
@@ -3985,7 +4142,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
               {/* Card 2: Your Creator Profit Markup (Figma Design) */}
               <div className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
                   <div>
                     <h3 className="text-xl font-bold font-clash text-white">
                       Your Creator Profit Markup
@@ -4036,7 +4193,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 </div>
 
                 {/* 3 Summary Cards */}
-                <div className="grid grid-cols-3 gap-3 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-2">
                   {/* Card 1: Base Cost */}
                   <div className="border border-white/10 bg-black/40 rounded-2xl p-3.5 space-y-1">
                     <span className="text-xs text-gray-400 font-medium block">Base Cost</span>
@@ -4116,7 +4273,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               {/* Base Catalog Item Card (Figma Design) */}
               <div className="p-5 sm:p-6 bg-gray-900/60 rounded-3xl border border-white/10 shadow-lg">
                 <div className="flex flex-col sm:flex-row gap-5 items-start">
-                  <div className="w-full sm:w-[150px] aspect-square relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
+                  <div className="w-28 h-28 sm:w-[150px] aspect-square mx-auto sm:mx-0 relative bg-[#EBE8E1] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center flex-shrink-0 p-3">
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
@@ -4182,18 +4339,27 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
               {/* Card 1: Review & Publish Live (Figma Design) */}
               <div id="field-mockup-studio" className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-4 scroll-mt-48 transition-all">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
                   <h3 className="text-xl font-bold font-clash text-white">
                     Review & Publish Live
                   </h3>
                   <button
                     type="button"
                     onClick={() => customFileInputRef.current?.click()}
-                    disabled={isUploadingCustomImage}
-                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_4px_16px_rgba(255,109,31,0.3)] transition-all cursor-pointer disabled:opacity-50"
+                    disabled={isUploadingCustomImage || isPublishing}
+                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_4px_16px_rgba(255,109,31,0.3)] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span>Upload Image</span>
-                    <ArrowRight className="w-4 h-4" />
+                    {isUploadingCustomImage ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Upload Image</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 </div>
 
@@ -4202,6 +4368,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   ref={customFileInputRef}
                   type="file"
                   accept="image/*"
+                  multiple
+                  disabled={isUploadingCustomImage || isPublishing}
                   className="hidden"
                   onChange={handleCustomImageUpload}
                 />
@@ -4313,7 +4481,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
               {/* Card 3: Big Ready to Go Live Card (Figma Design) */}
               <div className="p-6 rounded-3xl bg-gradient-to-br from-[#1C1229] via-[#0E1322] to-[#0A0D18] border border-purple-500/30 space-y-4 shadow-2xl">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
                   <div>
                     <h4 className="text-lg sm:text-xl font-bold font-clash text-white flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-purple-400" />
@@ -4333,7 +4501,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                 <Button
                   onClick={handlePublishSubmit}
-                  disabled={isPublishing}
+                  disabled={isPublishing || isUploadingCustomImage || isGeneratingPreview}
                   className="group relative overflow-hidden w-full bg-gradient-to-r from-[#7C3AED] via-[#FF6D1F] to-[#FF8A3D] hover:from-[#8B5CF6] hover:via-[#FF7D30] hover:to-[#FFA05C] border border-orange-400/50 hover:border-orange-300 text-white font-black text-base sm:text-lg py-5 rounded-2xl transition-all duration-300 shadow-[0_4px_25px_rgba(255,109,31,0.35)] hover:shadow-[0_8px_40px_rgba(255,109,31,0.65)] hover:scale-[1.015] active:scale-[0.985] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {/* Glowing Animated Light Streak on Hover */}
@@ -4343,6 +4511,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <div className="flex items-center justify-center gap-2 relative z-10">
                       <Loader2 className="w-5 h-5 animate-spin text-white" />
                       <span>{isEditing ? "Saving Changes..." : "Publishing to Marketplace..."}</span>
+                    </div>
+                  ) : isUploadingCustomImage ? (
+                    <div className="flex items-center justify-center gap-2 relative z-10">
+                      <Loader2 className="w-5 h-5 animate-spin text-white" />
+                      <span>Uploading Custom Image... Please wait</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-3 relative z-10">
@@ -4359,7 +4532,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <button
                   type="button"
                   onClick={() => goToStep(3)}
-                  className="px-5 py-2.5 rounded-xl border border-white/20 bg-transparent hover:bg-white/10 text-white font-medium text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-colors"
+                  disabled={isPublishing || isUploadingCustomImage}
+                  className="px-5 py-2.5 rounded-xl border border-white/20 bg-transparent hover:bg-white/10 text-white font-medium text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -4524,7 +4698,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <button
               type="button"
               onClick={() => goToStep(activeStep - 1)}
-              className="h-9 px-2.5 text-xs text-gray-300 border border-white/10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center cursor-pointer transition-colors"
+              disabled={isPublishing || isUploadingCustomImage}
+              className="h-9 px-2.5 text-xs text-gray-300 border border-white/10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
             </button>
@@ -4533,12 +4708,17 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           {activeStep < 4 ? (
             <button
               type="button"
+              disabled={(activeStep === 2 && isStep2NextDisabled) || isPublishing || isUploadingCustomImage}
               onClick={() => {
                 if (validateAndRedirect(activeStep)) {
                   goToStep(activeStep + 1);
                 }
               }}
-              className="h-9 bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs px-3.5 rounded-xl flex items-center gap-1.5 shadow-[0_0_10px_rgba(255,109,31,0.3)] cursor-pointer transition-all"
+              className={`h-9 font-bold text-xs px-3.5 rounded-xl flex items-center gap-1.5 transition-all ${
+                (activeStep === 2 && isStep2NextDisabled) || isPublishing || isUploadingCustomImage
+                  ? "bg-gray-800 text-gray-500 border border-white/10 cursor-not-allowed shadow-none"
+                  : "bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white shadow-[0_0_10px_rgba(255,109,31,0.3)] cursor-pointer"
+              }`}
             >
               <span>Next</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -4546,10 +4726,22 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           ) : (
             <Button
               onClick={handlePublishSubmit}
-              disabled={isPublishing}
-              className="h-9 bg-gradient-to-r from-purple-600 to-[#FF6D1F] text-white font-extrabold text-xs px-3.5 rounded-xl shadow-[0_0_12px_rgba(255,109,31,0.4)] disabled:opacity-50 cursor-pointer"
+              disabled={isPublishing || isUploadingCustomImage || isGeneratingPreview}
+              className="h-9 bg-gradient-to-r from-purple-600 to-[#FF6D1F] text-white font-extrabold text-xs px-3.5 rounded-xl shadow-[0_0_12px_rgba(255,109,31,0.4)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
             >
-              {isPublishing ? "Publishing..." : "Publish 🚀"}
+              {isPublishing ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Publishing...</span>
+                </>
+              ) : isUploadingCustomImage ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                <span>Publish 🚀</span>
+              )}
             </Button>
           )}
         </div>

@@ -20,6 +20,10 @@ export function QualityProductsSection() {
   const [hasAddedProducts, setHasAddedProducts] = useState<boolean>(false);
   const [checkingProducts, setCheckingProducts] = useState<boolean>(true);
 
+  const createProductHref = isAuthenticated
+    ? (user?.role === 'admin' ? "/dashboard/admin" : user?.role === 'creator' ? "/dashboard/creator/catalog" : "/dashboard")
+    : "/auth/login?redirect=/dashboard/creator/catalog";
+
   const [expandedSection, setExpandedSection] = useState<string | null>(
     "create"
   );
@@ -178,7 +182,7 @@ export function QualityProductsSection() {
                     From apparel to makeup to your own product lines, we've teamed up with top brands and manufacturers to bring your ideas to life. No minimums required.
                   </p>
                   {!checkingProducts && !hasAddedProducts && (
-                    <Button variant="primary" href="/dashboard/creator/catalog">
+                    <Button variant="primary" href={createProductHref}>
                       Create your first product
                     </Button>
                   )}

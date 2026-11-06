@@ -43,17 +43,50 @@ interface WishlistContextType {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
-export const addPendingWishlistItem = (productId: number) => {
-  if (typeof window === 'undefined') return;
+export const getPendingWishlist = (): number[] => {
+  if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem('pending_wishlist');
     const list: number[] = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+};
+
+export const addPendingWishlistItem = (productId: number) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const list = getPendingWishlist();
     if (!list.includes(productId)) {
       list.push(productId);
       localStorage.setItem('pending_wishlist', JSON.stringify(list));
+      window.dispatchEvent(new Event('wishlist-updated'));
     }
   } catch (e) {
     console.error('Error saving pending wishlist item:', e);
+  }
+};
+
+export const removePendingWishlistItem = (productId: number) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const list = getPendingWishlist();
+    const updated = list.filter(id => id !== productId);
+    localStorage.setItem('pending_wishlist', JSON.stringify(updated));
+    window.dispatchEvent(new Event('wishlist-updated'));
+  } catch (e) {
+    console.error('Error removing pending wishlist item:', e);
+  }
+};
+
+export const clearPendingWishlist = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem('pending_wishlist');
+    window.dispatchEvent(new Event('wishlist-updated'));
+  } catch (e) {
+    console.error('Error clearing pending wishlist:', e);
   }
 };
 
@@ -68,7 +101,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const refreshWishlist = useCallback(async (force = false) => {
     if (!isAuthenticated) {
       setItems([]);
-      setWishlistCount(0);
+      setWishlistCount(getPendingWishlist().length);
       return;
     }
 
@@ -103,12 +136,10 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const syncPendingWishlist = useCallback(async () => {
     if (typeof window === 'undefined') return;
     try {
-      const raw = localStorage.getItem('pending_wishlist');
-      if (!raw) return;
-
-      const list: number[] = JSON.parse(raw);
+      const list = getPendingWishlist();
       if (Array.isArray(list) && list.length > 0) {
         localStorage.removeItem('pending_wishlist');
+        window.dispatchEvent(new Event('wishlist-updated'));
         for (const pid of list) {
           try {
             await wishlistAPI.addToWishlist(pid);
@@ -117,13 +148,32 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
           }
         }
         await refreshWishlist(true);
-        toast.success('Saved item to your wishlist!');
+        toast.success('Saved items synced to your wishlist!');
       }
     } catch (e) {
       console.error('Error syncing pending wishlist items:', e);
       localStorage.removeItem('pending_wishlist');
+      window.dispatchEvent(new Event('wishlist-updated'));
     }
   }, [refreshWishlist]);
+
+  // Keep guest wishlist count updated when unauthenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const updateCount = () => {
+        setWishlistCount(getPendingWishlist().length);
+      };
+
+      updateCount();
+
+      window.addEventListener('wishlist-updated', updateCount);
+      window.addEventListener('storage', updateCount);
+      return () => {
+        window.removeEventListener('wishlist-updated', updateCount);
+        window.removeEventListener('storage', updateCount);
+      };
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -132,7 +182,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       });
     } else {
       setItems([]);
-      setWishlistCount(0);
+      setWishlistCount(getPendingWishlist().length);
       lastFetchTimeRef.current = 0;
     }
   }, [isAuthenticated, user, refreshWishlist, syncPendingWishlist]);
@@ -160,7 +210,8 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const addToWishlist = async (productId: number): Promise<boolean> => {
     if (!isAuthenticated) {
       addPendingWishlistItem(productId);
-      toast.success('Item saved! Please sign in to view your wishlist.');
+      setWishlistCount(getPendingWishlist().length);
+      toast.success('Added to wishlist!');
       return true;
     }
 
@@ -180,8 +231,10 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromWishlist = async (productId: number): Promise<boolean> => {
     if (!isAuthenticated) {
-      toast.error('Please login to remove items');
-      return false;
+      removePendingWishlistItem(productId);
+      setWishlistCount(getPendingWishlist().length);
+      toast.success('Removed from wishlist');
+      return true;
     }
 
     try {
@@ -200,8 +253,10 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   const clearWishlist = async (): Promise<boolean> => {
     if (!isAuthenticated) {
-      toast.error('Please login to clear wishlist');
-      return false;
+      clearPendingWishlist();
+      setWishlistCount(0);
+      toast.success('Wishlist cleared');
+      return true;
     }
 
     try {
@@ -221,7 +276,9 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isInWishlist = (productId: number): boolean => {
-    if (!isAuthenticated) return false;
+    if (!isAuthenticated) {
+      return getPendingWishlist().includes(productId);
+    }
 
     // Only use local state - no API calls needed since we have all wishlist data
     return items.some(item => item.product_id === productId);

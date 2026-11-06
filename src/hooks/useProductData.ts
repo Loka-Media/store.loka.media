@@ -176,6 +176,12 @@ export const useProductData = (slug: string) => {
                 variantIds: m.variantIds || m.variant_ids || [],
               }));
 
+              const printifyUrls = new Set<string>();
+              normalizedMockups.forEach((m: any) => {
+                const u = m.permanent_url || m.src || m.url;
+                if (u) printifyUrls.add(u);
+              });
+
               setProduct(prevProduct => {
                 if (!prevProduct) return null;
                 const updatedVariants = prevProduct.variants.map(v => {
@@ -189,9 +195,42 @@ export const useProductData = (slug: string) => {
                   };
                 });
 
+                // Preserve custom uploads from prevProduct.images or prevProduct.mockups
+                const customUploadMockups: any[] = [];
+                const savedImages = Array.isArray(prevProduct.images) ? prevProduct.images : [];
+                savedImages.forEach((img: any) => {
+                  const u = typeof img === 'string' ? img : (img?.permanent_url || img?.src || img?.url);
+                  if (u && !printifyUrls.has(u) && !u.includes('placeholder')) {
+                    printifyUrls.add(u);
+                    customUploadMockups.push({
+                      permanent_url: u,
+                      src: u,
+                      url: u,
+                      variant_ids: [],
+                      variantIds: [],
+                      isCustomUpload: true,
+                      placement: 'custom',
+                    });
+                  }
+                });
+
+                if (Array.isArray(prevProduct.mockups)) {
+                  prevProduct.mockups.forEach((m: any) => {
+                    const u = m.permanent_url || m.src || m.url;
+                    if (u && !printifyUrls.has(u) && (m.isCustomUpload || m.placement === 'custom')) {
+                      printifyUrls.add(u);
+                      customUploadMockups.push(m);
+                    }
+                  });
+                }
+
+                const allMockups = customUploadMockups.length > 0
+                  ? [...customUploadMockups, ...normalizedMockups]
+                  : normalizedMockups;
+
                 return {
                   ...prevProduct,
-                  mockups: normalizedMockups.length > 0 ? normalizedMockups : prevProduct.mockups,
+                  mockups: allMockups.length > 0 ? allMockups : prevProduct.mockups,
                   variants: updatedVariants,
                 };
               });

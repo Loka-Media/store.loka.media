@@ -159,8 +159,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     ? product.mockups
     : [product.thumbnail_url || getValidImageUrl(product)];
 
-
-  const allExtractedImages = rawImages.map(extractImageUrl).filter(Boolean);
+  let allExtractedImages = rawImages.map(extractImageUrl).filter(Boolean);
 
   const isSizeChartUrl = (url: string) => {
     if (!url) return false;
@@ -174,6 +173,14 @@ export default function ProductPage({ params }: ProductPageProps) {
       lower.includes('guide')
     );
   };
+
+  // If product.thumbnail_url is set and not a placeholder, ensure it is at index 0 (storefront cover)
+  const explicitThumb = extractImageUrl(product.thumbnail_url);
+  if (explicitThumb && !isSizeChartUrl(explicitThumb) && !explicitThumb.includes('placeholder')) {
+    if (!allExtractedImages.includes(explicitThumb)) {
+      allExtractedImages.unshift(explicitThumb);
+    }
+  }
 
   const allSizeGuideImages = allExtractedImages.filter(isSizeChartUrl);
 
@@ -217,7 +224,24 @@ export default function ProductPage({ params }: ProductPageProps) {
       otherColorVariants.flatMap((v) => [v.id, v.printify_variant_id].filter(Boolean) as number[])
     );
 
-    // 1. Try mockup objects if available
+    // Build mockup mapping: variant IDs and custom upload tags
+    const mockupVariantMap = new Map<string, number[]>();
+    const customMockupUrls = new Set<string>();
+
+    if (product.mockups && product.mockups.length > 0) {
+      product.mockups.forEach((m) => {
+        const u = extractImageUrl(m);
+        const vIds = m.variant_ids || (m as any).variantIds || [];
+        if (u) {
+          mockupVariantMap.set(u, vIds);
+          if ((m as any).isCustomUpload || (m as any).placement === 'custom' || vIds.length === 0) {
+            customMockupUrls.add(u);
+          }
+        }
+      });
+    }
+
+    // 1. Try mockup objects if available (for unedited catalog products)
     let filteredFromMockups: string[] = [];
     if (product.mockups && product.mockups.length > 0) {
       const matched = product.mockups.filter((mockup) => {
@@ -241,8 +265,22 @@ export default function ProductPage({ params }: ProductPageProps) {
       }
     }
 
-    // 2. Filter allExtractedImages (works directly on product.images string array from database!)
+    // 2. Filter allExtractedImages (preserves creator's exact ordering & custom uploads!)
     const matchedFromAllImages = allExtractedImages.filter((url) => {
+      // Custom uploads / cover artwork are never tied to another color and must ALWAYS be kept
+      if (customMockupUrls.has(url)) return true;
+
+      // If this image is a Printify mockup with variant IDs
+      if (mockupVariantMap.has(url)) {
+        const vIds = mockupVariantMap.get(url)!;
+        if (vIds.length > 0) {
+          const hasThisColor = vIds.some((id: number) => colorVariantIds.has(Number(id)));
+          const hasOtherColor = vIds.some((id: number) => otherColorVariantIds.has(Number(id)));
+          if (hasThisColor) return true;
+          if (hasOtherColor) return false;
+        }
+      }
+
       const matchesThisColor = Array.from(colorVariantIds).some((id) => matchVariantInUrl(url, id));
       const matchesOtherColor = Array.from(otherColorVariantIds).some((id) => matchVariantInUrl(url, id));
 
@@ -257,7 +295,10 @@ export default function ProductPage({ params }: ProductPageProps) {
       return true;
     });
 
-    if (filteredFromMockups.length > 0) {
+    if (hasSavedImages) {
+      // When creator explicitly ordered product images, respect that order and keep custom uploads!
+      images = matchedFromAllImages.length > 0 ? matchedFromAllImages : allExtractedImages;
+    } else if (filteredFromMockups.length > 0) {
       images = filteredFromMockups;
     } else if (matchedFromAllImages.length > 0 && matchedFromAllImages.length < allExtractedImages.length) {
       images = matchedFromAllImages;

@@ -96,11 +96,74 @@ export function getValidImageUrl(product: any): string {
     }
   };
 
-  // 1. Collect from thumbnail_url / thumbnailUrl
+  // Helper to extract a single clean string URL from string or object
+  const extractUrl = (item: any): string | null => {
+    if (!item) return null;
+    if (typeof item === 'string') {
+      const trimmed = item.trim();
+      if (!trimmed) return null;
+      if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return extractUrl(parsed[0]);
+          } else if (parsed && typeof parsed === 'object') {
+            return extractUrl(
+              parsed.permanent_url || parsed.src || parsed.url || parsed.image_url || parsed.preview_url || parsed.file_url
+            );
+          }
+        } catch {
+          return null;
+        }
+      }
+      const lower = trimmed.toLowerCase();
+      if (
+        !lower.includes('placeholder-product') &&
+        !lower.includes('placeholder.svg') &&
+        !lower.includes('/placeholder') &&
+        !lower.includes('camera_1_front.jpg')
+      ) {
+        return trimmed;
+      }
+      return null;
+    }
+    if (typeof item === 'object') {
+      const url =
+        item.permanent_url ||
+        item.src ||
+        item.url ||
+        item.image_url ||
+        item.preview_url ||
+        item.file_url;
+      if (url) return extractUrl(url);
+    }
+    return null;
+  };
+
+  // 1. High priority: User-ordered Image #1 (Storefront Cover) from product.images
+  // When a creator arranges images in Canvas, image #1 is explicitly set as the cover.
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    const firstImg = extractUrl(product.images[0]);
+    if (firstImg) {
+      return firstImg;
+    }
+  } else if (product.images && typeof product.images === 'string') {
+    const firstImg = extractUrl(product.images);
+    if (firstImg) {
+      return firstImg;
+    }
+  }
+
+  // 2. High priority: Explicit thumbnail_url / thumbnailUrl
+  const explicitThumb = extractUrl(product.thumbnail_url) || extractUrl(product.thumbnailUrl);
+  if (explicitThumb) {
+    return explicitThumb;
+  }
+
+  // Fallback: Collect all possible candidate images from mockups, variants, etc.
   extractAndPush(product.thumbnail_url);
   extractAndPush(product.thumbnailUrl);
 
-  // 2. Collect from images
   if (Array.isArray(product.images)) {
     product.images.forEach(extractAndPush);
   } else if (product.images) {

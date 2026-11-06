@@ -131,11 +131,11 @@ function getVariantSortScore(v: any): number {
 function computePrintFilesFromVariants(variants: any[], productTitle?: string) {
   if (!variants || variants.length === 0) return null;
 
-  // Determine if this product is genuinely a stationery book/journal that uses a single wraparound cover
+  // Determine if this product is genuinely a stationery book/journal (notebooks, journals, spiral, etc.)
   const isGenuineBookProduct = (() => {
     const t = (productTitle || '').toLowerCase();
     if (!t) return false;
-    const isBook = /\b(journal|notebook|diary|planner|hardcover|spiral)\b/i.test(t);
+    const isBook = /\b(journal|notebook|diary|planner|hardcover|spiral|softcover|wirobound|stationery)\b/i.test(t);
     const isApparelOrOther = /\b(hoodie|sweatshirt|shirt|tee|t-shirt|apparel|pullover|jacket|tank|top|sweater|fleece|jogger|pant|pants|sock|socks|hat|cap|beanie|mug|mugs|tumbler|bottle|poster|posters|canvas|banner|pillow|blanket|tote|bag)\b/i.test(t);
     return isBook && !isApparelOrOther;
   })();
@@ -162,11 +162,10 @@ function computePrintFilesFromVariants(variants: any[], productTitle?: string) {
       // Assign exact raw position
       placements[rawPos] = printfile_id;
 
-      // Check if this is a wide wraparound cover (ONLY for actual books/journals with NO separate back placement)
-      const isWraparoundCover = isGenuineBookProduct && !hasExplicitBack && rawPos === 'front' && p.width && p.height && (p.width / p.height > 1.25) && p.width >= 3000;
-      if (isWraparoundCover) {
+      // For books/journals/notebooks, Printify only provides front cover design
+      if (isGenuineBookProduct && rawPos === 'front') {
         placements['front_cover'] = printfile_id;
-        placements['back_cover'] = v.id * 1000 + POS_CODE_MAP.back_cover;
+        placements['front'] = printfile_id;
       }
 
       // Also set aliases so standard lookups work seamlessly
@@ -227,15 +226,14 @@ function computePrintFilesFromVariants(variants: any[], productTitle?: string) {
         });
       }
 
-      // If this is a wide wraparound cover, also generate virtual front_cover & back_cover printfiles (ONLY for books/journals)
-      const isWraparoundCover = isGenuineBookProduct && !hasExplicitBack && rawPos === 'front' && p.width && p.height && (p.width / p.height > 1.25) && p.width >= 3000;
-      if (isWraparoundCover) {
-        const backCode = POS_CODE_MAP.back_cover;
-        const backPrintfileId = v.id * 1000 + backCode;
-        if (!printfiles.some(pf => pf.printfile_id === backPrintfileId)) {
+      // For books/journals/notebooks, generate front_cover printfile only (no back_cover)
+      if (isGenuineBookProduct && rawPos === 'front') {
+        const frontCode = POS_CODE_MAP.front_cover;
+        const frontPrintfileId = v.id * 1000 + frontCode;
+        if (!printfiles.some(pf => pf.printfile_id === frontPrintfileId)) {
           printfiles.push({
-            printfile_id: backPrintfileId,
-            position: 'back_cover',
+            printfile_id: frontPrintfileId,
+            position: 'front_cover',
             width: p.width,
             height: p.height,
             dpi: p.dpi || 300
@@ -624,27 +622,37 @@ function CanvasContent() {
 
             // Restore canvas mockups and custom image uploads from localStorage & DB
             try {
-              const savedMockupsJson = localStorage.getItem(`saved_canvas_mockups_${effectiveBlueprintId}`);
-              if (savedMockupsJson) {
-                const parsedMockups = JSON.parse(savedMockupsJson);
-                if (Array.isArray(parsedMockups) && parsedMockups.length > 0) {
-                  setMockupUrls(parsedMockups);
-                }
-              }
-              const token = localStorage.getItem('accessToken') || '';
-              fetch(
-                `/api/creator/canvas-mockups?blueprintId=${effectiveBlueprintId}&productId=${editingProductId || ''}`,
-                {
-                  headers: {
-                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+              if (urlProductId) {
+                // When editing an existing product: restore mockups specifically saved for this productId
+                const savedMockupsJson = localStorage.getItem(`saved_canvas_mockups_${effectiveBlueprintId}`);
+                if (savedMockupsJson) {
+                  const parsedMockups = JSON.parse(savedMockupsJson);
+                  if (Array.isArray(parsedMockups) && parsedMockups.length > 0) {
+                    setMockupUrls(parsedMockups);
                   }
                 }
-              ).then(r => r.ok ? r.json() : null).then(mData => {
-                if (mData?.success && Array.isArray(mData.mockups) && mData.mockups.length > 0) {
-                  setMockupUrls(mData.mockups);
-                  localStorage.setItem(`saved_canvas_mockups_${effectiveBlueprintId}`, JSON.stringify(mData.mockups));
+                const token = localStorage.getItem('accessToken') || '';
+                fetch(
+                  `/api/creator/canvas-mockups?productId=${urlProductId}`,
+                  {
+                    headers: {
+                      ...(token ? { Authorization: `Bearer ${token}` } : {})
+                    }
+                  }
+                ).then(r => r.ok ? r.json() : null).then(mData => {
+                  if (mData?.success && Array.isArray(mData.mockups) && mData.mockups.length > 0) {
+                    setMockupUrls(mData.mockups);
+                    localStorage.setItem(`saved_canvas_mockups_${effectiveBlueprintId}`, JSON.stringify(mData.mockups));
+                  }
+                }).catch(() => {});
+              } else {
+                // Creating a brand new product from blueprint:
+                // Ensure no previous custom upload / mockups from past published products are loaded
+                if (effectiveBlueprintId) {
+                  localStorage.removeItem(`saved_canvas_mockups_${effectiveBlueprintId}`);
                 }
-              }).catch(() => {});
+                setMockupUrls((prev: any) => (prev || []).filter((m: any) => !m?.isCustomUpload && m?.placement !== "custom"));
+              }
             } catch (_) {}
           }
 
@@ -1271,9 +1279,12 @@ function CanvasContent() {
 
       if (result.success) {
         localStorage.removeItem(`mockup_request_${selectedProduct.id}`);
-        // Note: Publishing is handled server-side in the background during storeMockupsPermanently (sync route)
-        if (blueprintId) {
-          localStorage.removeItem(`productForm_${blueprintId}`);
+        const bId = selectedProduct?.blueprintId || selectedProduct?.id || blueprintId;
+        if (bId) {
+          localStorage.removeItem(`productForm_${bId}`);
+          localStorage.removeItem(`saved_canvas_mockups_${bId}`);
+          localStorage.removeItem(`loka_draft_${bId}`);
+          localStorage.removeItem(`mockup_request_${bId}`);
         }
       }
 
@@ -1281,21 +1292,53 @@ function CanvasContent() {
 
       if (result.success && result.marketplace_ready) {
         const createdId = result.product_id || result.productId;
+        const bId = selectedProduct?.blueprintId || selectedProduct?.id || blueprintId;
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') || '' : '';
+
         if (createdId) {
           try {
             await fetch('/api/products/update', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('accessToken') || ''}`
+                'Authorization': `Bearer ${token}`
               },
               body: JSON.stringify({
                 productId: createdId,
                 ...productData
               })
             });
+
+            // Save and link canvas mockups (including any custom uploads) to the new product ID
+            // so editing this specific product later will properly restore them
+            await fetch('/api/creator/canvas-mockups', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+              },
+              body: JSON.stringify({
+                productId: String(createdId),
+                blueprintId: bId ? String(bId) : null,
+                mockups: mockupUrls
+              })
+            });
           } catch (syncErr) {
             console.warn('[Canvas Publish] Post-publish sync notice:', syncErr);
+          }
+        }
+
+        // Clean up unassigned blueprint draft from DB so creating a new product for this blueprint starts fresh
+        if (bId) {
+          try {
+            await fetch(`/api/creator/canvas-mockups?blueprintId=${bId}&unassignedOnly=true`, {
+              method: 'DELETE',
+              headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+              }
+            });
+          } catch (delErr) {
+            console.warn('[Canvas Publish] Error clearing blueprint draft from DB:', delErr);
           }
         }
 

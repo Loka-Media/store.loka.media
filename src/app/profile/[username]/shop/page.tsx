@@ -410,7 +410,7 @@ function CreatorShopContent() {
   }
 
   return (
-    <div className="bg-black text-white min-h-screen pt-12 sm:pt-16">
+    <div className="bg-black text-white min-h-screen pt-1 sm:pt-4">
       <style>{`
         @keyframes slideDown {
           from {

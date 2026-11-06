@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
@@ -19,6 +20,8 @@ import {
   ExternalLink,
   Camera,
   Edit3,
+  Plus,
+  Shield,
 } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -46,11 +49,50 @@ export default function Navigation() {
   const { cartCount } = useGuestCart();
   const { wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close mobile menu whenever navigation/route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
   const { currency, setCurrency } = useCurrency();
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
   const [copiedStoreLink, setCopiedStoreLink] = useState(false);
   const [isProfileHovered, setIsProfileHovered] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isMenuOpen]);
+
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMenuOpen]);
+
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
 
   const handleProfileMouseEnter = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -104,11 +146,12 @@ export default function Navigation() {
   const activeCurrency = availableCurrencies.find(c => c.code === currency) || availableCurrencies[0];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 pb-4 bg-[#050505]/60 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 py-2.5 sm:py-4 bg-[#050505]/60 backdrop-blur-md border-b border-white/5 transition-all duration-300">
       <div className="container mx-auto">
         {/* Rounded pill container */}
         <div className="bg-[#1a1a1a]/95 backdrop-blur-lg rounded-full border border-white/10 shadow-2xl">
-          <div className="flex items-center justify-between px-6 md:px-8 h-16 md:h-[72px]">
+          <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 h-14 sm:h-16 md:h-[72px]">
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/">
@@ -144,26 +187,31 @@ export default function Navigation() {
 
                 {isAuthenticated ? (
                   <>
-                    {user?.role === "creator" || user?.creatorStatus === "approved" ? (
-                      <Link
-                        href="/dashboard/creator"
-                        className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center gap-1.5"
-                        style={{ color: "var(--nav-text)" }}
-                      >
-                        <span>Creator Hub</span>
-                        <span className="text-[10px] bg-green-500/20 text-green-400 border border-green-500/30 px-1.5 py-0.5 rounded-full font-extrabold">2/2 ✓</span>
-                      </Link>
-                    ) : user?.creatorStatus === "pending" ? (
-                      <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-yellow-300">
-                        <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
-                        <span>Login as creator (1/2): Waiting for approval</span>
-                      </div>
-                    ) : user?.creatorStatus === "rejected" ? (
-                      <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-red-300">
-                        <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
-                        <span>Creator Application: Rejected</span>
-                      </div>
-                    ) : null}
+                    {user?.role !== "admin" && (
+                      user?.role === "creator" || user?.creatorStatus === "approved" ? (
+                        <Link
+                          href="/dashboard/creator"
+                          className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center gap-1.5"
+                          style={{ color: "var(--nav-text)" }}
+                        >
+                          <span>Creator Hub</span>
+                          <span className="text-[10px] bg-green-500/20 text-green-400 border border-green-500/30 px-1.5 py-0.5 rounded-full font-extrabold">2/2 ✓</span>
+                        </Link>
+                      ) : user?.creatorStatus === "pending" ? (
+                        <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-yellow-300">
+                          <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+                          <span>Login as creator (1/2): Waiting for approval</span>
+                        </div>
+                      ) : user?.creatorStatus === "rejected" ? (
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-red-300 hover:bg-red-500/20 transition-colors"
+                        >
+                          <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
+                          <span>Application Rejected • Re-apply</span>
+                        </Link>
+                      ) : null
+                    )}
 
                     {user?.role === "admin" && (
                       <Link
@@ -300,7 +348,7 @@ export default function Navigation() {
                           </div>
 
                           {/* Missing Photo Prompt for Creators */}
-                          {(user?.role === "creator" || user?.creatorStatus === "approved") && !user?.profileImg && (
+                          {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && !user?.profileImg && (
                             <Link
                               href="/profile/edit"
                               className="p-2.5 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:bg-orange-500/25 transition-all flex items-center justify-between group/photo block cursor-pointer"
@@ -323,7 +371,7 @@ export default function Navigation() {
                             </Link>
                           )}
 
-                          {user?.creatorStatus === "pending" && (
+                          {user?.role !== "admin" && user?.creatorStatus === "pending" && (
                             <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 space-y-1">
                               <div className="font-bold text-yellow-300 flex justify-between items-center">
                                 <span>Login as creator</span>
@@ -336,15 +384,26 @@ export default function Navigation() {
                               <div className="text-[10px] text-gray-400">Admin review in progress. Creator Hub will unlock upon approval.</div>
                             </div>
                           )}
-                          {(user?.role === "creator" || user?.creatorStatus === "approved") && (
+                          {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && (
                             <div className="space-y-2">
                               <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-200 space-y-1">
                                 <div className="font-bold text-green-300 flex justify-between items-center">
                                   <span>Creator Hub</span>
                                   <span className="text-[10px] bg-green-400/20 text-green-300 px-1.5 py-0.5 rounded font-mono font-bold">2/2 ✓</span>
                                 </div>
-                                <div className="text-[11px] text-green-400 font-semibold">✅ Approved & Active</div>
+                                <div className="text-[11px] text-green-400 font-semibold">
+                                  ✅ Approved & Active
+                                </div>
                               </div>
+
+                              <Link
+                                href="/dashboard/creator/catalog"
+                                onClick={() => setIsProfileHovered(false)}
+                                className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 rounded-lg text-white font-bold text-xs transition-opacity shadow-sm"
+                              >
+                                <span>Create / Design Product</span>
+                                <Plus className="w-3.5 h-3.5" />
+                              </Link>
 
                               {/* Creator Store Link Section */}
                               {creatorSlug && (
@@ -387,11 +446,28 @@ export default function Navigation() {
                               )}
                             </div>
                           )}
-                          {user?.creatorStatus === "rejected" && (
-                            <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200 space-y-1">
-                              <div className="font-bold text-red-300">Creator Application</div>
-                              <div className="text-[11px] text-red-400 font-semibold">❌ Rejected</div>
-                            </div>
+                          {user?.role !== "admin" && user?.creatorStatus === "rejected" && (
+                            <Link
+                              href="/dashboard"
+                              onClick={() => setIsProfileHovered(false)}
+                              className="block p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200 space-y-1 hover:bg-red-500/20 transition-colors"
+                            >
+                              <div className="font-bold text-red-300 flex justify-between items-center">
+                                <span>Creator Application</span>
+                                <span className="text-[10px] bg-red-400/20 text-red-300 px-1.5 py-0.5 rounded font-mono font-bold">Rejected</span>
+                              </div>
+                              <div className="text-[11px] text-red-400 font-semibold">Click here to re-apply →</div>
+                            </Link>
+                          )}
+                          {user?.role === "admin" && (
+                            <Link
+                              href="/dashboard/admin"
+                              onClick={() => setIsProfileHovered(false)}
+                              className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 rounded-lg text-white font-bold text-xs transition-opacity shadow-sm"
+                            >
+                              <span>Admin Dashboard</span>
+                              <Shield className="w-3.5 h-3.5" />
+                            </Link>
                           )}
                         </div>
                       </div>
@@ -457,7 +533,7 @@ export default function Navigation() {
                       Log in
                     </Link>
                     <Link
-                      href="/auth/signup"
+                      href="/auth/signup/customer"
                       className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
                       style={{ background: "#FF6D1F", fontWeight: 500 }}
                     >
@@ -534,9 +610,10 @@ export default function Navigation() {
               </button>
               {!isAuthenticated && (
                 <Link
-                  href="/auth/signup"
+                  href="/auth/signup/customer"
                   className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
                   style={{ background: "#FF6D1F", fontWeight: 500 }}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Join Now
                 </Link>
@@ -548,7 +625,16 @@ export default function Navigation() {
 
       {/* Mobile menu - Glassmorphism design */}
       {isMenuOpen && (
-        <div className="md:hidden mt-2 mx-4 rounded-2xl p-4 space-y-3 bg-[#1a1a1a]/95 backdrop-blur-lg border border-white/10">
+        <div className="container mx-auto">
+          <div
+            data-lenis-prevent="true"
+            className="md:hidden mt-2 rounded-2xl p-4 pb-8 space-y-3 bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-y-auto max-h-[calc(100dvh-110px)] overscroll-contain"
+            style={{
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "thin",
+              touchAction: "pan-y",
+            }}
+          >
           <Link
             href="/products"
             className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
@@ -568,7 +654,7 @@ export default function Navigation() {
 
           {isAuthenticated ? (
             <>
-              {user?.role === "creator" || user?.creatorStatus === "approved" ? (
+              {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") ? (
                 <>
                   <Link
                     href="/dashboard/creator"
@@ -577,7 +663,18 @@ export default function Navigation() {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <span>Creator Hub</span>
-                    <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">2/2 Approved ✓</span>
+                    <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">
+                      2/2 Approved ✓
+                    </span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/creator/catalog"
+                    className="text-white font-medium flex items-center justify-between px-4 py-2 rounded-lg hover:opacity-80 transition-opacity bg-gradient-to-r from-orange-500/20 to-pink-500/20 border border-orange-500/30 text-orange-400"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span>Create / Design Product</span>
+                    <Plus className="w-4 h-4" />
                   </Link>
 
                   {creatorSlug && (
@@ -645,7 +742,7 @@ export default function Navigation() {
                     </Link>
                   )}
                 </>
-              ) : user?.creatorStatus === "pending" ? (
+              ) : user?.role !== "admin" && user?.creatorStatus === "pending" ? (
                 <div className="px-4 py-2.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs font-semibold space-y-1">
                   <div className="flex justify-between items-center font-bold">
                     <span>Login as creator</span>
@@ -656,10 +753,15 @@ export default function Navigation() {
                     Waiting for approval
                   </div>
                 </div>
-              ) : user?.creatorStatus === "rejected" ? (
-                <div className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold">
-                  Creator Application: Rejected
-                </div>
+              ) : user?.role !== "admin" && user?.creatorStatus === "rejected" ? (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold flex items-center justify-between hover:bg-red-500/20 transition-colors"
+                >
+                  <span>Creator Application: Rejected</span>
+                  <span className="text-[10px] text-red-400 font-bold underline">Re-apply →</span>
+                </Link>
               ) : null}
 
               {user?.role === "admin" && (
@@ -809,9 +911,10 @@ export default function Navigation() {
                   Log in
                 </Link>
                 <Link
-                  href="/auth/signup"
-                  className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                  href="/auth/signup/customer"
+                  className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer text-center block"
                   style={{ background: "#FF6D1F", fontWeight: 500 }}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Join Now
                 </Link>
@@ -840,7 +943,17 @@ export default function Navigation() {
             </div>
           </div>
         </div>
+      </div>
       )}
     </nav>
+
+    {/* Mobile menu backdrop */}
+    {isMenuOpen && (
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
+        onClick={() => setIsMenuOpen(false)}
+      />
+    )}
+  </>
   );
 }

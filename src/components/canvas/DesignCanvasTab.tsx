@@ -80,9 +80,34 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
-  const canvasDims = getCanvasDimensions(activePrintFile, 620, 380);
-  const printAreaWidth = activePrintFile?.width || canvasDims.printWidth || 0;
-  const printAreaHeight = activePrintFile?.height || canvasDims.printHeight || 0;
+  // Check if active print file is a wide wraparound template (> 1.25 aspect ratio and >= 2800px)
+  const isWideWraparound = Boolean(
+    activePrintFile &&
+    activePrintFile.width &&
+    activePrintFile.height &&
+    activePrintFile.width / activePrintFile.height > 1.25 &&
+    activePrintFile.width >= 2800 &&
+    (activePlacement === "front_cover" || activePlacement === "back_cover")
+  );
+
+  const coverWidth = isWideWraparound && activePrintFile ? Math.round(activePrintFile.width * 0.47) : 0;
+  const frontOffsetLeft = isWideWraparound && activePrintFile ? Math.round(activePrintFile.width * 0.53) : 0;
+
+  const effectivePrintFile = useMemo<PrintFile | null>(() => {
+    if (!activePrintFile) return null;
+    if (isWideWraparound) {
+      return {
+        ...activePrintFile,
+        width: coverWidth,
+        height: activePrintFile.height,
+      };
+    }
+    return activePrintFile;
+  }, [activePrintFile, isWideWraparound, coverWidth]);
+
+  const canvasDims = getCanvasDimensions(effectivePrintFile, 620, 380);
+  const printAreaWidth = effectivePrintFile?.width || canvasDims.printWidth || 0;
+  const printAreaHeight = effectivePrintFile?.height || canvasDims.printHeight || 0;
 
   // Active design for current placement
   const activeDesign = useMemo(() => {
@@ -146,25 +171,18 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
     const isApparel = /\b(hoodie|sweatshirt|shirt|tee|t-shirt|apparel|pullover|jacket|tank|top|sweater|fleece|jogger|pant|pants|sock|socks|hat|cap|beanie)\b/i.test(searchString);
     if (isApparel) return false;
     const isBookProduct = /\b(journal|notebook|hardcover|spiral|planner|diary)\b/i.test(searchString);
-    const isCoverPlacement = activePlacement === "front_cover" || activePlacement === "back_cover" || activePlacement === "full_wrap";
-    return isBookProduct && isCoverPlacement;
-  }, [productTitle, productType, activePlacement]);
+    return isBookProduct;
+  }, [productTitle, productType]);
 
-  const showBookGuides = useMemo(() => {
-    return (
-      isBookOrJournal &&
-      (activePlacement === "front_cover" ||
-        activePlacement === "back_cover" ||
-        activePlacement === "full_wrap")
-    );
+  // Full-wrap template guides ONLY when viewing the full wraparound panoramic canvas
+  const showFullWrapGuides = useMemo(() => {
+    return isBookOrJournal && activePlacement === "full_wrap";
   }, [isBookOrJournal, activePlacement]);
 
   // Design scale factors for canvas (strictly preserving aspect ratio)
   const canvasWidth = canvasDims.width;
   const canvasHeight = canvasDims.height;
-  const designScale = activePrintFile && activePrintFile.width > 0
-    ? canvasWidth / activePrintFile.width
-    : 0.5;
+  const designScale = printAreaWidth > 0 ? canvasWidth / printAreaWidth : 0.5;
 
   // Calculate natural aspect ratio and max fit size of the active design
   const { currentScalePercent, maxFitWidth, maxFitHeight } = useMemo(() => {
@@ -192,7 +210,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
 
   // Handle scale change from slider or preset buttons
   const handleScaleChange = (targetPercent: number) => {
-    if (!activeDesign || !activePrintFile) return;
+    if (!activeDesign || !effectivePrintFile) return;
 
     if (targetPercent >= 100) {
       handleQuickAlign("fit");
@@ -202,15 +220,22 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
     applyQuickPosition(
       "scale",
       activeDesign,
-      activePrintFile,
+      effectivePrintFile,
       (updatedDesign) => {
+        let finalLeft = updatedDesign.position.left;
+        if (isWideWraparound && activePlacement === "front_cover") {
+          finalLeft += frontOffsetLeft;
+        }
         updateDesignPosition(activeDesign.id, {
           width: updatedDesign.position.width,
           height: updatedDesign.position.height,
-          left: updatedDesign.position.left,
+          left: finalLeft,
           top: updatedDesign.position.top,
         });
-        setSelectedDesignFile(updatedDesign);
+        setSelectedDesignFile({
+          ...updatedDesign,
+          position: { ...updatedDesign.position, left: finalLeft },
+        });
       },
       targetPercent / 100
     );
@@ -218,20 +243,27 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
 
   // Handle quick alignment (Center, Top, Bottom, Left, Right, Fit)
   const handleQuickAlign = (alignType: string) => {
-    if (!activeDesign || !activePrintFile) return;
+    if (!activeDesign || !effectivePrintFile) return;
 
     applyQuickPosition(
       alignType,
       activeDesign,
-      activePrintFile,
+      effectivePrintFile,
       (updatedDesign) => {
+        let finalLeft = updatedDesign.position.left;
+        if (isWideWraparound && activePlacement === "front_cover") {
+          finalLeft += frontOffsetLeft;
+        }
         updateDesignPosition(activeDesign.id, {
           width: updatedDesign.position.width,
           height: updatedDesign.position.height,
-          left: updatedDesign.position.left,
+          left: finalLeft,
           top: updatedDesign.position.top,
         });
-        setSelectedDesignFile(updatedDesign);
+        setSelectedDesignFile({
+          ...updatedDesign,
+          position: { ...updatedDesign.position, left: finalLeft },
+        });
       }
     );
   };
@@ -429,18 +461,45 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       </span>
                     </div>
 
-                    {/* Empty Canvas Placeholder */}
-                    {designFiles.length === 0 ? (
-                      <div className="absolute inset-0 flex items-center justify-center p-4">
+                    {/* Placement Badge on Canvas */}
+                    <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                      <span className="text-[10px] font-extrabold tracking-widest uppercase px-2.5 py-1 rounded-md bg-[#FF6D1F] text-white shadow-lg shadow-orange-500/40">
+                        {activePlacement === "front_cover"
+                          ? "Front Cover"
+                          : activePlacement === "back_cover"
+                          ? "Back Cover"
+                          : activePlacement === "full_wrap"
+                          ? "Full Wrap"
+                          : activePlacement.replace(/_/g, " ")}
+                      </span>
+                    </div>
+
+                    {/* Barcode Area Indicator (Only for Back Cover) */}
+                    {activePlacement === "back_cover" && (
+                      <div className="absolute bottom-3 right-3 w-16 h-8 border border-white/20 bg-black/60 rounded flex flex-col items-center justify-center p-0.5 opacity-60 pointer-events-none z-10">
+                        <div className="text-[7px] text-gray-400 font-mono tracking-tighter">||||||||||||</div>
+                        <span className="text-[6px] text-gray-400">Barcode</span>
+                      </div>
+                    )}
+
+                    {/* Empty Canvas Placeholder (placement specific) */}
+                    {designFiles.filter(d => d.placement === activePlacement || (activePlacement === "full_wrap" && (d.placement === "front_cover" || d.placement === "back_cover"))).length === 0 ? (
+                      <div className="absolute inset-0 flex items-center justify-center p-4 z-10">
                         <div className="text-center text-gray-400">
                           <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner border border-white/10">
                             <Crosshair className="w-7 h-7 text-[#FF6D1F]" />
                           </div>
-                          <p className="text-sm font-semibold text-white">
-                            Print Area Canvas
+                          <p className="text-sm font-semibold text-white capitalize">
+                            {activePlacement === "front_cover"
+                              ? "Front Cover Canvas"
+                              : activePlacement === "back_cover"
+                              ? "Back Cover Canvas"
+                              : activePlacement === "full_wrap"
+                              ? "Full Wrap Canvas"
+                              : `${activePlacement.replace(/_/g, " ")} Canvas`}
                           </p>
                           <p className="text-xs text-gray-400 mt-0.5">
-                            Select artwork above to place on this placement
+                            Select artwork above to place on {activePlacement === "front_cover" ? "front cover" : activePlacement === "back_cover" ? "back cover" : activePlacement.replace(/_/g, " ")}
                           </p>
                           <p className="text-[11px] text-orange-400/80 mt-1 font-mono">
                             {printAreaWidth} × {printAreaHeight} px
@@ -449,29 +508,16 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       </div>
                     ) : null}
 
-                    {/* Visual Template Guides (ONLY for actual journals/books/notebooks) */}
-                    {showBookGuides && (
+                    {/* Visual Template Guides (ONLY for explicit full_wrap placement) */}
+                    {showFullWrapGuides && (
                       <div className="absolute inset-0 pointer-events-none select-none z-0">
                         {/* Left Half: BACK COVER */}
-                        <div
-                          className={`absolute top-0 bottom-0 left-0 w-[47%] border-r border-dashed transition-all ${
-                            activePlacement === "back_cover"
-                              ? "border-orange-500 bg-orange-500/10 ring-1 ring-orange-500/30"
-                              : "border-white/20 bg-white/[0.02]"
-                          }`}
-                        >
+                        <div className="absolute top-0 bottom-0 left-0 w-[47%] border-r border-dashed border-white/20 bg-white/[0.02]">
                           <div className="p-3">
-                            <span
-                              className={`text-[10px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded ${
-                                activePlacement === "back_cover"
-                                  ? "bg-orange-500 text-white shadow-md shadow-orange-500/40"
-                                  : "bg-white/10 text-gray-400"
-                              }`}
-                            >
+                            <span className="text-[10px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded bg-white/10 text-gray-400">
                               Back Cover
                             </span>
                           </div>
-
                           <div className="absolute bottom-2 right-2 w-12 h-7 border border-white/20 bg-black/60 rounded flex flex-col items-center justify-center p-0.5 opacity-60">
                             <div className="text-[7px] text-gray-400 font-mono tracking-tighter">|||||||||</div>
                             <span className="text-[6px] text-gray-400">Barcode</span>
@@ -486,21 +532,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                         </div>
 
                         {/* Right Half: FRONT COVER */}
-                        <div
-                          className={`absolute top-0 bottom-0 right-0 w-[47%] transition-all ${
-                            activePlacement === "front_cover"
-                              ? "border-l border-dashed border-orange-500 bg-orange-500/10 ring-1 ring-orange-500/30"
-                              : "border-l border-dashed border-white/20 bg-white/[0.02]"
-                          }`}
-                        >
+                        <div className="absolute top-0 bottom-0 right-0 w-[47%] border-l border-dashed border-white/20 bg-white/[0.02]">
                           <div className="p-3 text-right">
-                            <span
-                              className={`text-[10px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded ${
-                                activePlacement === "front_cover"
-                                  ? "bg-orange-500 text-white shadow-md shadow-orange-500/40"
-                                  : "bg-white/10 text-gray-400"
-                              }`}
-                            >
+                            <span className="text-[10px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded bg-white/10 text-gray-400">
                               Front Cover
                             </span>
                           </div>
@@ -514,10 +548,8 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                         .filter((design) => {
                           if (design.placement === activePlacement) return true;
                           if (
-                            showBookGuides &&
-                            ((activePlacement === "front_cover" && design.placement === "back_cover") ||
-                              (activePlacement === "back_cover" && design.placement === "front_cover") ||
-                              (activePlacement === "full_wrap" && (design.placement === "front_cover" || design.placement === "back_cover")))
+                            activePlacement === "full_wrap" &&
+                            (design.placement === "front_cover" || design.placement === "back_cover")
                           ) {
                             return true;
                           }
@@ -527,13 +559,30 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                           const isOtherPlacement = design.placement !== activePlacement;
                           const isSelected = selectedDesignFile?.id === design.id || activeDesign?.id === design.id;
 
+                          // Compute local left relative to this cover's canvas
+                          let localLeft = design.position.left;
+                          if (isWideWraparound && activePlacement === "front_cover" && localLeft >= frontOffsetLeft) {
+                            localLeft -= frontOffsetLeft;
+                          }
+
+                          // Check if design is fit to 100% of the print area
+                          const isFit = Boolean(
+                            (printAreaWidth > 0 &&
+                             printAreaHeight > 0 &&
+                             design.position.width >= printAreaWidth - 4 &&
+                             design.position.height >= printAreaHeight - 4 &&
+                             Math.abs(localLeft) <= 4 &&
+                             Math.abs(design.position.top) <= 4) ||
+                            (isSelected && currentScalePercent >= 100)
+                          );
+
                           const scaledSize = {
                             width: Math.max(20, design.position.width * designScale),
                             height: Math.max(20, design.position.height * designScale),
                           };
 
                           const scaledPosition = {
-                            x: design.position.left * designScale,
+                            x: localLeft * designScale,
                             y: design.position.top * designScale,
                           };
 
@@ -572,30 +621,42 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                               position={scaledPosition}
                               scale={scale}
                               lockAspectRatio={true}
+                              disableDragging={isFit}
+                              enableResizing={isFit ? false : undefined}
                               onDragStop={(_e, data) => {
+                                const newLocalLeft = Math.round(data.x / designScale);
+                                const actualLeft = isWideWraparound && activePlacement === "front_cover"
+                                  ? newLocalLeft + frontOffsetLeft
+                                  : newLocalLeft;
+
                                 updateDesignPosition(design.id, {
-                                  left: Math.round(data.x / designScale),
+                                  left: actualLeft,
                                   top: Math.round(data.y / designScale),
                                 });
                               }}
                               onResizeStop={(_e, _direction, ref, _delta, position) => {
+                                const newLocalLeft = Math.round(position.x / designScale);
+                                const actualLeft = isWideWraparound && activePlacement === "front_cover"
+                                  ? newLocalLeft + frontOffsetLeft
+                                  : newLocalLeft;
+
                                 updateDesignPosition(design.id, {
                                   width: Math.max(1, Math.round(parseFloat(ref.style.width) / designScale)),
                                   height: Math.max(1, Math.round(parseFloat(ref.style.height) / designScale)),
-                                  left: Math.round(position.x / designScale),
+                                  left: actualLeft,
                                   top: Math.round(position.y / designScale),
                                 });
                               }}
                               bounds="parent"
                               minWidth={20}
                               minHeight={20}
-                              className={`rounded-lg relative group transition-shadow ${
-                                isSelected
-                                  ? "border-2 border-[#FF6D1F] shadow-[0_0_15px_rgba(255,109,31,0.4)]"
-                                  : "border border-white/40 hover:border-white/70"
+                              className={`relative group transition-shadow ${
+                                isFit
+                                  ? "border-0 shadow-none rounded-none"
+                                  : `${isSelected ? "border-2 border-[#FF6D1F] shadow-[0_0_15px_rgba(255,109,31,0.4)]" : "border border-white/40 hover:border-white/70"} rounded-lg`
                               } ${design.id === -1 ? "bg-blue-100/20" : "bg-transparent"}`}
                               onClick={() => setSelectedDesignFile(design)}
-                              resizeHandleComponent={{
+                              resizeHandleComponent={isFit ? {} : {
                                 topLeft: (
                                   <div
                                     className="w-3.5 h-3.5 bg-[#FF6D1F] border-2 border-white rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize hover:scale-125 transition-transform"
@@ -648,8 +709,8 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                                 </button>
                               )}
 
-                              {/* Floating Dimensions Tag (Only when selected) */}
-                              {isSelected && (
+                              {/* Floating Dimensions Tag (Only when selected and not full fit) */}
+                              {isSelected && !isFit && (
                                 <div className={`absolute left-1/2 -translate-x-1/2 z-30 pointer-events-none whitespace-nowrap bg-black/90 backdrop-blur-md text-[10px] text-white font-medium px-2 py-0.5 rounded-full border border-orange-500/40 shadow-lg flex items-center gap-1.5 ${
                                   scaledPosition.y < 32 ? "top-2.5" : "-top-7"
                                 }`}>
@@ -690,7 +751,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                 </div>
 
                 {/* Row 1: Interactive Size / Scale Slider */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-gray-300 font-medium flex items-center gap-1.5">
                       <Sliders className="w-3.5 h-3.5 text-orange-400" />
@@ -701,44 +762,47 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => handleScaleChange(Math.max(10, currentScalePercent - 5))}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-gray-200 transition-colors cursor-pointer"
-                      title="Decrease size by 5%"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5">
+                    {/* Slider row (takes full width on mobile) */}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => handleScaleChange(Math.max(10, currentScalePercent - 5))}
+                        className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-gray-200 transition-colors cursor-pointer"
+                        title="Decrease size by 5%"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
 
-                    <input
-                      type="range"
-                      min={10}
-                      max={100}
-                      step={1}
-                      value={currentScalePercent}
-                      onChange={(e) => handleScaleChange(Number(e.target.value))}
-                      className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#FF6D1F]"
-                      title="Drag to resize artwork"
-                    />
+                      <input
+                        type="range"
+                        min={10}
+                        max={100}
+                        step={1}
+                        value={currentScalePercent}
+                        onChange={(e) => handleScaleChange(Number(e.target.value))}
+                        className="flex-1 min-w-0 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#FF6D1F]"
+                        title="Drag to resize artwork"
+                      />
 
-                    <button
-                      type="button"
-                      onClick={() => handleScaleChange(Math.min(100, currentScalePercent + 5))}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-gray-200 transition-colors cursor-pointer"
-                      title="Increase size by 5%"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleScaleChange(Math.min(100, currentScalePercent + 5))}
+                        className="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-gray-200 transition-colors cursor-pointer"
+                        title="Increase size by 5%"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
 
-                    {/* Quick Presets */}
-                    <div className="flex items-center gap-1 pl-1">
+                    {/* Quick Presets: 4 columns grid on mobile, flex row on sm+ */}
+                    <div className="grid grid-cols-4 sm:flex items-center gap-1 sm:pl-1">
                       <button
                         type="button"
                         onClick={() => handleScaleChange(25)}
-                        className={`px-2 py-1 text-[11px] rounded-lg border transition-colors cursor-pointer ${
+                        className={`px-2 py-1 text-center text-[11px] rounded-lg border transition-colors cursor-pointer ${
                           currentScalePercent === 25
-                            ? "bg-orange-500 text-white border-orange-500"
+                            ? "bg-orange-500 text-white border-orange-500 font-semibold"
                             : "bg-white/5 hover:bg-white/10 border-white/10 text-gray-300"
                         }`}
                       >
@@ -747,9 +811,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       <button
                         type="button"
                         onClick={() => handleScaleChange(50)}
-                        className={`px-2 py-1 text-[11px] rounded-lg border transition-colors cursor-pointer ${
+                        className={`px-2 py-1 text-center text-[11px] rounded-lg border transition-colors cursor-pointer ${
                           currentScalePercent === 50
-                            ? "bg-orange-500 text-white border-orange-500"
+                            ? "bg-orange-500 text-white border-orange-500 font-semibold"
                             : "bg-white/5 hover:bg-white/10 border-white/10 text-gray-300"
                         }`}
                       >
@@ -758,9 +822,9 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       <button
                         type="button"
                         onClick={() => handleScaleChange(75)}
-                        className={`px-2 py-1 text-[11px] rounded-lg border transition-colors cursor-pointer ${
+                        className={`px-2 py-1 text-center text-[11px] rounded-lg border transition-colors cursor-pointer ${
                           currentScalePercent === 75
-                            ? "bg-orange-500 text-white border-orange-500"
+                            ? "bg-orange-500 text-white border-orange-500 font-semibold"
                             : "bg-white/5 hover:bg-white/10 border-white/10 text-gray-300"
                         }`}
                       >
@@ -769,7 +833,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       <button
                         type="button"
                         onClick={() => handleQuickAlign("fit")}
-                        className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg border transition-colors cursor-pointer flex items-center gap-1 ${
+                        className={`px-2.5 py-1 text-center text-[11px] font-semibold rounded-lg border transition-colors cursor-pointer flex items-center justify-center gap-1 ${
                           currentScalePercent === 100
                             ? "bg-orange-500 text-white border-orange-500"
                             : "bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-orange-300"
@@ -784,14 +848,14 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                 </div>
 
                 {/* Row 2: Alignment & Action Buttons */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-white/10 text-xs">
                   {/* Position Alignment Buttons */}
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                     <span className="text-gray-400 text-[11px] mr-1">Align:</span>
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("center")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Center horizontally and vertically"
                     >
                       <Crosshair className="w-3 h-3 text-orange-400" />
@@ -800,7 +864,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("top-center")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Align to top center"
                     >
                       <ArrowUp className="w-3 h-3 text-gray-400" />
@@ -809,7 +873,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("bottom-center")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Align to bottom center"
                     >
                       <ArrowDown className="w-3 h-3 text-gray-400" />
@@ -818,7 +882,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("center-left")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Align to left"
                     >
                       <ArrowLeft className="w-3 h-3 text-gray-400" />
@@ -827,7 +891,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleQuickAlign("center-right")}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/10 rounded-lg text-gray-200 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Align to right"
                     >
                       <ArrowRight className="w-3 h-3 text-gray-400" />
@@ -836,13 +900,13 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                   </div>
 
                   {/* Actions: AI BG, Auto-Fix Ratio, Remove */}
-                  <div className="flex items-center gap-2 ml-auto">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:ml-auto">
                     {onRemoveBackground && (
                       <button
                         type="button"
                         onClick={onRemoveBackground}
                         disabled={isRemovingBackground}
-                        className="px-2.5 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1 text-[11px]"
+                        className="px-2 sm:px-2.5 py-1 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1 text-[11px]"
                         title="Remove white/solid background using AI"
                       >
                         <Sparkles className="w-3 h-3 text-orange-400" />
@@ -855,7 +919,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       activePlacement={activePlacement}
                       activePrintFile={activePrintFile}
                       updateDesignPosition={updateDesignPosition}
-                      className="px-2.5 py-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                     >
                       <Zap className="w-3 h-3 text-blue-400" />
                       <span>Fix Ratio</span>
@@ -864,7 +928,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                     <button
                       type="button"
                       onClick={() => handleRemoveDesign(activeDesign)}
-                      className="px-2.5 py-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      className="px-2 sm:px-2.5 py-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
                       title="Remove artwork from placement"
                     >
                       <Trash2 className="w-3 h-3" />

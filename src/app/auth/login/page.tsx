@@ -364,7 +364,7 @@ function LoginPageContent() {
                   <div className="space-y-2.5 signup-button-group">
                     {/* Customer Signup Button */}
                     <Button
-                      href="/auth/signup/customer"
+                      href={searchParams.get("redirect") || searchParams.get("returnUrl") ? `/auth/signup/customer?redirect=${encodeURIComponent(searchParams.get("redirect") || searchParams.get("returnUrl") || "")}` : "/auth/signup/customer"}
                       variant="secondary"
                       className="signup-button w-full flex items-center justify-between gap-3 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 hover:border-green-400 hover:from-green-900/40 hover:to-emerald-900/40 hover:shadow-[0_0_20px_rgba(34,197,94,0.2)] !rounded-lg sm:!rounded-xl !text-left !px-3 sm:!px-4 !py-4 sm:!py-4 transition-all duration-300 group"
                     >
