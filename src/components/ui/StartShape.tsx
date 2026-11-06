@@ -51,7 +51,7 @@ export default function StartShape({
       </svg>
 
       {/* Content */}
-      <div className="relative z-10 p-6">
+      <div className="relative z-10 p-3 sm:p-5 lg:p-6">
         {children}
       </div>
     </div>

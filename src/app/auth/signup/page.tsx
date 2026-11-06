@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import CustomerSignupPage from './customer/page';
 
 export default function SignupRootPage() {
-  redirect('/auth/signup/customer');
+  return <CustomerSignupPage />;
 }
