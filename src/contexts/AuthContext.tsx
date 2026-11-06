@@ -2,6 +2,10 @@
 
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { authAPI, User } from '@/lib/auth';
+import { installAuthFetch } from '@/lib/installAuthFetch';
+
+// Send the access token with bare fetch('/api/...') calls (server routes verify it)
+installAuthFetch();
 import toast from 'react-hot-toast';
 
 interface RegisterData {

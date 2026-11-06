@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireCreatorOrAdminAuth } from '@/lib/serverAuth';
 
 export async function GET(request: NextRequest) {
+  // requireAccessGuard: verified JWT + live DB role
+  const accessGuard = await requireCreatorOrAdminAuth(request);
+  if (!accessGuard.authorized) return accessGuard.response;
+
   try {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeSecretKey) {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/serverAuth';
 import { resetKnowledgeBaseToDefaults } from '@/services/support/knowledge-manager';
 
 /**
@@ -6,6 +7,10 @@ import { resetKnowledgeBaseToDefaults } from '@/services/support/knowledge-manag
  * Resets knowledge base back to initial system defaults
  */
 export async function POST(req: NextRequest) {
+  // requireAccessGuard: verified JWT + live DB role
+  const accessGuard = await requireAdminAuth(req);
+  if (!accessGuard.authorized) return accessGuard.response;
+
   try {
     const stats = resetKnowledgeBaseToDefaults();
 

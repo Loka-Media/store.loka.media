@@ -111,7 +111,7 @@ export default function DashboardPage() {
                   Dashboard
                 </h1>
                 <span className="text-[11px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10">
-                  {user.role === "creator" ? "Creator" : "Customer"}
+                  {user.role === "creator" && user.creatorStatus === "approved" ? "Creator" : "Customer"}
                 </span>
               </div>
               <p className="mt-1 text-sm text-gray-400 font-medium">
@@ -135,7 +135,8 @@ export default function DashboardPage() {
         <CreatorApprovalStatus />
 
         {/* Creator Onboarding / Application Card (Shown to regular customers who have not yet applied or whose application was rejected) */}
-        {(!user.creatorStatus || user.creatorStatus === "rejected") && user.role !== "creator" && user.role !== "admin" && (
+        {user.role !== "admin" &&
+          ((!user.creatorStatus && user.role !== "creator") || user.creatorStatus === "rejected") && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-950/40 via-neutral-900 to-black border border-orange-500/30 p-6 sm:p-8 shadow-2xl">
             <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
             

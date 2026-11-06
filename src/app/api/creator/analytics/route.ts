@@ -1,36 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
+import { requireCreatorOrAdminAuth } from '@/lib/serverAuth';
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '');
-
-    let userId: number | null = null;
-    let role = '';
-
-    if (token) {
-      try {
-        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-        userId = payload.id || payload.userId || null;
-        role = payload.role || '';
-      } catch {
-        // Token parse fallback
-      }
-    }
+    // Verified JWT + live DB role/status: only admins and approved creators
+    const auth = await requireCreatorOrAdminAuth(request);
+    if (!auth.authorized) return auth.response;
+    const { id: userId, role } = auth.user;
 
     const { searchParams } = new URL(request.url);
     const creatorIdParam = searchParams.get('creatorId');
 
+    // Admins may pick any creator (or all); creators only ever see their own data
     let targetCreatorId: number | null = null;
     if (role === 'admin') {
       if (creatorIdParam && creatorIdParam !== 'all') {
         targetCreatorId = parseInt(creatorIdParam, 10);
       }
-    } else if (userId) {
+    } else {
       targetCreatorId = userId;
-    } else if (creatorIdParam && creatorIdParam !== 'all') {
-      targetCreatorId = parseInt(creatorIdParam, 10);
     }
 
     // 1. Get creator info if targeting a specific creator

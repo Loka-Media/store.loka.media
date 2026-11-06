@@ -7,7 +7,9 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function CreatorApprovalStatus() {
   const { user } = useAuth();
 
-  if (!user || user.role !== 'user' || !user.creatorStatus) {
+  // Key off creatorStatus rather than role: a rejected/removed creator may still carry
+  // a stale 'creator' role, and they must still see the rejection notice.
+  if (!user || user.role === 'admin' || !user.creatorStatus) {
     return null;
   }
 

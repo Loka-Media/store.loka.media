@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
+import { requireAuth } from '@/lib/serverAuth';
 import { getApiUrl } from '@/lib/getApiUrl';
 import axios from 'axios';
 
@@ -8,23 +9,16 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization') || '';
     const token = authHeader.replace(/^Bearer\s+/i, '');
 
-    let userId: number | null = null;
-    let userEmail: string | null = null;
-
-    if (token) {
-      try {
-        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-        userId = payload.id || payload.userId || null;
-        userEmail = payload.email || null;
-      } catch {}
-    }
-
-    if (!userId && !userEmail) {
+    // Verified JWT (signature + expiry) and live DB lookup
+    const auth = await requireAuth(request);
+    if (!auth.authorized) {
       return NextResponse.json(
         { error: 'Unauthorized. Please log in to apply.' },
         { status: 401 }
       );
     }
+    const userId: number | null = auth.user.id;
+    const userEmail: string | null = auth.user.email || null;
 
     const body = await request.json().catch(() => ({}));
     const rawUrl = body?.creatorUrl || body?.creator_url || body?.instagramUrl || '';

@@ -45,7 +45,18 @@ const StartSellingButton = () => (
 );
 
 export default function Navigation() {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, refreshUser } = useAuth();
+  const [checkingStatus, setCheckingStatus] = useState(false);
+
+  const handleCheckStatus = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCheckingStatus(true);
+    try {
+      await refreshUser();
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
   const { cartCount } = useGuestCart();
   const { wishlistCount } = useWishlist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -188,7 +199,7 @@ export default function Navigation() {
                 {isAuthenticated ? (
                   <>
                     {user?.role !== "admin" && (
-                      user?.role === "creator" || user?.creatorStatus === "approved" ? (
+                      user?.role === "creator" && user?.creatorStatus === "approved" ? (
                         <Link
                           href="/dashboard/creator"
                           className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center gap-1.5"
@@ -201,6 +212,18 @@ export default function Navigation() {
                         <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-yellow-300">
                           <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
                           <span>Login as creator (1/2): Waiting for approval</span>
+                          <button
+                            onClick={handleCheckStatus}
+                            disabled={checkingStatus}
+                            title="Check approval status now"
+                            className="ml-1 text-yellow-400 hover:text-yellow-200 disabled:opacity-50 cursor-pointer transition-colors"
+                          >
+                            {checkingStatus ? (
+                              <span className="inline-block w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            )}
+                          </button>
                         </div>
                       ) : user?.creatorStatus === "rejected" ? (
                         <Link
@@ -296,7 +319,7 @@ export default function Navigation() {
                           {user?.creatorStatus === "pending" && (
                             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border border-black" />
                           )}
-                          {(user?.role === "creator" || user?.creatorStatus === "approved") && (
+                          {(user?.role === "creator" && user?.creatorStatus === "approved") && (
                             <span 
                               className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-black ${
                                 !user?.profileImg ? "bg-orange-500 animate-pulse" : "bg-green-400"
@@ -348,7 +371,7 @@ export default function Navigation() {
                           </div>
 
                           {/* Missing Photo Prompt for Creators */}
-                          {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && !user?.profileImg && (
+                          {user?.role !== "admin" && (user?.role === "creator" && user?.creatorStatus === "approved") && !user?.profileImg && (
                             <Link
                               href="/profile/edit"
                               className="p-2.5 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:bg-orange-500/25 transition-all flex items-center justify-between group/photo block cursor-pointer"
@@ -382,9 +405,21 @@ export default function Navigation() {
                                 Waiting for approval
                               </div>
                               <div className="text-[10px] text-gray-400">Admin review in progress. Creator Hub will unlock upon approval.</div>
+                              <button
+                                onClick={handleCheckStatus}
+                                disabled={checkingStatus}
+                                className="mt-1 w-full flex items-center justify-center gap-1.5 text-[10px] text-yellow-400 hover:text-yellow-200 disabled:opacity-50 cursor-pointer transition-colors py-1 border border-yellow-500/20 rounded-md hover:bg-yellow-500/10"
+                              >
+                                {checkingStatus ? (
+                                  <span className="inline-block w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                )}
+                                {checkingStatus ? "Checking..." : "Check Status Now"}
+                              </button>
                             </div>
                           )}
-                          {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") && (
+                          {user?.role !== "admin" && (user?.role === "creator" && user?.creatorStatus === "approved") && (
                             <div className="space-y-2">
                               <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-200 space-y-1">
                                 <div className="font-bold text-green-300 flex justify-between items-center">
@@ -654,7 +689,7 @@ export default function Navigation() {
 
           {isAuthenticated ? (
             <>
-              {user?.role !== "admin" && (user?.role === "creator" || user?.creatorStatus === "approved") ? (
+              {user?.role !== "admin" && (user?.role === "creator" && user?.creatorStatus === "approved") ? (
                 <>
                   <Link
                     href="/dashboard/creator"
@@ -752,6 +787,18 @@ export default function Navigation() {
                     <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
                     Waiting for approval
                   </div>
+                  <button
+                    onClick={handleCheckStatus}
+                    disabled={checkingStatus}
+                    className="mt-1 w-full flex items-center justify-center gap-1.5 text-[10px] text-yellow-400 hover:text-yellow-200 disabled:opacity-50 cursor-pointer transition-colors py-1 border border-yellow-500/20 rounded-md hover:bg-yellow-500/10"
+                  >
+                    {checkingStatus ? (
+                      <span className="inline-block w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    )}
+                    {checkingStatus ? "Checking..." : "Check Status Now"}
+                  </button>
                 </div>
               ) : user?.role !== "admin" && user?.creatorStatus === "rejected" ? (
                 <Link
