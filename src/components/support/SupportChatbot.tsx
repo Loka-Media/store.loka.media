@@ -744,6 +744,8 @@ export default function SupportChatbot() {
 
   const showSuggestions = messages.length <= 3 && !isLoading;
 
+  return null;
+
   /* ─────────────── STYLES (inline for reliability) ─────────────── */
   const WIN_BORDER_RADIUS = '28px';
   const ORANGE = '#FF6D1F';
