@@ -28,7 +28,7 @@ export function EnhancedDashboardHeader({
 
   const slug = creatorUsername.trim().toLowerCase().replace(/\s+/g, '');
   const shopPath = slug ? `/shop/${slug}` : '/shop';
-  const publicStoreUrl = slug ? `https://shop.loka.media/shop/${slug}` : '';
+  const publicStoreUrl = slug ? `https://lokacustoms.shop/shop/${slug}` : '';
 
   const handleCopy = async () => {
     if (!publicStoreUrl) return;

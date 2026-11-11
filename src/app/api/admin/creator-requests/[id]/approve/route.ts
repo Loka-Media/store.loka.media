@@ -111,7 +111,7 @@ export async function POST(
             to: userEmail,
             name: userName,
             type: 'approved',
-            appUrl: origin || 'https://shop.loka.media',
+            appUrl: origin || 'https://lokacustoms.shop',
           }),
         }).catch((e) => console.warn('Failed to send creator approval email:', e));
       } catch (e) {

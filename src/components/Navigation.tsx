@@ -117,7 +117,7 @@ export default function Navigation() {
   };
 
   const creatorSlug = user?.username || (user?.name ? user.name.toLowerCase().replace(/\s+/g, '') : '');
-  const publicStoreUrl = creatorSlug ? `https://shop.loka.media/shop/${creatorSlug}` : '';
+  const publicStoreUrl = creatorSlug ? `https://lokacustoms.shop/shop/${creatorSlug}` : '';
 
   const getStoreUrl = () => {
     return publicStoreUrl;
@@ -159,848 +159,844 @@ export default function Navigation() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 py-2.5 sm:py-4 bg-[#050505]/60 backdrop-blur-md border-b border-white/5 transition-all duration-300">
-      <div className="container mx-auto">
-        {/* Rounded pill container */}
-        <div className="bg-[#1a1a1a]/95 backdrop-blur-lg rounded-full border border-white/10 shadow-2xl">
-          <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 h-14 sm:h-16 md:h-[72px]">
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <Link href="/">
-                <Image
-                  src="/loka-logo/loka-main-white.png"
-                  alt="Loka"
-                  width={120}
-                  height={40}
-                  className="h-8 md:h-10 w-auto"
-                  priority
-                />
-              </Link>
-            </div>
-
-            {/* Desktop Navigation - Clean and minimal */}
-            <div className="hidden md:block">
-              <div className="flex items-center space-x-8">
-                {/* Main navigation links */}
-                <Link
-                  href="/products"
-                  className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
-                  style={{ color: "var(--nav-text)" }}
-                >
-                  Discover
+        <div className="container mx-auto">
+          {/* Rounded pill container */}
+          <div className="bg-[#1a1a1a]/95 backdrop-blur-lg rounded-full border border-white/10 shadow-2xl">
+            <div className="flex items-center justify-between px-4 sm:px-6 md:px-8 h-14 sm:h-16 md:h-[72px]">
+              {/* Logo */}
+              <div className="flex-shrink-0">
+                <Link href="/">
+                  <Image
+                    src="/loka-logo/loka-main-white.png"
+                    alt="Loka"
+                    width={120}
+                    height={40}
+                    className="h-8 md:h-10 w-auto"
+                    priority
+                  />
                 </Link>
-                <Link
-                  href="/creators"
-                  className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
-                  style={{ color: "var(--nav-text)" }}
-                >
-                  Creators
-                </Link>
+              </div>
 
-                {isAuthenticated ? (
-                  <>
-                    {user?.role !== "admin" && (
-                      user?.role === "creator" && user?.creatorStatus === "approved" ? (
+              {/* Desktop Navigation - Clean and minimal */}
+              <div className="hidden md:block">
+                <div className="flex items-center space-x-8">
+                  {/* Main navigation links */}
+                  <Link
+                    href="/products"
+                    className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
+                    style={{ color: "var(--nav-text)" }}
+                  >
+                    Discover
+                  </Link>
+                  <Link
+                    href="/creators"
+                    className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
+                    style={{ color: "var(--nav-text)" }}
+                  >
+                    Creators
+                  </Link>
+
+                  {isAuthenticated ? (
+                    <>
+                      {user?.role !== "admin" && (
+                        user?.role === "creator" && user?.creatorStatus === "approved" ? (
+                          <Link
+                            href="/dashboard/creator"
+                            className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center gap-1.5"
+                            style={{ color: "var(--nav-text)" }}
+                          >
+                            <span>Creator Hub</span>
+                            <span className="text-[10px] bg-green-500/20 text-green-400 border border-green-500/30 px-1.5 py-0.5 rounded-full font-extrabold">2/2 ✓</span>
+                          </Link>
+                        ) : user?.creatorStatus === "pending" ? (
+                          <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-yellow-300">
+                            <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+                            <span>Login as creator (1/2): Waiting for approval</span>
+                            <button
+                              onClick={handleCheckStatus}
+                              disabled={checkingStatus}
+                              title="Check approval status now"
+                              className="ml-1 text-yellow-400 hover:text-yellow-200 disabled:opacity-50 cursor-pointer transition-colors"
+                            >
+                              {checkingStatus ? (
+                                <span className="inline-block w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                              )}
+                            </button>
+                          </div>
+                        ) : user?.creatorStatus === "rejected" ? (
+                          <Link
+                            href="/dashboard"
+                            className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-red-300 hover:bg-red-500/20 transition-colors"
+                          >
+                            <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
+                            <span>Application Rejected • Re-apply</span>
+                          </Link>
+                        ) : null
+                      )}
+
+                      {user?.role === "admin" && (
                         <Link
-                          href="/dashboard/creator"
-                          className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center gap-1.5"
+                          href="/dashboard/admin"
+                          className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
                           style={{ color: "var(--nav-text)" }}
                         >
-                          <span>Creator Hub</span>
-                          <span className="text-[10px] bg-green-500/20 text-green-400 border border-green-500/30 px-1.5 py-0.5 rounded-full font-extrabold">2/2 ✓</span>
+                          Admin
                         </Link>
-                      ) : user?.creatorStatus === "pending" ? (
-                        <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-yellow-300">
-                          <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
-                          <span>Login as creator (1/2): Waiting for approval</span>
-                          <button
-                            onClick={handleCheckStatus}
-                            disabled={checkingStatus}
-                            title="Check approval status now"
-                            className="ml-1 text-yellow-400 hover:text-yellow-200 disabled:opacity-50 cursor-pointer transition-colors"
-                          >
-                            {checkingStatus ? (
-                              <span className="inline-block w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                            )}
-                          </button>
-                        </div>
-                      ) : user?.creatorStatus === "rejected" ? (
-                        <Link
-                          href="/dashboard"
-                          className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-semibold text-red-300 hover:bg-red-500/20 transition-colors"
-                        >
-                          <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
-                          <span>Application Rejected • Re-apply</span>
-                        </Link>
-                      ) : null
-                    )}
-
-                    {user?.role === "admin" && (
-                      <Link
-                        href="/dashboard/admin"
-                        className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
-                        style={{ color: "var(--nav-text)" }}
-                      >
-                        Admin
-                      </Link>
-                    )}
-
-                    <Link
-                      href="/wishlist"
-                      className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
-                      style={{ color: "var(--nav-text)" }}
-                    >
-                      <Heart className="w-5 h-5" />
-                      {wishlistCount > 0 && (
-                        <span
-                          className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
-                        >
-                          {wishlistCount > 99 ? "99+" : wishlistCount}
-                        </span>
                       )}
-                      <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
-                        Wishlist
-                      </span>
-                    </Link>
-                    <Link
-                      href="/cart"
-                      className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
-                      style={{ color: "var(--nav-text)" }}
-                    >
-                      <ShoppingBag className="w-5 h-5" />
-                      {cartCount > 0 && (
-                        <span
-                          className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
-                        >
-                          {cartCount > 99 ? "99+" : cartCount}
-                        </span>
-                      )}
-                      <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
-                        Cart
-                      </span>
-                    </Link>
 
-                    {user?.role === "user" && (
                       <Link
-                        href="/addresses"
-                        className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center"
-                        style={{ color: "var(--nav-text)" }}
-                      >
-                        <MapPin className="w-5 h-5" />
-                      </Link>
-                    )}
-
-                    {/* Separator */}
-                    <div
-                      className="h-8 w-px mx-4"
-                      style={{ background: "var(--nav-border-light)" }}
-                    ></div>
-
-                    {/* User section with Status Tooltip */}
-                    <div 
-                      className="relative group"
-                      onMouseEnter={handleProfileMouseEnter}
-                      onMouseLeave={handleProfileMouseLeave}
-                    >
-                      <Link
-                        href="/profile"
+                        href="/wishlist"
                         className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
                         style={{ color: "var(--nav-text)" }}
                       >
-                        <div className="relative">
-                          {user?.profileImg ? (
-                            <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20">
-                              <img src={user.profileImg} alt={user.name || "User"} className="w-full h-full object-cover" />
-                            </div>
-                          ) : (
-                            <User className="w-5 h-5" />
-                          )}
-                          {user?.creatorStatus === "pending" && (
-                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border border-black" />
-                          )}
-                          {(user?.role === "creator" && user?.creatorStatus === "approved") && (
-                            <span 
-                              className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-black ${
-                                !user?.profileImg ? "bg-orange-500 animate-pulse" : "bg-green-400"
-                              }`} 
-                              title={!user?.profileImg ? "Profile photo missing" : "Creator active"}
-                            />
-                          )}
-                        </div>
+                        <Heart className="w-5 h-5" />
+                        {wishlistCount > 0 && (
+                          <span
+                            className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
+                          >
+                            {wishlistCount > 99 ? "99+" : wishlistCount}
+                          </span>
+                        )}
+                        <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                          Wishlist
+                        </span>
+                      </Link>
+                      <Link
+                        href="/cart"
+                        className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                        style={{ color: "var(--nav-text)" }}
+                      >
+                        <ShoppingBag className="w-5 h-5" />
+                        {cartCount > 0 && (
+                          <span
+                            className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
+                          >
+                            {cartCount > 99 ? "99+" : cartCount}
+                          </span>
+                        )}
+                        <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                          Cart
+                        </span>
                       </Link>
 
-                      {/* Detailed Hover Status Dropdown (Zero gap wrapper) */}
-                      <div className={`absolute top-full right-0 pt-2.5 w-80 sm:w-88 transition-all duration-200 z-50 ${
-                        isProfileHovered 
-                          ? "opacity-100 pointer-events-auto translate-y-0" 
-                          : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
-                      }`}>
-                        <div className="relative bg-[#1a1a1a]/95 backdrop-blur-md text-white text-xs rounded-xl border border-white/10 shadow-2xl p-3.5 space-y-2.5 before:content-[''] before:absolute before:-top-3 before:left-0 before:right-0 before:h-3">
-                          {/* Top User Info with Avatar & Edit Profile */}
-                          <div className="flex items-center gap-3">
-                            <Link
-                              href="/profile/edit"
-                              className="relative w-9 h-9 rounded-full overflow-hidden bg-neutral-800 border border-white/20 flex items-center justify-center flex-shrink-0 group/avatar hover:border-orange-500 transition-colors"
-                              title={user?.profileImg ? "Change Profile Photo" : "Upload Profile Photo"}
-                            >
-                              {user?.profileImg ? (
+                      {user?.role === "user" && (
+                        <Link
+                          href="/addresses"
+                          className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center"
+                          style={{ color: "var(--nav-text)" }}
+                        >
+                          <MapPin className="w-5 h-5" />
+                        </Link>
+                      )}
+
+                      {/* Separator */}
+                      <div
+                        className="h-8 w-px mx-4"
+                        style={{ background: "var(--nav-border-light)" }}
+                      ></div>
+
+                      {/* User section with Status Tooltip */}
+                      <div
+                        className="relative group"
+                        onMouseEnter={handleProfileMouseEnter}
+                        onMouseLeave={handleProfileMouseLeave}
+                      >
+                        <Link
+                          href="/profile"
+                          className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                          style={{ color: "var(--nav-text)" }}
+                        >
+                          <div className="relative">
+                            {user?.profileImg ? (
+                              <div className="w-6 h-6 rounded-full overflow-hidden border border-white/20">
                                 <img src={user.profileImg} alt={user.name || "User"} className="w-full h-full object-cover" />
-                              ) : (
-                                <User className="w-4 h-4 text-gray-400" />
-                              )}
-                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity">
-                                <Camera className="w-3.5 h-3.5 text-white" />
                               </div>
-                            </Link>
-
-                            <div className="flex-1 min-w-0">
-                              <div className="font-bold text-sm text-white truncate">{user?.name || user?.email}</div>
-                              {user?.username && (
-                                <span className="text-[11px] text-gray-400 font-mono">@{user.username}</span>
-                              )}
-                            </div>
-
-                            <Link
-                              href="/profile/edit"
-                              className="text-[11px] text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1 hover:underline flex-shrink-0"
-                            >
-                              <span>Edit</span>
-                              <Edit3 className="w-3 h-3" />
-                            </Link>
+                            ) : (
+                              <User className="w-5 h-5" />
+                            )}
+                            {user?.creatorStatus === "pending" && (
+                              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border border-black" />
+                            )}
+                            {(user?.role === "creator" && user?.creatorStatus === "approved") && (
+                              <span
+                                className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-black ${!user?.profileImg ? "bg-orange-500 animate-pulse" : "bg-green-400"
+                                  }`}
+                                title={!user?.profileImg ? "Profile photo missing" : "Creator active"}
+                              />
+                            )}
                           </div>
+                        </Link>
 
-                          {/* Missing Photo Prompt for Creators */}
-                          {user?.role !== "admin" && (user?.role === "creator" && user?.creatorStatus === "approved") && !user?.profileImg && (
-                            <Link
-                              href="/profile/edit"
-                              className="p-2.5 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:bg-orange-500/25 transition-all flex items-center justify-between group/photo block cursor-pointer"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400 flex-shrink-0">
-                                  <Camera className="w-3.5 h-3.5" />
-                                </div>
-                                <div className="text-left">
-                                  <div className="text-[11px] font-bold text-orange-300 flex items-center gap-1.5">
-                                    <span>Profile Photo Not Set</span>
-                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
-                                  </div>
-                                  <div className="text-[10px] text-gray-300">Upload a photo for your store profile</div>
-                                </div>
-                              </div>
-                              <span className="text-[10px] bg-orange-500 text-black font-extrabold px-2 py-1 rounded-md group-hover/photo:bg-orange-400 transition-colors flex-shrink-0">
-                                Upload →
-                              </span>
-                            </Link>
-                          )}
-
-                          {user?.role !== "admin" && user?.creatorStatus === "pending" && (
-                            <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 space-y-1">
-                              <div className="font-bold text-yellow-300 flex justify-between items-center">
-                                <span>Login as creator</span>
-                                <span className="text-[10px] bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded font-mono font-bold">1/2</span>
-                              </div>
-                              <div className="text-[11px] text-yellow-400 font-semibold flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
-                                Waiting for approval
-                              </div>
-                              <div className="text-[10px] text-gray-400">Admin review in progress. Creator Hub will unlock upon approval.</div>
-                              <button
-                                onClick={handleCheckStatus}
-                                disabled={checkingStatus}
-                                className="mt-1 w-full flex items-center justify-center gap-1.5 text-[10px] text-yellow-400 hover:text-yellow-200 disabled:opacity-50 cursor-pointer transition-colors py-1 border border-yellow-500/20 rounded-md hover:bg-yellow-500/10"
+                        {/* Detailed Hover Status Dropdown (Zero gap wrapper) */}
+                        <div className={`absolute top-full right-0 pt-2.5 w-80 sm:w-88 transition-all duration-200 z-50 ${isProfileHovered
+                          ? "opacity-100 pointer-events-auto translate-y-0"
+                          : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"
+                          }`}>
+                          <div className="relative bg-[#1a1a1a]/95 backdrop-blur-md text-white text-xs rounded-xl border border-white/10 shadow-2xl p-3.5 space-y-2.5 before:content-[''] before:absolute before:-top-3 before:left-0 before:right-0 before:h-3">
+                            {/* Top User Info with Avatar & Edit Profile */}
+                            <div className="flex items-center gap-3">
+                              <Link
+                                href="/profile/edit"
+                                className="relative w-9 h-9 rounded-full overflow-hidden bg-neutral-800 border border-white/20 flex items-center justify-center flex-shrink-0 group/avatar hover:border-orange-500 transition-colors"
+                                title={user?.profileImg ? "Change Profile Photo" : "Upload Profile Photo"}
                               >
-                                {checkingStatus ? (
-                                  <span className="inline-block w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                                {user?.profileImg ? (
+                                  <img src={user.profileImg} alt={user.name || "User"} className="w-full h-full object-cover" />
                                 ) : (
-                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                  <User className="w-4 h-4 text-gray-400" />
                                 )}
-                                {checkingStatus ? "Checking..." : "Check Status Now"}
-                              </button>
-                            </div>
-                          )}
-                          {user?.role !== "admin" && (user?.role === "creator" && user?.creatorStatus === "approved") && (
-                            <div className="space-y-2">
-                              <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-200 space-y-1">
-                                <div className="font-bold text-green-300 flex justify-between items-center">
-                                  <span>Creator Hub</span>
-                                  <span className="text-[10px] bg-green-400/20 text-green-300 px-1.5 py-0.5 rounded font-mono font-bold">2/2 ✓</span>
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity">
+                                  <Camera className="w-3.5 h-3.5 text-white" />
                                 </div>
-                                <div className="text-[11px] text-green-400 font-semibold">
-                                  ✅ Approved & Active
-                                </div>
+                              </Link>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-sm text-white truncate">{user?.name || user?.email}</div>
+                                {user?.username && (
+                                  <span className="text-[11px] text-gray-400 font-mono">@{user.username}</span>
+                                )}
                               </div>
 
                               <Link
-                                href="/dashboard/creator/catalog"
-                                onClick={() => setIsProfileHovered(false)}
-                                className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 rounded-lg text-white font-bold text-xs transition-opacity shadow-sm"
+                                href="/profile/edit"
+                                className="text-[11px] text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1 hover:underline flex-shrink-0"
                               >
-                                <span>Create / Design Product</span>
-                                <Plus className="w-3.5 h-3.5" />
+                                <span>Edit</span>
+                                <Edit3 className="w-3 h-3" />
                               </Link>
+                            </div>
 
-                              {/* Creator Store Link Section */}
-                              {creatorSlug && (
-                                <div className="p-2.5 rounded-lg bg-white/5 border border-white/10 space-y-2">
-                                  <div className="flex items-center justify-between text-[11px] font-semibold text-gray-300">
-                                    <span>My Store Link</span>
-                                    <Link
-                                      href={`/shop/${creatorSlug}`}
-                                      className="text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors"
-                                    >
-                                      Visit <ExternalLink className="w-3 h-3" />
-                                    </Link>
+                            {/* Missing Photo Prompt for Creators */}
+                            {user?.role !== "admin" && (user?.role === "creator" && user?.creatorStatus === "approved") && !user?.profileImg && (
+                              <Link
+                                href="/profile/edit"
+                                className="p-2.5 rounded-lg bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:bg-orange-500/25 transition-all flex items-center justify-between group/photo block cursor-pointer"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-orange-400 flex-shrink-0">
+                                    <Camera className="w-3.5 h-3.5" />
                                   </div>
-                                  <div className="flex items-center gap-1.5 bg-black/70 border border-white/10 rounded-md px-2.5 py-1.5 text-[11px]">
-                                    <span className="font-mono text-gray-300 truncate flex-1 select-all" title={publicStoreUrl}>
-                                      {publicStoreUrl}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={handleCopyStoreLink}
-                                      className="p-1 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer flex-shrink-0"
-                                      title="Copy Store Link"
-                                    >
-                                      {copiedStoreLink ? (
-                                        <Check className="w-3.5 h-3.5 text-green-400" />
-                                      ) : (
-                                        <Copy className="w-3.5 h-3.5" />
-                                      )}
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={handleShareStoreLink}
-                                      className="p-1 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer flex-shrink-0"
-                                      title="Share Store Link"
-                                    >
-                                      <Share2 className="w-3.5 h-3.5" />
-                                    </button>
+                                  <div className="text-left">
+                                    <div className="text-[11px] font-bold text-orange-300 flex items-center gap-1.5">
+                                      <span>Profile Photo Not Set</span>
+                                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
+                                    </div>
+                                    <div className="text-[10px] text-gray-300">Upload a photo for your store profile</div>
                                   </div>
                                 </div>
-                              )}
-                            </div>
-                          )}
-                          {user?.role !== "admin" && user?.creatorStatus === "rejected" && (
-                            <Link
-                              href="/dashboard"
-                              onClick={() => setIsProfileHovered(false)}
-                              className="block p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200 space-y-1 hover:bg-red-500/20 transition-colors"
-                            >
-                              <div className="font-bold text-red-300 flex justify-between items-center">
-                                <span>Creator Application</span>
-                                <span className="text-[10px] bg-red-400/20 text-red-300 px-1.5 py-0.5 rounded font-mono font-bold">Rejected</span>
+                                <span className="text-[10px] bg-orange-500 text-black font-extrabold px-2 py-1 rounded-md group-hover/photo:bg-orange-400 transition-colors flex-shrink-0">
+                                  Upload →
+                                </span>
+                              </Link>
+                            )}
+
+                            {user?.role !== "admin" && user?.creatorStatus === "pending" && (
+                              <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 space-y-1">
+                                <div className="font-bold text-yellow-300 flex justify-between items-center">
+                                  <span>Login as creator</span>
+                                  <span className="text-[10px] bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded font-mono font-bold">1/2</span>
+                                </div>
+                                <div className="text-[11px] text-yellow-400 font-semibold flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                                  Waiting for approval
+                                </div>
+                                <div className="text-[10px] text-gray-400">Admin review in progress. Creator Hub will unlock upon approval.</div>
+                                <button
+                                  onClick={handleCheckStatus}
+                                  disabled={checkingStatus}
+                                  className="mt-1 w-full flex items-center justify-center gap-1.5 text-[10px] text-yellow-400 hover:text-yellow-200 disabled:opacity-50 cursor-pointer transition-colors py-1 border border-yellow-500/20 rounded-md hover:bg-yellow-500/10"
+                                >
+                                  {checkingStatus ? (
+                                    <span className="inline-block w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                  )}
+                                  {checkingStatus ? "Checking..." : "Check Status Now"}
+                                </button>
                               </div>
-                              <div className="text-[11px] text-red-400 font-semibold">Click here to re-apply →</div>
-                            </Link>
-                          )}
-                          {user?.role === "admin" && (
-                            <Link
-                              href="/dashboard/admin"
-                              onClick={() => setIsProfileHovered(false)}
-                              className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 rounded-lg text-white font-bold text-xs transition-opacity shadow-sm"
-                            >
-                              <span>Admin Dashboard</span>
-                              <Shield className="w-3.5 h-3.5" />
-                            </Link>
-                          )}
+                            )}
+                            {user?.role !== "admin" && (user?.role === "creator" && user?.creatorStatus === "approved") && (
+                              <div className="space-y-2">
+                                <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/30 text-green-200 space-y-1">
+                                  <div className="font-bold text-green-300 flex justify-between items-center">
+                                    <span>Creator Hub</span>
+                                    <span className="text-[10px] bg-green-400/20 text-green-300 px-1.5 py-0.5 rounded font-mono font-bold">2/2 ✓</span>
+                                  </div>
+                                  <div className="text-[11px] text-green-400 font-semibold">
+                                    ✅ Approved & Active
+                                  </div>
+                                </div>
+
+                                <Link
+                                  href="/dashboard/creator/catalog"
+                                  onClick={() => setIsProfileHovered(false)}
+                                  className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 rounded-lg text-white font-bold text-xs transition-opacity shadow-sm"
+                                >
+                                  <span>Create / Design Product</span>
+                                  <Plus className="w-3.5 h-3.5" />
+                                </Link>
+
+                                {/* Creator Store Link Section */}
+                                {creatorSlug && (
+                                  <div className="p-2.5 rounded-lg bg-white/5 border border-white/10 space-y-2">
+                                    <div className="flex items-center justify-between text-[11px] font-semibold text-gray-300">
+                                      <span>My Store Link</span>
+                                      <Link
+                                        href={`/shop/${creatorSlug}`}
+                                        className="text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors"
+                                      >
+                                        Visit <ExternalLink className="w-3 h-3" />
+                                      </Link>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 bg-black/70 border border-white/10 rounded-md px-2.5 py-1.5 text-[11px]">
+                                      <span className="font-mono text-gray-300 truncate flex-1 select-all" title={publicStoreUrl}>
+                                        {publicStoreUrl}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={handleCopyStoreLink}
+                                        className="p-1 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer flex-shrink-0"
+                                        title="Copy Store Link"
+                                      >
+                                        {copiedStoreLink ? (
+                                          <Check className="w-3.5 h-3.5 text-green-400" />
+                                        ) : (
+                                          <Copy className="w-3.5 h-3.5" />
+                                        )}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={handleShareStoreLink}
+                                        className="p-1 rounded hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer flex-shrink-0"
+                                        title="Share Store Link"
+                                      >
+                                        <Share2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {user?.role !== "admin" && user?.creatorStatus === "rejected" && (
+                              <Link
+                                href="/dashboard"
+                                onClick={() => setIsProfileHovered(false)}
+                                className="block p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200 space-y-1 hover:bg-red-500/20 transition-colors"
+                              >
+                                <div className="font-bold text-red-300 flex justify-between items-center">
+                                  <span>Creator Application</span>
+                                  <span className="text-[10px] bg-red-400/20 text-red-300 px-1.5 py-0.5 rounded font-mono font-bold">Rejected</span>
+                                </div>
+                                <div className="text-[11px] text-red-400 font-semibold">Click here to re-apply →</div>
+                              </Link>
+                            )}
+                            {user?.role === "admin" && (
+                              <Link
+                                href="/dashboard/admin"
+                                onClick={() => setIsProfileHovered(false)}
+                                className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 rounded-lg text-white font-bold text-xs transition-opacity shadow-sm"
+                              >
+                                <span>Admin Dashboard</span>
+                                <Shield className="w-3.5 h-3.5" />
+                              </Link>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
+                      <button
+                        onClick={logout}
+                        className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity cursor-pointer"
+                        style={{ color: "var(--nav-text)" }}
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/wishlist"
+                        className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                        style={{ color: "var(--nav-text)" }}
+                      >
+                        <Heart className="w-5 h-5" />
+                        {wishlistCount > 0 && (
+                          <span
+                            className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
+                          >
+                            {wishlistCount > 99 ? "99+" : wishlistCount}
+                          </span>
+                        )}
+                        <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                          Wishlist
+                        </span>
+                      </Link>
+                      <Link
+                        href="/cart"
+                        className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
+                        style={{ color: "var(--nav-text)" }}
+                      >
+                        <ShoppingBag className="w-5 h-5" />
+                        {cartCount > 0 && (
+                          <span
+                            className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
+                          >
+                            {cartCount > 99 ? "99+" : cartCount}
+                          </span>
+                        )}
+                        <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                          Cart
+                        </span>
+                      </Link>
+
+                      {/* Separator */}
+                      <div
+                        className="h-8 w-px mx-4"
+                        style={{ background: "var(--nav-border-light)" }}
+                      ></div>
+
+                      {/* Action buttons */}
+                      <Link
+                        href="/auth/login"
+                        className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
+                        style={{ color: "var(--nav-text)" }}
+                      >
+                        Log in
+                      </Link>
+                      <Link
+                        href="/auth/signup/customer"
+                        className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                        style={{ background: "#FF6D1F", fontWeight: 500 }}
+                      >
+                        Join Now
+                      </Link>
+                    </>
+                  )}
+
+                  {/* Separator */}
+                  <div
+                    className="h-8 w-px mx-2"
+                    style={{ background: "var(--nav-border-light)" }}
+                  ></div>
+
+                  {/* Currency Selector Dropdown */}
+                  <div className="relative flex items-center">
                     <button
-                      onClick={logout}
-                      className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity cursor-pointer"
+                      onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
+                      className="flex items-center space-x-1 text-white text-sm font-semibold hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
                       style={{ color: "var(--nav-text)" }}
                     >
+                      <span className="text-[14px] font-bold text-orange-400 leading-none">{activeCurrency.symbol}</span>
+                      <span className="uppercase text-[13px]">{activeCurrency.code}</span>
+                      <svg
+                        className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isCurrencyOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isCurrencyOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setIsCurrencyOpen(false)} />
+                        <div className="absolute right-0 top-full mt-3 w-48 bg-[#1a1a1a]/95 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                          {availableCurrencies.map((item) => (
+                            <button
+                              key={item.code}
+                              onClick={() => {
+                                setCurrency(item.code);
+                                setIsCurrencyOpen(false);
+                              }}
+                              className={`w-full flex items-center space-x-3.5 px-4 py-2.5 text-left text-sm font-medium transition-colors hover:bg-white/5 cursor-pointer ${currency === item.code ? 'text-orange-500 bg-white/5' : 'text-white/80 hover:text-white'
+                                }`}
+                            >
+                              <span className="text-[14px] font-bold text-orange-400 w-5 text-center leading-none">{item.symbol}</span>
+                              <div className="flex flex-col">
+                                <span className="text-[13px] leading-tight font-semibold">{item.code}</span>
+                                <span className="text-[10px] text-gray-400">{item.name}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile menu button and Join Now button */}
+              <div className="md:hidden flex items-center gap-3">
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="inline-flex items-center justify-center p-2 rounded-lg hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
+                  style={{ color: "var(--nav-text)" }}
+                >
+                  {isMenuOpen ? (
+                    <X className="h-6 w-6" />
+                  ) : (
+                    <Menu className="h-6 w-6" />
+                  )}
+                </button>
+                {!isAuthenticated && (
+                  <Link
+                    href="/auth/signup/customer"
+                    className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                    style={{ background: "#FF6D1F", fontWeight: 500 }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Join Now
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile menu - Glassmorphism design */}
+        {isMenuOpen && (
+          <div className="container mx-auto">
+            <div
+              data-lenis-prevent="true"
+              className="md:hidden mt-2 rounded-2xl p-4 pb-8 space-y-3 bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-y-auto max-h-[calc(100dvh-110px)] overscroll-contain"
+              style={{
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "thin",
+                touchAction: "pan-y",
+              }}
+            >
+              <Link
+                href="/products"
+                className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                style={{ color: "var(--nav-text)" }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Discover
+              </Link>
+              <Link
+                href="/creators"
+                className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                style={{ color: "var(--nav-text)" }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Creators
+              </Link>
+
+              {isAuthenticated ? (
+                <>
+                  {user?.role !== "admin" && (user?.role === "creator" && user?.creatorStatus === "approved") ? (
+                    <>
+                      <Link
+                        href="/dashboard/creator"
+                        className="text-white font-medium flex items-center justify-between px-4 py-2 rounded-lg hover:opacity-80 transition-opacity bg-green-500/10 border border-green-500/20"
+                        style={{ color: "var(--nav-text)" }}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span>Creator Hub</span>
+                        <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">
+                          2/2 Approved ✓
+                        </span>
+                      </Link>
+
+                      <Link
+                        href="/dashboard/creator/catalog"
+                        className="text-white font-medium flex items-center justify-between px-4 py-2 rounded-lg hover:opacity-80 transition-opacity bg-gradient-to-r from-orange-500/20 to-pink-500/20 border border-orange-500/30 text-orange-400"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span>Create / Design Product</span>
+                        <Plus className="w-4 h-4" />
+                      </Link>
+
+                      {creatorSlug && (
+                        <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-2">
+                          <div className="flex items-center justify-between text-xs font-semibold text-gray-300">
+                            <span>My Store Link</span>
+                            <Link
+                              href={`/shop/${creatorSlug}`}
+                              className="text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors text-xs"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              Visit <ExternalLink className="w-3.5 h-3.5" />
+                            </Link>
+                          </div>
+                          <div className="flex items-center gap-2 bg-black/80 border border-white/10 rounded-lg px-3 py-2 text-xs">
+                            <span className="font-mono text-gray-300 truncate flex-1 select-all" title={publicStoreUrl}>
+                              {publicStoreUrl}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleCopyStoreLink}
+                              className="p-1 rounded hover:bg-white/10 text-gray-300 hover:text-white transition-colors cursor-pointer flex-shrink-0"
+                              title="Copy Store Link"
+                            >
+                              {copiedStoreLink ? (
+                                <Check className="w-4 h-4 text-green-400" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleShareStoreLink}
+                              className="p-1 rounded hover:bg-white/10 text-gray-300 hover:text-white transition-colors cursor-pointer flex-shrink-0"
+                              title="Share Store Link"
+                            >
+                              <Share2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Missing Photo Alert on Mobile for Creators */}
+                      {!user?.profileImg && (
+                        <Link
+                          href="/profile/edit"
+                          className="p-3 rounded-xl bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:bg-orange-500/25 transition-all flex items-center justify-between"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 flex-shrink-0">
+                              <Camera className="w-4 h-4" />
+                            </div>
+                            <div className="text-left">
+                              <div className="text-xs font-bold text-orange-300 flex items-center gap-1.5">
+                                <span>Profile Photo Not Set</span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
+                              </div>
+                              <div className="text-[11px] text-gray-300">Upload photo for your store</div>
+                            </div>
+                          </div>
+                          <span className="text-xs bg-orange-500 text-black font-extrabold px-2.5 py-1 rounded-md">
+                            Upload →
+                          </span>
+                        </Link>
+                      )}
+                    </>
+                  ) : user?.role !== "admin" && user?.creatorStatus === "pending" ? (
+                    <div className="px-4 py-2.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs font-semibold space-y-1">
+                      <div className="flex justify-between items-center font-bold">
+                        <span>Login as creator</span>
+                        <span className="bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded text-[10px]">1/2</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-yellow-400 text-[11px]">
+                        <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                        Waiting for approval
+                      </div>
+                      <button
+                        onClick={handleCheckStatus}
+                        disabled={checkingStatus}
+                        className="mt-1 w-full flex items-center justify-center gap-1.5 text-[10px] text-yellow-400 hover:text-yellow-200 disabled:opacity-50 cursor-pointer transition-colors py-1 border border-yellow-500/20 rounded-md hover:bg-yellow-500/10"
+                      >
+                        {checkingStatus ? (
+                          <span className="inline-block w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        )}
+                        {checkingStatus ? "Checking..." : "Check Status Now"}
+                      </button>
+                    </div>
+                  ) : user?.role !== "admin" && user?.creatorStatus === "rejected" ? (
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="px-4 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold flex items-center justify-between hover:bg-red-500/20 transition-colors"
+                    >
+                      <span>Creator Application: Rejected</span>
+                      <span className="text-[10px] text-red-400 font-bold underline">Re-apply →</span>
+                    </Link>
+                  ) : null}
+
+                  {user?.role === "admin" && (
+                    <Link
+                      href="/dashboard/admin"
+                      className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                      style={{ color: "var(--nav-text)" }}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+
+                  <Link
+                    href="/wishlist"
+                    className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                    style={{ color: "var(--nav-text)" }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Heart className="w-5 h-5 mr-3" />
+                    Wishlist
+                    {wishlistCount > 0 && (
+                      <span
+                        className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
+                        style={{ background: "var(--nav-hover-bg)" }}
+                      >
+                        {wishlistCount > 99 ? "99+" : wishlistCount}
+                      </span>
+                    )}
+                  </Link>
+
+                  <Link
+                    href="/cart"
+                    className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                    style={{ color: "var(--nav-text)" }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <ShoppingBag className="w-5 h-5 mr-3" />
+                    Cart
+                    {cartCount > 0 && (
+                      <span
+                        className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
+                        style={{ background: "var(--nav-hover-bg)" }}
+                      >
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </span>
+                    )}
+                  </Link>
+
+                  {user?.role === "user" && (
+                    <Link
+                      href="/addresses"
+                      className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                      style={{ color: "var(--nav-text)" }}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <MapPin className="w-5 h-5 mr-3" />
+                      Addresses
+                    </Link>
+                  )}
+
+                  <Link
+                    href="/profile"
+                    className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                    style={{ color: "var(--nav-text)" }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User className="w-5 h-5 mr-3" />
+                    Profile
+                  </Link>
+
+                  <div
+                    className="border-t mt-3 pt-3"
+                    style={{ borderColor: "var(--nav-border-light)" }}
+                  >
+                    <div
+                      className="px-4 py-2 mb-2 rounded-lg"
+                      style={{ background: "var(--nav-hover-bg)" }}
+                    >
+                      <span
+                        className="text-sm text-white font-medium"
+                        style={{ color: "var(--nav-text)" }}
+                      >
+                        {user?.name || user?.email}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity w-full cursor-pointer"
+                      style={{ color: "var(--nav-text)" }}
+                    >
+                      <LogOut className="w-5 h-5 mr-3" />
                       Logout
                     </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/wishlist"
-                      className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
-                      style={{ color: "var(--nav-text)" }}
-                    >
-                      <Heart className="w-5 h-5" />
-                      {wishlistCount > 0 && (
-                        <span
-                          className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
-                        >
-                          {wishlistCount > 99 ? "99+" : wishlistCount}
-                        </span>
-                      )}
-                      <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
-                        Wishlist
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/wishlist"
+                    className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                    style={{ color: "var(--nav-text)" }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Heart className="w-5 h-5 mr-3" />
+                    Wishlist
+                    {wishlistCount > 0 && (
+                      <span
+                        className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
+                        style={{ background: "var(--nav-hover-bg)" }}
+                      >
+                        {wishlistCount > 99 ? "99+" : wishlistCount}
                       </span>
-                    </Link>
-                    <Link
-                      href="/cart"
-                      className="group text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity flex items-center relative"
-                      style={{ color: "var(--nav-text)" }}
-                    >
-                      <ShoppingBag className="w-5 h-5" />
-                      {cartCount > 0 && (
-                        <span
-                          className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 text-[10px] leading-none rounded-full border border-black/60 bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold shadow-[0_0_0_2px_rgba(12,12,12,0.95)]"
-                        >
-                          {cartCount > 99 ? "99+" : cartCount}
-                        </span>
-                      )}
-                      <span className="absolute top-full mt-3 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-[#1a1a1a]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
-                        Cart
+                    )}
+                  </Link>
+                  <Link
+                    href="/cart"
+                    className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                    style={{ color: "var(--nav-text)" }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <ShoppingBag className="w-5 h-5 mr-3" />
+                    Cart
+                    {cartCount > 0 && (
+                      <span
+                        className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
+                        style={{ background: "var(--nav-hover-bg)" }}
+                      >
+                        {cartCount > 99 ? "99+" : cartCount}
                       </span>
-                    </Link>
+                    )}
+                  </Link>
 
-                    {/* Separator */}
-                    <div
-                      className="h-8 w-px mx-4"
-                      style={{ background: "var(--nav-border-light)" }}
-                    ></div>
-
-                    {/* Action buttons */}
+                  <div
+                    className="border-t mt-3 pt-3 space-y-2"
+                    style={{ borderColor: "var(--nav-border-light)" }}
+                  >
                     <Link
                       href="/auth/login"
-                      className="text-white px-0 py-2 text-sm font-medium hover:opacity-80 transition-opacity"
+                      className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity text-center"
                       style={{ color: "var(--nav-text)" }}
+                      onClick={() => setIsMenuOpen(false)}
                     >
                       Log in
                     </Link>
                     <Link
                       href="/auth/signup/customer"
-                      className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                      className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer text-center block"
                       style={{ background: "#FF6D1F", fontWeight: 500 }}
+                      onClick={() => setIsMenuOpen(false)}
                     >
                       Join Now
                     </Link>
-                  </>
-                )}
-
-                {/* Separator */}
-                <div
-                  className="h-8 w-px mx-2"
-                  style={{ background: "var(--nav-border-light)" }}
-                ></div>
-
-                {/* Currency Selector Dropdown */}
-                <div className="relative flex items-center">
-                  <button
-                    onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
-                    className="flex items-center space-x-1 text-white text-sm font-semibold hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
-                    style={{ color: "var(--nav-text)" }}
-                  >
-                    <span className="text-[14px] font-bold text-orange-400 leading-none">{activeCurrency.symbol}</span>
-                    <span className="uppercase text-[13px]">{activeCurrency.code}</span>
-                    <svg
-                      className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isCurrencyOpen ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {isCurrencyOpen && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setIsCurrencyOpen(false)} />
-                      <div className="absolute right-0 top-full mt-3 w-48 bg-[#1a1a1a]/95 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                        {availableCurrencies.map((item) => (
-                          <button
-                            key={item.code}
-                            onClick={() => {
-                              setCurrency(item.code);
-                              setIsCurrencyOpen(false);
-                            }}
-                            className={`w-full flex items-center space-x-3.5 px-4 py-2.5 text-left text-sm font-medium transition-colors hover:bg-white/5 cursor-pointer ${
-                              currency === item.code ? 'text-orange-500 bg-white/5' : 'text-white/80 hover:text-white'
-                            }`}
-                          >
-                            <span className="text-[14px] font-bold text-orange-400 w-5 text-center leading-none">{item.symbol}</span>
-                            <div className="flex flex-col">
-                              <span className="text-[13px] leading-tight font-semibold">{item.code}</span>
-                              <span className="text-[10px] text-gray-400">{item.name}</span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile menu button and Join Now button */}
-            <div className="md:hidden flex items-center gap-3">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-lg hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
-                style={{ color: "var(--nav-text)" }}
-              >
-                {isMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
-              </button>
-              {!isAuthenticated && (
-                <Link
-                  href="/auth/signup/customer"
-                  className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-                  style={{ background: "#FF6D1F", fontWeight: 500 }}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Join Now
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile menu - Glassmorphism design */}
-      {isMenuOpen && (
-        <div className="container mx-auto">
-          <div
-            data-lenis-prevent="true"
-            className="md:hidden mt-2 rounded-2xl p-4 pb-8 space-y-3 bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/10 shadow-2xl overflow-y-auto max-h-[calc(100dvh-110px)] overscroll-contain"
-            style={{
-              WebkitOverflowScrolling: "touch",
-              scrollbarWidth: "thin",
-              touchAction: "pan-y",
-            }}
-          >
-          <Link
-            href="/products"
-            className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-            style={{ color: "var(--nav-text)" }}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Discover
-          </Link>
-          <Link
-            href="/creators"
-            className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-            style={{ color: "var(--nav-text)" }}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Creators
-          </Link>
-
-          {isAuthenticated ? (
-            <>
-              {user?.role !== "admin" && (user?.role === "creator" && user?.creatorStatus === "approved") ? (
-                <>
-                  <Link
-                    href="/dashboard/creator"
-                    className="text-white font-medium flex items-center justify-between px-4 py-2 rounded-lg hover:opacity-80 transition-opacity bg-green-500/10 border border-green-500/20"
-                    style={{ color: "var(--nav-text)" }}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <span>Creator Hub</span>
-                    <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">
-                      2/2 Approved ✓
-                    </span>
-                  </Link>
-
-                  <Link
-                    href="/dashboard/creator/catalog"
-                    className="text-white font-medium flex items-center justify-between px-4 py-2 rounded-lg hover:opacity-80 transition-opacity bg-gradient-to-r from-orange-500/20 to-pink-500/20 border border-orange-500/30 text-orange-400"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <span>Create / Design Product</span>
-                    <Plus className="w-4 h-4" />
-                  </Link>
-
-                  {creatorSlug && (
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                      <div className="flex items-center justify-between text-xs font-semibold text-gray-300">
-                        <span>My Store Link</span>
-                        <Link
-                          href={`/shop/${creatorSlug}`}
-                          className="text-orange-400 hover:text-orange-300 flex items-center gap-1 transition-colors text-xs"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          Visit <ExternalLink className="w-3.5 h-3.5" />
-                        </Link>
-                      </div>
-                      <div className="flex items-center gap-2 bg-black/80 border border-white/10 rounded-lg px-3 py-2 text-xs">
-                        <span className="font-mono text-gray-300 truncate flex-1 select-all" title={publicStoreUrl}>
-                          {publicStoreUrl}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleCopyStoreLink}
-                          className="p-1 rounded hover:bg-white/10 text-gray-300 hover:text-white transition-colors cursor-pointer flex-shrink-0"
-                          title="Copy Store Link"
-                        >
-                          {copiedStoreLink ? (
-                            <Check className="w-4 h-4 text-green-400" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleShareStoreLink}
-                          className="p-1 rounded hover:bg-white/10 text-gray-300 hover:text-white transition-colors cursor-pointer flex-shrink-0"
-                          title="Share Store Link"
-                        >
-                          <Share2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Missing Photo Alert on Mobile for Creators */}
-                  {!user?.profileImg && (
-                    <Link
-                      href="/profile/edit"
-                      className="p-3 rounded-xl bg-orange-500/15 border border-orange-500/30 text-orange-200 hover:bg-orange-500/25 transition-all flex items-center justify-between"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 flex-shrink-0">
-                          <Camera className="w-4 h-4" />
-                        </div>
-                        <div className="text-left">
-                          <div className="text-xs font-bold text-orange-300 flex items-center gap-1.5">
-                            <span>Profile Photo Not Set</span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
-                          </div>
-                          <div className="text-[11px] text-gray-300">Upload photo for your store</div>
-                        </div>
-                      </div>
-                      <span className="text-xs bg-orange-500 text-black font-extrabold px-2.5 py-1 rounded-md">
-                        Upload →
-                      </span>
-                    </Link>
-                  )}
+                  </div>
                 </>
-              ) : user?.role !== "admin" && user?.creatorStatus === "pending" ? (
-                <div className="px-4 py-2.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs font-semibold space-y-1">
-                  <div className="flex justify-between items-center font-bold">
-                    <span>Login as creator</span>
-                    <span className="bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded text-[10px]">1/2</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-yellow-400 text-[11px]">
-                    <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-                    Waiting for approval
-                  </div>
-                  <button
-                    onClick={handleCheckStatus}
-                    disabled={checkingStatus}
-                    className="mt-1 w-full flex items-center justify-center gap-1.5 text-[10px] text-yellow-400 hover:text-yellow-200 disabled:opacity-50 cursor-pointer transition-colors py-1 border border-yellow-500/20 rounded-md hover:bg-yellow-500/10"
-                  >
-                    {checkingStatus ? (
-                      <span className="inline-block w-3 h-3 border border-yellow-400 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                    )}
-                    {checkingStatus ? "Checking..." : "Check Status Now"}
-                  </button>
-                </div>
-              ) : user?.role !== "admin" && user?.creatorStatus === "rejected" ? (
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="px-4 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold flex items-center justify-between hover:bg-red-500/20 transition-colors"
-                >
-                  <span>Creator Application: Rejected</span>
-                  <span className="text-[10px] text-red-400 font-bold underline">Re-apply →</span>
-                </Link>
-              ) : null}
-
-              {user?.role === "admin" && (
-                <Link
-                  href="/dashboard/admin"
-                  className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                  style={{ color: "var(--nav-text)" }}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Admin Dashboard
-                </Link>
               )}
 
-              <Link
-                href="/wishlist"
-                className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                style={{ color: "var(--nav-text)" }}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Heart className="w-5 h-5 mr-3" />
-                Wishlist
-                {wishlistCount > 0 && (
-                  <span
-                    className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
-                    style={{ background: "var(--nav-hover-bg)" }}
-                  >
-                    {wishlistCount > 99 ? "99+" : wishlistCount}
-                  </span>
-                )}
-              </Link>
-
-              <Link
-                href="/cart"
-                className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                style={{ color: "var(--nav-text)" }}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <ShoppingBag className="w-5 h-5 mr-3" />
-                Cart
-                {cartCount > 0 && (
-                  <span
-                    className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
-                    style={{ background: "var(--nav-hover-bg)" }}
-                  >
-                    {cartCount > 99 ? "99+" : cartCount}
-                  </span>
-                )}
-              </Link>
-
-              {user?.role === "user" && (
-                <Link
-                  href="/addresses"
-                  className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                  style={{ color: "var(--nav-text)" }}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <MapPin className="w-5 h-5 mr-3" />
-                  Addresses
-                </Link>
-              )}
-
-              <Link
-                href="/profile"
-                className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                style={{ color: "var(--nav-text)" }}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <User className="w-5 h-5 mr-3" />
-                Profile
-              </Link>
-
-              <div
-                className="border-t mt-3 pt-3"
-                style={{ borderColor: "var(--nav-border-light)" }}
-              >
-                <div
-                  className="px-4 py-2 mb-2 rounded-lg"
-                  style={{ background: "var(--nav-hover-bg)" }}
-                >
-                  <span
-                    className="text-sm text-white font-medium"
-                    style={{ color: "var(--nav-text)" }}
-                  >
-                    {user?.name || user?.email}
-                  </span>
+              {/* Mobile Currency Selector */}
+              <div className="border-t pt-3 mt-3" style={{ borderColor: "var(--nav-border-light)" }}>
+                <span className="text-xs text-gray-400 block mb-2 font-medium px-4">Select Currency</span>
+                <div className="grid grid-cols-3 gap-2 px-4">
+                  {availableCurrencies.map((item) => (
+                    <button
+                      key={item.code}
+                      onClick={() => setCurrency(item.code)}
+                      className={`flex items-center justify-center space-x-1 py-2 px-3 rounded-lg border text-[11px] font-semibold transition-colors cursor-pointer ${currency === item.code
+                        ? 'border-orange-500 text-orange-500 bg-orange-500/10'
+                        : 'border-white/10 text-white/70 hover:bg-white/5 hover:text-white'
+                        }`}
+                    >
+                      <span className="text-[12px] font-bold text-orange-400">{item.symbol}</span>
+                      <span>{item.code}</span>
+                    </button>
+                  ))}
                 </div>
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity w-full cursor-pointer"
-                  style={{ color: "var(--nav-text)" }}
-                >
-                  <LogOut className="w-5 h-5 mr-3" />
-                  Logout
-                </button>
               </div>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/wishlist"
-                className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                style={{ color: "var(--nav-text)" }}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Heart className="w-5 h-5 mr-3" />
-                Wishlist
-                {wishlistCount > 0 && (
-                  <span
-                    className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
-                    style={{ background: "var(--nav-hover-bg)" }}
-                  >
-                    {wishlistCount > 99 ? "99+" : wishlistCount}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/cart"
-                className="text-white font-medium flex items-center px-4 py-2 rounded-lg hover:opacity-80 transition-opacity"
-                style={{ color: "var(--nav-text)" }}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <ShoppingBag className="w-5 h-5 mr-3" />
-                Cart
-                {cartCount > 0 && (
-                  <span
-                    className="ml-auto text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-extrabold"
-                    style={{ background: "var(--nav-hover-bg)" }}
-                  >
-                    {cartCount > 99 ? "99+" : cartCount}
-                  </span>
-                )}
-              </Link>
-
-              <div
-                className="border-t mt-3 pt-3 space-y-2"
-                style={{ borderColor: "var(--nav-border-light)" }}
-              >
-                <Link
-                  href="/auth/login"
-                  className="text-white font-medium block px-4 py-2 rounded-lg hover:opacity-80 transition-opacity text-center"
-                  style={{ color: "var(--nav-text)" }}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Log in
-                </Link>
-                <Link
-                  href="/auth/signup/customer"
-                  className="px-4 py-2 rounded-full text-black text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer text-center block"
-                  style={{ background: "#FF6D1F", fontWeight: 500 }}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Join Now
-                </Link>
-              </div>
-            </>
-          )}
-
-          {/* Mobile Currency Selector */}
-          <div className="border-t pt-3 mt-3" style={{ borderColor: "var(--nav-border-light)" }}>
-            <span className="text-xs text-gray-400 block mb-2 font-medium px-4">Select Currency</span>
-            <div className="grid grid-cols-3 gap-2 px-4">
-              {availableCurrencies.map((item) => (
-                <button
-                  key={item.code}
-                  onClick={() => setCurrency(item.code)}
-                  className={`flex items-center justify-center space-x-1 py-2 px-3 rounded-lg border text-[11px] font-semibold transition-colors cursor-pointer ${
-                    currency === item.code
-                      ? 'border-orange-500 text-orange-500 bg-orange-500/10'
-                      : 'border-white/10 text-white/70 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <span className="text-[12px] font-bold text-orange-400">{item.symbol}</span>
-                  <span>{item.code}</span>
-                </button>
-              ))}
             </div>
           </div>
-        </div>
-      </div>
-      )}
-    </nav>
+        )}
+      </nav>
 
-    {/* Mobile menu backdrop */}
-    {isMenuOpen && (
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
-        onClick={() => setIsMenuOpen(false)}
-      />
-    )}
-  </>
+      {/* Mobile menu backdrop */}
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+    </>
   );
 }
