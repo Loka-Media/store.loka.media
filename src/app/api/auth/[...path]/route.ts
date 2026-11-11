@@ -179,12 +179,13 @@ async function handler(
 
             if (otp) {
               const recipientName = userRows[0]?.name;
-              await sendOtpEmail({
+              const result = await sendOtpEmail({
                 to: userEmail,
                 name: recipientName,
                 otp,
                 type: 'password_reset',
               });
+              console.log(`[OTP Dispatch - forgot-password] Email: ${userEmail}, OTP: ${otp}, Result:`, result);
             }
 
             // Always ensure client gets success response if we have handled/generated OTP
@@ -222,12 +223,13 @@ async function handler(
             );
             const recipientName = userRows[0]?.name;
 
-            await sendOtpEmail({
+            const result = await sendOtpEmail({
               to: userEmail,
               name: recipientName,
               otp,
               type: 'email_verification',
             });
+            console.log(`[OTP Dispatch - resend-otp] Email: ${userEmail}, OTP: ${otp}, Result:`, result);
           } catch (otpErr) {
             console.error('[Auth Proxy] Error handling resend-otp email:', otpErr);
           }
@@ -251,12 +253,13 @@ async function handler(
               );
             }
 
-            await sendOtpEmail({
+            const result = await sendOtpEmail({
               to: userEmail,
               name: userName,
               otp,
               type: 'email_verification',
             });
+            console.log(`[OTP Dispatch - register] Email: ${userEmail}, OTP: ${otp}, Result:`, result);
           } catch (otpErr) {
             console.error('[Auth Proxy] Error handling register OTP email:', otpErr);
           }

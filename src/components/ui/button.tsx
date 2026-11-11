@@ -11,6 +11,7 @@ interface ButtonProps {
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function Button({
@@ -21,30 +22,25 @@ export function Button({
   disabled = false,
   type = "button",
   className = "",
+  style,
 }: ButtonProps) {
-  const baseClasses = "font-medium transition-all duration-300 hover:shadow-lg active:scale-95 px-4 py-2 sm:px-14 sm:py-4 text-sm sm:text-base lg:text-lg rounded-full flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseClasses =
+    "font-medium transition-all duration-300 active:scale-95 px-4 py-2 sm:px-14 sm:py-4 text-sm sm:text-base lg:text-lg rounded-full flex items-center justify-center cursor-pointer select-none disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none";
 
-  const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
-    primary: {
-      backgroundColor: "#FF6D1F",
-      color: "#000000",
-    },
-    secondary: {
-      color: "#FF6D1F",
-      backgroundColor: "rgba(250, 243, 225, 0.2)",
-    },
-    tertiary: {
-      color: "#FFFFFF",
-      backgroundColor: "transparent",
-      border: "2px solid #FFFFFF",
-    },
+  const variantClasses: Record<ButtonVariant, string> = {
+    primary:
+      "bg-[#FF6D1F] text-black font-semibold shadow-[0_4px_14px_rgba(255,109,31,0.3)] hover:bg-[#FF7E38] hover:shadow-[0_6px_25px_rgba(255,109,31,0.55)] hover:scale-[1.02] hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
+    secondary:
+      "bg-[rgba(250,243,225,0.2)] text-[#FF6D1F] border border-white/10 backdrop-blur-sm hover:bg-[rgba(250,243,225,0.3)] hover:border-[#FF6D1F]/50 hover:text-white hover:shadow-[0_6px_25px_rgba(255,109,31,0.25)] hover:scale-[1.02] hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
+    tertiary:
+      "bg-transparent text-white border-2 border-white hover:bg-white/10 hover:border-white hover:scale-[1.02] hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
   };
 
-  const style = variantStyles[variant];
+  const combinedClasses = `${baseClasses} ${variantClasses[variant]} ${className}`.trim();
 
   if (href) {
     return (
-      <Link href={href} className={`${baseClasses} ${className}`} style={style}>
+      <Link href={href} className={combinedClasses} style={style}>
         {children}
       </Link>
     );
@@ -55,8 +51,8 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseClasses} ${className}`}
-      style={disabled ? { ...style, opacity: 0.5, cursor: "not-allowed" } : style}
+      className={combinedClasses}
+      style={style}
     >
       {children}
     </button>

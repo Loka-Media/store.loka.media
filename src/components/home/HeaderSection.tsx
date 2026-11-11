@@ -120,11 +120,19 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
           {/* CTA Buttons */}
           {!isAuthenticated && (
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 md:gap-8 w-full px-3 sm:px-0 sm:max-w-2xl sm:mx-auto">
-              <Button variant="primary" href="/auth/signup/creator" className="w-full sm:flex-1">
+              <Button
+                variant="primary"
+                href="/auth/signup/creator"
+                className="w-full sm:flex-1 font-semibold tracking-wide"
+              >
                 Start Selling
               </Button>
 
-              <Button variant="secondary" href="/products" className="w-full sm:flex-1">
+              <Button
+                variant="secondary"
+                href="/products"
+                className="w-full sm:flex-1 font-medium tracking-wide"
+              >
                 Explore Marketplace
               </Button>
             </div>
