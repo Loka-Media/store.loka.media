@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/serverAuth';
 import { queryDb } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
+  // requireAccessGuard: verified JWT + live DB role
+  const accessGuard = await requireAdminAuth(request);
+  if (!accessGuard.authorized) return accessGuard.response;
+
   try {
     const rows = await queryDb<any>(`
       SELECT 

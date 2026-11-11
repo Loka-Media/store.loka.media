@@ -1,25 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
+import { requireCreatorOrAdminAuth } from '@/lib/serverAuth';
 import { getApiUrl } from '@/lib/getApiUrl';
 import { calculateSellingPrice } from '@/lib/pricing';
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '');
-
-    let userId: number | null = null;
-    let role = '';
-
-    if (token) {
-      try {
-        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-        userId = payload.id || payload.userId || null;
-        role = payload.role || '';
-      } catch {
-        // Token parse failed
-      }
-    }
+    // Verified JWT + live DB role/status: only admins and approved creators
+    const auth = await requireCreatorOrAdminAuth(request);
+    if (!auth.authorized) return auth.response;
+    const { id: userId, role } = auth.user;
 
     const { searchParams } = new URL(request.url);
     const creatorIdParam = searchParams.get('creatorId');
@@ -232,6 +222,7 @@ export async function GET(request: NextRequest) {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
+    const authHeader = request.headers.get('authorization');
     if (authHeader) headers['Authorization'] = authHeader;
 
     const backendRes = await fetch(backendUrl, { headers });

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/serverAuth';
 import { queryDb } from '@/lib/db';
 import { getApiUrl } from '@/lib/getApiUrl';
 import axios from 'axios';
@@ -7,6 +8,10 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // requireAccessGuard: verified JWT + live DB role
+  const accessGuard = await requireAdminAuth(request);
+  if (!accessGuard.authorized) return accessGuard.response;
+
   try {
     const { id: paramId } = await params;
     const body = await request.json().catch(() => ({}));

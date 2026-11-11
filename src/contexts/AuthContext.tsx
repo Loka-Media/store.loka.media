@@ -1,7 +1,11 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { authAPI, User } from '@/lib/auth';
+import { installAuthFetch } from '@/lib/installAuthFetch';
+
+// Send the access token with bare fetch('/api/...') calls (server routes verify it)
+installAuthFetch();
 import toast from 'react-hot-toast';
 
 interface RegisterData {
@@ -30,11 +34,47 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const statusPollRef = useRef<NodeJS.Timeout | null>(null);
 
   const isAuthenticated = !!user;
 
+  // Poll for creator status changes (e.g. admin approve/reject) every 30 seconds
+  // when the user has a pending creator application, so the UI updates without
+  // requiring a manual page refresh.
+  const CREATOR_STATUS_POLL_INTERVAL_MS = 30_000;
+
+  const startStatusPolling = () => {
+    stopStatusPolling();
+    statusPollRef.current = setInterval(async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+        if (!token) return stopStatusPolling();
+        const response = await authAPI.getMe();
+        setUser((prev) => {
+          if (!prev) return prev;
+          const updated = getResolvedUser(response.user);
+          // Stop polling once status is no longer pending
+          if (updated.creatorStatus !== 'pending') {
+            stopStatusPolling();
+          }
+          return updated;
+        });
+      } catch {
+        // Silently ignore poll errors to avoid disrupting the user
+      }
+    }, CREATOR_STATUS_POLL_INTERVAL_MS);
+  };
+
+  const stopStatusPolling = () => {
+    if (statusPollRef.current) {
+      clearInterval(statusPollRef.current);
+      statusPollRef.current = null;
+    }
+  };
+
   useEffect(() => {
     checkAuthStatus();
+    return () => stopStatusPolling();
   }, []);
 
   const getResolvedUser = (userData: User): User => {
@@ -65,7 +105,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = localStorage.getItem('accessToken');
       if (token) {
         const response = await authAPI.getMe();
-        setUser(getResolvedUser(response.user));
+        const resolvedUser = getResolvedUser(response.user);
+        setUser(resolvedUser);
+        // Start polling if creator approval is still pending
+        if (resolvedUser.creatorStatus === 'pending') {
+          startStatusPolling();
+        }
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -79,8 +124,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await authAPI.login({ email, password });
-      setUser(getResolvedUser(response.user));
+      const resolvedUser = getResolvedUser(response.user);
+      setUser(resolvedUser);
       toast.success('Login successful');
+      // Start polling if creator approval is pending so the UI reflects
+      // an admin decision (approve/reject) without requiring a manual refresh.
+      if (resolvedUser.creatorStatus === 'pending') {
+        startStatusPolling();
+      }
       return true;
     } catch (error: unknown) {
       const message = (error && typeof error === 'object' && 'response' in error && 
@@ -213,7 +264,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = localStorage.getItem('accessToken');
       if (token) {
         const response = await authAPI.getMe();
-        setUser(getResolvedUser(response.user));
+        const resolvedUser = getResolvedUser(response.user);
+        setUser(resolvedUser);
+        // Resume polling if status is still pending, stop otherwise
+        if (resolvedUser.creatorStatus === 'pending') {
+          startStatusPolling();
+        } else {
+          stopStatusPolling();
+        }
       }
     } catch (error) {
       console.error('Refresh user failed:', error);
@@ -223,6 +281,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await authAPI.logout();
+      stopStatusPolling();
       // Clear the legacy shared storage key so the next user won't see this user's files
       localStorage.removeItem('uploaded_printify_images');
       if (typeof window !== 'undefined') {
@@ -235,6 +294,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Logout error:', error);
       localStorage.removeItem('uploaded_printify_images');
+      stopStatusPolling();
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('loka_support_chat_history');
         sessionStorage.removeItem('loka_support_session_id');

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/serverAuth';
 import { retrieveKnowledge } from '@/services/support/knowledge-retriever';
 
 /**
@@ -6,6 +7,10 @@ import { retrieveKnowledge } from '@/services/support/knowledge-retriever';
  * Interactive testing endpoint for admins to evaluate RAG retrieval and confidence
  */
 export async function POST(req: NextRequest) {
+  // requireAccessGuard: verified JWT + live DB role
+  const accessGuard = await requireAdminAuth(req);
+  if (!accessGuard.authorized) return accessGuard.response;
+
   try {
     const body = await req.json();
     const { query } = body;

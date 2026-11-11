@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/serverAuth';
 import fs from 'fs';
 import path from 'path';
 import { printifyCatalogAPI } from '@/services/printify/PrintifyClient';
@@ -153,6 +154,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // requireAccessGuard: verified JWT + live DB role
+  const accessGuard = await requireAdminAuth(request);
+  if (!accessGuard.authorized) return accessGuard.response;
+
   try {
     const body = await request.json();
     const markup = parseFloat(body.globalMarkup);
@@ -201,5 +206,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  // requireAccessGuard: verified JWT + live DB role
+  const accessGuard = await requireAdminAuth(request);
+  if (!accessGuard.authorized) return accessGuard.response;
+
   return POST(request);
 }

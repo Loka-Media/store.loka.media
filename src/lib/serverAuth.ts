@@ -21,6 +21,7 @@ export interface AuthenticatedUser {
   email: string;
   role: string;
   name?: string;
+  creatorStatus?: string | null;
 }
 
 export function verifyJwtToken(token: string): {
@@ -158,7 +159,7 @@ export async function resolveAuthenticatedUser(
     if (userId && !isNaN(userId)) {
       try {
         const rows = await executeUserQuery(
-          'SELECT id, email, role, name, is_active FROM users WHERE id = $1 LIMIT 1',
+          'SELECT id, email, role, name, is_active, creator_status FROM users WHERE id = $1 LIMIT 1',
           [userId]
         );
 
@@ -172,6 +173,7 @@ export async function resolveAuthenticatedUser(
             email: String(dbUser.email).toLowerCase().trim(),
             role: String(dbUser.role).toLowerCase().trim(),
             name: dbUser.name,
+            creatorStatus: dbUser.creator_status ?? null,
           };
           setCachedVerifiedUser(token, userObj);
           return { user: userObj };
@@ -188,6 +190,7 @@ export async function resolveAuthenticatedUser(
         email: String(payloadEmail).toLowerCase().trim(),
         role: String(payloadRole).toLowerCase().trim(),
         name: payload.name,
+        creatorStatus: payload.creatorStatus ?? payload.creator_status ?? null,
       };
       setCachedVerifiedUser(token, userObj);
       return { user: userObj };
@@ -222,6 +225,7 @@ export async function resolveAuthenticatedUser(
             email: String(meData.user.email || '').toLowerCase().trim(),
             role: String(meData.user.role || '').toLowerCase().trim(),
             name: meData.user.name,
+            creatorStatus: meData.user.creatorStatus ?? meData.user.creator_status ?? null,
           };
           setCachedVerifiedUser(token, userObj);
           return { user: userObj };
@@ -290,15 +294,27 @@ export async function requireCreatorOrAdminAuth(
     return authResult;
   }
 
-  if (authResult.user.role !== 'creator' && authResult.user.role !== 'admin') {
-    return {
-      authorized: false,
-      response: NextResponse.json(
-        { success: false, error: 'Forbidden: Creator or Admin access required' },
-        { status: 403 }
-      ),
-    };
+  if (authResult.user.role === 'admin' || isApprovedCreator(authResult.user)) {
+    return authResult;
   }
 
-  return authResult;
+  return {
+    authorized: false,
+    response: NextResponse.json(
+      {
+        success: false,
+        error:
+          authResult.user.creatorStatus === 'rejected'
+            ? 'Forbidden: Your creator application has been rejected'
+            : 'Forbidden: Creator or Admin access required',
+        creatorStatus: authResult.user.creatorStatus ?? null,
+      },
+      { status: 403 }
+    ),
+  };
+}
+
+/** A creator only has creator access once an admin has approved them. */
+export function isApprovedCreator(user: AuthenticatedUser): boolean {
+  return user.role === 'creator' && user.creatorStatus === 'approved';
 }
