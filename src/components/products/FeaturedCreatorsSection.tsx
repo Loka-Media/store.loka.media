@@ -45,8 +45,8 @@ export function FeaturedCreatorsSection({
                 className="group text-center p-6 hover:bg-gray-800/50 rounded-2xl transition-all duration-300 cursor-pointer border border-transparent hover:border-orange-500/30 backdrop-blur-sm"
                 onClick={() => handleFilterChange("creator", creator.name)}
               >
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-r from-orange-500 to-purple-500 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <span className="text-white font-bold text-2xl">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-primary/20 border-2 border-primary/40 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <span className="text-primary font-bold text-2xl">
                     {creator.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -73,8 +73,8 @@ export function FeaturedCreatorsSection({
                 key={creator.name}
                 className="group text-center p-6 hover:bg-gray-800/50 rounded-2xl transition-all duration-300 border border-transparent hover:border-orange-500/30"
               >
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-r from-orange-500 to-purple-500 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <span className="text-white font-bold text-2xl">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden bg-primary/20 border-2 border-primary/40 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <span className="text-primary font-bold text-2xl">
                     {creator.name.charAt(0)}
                   </span>
                 </div>

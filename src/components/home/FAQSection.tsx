@@ -116,7 +116,7 @@ export function FAQSection() {
   lg:text-left
 "
               style={{
-                background: "linear-gradient(180deg, #FFFFFF 0%, #B94D13 100%)",
+                background: "linear-gradient(180deg, #FFFFFF 0%, var(--primary-dark) 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -157,7 +157,7 @@ export function FAQSection() {
                 >
                   {openFAQ === index ? (
                     <GradientText
-                      gradient="linear-gradient(180deg, #FFFFFF 0%, #B94D13 100%)"
+                      gradient="linear-gradient(180deg, #FFFFFF 0%, var(--primary-dark) 100%)"
                       className="text-base md:text-lg font-extrabold pr-4 group-hover:translate-x-1 transition-transform block"
                       style={{ wordSpacing: '0.15em' }}
                     >
@@ -176,7 +176,7 @@ export function FAQSection() {
                         <defs>
                           <linearGradient id="paint0_linear_1248_293" x1="17.9787" y1="-26.8604" x2="17.9787" y2="29.8256" gradientUnits="userSpaceOnUse">
                             <stop stopColor="white" />
-                            <stop offset="1" stopColor="#B94D13" />
+                            <stop offset="1" stopColor="var(--primary-dark)" />
                           </linearGradient>
                         </defs>
                       </svg>
@@ -186,7 +186,7 @@ export function FAQSection() {
                         <defs>
                           <linearGradient id="paint0_linear_1248_297" x1="13.993" y1="-23.8252" x2="13.993" y2="52.6883" gradientUnits="userSpaceOnUse">
                             <stop stopColor="white" />
-                            <stop offset="1" stopColor="#B94D13" />
+                            <stop offset="1" stopColor="var(--primary-dark)" />
                           </linearGradient>
                         </defs>
                       </svg>

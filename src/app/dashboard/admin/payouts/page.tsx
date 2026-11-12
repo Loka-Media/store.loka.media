@@ -492,7 +492,7 @@ function AdminPayoutsPageContent() {
                               <button
                                 onClick={() => handleApproveClick(req)}
                                 disabled={actioningId === req.id}
-                                className="flex items-center justify-center gap-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-bold shadow-lg hover:opacity-95 transition-all text-sm disabled:opacity-40"
+                                className="flex items-center justify-center gap-1 px-4 py-2 bg-primary hover:bg-primary-hover text-black rounded-xl font-bold shadow-lg transition-all text-sm disabled:opacity-40"
                               >
                                 <Check className="w-4 h-4" /> Approve
                               </button>
@@ -631,7 +631,7 @@ function AdminPayoutsPageContent() {
                       </button>
                       <button
                         type="submit"
-                        className="flex-1 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-lg transition-all text-sm"
+                        className="flex-1 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-all text-sm"
                       >
                         Confirm Approval
                       </button>

@@ -167,7 +167,7 @@ export const OrderCard = ({
                         Color: {item.color}
                       </p>
                     )}
-                    <p className="text-xs font-semibold text-[#FF6D1F] mt-1">
+                    <p className="text-xs font-semibold text-primary mt-1">
                       ${parseFloat(item.price || '0').toFixed(2)}
                     </p>
                   </div>

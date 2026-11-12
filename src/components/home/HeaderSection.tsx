@@ -91,7 +91,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
               fontSize: "clamp(2rem, 6vw, 5.5rem)",
               lineHeight: "1.1",
               background:
-                "linear-gradient(273.09deg, #9E4719 0.41%, #FFFFFF 100%)",
+                "linear-gradient(273.09deg, var(--primary-dark) 0.41%, #FFFFFF 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -170,7 +170,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   className="font-bold tracking-wider"
                   style={{
                     fontSize: "clamp(1.5rem, 5vw, 5rem)",
-                    color: "#FF6D1F",
+                    color: "var(--primary)",
                     lineHeight: "1",
                     letterSpacing: "0.02em",
                   }}
@@ -197,7 +197,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   className="font-bold tracking-wider"
                   style={{
                     fontSize: "clamp(1.5rem, 5vw, 5rem)",
-                    color: "#FF6D1F",
+                    color: "var(--primary)",
                     lineHeight: "1",
                     letterSpacing: "0.02em",
                   }}
@@ -224,7 +224,7 @@ export function HeroSection({ isAuthenticated, user }: HeroSectionProps) {
                   className="font-bold tracking-wider"
                   style={{
                     fontSize: "clamp(1.5rem, 5vw, 5rem)",
-                    color: "#FF6D1F",
+                    color: "var(--primary)",
                     lineHeight: "1",
                     letterSpacing: "0.02em",
                   }}

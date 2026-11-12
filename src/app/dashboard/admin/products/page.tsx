@@ -173,7 +173,7 @@ export default function AdminProductsPage() {
                     <Link
                       href={`/products/${product.id}`}
                       target="_blank"
-                      className="mt-2.5 w-full py-1.5 px-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white text-[11px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition-opacity shadow-sm"
+                      className="mt-2.5 w-full py-1.5 px-2 bg-primary hover:bg-primary-hover text-black text-[11px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm"
                     >
                       <ExternalLink className="w-3 h-3" />
                       <span>View in Store</span>

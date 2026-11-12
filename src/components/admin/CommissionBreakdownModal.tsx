@@ -262,7 +262,7 @@ export default function CommissionBreakdownModal({
               ) : (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-[#FF6D1F]" />
+                    <DollarSign className="w-5 h-5 text-primary" />
                     Creator Commissions
                   </h3>
 
@@ -381,7 +381,7 @@ export default function CommissionBreakdownModal({
         <div className="bg-neutral-950 px-6 py-4 border-t border-white/10">
           <button
             onClick={onClose}
-            className="w-full bg-[#FF6D1F] hover:bg-[#ff7d38] text-black py-2.5 px-4 rounded-lg font-bold transition duration-300"
+            className="w-full bg-primary hover:bg-primary-hover text-black py-2.5 px-4 rounded-lg font-bold transition duration-300"
           >
             Close
           </button>

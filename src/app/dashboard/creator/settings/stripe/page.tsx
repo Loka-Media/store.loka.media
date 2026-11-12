@@ -444,9 +444,6 @@ function PayoutSettingsPageContent() {
             <Lock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm text-blue-300 font-medium mb-1">Bank details are fully encrypted</p>
-              <p className="text-xs text-blue-300/70">
-                We use AES-256 encryption to protect your sensitive information. Your data is never shared with third parties.
-              </p>
             </div>
           </div>
         </div>
@@ -578,15 +575,15 @@ function PayoutSettingsPageContent() {
                 border-radius: 4px;
               }
               .modal-scrollbar-5px::-webkit-scrollbar-thumb {
-                background: #FF6D1F !important;
+                background: var(--primary) !important;
                 border-radius: 4px;
               }
               .modal-scrollbar-5px::-webkit-scrollbar-thumb:hover {
-                background: #FF7A1A !important;
+                background: var(--primary-hover) !important;
               }
               .modal-scrollbar-5px {
                 scrollbar-width: thin !important;
-                scrollbar-color: #FF6D1F #111827 !important;
+                scrollbar-color: var(--primary) #111827 !important;
               }
             `}</style>
             <div

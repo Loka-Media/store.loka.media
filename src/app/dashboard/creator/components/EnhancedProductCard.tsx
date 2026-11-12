@@ -11,7 +11,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { productAPI } from '@/lib/api';
-import { Switch } from "@/components/ui/switch";
 import { createProductSlug, getValidImageUrl } from '@/lib/utils';
 import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -129,7 +128,7 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
             router.push(productHref);
           }
         }}
-        className="gradient-border-white-bottom overflow-hidden group cursor-pointer flex flex-col h-full hover:shadow-[0_20px_60px_rgba(255,99,71,0.3)] transition-all duration-300"
+        className="gradient-border-white-bottom overflow-hidden group cursor-pointer flex flex-col h-full hover:shadow-[0_20px_60px_rgba(var(--primary-rgb),0.3)] transition-all duration-300"
       >
         {/* Image Container */}
         <div className="w-full relative overflow-hidden bg-gradient-to-br from-gray-800 to-black" style={{ aspectRatio: '1/1' }}>
@@ -171,18 +170,27 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
             />
           )}
 
-          {/* Status badge */}
+          {/* Status badge (clickable toggle) */}
           <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">
-            <span className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-semibold shadow-sm ${localStatus
-              ? 'bg-[#00D953] border border-green-500 text-black'
-              : 'bg-red-500 border border-red-600 text-white'
-              }`}>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleStatusChange(!localStatus);
+              }}
+              title={`Click to ${localStatus ? 'deactivate' : 'activate'}`}
+              className={`inline-flex items-center px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-semibold shadow-sm cursor-pointer hover:opacity-90 transition-opacity ${localStatus
+                ? 'bg-primary border border-primary/50 text-black'
+                : 'bg-red-500 border border-red-600 text-white'
+              }`}
+            >
               <span className="sm:hidden">{localStatus ? '✓' : '✕'}</span>
               <span className="hidden sm:inline">{localStatus ? 'Active' : 'Inactive'}</span>
-            </span>
+            </button>
           </div>
           <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 z-10">
-            <span className="text-xs font-medium bg-black  text-white px-2.5 py-1 rounded-xl">
+            <span className="text-xs font-medium bg-black text-white px-2.5 py-1 rounded-xl">
               {product.variant_count} variants
             </span>
           </div>
@@ -191,7 +199,7 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
             <Link
               href={productHref}
               target="_blank"
-              className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-orange-500 border border-white/20 text-white rounded-lg transition-all duration-300"
+              className="p-1.5 sm:p-2.5 bg-black/60 hover:bg-primary hover:text-black border border-white/20 text-white rounded-lg transition-all duration-300"
               title="View Product"
               onClick={(e) => e.stopPropagation()}
             >
@@ -213,30 +221,6 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
               <Trash2 className="w-3 sm:w-4 h-3 sm:h-4" />
             </button>
           </div>
-
-          {/* Status toggle at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}>
-            <div className="flex items-center space-x-2">
-              <Switch
-                checked={localStatus}
-                onCheckedChange={handleStatusChange}
-                id={`status-switch-${product.id}`}
-              />
-              <label
-                htmlFor={`status-switch-${product.id}`}
-                className={`text-sm font-bold cursor-pointer ${localStatus ? "text-green-400" : "text-red-400"}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
-                {localStatus ? "Active" : "Inactive"}
-              </label>
-            </div>
-          </div>
         </div>
 
         {/* Content Section */}
@@ -246,7 +230,7 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
               by {product.creator_name}
             </span>
           )}
-          <h3 className="font-extrabold text-center text-sm text-white truncate mb-2 group-hover:text-orange-400 transition-colors line-clamp-2 tracking-tight">
+          <h3 className="font-extrabold text-center text-sm text-white truncate mb-2 group-hover:text-primary transition-colors line-clamp-2 tracking-tight">
             {product.name}
           </h3>
           <div className="flex items-center justify-center mb-3 flex-wrap gap-2">
@@ -259,14 +243,14 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
 
           </div>
           <div className="mt-auto pt-3 sm:pt-4">
-            <div className="w-full border border-[#FF6D1F] rounded-full
+            <div className="w-full border border-primary rounded-full
                   py-2
                   sm:py-2.5
                   md:py-3
                   lg:py-3
                   xl:py-3
                   text-center">
-              <span className="text-[#FF6D1F]
+              <span className="text-primary
                      text-[11px]
                      sm:text-xs
                      md:text-sm

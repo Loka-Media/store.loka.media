@@ -463,7 +463,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
 
                     {/* Placement Badge on Canvas */}
                     <div className="absolute top-3 left-3 z-20 pointer-events-none">
-                      <span className="text-[10px] font-extrabold tracking-widest uppercase px-2.5 py-1 rounded-md bg-[#FF6D1F] text-white shadow-lg shadow-orange-500/40">
+                      <span className="text-[10px] font-extrabold tracking-widest uppercase px-2.5 py-1 rounded-md bg-primary text-white shadow-lg shadow-orange-500/40">
                         {activePlacement === "front_cover"
                           ? "Front Cover"
                           : activePlacement === "back_cover"
@@ -487,7 +487,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                       <div className="absolute inset-0 flex items-center justify-center p-4 z-10">
                         <div className="text-center text-gray-400">
                           <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner border border-white/10">
-                            <Crosshair className="w-7 h-7 text-[#FF6D1F]" />
+                            <Crosshair className="w-7 h-7 text-primary" />
                           </div>
                           <p className="text-sm font-semibold text-white capitalize">
                             {activePlacement === "front_cover"
@@ -653,31 +653,31 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                               className={`relative group transition-shadow ${
                                 isFit
                                   ? "border-0 shadow-none rounded-none"
-                                  : `${isSelected ? "border-2 border-[#FF6D1F] shadow-[0_0_15px_rgba(255,109,31,0.4)]" : "border border-white/40 hover:border-white/70"} rounded-lg`
+                                  : `${isSelected ? "border-2 border-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]" : "border border-white/40 hover:border-white/70"} rounded-lg`
                               } ${design.id === -1 ? "bg-blue-100/20" : "bg-transparent"}`}
                               onClick={() => setSelectedDesignFile(design)}
                               resizeHandleComponent={isFit ? {} : {
                                 topLeft: (
                                   <div
-                                    className="w-3.5 h-3.5 bg-[#FF6D1F] border-2 border-white rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize hover:scale-125 transition-transform"
+                                    className="w-3.5 h-3.5 bg-primary border-2 border-white rounded-full shadow-md -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize hover:scale-125 transition-transform"
                                     title="Drag corner to resize"
                                   />
                                 ),
                                 topRight: (
                                   <div
-                                    className="w-3.5 h-3.5 bg-[#FF6D1F] border-2 border-white rounded-full shadow-md translate-x-1/2 -translate-y-1/2 cursor-nesw-resize hover:scale-125 transition-transform"
+                                    className="w-3.5 h-3.5 bg-primary border-2 border-white rounded-full shadow-md translate-x-1/2 -translate-y-1/2 cursor-nesw-resize hover:scale-125 transition-transform"
                                     title="Drag corner to resize"
                                   />
                                 ),
                                 bottomLeft: (
                                   <div
-                                    className="w-3.5 h-3.5 bg-[#FF6D1F] border-2 border-white rounded-full shadow-md -translate-x-1/2 translate-y-1/2 cursor-nesw-resize hover:scale-125 transition-transform"
+                                    className="w-3.5 h-3.5 bg-primary border-2 border-white rounded-full shadow-md -translate-x-1/2 translate-y-1/2 cursor-nesw-resize hover:scale-125 transition-transform"
                                     title="Drag corner to resize"
                                   />
                                 ),
                                 bottomRight: (
                                   <div
-                                    className="w-3.5 h-3.5 bg-[#FF6D1F] border-2 border-white rounded-full shadow-md translate-x-1/2 translate-y-1/2 cursor-nwse-resize hover:scale-125 transition-transform"
+                                    className="w-3.5 h-3.5 bg-primary border-2 border-white rounded-full shadow-md translate-x-1/2 translate-y-1/2 cursor-nwse-resize hover:scale-125 transition-transform"
                                     title="Drag corner to resize"
                                   />
                                 ),
@@ -734,7 +734,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                 {/* Header row: Placement info & dimensions */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/10 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="text-[#FF6D1F] font-bold uppercase tracking-wider text-[11px] flex items-center gap-1">
+                    <span className="text-primary font-bold uppercase tracking-wider text-[11px] flex items-center gap-1">
                       <Crosshair className="w-3.5 h-3.5" />
                       Placement: {activePlacement.replace(/_/g, " ")}
                     </span>
@@ -781,7 +781,7 @@ const DesignCanvasTab: React.FC<DesignCanvasTabProps> = ({
                         step={1}
                         value={currentScalePercent}
                         onChange={(e) => handleScaleChange(Number(e.target.value))}
-                        className="flex-1 min-w-0 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#FF6D1F]"
+                        className="flex-1 min-w-0 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[var(--primary)]"
                         title="Drag to resize artwork"
                       />
 

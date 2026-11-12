@@ -100,7 +100,7 @@ export function QualityProductsSection() {
   lg:text-left
 "
               style={{
-                background: "linear-gradient(180deg, #FFFFFF 0%, #B94D13 100%)",
+                background: "linear-gradient(180deg, #FFFFFF 0%, var(--primary-dark) 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",

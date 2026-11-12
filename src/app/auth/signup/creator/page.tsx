@@ -107,20 +107,20 @@ function CreatorSignupContent() {
                       <path fillRule="evenodd" clipRule="evenodd" d="M62.2276 23.5546C62.4135 23.5307 62.5776 23.5776 62.7197 23.6953C62.7666 23.9297 62.8135 24.164 62.8604 24.3984C62.9542 32.0859 62.9542 39.7733 62.8604 47.4609C62.3655 50.0626 61.0296 52.1017 58.8526 53.5781C52.0082 56.7074 45.1409 59.7778 38.251 62.789C38.1807 53.1797 38.1572 43.5704 38.1807 33.9609C38.9477 33.8227 39.6976 33.6117 40.4307 33.3281C42.7686 32.2598 45.1122 31.2051 47.4619 30.164C47.5391 32.2344 47.6563 34.2968 47.8135 36.3515C48.6589 37.8549 49.8074 38.1362 51.2588 37.1953C51.5572 36.9209 51.7682 36.5927 51.8916 36.2109C51.9384 33.539 51.9854 30.8671 52.0322 28.1953C55.4496 26.6619 58.8481 25.115 62.2276 23.5546Z" fill="url(#paint3_linear_1167_952)"/>
                       <defs>
                         <linearGradient id="paint0_linear_1167_952" x1="42.9066" y1="8.78906" x2="42.9066" y2="24.2578" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                         <linearGradient id="paint1_linear_1167_952" x1="28.0004" y1="15.1172" x2="28.0004" y2="29.8669" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                         <linearGradient id="paint2_linear_1167_952" x1="21.3091" y1="23.5547" x2="21.3091" y2="62.7891" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                         <linearGradient id="paint3_linear_1167_952" x1="50.5513" y1="23.5486" x2="50.5513" y2="62.789" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                       </defs>
                     </svg>
@@ -220,8 +220,8 @@ function CreatorSignupContent() {
                   <ShoppingBag className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                   <span>Join as Customer</span>
                 </Link>
-                <div className="flex-1 py-2 sm:py-2.5 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-extrabold transition-all text-center flex items-center justify-center gap-1.5 sm:gap-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg ring-1 ring-white/20">
-                  <Sparkles className="w-4 h-4 text-white flex-shrink-0" />
+                <div className="flex-1 py-2 sm:py-2.5 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-extrabold transition-all text-center flex items-center justify-center gap-1.5 sm:gap-2 bg-primary text-black shadow-lg ring-1 ring-white/20">
+                  <Sparkles className="w-4 h-4 text-black flex-shrink-0" />
                   <span>Join as Creator</span>
                 </div>
               </div>

@@ -10,7 +10,7 @@ interface GradientTitleProps {
  * GradientTitle Component
  *
  * A reusable title component with SVG-inspired gradient styling.
- * Default gradient: linear-gradient(273.09deg, #9E4719 0.41%, #FFFFFF 100%)
+ * Default gradient: linear-gradient(273.09deg, var(--primary-dark) 0.41%, #FFFFFF 100%)
  * Perfect for hero sections and prominent headings.
  *
  * @param text - The title text to display
@@ -34,7 +34,7 @@ export default function GradientTitle({
       className={`font-clash font-extrabold tracking-tight leading-[1.1] ${sizeMap[size]} ${className}`}
       style={{
         fontFamily: "'Clash Display', var(--font-inter), sans-serif",
-        backgroundImage: 'linear-gradient(273.09deg, #9E4719 0.41%, #FFFFFF 100%)',
+        backgroundImage: 'linear-gradient(273.09deg, var(--primary-dark) 0.41%, #FFFFFF 100%)',
         backgroundClip: 'text',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',

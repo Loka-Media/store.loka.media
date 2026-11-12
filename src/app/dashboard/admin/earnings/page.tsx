@@ -308,9 +308,9 @@ function AdminEarningsPageContent() {
                         <button
                           key={pageNum}
                           onClick={() => setPage(pageNum)}
-                          className={`px-3 py-2 rounded-xl font-medium transition-colors ${
+                          className={`px-3 py-2 rounded-xl font-bold transition-colors ${
                             page === pageNum
-                              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
+                              ? 'bg-primary text-black'
                               : 'border border-white/10 text-white bg-neutral-900 hover:bg-neutral-800'
                           }`}
                         >

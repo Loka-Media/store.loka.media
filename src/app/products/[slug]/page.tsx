@@ -421,12 +421,12 @@ export default function ProductPage({ params }: ProductPageProps) {
                       </g>
                       <defs>
                         <linearGradient id="paint0_linear_1353_2181" x1="35.9297" y1="14.5449" x2="35.9297" y2="57.1778" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                         <linearGradient id="paint1_linear_1353_2181" x1="57.0938" y1="14.9766" x2="57.0938" y2="25.1191" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                         <clipPath id="clip0_1353_2181">
                           <rect width="72" height="72" fill="white"/>

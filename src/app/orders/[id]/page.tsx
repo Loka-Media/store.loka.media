@@ -191,7 +191,7 @@ export default function OrderPage({ params }: OrderPageProps) {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#080809] flex flex-col items-center justify-center gap-3">
-        <div className="w-10 h-10 border-3 border-[#FF6D1F]/20 border-t-[#FF6D1F] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-3 border-primary/20 border-t-primary rounded-full animate-spin" />
         <p className="text-sm text-gray-400 font-medium">Loading order details...</p>
       </div>
     );
@@ -258,7 +258,7 @@ export default function OrderPage({ params }: OrderPageProps) {
           {/* Quick Metrics Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#FF6D1F]/10 border border-[#FF6D1F]/20 flex items-center justify-center text-[#FF6D1F] shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                 <Package size={20} />
               </div>
               <div className="min-w-0">
@@ -380,7 +380,7 @@ export default function OrderPage({ params }: OrderPageProps) {
 
                   <div className="text-right shrink-0">
                     <p className="text-xs text-gray-400">Unit: {formatPrice(item.unit_price)}</p>
-                    <p className="text-sm sm:text-base font-extrabold text-[#FF6D1F] mt-1">{formatPrice(item.total_price)}</p>
+                    <p className="text-sm sm:text-base font-extrabold text-primary mt-1">{formatPrice(item.total_price)}</p>
                   </div>
                 </div>
               ))}
@@ -392,7 +392,7 @@ export default function OrderPage({ params }: OrderPageProps) {
             {/* Shipping Address */}
             <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                <MapPin size={16} className="text-[#FF6D1F]" /> Shipping Address
+                <MapPin size={16} className="text-primary" /> Shipping Address
               </h3>
               {order.shipping_address && (order.shipping_address.name || order.shipping_address.address1) ? (
                 <div className="text-sm text-gray-300 space-y-1">
@@ -426,7 +426,7 @@ export default function OrderPage({ params }: OrderPageProps) {
                 </div>
                 <div className="border-t border-white/10 pt-3 flex justify-between items-baseline">
                   <span className="text-base font-bold text-white">Total</span>
-                  <span className="text-xl font-extrabold text-[#FF6D1F]">
+                  <span className="text-xl font-extrabold text-primary">
                     {formatPrice(order.total_amount)}
                   </span>
                 </div>

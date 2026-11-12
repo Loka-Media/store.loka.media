@@ -92,24 +92,24 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row gap-4 lg:gap-8 mb-3">
             <a
               href="tel:1-888-568-5652"
-              className="flex items-center gap-2 text-[#cccccc] text-sm md:text-base lg:text-sm no-underline transition-colors duration-200 hover:text-[#FF6B00]"
+              className="flex items-center gap-2 text-[#cccccc] text-sm md:text-base lg:text-sm no-underline transition-colors duration-200 hover:text-primary"
             >
-              <Phone size={16} className="text-[#FF6B00] flex-shrink-0" />
+              <Phone size={16} className="text-primary flex-shrink-0" />
               <span>1-888-568-5652 (loka)</span>
             </a>
 
             <a
               href="mailto:hello@loka.media"
-              className="flex items-center gap-2 text-[#cccccc] text-sm md:text-base lg:text-sm no-underline transition-colors duration-200 hover:text-[#FF6B00]"
+              className="flex items-center gap-2 text-[#cccccc] text-sm md:text-base lg:text-sm no-underline transition-colors duration-200 hover:text-primary"
             >
-              <Mail size={16} className="text-[#FF6B00] flex-shrink-0" />
+              <Mail size={16} className="text-primary flex-shrink-0" />
               <span>hello@loka.media</span>
             </a>
           </div>
 
           {/* Locations */}
           <div className="flex items-center gap-2 text-[#cccccc] text-sm md:text-base lg:text-sm">
-            <Globe size={16} className="text-[#FF6B00] flex-shrink-0" />
+            <Globe size={16} className="text-primary flex-shrink-0" />
             <span style={{ fontWeight: '600', letterSpacing: '0.05em' }}>Winnipeg &nbsp;|&nbsp; Toronto &nbsp;|&nbsp; Los Angeles &nbsp;|&nbsp; India</span>
           </div>
         </div>
@@ -133,12 +133,12 @@ export default function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isSubmitting}
-               className="min-w-0 flex-1 px-3 py-2.5 md:px-4 md:py-3 lg:px-4 lg:py-3 bg-transparent border border-[#3a3530] border-r-0 rounded-l text-white text-sm md:text-base lg:text-sm outline-none transition-colors duration-200 focus:border-[#FF6B00] disabled:opacity-50"
+               className="min-w-0 flex-1 px-3 py-2.5 md:px-4 md:py-3 lg:px-4 lg:py-3 bg-transparent border border-[#3a3530] border-r-0 rounded-l text-white text-sm md:text-base lg:text-sm outline-none transition-colors duration-200 focus:border-primary disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="shrink-0 px-4 py-2.5 md:px-6 md:py-3 lg:px-6 lg:py-3 bg-[#FF6B00] border-none rounded-r text-black text-sm md:text-base lg:text-sm font-semibold cursor-pointer transition-colors duration-200 hover:bg-[#ff8533] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="shrink-0 px-4 py-2.5 md:px-6 md:py-3 lg:px-6 lg:py-3 bg-primary border-none rounded-r text-black text-sm md:text-base lg:text-sm font-semibold cursor-pointer transition-colors duration-200 hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
@@ -175,7 +175,7 @@ export default function Footer() {
           target="_blank"
           rel="noopener noreferrer"
           className="transition-colors duration-200 order-1 sm:order-2"
-          style={{ color: '#FF6D1F' }}
+          style={{ color: 'var(--primary)' }}
         >
           <Instagram size={16} />
         </a>
@@ -187,7 +187,7 @@ export default function Footer() {
         <div className="flex items-center gap-3 order-3 sm:order-3">
           <a
             href="/terms"
-            className="text-xs text-white no-underline transition-colors duration-200 hover:text-[#FF6B00]"
+            className="text-xs text-white no-underline transition-colors duration-200 hover:text-primary"
             style={{ fontWeight: '400' }}
           >
             Terms of Use
@@ -195,7 +195,7 @@ export default function Footer() {
           <span className="text-white">|</span>
           <a
             href="/privacy"
-            className="text-xs text-white no-underline transition-colors duration-200 hover:text-[#FF6B00]"
+            className="text-xs text-white no-underline transition-colors duration-200 hover:text-primary"
             style={{ fontWeight: '400' }}
           >
             Privacy Policy

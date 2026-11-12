@@ -166,7 +166,7 @@ const privacySections = [
         </ul>
         <p>
           To exercise any of these privileges, please send a message to our legal operations team at{" "}
-          <a href="mailto:hello@loka.media" className="text-[#FF6D1F] hover:underline">
+          <a href="mailto:hello@loka.media" className="text-primary hover:underline">
             hello@loka.media
           </a>.
         </p>
@@ -212,13 +212,13 @@ const privacySections = [
         <div className="bg-[#1A1A1A] p-6 rounded-2xl border border-white/10 space-y-3 max-w-md">
           <div className="flex items-center gap-3">
             <span className="text-white font-bold font-clash">Email:</span>
-            <a href="mailto:hello@loka.media" className="text-[#FF6D1F] hover:underline text-sm md:text-base">
+            <a href="mailto:hello@loka.media" className="text-primary hover:underline text-sm md:text-base">
               hello@loka.media
             </a>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-white font-bold font-clash">Phone:</span>
-            <a href="tel:1-888-568-5652" className="text-[#FF6D1F] hover:underline text-sm md:text-base">
+            <a href="tel:1-888-568-5652" className="text-primary hover:underline text-sm md:text-base">
               1-888-568-5652 (loka)
             </a>
           </div>
@@ -240,15 +240,15 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-black font-satoshi flex flex-col justify-between overflow-x-clip">
       <main className="bg-black flex-grow pt-[40px] md:pt-[60px] pb-16 px-4 sm:px-6 md:px-12 max-w-[1400px] mx-auto w-full relative">
         {/* Decorative ambient light blur */}
-        <div className="absolute top-0 right-1/4 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-[#FF6D1F]/5 rounded-full blur-[100px] sm:blur-[180px] pointer-events-none" />
-        <div className="absolute top-1/3 left-1/10 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-[#B94D13]/5 rounded-full blur-[80px] sm:blur-[150px] pointer-events-none" />
+        <div className="absolute top-0 right-1/4 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-primary/5 rounded-full blur-[100px] sm:blur-[180px] pointer-events-none" />
+        <div className="absolute top-1/3 left-1/10 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-[var(--primary-dark)]/5 rounded-full blur-[80px] sm:blur-[150px] pointer-events-none" />
 
         {/* Title / Header section */}
         <div className="text-center md:text-left mb-12 sm:mb-16 md:mb-20 max-w-4xl">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-clash tracking-tight mb-4 uppercase">
             <span
               style={{
-                background: "linear-gradient(273.09deg, #9E4719 0.41%, #FFFFFF 100%)",
+                background: "linear-gradient(273.09deg, var(--primary-dark) 0.41%, #FFFFFF 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -267,7 +267,7 @@ export default function PrivacyPage() {
           
           {/* Left Sticky Sidebar Index for Desktop */}
           <aside className="w-full lg:w-[320px] shrink-0 sticky top-[120px] hidden lg:block bg-[#111111]/80 backdrop-blur-md rounded-3xl p-6 border border-white/10 shadow-lg">
-            <h3 className="text-sm font-bold font-clash text-[#FF6D1F] uppercase tracking-wider mb-4 border-b border-white/10 pb-2">
+            <h3 className="text-sm font-bold font-clash text-primary uppercase tracking-wider mb-4 border-b border-white/10 pb-2">
               On This Page
             </h3>
             <nav className="flex flex-col gap-3">

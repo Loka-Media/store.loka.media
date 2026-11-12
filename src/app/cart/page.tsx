@@ -133,8 +133,8 @@ export default function CartPage() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl inline-flex items-center justify-center mb-6">
-            <ShoppingBag className="h-8 w-8 text-white" />
+          <div className="p-4 bg-primary/20 border border-primary/30 rounded-2xl inline-flex items-center justify-center mb-6">
+            <ShoppingBag className="h-8 w-8 text-primary" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">Sign In to Continue</h2>
           <p className="text-gray-400 font-medium mb-8">Please log in to access your cart and complete your purchase.</p>
@@ -183,15 +183,15 @@ export default function CartPage() {
 
         {items.length === 0 ? (
           <div className="text-center py-16 px-4">
-            <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl inline-flex items-center justify-center mb-6">
-              <ShoppingBag className="h-8 w-8 text-white" />
+            <div className="p-4 bg-primary/20 border border-primary/30 rounded-2xl inline-flex items-center justify-center mb-6">
+              <ShoppingBag className="h-8 w-8 text-primary" />
             </div>
             <span className="text-lg sm:text-xl font-bold text-white block">Your cart is empty</span>
             <p className="mt-2 text-sm sm:text-base text-gray-400 font-medium">Start adding some products to your cart!</p>
             <div className="mt-6 sm:mt-8">
               <Link
                 href="/products"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl text-black bg-primary hover:bg-primary-hover transition-all duration-300 shadow-lg shadow-primary/20"
               >
                 Start Shopping
               </Link>
@@ -354,7 +354,7 @@ export default function CartPage() {
                 <div className="mt-6 sm:mt-8">
                   <Link
                     href="/checkout-unified"
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 border border-transparent rounded-xl shadow-lg py-3.5 px-4 text-sm sm:text-base font-bold text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
+                    className="w-full bg-primary hover:bg-primary-hover border border-transparent rounded-xl shadow-lg shadow-primary/20 py-3.5 px-4 text-sm sm:text-base font-bold text-black flex items-center justify-center transition-all duration-300 hover:shadow-[0_10px_30px_rgba(var(--primary-rgb),0.3)]"
                   >
                     Proceed to Checkout
                     <ArrowRight className="ml-2 h-4 w-4" />

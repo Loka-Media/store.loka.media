@@ -138,7 +138,7 @@ function renderInlineText(text: string, baseKey: string) {
           rel={isMailto ? undefined : 'noopener noreferrer'}
           className="hover:underline transition-colors cursor-pointer"
           style={{
-            color: '#FF8C38',
+            color: 'var(--primary-light)',
             textDecoration: 'underline',
             textUnderlineOffset: '3px',
             fontWeight: 600,
@@ -157,7 +157,7 @@ function renderInlineText(text: string, baseKey: string) {
           href={`mailto:${part}`}
           className="hover:underline transition-colors cursor-pointer"
           style={{
-            color: '#FF8C38',
+            color: 'var(--primary-light)',
             textDecoration: 'underline',
             textUnderlineOffset: '3px',
             fontWeight: 600,
@@ -179,7 +179,7 @@ function renderInlineText(text: string, baseKey: string) {
           rel="noopener noreferrer"
           className="hover:underline transition-colors cursor-pointer"
           style={{
-            color: '#FF8C38',
+            color: 'var(--primary-light)',
             textDecoration: 'underline',
             textUnderlineOffset: '3px',
             wordBreak: 'break-all',
@@ -748,8 +748,8 @@ export default function SupportChatbot() {
 
   /* ─────────────── STYLES (inline for reliability) ─────────────── */
   const WIN_BORDER_RADIUS = '28px';
-  const ORANGE = '#FF6D1F';
-  const ORANGE_LIGHT = '#FF9A45';
+  const ORANGE = 'var(--primary)';
+  const ORANGE_LIGHT = 'var(--primary-light)';
   const GREEN = '#34D399';
   const BG_DARK = '#080809';
 
@@ -1002,10 +1002,10 @@ export default function SupportChatbot() {
   //                           {msg.showAuthPrompt && (
   //                             <div style={{
   //                               marginTop: '0.85rem', padding: '0.85rem',
-  //                               background: 'rgba(255,109,31,0.08)',
-  //                               border: '1px solid rgba(255,109,31,0.22)', borderRadius: '14px',
+  //                               background: 'rgba(var(--primary-rgb),0.08)',
+  //                               border: '1px solid rgba(var(--primary-rgb),0.22)', borderRadius: '14px',
   //                             }}>
-  //                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FF8C38', fontWeight: 700, fontSize: '11px', marginBottom: '6px' }}>
+  //                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--primary-light)', fontWeight: 700, fontSize: '11px', marginBottom: '6px' }}>
   //                                 <LogIn size={13} /><span>Account Login Required</span>
   //                               </div>
   //                               <p style={{ color: '#9CA3AF', fontSize: '11px', lineHeight: 1.5, margin: '0 0 10px' }}>
@@ -1096,7 +1096,7 @@ export default function SupportChatbot() {
   //                                     const isCancelled = step.status === 'cancelled';
 
   //                                     const dotBg = isDone ? '#10B981' : isActive ? ORANGE : isCancelled ? '#EF4444' : 'rgba(255,255,255,0.15)';
-  //                                     const textColor = isDone ? '#10B981' : isActive ? '#FF8C38' : isCancelled ? '#EF4444' : '#6B7280';
+  //                                     const textColor = isDone ? '#10B981' : isActive ? 'var(--primary-light)' : isCancelled ? '#EF4444' : '#6B7280';
 
   //                                     return (
   //                                       <div key={step.step} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1 }}>
@@ -1104,7 +1104,7 @@ export default function SupportChatbot() {
   //                                           width: '22px', height: '22px', borderRadius: '50%',
   //                                           background: dotBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
   //                                           color: 'white', fontSize: '10px', fontWeight: 800,
-  //                                           boxShadow: isActive ? '0 0 10px rgba(255,109,31,0.5)' : isDone ? '0 0 8px rgba(16,185,129,0.35)' : 'none',
+  //                                           boxShadow: isActive ? '0 0 10px rgba(var(--primary-rgb),0.5)' : isDone ? '0 0 8px rgba(16,185,129,0.35)' : 'none',
   //                                           border: `2px solid ${BG_DARK}`,
   //                                         }}>
   //                                           {isDone ? '✓' : isCancelled ? '✕' : step.step}
@@ -1319,8 +1319,8 @@ export default function SupportChatbot() {
   //                                         onClick={() => handleTrackSpecificOrder(ord)}
   //                                         style={{
   //                                           display: 'inline-flex', alignItems: 'center', gap: '4px',
-  //                                           background: 'rgba(255,109,31,0.12)', border: '1px solid rgba(255,109,31,0.3)',
-  //                                           color: '#FF8C38', padding: '5px 12px', borderRadius: '8px',
+  //                                           background: 'rgba(var(--primary-rgb),0.12)', border: '1px solid rgba(var(--primary-rgb),0.3)',
+  //                                           color: 'var(--primary-light)', padding: '5px 12px', borderRadius: '8px',
   //                                           fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
   //                                           transition: 'all 0.15s ease',
   //                                         }}
@@ -1338,10 +1338,10 @@ export default function SupportChatbot() {
   //                           {msg.requiresEscalation && (
   //                             <div style={{
   //                               marginTop: '0.8rem', padding: '0.8rem',
-  //                               background: 'rgba(255,109,31,0.07)',
-  //                               border: '1px solid rgba(255,109,31,0.2)', borderRadius: '12px',
+  //                               background: 'rgba(var(--primary-rgb),0.07)',
+  //                               border: '1px solid rgba(var(--primary-rgb),0.2)', borderRadius: '12px',
   //                             }}>
-  //                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FF8C38', fontWeight: 700, fontSize: '11px', marginBottom: '6px' }}>
+  //                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--primary-light)', fontWeight: 700, fontSize: '11px', marginBottom: '6px' }}>
   //                                 <AlertCircle size={13} /><span>Need Human Support?</span>
   //                               </div>
   //                               <p style={{ color: '#9CA3AF', fontSize: '11px', lineHeight: 1.55, margin: '0 0 10px' }}>
@@ -1350,7 +1350,7 @@ export default function SupportChatbot() {
   //                               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
   //                                 <a
   //                                   href="mailto:support@loka.media"
-  //                                   style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_LIGHT})`, color: 'white', fontWeight: 700, fontSize: '11px', padding: '6px 12px', borderRadius: '8px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(255,109,31,0.28)' }}
+  //                                   style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_LIGHT})`, color: 'white', fontWeight: 700, fontSize: '11px', padding: '6px 12px', borderRadius: '8px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(var(--primary-rgb),0.28)' }}
   //                                 >
   //                                   <Mail size={11} />Email Support
   //                                 </a>
@@ -1458,7 +1458,7 @@ export default function SupportChatbot() {
   //                   key={label}
   //                   type="button"
   //                   onClick={() => handleSendMessage(query)}
-  //                   className="inline-flex items-center gap-1.5 text-[11px] text-[#6B7280] hover:text-[#FF8C38] bg-white/[0.04] hover:bg-[#FF6D1F]/10 border border-white/[0.07] hover:border-[#FF6D1F]/30 px-2.5 py-1.5 rounded-full cursor-pointer transition-all duration-200"
+  //                   className="inline-flex items-center gap-1.5 text-[11px] text-[#6B7280] hover:text-[var(--primary-light)] bg-white/[0.04] hover:bg-primary/10 border border-white/[0.07] hover:border-primary/30 px-2.5 py-1.5 rounded-full cursor-pointer transition-all duration-200"
   //                   style={{ fontFamily: 'inherit' }}
   //                 >
   //                   <Icon size={11} />{label}
@@ -1481,7 +1481,7 @@ export default function SupportChatbot() {
   //         >
   //           <form
   //             onSubmit={e => { e.preventDefault(); handleSendMessage(); }}
-  //             className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] focus-within:border-[#FF6D1F]/50 focus-within:shadow-[0_0_0_3px_rgba(255,109,31,0.08)] rounded-2xl pl-4 pr-1.5 py-1.5 transition-all duration-200"
+  //             className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] focus-within:border-primary/50 focus-within:shadow-[0_0_0_3px_rgba(var(--primary-rgb),0.08)] rounded-2xl pl-4 pr-1.5 py-1.5 transition-all duration-200"
   //           >
   //             <input
   //               ref={inputRef}

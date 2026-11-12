@@ -14,7 +14,7 @@ export function HowItWorksSection() {
   const { isAuthenticated } = useAuth();
   const iconHoverStyles = `
     .group:hover .icon-inner {
-      color: #FF6D1F !important;
+      color: var(--primary) !important;
     }
   `;
   const UserIcon = () => (
@@ -102,7 +102,7 @@ export function HowItWorksSection() {
   lg:text-left
 "
               style={{
-                background: "linear-gradient(180deg, #FFFFFF 0%, #B94D13 100%)",
+                background: "linear-gradient(180deg, #FFFFFF 0%, var(--primary-dark) 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -165,13 +165,13 @@ export function HowItWorksSection() {
         </div>
 
         {/* CTA section - Full width */}
-        <div className="text-center relative -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(255, 89, 0, 0.5) 50%, rgba(0, 0, 0, 0.5) 100%)' }}>
+        <div className="text-center relative -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8" style={{ background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(var(--primary-rgb), 0.25) 50%, rgba(0, 0, 0, 0.5) 100%)' }}>
           <div className="max-w-7xl mx-auto py-12 sm:py-16 md:py-20">
             <div className="max-w-2xl mx-auto relative z-10">
               <h3
                 className="!text-5xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-4 sm:mb-6 leading-tight tracking-tight text-transparent"
                 style={{
-                  background: "linear-gradient(180deg, #FFFFFF 0%, #B94D13 100%)",
+                  background: "linear-gradient(180deg, #FFFFFF 0%, var(--primary-dark) 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",

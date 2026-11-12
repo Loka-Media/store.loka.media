@@ -194,7 +194,7 @@ export default function LokaProductsPage() {
               <button
                 onClick={handlePublishSelected}
                 disabled={publishing.length > 0}
-                className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm sm:text-base gap-2"
+                className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm sm:text-base gap-2"
               >
                 {publishing.length > 0 ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

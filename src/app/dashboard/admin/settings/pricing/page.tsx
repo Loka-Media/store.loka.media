@@ -11,17 +11,17 @@ import { ArrowLeft } from 'lucide-react';
 const MARKUP_PRESETS = [0, 10, 20, 30, 35, 40, 50, 75, 100];
 
 const sliderSx = {
-  color: '#FF6D1F',
+  color: 'var(--primary)',
   height: 8,
   '& .MuiSlider-track': {
     border: 'none',
-    background: 'linear-gradient(90deg, #FF6D1F, #FF8343)',
+    background: 'linear-gradient(90deg, var(--primary), var(--primary-light))',
   },
   '& .MuiSlider-thumb': {
     height: 22,
     width: 22,
     backgroundColor: '#fff',
-    border: '2px solid #FF6D1F',
+    border: '2px solid var(--primary)',
     '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
       boxShadow: 'inherit',
     },

@@ -277,7 +277,7 @@ export default function ProfilePage() {
             <button
               onClick={() => fetchUserData()}
               disabled={loading}
-              className="inline-flex items-center px-6 sm:px-8 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-sm sm:text-base gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-6 sm:px-8 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg hover:shadow-lg transition-all text-sm sm:text-base gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -354,7 +354,7 @@ export default function ProfilePage() {
               {user?.role !== 'admin' && (user?.role === 'creator' || user?.creatorStatus === 'approved') && (
                 <Link
                   href="/dashboard/creator/catalog"
-                  className="inline-flex items-center px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:opacity-90 transition-all text-xs sm:text-sm gap-1.5 whitespace-nowrap shadow-md shadow-orange-500/20"
+                  className="inline-flex items-center px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg transition-all text-xs sm:text-sm gap-1.5 whitespace-nowrap shadow-md shadow-primary/20"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create Product</span>
@@ -367,9 +367,9 @@ export default function ProfilePage() {
                 <span>Edit Profile</span>
                 <svg width="16" height="16" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <g clipPath="url(#clip0_1412_2567)">
-                    <path opacity="0.968" fillRule="evenodd" clipRule="evenodd" d="M36.957 -0.0410156C37.3672 -0.0410156 37.7773 -0.0410156 38.1875 -0.0410156C38.549 0.0993423 38.8771 0.30442 39.1719 0.574219C39.8965 1.29883 40.6211 2.02344 41.3457 2.74805C41.6155 3.04279 41.8206 3.37091 41.9609 3.73242C41.9609 4.14258 41.9609 4.55273 41.9609 4.96289C41.8465 5.1796 41.7235 5.39835 41.5918 5.61914C40.8672 6.34375 40.1426 7.06836 39.418 7.79297C39.3633 7.84766 39.3086 7.84766 39.2539 7.79297C37.5164 6.06918 35.7937 4.33285 34.0859 2.58398C34.8094 1.81952 35.5477 1.06757 36.3008 0.328125C36.5215 0.19648 36.7403 0.0734329 36.957 -0.0410156Z" fill="#FF6D1F" />
-                    <path opacity="0.983" fillRule="evenodd" clipRule="evenodd" d="M32.2797 4.30664C34.0774 5.98119 35.8411 7.70384 37.5707 9.47461C37.6254 9.52932 37.6254 9.58396 37.5707 9.63867C32.4165 14.7929 27.2621 19.9473 22.1078 25.1016C20.2881 25.7628 18.4561 26.3918 16.6117 26.9883C15.3403 27.1386 14.7797 26.5781 14.9301 25.3066C15.5266 23.4623 16.1556 21.6303 16.8168 19.8105C21.9877 14.6534 27.1419 9.48544 32.2797 4.30664Z" fill="#FF6D1F" />
-                    <path opacity="0.997" fillRule="evenodd" clipRule="evenodd" d="M31.625 41.959C22.2734 41.959 12.9219 41.959 3.57031 41.959C1.68359 41.4395 0.480469 40.2363 -0.0390625 38.3496C-0.0390625 28.998 -0.0390625 19.6465 -0.0390625 10.2949C0.465603 8.40944 1.66873 7.21999 3.57031 6.72656C11.2265 6.67187 18.8828 6.67187 26.5391 6.72656C22.6403 10.5979 18.7712 14.4944 14.9316 18.416C14.7467 18.7037 14.5827 19.0044 14.4395 19.3184C13.8379 21.123 13.2363 22.9277 12.6348 24.7324C12.2073 26.5424 12.7679 27.9506 14.3164 28.957C15.2297 29.4196 16.1868 29.529 17.1875 29.2852C18.9922 28.6836 20.7969 28.082 22.6016 27.4805C23.0525 27.2963 23.4626 27.0502 23.832 26.7422C27.6192 22.9551 31.4062 19.168 35.1934 15.3809C35.2481 23.0371 35.2481 30.6934 35.1934 38.3496C34.6999 40.2512 33.5105 41.4543 31.625 41.959Z" fill="#FF6D1F" />
+                    <path opacity="0.968" fillRule="evenodd" clipRule="evenodd" d="M36.957 -0.0410156C37.3672 -0.0410156 37.7773 -0.0410156 38.1875 -0.0410156C38.549 0.0993423 38.8771 0.30442 39.1719 0.574219C39.8965 1.29883 40.6211 2.02344 41.3457 2.74805C41.6155 3.04279 41.8206 3.37091 41.9609 3.73242C41.9609 4.14258 41.9609 4.55273 41.9609 4.96289C41.8465 5.1796 41.7235 5.39835 41.5918 5.61914C40.8672 6.34375 40.1426 7.06836 39.418 7.79297C39.3633 7.84766 39.3086 7.84766 39.2539 7.79297C37.5164 6.06918 35.7937 4.33285 34.0859 2.58398C34.8094 1.81952 35.5477 1.06757 36.3008 0.328125C36.5215 0.19648 36.7403 0.0734329 36.957 -0.0410156Z" fill="var(--primary)" />
+                    <path opacity="0.983" fillRule="evenodd" clipRule="evenodd" d="M32.2797 4.30664C34.0774 5.98119 35.8411 7.70384 37.5707 9.47461C37.6254 9.52932 37.6254 9.58396 37.5707 9.63867C32.4165 14.7929 27.2621 19.9473 22.1078 25.1016C20.2881 25.7628 18.4561 26.3918 16.6117 26.9883C15.3403 27.1386 14.7797 26.5781 14.9301 25.3066C15.5266 23.4623 16.1556 21.6303 16.8168 19.8105C21.9877 14.6534 27.1419 9.48544 32.2797 4.30664Z" fill="var(--primary)" />
+                    <path opacity="0.997" fillRule="evenodd" clipRule="evenodd" d="M31.625 41.959C22.2734 41.959 12.9219 41.959 3.57031 41.959C1.68359 41.4395 0.480469 40.2363 -0.0390625 38.3496C-0.0390625 28.998 -0.0390625 19.6465 -0.0390625 10.2949C0.465603 8.40944 1.66873 7.21999 3.57031 6.72656C11.2265 6.67187 18.8828 6.67187 26.5391 6.72656C22.6403 10.5979 18.7712 14.4944 14.9316 18.416C14.7467 18.7037 14.5827 19.0044 14.4395 19.3184C13.8379 21.123 13.2363 22.9277 12.6348 24.7324C12.2073 26.5424 12.7679 27.9506 14.3164 28.957C15.2297 29.4196 16.1868 29.529 17.1875 29.2852C18.9922 28.6836 20.7969 28.082 22.6016 27.4805C23.0525 27.2963 23.4626 27.0502 23.832 26.7422C27.6192 22.9551 31.4062 19.168 35.1934 15.3809C35.2481 23.0371 35.2481 30.6934 35.1934 38.3496C34.6999 40.2512 33.5105 41.4543 31.625 41.959Z" fill="var(--primary)" />
                   </g>
                   <defs>
                     <clipPath id="clip0_1412_2567">
@@ -485,7 +485,7 @@ export default function ProfilePage() {
                 key={key}
                 onClick={() => setActiveTab(key)}
                 className={`py-2.5 sm:py-3.5 px-2 sm:px-6 font-bold text-[11px] xs:text-xs sm:text-sm flex items-center justify-center cursor-pointer gap-1 sm:gap-2 rounded-full transition-all text-center truncate ${activeTab === key
-                  ? 'bg-[#FF6D1F] text-black shadow-lg'
+                  ? 'bg-primary text-black shadow-lg'
                   : 'border border-white/20 text-white hover:border-white/50'
                   }`}
               >
@@ -625,7 +625,7 @@ export default function ProfilePage() {
                 <p className="text-xl sm:text-2xl font-bold text-white mb-4">No orders yet</p>
                 <Link
                   href="/products"
-                  className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
+                  className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
                 >
                   Start Shopping
                 </Link>
@@ -833,7 +833,7 @@ export default function ProfilePage() {
               <h3 className="text-xl sm:text-2xl font-bold text-white">Saved Addresses</h3>
               <Link
                 href="/addresses"
-                className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
+                className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">Add Address</span>
@@ -848,7 +848,7 @@ export default function ProfilePage() {
                 <p className="text-xl sm:text-2xl font-bold text-white mb-4">No addresses saved</p>
                 <Link
                   href="/addresses"
-                  className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
+                  className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2"
                 >
                   Add Your First Address
                 </Link>

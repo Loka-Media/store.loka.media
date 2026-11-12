@@ -171,7 +171,7 @@ export default function DashboardPage() {
                 <button
                   type="submit"
                   disabled={submittingApp}
-                  className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary-hover text-black font-bold text-sm rounded-xl transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   {submittingApp ? (
                     <>

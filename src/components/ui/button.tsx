@@ -29,9 +29,9 @@ export function Button({
 
   const variantClasses: Record<ButtonVariant, string> = {
     primary:
-      "bg-[#FF6D1F] text-black font-semibold shadow-[0_4px_14px_rgba(255,109,31,0.3)] hover:bg-[#FF7E38] hover:shadow-[0_6px_25px_rgba(255,109,31,0.55)] hover:scale-[1.02] hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
+      "bg-primary text-black font-semibold shadow-[0_4px_14px_rgba(var(--primary-rgb),0.3)] hover:bg-primary-hover hover:shadow-[0_6px_25px_rgba(var(--primary-rgb),0.55)] hover:scale-[1.02] hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
     secondary:
-      "bg-[rgba(250,243,225,0.2)] text-[#FF6D1F] border border-white/10 backdrop-blur-sm hover:bg-[rgba(250,243,225,0.3)] hover:border-[#FF6D1F]/50 hover:text-white hover:shadow-[0_6px_25px_rgba(255,109,31,0.25)] hover:scale-[1.02] hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
+      "bg-[rgba(250,243,225,0.08)] text-primary border border-white/10 backdrop-blur-sm hover:bg-[rgba(250,243,225,0.15)] hover:border-primary/50 hover:text-white hover:shadow-[0_6px_25px_rgba(var(--primary-rgb),0.25)] hover:scale-[1.02] hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
     tertiary:
       "bg-transparent text-white border-2 border-white hover:bg-white/10 hover:border-white hover:scale-[1.02] hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
   };

@@ -339,7 +339,7 @@ export default function EditProfilePage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg hover:shadow-lg transition-all text-xs sm:text-sm gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>{loading ? 'Saving...' : 'Save Changes'}</span>

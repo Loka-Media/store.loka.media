@@ -478,7 +478,7 @@ function FilesPageContent() {
             </div>
 
             <div className="flex flex-col sm:items-end gap-1.5 w-full sm:w-auto">
-              <label className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all cursor-pointer text-sm w-full sm:w-fit">
+              <label className="inline-flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer text-sm w-full sm:w-fit">
                 {uploading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -618,7 +618,7 @@ function FilesPageContent() {
             </p>
             {!filters.search && !filters.type && !filters.status && (
               <div className="mt-6 flex flex-col items-center">
-                <label className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-lg hover:shadow-lg transition-all text-sm sm:text-base gap-2 cursor-pointer">
+                <label className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg hover:shadow-lg transition-all text-sm sm:text-base gap-2 cursor-pointer">
                   <Upload className="w-5 h-5" />
                   <span>Upload Your First File</span>
                   <input

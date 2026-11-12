@@ -112,8 +112,8 @@ export const ArrowIcon = () => (
     </g>
     <defs>
       <linearGradient id="paint0_linear_1378_310" x1="25" y1="6.25" x2="25" y2="43.75" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#FF6D1F"/>
-        <stop offset="1" stopColor="#994113"/>
+        <stop stopColor="var(--primary)"/>
+        <stop offset="1" stopColor="var(--primary-dark)"/>
       </linearGradient>
     </defs>
   </svg>

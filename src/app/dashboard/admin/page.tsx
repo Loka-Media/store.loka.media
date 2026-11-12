@@ -101,7 +101,7 @@ export default function AdminDashboard() {
       description: 'Manage and review published products across all platform categories',
       icon: Package,
       href: '/dashboard/admin/products',
-      color: 'bg-gradient-to-br from-orange-500 to-pink-500',
+      color: 'bg-primary text-black',
       stats: 'Manage Products'
     },
     {
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/dashboard/admin/products"
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:opacity-90 transition-all text-sm"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl shadow-lg shadow-primary/20 transition-all text-sm"
             >
               <Package className="w-4 h-4" />
               <span>Manage Products</span>

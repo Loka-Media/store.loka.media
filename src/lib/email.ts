@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 /**
  * Nodemailer Email Service for Loka Media
  */
+const BRAND_COLOR = '#05DF72'; // Vibrant mint brand color matching globals.css
 
 // Helper to get transporter instance
 export const getMailTransporter = () => {
@@ -78,15 +79,15 @@ export const sendNodemailerEmail = async ({ to, name, type, appUrl, otp }: SendE
     html = `
       <div style="font-family: Arial, sans-serif; background-color: #0d0d0d; color: #ffffff; padding: 32px; border-radius: 16px; max-width: 600px; margin: 0 auto; border: 1px solid #222;">
         <div style="text-align: center; margin-bottom: 24px;">
-          <h1 style="color: #FF6D1F; font-size: 24px; font-weight: 800; margin: 0;">LOKA MEDIA</h1>
+          <h1 style="color: ${BRAND_COLOR}; font-size: 24px; font-weight: 800; margin: 0;">LOKA MEDIA</h1>
           <p style="color: #888888; font-size: 12px; margin-top: 4px;">Monetization Made Easy</p>
         </div>
         <h2 style="color: #ffffff; font-size: 18px; margin-bottom: 12px;">Hi ${recipientName},</h2>
         <p style="font-size: 14px; color: #cccccc; line-height: 1.6;">
           Thank you for registering on <strong>Loka Media</strong>! We have received your creator account application.
         </p>
-        <div style="background-color: #161616; border-left: 4px solid #FF6D1F; padding: 18px; margin: 24px 0; border-radius: 8px;">
-          <p style="margin: 0; font-weight: bold; color: #FF6D1F; font-size: 15px;">
+        <div style="background-color: #161616; border-left: 4px solid ${BRAND_COLOR}; padding: 18px; margin: 24px 0; border-radius: 8px;">
+          <p style="margin: 0; font-weight: bold; color: ${BRAND_COLOR}; font-size: 15px;">
             ⏳ Application Status: Pending Review
           </p>
           <p style="margin: 8px 0 0 0; color: #bbbbbb; font-size: 14px; line-height: 1.5;">
@@ -107,7 +108,7 @@ export const sendNodemailerEmail = async ({ to, name, type, appUrl, otp }: SendE
     html = `
       <div style="font-family: Arial, sans-serif; background-color: #0d0d0d; color: #ffffff; padding: 32px; border-radius: 16px; max-width: 600px; margin: 0 auto; border: 1px solid #222;">
         <div style="text-align: center; margin-bottom: 24px;">
-          <h1 style="color: #FF6D1F; font-size: 24px; font-weight: 800; margin: 0;">LOKA MEDIA</h1>
+          <h1 style="color: ${BRAND_COLOR}; font-size: 24px; font-weight: 800; margin: 0;">LOKA MEDIA</h1>
           <p style="color: #888888; font-size: 12px; margin-top: 4px;">Monetization Made Easy</p>
         </div>
         <h2 style="color: #22c55e; font-size: 20px; margin-bottom: 12px;">Congratulations ${recipientName}! 🎉</h2>
@@ -123,7 +124,7 @@ export const sendNodemailerEmail = async ({ to, name, type, appUrl, otp }: SendE
           </p>
         </div>
         <div style="text-align: center; margin: 28px 0;">
-          <a href="${creatorLoginUrl}" style="display: inline-block; background-color: #FF6D1F; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; font-size: 14px; border-radius: 10px;">
+          <a href="${creatorLoginUrl}" style="display: inline-block; background-color: ${BRAND_COLOR}; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; font-size: 14px; border-radius: 10px;">
             Go to Creator Hub →
           </a>
         </div>
@@ -138,7 +139,7 @@ export const sendNodemailerEmail = async ({ to, name, type, appUrl, otp }: SendE
     html = `
       <div style="font-family: Arial, sans-serif; background-color: #0d0d0d; color: #ffffff; padding: 32px; border-radius: 16px; max-width: 600px; margin: 0 auto; border: 1px solid #222;">
         <div style="text-align: center; margin-bottom: 24px;">
-          <h1 style="color: #FF6D1F; font-size: 24px; font-weight: 800; margin: 0;">LOKA MEDIA</h1>
+          <h1 style="color: ${BRAND_COLOR}; font-size: 24px; font-weight: 800; margin: 0;">LOKA MEDIA</h1>
           <p style="color: #888888; font-size: 12px; margin-top: 4px;">Monetization Made Easy</p>
         </div>
         <h2 style="color: #ef4444; font-size: 18px; margin-bottom: 12px;">Application Status Update</h2>
@@ -206,7 +207,7 @@ export const sendOtpEmail = async ({ to, name, otp, type }: SendOtpEmailOptions)
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0a0a0a; color: #ffffff; padding: 36px 20px; max-width: 580px; margin: 0 auto; border-radius: 16px; border: 1px solid #222;">
       <div style="text-align: center; margin-bottom: 28px;">
-        <h1 style="color: #FF6D1F; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0;">LOKA MEDIA</h1>
+        <h1 style="color: ${BRAND_COLOR}; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0;">LOKA MEDIA</h1>
         <p style="color: #888888; font-size: 12px; margin-top: 4px; letter-spacing: 0.5px;">Monetization Made Easy</p>
       </div>
 
@@ -217,8 +218,8 @@ export const sendOtpEmail = async ({ to, name, otp, type }: SendOtpEmailOptions)
           ${description}
         </p>
 
-        <div style="background-color: #0a0a0a; border: 2px dashed #FF6D1F; border-radius: 12px; padding: 18px; margin: 20px auto; display: inline-block;">
-          <span style="font-family: monospace, 'Courier New', Courier; font-size: 34px; font-weight: 800; letter-spacing: 10px; color: #FF6D1F; padding-left: 10px;">${otp}</span>
+        <div style="background-color: #0a0a0a; border: 2px dashed ${BRAND_COLOR}; border-radius: 12px; padding: 18px; margin: 20px auto; display: inline-block;">
+          <span style="font-family: monospace, 'Courier New', Courier; font-size: 34px; font-weight: 800; letter-spacing: 10px; color: ${BRAND_COLOR}; padding-left: 10px;">${otp}</span>
         </div>
 
         <p style="color: #888888; font-size: 12px; margin: 12px 0 0 0;">
@@ -320,7 +321,7 @@ export const sendOrderCancellationEmail = async ({
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; margin-top: 14px; padding-top: 14px; border-top: 1px solid #2c2c2c;">
             <tr>
               <td valign="middle" style="font-size: 14px; font-weight: 700; color: #ffffff; padding-top: 12px;">Total Order Amount</td>
-              <td align="right" valign="middle" style="font-size: 16px; font-weight: 800; color: #FF6D1F; padding-top: 12px; text-align: right;">
+              <td align="right" valign="middle" style="font-size: 16px; font-weight: 800; color: ${BRAND_COLOR}; padding-top: 12px; text-align: right;">
                 $${typeof totalAmount === 'number' ? totalAmount.toFixed(2) : totalAmount}
               </td>
             </tr>
@@ -342,8 +343,8 @@ export const sendOrderCancellationEmail = async ({
       </div>
     `
     : `
-      <div style="background-color: #1a1614; border-left: 4px solid #FF6D1F; padding: 16px; margin: 20px 0; border-radius: 8px;">
-        <p style="margin: 0; font-weight: 700; color: #FF6D1F; font-size: 14px;">
+      <div style="background-color: #1a1614; border-left: 4px solid ${BRAND_COLOR}; padding: 16px; margin: 20px 0; border-radius: 8px;">
+        <p style="margin: 0; font-weight: 700; color: ${BRAND_COLOR}; font-size: 14px;">
           ℹ️ Order Status: Cancelled
         </p>
         <p style="margin: 6px 0 0 0; color: #cccccc; font-size: 13px; line-height: 1.5;">
@@ -355,7 +356,7 @@ export const sendOrderCancellationEmail = async ({
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0a0a0a; color: #ffffff; padding: 36px 20px; max-width: 600px; margin: 0 auto; border-radius: 20px; border: 1px solid #222;">
       <div style="text-align: center; margin-bottom: 28px;">
-        <h1 style="color: #FF6D1F; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0;">LOKA MEDIA</h1>
+        <h1 style="color: ${BRAND_COLOR}; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0;">LOKA MEDIA</h1>
         <p style="color: #777777; font-size: 12px; margin-top: 4px; letter-spacing: 0.5px;">Monetization Made Easy</p>
       </div>
 
@@ -378,7 +379,7 @@ export const sendOrderCancellationEmail = async ({
 
       <div style="margin-top: 24px; padding: 16px; background-color: #121212; border-radius: 10px; border: 1px solid #1f1f1f;">
         <p style="margin: 0; font-size: 13px; color: #888888; line-height: 1.5;">
-          Have questions or need assistance? Reply directly to this email or reach us at <a href="mailto:support@loka.media" style="color: #FF6D1F; text-decoration: none; font-weight: 600;">support@loka.media</a>.
+          Have questions or need assistance? Reply directly to this email or reach us at <a href="mailto:support@loka.media" style="color: ${BRAND_COLOR}; text-decoration: none; font-weight: 600;">support@loka.media</a>.
         </p>
       </div>
 

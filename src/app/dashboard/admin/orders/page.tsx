@@ -1329,7 +1329,7 @@ export default function AdminOrdersPage() {
                   className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-6 scrollbar-5px"
                   style={{
                     scrollbarWidth: 'thin',
-                    scrollbarColor: '#FF6D1F transparent',
+                    scrollbarColor: 'var(--primary) transparent',
                   }}
                 >
                   {/* Quick Info Grid */}

@@ -119,20 +119,20 @@ function LoginPageContent() {
                       <path fillRule="evenodd" clipRule="evenodd" d="M62.2276 23.5546C62.4135 23.5307 62.5776 23.5776 62.7197 23.6953C62.7666 23.9297 62.8135 24.164 62.8604 24.3984C62.9542 32.0859 62.9542 39.7733 62.8604 47.4609C62.3655 50.0626 61.0296 52.1017 58.8526 53.5781C52.0082 56.7074 45.1409 59.7778 38.251 62.789C38.1807 53.1797 38.1572 43.5704 38.1807 33.9609C38.9477 33.8227 39.6976 33.6117 40.4307 33.3281C42.7686 32.2598 45.1122 31.2051 47.4619 30.164C47.5391 32.2344 47.6563 34.2968 47.8135 36.3515C48.6589 37.8549 49.8074 38.1362 51.2588 37.1953C51.5572 36.9209 51.7682 36.5927 51.8916 36.2109C51.9384 33.539 51.9854 30.8671 52.0322 28.1953C55.4496 26.6619 58.8481 25.115 62.2276 23.5546Z" fill="url(#paint3_linear_1167_952)"/>
                       <defs>
                         <linearGradient id="paint0_linear_1167_952" x1="42.9066" y1="8.78906" x2="42.9066" y2="24.2578" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                         <linearGradient id="paint1_linear_1167_952" x1="28.0004" y1="15.1172" x2="28.0004" y2="29.8669" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                         <linearGradient id="paint2_linear_1167_952" x1="21.3091" y1="23.5547" x2="21.3091" y2="62.7891" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                         <linearGradient id="paint3_linear_1167_952" x1="50.5513" y1="23.5486" x2="50.5513" y2="62.789" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="#FF6D1F"/>
-                          <stop offset="1" stopColor="#772C05"/>
+                          <stop stopColor="var(--primary)"/>
+                          <stop offset="1" stopColor="var(--primary-dark)"/>
                         </linearGradient>
                       </defs>
                     </svg>
@@ -390,16 +390,16 @@ function LoginPageContent() {
                     <Button
                       href="/auth/signup/creator"
                       variant="secondary"
-                      className="signup-button w-full flex items-center justify-between gap-3 bg-gradient-to-r from-orange-900/20 to-red-900/20 border border-orange-500/30 hover:border-orange-400 hover:from-orange-900/40 hover:to-red-900/40 hover:shadow-[0_0_20px_rgba(255,124,31,0.2)] !rounded-lg sm:!rounded-xl !text-left !px-3 sm:!px-4 !py-4 sm:!py-4 transition-all duration-300 group"
+                      className="signup-button w-full flex items-center justify-between gap-3 bg-primary/10 border border-primary/30 hover:border-primary hover:bg-primary/20 hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)] !rounded-lg sm:!rounded-xl !text-left !px-3 sm:!px-4 !py-4 sm:!py-4 transition-all duration-300 group"
                     >
                       <div className="flex items-center gap-3 flex-1">
-                        <div className="flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                          <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-lg bg-primary text-black flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                          <svg className="h-5 w-5 text-black" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                           </svg>
                         </div>
                         <div>
-                          <p className="text-sm font-normal text-white group-hover:text-orange-300 transition-colors">Start Selling Now</p>
+                          <p className="text-sm font-normal text-white group-hover:text-primary transition-colors">Start Selling Now</p>
                           <p className="text-xs text-white/60 group-hover:text-white/80 transition-colors">Earn by creating & selling</p>
                         </div>
                       </div>

@@ -63,7 +63,7 @@ export function ProductCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-orange-600/5 via-transparent to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       {/* Sale badge */}
       {isOnSale && (

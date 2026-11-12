@@ -602,7 +602,7 @@ const Product360Viewer: React.FC<{
   return (
     <div className="space-y-4 w-full">
       <div
-        className={`aspect-square bg-[#f4f4f5] rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative group select-none cursor-grab active:cursor-grabbing transition-all duration-300 ${isDragging ? "border-[#FF6D1F]/50 shadow-[0_0_20px_rgba(255,109,31,0.15)]" : ""
+        className={`aspect-square bg-[#f4f4f5] rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center relative group select-none cursor-grab active:cursor-grabbing transition-all duration-300 ${isDragging ? "border-primary/50 shadow-[0_0_20px_rgba(var(--primary-rgb), 0.15)]" : ""
           }`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -688,7 +688,7 @@ const Product360Viewer: React.FC<{
 
         {/* 360 Badge Overlay */}
         <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md border border-white/10 rounded-full py-1 px-3 flex items-center gap-1.5 shadow-lg pointer-events-none z-20">
-          <RotateCw className="w-3 h-3 text-[#FF6D1F] animate-spin" style={{ animationDuration: "8s" }} />
+          <RotateCw className="w-3 h-3 text-primary animate-spin" style={{ animationDuration: "8s" }} />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-200">Interactive Preview</span>
         </div>
 
@@ -778,11 +778,11 @@ const Product360Viewer: React.FC<{
                     }}
                     className={`group/thumb relative rounded-xl transition-all flex-shrink-0 cursor-pointer overflow-hidden border-2 ${
                       isDraggingThis
-                        ? "opacity-30 border-dashed border-[#FF6D1F] scale-95"
+                        ? "opacity-30 border-dashed border-primary scale-95"
                         : isDragOverThis
-                        ? "border-[#FF6D1F] ring-2 ring-[#FF6D1F]/50 scale-105"
+                        ? "border-primary ring-2 ring-primary/50 scale-105"
                         : isSelected
-                        ? "border-[#FF6D1F] scale-105 shadow-[0_4px_16px_rgba(255,109,31,0.35)]"
+                        ? "border-primary scale-105 shadow-[0_4px_16px_rgba(var(--primary-rgb), 0.35)]"
                         : isCover
                         ? "border-amber-500/80 hover:border-amber-400 bg-white shadow-sm"
                         : "border-black/10 hover:border-black/30 bg-white/70"
@@ -806,7 +806,7 @@ const Product360Viewer: React.FC<{
                         <span
                           className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 leading-none ${
                             isCover
-                              ? "bg-gradient-to-r from-amber-500 to-[#FF6D1F] text-white"
+                              ? "bg-gradient-to-r from-amber-500 to-primary text-white"
                               : "bg-black/75 text-white"
                           }`}
                         >
@@ -1147,17 +1147,17 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   };
 
   const creatorSliderSx = {
-    color: '#FF6D1F',
+    color: 'var(--primary)',
     height: 8,
     '& .MuiSlider-track': {
       border: 'none',
-      background: 'linear-gradient(90deg, #FF6D1F, #FF8343)',
+      background: 'linear-gradient(90deg, var(--primary), var(--primary-light))',
     },
     '& .MuiSlider-thumb': {
       height: 22,
       width: 22,
       backgroundColor: '#fff',
-      border: '2px solid #FF6D1F',
+      border: '2px solid var(--primary)',
       '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': { boxShadow: 'inherit' },
       '&::before': { display: 'none' },
     },
@@ -3037,7 +3037,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 type="button"
                 onClick={handleManualRegenerate}
                 disabled={isGeneratingPreview || designFiles.length === 0 || cooldown > 0 || isPublishing || isUploadingCustomImage}
-                className="h-8 sm:h-10 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_16px_rgba(255,109,31,0.25)] flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed leading-none"
+                className="h-8 sm:h-10 px-2 sm:px-4 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-primary hover:bg-primary-hover text-white transition-all shadow-[0_4px_16px_rgba(var(--primary-rgb), 0.25)] flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed leading-none"
               >
                 {isGeneratingPreview ? (
                   <>
@@ -3068,7 +3068,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               type="button"
               onClick={handleContinueNext}
               disabled={isPublishing || isGeneratingPreview || isUploadingCustomImage}
-              className="h-8 sm:h-10 px-2.5 sm:px-5 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 leading-none"
+              className="h-8 sm:h-10 px-2.5 sm:px-5 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-bold bg-primary hover:bg-primary-hover text-white transition-all shadow-[0_4px_20px_rgba(var(--primary-rgb), 0.3)] disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 leading-none"
             >
               {isPublishing ? (
                 <div className="flex items-center gap-1.5 whitespace-nowrap">
@@ -3103,7 +3103,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
             {/* Active orange connecting track line */}
             <div
-              className="absolute top-4 sm:top-4 left-[12.5%] h-[2px] bg-[#FF6D1F] -translate-y-1/2 pointer-events-none transition-all duration-300 shadow-[0_0_10px_rgba(255,109,31,0.6)]"
+              className="absolute top-4 sm:top-4 left-[12.5%] h-[2px] bg-primary -translate-y-1/2 pointer-events-none transition-all duration-300 shadow-[0_0_10px_rgba(var(--primary-rgb), 0.6)]"
               style={{
                 width:
                   activeStep === 1
@@ -3146,9 +3146,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all duration-200 ${
                         isActive
-                          ? "bg-[#FF6D1F] text-white shadow-[0_0_16px_rgba(255,109,31,0.6)] ring-2 ring-[#FF6D1F]/50 scale-105"
+                          ? "bg-primary text-white shadow-[0_0_16px_rgba(var(--primary-rgb), 0.6)] ring-2 ring-primary/50 scale-105"
                           : isPassed
-                          ? "bg-[#FF6D1F] text-white shadow-sm"
+                          ? "bg-primary text-white shadow-sm"
                           : "bg-[#0B132B] border-2 border-white/40 text-white/70 group-hover:border-white/80 group-hover:text-white"
                       }`}
                     >
@@ -3191,7 +3191,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="space-y-6 animate-fadeIn">
               {/* Step 1 Typography Header (Figma Design) */}
               <div className="space-y-1 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#FF6D1F]">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   Step 01 to 04
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold font-clash text-white">
@@ -3221,7 +3221,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="flex-1 space-y-2">
                     <span className={`text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${isEditing
                       ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                      : "bg-[#FF6D1F]/20 text-[#FF6D1F]"
+                      : "bg-primary/20 text-primary"
                       }`}>
                       {isEditing ? "Editing Product" : "Base Catalog Item"}
                     </span>
@@ -3246,7 +3246,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setIsDescExpanded(!isDescExpanded)}
-                                className="text-xs font-semibold text-[#FF6D1F] hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
+                                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
                               >
                                 {isDescExpanded ? (
                                   <>
@@ -3277,7 +3277,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               <div id="field-variants" className="p-5 sm:p-6 bg-gray-900/50 rounded-3xl border border-white/10 space-y-6 scroll-mt-48 transition-all">
                 <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleAccordion("variants")}>
                   <h3 className="text-lg sm:text-xl font-bold font-clash flex items-center gap-2.5">
-                    <Palette className="w-5 h-5 text-[#FF6D1F]" />
+                    <Palette className="w-5 h-5 text-primary" />
                     Choose Variants (Colors & Sizes)
                   </h3>
                   {openAccordions.variants ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -3290,7 +3290,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       <div className="space-y-3 pb-4 border-b border-white/5">
                         <div className="flex items-center justify-between">
                           <label className="text-xs sm:text-sm font-semibold text-gray-300 flex items-center gap-1.5">
-                            <ShoppingBag className="w-4 h-4 text-[#FF6D1F]" />
+                            <ShoppingBag className="w-4 h-4 text-primary" />
                             Select Print Provider
                           </label>
                           <span className="text-[10px] text-gray-500">
@@ -3350,7 +3350,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               }}
                               className={`relative border-2 rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 min-w-[70px] sm:min-w-[85px] flex items-center justify-center transition-all duration-200 cursor-pointer ${isSelected
                                 ? isActive
-                                  ? "border-[#FF6D1F] shadow-[0_0_12px_rgba(255,109,31,0.35)]"
+                                  ? "border-primary shadow-[0_0_12px_rgba(var(--primary-rgb), 0.35)]"
                                   : "border-white"
                                 : "border-white/20 hover:border-white/50 opacity-80 hover:opacity-100"
                                 }`}
@@ -3365,7 +3365,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                                 {color.name}
                               </span>
                               {isSelected && (
-                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#FF6D1F] rounded-full flex items-center justify-center text-white shadow-sm ring-2 ring-[#0B132B] pointer-events-none">
+                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary rounded-full flex items-center justify-center text-white shadow-sm ring-2 ring-[#0B132B] pointer-events-none">
                                   <Check className="w-2.5 h-2.5 stroke-[3]" />
                                 </span>
                               )}
@@ -3385,7 +3385,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         <div className="flex items-center gap-3 text-xs">
                           <button
                             onClick={() => setSelectedSizes(uniqueSizes)}
-                            className="text-[#FF6D1F] hover:underline cursor-pointer font-medium"
+                            className="text-primary hover:underline cursor-pointer font-medium"
                           >
                             Select All
                           </button>
@@ -3428,7 +3428,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               }}
                               className={`relative border-2 rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 min-w-[70px] sm:min-w-[85px] text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center cursor-pointer bg-black/80 ${
                                 isActiveSize
-                                  ? "border-[#FF6D1F] text-white ring-2 ring-[#FF6D1F]/50 shadow-lg shadow-[#FF6D1F]/20"
+                                  ? "border-primary text-white ring-2 ring-primary/50 shadow-lg shadow-primary/20"
                                   : isSelected
                                   ? "border-white text-white shadow-sm"
                                   : "border-white/20 text-gray-300 hover:border-white/50"
@@ -3436,7 +3436,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                             >
                               <span>{formatSizeLabel(size)}</span>
                               {isSelected && (
-                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#FF6D1F] rounded-full flex items-center justify-center text-white shadow-sm ring-2 ring-[#0B132B] pointer-events-none">
+                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary rounded-full flex items-center justify-center text-white shadow-sm ring-2 ring-[#0B132B] pointer-events-none">
                                   <Check className="w-2.5 h-2.5 stroke-[3]" />
                                 </span>
                               )}
@@ -3489,7 +3489,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       goToStep(2);
                     }
                   }}
-                  className="w-full sm:w-auto bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(var(--primary-rgb), 0.3)] flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>Next Page</span>
                   <ArrowRight className="w-4 h-4" />
@@ -3505,7 +3505,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="space-y-6 animate-fadeIn">
               {/* Step 2 Typography Header (Figma Design) */}
               <div className="space-y-1 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#FF6D1F]">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   Step 02 to 04
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold font-clash text-white">
@@ -3532,7 +3532,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex-1 space-y-2">
-                    <span className="inline-block bg-[#342318] text-[#FF6D1F] border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                    <span className="inline-block bg-primary/10 text-primary border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
                       {isEditing ? "Editing Product" : "Base Catalog Item"}
                     </span>
                     <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
@@ -3556,7 +3556,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setIsDescExpanded(!isDescExpanded)}
-                                className="text-xs font-semibold text-[#FF6D1F] hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
+                                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
                               >
                                 {isDescExpanded ? (
                                   <>
@@ -3576,8 +3576,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       })()}
                     </div>
                     <div className="flex flex-wrap gap-5 pt-2 text-xs text-gray-400">
-                      <div><span className="text-[#FF6D1F] font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
-                      <div><span className="text-[#FF6D1F] font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
+                      <div><span className="text-primary font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
+                      <div><span className="text-primary font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
                     </div>
                   </div>
                 </div>
@@ -3606,7 +3606,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-2xl p-4 sm:p-5 cursor-pointer transition-all duration-300 scroll-mt-48 flex items-center gap-4 ${isDragging
-                      ? "border-[#FF6D1F] bg-[#FF6D1F]/20 scale-[1.01]"
+                      ? "border-primary bg-primary/20 scale-[1.01]"
                       : "border-[#8E5B37] bg-[#241A14] hover:bg-[#2C1F18]"
                       }`}
                   >
@@ -3618,7 +3618,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       onChange={handleFileChange}
                       className="hidden"
                     />
-                    <div className="w-12 h-12 rounded-xl bg-[#FF6D1F]/20 border border-[#FF6D1F]/30 flex items-center justify-center text-[#FF6D1F] flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary flex-shrink-0">
                       <Upload className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0 text-left">
@@ -3627,7 +3627,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     </div>
                     {uploadingFile && (
                       <div className="flex items-center gap-2 text-xs font-bold text-orange-400 flex-shrink-0">
-                        <Loader2 className="w-4 h-4 animate-spin text-[#FF6D1F]" />
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
                         <span>Uploading...</span>
                       </div>
                     )}
@@ -3650,7 +3650,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               key={file.id}
                               onClick={() => handleAddDesign(file)}
                               className={`group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all bg-black/60 ${hasAssigned
-                                ? "border-[#FF6D1F] ring-2 ring-orange-500/50 shadow-md shadow-orange-500/30"
+                                ? "border-primary ring-2 ring-orange-500/50 shadow-md shadow-orange-500/30"
                                 : "border-white/10 hover:border-orange-500/50 hover:scale-[1.02]"
                                 }`}
                               title="Click to place on product"
@@ -3672,7 +3672,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               </button>
 
                               {hasAssigned ? (
-                                <div className="absolute top-1.5 right-1.5 bg-[#FF6D1F] text-white p-0.5 rounded-full shadow z-10">
+                                <div className="absolute top-1.5 right-1.5 bg-primary text-white p-0.5 rounded-full shadow z-10">
                                   <Check className="w-2.5 h-2.5 stroke-[3]" />
                                 </div>
                               ) : (
@@ -3702,7 +3702,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                             type="button"
                             onClick={() => handlePlacementSelect(placement)}
                             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${isActive
-                              ? "bg-[#FF6D1F] text-white shadow-md shadow-orange-500/30"
+                              ? "bg-primary text-white shadow-md shadow-orange-500/30"
                               : hasAssigned
                                 ? "bg-orange-500/10 text-orange-300 border border-orange-500/30 hover:border-orange-500/60"
                                 : "bg-black/60 border border-white/20 text-gray-300 hover:border-white/40 hover:text-white"
@@ -3725,10 +3725,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10 text-xs">
                       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                         <span className="font-clash font-bold text-white text-sm sm:text-base tracking-wide flex items-center gap-1.5">
-                          <Sliders className="w-4 h-4 text-[#FF6D1F]" />
+                          <Sliders className="w-4 h-4 text-primary" />
                           Adjust & Resize Artwork
                         </span>
-                        <span className="text-[11px] font-semibold text-[#FF6D1F] bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 rounded-full capitalize">
+                        <span className="text-[11px] font-semibold text-primary bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 rounded-full capitalize">
                           {getPlacementLabel(activePlacement)}
                         </span>
 
@@ -3741,7 +3741,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                             return (
                               <span className="text-[11px] text-gray-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-mono flex items-center gap-1.5">
                                 <span className="text-gray-400">Print area:</span>
-                                <span className="text-[#FF6D1F] font-semibold">{displayW} × {displayH} px</span>
+                                <span className="text-primary font-semibold">{displayW} × {displayH} px</span>
                                 {apf.dpi ? <span className="text-gray-400">({apf.dpi} DPI)</span> : null}
                               </span>
                             );
@@ -3780,9 +3780,9 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 </div>
 
                 {/* Realistic Product Previews (Action Header & Generate Preview Button) */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-[#FF6D1F]/15 via-black/50 to-black/40 border border-[#FF6D1F]/30 rounded-2xl shadow-lg">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-primary/15 via-black/50 to-black/40 border border-primary/30 rounded-2xl shadow-lg">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-[#FF6D1F]/20 border border-[#FF6D1F]/40 flex items-center justify-center flex-shrink-0 text-[#FF6D1F]">
+                    <div className="w-9 h-9 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center flex-shrink-0 text-primary">
                       <Sparkles className="w-5 h-5" />
                     </div>
                     <div className="min-w-0">
@@ -3809,7 +3809,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     type="button"
                     onClick={handleManualRegenerate}
                     disabled={!hasUploadedDesign || isGeneratingPreview || cooldown > 0}
-                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_16px_rgba(255,109,31,0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer flex-shrink-0"
+                    className="bg-primary hover:bg-primary-hover text-white font-bold text-xs sm:text-sm px-4 py-2 sm:py-2.5 rounded-xl transition-all shadow-[0_4px_16px_rgba(var(--primary-rgb), 0.3)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer flex-shrink-0"
                   >
                     {isGeneratingPreview ? (
                       <>
@@ -3865,7 +3865,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                             }
                           }}
                           className={`aspect-[4/5] rounded-2xl overflow-hidden border-2 bg-white/5 p-2 flex flex-col items-center justify-center transition-all cursor-pointer relative group ${isMockupActive
-                            ? "border-[#FF6D1F] ring-2 ring-orange-500/30 shadow-lg shadow-orange-500/10 bg-white/10"
+                            ? "border-primary ring-2 ring-orange-500/30 shadow-lg shadow-orange-500/10 bg-white/10"
                             : "border-white/10 hover:border-white/30"
                             }`}
                         >
@@ -3881,7 +3881,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                             )}
                             {isGeneratingPreview && (
                               <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center gap-1.5 z-20 rounded-xl">
-                                <Loader2 className="w-5 h-5 text-[#FF6D1F] animate-spin" />
+                                <Loader2 className="w-5 h-5 text-primary animate-spin" />
                                 <span className="text-[9px] text-orange-200 font-medium">Rendering...</span>
                               </div>
                             )}
@@ -3899,7 +3899,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
                 {/* Progress Divider Line (half orange) matching Figma */}
                 <div className="w-full h-[3px] bg-white/10 relative rounded-full overflow-hidden my-4">
-                  <div className="absolute left-0 top-0 h-full bg-[#FF6D1F] w-1/2" />
+                  <div className="absolute left-0 top-0 h-full bg-primary w-1/2" />
                 </div>
 
                 {/* Step 2 Navigation Footer */}
@@ -3934,7 +3934,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       className={`font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 ${
                         isStep2NextDisabled
                           ? "bg-gray-800/80 text-gray-500 border border-white/10 cursor-not-allowed shadow-none"
-                          : "bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white shadow-[0_4px_20px_rgba(255,109,31,0.3)] cursor-pointer"
+                          : "bg-primary hover:bg-primary-hover text-white shadow-[0_4px_20px_rgba(var(--primary-rgb), 0.3)] cursor-pointer"
                       }`}
                     >
                       <span>Next Page</span>
@@ -3956,7 +3956,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="space-y-6 animate-fadeIn">
               {/* Step 3 Typography Header (Figma Design) */}
               <div className="space-y-1 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#FF6D1F]">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   Step 03 to 04
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold font-clash text-white">
@@ -3983,7 +3983,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex-1 space-y-2">
-                    <span className="inline-block bg-[#342318] text-[#FF6D1F] border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                    <span className="inline-block bg-primary/10 text-primary border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
                       {isEditing ? "Editing Product" : "Base Catalog Item"}
                     </span>
                     <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
@@ -4007,7 +4007,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setIsDescExpanded(!isDescExpanded)}
-                                className="text-xs font-semibold text-[#FF6D1F] hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
+                                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
                               >
                                 {isDescExpanded ? (
                                   <>
@@ -4027,8 +4027,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       })()}
                     </div>
                     <div className="flex flex-wrap gap-5 pt-2 text-xs text-gray-400">
-                      <div><span className="text-[#FF6D1F] font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
-                      <div><span className="text-[#FF6D1F] font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
+                      <div><span className="text-primary font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
+                      <div><span className="text-primary font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
                     </div>
                   </div>
                 </div>
@@ -4043,7 +4043,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 {/* Product Title */}
                 <div id="field-product-name" className="space-y-2 scroll-mt-48 transition-all">
                   <label className="block text-xs sm:text-sm font-semibold text-gray-300">
-                    Product Title <span className="text-[#FF6D1F]">*</span>
+                    Product Title <span className="text-primary">*</span>
                   </label>
                   <input
                     id="input-product-name"
@@ -4051,7 +4051,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     value={productForm.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     placeholder="Custom Suitcase"
-                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all ${formErrors.name ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
+                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all ${formErrors.name ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
                       }`}
                   />
                   {formErrors.name && <p className="text-xs text-red-400 mt-1">{formErrors.name}</p>}
@@ -4061,7 +4061,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <div id="field-product-description" className="space-y-2 scroll-mt-48 transition-all">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs sm:text-sm font-semibold text-gray-300">
-                      Product Description <span className="text-[#FF6D1F]">*</span>
+                      Product Description <span className="text-primary">*</span>
                     </label>
                     <span className="text-[11px] text-gray-500">
                       {productForm.description ? cleanDescription(productForm.description).length : 0}/1500 Minium Character Check
@@ -4075,7 +4075,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     onChange={(e) => handleInputChange("description", e.target.value)}
                     onWheel={(e) => e.stopPropagation()}
                     placeholder="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966 dummy text of the printing and typesetting industry Lorem Ipsum has been the industry's...."
-                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF6D1F] focus:ring-1 focus:ring-[#FF6D1F] transition-all overflow-y-auto resize-y min-h-[110px] max-h-[300px] ${formErrors.description ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
+                    className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all overflow-y-auto resize-y min-h-[110px] max-h-[300px] ${formErrors.description ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
                       }`}
                   />
                   {formErrors.description && <p className="text-xs text-red-400 mt-1">{formErrors.description}</p>}
@@ -4086,7 +4086,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   {/* Category */}
                   <div id="field-product-category" className="space-y-2 scroll-mt-48 transition-all">
                     <label className="block text-xs sm:text-sm font-semibold text-gray-300">
-                      Marketplace category <span className="text-[#FF6D1F]">*</span>
+                      Marketplace category <span className="text-primary">*</span>
                     </label>
                     <Select
                       value={productForm.category || "placeholder"}
@@ -4110,7 +4110,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   {/* Select Tag */}
                   <div id="field-product-tags" className="space-y-2 scroll-mt-48 transition-all">
                     <label className="block text-xs sm:text-sm font-semibold text-gray-300">
-                      Select tag <span className="text-[#FF6D1F]">*</span>
+                      Select tag <span className="text-primary">*</span>
                     </label>
                     <div className="flex items-center gap-2 pt-0.5">
                       {["Trending", "New", "Popular"].map((tagName) => {
@@ -4126,7 +4126,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               }
                             }}
                             className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${isSelected
-                              ? "bg-[#FF6D1F] text-white shadow-md shadow-orange-500/25 font-bold"
+                              ? "bg-primary text-white shadow-md shadow-orange-500/25 font-bold"
                               : "bg-[#141B26] border border-white/20 text-gray-300 hover:text-white hover:border-white/40"
                               }`}
                           >
@@ -4152,7 +4152,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-3xl font-extrabold text-[#FF6D1F] tabular-nums block">
+                    <span className="text-3xl font-extrabold text-primary tabular-nums block">
                       {creatorMarkup}%
                     </span>
                     <span className="text-[11px] text-gray-400 block">Your Margin</span>
@@ -4182,7 +4182,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         type="button"
                         onClick={() => handleCreatorPresetClick(preset)}
                         className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${isSelected
-                          ? "bg-[#FF6D1F] text-white shadow-md shadow-orange-500/25 font-extrabold"
+                          ? "bg-primary text-white shadow-md shadow-orange-500/25 font-extrabold"
                           : "bg-[#141B26] border border-white/20 text-gray-300 hover:text-white hover:border-white/40"
                           }`}
                       >
@@ -4239,7 +4239,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         goToStep(4);
                       }
                     }}
-                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(255,109,31,0.3)] flex items-center justify-center gap-2 cursor-pointer"
+                    className="bg-primary hover:bg-primary-hover text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl transition-all shadow-[0_4px_20px_rgba(var(--primary-rgb), 0.3)] flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Next Page</span>
                     <ArrowRight className="w-4 h-4" />
@@ -4259,7 +4259,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="space-y-6 animate-fadeIn">
               {/* Step 4 Typography Header (Figma Design) */}
               <div className="space-y-1 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#FF6D1F]">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   Step 04
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold font-clash text-white">
@@ -4286,7 +4286,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex-1 space-y-2">
-                    <span className="inline-block bg-[#342318] text-[#FF6D1F] border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                    <span className="inline-block bg-primary/10 text-primary border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
                       {isEditing ? "Editing Product" : "Base Catalog Item"}
                     </span>
                     <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
@@ -4310,7 +4310,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setIsDescExpanded(!isDescExpanded)}
-                                className="text-xs font-semibold text-[#FF6D1F] hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
+                                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 mt-1 transition-colors cursor-pointer touch-manipulation py-1"
                               >
                                 {isDescExpanded ? (
                                   <>
@@ -4330,8 +4330,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       })()}
                     </div>
                     <div className="flex flex-wrap gap-5 pt-2 text-xs text-gray-400">
-                      <div><span className="text-[#FF6D1F] font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
-                      <div><span className="text-[#FF6D1F] font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
+                      <div><span className="text-primary font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
+                      <div><span className="text-primary font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
                     </div>
                   </div>
                 </div>
@@ -4347,7 +4347,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     type="button"
                     onClick={() => customFileInputRef.current?.click()}
                     disabled={isUploadingCustomImage || isPublishing}
-                    className="bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_4px_16px_rgba(255,109,31,0.3)] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_4px_16px_rgba(var(--primary-rgb), 0.3)] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isUploadingCustomImage ? (
                       <>
@@ -4502,7 +4502,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <Button
                   onClick={handlePublishSubmit}
                   disabled={isPublishing || isUploadingCustomImage || isGeneratingPreview}
-                  className="group relative overflow-hidden w-full bg-gradient-to-r from-[#7C3AED] via-[#FF6D1F] to-[#FF8A3D] hover:from-[#8B5CF6] hover:via-[#FF7D30] hover:to-[#FFA05C] border border-orange-400/50 hover:border-orange-300 text-white font-black text-base sm:text-lg py-5 rounded-2xl transition-all duration-300 shadow-[0_4px_25px_rgba(255,109,31,0.35)] hover:shadow-[0_8px_40px_rgba(255,109,31,0.65)] hover:scale-[1.015] active:scale-[0.985] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer flex items-center justify-center gap-2"
+                  className="group relative overflow-hidden w-full bg-gradient-to-r from-[#7C3AED] via-primary to-primary-light hover:from-[#8B5CF6] hover:via-primary-hover hover:to-primary-light border border-orange-400/50 hover:border-orange-300 text-white font-black text-base sm:text-lg py-5 rounded-2xl transition-all duration-300 shadow-[0_4px_25px_rgba(var(--primary-rgb), 0.35)] hover:shadow-[0_8px_40px_rgba(var(--primary-rgb), 0.65)] hover:scale-[1.015] active:scale-[0.985] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {/* Glowing Animated Light Streak on Hover */}
                   <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out pointer-events-none" />
@@ -4551,7 +4551,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="space-y-0.5">
               <h3 className="text-base sm:text-lg font-bold font-clash text-white">Live Preview</h3>
               <p className="text-[11px] sm:text-xs text-gray-400 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#FF6D1F] animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 Updates as you configure your product
               </p>
             </div>
@@ -4623,7 +4623,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400">Loka Base Cost</span>
-                    <span className="text-[#FF6D1F] font-bold">
+                    <span className="text-primary font-bold">
                       {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} – $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
                     </span>
                   </div>
@@ -4649,21 +4649,21 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
 
               {/* Creator Tips (Figma Design) */}
               <div className="bg-[#161D2B] border border-orange-500/20 rounded-2xl p-4 sm:p-5 space-y-3 shadow-lg">
-                <h5 className="font-bold text-sm text-[#FF6D1F] flex items-center gap-2 font-clash">
-                  <Sparkles className="w-4 h-4 text-[#FF6D1F]" />
+                <h5 className="font-bold text-sm text-primary flex items-center gap-2 font-clash">
+                  <Sparkles className="w-4 h-4 text-primary" />
                   Creator Tips
                 </h5>
                 <ul className="text-xs text-gray-300 space-y-2.5">
                   <li className="flex items-start gap-2">
-                    <span className="text-[#FF6D1F] font-bold text-sm leading-none">•</span>
+                    <span className="text-primary font-bold text-sm leading-none">•</span>
                     <span>Choose bright colors to attract customer attention</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#FF6D1F] font-bold text-sm leading-none">•</span>
+                    <span className="text-primary font-bold text-sm leading-none">•</span>
                     <span>Write a description with materials & sizing tips</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#FF6D1F] font-bold text-sm leading-none">•</span>
+                    <span className="text-primary font-bold text-sm leading-none">•</span>
                     <span>Keep the main design centered for best results</span>
                   </li>
                 </ul>
@@ -4687,7 +4687,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <div className="text-[10px] text-gray-400 truncate">
               Step {activeStep}/4 • {activeStep === 1 ? "Colors" : activeStep === 2 ? "Artwork" : activeStep === 3 ? "Pricing" : "Review"}
             </div>
-            <div className="text-xs font-bold text-[#FF6D1F] truncate">
+            <div className="text-xs font-bold text-primary truncate">
               {hasPriceRange ? `${minSellingPrice.toFixed(2)} - ${maxSellingPrice.toFixed(2)}` : `${minSellingPrice.toFixed(2)}`}
             </div>
           </div>
@@ -4717,7 +4717,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               className={`h-9 font-bold text-xs px-3.5 rounded-xl flex items-center gap-1.5 transition-all ${
                 (activeStep === 2 && isStep2NextDisabled) || isPublishing || isUploadingCustomImage
                   ? "bg-gray-800 text-gray-500 border border-white/10 cursor-not-allowed shadow-none"
-                  : "bg-[#FF6D1F] hover:bg-[#FF7A1A] text-white shadow-[0_0_10px_rgba(255,109,31,0.3)] cursor-pointer"
+                  : "bg-primary hover:bg-primary-hover text-white shadow-[0_0_10px_rgba(var(--primary-rgb), 0.3)] cursor-pointer"
               }`}
             >
               <span>Next</span>
@@ -4727,7 +4727,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             <Button
               onClick={handlePublishSubmit}
               disabled={isPublishing || isUploadingCustomImage || isGeneratingPreview}
-              className="h-9 bg-gradient-to-r from-purple-600 to-[#FF6D1F] text-white font-extrabold text-xs px-3.5 rounded-xl shadow-[0_0_12px_rgba(255,109,31,0.4)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
+              className="h-9 bg-gradient-to-r from-purple-600 to-primary text-white font-extrabold text-xs px-3.5 rounded-xl shadow-[0_0_12px_rgba(var(--primary-rgb), 0.4)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
             >
               {isPublishing ? (
                 <>

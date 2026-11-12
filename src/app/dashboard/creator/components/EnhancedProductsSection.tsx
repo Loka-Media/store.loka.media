@@ -38,11 +38,11 @@ export function EnhancedProductsSection({ products, loading, onDelete }: Product
             className="w-full sm:w-auto inline-flex items-center justify-center
                  px-5 sm:px-8
                  py-3 sm:py-4
-                 bg-[#FF6D1F]
+                 bg-primary
                  text-black
                  font-medium
                  rounded-full
-                 hover:bg-[#ff7d38]
+                 hover:bg-primary-hover
                  transition-all
                  duration-300
                  text-sm sm:text-base lg:text-lg
@@ -68,7 +68,7 @@ export function EnhancedProductsSection({ products, loading, onDelete }: Product
           </p>
           <Link
             href="/dashboard/creator/catalog"
-            className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg font-bold hover:shadow-[0_10px_30px_rgba(255,99,71,0.3)] transition-all text-sm sm:text-base"
+            className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-primary hover:bg-primary-hover text-black rounded-lg font-bold hover:shadow-[0_10px_30px_rgba(var(--primary-rgb),0.3)] transition-all text-sm sm:text-base"
           >
             <Plus className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
             Create Your First Product

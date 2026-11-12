@@ -412,7 +412,7 @@ export default function CreatorsPage() {
                         </div>
 
                         {/* View Shop Action Button */}
-                        <div className="px-2.5 py-1 sm:px-4 sm:py-2 rounded-full bg-white text-black font-black text-[9px] sm:text-[11px] uppercase tracking-wider group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-pink-500 group-hover:text-white transition-all duration-300 shadow-md shrink-0">
+                        <div className="px-2.5 py-1 sm:px-4 sm:py-2 rounded-full bg-white text-black font-black text-[9px] sm:text-[11px] uppercase tracking-wider group-hover:bg-primary group-hover:text-black transition-all duration-300 shadow-md shrink-0">
                           Shop →
                         </div>
                       </div>
