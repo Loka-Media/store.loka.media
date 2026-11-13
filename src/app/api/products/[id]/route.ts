@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
 import { ensure99Pricing } from '@/lib/pricing-utils';
+import { sanitizeProductTitle, sanitizeProductDescription } from '@/lib/productSanitizer';
 
 const BACKEND_URL = (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
 
@@ -71,6 +72,13 @@ export async function GET(
         if (product && product.base_price == null && product.min_price != null) {
           product.base_price = product.min_price;
         }
+
+        if (product) {
+          if (product.name) product.name = sanitizeProductTitle(product.name);
+          if (product.title) product.title = sanitizeProductTitle(product.title);
+          if (product.description) product.description = sanitizeProductDescription(product.description);
+        }
+
         return NextResponse.json(product, { status: res.status });
       } catch {
         // Not JSON: pass through unchanged
@@ -98,6 +106,9 @@ export async function PUT(
     let body: any = {};
     try {
       body = JSON.parse(bodyText);
+      if (body.name) body.name = sanitizeProductTitle(body.name);
+      if (body.title) body.title = sanitizeProductTitle(body.title);
+      if (body.description) body.description = sanitizeProductDescription(body.description);
     } catch {
       body = {};
     }

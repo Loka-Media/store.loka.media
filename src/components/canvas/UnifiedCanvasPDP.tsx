@@ -58,6 +58,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CATEGORIES_MAP } from "@/config/categories";
 import { resolveProductCategoryName } from "@/lib/pricing";
 import { calculateFinalRetailPrice, calculateRetailPriceFromMarkup, ensure99Pricing } from "@/lib/pricing-utils";
+import { sanitizeProductTitle, sanitizeBrand, sanitizeTypeName, sanitizeProductDescription } from "@/lib/productSanitizer";
 
 import { getCanvasDimensions, getActivePrintFile, applyQuickPosition, calculateAspectRatioAwareDimensions } from "./utils";
 import DesignCanvasTab from "./DesignCanvasTab";
@@ -162,7 +163,8 @@ export const cleanDescription = (text?: string): string => {
   // 8. Fix punctuation spacing (e.g. "outfit.Please" -> "outfit. Please")
   clean = clean.replace(/([.!?])([A-Z])/g, '$1 $2');
 
-  return clean.replace(/\s+/g, ' ').trim();
+  const normalized = clean.replace(/\s+/g, ' ').trim();
+  return sanitizeProductDescription(normalized);
 };
 
 // Helper to determine readable text contrast color (black or white) based on background hex code
@@ -3024,10 +3026,10 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
             </button>
             <div className="min-w-0 flex-1">
               <div className="text-xs sm:text-base md:text-lg font-bold font-clash text-white truncate">
-                {selectedProduct?.title || selectedProduct?.name}
+                {sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
               </div>
               <p className="text-[10px] sm:text-xs text-gray-400 truncate hidden xs:block">
-                SKU: {selectedProduct?.model || selectedProduct?.id} | {selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}
+                SKU: {selectedProduct?.id} | {sanitizeTypeName(selectedProduct?.type_name || selectedProduct?.type, selectedProduct?.title)}
               </p>
             </div>
           </div>
@@ -3210,7 +3212,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
-                        alt={selectedProduct?.title}
+                        alt={sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                         className="w-full h-full object-contain"
                       />
                     ) : (
@@ -3226,7 +3228,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       {isEditing ? "Editing Product" : "Base Catalog Item"}
                     </span>
                     <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
-                      {selectedProduct?.title || selectedProduct?.name}
+                      {sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                     </h2>
                     <div className="space-y-1 pt-1">
                       {(() => {
@@ -3266,7 +3268,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       })()}
                     </div>
                     <div className="flex flex-wrap gap-4 pt-2 text-xs text-gray-500">
-                      <div>Type: <span className="text-white">{selectedProduct?.type_name || "Apparel"}</span></div>
+                      <div>Type: <span className="text-white">{sanitizeTypeName(selectedProduct?.type_name || selectedProduct?.type, selectedProduct?.title)}</span></div>
                       <div>SKU: <span className="text-white">{selectedProduct?.id}</span></div>
                     </div>
                   </div>
@@ -3523,7 +3525,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
-                        alt={selectedProduct?.title}
+                        alt={sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                         className="w-full h-full object-contain"
                       />
                     ) : (
@@ -3532,11 +3534,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex-1 space-y-2">
-                    <span className="inline-block bg-primary/10 text-primary border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                    <span className="inline-block bg-primary/10 text-primary border border-primary/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
                       {isEditing ? "Editing Product" : "Base Catalog Item"}
                     </span>
                     <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
-                      {selectedProduct?.title || selectedProduct?.name}
+                      {sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                     </h2>
                     <div className="space-y-1 pt-1">
                       {(() => {
@@ -3576,7 +3578,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       })()}
                     </div>
                     <div className="flex flex-wrap gap-5 pt-2 text-xs text-gray-400">
-                      <div><span className="text-primary font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
+                      <div><span className="text-primary font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{sanitizeTypeName(selectedProduct?.type_name || selectedProduct?.type, selectedProduct?.title)}</span></div>
                       <div><span className="text-primary font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
                     </div>
                   </div>
@@ -3769,8 +3771,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                         onAspectRatioIssues={handleSetAspectRatioIssues}
                         aspectRatioIssues={aspectRatioIssues}
                         hidePlacementTabs={true}
-                        productTitle={selectedProduct?.title || selectedProduct?.name || ""}
-                        productType={selectedProduct?.type_name || selectedProduct?.brand || ""}
+                        productTitle={sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name || "")}
+                        productType={sanitizeTypeName(selectedProduct?.type_name || selectedProduct?.type, selectedProduct?.title)}
                         onRemoveDesign={handleRemoveDesign}
                         onRemoveBackground={handleRemoveDesignBackground}
                         isRemovingBackground={isRemovingBackground}
@@ -3974,7 +3976,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
-                        alt={selectedProduct?.title}
+                        alt={sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                         className="w-full h-full object-contain"
                       />
                     ) : (
@@ -3983,11 +3985,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex-1 space-y-2">
-                    <span className="inline-block bg-primary/10 text-primary border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                    <span className="inline-block bg-primary/10 text-primary border border-primary/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
                       {isEditing ? "Editing Product" : "Base Catalog Item"}
                     </span>
                     <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
-                      {selectedProduct?.title || selectedProduct?.name}
+                      {sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                     </h2>
                     <div className="space-y-1 pt-1">
                       {(() => {
@@ -4027,7 +4029,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       })()}
                     </div>
                     <div className="flex flex-wrap gap-5 pt-2 text-xs text-gray-400">
-                      <div><span className="text-primary font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
+                      <div><span className="text-primary font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{sanitizeTypeName(selectedProduct?.type_name || selectedProduct?.type, selectedProduct?.title)}</span></div>
                       <div><span className="text-primary font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
                     </div>
                   </div>
@@ -4277,7 +4279,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     {selectedProduct?.image || (selectedProduct?.images && selectedProduct.images.length > 0) ? (
                       <img
                         src={selectedProduct?.image || selectedProduct?.images?.[0]}
-                        alt={selectedProduct?.title}
+                        alt={sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                         className="w-full h-full object-contain"
                       />
                     ) : (
@@ -4286,11 +4288,11 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   </div>
 
                   <div className="flex-1 space-y-2">
-                    <span className="inline-block bg-primary/10 text-primary border border-orange-500/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                    <span className="inline-block bg-primary/10 text-primary border border-primary/30 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
                       {isEditing ? "Editing Product" : "Base Catalog Item"}
                     </span>
                     <h2 className="text-xl sm:text-2xl font-bold font-clash text-white">
-                      {selectedProduct?.title || selectedProduct?.name}
+                      {sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                     </h2>
                     <div className="space-y-1 pt-1">
                       {(() => {
@@ -4330,7 +4332,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       })()}
                     </div>
                     <div className="flex flex-wrap gap-5 pt-2 text-xs text-gray-400">
-                      <div><span className="text-primary font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.type_name || selectedProduct?.brand || "Generic brand"}</span></div>
+                      <div><span className="text-primary font-bold">Type:</span> <span className="text-gray-200 ml-1.5">{sanitizeTypeName(selectedProduct?.type_name || selectedProduct?.type, selectedProduct?.title)}</span></div>
                       <div><span className="text-primary font-bold">SKU:</span> <span className="text-gray-200 ml-1.5">{selectedProduct?.id || "624"}</span></div>
                     </div>
                   </div>
@@ -4381,7 +4383,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       mockupUrls={getEffectiveMockups()}
                       images={selectedProduct?.images || []}
                       defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
-                      productName={selectedProduct?.title || selectedProduct?.name}
+                      productName={sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                       designFiles={designFiles}
                       activePlacement={activePlacement}
                       onPlacementChange={handlePlacementSelect}
@@ -4562,7 +4564,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                 mockupUrls={filteredMockupUrls && filteredMockupUrls.length > 0 ? filteredMockupUrls : getEffectiveMockups()}
                 images={selectedProduct?.images || []}
                 defaultImage={selectedProduct?.image || (variants.length > 0 ? variants[0]?.image : undefined)}
-                productName={selectedProduct?.title || selectedProduct?.name}
+                productName={sanitizeProductTitle(selectedProduct?.title || selectedProduct?.name)}
                 designFiles={designFiles}
                 activePlacement={activePlacement}
                 onPlacementChange={handlePlacementSelect}

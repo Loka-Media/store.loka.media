@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { productAPI, ExtendedProduct } from "@/lib/api";
 import { createProductSlug, isVariantAvailable, cleanDescription } from "@/lib/utils";
+import { sanitizeProductTitle } from "@/lib/productSanitizer";
 import { useGuestCart } from "@/contexts/GuestCartContext";
 import { useWishlist, addPendingWishlistItem } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -236,7 +237,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
             )}
             <Image
               src={imageUrl}
-              alt={product.name}
+              alt={sanitizeProductTitle(product.name)}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               unoptimized={true}
@@ -254,7 +255,7 @@ export function ProductListItem({ product }: ProductListItemProps) {
             />
             <img
               src={imageUrl}
-              alt={product.name}
+              alt={sanitizeProductTitle(product.name)}
               className="fallback-img absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               style={{ display: "none" }}
               onError={(e) => {
@@ -273,8 +274,8 @@ export function ProductListItem({ product }: ProductListItemProps) {
                   product.id
                 )}`}
               >
-                <h3 className="text-lg font-normal text-white hover:text-orange-400 transition-colors duration-200 mb-1">
-                  {product.name}
+                <h3 className="text-lg font-normal text-white hover:text-primary transition-colors duration-200 mb-1">
+                  {sanitizeProductTitle(product.name)}
                 </h3>
               </Link>
 

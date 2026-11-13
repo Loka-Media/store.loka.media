@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import GradientTitle from "@/components/ui/GradientTitle";
 import { Button } from "@/components/ui/button";
+import { sanitizeProductTitle } from "@/lib/productSanitizer";
 
 export default function WishlistPage() {
   const { items, loading, removeFromWishlist, clearWishlist, wishlistCount } = useWishlist();
@@ -220,7 +221,7 @@ export default function WishlistPage() {
                       <div className="relative overflow-hidden bg-gradient-to-br from-gray-800 to-black flex-shrink-0" style={{ aspectRatio: '1/1', width: '100%' }}>
                         <Image
                           src={item.thumbnail_url || "/placeholder-product.svg"}
-                          alt={item.product_name}
+                          alt={sanitizeProductTitle(item.product_name)}
                           fill
                           className="object-cover transition-all duration-700 group-hover:scale-110"
                           unoptimized={true}
@@ -255,13 +256,13 @@ export default function WishlistPage() {
                       {/* Content Section - Below Image */}
                       <div className="bg-gradient-to-b from-black/80 to-black p-2.5 sm:p-4 flex flex-col flex-grow backdrop-blur-sm gap-1 sm:gap-1.5">
                         {/* Creator Name with badge style */}
-                        <p className="text-[10px] sm:text-xs text-orange-400 font-semibold inline-block bg-orange-500/20 px-2 py-0.5 rounded-full w-fit truncate max-w-full">
+                        <p className="text-[10px] sm:text-xs text-primary font-semibold inline-block bg-primary/20 px-2 py-0.5 rounded-full w-fit truncate max-w-full">
                           by {item.creator?.name || item.creator_name || 'Unknown'}
                         </p>
 
                         {/* Product Title */}
-                        <div className="font-medium text-xs sm:text-sm text-white line-clamp-2 group-hover:text-orange-300 transition-colors duration-300 tracking-tight leading-snug flex-grow">
-                          {item.product_name}
+                        <div className="font-medium text-xs sm:text-sm text-white line-clamp-2 group-hover:text-primary transition-colors duration-300 tracking-tight leading-snug flex-grow">
+                          {sanitizeProductTitle(item.product_name)}
                         </div>
 
                         {/* Category and Variants Info */}

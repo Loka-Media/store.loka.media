@@ -15,6 +15,7 @@ import type {
   StorefrontMockup,
   StorefrontProduct,
 } from '@/types/printify';
+import { sanitizeProductTitle, sanitizeProductDescription } from '@/lib/productSanitizer';
 
 const POSITION_LABELS: Record<string, string> = {
   front: 'Front View',
@@ -250,8 +251,8 @@ export function transformProductForStorefront(product: PrintifyProduct): Storefr
 
   return {
     id: product.id,
-    title: product.title,
-    description: product.description,
+    title: sanitizeProductTitle(product.title),
+    description: sanitizeProductDescription(product.description),
     tags: product.tags || [],
     blueprintId: product.blueprint_id,
     printProviderId: product.print_provider_id,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
 import { ensure99Pricing } from '@/lib/pricing-utils';
 import { requireCreatorOrAdminAuth } from '@/lib/serverAuth';
+import { sanitizeProductTitle, sanitizeProductDescription } from '@/lib/productSanitizer';
 
 const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
 
@@ -58,6 +59,9 @@ async function handleUpdate(req: NextRequest) {
     const imagesArr = Array.isArray(images) ? images : [];
     const tagsArr = Array.isArray(tags) ? tags : [];
 
+    const cleanName = name !== undefined ? sanitizeProductTitle(name) : null;
+    const cleanDesc = description !== undefined ? sanitizeProductDescription(description) : null;
+
     console.log(`[Product Update Route] Updating product ${id} with uniform retail price: $${finalRetailPrice ?? 'unchanged'}`);
 
     // 1. Direct PostgreSQL Update on products table
@@ -77,8 +81,8 @@ async function handleUpdate(req: NextRequest) {
            updated_at = NOW()
          WHERE id = $10`,
         [
-          name || null,
-          description || null,
+          cleanName || null,
+          cleanDesc || null,
           markupVal,
           finalRetailPrice,
           category || null,

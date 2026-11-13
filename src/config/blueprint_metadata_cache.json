@@ -1,6 +1,6 @@
 {
   "5": {
-    "title": "Unisex Cotton Crew Tee",
+    "title": "Unisex Classic Cotton Crewneck T-Shirt",
     "providerId": 41,
     "price": "19.89",
     "premiumPrice": "15.14",
@@ -10,7 +10,7 @@
     "cost": "15.14"
   },
   "6": {
-    "title": "Unisex Heavy Cotton Tee",
+    "title": "Unisex Classic Heavyweight Cotton T-Shirt",
     "providerId": 26,
     "price": "9.40",
     "premiumPrice": "6.66",
@@ -20,7 +20,7 @@
     "cost": "6.66"
   },
   "9": {
-    "title": "Women's Favorite Tee",
+    "title": "Women's Fitted Cotton T-Shirt",
     "providerId": 6,
     "price": "17.07",
     "premiumPrice": "12.64",
@@ -40,7 +40,7 @@
     "cost": "23.17"
   },
   "11": {
-    "title": "Women's Jersey Short Sleeve Deep V-Neck Tee",
+    "title": "Women's Jersey Short Sleeve Deep V-Neck T-Shirt",
     "providerId": 39,
     "price": "12.50",
     "premiumPrice": "14.53",
@@ -50,7 +50,7 @@
     "cost": "14.53"
   },
   "12": {
-    "title": "Unisex Jersey Short Sleeve Tee",
+    "title": "Unisex Premium Soft Cotton T-Shirt",
     "providerId": 99,
     "price": "10.53",
     "premiumPrice": "8.11",
@@ -59,7 +59,7 @@
     "providersCount": 14
   },
   "14": {
-    "title": "The Boyfriend Tee for Women",
+    "title": "Women's Relaxed Fit T-Shirt",
     "providerId": 99,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -68,7 +68,7 @@
     "providersCount": 2
   },
   "15": {
-    "title": "Men's Very Important Tee",
+    "title": "Men's Essential Crewneck T-Shirt",
     "providerId": 61,
     "price": "12.56",
     "premiumPrice": "17.12",
@@ -78,7 +78,7 @@
     "cost": "17.12"
   },
   "18": {
-    "title": "Women's Ideal Racerback Tank",
+    "title": "Women's Classic Racerback Tank",
     "providerId": 99,
     "price": "7.42",
     "premiumPrice": "5.71",
@@ -87,7 +87,7 @@
     "providersCount": 5
   },
   "26": {
-    "title": "Men's Lightweight Fashion Tee",
+    "title": "Men's Lightweight Fashion T-Shirt",
     "providerId": 217,
     "price": "12.79",
     "premiumPrice": "9.56",
@@ -106,7 +106,7 @@
     "providersCount": 5
   },
   "32": {
-    "title": "Toddler's Fine Jersey Tee",
+    "title": "Toddler's Fine Jersey T-Shirt",
     "providerId": 99,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -124,7 +124,7 @@
     "providersCount": 7
   },
   "34": {
-    "title": "Infant Fine Jersey Tee",
+    "title": "Infant Fine Jersey T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -133,7 +133,7 @@
     "providersCount": 8
   },
   "36": {
-    "title": "Unisex Ultra Cotton Tee",
+    "title": "Unisex Ultra Cotton Premium T-Shirt",
     "providerId": 99,
     "price": "8.95",
     "premiumPrice": "6.89",
@@ -151,7 +151,7 @@
     "providersCount": 6
   },
   "41": {
-    "title": "Unisex Jersey Long Sleeve Tee",
+    "title": "Unisex Jersey Long Sleeve T-Shirt",
     "providerId": 41,
     "price": "20.43",
     "premiumPrice": "25.00",
@@ -161,7 +161,7 @@
     "cost": "25.00"
   },
   "45": {
-    "title": "Men's Long Sleeve Crew Tee",
+    "title": "Men's Long Sleeve Crew T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -179,7 +179,7 @@
     "providersCount": 7
   },
   "48": {
-    "title": "Unisex Jersey Short Sleeve V-Neck Tee",
+    "title": "Unisex Jersey Short Sleeve V-Neck T-Shirt",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -188,7 +188,7 @@
     "providersCount": 8
   },
   "49": {
-    "title": "Unisex Heavy Blend™ Crewneck Sweatshirt",
+    "title": "Unisex Classic Crewneck Fleece Sweatshirt",
     "providerId": 34,
     "price": "11.06",
     "premiumPrice": "11.45",
@@ -208,7 +208,7 @@
     "cost": "14.89"
   },
   "66": {
-    "title": "Unisex Heavy Blend™ Full Zip Hooded Sweatshirt",
+    "title": "Unisex Classic Full-Zip Fleece Hoodie",
     "providerId": 39,
     "price": "36.49",
     "premiumPrice": "26.68",
@@ -227,7 +227,7 @@
     "providersCount": 6
   },
   "68": {
-    "title": "Mug 11oz",
+    "title": "Classic Ceramic Coffee Mug (11oz)",
     "providerId": 1,
     "price": "19.50",
     "premiumPrice": "4.81",
@@ -237,7 +237,7 @@
     "cost": "4.81"
   },
   "70": {
-    "title": "Stainless Steel Travel Mug",
+    "title": "Insulated Stainless Steel Travel Mug",
     "providerId": 1,
     "price": "15.29",
     "premiumPrice": "11.77",
@@ -246,7 +246,7 @@
     "providersCount": 2
   },
   "74": {
-    "title": "Spiral Notebook - Ruled Line",
+    "title": "Spiral Bound Lined Notebook",
     "providerId": 1,
     "price": "20.27",
     "premiumPrice": "5.90",
@@ -256,7 +256,7 @@
     "cost": "5.90"
   },
   "75": {
-    "title": "Journal - Ruled Line",
+    "title": "Hardcover Lined Journal",
     "providerId": 1,
     "price": "20.27",
     "premiumPrice": "10.73",
@@ -266,7 +266,7 @@
     "cost": "10.73"
   },
   "76": {
-    "title": "Journal - Blank",
+    "title": "Hardcover Sketch Journal",
     "providerId": 99,
     "price": "14.25",
     "premiumPrice": "10.97",
@@ -275,7 +275,7 @@
     "providersCount": 8
   },
   "77": {
-    "title": "Unisex Heavy Blend Hoodie",
+    "title": "Unisex Classic Heavyweight Pullover Hoodie",
     "providerId": 99,
     "price": "20.18",
     "premiumPrice": "15.54",
@@ -284,7 +284,7 @@
     "providersCount": 11
   },
   "78": {
-    "title": "Unisex Heavy Blend Sweatshirt",
+    "title": "Unisex Classic Crewneck Fleece Sweatshirt",
     "providerId": 99,
     "price": "12.01",
     "premiumPrice": "9.25",
@@ -293,7 +293,7 @@
     "providersCount": 10
   },
   "79": {
-    "title": "Unisex 3\\4 Sleeve Baseball Tee",
+    "title": "Unisex 3/4 Sleeve Baseball T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -302,7 +302,7 @@
     "providersCount": 4
   },
   "80": {
-    "title": "Unisex Ultra Cotton Long Sleeve Tee",
+    "title": "Unisex Ultra Cotton Long Sleeve T-Shirt",
     "providerId": 3,
     "price": "13.60",
     "premiumPrice": "15.16",
@@ -312,7 +312,7 @@
     "cost": "15.16"
   },
   "81": {
-    "title": "Kids Softstyle Tee",
+    "title": "Kids Soft-Spun Cotton T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -321,7 +321,7 @@
     "providersCount": 6
   },
   "88": {
-    "title": "Women's Softstyle Tee",
+    "title": "Women's Soft-Spun Cotton T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -368,7 +368,7 @@
     "cost": "23.25"
   },
   "97": {
-    "title": "Satin Posters (210gsm)",
+    "title": "Premium Satin Wall Art Poster",
     "providerId": 99,
     "price": "5.45",
     "premiumPrice": "4.20",
@@ -386,7 +386,7 @@
     "providersCount": 2
   },
   "100": {
-    "title": "Men's Softstyle Tank Top",
+    "title": "Men's Soft Cotton Tank Top",
     "providerId": 6,
     "price": "16.57",
     "premiumPrice": "17.32",
@@ -396,7 +396,7 @@
     "cost": "17.32"
   },
   "114": {
-    "title": "Men's NUBLEND® Hooded Sweatshirt",
+    "title": "Men's Fleece Hooded Sweatshirt",
     "providerId": 99,
     "price": "19.00",
     "premiumPrice": "14.63",
@@ -405,7 +405,7 @@
     "providersCount": 4
   },
   "139": {
-    "title": "Unisex Tri-Blend Crew Tee",
+    "title": "Unisex Tri-Blend Crew T-Shirt",
     "providerId": 99,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -423,7 +423,7 @@
     "providersCount": 3
   },
   "142": {
-    "title": "Men's Fitted V-Neck Short Sleeve Tee",
+    "title": "Men's Fitted V-Neck Short Sleeve T-Shirt",
     "providerId": 99,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -432,7 +432,7 @@
     "providersCount": 4
   },
   "145": {
-    "title": "Unisex Softstyle T-Shirt",
+    "title": "Unisex Soft-Spun Cotton T-Shirt",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -441,7 +441,7 @@
     "providersCount": 7
   },
   "146": {
-    "title": "Kids Fine Jersey Tee",
+    "title": "Kids Fine Jersey T-Shirt",
     "providerId": 99,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -450,7 +450,7 @@
     "providersCount": 8
   },
   "147": {
-    "title": "Unisex Tri-Blend 3\\4 Raglan Tee",
+    "title": "Unisex Tri-Blend 3/4 Raglan T-Shirt",
     "providerId": 99,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -459,7 +459,7 @@
     "providersCount": 2
   },
   "157": {
-    "title": "Kids Heavy Cotton™ Tee",
+    "title": "Kids Classic Heavyweight Cotton T-Shirt",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -477,7 +477,7 @@
     "providersCount": 2
   },
   "184": {
-    "title": "Unisex Triblend Tee",
+    "title": "Unisex Tri-Blend T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -559,7 +559,7 @@
     "providersCount": 4
   },
   "256": {
-    "title": "Women's Cut & Sew Casual Leggings (AOP)",
+    "title": "Women's Cut & Sew Casual Leggings - All-Over Print",
     "providerId": 99,
     "price": "14.25",
     "premiumPrice": "10.97",
@@ -596,7 +596,7 @@
     "providersCount": 5
   },
   "276": {
-    "title": "Women's Cut & Sew Racerback Dress (AOP)",
+    "title": "Women's Cut & Sew Racerback Dress - All-Over Print",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -615,7 +615,7 @@
     "cost": "22.09"
   },
   "279": {
-    "title": "Women's Cut & Sew Tee (AOP)",
+    "title": "Women's Cut & Sew T-Shirt - All-Over Print",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -624,7 +624,7 @@
     "providersCount": 8
   },
   "281": {
-    "title": "Unisex Cut & Sew Tee (AOP)",
+    "title": "Unisex Cut & Sew T-Shirt - All-Over Print",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -651,7 +651,7 @@
     "providersCount": 6
   },
   "285": {
-    "title": "Women's Pencil Skirt (AOP)",
+    "title": "Women's Pencil Skirt - All-Over Print",
     "providerId": 99,
     "price": "17.00",
     "premiumPrice": "13.09",
@@ -660,7 +660,7 @@
     "providersCount": 7
   },
   "286": {
-    "title": "Women's Skater Skirt (AOP)",
+    "title": "Women's Skater Skirt - All-Over Print",
     "providerId": 99,
     "price": "14.25",
     "premiumPrice": "10.97",
@@ -736,7 +736,7 @@
     "providersCount": 4
   },
   "314": {
-    "title": "Youth Heavy Blend Hooded Sweatshirt",
+    "title": "Youth Classic Heavyweight Pullover Hoodie",
     "providerId": 39,
     "price": "22.42",
     "premiumPrice": "17.26",
@@ -745,7 +745,7 @@
     "providersCount": 8
   },
   "326": {
-    "title": "Unisex Heavy Blend Full Zip Hooded Sweatshirt",
+    "title": "Unisex Classic Full-Zip Fleece Hoodie",
     "providerId": 10,
     "price": "28.63",
     "premiumPrice": "18.98",
@@ -782,7 +782,7 @@
     "providersCount": 7
   },
   "349": {
-    "title": "Women's Bikini Swimsuit (AOP)",
+    "title": "Women's Bikini Swimsuit - All-Over Print",
     "providerId": 99,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -791,7 +791,7 @@
     "providersCount": 8
   },
   "350": {
-    "title": "Women's One-piece Swimsuit (AOP)",
+    "title": "Women's One-piece Swimsuit - All-Over Print",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -846,7 +846,7 @@
     "providersCount": 2
   },
   "360": {
-    "title": "Women's Classic One-Piece Swimsuit (AOP)",
+    "title": "Women's Classic One-Piece Swimsuit - All-Over Print",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -855,7 +855,7 @@
     "providersCount": 5
   },
   "361": {
-    "title": "Women's Vintage Swimsuit (AOP)",
+    "title": "Women's Vintage Swimsuit - All-Over Print",
     "providerId": 99,
     "price": "9.25",
     "premiumPrice": "7.12",
@@ -901,7 +901,7 @@
     "providersCount": 3
   },
   "376": {
-    "title": "Sublimation Socks",
+    "title": "All-Over Print Crew Socks",
     "providerId": 1,
     "price": "20.99",
     "premiumPrice": "5.40",
@@ -947,7 +947,7 @@
     "providersCount": 3
   },
   "406": {
-    "title": "Men's Boxer Briefs (AOP)",
+    "title": "Men's Boxer Briefs - All-Over Print",
     "providerId": 99,
     "price": "14.25",
     "premiumPrice": "10.97",
@@ -956,7 +956,7 @@
     "providersCount": 2
   },
   "407": {
-    "title": "Women's Briefs (AOP)",
+    "title": "Women's Briefs - All-Over Print",
     "providerId": 14,
     "price": "16.76",
     "premiumPrice": "15.93",
@@ -1011,7 +1011,7 @@
     "providersCount": 5
   },
   "417": {
-    "title": "Youth Ultra Cotton Tee",
+    "title": "Youth Ultra Cotton Premium T-Shirt",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -1020,7 +1020,7 @@
     "providersCount": 6
   },
   "418": {
-    "title": "Apron (AOP)",
+    "title": "Apron - All-Over Print",
     "providerId": 99,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -1038,7 +1038,7 @@
     "providersCount": 8
   },
   "420": {
-    "title": "Youth Short Sleeve Tee",
+    "title": "Youth Short Sleeve T-Shirt",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -1047,7 +1047,7 @@
     "providersCount": 2
   },
   "421": {
-    "title": "Tough Cases",
+    "title": "Dual-Layer Tough Phone Case",
     "providerId": 99,
     "price": "9.35",
     "premiumPrice": "7.20",
@@ -1056,7 +1056,7 @@
     "providersCount": 3
   },
   "425": {
-    "title": "Mug 15oz",
+    "title": "Large Ceramic Coffee Mug (15oz)",
     "providerId": 99,
     "price": "7.70",
     "premiumPrice": "5.93",
@@ -1101,7 +1101,7 @@
     "providersCount": 5
   },
   "431": {
-    "title": "T-Shirt Dress (AOP)",
+    "title": "T-Shirt Dress - All-Over Print",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -1110,7 +1110,7 @@
     "providersCount": 6
   },
   "433": {
-    "title": "Men's Bomber Jacket (AOP)",
+    "title": "Men's Bomber Jacket - All-Over Print",
     "providerId": 14,
     "price": "20.27",
     "premiumPrice": "44.40",
@@ -1120,7 +1120,7 @@
     "cost": "44.40"
   },
   "438": {
-    "title": "Area Rugs ",
+    "title": "Area Rugs",
     "providerId": 99,
     "price": "18.00",
     "premiumPrice": "13.86",
@@ -1139,7 +1139,7 @@
     "cost": "21.68"
   },
   "440": {
-    "title": "Adult Staple Tee",
+    "title": "Classic Everyday Crewneck T-Shirt",
     "providerId": 29,
     "price": "16.28",
     "premiumPrice": "18.06",
@@ -1195,7 +1195,7 @@
     "providersCount": 7
   },
   "449": {
-    "title": "Unisex Sweatshirt (AOP)",
+    "title": "Unisex Sweatshirt - All-Over Print",
     "providerId": 99,
     "price": "26.70",
     "premiumPrice": "20.56",
@@ -1204,7 +1204,7 @@
     "providersCount": 3
   },
   "450": {
-    "title": "Unisex Pullover Hoodie (AOP)",
+    "title": "Unisex Pullover Hoodie - All-Over Print",
     "providerId": 99,
     "price": "37.00",
     "premiumPrice": "28.49",
@@ -1213,7 +1213,7 @@
     "providersCount": 4
   },
   "451": {
-    "title": "Unisex Zip Hoodie (AOP)",
+    "title": "Unisex Zip Hoodie - All-Over Print",
     "providerId": 99,
     "price": "24.43",
     "premiumPrice": "18.81",
@@ -1295,7 +1295,7 @@
     "providersCount": 6
   },
   "460": {
-    "title": "Women's Triblend Tee",
+    "title": "Women's Tri-Blend T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -1304,7 +1304,7 @@
     "providersCount": 7
   },
   "464": {
-    "title": "Men's Modern-fit Tee",
+    "title": "Men's Modern-fit T-Shirt",
     "providerId": 99,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -1313,7 +1313,7 @@
     "providersCount": 4
   },
   "466": {
-    "title": "Women's Midweight Cotton Tee",
+    "title": "Women's Midweight Cotton T-Shirt",
     "providerId": 99,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -1340,7 +1340,7 @@
     "providersCount": 2
   },
   "472": {
-    "title": "Women's Cotton Tee",
+    "title": "Women's Cotton T-Shirt",
     "providerId": 99,
     "price": "14.23",
     "premiumPrice": "10.96",
@@ -1467,7 +1467,7 @@
     "providersCount": 5
   },
   "494": {
-    "title": "Giclée Art Print ",
+    "title": "Giclée Art Print",
     "providerId": 99,
     "price": "10.70",
     "premiumPrice": "8.24",
@@ -1485,7 +1485,7 @@
     "providersCount": 7
   },
   "496": {
-    "title": "Sublimation Crew Socks (EU)",
+    "title": "All-Over Print Crew Socks (EU)",
     "providerId": 99,
     "price": "11.65",
     "premiumPrice": "8.97",
@@ -1494,7 +1494,7 @@
     "providersCount": 8
   },
   "498": {
-    "title": "Unisex Deluxe T-shirt ",
+    "title": "Unisex Deluxe T-shirt",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -1512,7 +1512,7 @@
     "providersCount": 4
   },
   "500": {
-    "title": "Unisex Barnard Tank ",
+    "title": "Unisex Classic Ribbed Cotton Tank Top",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -1521,7 +1521,7 @@
     "providersCount": 5
   },
   "501": {
-    "title": "Men’s Base Longsleeve Tee ",
+    "title": "Men’s Base Longsleeve T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -1530,7 +1530,7 @@
     "providersCount": 6
   },
   "502": {
-    "title": "Women’s Maple Tee ",
+    "title": "Women’s Maple T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -1557,7 +1557,7 @@
     "providersCount": 4
   },
   "507": {
-    "title": "Canvas Tote Bag, 5-Color Straps",
+    "title": "Canvas Tote Bag",
     "providerId": 99,
     "price": "16.50",
     "premiumPrice": "12.71",
@@ -1566,7 +1566,7 @@
     "providersCount": 5
   },
   "508": {
-    "title": "Women's Mid-Waist Pencil Skirt (AOP)",
+    "title": "Women's Mid-Waist Pencil Skirt - All-Over Print",
     "providerId": 99,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -1575,7 +1575,7 @@
     "providersCount": 6
   },
   "509": {
-    "title": "Women's Casual Spandex Leggings (AOP)",
+    "title": "Women's Casual Spandex Leggings - All-Over Print",
     "providerId": 99,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -1611,7 +1611,7 @@
     "providersCount": 6
   },
   "516": {
-    "title": "High Waisted Yoga Leggings (AOP)",
+    "title": "High Waisted Yoga Leggings - All-Over Print",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -1684,7 +1684,7 @@
     "providersCount": 2
   },
   "526": {
-    "title": "Champion T-Shirt",
+    "title": "Classic Cotton T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -1693,7 +1693,7 @@
     "providersCount": 3
   },
   "527": {
-    "title": "Champion Sweatshirt",
+    "title": "Classic Crewneck Sweatshirt",
     "providerId": 99,
     "price": "28.70",
     "premiumPrice": "22.10",
@@ -1702,7 +1702,7 @@
     "providersCount": 4
   },
   "528": {
-    "title": "Champion Hoodie",
+    "title": "Classic Pullover Hoodie",
     "providerId": 99,
     "price": "33.00",
     "premiumPrice": "25.41",
@@ -1748,7 +1748,7 @@
     "providersCount": 2
   },
   "533": {
-    "title": "Unisex EcoSmart® Crewneck Sweatshirt",
+    "title": "Unisex Eco-Fleece Crewneck Sweatshirt",
     "providerId": 99,
     "price": "18.70",
     "premiumPrice": "14.40",
@@ -1766,7 +1766,7 @@
     "providersCount": 5
   },
   "536": {
-    "title": "Unisex EcoSmart® Pullover Hoodie Sweatshirt",
+    "title": "Unisex Eco-Fleece Pullover Hoodie Sweatshirt",
     "providerId": 99,
     "price": "29.86",
     "premiumPrice": "22.99",
@@ -1847,7 +1847,7 @@
     "providersCount": 3
   },
   "555": {
-    "title": "Stretched Canvas",
+    "title": "Gallery Wrapped Canvas Wall Art",
     "providerId": 99,
     "price": "32.50",
     "premiumPrice": "25.03",
@@ -1892,7 +1892,7 @@
     "providersCount": 6
   },
   "565": {
-    "title": "Organic Staple T-shirt",
+    "title": "Organic Classic Everyday Crewneck T-Shirt",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -1910,7 +1910,7 @@
     "providersCount": 8
   },
   "568": {
-    "title": "Baby Short Sleeve Onesie®",
+    "title": "Baby Short Sleeve Bodysuit",
     "providerId": 99,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -1919,7 +1919,7 @@
     "providersCount": 3
   },
   "569": {
-    "title": "Onesie® Organic Baby Bodysuit",
+    "title": "Organic Cotton Baby Bodysuit",
     "providerId": 99,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -1974,7 +1974,7 @@
     "providersCount": 3
   },
   "576": {
-    "title": "Baby Beanie (AOP)",
+    "title": "Baby Beanie - All-Over Print",
     "providerId": 70,
     "price": "18.79",
     "premiumPrice": "12.40",
@@ -1984,7 +1984,7 @@
     "cost": "12.40"
   },
   "577": {
-    "title": "Men's Jersey Curved Hem Tee",
+    "title": "Men's Jersey Curved Hem T-Shirt",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -2011,7 +2011,7 @@
     "providersCount": 7
   },
   "580": {
-    "title": "Toddler Short Sleeve Tee",
+    "title": "Toddler Short Sleeve T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -2020,7 +2020,7 @@
     "providersCount": 8
   },
   "582": {
-    "title": "Mouse Pad ",
+    "title": "Mouse Pad",
     "providerId": 99,
     "price": "16.00",
     "premiumPrice": "12.32",
@@ -2047,7 +2047,7 @@
     "providersCount": 6
   },
   "586": {
-    "title": "Toddler Long Sleeve Tee",
+    "title": "Toddler Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -2075,7 +2075,7 @@
     "cost": "39.50"
   },
   "589": {
-    "title": "Swim Trunks (AOP)",
+    "title": "Swim Trunks - All-Over Print",
     "providerId": 99,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -2084,7 +2084,7 @@
     "providersCount": 3
   },
   "591": {
-    "title": "Athletic Joggers (AOP)",
+    "title": "Athletic Joggers - All-Over Print",
     "providerId": 83,
     "price": "20.27",
     "premiumPrice": "26.35",
@@ -2094,7 +2094,7 @@
     "cost": "26.35"
   },
   "592": {
-    "title": "Fashion Hoodie (AOP)",
+    "title": "Fashion Hoodie - All-Over Print",
     "providerId": 99,
     "price": "36.43",
     "premiumPrice": "28.05",
@@ -2103,7 +2103,7 @@
     "providersCount": 6
   },
   "593": {
-    "title": "Men's Baseball Jersey (AOP)",
+    "title": "Men's Baseball Jersey - All-Over Print",
     "providerId": 83,
     "price": "18.72",
     "premiumPrice": "24.50",
@@ -2131,7 +2131,7 @@
     "providersCount": 3
   },
   "597": {
-    "title": "CamelBak Eddy®  Water Bottle, 20oz\\25oz",
+    "title": "Insulated Sport Water Bottle, 20oz / 25oz",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -2195,7 +2195,7 @@
     "providersCount": 6
   },
   "607": {
-    "title": "Beefy-T®  Short-Sleeve T-Shirt",
+    "title": "Heavyweight Cotton T-Shirt Short-Sleeve T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -2222,7 +2222,7 @@
     "providersCount": 2
   },
   "612": {
-    "title": "Metallic Mug (Silver\\Gold)",
+    "title": "Metallic Mug (Silver / Gold)",
     "providerId": 99,
     "price": "6.40",
     "premiumPrice": "4.93",
@@ -2231,7 +2231,7 @@
     "providersCount": 5
   },
   "614": {
-    "title": "Kensington Tritan™ Sport Bottle, 20oz",
+    "title": "Tritan Sport Bottle, 20oz",
     "providerId": 99,
     "price": "10.50",
     "premiumPrice": "8.09",
@@ -2258,7 +2258,7 @@
     "providersCount": 3
   },
   "618": {
-    "title": "Ceramic Mugs (11oz\\15oz\\20oz)",
+    "title": "Ceramic Mugs (11oz / 15oz / 20oz)",
     "providerId": 99,
     "price": "8.40",
     "premiumPrice": "6.47",
@@ -2313,7 +2313,7 @@
     "providersCount": 2
   },
   "627": {
-    "title": "Crop Tee (AOP)",
+    "title": "Crop T-Shirt - All-Over Print",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -2331,7 +2331,7 @@
     "providersCount": 7
   },
   "630": {
-    "title": "Tie-Dye Tee, Crystal",
+    "title": "Tie-Dye T-Shirt, Crystal",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -2340,7 +2340,7 @@
     "providersCount": 2
   },
   "631": {
-    "title": "Tie-Dye Tee, Cyclone",
+    "title": "Tie-Dye T-Shirt, Cyclone",
     "providerId": 99,
     "price": "16.73",
     "premiumPrice": "19.28",
@@ -2350,7 +2350,7 @@
     "cost": "19.28"
   },
   "632": {
-    "title": "Tie-Dye Tee, Spiral",
+    "title": "Tie-Dye T-Shirt, Spiral",
     "providerId": 99,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -2387,7 +2387,7 @@
     "providersCount": 8
   },
   "638": {
-    "title": "Women's Flowy Cropped Tee",
+    "title": "Women's Flowy Cropped T-Shirt",
     "providerId": 99,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -2469,7 +2469,7 @@
     "providersCount": 4
   },
   "659": {
-    "title": "Women's Crop Tee",
+    "title": "Women's Crop T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -2523,7 +2523,7 @@
     "providersCount": 7
   },
   "672": {
-    "title": "Champion Women's Heritage Cropped T-Shirt",
+    "title": "Women's Heritage Cropped T-Shirt",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -2559,7 +2559,7 @@
     "providersCount": 5
   },
   "676": {
-    "title": "Unisex Hammer™ T-shirt",
+    "title": "Unisex Heavyweight Cotton T-Shirt",
     "providerId": 99,
     "price": "14.23",
     "premiumPrice": "10.96",
@@ -2640,7 +2640,7 @@
     "providersCount": 8
   },
   "706": {
-    "title": "Unisex Garment Dyed Tee",
+    "title": "Unisex Garment Dyed T-Shirt",
     "providerId": 99,
     "price": "10.93",
     "premiumPrice": "10.93",
@@ -2785,7 +2785,7 @@
     "providersCount": 4
   },
   "725": {
-    "title": "Unisex Classic Tee",
+    "title": "Unisex Classic T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -2876,7 +2876,7 @@
     "providersCount": 5
   },
   "739": {
-    "title": "Women's Pajama Pants (AOP)",
+    "title": "Women's Pajama Pants - All-Over Print",
     "providerId": 99,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -2885,7 +2885,7 @@
     "providersCount": 6
   },
   "740": {
-    "title": "Men's Pajama Pants (AOP)",
+    "title": "Men's Pajama Pants - All-Over Print",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -2948,7 +2948,7 @@
     "providersCount": 8
   },
   "750": {
-    "title": "Youth Midweight Tee",
+    "title": "Youth Midweight T-Shirt",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -2984,7 +2984,7 @@
     "providersCount": 8
   },
   "757": {
-    "title": "Men's Jogger Shorts (AOP)",
+    "title": "Men's Jogger Shorts - All-Over Print",
     "providerId": 99,
     "price": "11.25",
     "premiumPrice": "8.66",
@@ -3128,7 +3128,7 @@
     "providersCount": 6
   },
   "783": {
-    "title": "Women's Hoodie Dress (AOP)",
+    "title": "Women's Hoodie Dress - All-Over Print",
     "providerId": 99,
     "price": "28.00",
     "premiumPrice": "21.56",
@@ -3146,7 +3146,7 @@
     "providersCount": 2
   },
   "785": {
-    "title": " Greeting Cards (1 or 10-pcs)",
+    "title": "Greeting Cards (1 or 10-pcs)",
     "providerId": 99,
     "price": "17.50",
     "premiumPrice": "13.47",
@@ -3255,7 +3255,7 @@
     "providersCount": 8
   },
   "799": {
-    "title": "Women's Bomber Jacket (AOP)",
+    "title": "Women's Bomber Jacket - All-Over Print",
     "providerId": 90,
     "price": "20.61",
     "premiumPrice": "18.38",
@@ -3310,7 +3310,7 @@
     "providersCount": 2
   },
   "806": {
-    "title": "Round Stickers, Indoor\\Outdoor",
+    "title": "Round Stickers, Indoor / Outdoor",
     "providerId": 99,
     "price": "2.40",
     "premiumPrice": "1.85",
@@ -3373,7 +3373,7 @@
     "providersCount": 3
   },
   "818": {
-    "title": "Square Stickers, Indoor\\Outdoor",
+    "title": "Square Stickers, Indoor / Outdoor",
     "providerId": 99,
     "price": "2.40",
     "premiumPrice": "1.85",
@@ -3400,7 +3400,7 @@
     "providersCount": 3
   },
   "822": {
-    "title": "Women's Baseball Jersey (AOP)",
+    "title": "Women's Baseball Jersey - All-Over Print",
     "providerId": 99,
     "price": "16.00",
     "premiumPrice": "12.32",
@@ -3436,7 +3436,7 @@
     "providersCount": 2
   },
   "828": {
-    "title": "Women's Short Pajama Set (AOP)",
+    "title": "Women's Short Pajama Set - All-Over Print",
     "providerId": 99,
     "price": "18.00",
     "premiumPrice": "13.86",
@@ -3445,7 +3445,7 @@
     "providersCount": 4
   },
   "829": {
-    "title": "Satin Posters (300gsm)",
+    "title": "Premium Satin Wall Art Poster",
     "providerId": 99,
     "price": "5.45",
     "premiumPrice": "4.20",
@@ -3454,7 +3454,7 @@
     "providersCount": 5
   },
   "830": {
-    "title": "Adult Apron (AOP)",
+    "title": "Everyday Kitchen & Studio Apron - All-Over Print",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -3463,7 +3463,7 @@
     "providersCount": 6
   },
   "831": {
-    "title": "Men's Baseball Jersey (AOP)",
+    "title": "Men's Baseball Jersey - All-Over Print",
     "providerId": 14,
     "price": "12.87",
     "premiumPrice": "22.38",
@@ -3473,7 +3473,7 @@
     "cost": "22.38"
   },
   "832": {
-    "title": "Men's Full-Zip Hoodie (AOP)",
+    "title": "Men's Full-Zip Hoodie - All-Over Print",
     "providerId": 14,
     "price": "43.69",
     "premiumPrice": "30.95",
@@ -3511,7 +3511,7 @@
     "providersCount": 4
   },
   "836": {
-    "title": "Shoulder Tote Bag (AOP)",
+    "title": "Shoulder Tote Bag - All-Over Print",
     "providerId": 99,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -3592,7 +3592,7 @@
     "providersCount": 3
   },
   "849": {
-    "title": "Slim Cases",
+    "title": "Ultra-Slim Snap Phone Case",
     "providerId": 99,
     "price": "9.15",
     "premiumPrice": "7.05",
@@ -3655,7 +3655,7 @@
     "providersCount": 3
   },
   "856": {
-    "title": "Men's Board Shorts (AOP)",
+    "title": "Men's Board Shorts - All-Over Print",
     "providerId": 99,
     "price": "14.25",
     "premiumPrice": "10.97",
@@ -3673,7 +3673,7 @@
     "providersCount": 5
   },
   "858": {
-    "title": "Apron (AOP)",
+    "title": "Apron - All-Over Print",
     "providerId": 99,
     "price": "18.00",
     "premiumPrice": "13.86",
@@ -3682,7 +3682,7 @@
     "providersCount": 6
   },
   "859": {
-    "title": "Women’s Full-Zip Hoodie (AOP)",
+    "title": "Women’s Full-Zip Hoodie - All-Over Print",
     "providerId": 99,
     "price": "35.43",
     "premiumPrice": "27.28",
@@ -3763,7 +3763,7 @@
     "providersCount": 4
   },
   "879": {
-    "title": "Long Sleeve Crewneck Tee",
+    "title": "Long Sleeve Crewneck T-Shirt",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -3962,7 +3962,7 @@
     "providersCount": 3
   },
   "919": {
-    "title": "Apron, 5-Color Straps (AOP)",
+    "title": "Apron - All-Over Print",
     "providerId": 99,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -3980,7 +3980,7 @@
     "providersCount": 7
   },
   "923": {
-    "title": "Long Sleeve Kimono Robe (AOP)",
+    "title": "Long Sleeve Kimono Robe - All-Over Print",
     "providerId": 99,
     "price": "13.50",
     "premiumPrice": "10.39",
@@ -3989,7 +3989,7 @@
     "providersCount": 8
   },
   "924": {
-    "title": "Men's Hawaiian Shirt (AOP)",
+    "title": "Men's Hawaiian Shirt - All-Over Print",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -3998,7 +3998,7 @@
     "providersCount": 2
   },
   "925": {
-    "title": "Women's Relaxed Shorts (AOP)",
+    "title": "Women's Relaxed Shorts - All-Over Print",
     "providerId": 99,
     "price": "17.25",
     "premiumPrice": "13.28",
@@ -4025,7 +4025,7 @@
     "providersCount": 5
   },
   "928": {
-    "title": "Acrylic Prints (French Cleat Hanging) ",
+    "title": "Acrylic Prints",
     "providerId": 99,
     "price": "8.45",
     "premiumPrice": "6.51",
@@ -4043,7 +4043,7 @@
     "providersCount": 8
   },
   "934": {
-    "title": "Men's Puffer Jacket (AOP)",
+    "title": "Men's Puffer Jacket - All-Over Print",
     "providerId": 99,
     "price": "10.25",
     "premiumPrice": "7.89",
@@ -4052,7 +4052,7 @@
     "providersCount": 5
   },
   "937": {
-    "title": "Matte Canvas, Stretched, 0.75\" (Multi-Size)",
+    "title": "Matte Canvas, Stretched, 0.75\"",
     "providerId": 99,
     "price": "27.05",
     "premiumPrice": "20.83",
@@ -4079,7 +4079,7 @@
     "providersCount": 7
   },
   "944": {
-    "title": "Matte Canvas, Framed (Multi-color)",
+    "title": "Matte Canvas, Framed",
     "providerId": 99,
     "price": "26.60",
     "premiumPrice": "20.48",
@@ -4097,7 +4097,7 @@
     "providersCount": 2
   },
   "946": {
-    "title": "Unisex DryBlend® Hooded Sweatshirt",
+    "title": "Unisex Moisture-Wicking Hooded Sweatshirt",
     "providerId": 99,
     "price": "23.35",
     "premiumPrice": "17.98",
@@ -4106,7 +4106,7 @@
     "providersCount": 3
   },
   "947": {
-    "title": "Women's Casual Leggings (AOP)",
+    "title": "Women's Casual Leggings - All-Over Print",
     "providerId": 99,
     "price": "11.50",
     "premiumPrice": "8.86",
@@ -4115,7 +4115,7 @@
     "providersCount": 4
   },
   "948": {
-    "title": "Basketball Shorts (AOP)",
+    "title": "Basketball Shorts - All-Over Print",
     "providerId": 99,
     "price": "18.00",
     "premiumPrice": "13.86",
@@ -4124,7 +4124,7 @@
     "providersCount": 5
   },
   "949": {
-    "title": "Basketball Jersey (AOP)",
+    "title": "Basketball Jersey - All-Over Print",
     "providerId": 99,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -4196,7 +4196,7 @@
     "providersCount": 7
   },
   "958": {
-    "title": "Unisex DryBlend® Crewneck Sweatshirt",
+    "title": "Unisex Moisture-Wicking Crewneck Sweatshirt",
     "providerId": 99,
     "price": "27.35",
     "premiumPrice": "21.06",
@@ -4214,7 +4214,7 @@
     "providersCount": 2
   },
   "960": {
-    "title": "Girls' Sleeveless Sundress (AOP)",
+    "title": "Girls' Sleeveless Sundress - All-Over Print",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -4341,7 +4341,7 @@
     "providersCount": 5
   },
   "977": {
-    "title": "Men's Elastic Beach Shorts (AOP)",
+    "title": "Men's Elastic Beach Shorts - All-Over Print",
     "providerId": 99,
     "price": "11.50",
     "premiumPrice": "8.86",
@@ -4350,7 +4350,7 @@
     "providersCount": 6
   },
   "978": {
-    "title": "Men's Mid-Length Swim Shorts (AOP)",
+    "title": "Men's Mid-Length Swim Shorts - All-Over Print",
     "providerId": 99,
     "price": "18.00",
     "premiumPrice": "13.86",
@@ -4377,7 +4377,7 @@
     "providersCount": 2
   },
   "981": {
-    "title": "Unisex NuBlend® Crewneck Sweatshirt",
+    "title": "Unisex Fleece Crewneck Sweatshirt",
     "providerId": 99,
     "price": "18.00",
     "premiumPrice": "13.86",
@@ -4467,7 +4467,7 @@
     "providersCount": 4
   },
   "997": {
-    "title": "Men's Tank (AOP)",
+    "title": "Men's Tank - All-Over Print",
     "providerId": 99,
     "price": "11.25",
     "premiumPrice": "8.66",
@@ -4566,7 +4566,7 @@
     "providersCount": 6
   },
   "1014": {
-    "title": "Women's Tie-Dye Crop Tee",
+    "title": "Women's Tie-Dye Crop T-Shirt",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -4620,7 +4620,7 @@
     "providersCount": 2
   },
   "1023": {
-    "title": "Lightweight Sweatshirt (AOP)",
+    "title": "Lightweight Sweatshirt - All-Over Print",
     "providerId": 99,
     "price": "20.00",
     "premiumPrice": "15.40",
@@ -4647,7 +4647,7 @@
     "providersCount": 6
   },
   "1028": {
-    "title": "Men's Hoodie (AOP)",
+    "title": "Men's Hoodie - All-Over Print",
     "providerId": 90,
     "price": "45.76",
     "premiumPrice": "26.99",
@@ -4666,7 +4666,7 @@
     "providersCount": 3
   },
   "1032": {
-    "title": "Men's Loose T-shirt (AOP)",
+    "title": "Men's Loose T-shirt - All-Over Print",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -4693,7 +4693,7 @@
     "providersCount": 7
   },
   "1036": {
-    "title": "Stuffed Animals with Tee",
+    "title": "Stuffed Animals with T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -4702,7 +4702,7 @@
     "providersCount": 2
   },
   "1037": {
-    "title": "Women's Satin Pajamas (AOP)",
+    "title": "Women's Satin Pajamas - All-Over Print",
     "providerId": 99,
     "price": "11.50",
     "premiumPrice": "8.86",
@@ -4783,7 +4783,7 @@
     "providersCount": 7
   },
   "1050": {
-    "title": "Women’s Capri Leggings (AOP)",
+    "title": "Women’s Capri Leggings - All-Over Print",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -4828,7 +4828,7 @@
     "providersCount": 6
   },
   "1062": {
-    "title": "Unisex Tank Top (AOP)",
+    "title": "Unisex Tank Top - All-Over Print",
     "providerId": 99,
     "price": "16.00",
     "premiumPrice": "12.32",
@@ -4891,7 +4891,7 @@
     "providersCount": 3
   },
   "1073": {
-    "title": "Postcard Bundles (envelopes not included) ",
+    "title": "Postcard Bundles (envelopes not included)",
     "providerId": 99,
     "price": "13.50",
     "premiumPrice": "10.39",
@@ -4918,7 +4918,7 @@
     "providersCount": 8
   },
   "1078": {
-    "title": "Basketball Rib Shorts (AOP)",
+    "title": "Basketball Rib Shorts - All-Over Print",
     "providerId": 99,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -4954,7 +4954,7 @@
     "providersCount": 7
   },
   "1084": {
-    "title": "Athletic Long Shorts (AOP)",
+    "title": "Athletic Long Shorts - All-Over Print",
     "providerId": 99,
     "price": "10.25",
     "premiumPrice": "7.89",
@@ -4981,7 +4981,7 @@
     "providersCount": 3
   },
   "1087": {
-    "title": "Unisex Football Jersey (AOP)",
+    "title": "Unisex Football Jersey - All-Over Print",
     "providerId": 99,
     "price": "11.25",
     "premiumPrice": "8.66",
@@ -5053,7 +5053,7 @@
     "providersCount": 5
   },
   "1097": {
-    "title": "Youth Leggings (AOP)",
+    "title": "Youth Leggings - All-Over Print",
     "providerId": 99,
     "price": "11.50",
     "premiumPrice": "8.86",
@@ -5089,7 +5089,7 @@
     "providersCount": 3
   },
   "1101": {
-    "title": "Postcard Bundles (envelopes included) ",
+    "title": "Postcard Bundles (envelopes included)",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -5143,7 +5143,7 @@
     "providersCount": 4
   },
   "1110": {
-    "title": "Women's Shorts (AOP)",
+    "title": "Women's Shorts - All-Over Print",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -5197,7 +5197,7 @@
     "providersCount": 2
   },
   "1121": {
-    "title": "Unisex Moisture Wicking Tee",
+    "title": "Unisex Moisture Wicking T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -5215,7 +5215,7 @@
     "providersCount": 4
   },
   "1123": {
-    "title": "Ladies Competitor Tee",
+    "title": "Ladies Competitor T-Shirt",
     "providerId": 99,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -5288,7 +5288,7 @@
     "cost": "17.80"
   },
   "1132": {
-    "title": "Women's Biker Shorts (AOP)",
+    "title": "Women's Biker Shorts - All-Over Print",
     "providerId": 99,
     "price": "16.25",
     "premiumPrice": "12.51",
@@ -5360,7 +5360,7 @@
     "providersCount": 8
   },
   "1141": {
-    "title": "Youth Long Sleeve Competitor Tee",
+    "title": "Youth Long Sleeve Competitor T-Shirt",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -5369,7 +5369,7 @@
     "providersCount": 2
   },
   "1142": {
-    "title": "Youth Competitor Tee",
+    "title": "Youth Competitor T-Shirt",
     "providerId": 99,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -5423,7 +5423,7 @@
     "providersCount": 2
   },
   "1149": {
-    "title": "Puzzle (110, 252, 520, 1014-piece)",
+    "title": "Puzzle (, 252, 520, 1014-piece)",
     "providerId": 99,
     "price": "15.00",
     "premiumPrice": "11.55",
@@ -5450,7 +5450,7 @@
     "providersCount": 6
   },
   "1154": {
-    "title": "Insulated Coffee Mug, 10oz ",
+    "title": "Insulated Coffee Mug, 10oz",
     "providerId": 99,
     "price": "5.70",
     "premiumPrice": "4.39",
@@ -5487,7 +5487,7 @@
     "providersCount": 6
   },
   "1160": {
-    "title": "Stainless Steel Travel Mug with Handle, 14oz",
+    "title": "Insulated Stainless Steel Travel Mug with Handle, 14oz",
     "providerId": 99,
     "price": "7.70",
     "premiumPrice": "5.93",
@@ -5532,7 +5532,7 @@
     "providersCount": 3
   },
   "1174": {
-    "title": "Plus Size Leggings (AOP)",
+    "title": "Plus Size Leggings - All-Over Print",
     "providerId": 99,
     "price": "10.25",
     "premiumPrice": "7.89",
@@ -5550,7 +5550,7 @@
     "providersCount": 2
   },
   "1177": {
-    "title": "Women's Casual Shorts (AOP)",
+    "title": "Women's Casual Shorts - All-Over Print",
     "providerId": 99,
     "price": "11.25",
     "premiumPrice": "8.66",
@@ -5595,7 +5595,7 @@
     "providersCount": 3
   },
   "1185": {
-    "title": "Kids Leggings (AOP)",
+    "title": "Kids Leggings - All-Over Print",
     "providerId": 99,
     "price": "17.00",
     "premiumPrice": "13.09",
@@ -5622,7 +5622,7 @@
     "providersCount": 3
   },
   "1192": {
-    "title": "Unisex Lightweight Long Sleeve Tee",
+    "title": "Unisex Lightweight Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "14.23",
     "premiumPrice": "10.96",
@@ -5721,7 +5721,7 @@
     "providersCount": 6
   },
   "1209": {
-    "title": "Unisex Basketball Jersey (AOP)",
+    "title": "Unisex Basketball Jersey - All-Over Print",
     "providerId": 99,
     "price": "15.00",
     "premiumPrice": "11.55",
@@ -5757,7 +5757,7 @@
     "providersCount": 7
   },
   "1217": {
-    "title": "Youth Joggers (AOP)",
+    "title": "Youth Joggers - All-Over Print",
     "providerId": 99,
     "price": "11.50",
     "premiumPrice": "8.86",
@@ -5766,7 +5766,7 @@
     "providersCount": 8
   },
   "1218": {
-    "title": "Children's Hoodie (AOP)",
+    "title": "Children's Hoodie - All-Over Print",
     "providerId": 99,
     "price": "38.00",
     "premiumPrice": "29.26",
@@ -5838,7 +5838,7 @@
     "providersCount": 2
   },
   "1234": {
-    "title": "Men's Fine Jersey Tee",
+    "title": "Men's Fine Jersey T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -5865,7 +5865,7 @@
     "providersCount": 6
   },
   "1238": {
-    "title": "Classic Stretched Canvas",
+    "title": "Classic Gallery Wrapped Canvas Wall Art",
     "providerId": 99,
     "price": "24.60",
     "premiumPrice": "18.94",
@@ -5883,7 +5883,7 @@
     "providersCount": 2
   },
   "1242": {
-    "title": "Men's Polyester Tee (AOP)",
+    "title": "Men's Polyester T-Shirt - All-Over Print",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -5946,7 +5946,7 @@
     "providersCount": 6
   },
   "1251": {
-    "title": "Women's Pajama Pants (AOP)",
+    "title": "Women's Pajama Pants - All-Over Print",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -5964,7 +5964,7 @@
     "providersCount": 2
   },
   "1254": {
-    "title": "Men's Pajama Pants (AOP)",
+    "title": "Men's Pajama Pants - All-Over Print",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -5973,7 +5973,7 @@
     "providersCount": 3
   },
   "1255": {
-    "title": "Women's Long Sleeve V-neck Shirt (AOP)",
+    "title": "Women's Long Sleeve V-neck Shirt - All-Over Print",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -6000,7 +6000,7 @@
     "providersCount": 6
   },
   "1260": {
-    "title": "Kids Lounge Pants (AOP)",
+    "title": "Kids Lounge Pants - All-Over Print",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -6009,7 +6009,7 @@
     "providersCount": 2
   },
   "1261": {
-    "title": "Men's Long Sleeve Shirt (AOP)",
+    "title": "Men's Long Sleeve Shirt - All-Over Print",
     "providerId": 47,
     "price": "20.27",
     "premiumPrice": "22.55",
@@ -6019,7 +6019,7 @@
     "cost": "22.55"
   },
   "1262": {
-    "title": "Women's Skater Dress (AOP)",
+    "title": "Women's Skater Dress - All-Over Print",
     "providerId": 99,
     "price": "16.50",
     "premiumPrice": "12.71",
@@ -6028,7 +6028,7 @@
     "providersCount": 4
   },
   "1263": {
-    "title": "Women's Long Sleeve Dance Dress (AOP)",
+    "title": "Women's Long Sleeve Dance Dress - All-Over Print",
     "providerId": 99,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -6073,7 +6073,7 @@
     "providersCount": 4
   },
   "1270": {
-    "title": "Athletic Hoodie (AOP)",
+    "title": "Athletic Hoodie - All-Over Print",
     "providerId": 99,
     "price": "37.43",
     "premiumPrice": "28.82",
@@ -6109,7 +6109,7 @@
     "providersCount": 4
   },
   "1283": {
-    "title": " Men’s Sports Shorts (AOP)",
+    "title": "Men’s Sports Shorts - All-Over Print",
     "providerId": 99,
     "price": "13.50",
     "premiumPrice": "10.39",
@@ -6136,7 +6136,7 @@
     "providersCount": 2
   },
   "1289": {
-    "title": "Women's Short Sleeve Shirt (AOP)",
+    "title": "Women's Short Sleeve Shirt - All-Over Print",
     "providerId": 99,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -6145,7 +6145,7 @@
     "providersCount": 3
   },
   "1290": {
-    "title": "Women's Workout Shorts (AOP)",
+    "title": "Women's Workout Shorts - All-Over Print",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -6163,7 +6163,7 @@
     "providersCount": 7
   },
   "1294": {
-    "title": "Post-it® Note Pads",
+    "title": "Post-it Note Pads",
     "providerId": 99,
     "price": "10.25",
     "premiumPrice": "7.89",
@@ -6199,7 +6199,7 @@
     "providersCount": 5
   },
   "1299": {
-    "title": "Unisex Long Body Urban Tee",
+    "title": "Unisex Long Body Urban T-Shirt",
     "providerId": 99,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -6208,7 +6208,7 @@
     "providersCount": 6
   },
   "1300": {
-    "title": "Adjustable Tote Bag (AOP)",
+    "title": "Adjustable Tote Bag - All-Over Print",
     "providerId": 99,
     "price": "12.25",
     "premiumPrice": "9.43",
@@ -6271,7 +6271,7 @@
     "providersCount": 6
   },
   "1307": {
-    "title": "Unisex Tall Beefy-T® T-Shirt",
+    "title": "Unisex Tall Heavyweight Cotton T-Shirt T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -6343,7 +6343,7 @@
     "providersCount": 2
   },
   "1317": {
-    "title": "Unisex CVC Jersey T-shirt",
+    "title": "Unisex Cotton-Blend Jersey T-shirt",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -6352,7 +6352,7 @@
     "providersCount": 3
   },
   "1318": {
-    "title": "Unisex Ultra Cotton® Tall T-Shirt",
+    "title": "Unisex Ultra Cotton Tall T-Shirt",
     "providerId": 99,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -6433,7 +6433,7 @@
     "providersCount": 3
   },
   "1332": {
-    "title": "Men's Sports Jersey (AOP)",
+    "title": "Men's Sports Jersey - All-Over Print",
     "providerId": 99,
     "price": "16.00",
     "premiumPrice": "12.32",
@@ -6442,7 +6442,7 @@
     "providersCount": 4
   },
   "1333": {
-    "title": "Women's Sports Jersey (AOP)",
+    "title": "Women's Sports Jersey - All-Over Print",
     "providerId": 99,
     "price": "13.25",
     "premiumPrice": "10.20",
@@ -6451,7 +6451,7 @@
     "providersCount": 5
   },
   "1334": {
-    "title": "Kids Sports Jersey (AOP)",
+    "title": "Kids Sports Jersey - All-Over Print",
     "providerId": 99,
     "price": "10.50",
     "premiumPrice": "8.09",
@@ -6487,7 +6487,7 @@
     "providersCount": 2
   },
   "1338": {
-    "title": "Men's Sports Warmup Hoodie (AOP)",
+    "title": "Men's Sports Warmup Hoodie - All-Over Print",
     "providerId": 99,
     "price": "33.00",
     "premiumPrice": "25.41",
@@ -6523,7 +6523,7 @@
     "providersCount": 5
   },
   "1349": {
-    "title": "Men's Heavy Oversized Tee",
+    "title": "Men's Heavy Oversized T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -6532,7 +6532,7 @@
     "providersCount": 7
   },
   "1350": {
-    "title": "Unisex Heavy Cotton Pocket Tee",
+    "title": "Unisex Heavy Cotton Pocket T-Shirt",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -6568,7 +6568,7 @@
     "providersCount": 2
   },
   "1359": {
-    "title": "Aluminum Ornaments (1pc, 5pcs, 10pcs, 20pcs)",
+    "title": "Aluminum Ornaments",
     "providerId": 99,
     "price": "15.00",
     "premiumPrice": "11.55",
@@ -6586,7 +6586,7 @@
     "providersCount": 4
   },
   "1361": {
-    "title": "Ceramic Ornaments (1pcs, 5pcs, 10pcs, 20pcs)",
+    "title": "Ceramic Ornaments",
     "providerId": 99,
     "price": "9.50",
     "premiumPrice": "7.32",
@@ -6640,7 +6640,7 @@
     "providersCount": 6
   },
   "1370": {
-    "title": "Ceramic Ornaments, 2-Side Print, (1pc, 3pcs, 5pcs, 10pcs)",
+    "title": "Ceramic Ornaments, 2-Side Print",
     "providerId": 99,
     "price": "10.70",
     "premiumPrice": "8.24",
@@ -6668,7 +6668,7 @@
     "cost": "7.35"
   },
   "1382": {
-    "title": "Unisex Oversized Boxy Tee",
+    "title": "Unisex Oversized Boxy T-Shirt",
     "providerId": 99,
     "price": "8.46",
     "premiumPrice": "6.51",
@@ -6704,7 +6704,7 @@
     "providersCount": 3
   },
   "1389": {
-    "title": "Tote Bag (AOP)",
+    "title": "Tote Bag - All-Over Print",
     "providerId": 99,
     "price": "15.00",
     "premiumPrice": "11.55",
@@ -6722,7 +6722,7 @@
     "providersCount": 6
   },
   "1391": {
-    "title": "Women’s Puffer Jacket (AOP)",
+    "title": "Women’s Puffer Jacket - All-Over Print",
     "providerId": 99,
     "price": "9.50",
     "premiumPrice": "7.32",
@@ -6731,7 +6731,7 @@
     "providersCount": 7
   },
   "1393": {
-    "title": "Women's Boxy Tee",
+    "title": "Women's Boxy T-Shirt",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -6767,7 +6767,7 @@
     "providersCount": 5
   },
   "1397": {
-    "title": "Windbreaker Jacket (AOP)",
+    "title": "Windbreaker Jacket - All-Over Print",
     "providerId": 99,
     "price": "11.50",
     "premiumPrice": "8.86",
@@ -6785,7 +6785,7 @@
     "providersCount": 7
   },
   "1400": {
-    "title": "Heavy Cotton™ Toddler T-shirt",
+    "title": "Heavy Cotton Toddler T-shirt",
     "providerId": 99,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -6839,7 +6839,7 @@
     "providersCount": 6
   },
   "1433": {
-    "title": "Sublimation Crew Socks",
+    "title": "All-Over Print Crew Socks",
     "providerId": 99,
     "price": "8.80",
     "premiumPrice": "6.78",
@@ -6866,7 +6866,7 @@
     "providersCount": 2
   },
   "1436": {
-    "title": "Unisex Midweight Softstyle Fleece Crewneck Sweatshirt",
+    "title": "Unisex Midweight Soft Cotton Fleece Crewneck Sweatshirt",
     "providerId": 99,
     "price": "29.70",
     "premiumPrice": "22.87",
@@ -6885,7 +6885,7 @@
     "cost": "31.32"
   },
   "1439": {
-    "title": "Unisex HD Cotton™ T-shirt",
+    "title": "Unisex HD Cotton T-shirt",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -6939,7 +6939,7 @@
     "providersCount": 7
   },
   "1457": {
-    "title": "Unisex Heavy Faded Tee",
+    "title": "Unisex Vintage Washed Heavyweight Cotton T-Shirt",
     "providerId": 99,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -7011,7 +7011,7 @@
     "providersCount": 3
   },
   "1468": {
-    "title": "Scented Soy Candle (Multi-Size, Amber Jar)",
+    "title": "Scented Soy Candle",
     "providerId": 99,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -7029,7 +7029,7 @@
     "providersCount": 8
   },
   "1470": {
-    "title": "EVA Foam Rubber Shoes (AOP)",
+    "title": "EVA Foam Rubber Shoes - All-Over Print",
     "providerId": 99,
     "price": "48.00",
     "premiumPrice": "36.96",
@@ -7047,7 +7047,7 @@
     "providersCount": 3
   },
   "1473": {
-    "title": "adidas Unisex Fleece Hoodie",
+    "title": "Classic Fleece Pullover Hoodie",
     "providerId": 99,
     "price": "28.00",
     "premiumPrice": "21.56",
@@ -7056,7 +7056,7 @@
     "providersCount": 5
   },
   "1474": {
-    "title": "adidas Unisex Fleece Crewneck Sweatshirt",
+    "title": "Classic Fleece Crewneck Sweatshirt",
     "providerId": 99,
     "price": "27.35",
     "premiumPrice": "21.06",
@@ -7065,7 +7065,7 @@
     "providersCount": 6
   },
   "1475": {
-    "title": "adidas Unisex Performance Polo",
+    "title": "Athletic Performance Pique Polo",
     "providerId": 99,
     "price": "17.50",
     "premiumPrice": "13.47",
@@ -7074,7 +7074,7 @@
     "providersCount": 7
   },
   "1476": {
-    "title": "Unisex Garment-Dyed Heavyweight Cotton Tee",
+    "title": "Unisex Garment-Dyed Heavyweight Cotton T-Shirt",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -7083,7 +7083,7 @@
     "providersCount": 8
   },
   "1478": {
-    "title": "Men's T-Shirt (AOP)",
+    "title": "Men's T-Shirt - All-Over Print",
     "providerId": 99,
     "price": "8.46",
     "premiumPrice": "6.51",
@@ -7119,7 +7119,7 @@
     "providersCount": 7
   },
   "1484": {
-    "title": "Women's T-Shirt (AOP)",
+    "title": "Women's T-Shirt - All-Over Print",
     "providerId": 99,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -7128,7 +7128,7 @@
     "providersCount": 2
   },
   "1485": {
-    "title": "Men's Crewneck Sweatshirt (AOP)",
+    "title": "Men's Crewneck Sweatshirt - All-Over Print",
     "providerId": 14,
     "price": "36.91",
     "premiumPrice": "19.52",
@@ -7138,7 +7138,7 @@
     "cost": "19.52"
   },
   "1486": {
-    "title": "Women's Crewneck Sweatshirt (AOP)",
+    "title": "Women's Crewneck Sweatshirt - All-Over Print",
     "providerId": 99,
     "price": "19.35",
     "premiumPrice": "14.90",
@@ -7174,7 +7174,7 @@
     "providersCount": 7
   },
   "1490": {
-    "title": "Men's Pajama Set (AOP)",
+    "title": "Men's Pajama Set - All-Over Print",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -7210,7 +7210,7 @@
     "providersCount": 4
   },
   "1494": {
-    "title": "Chest Bag (AOP)",
+    "title": "Chest Bag - All-Over Print",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -7246,7 +7246,7 @@
     "providersCount": 2
   },
   "1499": {
-    "title": "Women's Varsity Jacket (AOP)",
+    "title": "Women's Varsity Jacket - All-Over Print",
     "providerId": 99,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -7282,7 +7282,7 @@
     "providersCount": 7
   },
   "1504": {
-    "title": "Organic Rib Baby Tee",
+    "title": "Organic Rib Baby T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -7426,7 +7426,7 @@
     "providersCount": 4
   },
   "1522": {
-    "title": "AirPod Max Cases (AOP)",
+    "title": "AirPod Max Cases - All-Over Print",
     "providerId": 99,
     "price": "8.35",
     "premiumPrice": "6.43",
@@ -7444,7 +7444,7 @@
     "providersCount": 6
   },
   "1525": {
-    "title": "Unisex Midweight Softstyle Fleece Hoodie",
+    "title": "Unisex Midweight Soft Cotton Fleece Hoodie",
     "providerId": 99,
     "price": "27.43",
     "premiumPrice": "21.12",
@@ -7507,7 +7507,7 @@
     "providersCount": 8
   },
   "1533": {
-    "title": "Men's Hawaiian Camp Shirt (AOP)",
+    "title": "Men's Hawaiian Camp Shirt - All-Over Print",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -7516,7 +7516,7 @@
     "providersCount": 2
   },
   "1534": {
-    "title": "Kid's EVA Foam Clogs (AOP)",
+    "title": "Kid's EVA Foam Clogs - All-Over Print",
     "providerId": 99,
     "price": "10.25",
     "premiumPrice": "7.89",
@@ -7588,7 +7588,7 @@
     "providersCount": 4
   },
   "1568": {
-    "title": "Unisex ComfortWash® Garment-Dyed T-Shirt",
+    "title": "Unisex Vintage Garment-Washed Garment-Dyed T-Shirt",
     "providerId": 99,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -7597,7 +7597,7 @@
     "providersCount": 2
   },
   "1569": {
-    "title": "Unisex ComfortWash® Garment-Dyed Long Sleeve T-Shirt",
+    "title": "Unisex Vintage Garment-Washed Garment-Dyed Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -7606,7 +7606,7 @@
     "providersCount": 3
   },
   "1570": {
-    "title": "Unisex ComfortWash® Garment Dyed Crewneck Sweatshirt",
+    "title": "Unisex Vintage Garment-Washed Garment Dyed Crewneck Sweatshirt",
     "providerId": 99,
     "price": "19.35",
     "premiumPrice": "14.90",
@@ -7615,7 +7615,7 @@
     "providersCount": 4
   },
   "1571": {
-    "title": "Men's Staple Faded Tee",
+    "title": "Men's Vintage Faded Cotton T-Shirt",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -7651,7 +7651,7 @@
     "providersCount": 8
   },
   "1575": {
-    "title": "Unisex Urban Heavy Tee",
+    "title": "Unisex Urban Heavy T-Shirt",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -7696,7 +7696,7 @@
     "providersCount": 6
   },
   "1580": {
-    "title": "Women's Baby Tee",
+    "title": "Women's Baby T-Shirt",
     "providerId": 99,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -7705,7 +7705,7 @@
     "providersCount": 7
   },
   "1581": {
-    "title": "Champion Unisex Packable Anorak Jacket",
+    "title": "Unisex Packable Anorak Jacket",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -7723,7 +7723,7 @@
     "providersCount": 3
   },
   "1585": {
-    "title": "Men's Basic Tee",
+    "title": "Men's Basic T-Shirt",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -7732,7 +7732,7 @@
     "providersCount": 5
   },
   "1586": {
-    "title": "Men's Staple Ringer Tee",
+    "title": "Men's Retro Contrast Ringer T-Shirt",
     "providerId": 99,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -7741,7 +7741,7 @@
     "providersCount": 6
   },
   "1587": {
-    "title": "Men's Staple V Neck Tee",
+    "title": "Men's Classic V-Neck Cotton T-Shirt",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -7759,7 +7759,7 @@
     "providersCount": 8
   },
   "1589": {
-    "title": "Basketball Training Shorts (AOP)",
+    "title": "Basketball Training Shorts - All-Over Print",
     "providerId": 99,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -7867,7 +7867,7 @@
     "providersCount": 8
   },
   "1603": {
-    "title": "Unisex Freestyler Dry Handfeel Heavy Tee",
+    "title": "Unisex Relaxed Heavyweight Textured Cotton T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -7876,7 +7876,7 @@
     "providersCount": 2
   },
   "1604": {
-    "title": "Unisex Polo Shirt (AOP)",
+    "title": "Unisex Polo Shirt - All-Over Print",
     "providerId": 99,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -7885,7 +7885,7 @@
     "providersCount": 3
   },
   "1605": {
-    "title": "Men's UV Protection Long Sleeve Shirt (AOP)",
+    "title": "Men's UV Protection Long Sleeve Shirt - All-Over Print",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -7903,7 +7903,7 @@
     "providersCount": 5
   },
   "1607": {
-    "title": "Men's Acid Washed Heavy Oversize Tee",
+    "title": "Men's Acid Washed Heavy Oversize T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -7930,7 +7930,7 @@
     "providersCount": 8
   },
   "1610": {
-    "title": "Maker Sip Tumbler,  20oz",
+    "title": "Maker Sip Tumbler, 20oz",
     "providerId": 99,
     "price": "7.70",
     "premiumPrice": "5.93",
@@ -7948,7 +7948,7 @@
     "providersCount": 3
   },
   "1612": {
-    "title": "Unisex Ultra Heavy Cotton Box Tee",
+    "title": "Unisex Ultra Heavyweight Boxy Cotton T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -7957,7 +7957,7 @@
     "providersCount": 4
   },
   "1613": {
-    "title": "Acrylic Ornaments (Multi-shape)",
+    "title": "Acrylic Ornaments",
     "providerId": 99,
     "price": "13.50",
     "premiumPrice": "10.39",
@@ -7984,7 +7984,7 @@
     "providersCount": 7
   },
   "1616": {
-    "title": "Men's Heavy Faded Long Sleeve Tee",
+    "title": "Men's Vintage Washed Heavyweight Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -8020,7 +8020,7 @@
     "providersCount": 4
   },
   "1620": {
-    "title": "Aluminum Ornaments (Multi-shape)",
+    "title": "Aluminum Ornaments",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -8047,7 +8047,7 @@
     "providersCount": 7
   },
   "1623": {
-    "title": "Decorative Ceramic Ornaments, Double-Sided (1pc, 3pcs, 5pcs, 10pcs)",
+    "title": "Decorative Ceramic Ornaments, Double-Sided",
     "providerId": 99,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -8065,7 +8065,7 @@
     "providersCount": 2
   },
   "1625": {
-    "title": "Decorative Ornaments, Ceramic (1pcs, 5pcs, 10pcs, 20pcs)",
+    "title": "Decorative Ornaments, Ceramic",
     "providerId": 99,
     "price": "17.50",
     "premiumPrice": "13.47",
@@ -8083,7 +8083,7 @@
     "providersCount": 4
   },
   "1627": {
-    "title": "Unisex Heavy Oversize Tee",
+    "title": "Unisex Heavy Oversize T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -8119,7 +8119,7 @@
     "providersCount": 8
   },
   "1632": {
-    "title": "Ceramic Decoration Ornament, (1pc)",
+    "title": "Ceramic Decoration Ornament",
     "providerId": 99,
     "price": "16.00",
     "premiumPrice": "12.32",
@@ -8273,7 +8273,7 @@
     "providersCount": 2
   },
   "1653": {
-    "title": "Unisex DryBlend® T-Shirt",
+    "title": "Unisex Moisture-Wicking T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -8291,7 +8291,7 @@
     "providersCount": 4
   },
   "1655": {
-    "title": "Youth DryBlend® T-Shirt",
+    "title": "Youth Moisture-Wicking T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -8300,7 +8300,7 @@
     "providersCount": 5
   },
   "1656": {
-    "title": "Performance® T-Shirt",
+    "title": "Performance T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -8417,7 +8417,7 @@
     "providersCount": 8
   },
   "1673": {
-    "title": "Youth Heavy Blend Zipped Hoodie",
+    "title": "Youth Heavyweight Fleece Zipped Hoodie",
     "providerId": 99,
     "price": "28.86",
     "premiumPrice": "22.22",
@@ -8462,7 +8462,7 @@
     "providersCount": 2
   },
   "1681": {
-    "title": "Youth T-shirt (AOP)",
+    "title": "Youth T-shirt - All-Over Print",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -8480,7 +8480,7 @@
     "providersCount": 4
   },
   "1683": {
-    "title": "Acid Washed Round Neck Tee",
+    "title": "Acid Washed Round Neck T-Shirt",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -8507,7 +8507,7 @@
     "providersCount": 7
   },
   "1687": {
-    "title": "Unisex Nantucket Crewneck Sweatshirt (Embroidery)",
+    "title": "Unisex Nantucket Crewneck Sweatshirt (Embroidered)",
     "providerId": 99,
     "price": "20.35",
     "premiumPrice": "15.67",
@@ -8516,7 +8516,7 @@
     "providersCount": 2
   },
   "1688": {
-    "title": "Softstyle Youth Midweight Hooded Sweatshirt",
+    "title": "Soft Cotton Youth Midweight Hooded Sweatshirt",
     "providerId": 99,
     "price": "25.70",
     "premiumPrice": "19.79",
@@ -8543,7 +8543,7 @@
     "providersCount": 5
   },
   "1691": {
-    "title": "Classic Cuffed Beanie (Embroidery)",
+    "title": "Classic Cuffed Beanie (Embroidered)",
     "providerId": 99,
     "price": "9.50",
     "premiumPrice": "7.32",
@@ -8570,7 +8570,7 @@
     "providersCount": 3
   },
   "1696": {
-    "title": "Women's Yoga Pants (AOP)",
+    "title": "Women's Yoga Pants - All-Over Print",
     "providerId": 99,
     "price": "14.25",
     "premiumPrice": "10.97",
@@ -8579,7 +8579,7 @@
     "providersCount": 4
   },
   "1697": {
-    "title": "Satin Posters",
+    "title": "Premium Satin Wall Art Poster",
     "providerId": 99,
     "price": "5.70",
     "premiumPrice": "4.39",
@@ -8606,7 +8606,7 @@
     "providersCount": 7
   },
   "1700": {
-    "title": "Men's Crewneck Long Sleeve Sweatshirt (AOP)",
+    "title": "Men's Crewneck Long Sleeve Sweatshirt - All-Over Print",
     "providerId": 332,
     "price": "21.05",
     "premiumPrice": "4.89",
@@ -8625,7 +8625,7 @@
     "providersCount": 2
   },
   "1702": {
-    "title": "Youth Jersey Long Sleeve Tee",
+    "title": "Youth Jersey Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -8643,7 +8643,7 @@
     "providersCount": 4
   },
   "1704": {
-    "title": "Hand Flag (1pc, 5pcs)",
+    "title": "Hand Flag",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -8688,7 +8688,7 @@
     "providersCount": 2
   },
   "1709": {
-    "title": "Women's Casual Dress (AOP)",
+    "title": "Women's Casual Dress - All-Over Print",
     "providerId": 99,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -8697,7 +8697,7 @@
     "providersCount": 3
   },
   "1712": {
-    "title": "Men's Heavyweight Tee",
+    "title": "Men's Heavyweight T-Shirt",
     "providerId": 99,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -8724,7 +8724,7 @@
     "providersCount": 3
   },
   "1717": {
-    "title": "Thermochromic Tote Bag (AOP)",
+    "title": "Thermochromic Tote Bag - All-Over Print",
     "providerId": 99,
     "price": "11.25",
     "premiumPrice": "8.66",
@@ -8733,7 +8733,7 @@
     "providersCount": 4
   },
   "1719": {
-    "title": "Vegan Wallet (Magsafe® Compatible)",
+    "title": "Vegan Wallet (Magsafe Compatible)",
     "providerId": 99,
     "price": "15.00",
     "premiumPrice": "11.55",
@@ -8760,7 +8760,7 @@
     "providersCount": 3
   },
   "1724": {
-    "title": "Women's Polyester Yoga Shorts (AOP)",
+    "title": "Women's Polyester Yoga Shorts - All-Over Print",
     "providerId": 99,
     "price": "10.50",
     "premiumPrice": "8.09",
@@ -8769,7 +8769,7 @@
     "providersCount": 4
   },
   "1725": {
-    "title": "Polyester Sports Bra (AOP)",
+    "title": "Polyester Sports Bra - All-Over Print",
     "providerId": 99,
     "price": "17.00",
     "premiumPrice": "13.09",
@@ -8787,7 +8787,7 @@
     "providersCount": 6
   },
   "1728": {
-    "title": "Knit Beanie (Embroidery)",
+    "title": "Knit Beanie (Embroidered)",
     "providerId": 99,
     "price": "18.00",
     "premiumPrice": "13.86",
@@ -8796,7 +8796,7 @@
     "providersCount": 8
   },
   "1729": {
-    "title": "Distressed Dad Hat (Embroidery)",
+    "title": "Distressed Dad Hat (Embroidered)",
     "providerId": 99,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -8805,7 +8805,7 @@
     "providersCount": 2
   },
   "1730": {
-    "title": "Unisex Polo Shirt (Embroidery)",
+    "title": "Unisex Polo Shirt (Embroidered)",
     "providerId": 99,
     "price": "8.46",
     "premiumPrice": "6.51",
@@ -8814,7 +8814,7 @@
     "providersCount": 3
   },
   "1731": {
-    "title": "Unisex Fleece Sweatpants (Embroidery)",
+    "title": "Unisex Fleece Sweatpants (Embroidered)",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -8823,7 +8823,7 @@
     "providersCount": 4
   },
   "1732": {
-    "title": "adidas® Quarter-Zip Pullover (Embroidery)",
+    "title": "Performance Quarter-Zip Pullover (Embroidered)",
     "providerId": 99,
     "price": "25.35",
     "premiumPrice": "19.52",
@@ -8832,7 +8832,7 @@
     "providersCount": 5
   },
   "1733": {
-    "title": "Unisex Eco Raglan Hoodie (Embroidery)",
+    "title": "Unisex Eco Raglan Hoodie (Embroidered)",
     "providerId": 99,
     "price": "33.86",
     "premiumPrice": "26.07",
@@ -8859,7 +8859,7 @@
     "providersCount": 8
   },
   "1736": {
-    "title": "Vintage Cap (Embroidery)",
+    "title": "Vintage Cap (Embroidered)",
     "providerId": 99,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -8886,7 +8886,7 @@
     "providersCount": 6
   },
   "1741": {
-    "title": "Organic Baseball Cap (Embroidery)",
+    "title": "Organic Baseball Cap (Embroidered)",
     "providerId": 99,
     "price": "9.25",
     "premiumPrice": "7.12",
@@ -8895,7 +8895,7 @@
     "providersCount": 7
   },
   "1742": {
-    "title": "Vintage Corduroy Cap (Embroidery)",
+    "title": "Vintage Corduroy Cap (Embroidered)",
     "providerId": 99,
     "price": "16.50",
     "premiumPrice": "12.71",
@@ -8913,7 +8913,7 @@
     "providersCount": 2
   },
   "1744": {
-    "title": "Closed-Back Structured Cap (Embroidery)",
+    "title": "Closed-Back Structured Cap (Embroidered)",
     "providerId": 99,
     "price": "10.25",
     "premiumPrice": "7.89",
@@ -8922,7 +8922,7 @@
     "providersCount": 3
   },
   "1745": {
-    "title": "Core Cotton Tee",
+    "title": "Essential Everyday Cotton T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -8949,7 +8949,7 @@
     "providersCount": 6
   },
   "1748": {
-    "title": "Unisex Crew Neck Sweater (AOP)",
+    "title": "Unisex Crew Neck Sweater - All-Over Print",
     "providerId": 99,
     "price": "21.70",
     "premiumPrice": "16.71",
@@ -8958,7 +8958,7 @@
     "providersCount": 7
   },
   "1749": {
-    "title": "Unisex Champion Tie-Dye Hoodie (Embroidery)",
+    "title": "Unisex Tie-Dye Hoodie (Embroidered)",
     "providerId": 99,
     "price": "35.00",
     "premiumPrice": "26.95",
@@ -8967,7 +8967,7 @@
     "providersCount": 8
   },
   "1750": {
-    "title": "Unisex Pique Polo Shirt (Embroidery)",
+    "title": "Unisex Pique Polo Shirt (Embroidered)",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -8976,7 +8976,7 @@
     "providersCount": 2
   },
   "1751": {
-    "title": "Women's Curvy Fine Jersey Tee",
+    "title": "Women's Curvy Fine Jersey T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -8985,7 +8985,7 @@
     "providersCount": 3
   },
   "1752": {
-    "title": "Camouflage Trucker Hat (Embroidery)",
+    "title": "Camouflage Trucker Hat (Embroidered)",
     "providerId": 99,
     "price": "16.00",
     "premiumPrice": "12.32",
@@ -8994,7 +8994,7 @@
     "providersCount": 4
   },
   "1753": {
-    "title": "Flat Bill Cap (Embroidery)",
+    "title": "Flat Bill Cap (Embroidered)",
     "providerId": 99,
     "price": "13.25",
     "premiumPrice": "10.20",
@@ -9003,7 +9003,7 @@
     "providersCount": 5
   },
   "1754": {
-    "title": "Unisex Fleece Pullover (Embroidery)",
+    "title": "Unisex Fleece Pullover (Embroidered)",
     "providerId": 99,
     "price": "23.70",
     "premiumPrice": "18.25",
@@ -9012,7 +9012,7 @@
     "providersCount": 6
   },
   "1755": {
-    "title": "Snapback (Embroidery)",
+    "title": "Snapback (Embroidered)",
     "providerId": 99,
     "price": "17.00",
     "premiumPrice": "13.09",
@@ -9021,7 +9021,7 @@
     "providersCount": 7
   },
   "1900": {
-    "title": "Denim Hat (Embroidery)",
+    "title": "Denim Hat (Embroidered)",
     "providerId": 99,
     "price": "12.25",
     "premiumPrice": "9.43",
@@ -9030,7 +9030,7 @@
     "providersCount": 5
   },
   "1901": {
-    "title": "5 Panel Cap (Embroidery)",
+    "title": "5 Panel Cap (Embroidered)",
     "providerId": 99,
     "price": "9.50",
     "premiumPrice": "7.32",
@@ -9039,7 +9039,7 @@
     "providersCount": 6
   },
   "1902": {
-    "title": "Unisex Columbia Fleece Jacket (Embroidery)",
+    "title": "Unisex All-Weather Full-Zip Fleece Jacket (Embroidered)",
     "providerId": 99,
     "price": "16.00",
     "premiumPrice": "12.32",
@@ -9048,7 +9048,7 @@
     "providersCount": 7
   },
   "1903": {
-    "title": "Unisex Joggers (Embroidery)",
+    "title": "Unisex Joggers (Embroidered)",
     "providerId": 99,
     "price": "13.25",
     "premiumPrice": "10.20",
@@ -9057,7 +9057,7 @@
     "providersCount": 8
   },
   "1905": {
-    "title": "Pom-Pom Knit Cap (Embroidery)",
+    "title": "Pom-Pom Knit Cap (Embroidered)",
     "providerId": 99,
     "price": "17.00",
     "premiumPrice": "13.09",
@@ -9066,7 +9066,7 @@
     "providersCount": 3
   },
   "1906": {
-    "title": "Oversized Tie-Dye T-Shirt (Embroidery)",
+    "title": "Oversized Tie-Dye T-Shirt (Embroidered)",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -9075,7 +9075,7 @@
     "providersCount": 4
   },
   "1907": {
-    "title": "Kids Fleece Hoodie (Embroidery)",
+    "title": "Kids Fleece Hoodie (Embroidered)",
     "providerId": 99,
     "price": "36.86",
     "premiumPrice": "28.38",
@@ -9093,7 +9093,7 @@
     "providersCount": 6
   },
   "1910": {
-    "title": "Bucket Hat (Embroidery)",
+    "title": "Bucket Hat (Embroidered)",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -9102,7 +9102,7 @@
     "providersCount": 8
   },
   "1911": {
-    "title": "Pixel Fleece Blanket (AOP)",
+    "title": "Pixel Fleece Blanket - All-Over Print",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -9111,7 +9111,7 @@
     "providersCount": 2
   },
   "1912": {
-    "title": "Women's Heavy Faded Crop Tee",
+    "title": "Women's Vintage Washed Cropped Cotton T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -9138,7 +9138,7 @@
     "providersCount": 7
   },
   "1917": {
-    "title": "Recycled Unisex Sweatshirt (AOP)",
+    "title": "Recycled Unisex Sweatshirt - All-Over Print",
     "providerId": 99,
     "price": "18.00",
     "premiumPrice": "13.86",
@@ -9156,7 +9156,7 @@
     "providersCount": 4
   },
   "1921": {
-    "title": "Under Armour® Men's Polo Shirt (Embroidery)",
+    "title": "Men's Athletic Performance Polo Shirt (Embroidered)",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -9165,7 +9165,7 @@
     "providersCount": 5
   },
   "1922": {
-    "title": "Ribbed Knit Beanie (Embroidery)",
+    "title": "Ribbed Knit Beanie (Embroidered)",
     "providerId": 99,
     "price": "16.50",
     "premiumPrice": "12.71",
@@ -9183,7 +9183,7 @@
     "providersCount": 2
   },
   "1926": {
-    "title": "Unisex Hooded Long Sleeve Tee",
+    "title": "Unisex Hooded Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -9201,7 +9201,7 @@
     "providersCount": 4
   },
   "1928": {
-    "title": "Men's Champion Crewneck Sweatshirt",
+    "title": "Men's Crewneck Sweatshirt",
     "providerId": 99,
     "price": "21.70",
     "premiumPrice": "16.71",
@@ -9246,7 +9246,7 @@
     "providersCount": 8
   },
   "1940": {
-    "title": "Flip Straw 25oz Bottle with Tritan™ Renew",
+    "title": "Flip Straw 25oz Bottle with Tritan Renew",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -9255,7 +9255,7 @@
     "providersCount": 3
   },
   "1941": {
-    "title": "Unisex Adult Quarter-Zip Sweatshirt",
+    "title": "Classic Quarter-Zip Fleece Sweatshirt",
     "providerId": 99,
     "price": "26.00",
     "premiumPrice": "20.02",
@@ -9264,7 +9264,7 @@
     "providersCount": 4
   },
   "1942": {
-    "title": "Men's Heavy Faded Tank",
+    "title": "Men's Vintage Washed Heavyweight Tank Top",
     "providerId": 99,
     "price": "16.25",
     "premiumPrice": "12.51",
@@ -9282,7 +9282,7 @@
     "providersCount": 6
   },
   "1947": {
-    "title": "DryBlend® Youth Jersey Polo",
+    "title": "Moisture-Wicking Youth Jersey Polo",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -9327,7 +9327,7 @@
     "providersCount": 3
   },
   "1955": {
-    "title": "Women’s Poly-Cotton Crop Tee",
+    "title": "Women’s Poly-Cotton Crop T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -9336,7 +9336,7 @@
     "providersCount": 4
   },
   "1957": {
-    "title": "District® V.I.T.™ Unisex Fleece Jogger (Embroidery)",
+    "title": "Unisex Fleece Jogger (Embroidered)",
     "providerId": 99,
     "price": "11.25",
     "premiumPrice": "8.66",
@@ -9354,7 +9354,7 @@
     "providersCount": 7
   },
   "1959": {
-    "title": "District® V.I.T.™ Unisex Fleece Crew",
+    "title": "Unisex Fleece Crew",
     "providerId": 99,
     "price": "15.00",
     "premiumPrice": "11.55",
@@ -9372,7 +9372,7 @@
     "providersCount": 2
   },
   "1961": {
-    "title": "Men's Quilted Full-Zip Jacket (Embroidery)",
+    "title": "Men's Quilted Full-Zip Jacket (Embroidered)",
     "providerId": 99,
     "price": "9.50",
     "premiumPrice": "7.32",
@@ -9399,7 +9399,7 @@
     "providersCount": 6
   },
   "1965": {
-    "title": "Port Authority® Unisex Long Sleeve Shirt (Embroidery)",
+    "title": "Executive Unisex Long Sleeve Shirt (Embroidered)",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -9408,7 +9408,7 @@
     "providersCount": 7
   },
   "1966": {
-    "title": "Port Authority® Men's Long Sleeve UV Daybreak Shirt (Embroidery)",
+    "title": "Executive Men's Long Sleeve UV Daybreak Shirt (Embroidered)",
     "providerId": 99,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -9417,7 +9417,7 @@
     "providersCount": 8
   },
   "1967": {
-    "title": "District® Unisex Jersey Full-Zip Hoodie",
+    "title": "Unisex Jersey Full-Zip Hoodie",
     "providerId": 99,
     "price": "26.86",
     "premiumPrice": "20.68",
@@ -9435,7 +9435,7 @@
     "providersCount": 4
   },
   "1970": {
-    "title": "Sport-Tek® PosiCharge® Competitor™ Polo",
+    "title": "Performance Athletic Polo",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -9444,7 +9444,7 @@
     "providersCount": 5
   },
   "1971": {
-    "title": "CornerStone® Washed Duck Cloth Vest (Embroidery)",
+    "title": "CornerStone Washed Duck Cloth Vest (Embroidered)",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -9462,7 +9462,7 @@
     "providersCount": 7
   },
   "1973": {
-    "title": "Port Authority® Men's Core Soft Shell Vest",
+    "title": "Executive Men's Core Soft Shell Vest",
     "providerId": 99,
     "price": "13.50",
     "premiumPrice": "10.39",
@@ -9471,7 +9471,7 @@
     "providersCount": 8
   },
   "1974": {
-    "title": "Port Authority® Unisex Short Sleeve UV Daybreak Shirt (Embroidery)",
+    "title": "Executive Unisex Short Sleeve UV Daybreak Shirt (Embroidered)",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -9489,7 +9489,7 @@
     "providersCount": 3
   },
   "1976": {
-    "title": "CornerStone® Unisex Duck Cloth Work Jacket ",
+    "title": "CornerStone Unisex Duck Cloth Work Jacket",
     "providerId": 99,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -9507,7 +9507,7 @@
     "providersCount": 5
   },
   "1978": {
-    "title": "Port Authority® Men's Core Soft Shell Jacket (Embroidery)",
+    "title": "Executive Men's Core Soft Shell Jacket (Embroidered)",
     "providerId": 99,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -9516,7 +9516,7 @@
     "providersCount": 6
   },
   "1979": {
-    "title": "District® V.I.T.™ Men's Fleece Hoodie",
+    "title": "Men's Fleece Hoodie",
     "providerId": 99,
     "price": "30.86",
     "premiumPrice": "23.76",
@@ -9525,7 +9525,7 @@
     "providersCount": 7
   },
   "1982": {
-    "title": "Mercer+Mettle® Men's Recharge Jersey Polo",
+    "title": "Mercer+Mettle Men's Recharge Jersey Polo",
     "providerId": 99,
     "price": "16.50",
     "premiumPrice": "12.71",
@@ -9534,7 +9534,7 @@
     "providersCount": 3
   },
   "1983": {
-    "title": "Mercer+Mettle® Men's Stretch Jersey Polo",
+    "title": "Mercer+Mettle Men's Stretch Jersey Polo",
     "providerId": 99,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -9543,7 +9543,7 @@
     "providersCount": 4
   },
   "1984": {
-    "title": "Sport-Tek® Men's UV Micropique Polo",
+    "title": "Men's UV Micropique Polo",
     "providerId": 99,
     "price": "10.25",
     "premiumPrice": "7.89",
@@ -9552,7 +9552,7 @@
     "providersCount": 5
   },
   "1985": {
-    "title": "CornerStone® Men's Select Lightweight Snag-Proof Polo",
+    "title": "CornerStone Men's Select Lightweight Snag-Proof Polo",
     "providerId": 99,
     "price": "17.50",
     "premiumPrice": "13.47",
@@ -9561,7 +9561,7 @@
     "providersCount": 6
   },
   "1986": {
-    "title": "Port Authority® Men's Collective Soft Shell Jacket ",
+    "title": "Executive Men's Collective Soft Shell Jacket",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -9570,7 +9570,7 @@
     "providersCount": 7
   },
   "1987": {
-    "title": "CornerStone® Men's Duck Cloth Hooded Work Jacket (Embroidery)",
+    "title": "CornerStone Men's Duck Cloth Hooded Work Jacket (Embroidered)",
     "providerId": 99,
     "price": "11.25",
     "premiumPrice": "8.66",
@@ -9606,7 +9606,7 @@
     "providersCount": 4
   },
   "1991": {
-    "title": "Men's PFG Tamiami™ II Shirt (Embroidery)",
+    "title": "Men's PFG Tamiami II Shirt (Embroidered)",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -9624,7 +9624,7 @@
     "providersCount": 6
   },
   "1993": {
-    "title": "Women's PFG Tamiami™ II Short Sleeve Shirt (Embroidery)",
+    "title": "Women's PFG Tamiami II Short Sleeve Shirt (Embroidered)",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -9633,7 +9633,7 @@
     "providersCount": 7
   },
   "1994": {
-    "title": "Men's Long Sleeve Tee",
+    "title": "Men's Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -9741,7 +9741,7 @@
     "providersCount": 5
   },
   "2010": {
-    "title": "Women’s Perfect Blend® CVC Long Sleeve Tee",
+    "title": "Women’s Perfect Blend Cotton-Blend Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -9750,7 +9750,7 @@
     "providersCount": 3
   },
   "2011": {
-    "title": "Women’s Perfect Tri ® Tee",
+    "title": "Women’s Perfect Tri T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -9759,7 +9759,7 @@
     "providersCount": 4
   },
   "2013": {
-    "title": "Men's Re-Fleece™ Full-Zip Hoodie",
+    "title": "Men's Re-Fleece Full-Zip Hoodie",
     "providerId": 99,
     "price": "38.00",
     "premiumPrice": "29.26",
@@ -9777,7 +9777,7 @@
     "providersCount": 7
   },
   "2017": {
-    "title": "Men's PosiCharge® Tri-Blend Wicking Quarter-Zip Pullover",
+    "title": "Men's Athletic Tri-Blend Wicking Quarter-Zip Pullover",
     "providerId": 99,
     "price": "18.35",
     "premiumPrice": "14.13",
@@ -9813,7 +9813,7 @@
     "providersCount": 8
   },
   "2023": {
-    "title": "Men's Sport-Wick® Stretch Quarter-Zip Pullover (Embroidery)",
+    "title": "Men's Sport-Wick Stretch Quarter-Zip Pullover (Embroidered)",
     "providerId": 99,
     "price": "20.35",
     "premiumPrice": "15.67",
@@ -9831,7 +9831,7 @@
     "providersCount": 5
   },
   "2027": {
-    "title": "District ® Perfect Tri ® Tee",
+    "title": "Perfect Tri T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -9876,7 +9876,7 @@
     "providersCount": 8
   },
   "2038": {
-    "title": "Port Authority® Fine Pique Blend Polo",
+    "title": "Executive Fine Pique Blend Polo",
     "providerId": 99,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -9912,7 +9912,7 @@
     "providersCount": 2
   },
   "2047": {
-    "title": "Youth V.I.T.™ Fleece Hoodie",
+    "title": "Youth V.I.T. Fleece Hoodie",
     "providerId": 99,
     "price": "31.43",
     "premiumPrice": "24.20",
@@ -9921,7 +9921,7 @@
     "providersCount": 5
   },
   "2048": {
-    "title": " Unisex Sponge Fleece Sweatshort",
+    "title": "Unisex Sponge Fleece Sweatshort",
     "providerId": 99,
     "price": "18.50",
     "premiumPrice": "14.25",
@@ -9939,7 +9939,7 @@
     "providersCount": 2
   },
   "2053": {
-    "title": "Women's Baby Tee",
+    "title": "Women's Baby T-Shirt",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -9966,7 +9966,7 @@
     "providersCount": 5
   },
   "2244": {
-    "title": "Unisex Softstyle® Midweight Q-Zip Sweatshirt",
+    "title": "Unisex Soft Cotton Midweight Q-Zip Sweatshirt",
     "providerId": 99,
     "price": "29.00",
     "premiumPrice": "22.33",
@@ -9993,7 +9993,7 @@
     "providersCount": 5
   },
   "2387": {
-    "title": "Unisex Crystal Tie-Dye Tee",
+    "title": "Unisex Crystal Tie-Dye T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -10002,7 +10002,7 @@
     "providersCount": 2
   },
   "2388": {
-    "title": "Youth Tie-Dye Tee",
+    "title": "Youth Tie-Dye T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -10056,7 +10056,7 @@
     "providersCount": 1
   },
   "2457": {
-    "title": "Men's Tie-Dye Tee",
+    "title": "Men's Tie-Dye T-Shirt",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -10065,7 +10065,7 @@
     "providersCount": 2
   },
   "2650": {
-    "title": "Premium Sherpa Blanket (Embroidery)",
+    "title": "Premium Sherpa Blanket (Embroidered)",
     "providerId": 99,
     "price": "12.25",
     "premiumPrice": "9.43",
@@ -10173,7 +10173,7 @@
     "providersCount": 4
   },
   "2663": {
-    "title": "Snapback Trucker Cap with Patch (Embroidery)",
+    "title": "Snapback Trucker Cap with Patch (Embroidered)",
     "providerId": 99,
     "price": "13.50",
     "premiumPrice": "10.39",
@@ -10200,7 +10200,7 @@
     "providersCount": 7
   },
   "2667": {
-    "title": "Women's Pigment-Dyed Cap with Fashion Undervisor (Embroidery)",
+    "title": "Women's Pigment-Dyed Cap with Fashion Undervisor (Embroidered)",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -10218,7 +10218,7 @@
     "providersCount": 3
   },
   "2669": {
-    "title": "Fitted Sheet (AOP)",
+    "title": "Fitted Sheet - All-Over Print",
     "providerId": 99,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -10254,7 +10254,7 @@
     "providersCount": 8
   },
   "2674": {
-    "title": "Unisex Organic  Changer 2.0  Sweatshirt",
+    "title": "Unisex Organic Changer 2.0 Sweatshirt",
     "providerId": 99,
     "price": "27.35",
     "premiumPrice": "21.06",
@@ -10407,7 +10407,7 @@
     "providersCount": 1
   },
   "2714": {
-    "title": "Premium Jersey Infant Blanket (Embroidery)",
+    "title": "Premium Jersey Infant Blanket (Embroidered)",
     "providerId": 99,
     "price": "10.50",
     "premiumPrice": "8.09",
@@ -10569,7 +10569,7 @@
     "providersCount": 8
   },
   "2747": {
-    "title": "Unisex Heavyweight Long Sleeve Tee",
+    "title": "Unisex Heavyweight Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -10659,7 +10659,7 @@
     "providersCount": 4
   },
   "2761": {
-    "title": "Stemless Wine Glass, 11.5oz (Engraving) ",
+    "title": "Stemless Wine Glass, 11.5oz (Engraving)",
     "providerId": 99,
     "price": "9.25",
     "premiumPrice": "7.12",
@@ -10704,7 +10704,7 @@
     "providersCount": 2
   },
   "2766": {
-    "title": "Women's Ringer Tee",
+    "title": "Women's Ringer T-Shirt",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -10767,7 +10767,7 @@
     "providersCount": 3
   },
   "2789": {
-    "title": "Adult Crewneck Sweatshirt",
+    "title": "Classic Fleece Crewneck Sweatshirt",
     "providerId": 99,
     "price": "18.70",
     "premiumPrice": "14.40",
@@ -10776,7 +10776,7 @@
     "providersCount": 5
   },
   "2790": {
-    "title": "Vintage Crewneck Tee",
+    "title": "Vintage Crewneck T-Shirt",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -10857,7 +10857,7 @@
     "providersCount": 3
   },
   "2817": {
-    "title": "Women's Tri-Blend V-Neck Tee",
+    "title": "Women's Tri-Blend V-Neck T-Shirt",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -10866,7 +10866,7 @@
     "providersCount": 5
   },
   "2829": {
-    "title": "Perfect Tri Long Sleeve Tee",
+    "title": "Perfect Tri Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -10884,7 +10884,7 @@
     "providersCount": 5
   },
   "2832": {
-    "title": "Women's Game V-Neck Tee",
+    "title": "Women's Game V-Neck T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -10893,7 +10893,7 @@
     "providersCount": 6
   },
   "2833": {
-    "title": "Perfect Tri V-Neck Tee",
+    "title": "Perfect Tri V-Neck T-Shirt",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -10902,7 +10902,7 @@
     "providersCount": 7
   },
   "2835": {
-    "title": "The Concert Tee",
+    "title": "Classic Tour Cotton T-Shirt",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -10911,7 +10911,7 @@
     "providersCount": 2
   },
   "2836": {
-    "title": "Medal Tee",
+    "title": "Medal T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -10920,7 +10920,7 @@
     "providersCount": 3
   },
   "2838": {
-    "title": "Women's V.I.T. Rib Scoop Neck Tee",
+    "title": "Women's V.I.T. Rib Scoop Neck T-Shirt",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -10929,7 +10929,7 @@
     "providersCount": 5
   },
   "2840": {
-    "title": "Very Important Tee V-Neck",
+    "title": "Essential Crewneck T-Shirt V-Neck",
     "providerId": 99,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -10938,7 +10938,7 @@
     "providersCount": 7
   },
   "2842": {
-    "title": "Women's Flex Scoop Neck Tee",
+    "title": "Women's Flex Scoop Neck T-Shirt",
     "providerId": 99,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -10947,7 +10947,7 @@
     "providersCount": 2
   },
   "2843": {
-    "title": "Women's Re-Tee V-Neck",
+    "title": "Women's Recycled Eco-Cotton T-Shirt V-Neck",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -10956,7 +10956,7 @@
     "providersCount": 3
   },
   "2844": {
-    "title": "Re-Tee Long Sleeve",
+    "title": "Recycled Eco-Cotton T-Shirt Long Sleeve",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -10983,7 +10983,7 @@
     "providersCount": 2
   },
   "2857": {
-    "title": "Women's Long Sleeve Fan Favorite V-Neck Tee",
+    "title": "Women's Long Sleeve Fan Favorite V-Neck T-Shirt",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -11001,7 +11001,7 @@
     "providersCount": 4
   },
   "2860": {
-    "title": "Women's Sleeveless PosiCharge Competitor V-Neck Tee",
+    "title": "Women's Sleeveless Performance Athletic V-Neck T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -11010,7 +11010,7 @@
     "providersCount": 6
   },
   "2863": {
-    "title": "Women's PosiCharge Tri-Blend Wicking Scoop Neck Raglan Tee",
+    "title": "Women's Athletic Tri-Blend Wicking Scoop Neck Raglan T-Shirt",
     "providerId": 99,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -11028,7 +11028,7 @@
     "providersCount": 4
   },
   "2867": {
-    "title": "Women's Rashguard Tee",
+    "title": "Women's Rashguard T-Shirt",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -11037,7 +11037,7 @@
     "providersCount": 6
   },
   "2900": {
-    "title": "Tie-Dye Long Sleeve Tee",
+    "title": "Tie-Dye Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -11046,7 +11046,7 @@
     "providersCount": 4
   },
   "2901": {
-    "title": "Tri-Blend Tee",
+    "title": "Tri-Blend T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -11055,7 +11055,7 @@
     "providersCount": 5
   },
   "2904": {
-    "title": "Long Sleeve Core Cotton Tee",
+    "title": "Long Sleeve Essential Everyday Cotton T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -11064,7 +11064,7 @@
     "providersCount": 8
   },
   "2909": {
-    "title": "Long Sleeve Pocket Tee",
+    "title": "Long Sleeve Pocket T-Shirt",
     "providerId": 99,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -11073,7 +11073,7 @@
     "providersCount": 6
   },
   "2910": {
-    "title": "Colorblock Performance Tee",
+    "title": "Colorblock Performance T-Shirt",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -11082,7 +11082,7 @@
     "providersCount": 7
   },
   "2911": {
-    "title": "Colorblock Performance Long Sleeve Tee",
+    "title": "Colorblock Performance Long Sleeve T-Shirt",
     "providerId": 52,
     "price": "19.50",
     "premiumPrice": "35.44",
@@ -11092,7 +11092,7 @@
     "cost": "35.44"
   },
   "2918": {
-    "title": "Long Sleeve Heather Contender Tee",
+    "title": "Long Sleeve Heather Contender T-Shirt",
     "providerId": 99,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -11101,7 +11101,7 @@
     "providersCount": 8
   },
   "2919": {
-    "title": "Long Sleeve Heather Colorblock Contender Tee",
+    "title": "Long Sleeve Heather Colorblock Contender T-Shirt",
     "providerId": 99,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -11110,7 +11110,7 @@
     "providersCount": 2
   },
   "2920": {
-    "title": "CamoHex Colorblock Tee",
+    "title": "CamoHex Colorblock T-Shirt",
     "providerId": 99,
     "price": "14.23",
     "premiumPrice": "10.96",
@@ -11119,7 +11119,7 @@
     "providersCount": 3
   },
   "2924": {
-    "title": "PosiCharge Long Sleeve Electric Heather Tee",
+    "title": "Athletic Long Sleeve Electric Heather T-Shirt",
     "providerId": 99,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -11128,7 +11128,7 @@
     "providersCount": 7
   },
   "2925": {
-    "title": "PosiCharge Tri-Blend Wicking Draft Tee",
+    "title": "Athletic Tri-Blend Wicking Draft T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -11137,7 +11137,7 @@
     "providersCount": 8
   },
   "2926": {
-    "title": "PosiCharge Strive Tee",
+    "title": "Athletic Strive T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -11146,7 +11146,7 @@
     "providersCount": 2
   },
   "2927": {
-    "title": "Endeavor Tee",
+    "title": "Endeavor T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -11155,7 +11155,7 @@
     "providersCount": 3
   },
   "2928": {
-    "title": "Rashguard Tee",
+    "title": "Rashguard T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -11164,7 +11164,7 @@
     "providersCount": 4
   },
   "2929": {
-    "title": "Long Sleeve Rashguard Tee",
+    "title": "Long Sleeve Rashguard T-Shirt",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -11173,7 +11173,7 @@
     "providersCount": 5
   },
   "2941": {
-    "title": "Unisex Padded Crew Socks (DTG)",
+    "title": "Unisex Padded Crew Socks",
     "providerId": 99,
     "price": "8.65",
     "premiumPrice": "6.66",
@@ -11317,7 +11317,7 @@
     "providersCount": 6
   },
   "2964": {
-    "title": "Light Cotton Tee",
+    "title": "Light Cotton T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -11326,7 +11326,7 @@
     "providersCount": 5
   },
   "2965": {
-    "title": "Youth Light Cotton Tee",
+    "title": "Youth Light Cotton T-Shirt",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -11398,7 +11398,7 @@
     "providersCount": 1
   },
   "2983": {
-    "title": "Unisex Premium Combed Ring Spun Cotton Tee",
+    "title": "Unisex Premium Combed Ring Spun Cotton T-Shirt",
     "providerId": 217,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -11407,7 +11407,7 @@
     "providersCount": 1
   },
   "2984": {
-    "title": "Compression Muscle Tee",
+    "title": "Compression Muscle T-Shirt",
     "providerId": 217,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -11416,7 +11416,7 @@
     "providersCount": 1
   },
   "2985": {
-    "title": "Sprint Performance Tee",
+    "title": "Sprint Performance T-Shirt",
     "providerId": 217,
     "price": "9.20",
     "premiumPrice": "7.08",
@@ -11425,7 +11425,7 @@
     "providersCount": 1
   },
   "2986": {
-    "title": "AirFlex Short Sleeve Tee",
+    "title": "Breathe-Flex Athletic Short Sleeve T-Shirt",
     "providerId": 217,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -11434,7 +11434,7 @@
     "providersCount": 1
   },
   "2989": {
-    "title": "Women's Relaxed Tri-Blend Scoop Neck Tee",
+    "title": "Women's Relaxed Tri-Blend Scoop Neck T-Shirt",
     "providerId": 217,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -11443,7 +11443,7 @@
     "providersCount": 1
   },
   "2990": {
-    "title": "Unisex Mineral Dye Organic Cotton Tee",
+    "title": "Unisex Mineral Dye Organic Cotton T-Shirt",
     "providerId": 217,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -11452,7 +11452,7 @@
     "providersCount": 1
   },
   "2991": {
-    "title": "Unisex Heavyweight Recycled Cotton Tee",
+    "title": "Unisex Heavyweight Recycled Cotton T-Shirt",
     "providerId": 99,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -11461,7 +11461,7 @@
     "providersCount": 4
   },
   "2992": {
-    "title": "Unisex Tri-Blend Hoodie Tee",
+    "title": "Unisex Tri-Blend Hoodie T-Shirt",
     "providerId": 99,
     "price": "36.43",
     "premiumPrice": "28.05",
@@ -11470,7 +11470,7 @@
     "providersCount": 5
   },
   "2993": {
-    "title": "Unisex Long Sleeve Organic Cotton Tee",
+    "title": "Unisex Long Sleeve Organic Cotton T-Shirt",
     "providerId": 217,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -11479,7 +11479,7 @@
     "providersCount": 1
   },
   "2994": {
-    "title": "Unisex Long Sleeve Recycled Blend Tee",
+    "title": "Unisex Long Sleeve Recycled Blend T-Shirt",
     "providerId": 217,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -11488,7 +11488,7 @@
     "providersCount": 1
   },
   "2995": {
-    "title": "Compression Short Sleeve Tee",
+    "title": "Compression Short Sleeve T-Shirt",
     "providerId": 217,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -11497,7 +11497,7 @@
     "providersCount": 1
   },
   "2998": {
-    "title": "Cooling Performance Long Sleeve Hooded Tee",
+    "title": "Cooling Performance Long Sleeve Hooded T-Shirt",
     "providerId": 217,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -11506,7 +11506,7 @@
     "providersCount": 1
   },
   "2999": {
-    "title": "Softek Long Sleeve Hooded Tee",
+    "title": "Ultra-Soft Breathable Long Sleeve Hooded T-Shirt",
     "providerId": 217,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -11533,7 +11533,7 @@
     "providersCount": 3
   },
   "3005": {
-    "title": "Unisex Mineral Dye Organic Cotton Hoodie Tee",
+    "title": "Unisex Mineral Dye Organic Cotton Hoodie T-Shirt",
     "providerId": 99,
     "price": "32.86",
     "premiumPrice": "25.30",
@@ -11542,7 +11542,7 @@
     "providersCount": 4
   },
   "3013": {
-    "title": "Unisex Heather CVC Short Sleeve Tee",
+    "title": "Unisex Heather Cotton-Blend Short Sleeve T-Shirt",
     "providerId": 99,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -11551,7 +11551,7 @@
     "providersCount": 5
   },
   "3017": {
-    "title": "Unisex Heather CVC V-Neck Tee",
+    "title": "Unisex Heather Cotton-Blend V-Neck T-Shirt",
     "providerId": 99,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -11560,7 +11560,7 @@
     "providersCount": 2
   },
   "3024": {
-    "title": "Unisex Heather CVC Tank",
+    "title": "Unisex Heather Cotton-Blend Tank",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -11569,7 +11569,7 @@
     "providersCount": 2
   },
   "3035": {
-    "title": "Unisex 7.5-Ounce Heavyweight Tee",
+    "title": "Unisex 7.5-Ounce Heavyweight T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -11596,7 +11596,7 @@
     "providersCount": 2
   },
   "3039": {
-    "title": "Women's 6-Ounce Heavyweight Tee",
+    "title": "Women's 6-Ounce Heavyweight T-Shirt",
     "providerId": 99,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -11605,7 +11605,7 @@
     "providersCount": 3
   },
   "3041": {
-    "title": "Women's Relaxed CVC Tee",
+    "title": "Women's Relaxed Cotton-Blend T-Shirt",
     "providerId": 99,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -11614,7 +11614,7 @@
     "providersCount": 5
   },
   "3042": {
-    "title": "Women's Relaxed Jersey Short Sleeve V-Neck Tee",
+    "title": "Women's Relaxed Jersey Short Sleeve V-Neck T-Shirt",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -11623,7 +11623,7 @@
     "providersCount": 6
   },
   "3043": {
-    "title": "Women's Jersey Crop Tee",
+    "title": "Women's Jersey Crop T-Shirt",
     "providerId": 99,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -11632,7 +11632,7 @@
     "providersCount": 7
   },
   "3044": {
-    "title": "Women's Jersey Long Sleeve Tee",
+    "title": "Women's Jersey Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -11641,7 +11641,7 @@
     "providersCount": 1
   },
   "3050": {
-    "title": "Softek Short Sleeve Tee",
+    "title": "Ultra-Soft Breathable Short Sleeve T-Shirt",
     "providerId": 217,
     "price": "8.46",
     "premiumPrice": "6.51",
@@ -11650,7 +11650,7 @@
     "providersCount": 1
   },
   "3051": {
-    "title": "Women's Cooling Performance Short Sleeve Tee",
+    "title": "Women's Cooling Performance Short Sleeve T-Shirt",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -11659,7 +11659,7 @@
     "providersCount": 8
   },
   "3054": {
-    "title": "Unisex Classic Heavyweight Long Sleeve Tee",
+    "title": "Unisex Classic Heavyweight Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -11668,7 +11668,7 @@
     "providersCount": 4
   },
   "3055": {
-    "title": "Women's Relaxed Triblend Tee",
+    "title": "Women's Relaxed Tri-Blend T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -11677,7 +11677,7 @@
     "providersCount": 5
   },
   "3056": {
-    "title": "ANSI 107 Class 3 Long Sleeve Snag-Resistant Reflective T-Shirt",
+    "title": "High-Visibility Long Sleeve Snag-Resistant Reflective T-Shirt",
     "providerId": 217,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -11686,7 +11686,7 @@
     "providersCount": 1
   },
   "3059": {
-    "title": "Workwear Pro Long Sleeve Pocket Tee",
+    "title": "Workwear Pro Long Sleeve Pocket T-Shirt",
     "providerId": 217,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -11695,7 +11695,7 @@
     "providersCount": 1
   },
   "3061": {
-    "title": "Workwear Pro Short Sleeve Tee",
+    "title": "Workwear Pro Short Sleeve T-Shirt",
     "providerId": 217,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -11704,7 +11704,7 @@
     "providersCount": 1
   },
   "3062": {
-    "title": "Tall Workwear Pro Short Sleeve Pocket Tee",
+    "title": "Tall Workwear Pro Short Sleeve Pocket T-Shirt",
     "providerId": 217,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -11713,7 +11713,7 @@
     "providersCount": 1
   },
   "3065": {
-    "title": "Women's Perfect Tri Long Sleeve V-Neck Tee",
+    "title": "Women's Perfect Tri Long Sleeve V-Neck T-Shirt",
     "providerId": 217,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -11722,7 +11722,7 @@
     "providersCount": 1
   },
   "3066": {
-    "title": "Women's Perfect Tri Midi Long Sleeve Tee",
+    "title": "Women's Perfect Tri Midi Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -11749,7 +11749,7 @@
     "providersCount": 1
   },
   "3070": {
-    "title": "Women's Fitted Perfect Tri Tee",
+    "title": "Women's Fitted Perfect Tri T-Shirt",
     "providerId": 217,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -11758,7 +11758,7 @@
     "providersCount": 1
   },
   "3071": {
-    "title": "Perfect Weight CVC Long Sleeve Tee",
+    "title": "Perfect Weight Cotton-Blend Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -11767,7 +11767,7 @@
     "providersCount": 7
   },
   "3072": {
-    "title": "Women's Perfect Weight CVC Tee",
+    "title": "Women's Perfect Weight Cotton-Blend T-Shirt",
     "providerId": 217,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -11776,7 +11776,7 @@
     "providersCount": 1
   },
   "3073": {
-    "title": "Long Sleeve Tee",
+    "title": "Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -11785,7 +11785,7 @@
     "providersCount": 1
   },
   "3075": {
-    "title": "Women's Fitted The Concert Tee",
+    "title": "Women's Fitted Classic Tour Cotton T-Shirt",
     "providerId": 217,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -11803,7 +11803,7 @@
     "providersCount": 5
   },
   "3077": {
-    "title": "Women's Fitted Very Important Tee",
+    "title": "Women's Fitted Essential Crewneck T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -11821,7 +11821,7 @@
     "providersCount": 1
   },
   "3079": {
-    "title": "Heavyweight Very Important Tee",
+    "title": "Heavyweight Essential Crewneck T-Shirt",
     "providerId": 217,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -11830,7 +11830,7 @@
     "providersCount": 1
   },
   "3081": {
-    "title": "Women's Very Important Tee V-Neck",
+    "title": "Women's Essential Crewneck T-Shirt V-Neck",
     "providerId": 217,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -11875,7 +11875,7 @@
     "providersCount": 1
   },
   "3093": {
-    "title": "Soft Wash Cotton Tee",
+    "title": "Soft Wash Cotton T-Shirt",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -11884,7 +11884,7 @@
     "providersCount": 8
   },
   "3096": {
-    "title": "Cotton Pocket Tee",
+    "title": "Cotton Pocket T-Shirt",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -11902,7 +11902,7 @@
     "providersCount": 1
   },
   "3104": {
-    "title": "Heavyweight Tee",
+    "title": "Heavyweight T-Shirt",
     "providerId": 99,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -11911,7 +11911,7 @@
     "providersCount": 5
   },
   "3105": {
-    "title": "Heavyweight Long Sleeve Tee",
+    "title": "Heavyweight Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -11920,7 +11920,7 @@
     "providersCount": 6
   },
   "3106": {
-    "title": "Women's Heavyweight Boxy Tee",
+    "title": "Women's Heavyweight Boxy T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -11929,7 +11929,7 @@
     "providersCount": 7
   },
   "3112": {
-    "title": "Garment-Dyed V-Neck Tee",
+    "title": "Garment-Dyed V-Neck T-Shirt",
     "providerId": 217,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -11947,7 +11947,7 @@
     "providersCount": 7
   },
   "3114": {
-    "title": "Women's Fan Favorite Blend V-Neck Tee",
+    "title": "Women's Fan Favorite Blend V-Neck T-Shirt",
     "providerId": 217,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -11956,7 +11956,7 @@
     "providersCount": 1
   },
   "3115": {
-    "title": "Garment-Dyed Pullover Hooded Tee",
+    "title": "Garment-Dyed Pullover Hooded T-Shirt",
     "providerId": 217,
     "price": "24.35",
     "premiumPrice": "18.75",
@@ -11974,7 +11974,7 @@
     "providersCount": 4
   },
   "3118": {
-    "title": "Garment-Dyed Pocket Tee",
+    "title": "Garment-Dyed Pocket T-Shirt",
     "providerId": 217,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -11983,7 +11983,7 @@
     "providersCount": 1
   },
   "3120": {
-    "title": "Window Tie-Dye Tee",
+    "title": "Window Tie-Dye T-Shirt",
     "providerId": 217,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -11992,7 +11992,7 @@
     "providersCount": 1
   },
   "3123": {
-    "title": "Heather Performance Tee",
+    "title": "Heather Performance T-Shirt",
     "providerId": 217,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -12001,7 +12001,7 @@
     "providersCount": 1
   },
   "3125": {
-    "title": "Youth Easy Cotton Tee",
+    "title": "Youth Lightweight Everyday Cotton T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -12010,7 +12010,7 @@
     "providersCount": 5
   },
   "3126": {
-    "title": "Easy Cotton Long Sleeve Tee",
+    "title": "Easy Cotton Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -12019,7 +12019,7 @@
     "providersCount": 1
   },
   "3127": {
-    "title": "Easy Cotton Tee",
+    "title": "Lightweight Everyday Cotton T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -12028,7 +12028,7 @@
     "providersCount": 7
   },
   "3128": {
-    "title": "Fan Favorite Blend Tee",
+    "title": "Premium Soft Blend T-Shirt",
     "providerId": 217,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -12037,7 +12037,7 @@
     "providersCount": 1
   },
   "3130": {
-    "title": "Core Cotton Camo Tee",
+    "title": "Core Cotton Camo T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -12046,7 +12046,7 @@
     "providersCount": 3
   },
   "3131": {
-    "title": "Core Cotton DTG Tee",
+    "title": "Core Cotton DTG T-Shirt",
     "providerId": 217,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -12055,7 +12055,7 @@
     "providersCount": 1
   },
   "3133": {
-    "title": "Core Cotton Sleeveless Tee",
+    "title": "Core Cotton Sleeveless T-Shirt",
     "providerId": 217,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -12064,7 +12064,7 @@
     "providersCount": 1
   },
   "3136": {
-    "title": "Long Sleeve Core Blend Tee",
+    "title": "Long Sleeve Comfort Blend Crewneck T-Shirt",
     "providerId": 217,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -12073,7 +12073,7 @@
     "providersCount": 1
   },
   "3138": {
-    "title": "Core Blend Pocket Tee",
+    "title": "Core Blend Pocket T-Shirt",
     "providerId": 99,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -12082,7 +12082,7 @@
     "providersCount": 4
   },
   "3139": {
-    "title": "Long Sleeve Bouncer Tee",
+    "title": "Long Sleeve Bouncer T-Shirt",
     "providerId": 217,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -12091,7 +12091,7 @@
     "providersCount": 1
   },
   "3141": {
-    "title": "Tall Long Sleeve Essential Pocket Tee",
+    "title": "Tall Long Sleeve Essential Pocket T-Shirt",
     "providerId": 217,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -12109,7 +12109,7 @@
     "providersCount": 1
   },
   "3145": {
-    "title": "Performance Tee",
+    "title": "Performance T-Shirt",
     "providerId": 217,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -12118,7 +12118,7 @@
     "providersCount": 1
   },
   "3146": {
-    "title": "Performance Long Sleeve Tee",
+    "title": "Performance Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -12127,7 +12127,7 @@
     "providersCount": 1
   },
   "3149": {
-    "title": "Women's Halftime Stripe Long Sleeve V-Neck Tee",
+    "title": "Women's Halftime Stripe Long Sleeve V-Neck T-Shirt",
     "providerId": 217,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -12154,7 +12154,7 @@
     "providersCount": 1
   },
   "3152": {
-    "title": "Digi Camo Tee",
+    "title": "Digi Camo T-Shirt",
     "providerId": 217,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -12163,7 +12163,7 @@
     "providersCount": 1
   },
   "3153": {
-    "title": "Long Sleeve Digi Camo Tee",
+    "title": "Long Sleeve Digi Camo T-Shirt",
     "providerId": 217,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -12208,7 +12208,7 @@
     "providersCount": 3
   },
   "3159": {
-    "title": "Tall Heather Contender Tee",
+    "title": "Tall Heather Contender T-Shirt",
     "providerId": 217,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -12217,7 +12217,7 @@
     "providersCount": 1
   },
   "3166": {
-    "title": "Unisex Rocker Tee",
+    "title": "Unisex Rocker T-Shirt",
     "providerId": 99,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -12226,7 +12226,7 @@
     "providersCount": 4
   },
   "3168": {
-    "title": "Unisex Freestyler Heavyweight Tee",
+    "title": "Unisex Relaxed Heavyweight Cotton T-Shirt",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -12235,7 +12235,7 @@
     "providersCount": 6
   },
   "3169": {
-    "title": "Unisex Creator 2.0 Tee",
+    "title": "Unisex Premium Organic Cotton T-Shirt",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -12244,7 +12244,7 @@
     "providersCount": 7
   },
   "3170": {
-    "title": "Unisex Freestyler Heavyweight Long Sleeve Tee",
+    "title": "Unisex Relaxed Heavyweight Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -12253,7 +12253,7 @@
     "providersCount": 8
   },
   "3172": {
-    "title": "Women's Stella Serena Scoop Neck Tee",
+    "title": "Women's Scoop Neck Premium Cotton T-Shirt",
     "providerId": 99,
     "price": "14.23",
     "premiumPrice": "10.96",
@@ -12262,7 +12262,7 @@
     "providersCount": 3
   },
   "3173": {
-    "title": "Women's Stella Isla V-Neck Tee",
+    "title": "Women's Soft V-Neck Cotton T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -12271,7 +12271,7 @@
     "providersCount": 4
   },
   "3174": {
-    "title": "Women's Daily V-Neck Tee",
+    "title": "Women's Daily V-Neck T-Shirt",
     "providerId": 217,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -12280,7 +12280,7 @@
     "providersCount": 1
   },
   "3175": {
-    "title": "All-American Long Sleeve Tee",
+    "title": "All-American Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -12289,7 +12289,7 @@
     "providersCount": 1
   },
   "3176": {
-    "title": "All-American Pocket Tee",
+    "title": "All-American Pocket T-Shirt",
     "providerId": 217,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -12298,7 +12298,7 @@
     "providersCount": 1
   },
   "3177": {
-    "title": "Tri Tee",
+    "title": "Tri T-Shirt",
     "providerId": 217,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -12307,7 +12307,7 @@
     "providersCount": 1
   },
   "3178": {
-    "title": "Daily Tee",
+    "title": "Daily T-Shirt",
     "providerId": 217,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -12316,7 +12316,7 @@
     "providersCount": 1
   },
   "3179": {
-    "title": "Chore Tee",
+    "title": "Chore T-Shirt",
     "providerId": 217,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -12325,7 +12325,7 @@
     "providersCount": 1
   },
   "3180": {
-    "title": "Chore Long Sleeve Tee",
+    "title": "Chore Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -12757,7 +12757,7 @@
     "providersCount": 1
   },
   "3321": {
-    "title": "Women's PosiCharge Re-Compete Polo",
+    "title": "Women's Athletic Re-Compete Polo",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -12802,7 +12802,7 @@
     "providersCount": 1
   },
   "3328": {
-    "title": "PosiCharge Strive Polo",
+    "title": "Athletic Strive Polo",
     "providerId": 99,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -12811,7 +12811,7 @@
     "providersCount": 5
   },
   "3329": {
-    "title": "PosiCharge RacerMesh Long Sleeve Polo",
+    "title": "Athletic RacerMesh Long Sleeve Polo",
     "providerId": 217,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -12829,7 +12829,7 @@
     "providersCount": 1
   },
   "3331": {
-    "title": "PosiCharge Micro-Mesh Colorblock Polo",
+    "title": "Athletic Micro-Mesh Colorblock Polo",
     "providerId": 217,
     "price": "9.25",
     "premiumPrice": "7.12",
@@ -12964,7 +12964,7 @@
     "providersCount": 1
   },
   "3399": {
-    "title": "Women's PosiCharge Tri-Blend Wicking Polo",
+    "title": "Women's Athletic Tri-Blend Wicking Polo",
     "providerId": 99,
     "price": "15.00",
     "premiumPrice": "11.55",
@@ -13009,7 +13009,7 @@
     "providersCount": 1
   },
   "3406": {
-    "title": "PosiCharge Electric Heather Polo",
+    "title": "Athletic Electric Heather Polo",
     "providerId": 217,
     "price": "14.25",
     "premiumPrice": "10.97",
@@ -13027,7 +13027,7 @@
     "providersCount": 1
   },
   "3410": {
-    "title": "PosiCharge RacerMesh Raglan Heather Block Polo",
+    "title": "Athletic RacerMesh Raglan Heather Block Polo",
     "providerId": 217,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -13036,7 +13036,7 @@
     "providersCount": 1
   },
   "3411": {
-    "title": "PosiCharge RacerMesh Pocket Polo",
+    "title": "Athletic RacerMesh Pocket Polo",
     "providerId": 217,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -13063,7 +13063,7 @@
     "providersCount": 1
   },
   "3416": {
-    "title": "PosiCharge Micro-Mesh Polo",
+    "title": "Athletic Micro-Mesh Polo",
     "providerId": 217,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -13072,7 +13072,7 @@
     "providersCount": 1
   },
   "3417": {
-    "title": "PosiCharge Active Textured Polo",
+    "title": "Athletic Textured Performance Polo",
     "providerId": 217,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -13090,7 +13090,7 @@
     "providersCount": 1
   },
   "3421": {
-    "title": "Women's Organic CVC Fleece Full-Zip Hoodie",
+    "title": "Women's Organic Cotton-Blend Fleece Full-Zip Hoodie",
     "providerId": 99,
     "price": "29.43",
     "premiumPrice": "22.66",
@@ -13117,7 +13117,7 @@
     "providersCount": 2
   },
   "3424": {
-    "title": "Unisex Organic CVC Fleece Pullover Hoodie",
+    "title": "Unisex Organic Cotton-Blend Fleece Pullover Hoodie",
     "providerId": 99,
     "price": "25.43",
     "premiumPrice": "19.58",
@@ -13126,7 +13126,7 @@
     "providersCount": 3
   },
   "3425": {
-    "title": "Unisex Organic CVC Fleece Crewneck Sweatshirt",
+    "title": "Unisex Organic Cotton-Blend Fleece Crewneck Sweatshirt",
     "providerId": 99,
     "price": "18.70",
     "premiumPrice": "14.40",
@@ -13378,7 +13378,7 @@
     "providersCount": 2
   },
   "3501": {
-    "title": "Softstyle Midweight Pocket Sweatpants",
+    "title": "Soft Cotton Midweight Pocket Sweatpants",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -13405,7 +13405,7 @@
     "providersCount": 1
   },
   "3518": {
-    "title": "Unisex CVC Ring Spun Crewneck Sweatshirt",
+    "title": "Unisex Cotton-Blend Ring Spun Crewneck Sweatshirt",
     "providerId": 217,
     "price": "23.70",
     "premiumPrice": "18.25",
@@ -13414,7 +13414,7 @@
     "providersCount": 1
   },
   "3520": {
-    "title": "Unisex CVC Ring Spun Pocket Jogger",
+    "title": "Unisex Cotton-Blend Ring Spun Pocket Jogger",
     "providerId": 217,
     "price": "12.25",
     "premiumPrice": "9.43",
@@ -13468,7 +13468,7 @@
     "providersCount": 2
   },
   "3561": {
-    "title": "Adult Santa Barbara Zip Hoodie",
+    "title": "Signature Full-Zip Fleece Hoodie",
     "providerId": 99,
     "price": "24.00",
     "premiumPrice": "18.48",
@@ -13720,7 +13720,7 @@
     "providersCount": 1
   },
   "3689": {
-    "title": "Women's PosiCharge Tri-Blend Wicking Fleece Full-Zip Hooded Jacket",
+    "title": "Women's Athletic Tri-Blend Wicking Fleece Full-Zip Hooded Jacket",
     "providerId": 217,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -13729,7 +13729,7 @@
     "providersCount": 1
   },
   "3690": {
-    "title": "Women's PosiCharge Tri-Blend Wicking Fleece Hooded Pullover",
+    "title": "Women's Athletic Tri-Blend Wicking Fleece Hooded Pullover",
     "providerId": 217,
     "price": "23.00",
     "premiumPrice": "17.71",
@@ -13738,7 +13738,7 @@
     "providersCount": 1
   },
   "3692": {
-    "title": "Women's PosiCharge Tri-Blend Wicking Long Sleeve Hoodie",
+    "title": "Women's Athletic Tri-Blend Wicking Long Sleeve Hoodie",
     "providerId": 217,
     "price": "36.86",
     "premiumPrice": "28.38",
@@ -13909,7 +13909,7 @@
     "providersCount": 1
   },
   "3726": {
-    "title": "PosiCharge Tri-Blend Wicking Fleece Full-Zip Hooded Jacket",
+    "title": "Athletic Tri-Blend Wicking Fleece Full-Zip Hooded Jacket",
     "providerId": 217,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -13918,7 +13918,7 @@
     "providersCount": 1
   },
   "3727": {
-    "title": "PosiCharge Tri-Blend Wicking Fleece Hooded Pullover",
+    "title": "Athletic Tri-Blend Wicking Fleece Hooded Pullover",
     "providerId": 217,
     "price": "28.35",
     "premiumPrice": "21.83",
@@ -13927,7 +13927,7 @@
     "providersCount": 1
   },
   "3728": {
-    "title": "PosiCharge Electric Heather Colorblock 1/4-Zip Pullover",
+    "title": "Athletic Electric Heather Colorblock 1/4-Zip Pullover",
     "providerId": 217,
     "price": "21.70",
     "premiumPrice": "16.71",
@@ -13936,7 +13936,7 @@
     "providersCount": 1
   },
   "3729": {
-    "title": "PosiCharge Tri-Blend Wicking Short Sleeve Hoodie",
+    "title": "Athletic Tri-Blend Wicking Short Sleeve Hoodie",
     "providerId": 217,
     "price": "25.00",
     "premiumPrice": "19.25",
@@ -13963,7 +13963,7 @@
     "providersCount": 1
   },
   "3733": {
-    "title": "PosiCharge Strive Hooded Pullover",
+    "title": "Athletic Strive Hooded Pullover",
     "providerId": 217,
     "price": "18.35",
     "premiumPrice": "14.13",
@@ -14089,7 +14089,7 @@
     "providersCount": 1
   },
   "3797": {
-    "title": "Women's Recycled Blend V-Neck Tee",
+    "title": "Women's Recycled Blend V-Neck T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -14107,7 +14107,7 @@
     "providersCount": 6
   },
   "3815": {
-    "title": "Women's Very Important Tee Long Sleeve V-Neck",
+    "title": "Women's Essential Crewneck T-Shirt Long Sleeve V-Neck",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -14116,7 +14116,7 @@
     "providersCount": 2
   },
   "3828": {
-    "title": "Women's Softstyle Midweight Tee",
+    "title": "Women's Soft Cotton Midweight T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -14125,7 +14125,7 @@
     "providersCount": 8
   },
   "3851": {
-    "title": "Women's Ideal V-Neck Tee",
+    "title": "Women's Ideal V-Neck T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -14134,7 +14134,7 @@
     "providersCount": 3
   },
   "3853": {
-    "title": "Women's CVC Tee",
+    "title": "Women's Cotton-Blend T-Shirt",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -14161,7 +14161,7 @@
     "providersCount": 1
   },
   "3877": {
-    "title": "Women's Performance Tee",
+    "title": "Women's Performance T-Shirt",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -14170,7 +14170,7 @@
     "providersCount": 8
   },
   "3878": {
-    "title": "Women's Fan Favorite V-Neck Tee",
+    "title": "Women's Fan Favorite V-Neck T-Shirt",
     "providerId": 99,
     "price": "8.46",
     "premiumPrice": "6.51",
@@ -14179,7 +14179,7 @@
     "providersCount": 2
   },
   "3879": {
-    "title": "Women's Core Blend Tee",
+    "title": "Women's Comfort Blend Crewneck T-Shirt",
     "providerId": 217,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -14251,7 +14251,7 @@
     "providersCount": 4
   },
   "3938": {
-    "title": "Women's PosiCharge Sport-Wick Heather Fleece Hooded Pullover",
+    "title": "Women's Athletic Sport-Wick Heather Fleece Hooded Pullover",
     "providerId": 217,
     "price": "27.70",
     "premiumPrice": "21.33",
@@ -14260,7 +14260,7 @@
     "providersCount": 1
   },
   "3941": {
-    "title": "Women's PosiCharge RacerMesh V-Neck Tee",
+    "title": "Women's Athletic RacerMesh V-Neck T-Shirt",
     "providerId": 99,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -14269,7 +14269,7 @@
     "providersCount": 2
   },
   "3943": {
-    "title": "Women's PosiCharge Draft Crop Tee",
+    "title": "Women's Athletic Draft Crop T-Shirt",
     "providerId": 217,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -14314,7 +14314,7 @@
     "providersCount": 1
   },
   "3953": {
-    "title": "Women's PosiCharge Electric Heather Polo",
+    "title": "Women's Athletic Electric Heather Polo",
     "providerId": 217,
     "price": "13.50",
     "premiumPrice": "10.39",
@@ -14323,7 +14323,7 @@
     "providersCount": 1
   },
   "3954": {
-    "title": "Women's Halftime Notch Neck Tee",
+    "title": "Women's Halftime Notch Neck T-Shirt",
     "providerId": 217,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -14341,7 +14341,7 @@
     "providersCount": 1
   },
   "3956": {
-    "title": "Women's PosiCharge Micro-Mesh Polo",
+    "title": "Women's Athletic Micro-Mesh Polo",
     "providerId": 217,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -14350,7 +14350,7 @@
     "providersCount": 1
   },
   "3957": {
-    "title": "Women's PosiCharge Micro-Mesh Colorblock Polo",
+    "title": "Women's Athletic Micro-Mesh Colorblock Polo",
     "providerId": 217,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -14359,7 +14359,7 @@
     "providersCount": 1
   },
   "3958": {
-    "title": "Women's PosiCharge Active Textured Polo",
+    "title": "Women's Athletic Textured Performance Polo",
     "providerId": 217,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -14386,7 +14386,7 @@
     "providersCount": 1
   },
   "3965": {
-    "title": "Women's Stella Ida Full-Zip Hooded Sweatshirt",
+    "title": "Women's Classic Full-Zip Hooded Fleece Sweatshirt",
     "providerId": 99,
     "price": "22.70",
     "premiumPrice": "17.48",
@@ -14395,7 +14395,7 @@
     "providersCount": 5
   },
   "3977": {
-    "title": "Women's Relaxed Heather CVC V-Neck Tee",
+    "title": "Women's Relaxed Heather Cotton-Blend V-Neck T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -14809,7 +14809,7 @@
     "providersCount": 1
   },
   "4093": {
-    "title": "Women's Performance Blend V-Neck Tee",
+    "title": "Women's Performance Blend V-Neck T-Shirt",
     "providerId": 217,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -14818,7 +14818,7 @@
     "providersCount": 1
   },
   "4094": {
-    "title": "Performance Tee",
+    "title": "Performance T-Shirt",
     "providerId": 99,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -14863,7 +14863,7 @@
     "providersCount": 1
   },
   "4109": {
-    "title": "Women's PosiCharge Electric Heather Colorblock 1/4-Zip Pullover",
+    "title": "Women's Athletic Electric Heather Colorblock 1/4-Zip Pullover",
     "providerId": 217,
     "price": "22.70",
     "premiumPrice": "17.48",
@@ -14926,7 +14926,7 @@
     "providersCount": 4
   },
   "4121": {
-    "title": "PosiCharge Compression 1/2-Sleeve Tee",
+    "title": "Athletic Compression 1/2-Sleeve T-Shirt",
     "providerId": 217,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -14935,7 +14935,7 @@
     "providersCount": 1
   },
   "4122": {
-    "title": "PosiCharge Compression Long Sleeve Tee",
+    "title": "Athletic Compression Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -14944,7 +14944,7 @@
     "providersCount": 1
   },
   "4123": {
-    "title": "PosiCharge Compression Sleeveless Tee",
+    "title": "Athletic Compression Sleeveless T-Shirt",
     "providerId": 217,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -14953,7 +14953,7 @@
     "providersCount": 1
   },
   "4124": {
-    "title": "PosiCharge Tough Mesh Full-Button Jersey",
+    "title": "Athletic Tough Mesh Full-Button Jersey",
     "providerId": 99,
     "price": "10.50",
     "premiumPrice": "8.09",
@@ -14962,7 +14962,7 @@
     "providersCount": 3
   },
   "4127": {
-    "title": "PosiCharge Competitor Short",
+    "title": "Performance Athletic Short",
     "providerId": 217,
     "price": "11.50",
     "premiumPrice": "8.86",
@@ -14971,7 +14971,7 @@
     "providersCount": 1
   },
   "4129": {
-    "title": "PosiCharge Competitor 2-Button Henley",
+    "title": "Performance Athletic 2-Button Henley",
     "providerId": 217,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -14989,7 +14989,7 @@
     "providersCount": 1
   },
   "4131": {
-    "title": "PosiCharge Electric Heather Tee",
+    "title": "Athletic Electric Heather T-Shirt",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -15016,7 +15016,7 @@
     "providersCount": 1
   },
   "4135": {
-    "title": "PosiCharge Reversible Mesh Tank",
+    "title": "Athletic Reversible Mesh Tank",
     "providerId": 217,
     "price": "17.25",
     "premiumPrice": "13.28",
@@ -15025,7 +15025,7 @@
     "providersCount": 1
   },
   "4136": {
-    "title": "PosiCharge Competitor Rev Tank",
+    "title": "Performance Athletic Rev Tank",
     "providerId": 217,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -15088,7 +15088,7 @@
     "providersCount": 1
   },
   "4196": {
-    "title": "ANSI 107 Class 3 Rain Jacket",
+    "title": "High-Visibility Rain Jacket",
     "providerId": 217,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -15097,7 +15097,7 @@
     "providersCount": 1
   },
   "4197": {
-    "title": "ANSI 107 Class 3 Economy Waterproof Insulated Bomber Jacket",
+    "title": "High-Visibility Economy Waterproof Insulated Bomber Jacket",
     "providerId": 217,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -15214,7 +15214,7 @@
     "providersCount": 1
   },
   "4485": {
-    "title": "Tall PosiCharge Competitor Tee",
+    "title": "Tall Performance Athletic T-Shirt",
     "providerId": 99,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -15232,7 +15232,7 @@
     "providersCount": 1
   },
   "4504": {
-    "title": "ANSI 107 Class 3 Mesh Long Sleeve Tee",
+    "title": "High-Visibility Mesh Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -15241,7 +15241,7 @@
     "providersCount": 1
   },
   "4505": {
-    "title": "ANSI 107 Class 2 Segmented Tape Tee",
+    "title": "High-Visibility Segmented Tape T-Shirt",
     "providerId": 217,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -15250,7 +15250,7 @@
     "providersCount": 1
   },
   "4506": {
-    "title": "ANSI 107 Class 3 Long Sleeve Segmented Tape Hooded Tee",
+    "title": "High-Visibility Long Sleeve Segmented Tape Hooded T-Shirt",
     "providerId": 217,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -15259,7 +15259,7 @@
     "providersCount": 1
   },
   "4507": {
-    "title": "ANSI 107 Class 3 Short Sleeve Snag-Resistant Reflective T-Shirt",
+    "title": "High-Visibility Short Sleeve Snag-Resistant Reflective T-Shirt",
     "providerId": 217,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -15322,7 +15322,7 @@
     "providersCount": 1
   },
   "4516": {
-    "title": "Workwear Pro Long Sleeve Hooded Tee",
+    "title": "Workwear Pro Long Sleeve Hooded T-Shirt",
     "providerId": 217,
     "price": "14.23",
     "premiumPrice": "10.96",
@@ -15331,7 +15331,7 @@
     "providersCount": 1
   },
   "4518": {
-    "title": "Workwear Pro Short Sleeve Pocket Tee",
+    "title": "Workwear Pro Short Sleeve Pocket T-Shirt",
     "providerId": 217,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -15349,7 +15349,7 @@
     "providersCount": 1
   },
   "4526": {
-    "title": "ANSI 107 Class 3 Surveyor Mesh Zippered Two-Tone Short Sleeve Vest",
+    "title": "High-Visibility Surveyor Mesh Zippered Two-Tone Short Sleeve Vest",
     "providerId": 217,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -15358,7 +15358,7 @@
     "providersCount": 1
   },
   "4527": {
-    "title": "ANSI 107 Class 2 Mesh Back Safety Vest",
+    "title": "High-Visibility Mesh Back Safety Vest",
     "providerId": 217,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -15403,7 +15403,7 @@
     "providersCount": 1
   },
   "4560": {
-    "title": "ANSI 107 Class 3 Mesh Tee",
+    "title": "High-Visibility Mesh T-Shirt",
     "providerId": 217,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -15412,7 +15412,7 @@
     "providersCount": 1
   },
   "4561": {
-    "title": "Enhanced Visibility Segmented Tape Tee",
+    "title": "Enhanced Visibility Segmented Tape T-Shirt",
     "providerId": 217,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -15421,7 +15421,7 @@
     "providersCount": 1
   },
   "4567": {
-    "title": "ANSI 107 Class 3 Heavy-Duty Fleece Pullover Hoodie",
+    "title": "High-Visibility Heavy-Duty Fleece Pullover Hoodie",
     "providerId": 217,
     "price": "26.43",
     "premiumPrice": "20.35",
@@ -15430,7 +15430,7 @@
     "providersCount": 1
   },
   "4570": {
-    "title": "ANSI 107 Class 3 Waterproof Ripstop 3-In-1 Parka",
+    "title": "High-Visibility Waterproof Ripstop 3-In-1 Parka",
     "providerId": 217,
     "price": "12.25",
     "premiumPrice": "9.43",
@@ -15439,7 +15439,7 @@
     "providersCount": 1
   },
   "4571": {
-    "title": "ANSI 107 Class 3 Soft Shell Jacket",
+    "title": "High-Visibility Soft Shell Jacket",
     "providerId": 217,
     "price": "9.50",
     "premiumPrice": "7.32",
@@ -15448,7 +15448,7 @@
     "providersCount": 1
   },
   "4574": {
-    "title": "ANSI 107 Class 2 Dual-Color Safety Vest",
+    "title": "High-Visibility Dual-Color Safety Vest",
     "providerId": 217,
     "price": "10.50",
     "premiumPrice": "8.09",
@@ -15466,7 +15466,7 @@
     "providersCount": 1
   },
   "4595": {
-    "title": "Heavy Blend Open Bottom Sweatpant",
+    "title": "Heavyweight Fleece Open Bottom Sweatpant",
     "providerId": 99,
     "price": "17.50",
     "premiumPrice": "13.47",
@@ -15547,7 +15547,7 @@
     "providersCount": 2
   },
   "4616": {
-    "title": "PosiCharge Competitor 7' Pocketed Short",
+    "title": "Performance Athletic 7' Pocketed Short",
     "providerId": 217,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -15574,7 +15574,7 @@
     "providersCount": 1
   },
   "4619": {
-    "title": "PosiCharge Mesh 7' Short",
+    "title": "Athletic Mesh 7' Short",
     "providerId": 217,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -15610,7 +15610,7 @@
     "providersCount": 5
   },
   "4745": {
-    "title": "Women's Cropped Boxy Tee",
+    "title": "Women's Cropped Boxy T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -15709,7 +15709,7 @@
     "providersCount": 1
   },
   "5164": {
-    "title": "Flexfit 110 Mesh Cap",
+    "title": "Mesh Cap",
     "providerId": 99,
     "price": "10.25",
     "premiumPrice": "7.89",
@@ -15718,7 +15718,7 @@
     "providersCount": 7
   },
   "5166": {
-    "title": "Flexfit 110 Performance Snapback Cap",
+    "title": "Performance Snapback Cap",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -15727,7 +15727,7 @@
     "providersCount": 2
   },
   "5167": {
-    "title": "Flexfit Melange Mesh Back Trucker Cap",
+    "title": "Melange Mesh Back Trucker Cap",
     "providerId": 99,
     "price": "11.25",
     "premiumPrice": "8.66",
@@ -15736,7 +15736,7 @@
     "providersCount": 3
   },
   "5182": {
-    "title": "Flexfit 210 Flat Bill Cap",
+    "title": "Flat Bill Cap",
     "providerId": 99,
     "price": "16.25",
     "premiumPrice": "12.51",
@@ -15745,7 +15745,7 @@
     "providersCount": 4
   },
   "5183": {
-    "title": "Flexfit Garment-Washed Cap",
+    "title": "Garment-Washed Cap",
     "providerId": 99,
     "price": "13.50",
     "premiumPrice": "10.39",
@@ -15754,7 +15754,7 @@
     "providersCount": 5
   },
   "5222": {
-    "title": "Flexfit 110 Foam Outdoor Cap",
+    "title": "Foam Outdoor Cap",
     "providerId": 99,
     "price": "16.50",
     "premiumPrice": "12.71",
@@ -15763,7 +15763,7 @@
     "providersCount": 2
   },
   "5223": {
-    "title": "Flexfit Delta Cap",
+    "title": "Cap",
     "providerId": 99,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -15772,7 +15772,7 @@
     "providersCount": 3
   },
   "5229": {
-    "title": "Flexfit Melange Unipanel Cap",
+    "title": "Melange Unipanel Cap",
     "providerId": 99,
     "price": "15.00",
     "premiumPrice": "11.55",
@@ -15781,7 +15781,7 @@
     "providersCount": 2
   },
   "5252": {
-    "title": "Flexfit NU Cap",
+    "title": "NU Cap",
     "providerId": 99,
     "price": "16.50",
     "premiumPrice": "12.71",
@@ -15808,7 +15808,7 @@
     "providersCount": 1
   },
   "5272": {
-    "title": "Flexfit Cool & Dry Poly Block Mesh Cap",
+    "title": "Cool & Dry Poly Block Mesh Cap",
     "providerId": 217,
     "price": "16.25",
     "premiumPrice": "12.51",
@@ -15826,7 +15826,7 @@
     "providersCount": 1
   },
   "5275": {
-    "title": "PosiCharge RacerMesh Cap",
+    "title": "Athletic RacerMesh Cap",
     "providerId": 217,
     "price": "17.25",
     "premiumPrice": "13.28",
@@ -15835,7 +15835,7 @@
     "providersCount": 1
   },
   "5277": {
-    "title": "PosiCharge Electric Heather Cap",
+    "title": "Athletic Electric Heather Cap",
     "providerId": 217,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -15889,7 +15889,7 @@
     "providersCount": 1
   },
   "5288": {
-    "title": "Flexfit Flat Bill Cap",
+    "title": "Flat Bill Cap",
     "providerId": 217,
     "price": "18.50",
     "premiumPrice": "14.25",
@@ -15943,7 +15943,7 @@
     "providersCount": 1
   },
   "5332": {
-    "title": "Flexfit Wool Blend Cap",
+    "title": "Wool Blend Cap",
     "providerId": 99,
     "price": "16.25",
     "premiumPrice": "12.51",
@@ -15988,7 +15988,7 @@
     "providersCount": 5
   },
   "5345": {
-    "title": "Men's Box Tee",
+    "title": "Men's Box T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -16042,7 +16042,7 @@
     "providersCount": 1
   },
   "5357": {
-    "title": "Youth Baseball Cap (Embroidery)",
+    "title": "Youth Baseball Cap (Embroidered)",
     "providerId": 99,
     "price": "15.54",
     "premiumPrice": "13.97",
@@ -16052,7 +16052,7 @@
     "cost": "13.97"
   },
   "5358": {
-    "title": "Women's Micro Rib Baby Tee",
+    "title": "Women's Micro Rib Baby T-Shirt",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -16106,7 +16106,7 @@
     "providersCount": 4
   },
   "5365": {
-    "title": "Spectator Scarf (Embroidery)",
+    "title": "Spectator Scarf (Embroidered)",
     "providerId": 99,
     "price": "17.25",
     "premiumPrice": "13.28",
@@ -16160,7 +16160,7 @@
     "providersCount": 3
   },
   "5371": {
-    "title": "Terry Hooded Towel with Ears (Embroidery)",
+    "title": "Terry Hooded Towel with Ears (Embroidered)",
     "providerId": 99,
     "price": "9.25",
     "premiumPrice": "7.12",
@@ -16187,7 +16187,7 @@
     "providersCount": 7
   },
   "5375": {
-    "title": "Puffer Blanket (Embroidery)",
+    "title": "Puffer Blanket (Embroidered)",
     "providerId": 217,
     "price": "17.50",
     "premiumPrice": "13.47",
@@ -16233,7 +16233,7 @@
     "providersCount": 5
   },
   "5382": {
-    "title": "Cotton Waffle Throw (Embroidery)",
+    "title": "Cotton Waffle Throw (Embroidered)",
     "providerId": 99,
     "price": "16.00",
     "premiumPrice": "12.32",
@@ -16359,7 +16359,7 @@
     "providersCount": 2
   },
   "5442": {
-    "title": "Diamond Quilt Blanket (Embroidery)",
+    "title": "Diamond Quilt Blanket (Embroidered)",
     "providerId": 99,
     "price": "16.00",
     "premiumPrice": "12.32",
@@ -16386,7 +16386,7 @@
     "providersCount": 7
   },
   "5445": {
-    "title": "Unisex Terry Shawl Robe (Embroidery)",
+    "title": "Unisex Terry Shawl Robe (Embroidered)",
     "providerId": 99,
     "price": "17.00",
     "premiumPrice": "13.09",
@@ -16395,7 +16395,7 @@
     "providersCount": 8
   },
   "5448": {
-    "title": "adidas Fundamental Dispatch Trucker Cap",
+    "title": "Classic Dispatch Mesh Trucker Cap",
     "providerId": 99,
     "price": "18.00",
     "premiumPrice": "13.86",
@@ -16404,7 +16404,7 @@
     "providersCount": 4
   },
   "5449": {
-    "title": "adidas Fundamental Alliance Cap",
+    "title": "Classic Structured Athletic Cap",
     "providerId": 99,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -16413,7 +16413,7 @@
     "providersCount": 5
   },
   "5450": {
-    "title": "Stadium Blanket (Embroidery)",
+    "title": "Stadium Blanket (Embroidered)",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -16449,7 +16449,7 @@
     "providersCount": 3
   },
   "5455": {
-    "title": "Women's Luxe Fitted Tee",
+    "title": "Women's Luxe Fitted T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -16458,7 +16458,7 @@
     "providersCount": 4
   },
   "5456": {
-    "title": "Under Armour® Team Blitzing Cap",
+    "title": "Athletic Curved-Bill Structured Cap",
     "providerId": 99,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -16549,7 +16549,7 @@
     "providersCount": 2
   },
   "5475": {
-    "title": "Men's Cotton Tee",
+    "title": "Men's Cotton T-Shirt",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -16702,7 +16702,7 @@
     "providersCount": 6
   },
   "5530": {
-    "title": "Unisex Super Sweats NuBlend® Sweatpants with Pockets",
+    "title": "Unisex Super Sweats Fleece Sweatpants with Pockets",
     "providerId": 99,
     "price": "12.25",
     "premiumPrice": "9.43",
@@ -16738,7 +16738,7 @@
     "providersCount": 1
   },
   "5560": {
-    "title": "Plush Throw Blanket (Embroidery)",
+    "title": "Plush Throw Blanket (Embroidered)",
     "providerId": 99,
     "price": "12.25",
     "premiumPrice": "9.43",
@@ -16747,7 +16747,7 @@
     "providersCount": 4
   },
   "5569": {
-    "title": "Cali Throw (Embroidery)",
+    "title": "Cali Throw (Embroidered)",
     "providerId": 99,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -16756,7 +16756,7 @@
     "providersCount": 6
   },
   "5570": {
-    "title": "Beach Throw (Embroidery)",
+    "title": "Beach Throw (Embroidered)",
     "providerId": 99,
     "price": "12.50",
     "premiumPrice": "9.63",
@@ -17071,7 +17071,7 @@
     "providersCount": 4
   },
   "5638": {
-    "title": "adidas® Defender 5 Backpack (Embroidery)",
+    "title": "Defender Multi-Pocket Sport Backpack (Embroidered)",
     "providerId": 99,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -17080,7 +17080,7 @@
     "providersCount": 5
   },
   "5639": {
-    "title": "Under Armour® All Sport Backpack (Embroidery)",
+    "title": "All-Sport Multi-Compartment Backpack (Embroidered)",
     "providerId": 99,
     "price": "15.50",
     "premiumPrice": "11.94",
@@ -17197,7 +17197,7 @@
     "providersCount": 4
   },
   "5659": {
-    "title": "Explorer Sling Bag (Embroidery)",
+    "title": "Explorer Sling Bag (Embroidered)",
     "providerId": 99,
     "price": "15.25",
     "premiumPrice": "11.74",
@@ -17233,7 +17233,7 @@
     "providersCount": 4
   },
   "5782": {
-    "title": "Women's CVC Tank",
+    "title": "Women's Cotton-Blend Tank",
     "providerId": 99,
     "price": "16.25",
     "premiumPrice": "12.51",
@@ -17242,7 +17242,7 @@
     "providersCount": 2
   },
   "5783": {
-    "title": "Women's Fine Jersey Boxy Tee",
+    "title": "Women's Fine Jersey Boxy T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -17251,7 +17251,7 @@
     "providersCount": 3
   },
   "5784": {
-    "title": "Women's Garment-Dyed Heavyweight Cropped Tee",
+    "title": "Women's Garment-Dyed Heavyweight Cropped T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -17287,7 +17287,7 @@
     "providersCount": 3
   },
   "5812": {
-    "title": "Women's Micro Rib Raglan Baby Tee",
+    "title": "Women's Micro Rib Raglan Baby T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -17377,7 +17377,7 @@
     "providersCount": 4
   },
   "5863": {
-    "title": "Unisex Triblend T-Shirt",
+    "title": "Unisex Tri-Blend T-Shirt",
     "providerId": 99,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -17395,7 +17395,7 @@
     "providersCount": 7
   },
   "5948": {
-    "title": "Unisex Pique Mockneck Tee",
+    "title": "Unisex Pique Mockneck T-Shirt",
     "providerId": 99,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -17404,7 +17404,7 @@
     "providersCount": 7
   },
   "5949": {
-    "title": "Unisex CVC Three-Quarter Sleeve Tee",
+    "title": "Unisex Cotton-Blend Three-Quarter Sleeve T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -17413,7 +17413,7 @@
     "providersCount": 8
   },
   "5950": {
-    "title": "Unisex CVC Henley Tee",
+    "title": "Unisex Cotton-Blend Henley T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -17422,7 +17422,7 @@
     "providersCount": 2
   },
   "5951": {
-    "title": "Unisex CVC V-Neck Tee",
+    "title": "Unisex Cotton-Blend V-Neck T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -17431,7 +17431,7 @@
     "providersCount": 3
   },
   "5952": {
-    "title": "Unisex Fine Jersey Long Sleeve Tee",
+    "title": "Unisex Fine Jersey Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -17467,7 +17467,7 @@
     "providersCount": 7
   },
   "6135": {
-    "title": "Women's Ultimate CVC V-Neck T-Shirt",
+    "title": "Women's Ultimate Cotton-Blend V-Neck T-Shirt",
     "providerId": 99,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -17503,7 +17503,7 @@
     "providersCount": 4
   },
   "6172": {
-    "title": "Women's Garment-Dyed Heavyweight Muscle Tee",
+    "title": "Women's Garment-Dyed Heavyweight Muscle T-Shirt",
     "providerId": 99,
     "price": "14.23",
     "premiumPrice": "10.96",
@@ -17521,7 +17521,7 @@
     "providersCount": 8
   },
   "6174": {
-    "title": "Unisex Sueded Cloud Jersey Tee",
+    "title": "Unisex Sueded Cloud Jersey T-Shirt",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -17530,7 +17530,7 @@
     "providersCount": 2
   },
   "6175": {
-    "title": "Unisex Super Heavyweight Long Sleeve Pocket Tee",
+    "title": "Unisex Super Heavyweight Long Sleeve Pocket T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -17566,7 +17566,7 @@
     "providersCount": 4
   },
   "6331": {
-    "title": "Unisex USA-Made Triblend T-Shirt",
+    "title": "Unisex USA-Made Tri-Blend T-Shirt",
     "providerId": 99,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -17602,7 +17602,7 @@
     "providersCount": 3
   },
   "6340": {
-    "title": "Unisex Sueded Tee",
+    "title": "Unisex Sueded T-Shirt",
     "providerId": 99,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -17611,7 +17611,7 @@
     "providersCount": 7
   },
   "6341": {
-    "title": "Unisex Triblend Tank",
+    "title": "Unisex Tri-Blend Tank",
     "providerId": 99,
     "price": "9.50",
     "premiumPrice": "7.32",
@@ -17710,7 +17710,7 @@
     "providersCount": 5
   },
   "6389": {
-    "title": "Unisex Viscose Fashion Tee",
+    "title": "Unisex Viscose Fashion T-Shirt",
     "providerId": 99,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -17737,7 +17737,7 @@
     "providersCount": 3
   },
   "6395": {
-    "title": "Women's Garment-Dyed Tee",
+    "title": "Women's Garment-Dyed T-Shirt",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -17746,7 +17746,7 @@
     "providersCount": 6
   },
   "6397": {
-    "title": "Women's Relaxed Triblend V-Neck Tee",
+    "title": "Women's Relaxed Tri-Blend V-Neck T-Shirt",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -17755,7 +17755,7 @@
     "providersCount": 8
   },
   "6400": {
-    "title": "Women's FWD Fashion Crop Long Sleeve Tee",
+    "title": "Women's FWD Fashion Crop Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "14.23",
     "premiumPrice": "10.96",
@@ -17764,7 +17764,7 @@
     "providersCount": 4
   },
   "6403": {
-    "title": "Women's Triblend Racerback Tank",
+    "title": "Women's Tri-Blend Racerback Tank",
     "providerId": 99,
     "price": "13.25",
     "premiumPrice": "10.20",
@@ -18178,7 +18178,7 @@
     "providersCount": 3
   },
   "6799": {
-    "title": "Unisex Softstyle® Full-Zip Hooded Sweatshirt",
+    "title": "Unisex Soft Cotton Full-Zip Hooded Sweatshirt",
     "providerId": 99,
     "price": "24.35",
     "premiumPrice": "18.75",
@@ -18187,7 +18187,7 @@
     "providersCount": 4
   },
   "6814": {
-    "title": "Perfect-T Triblend T-Shirt",
+    "title": "Perfect-T Tri-Blend T-Shirt",
     "providerId": 99,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -18196,7 +18196,7 @@
     "providersCount": 5
   },
   "6815": {
-    "title": "Women's Perfect-T Triblend V-Neck T-Shirt",
+    "title": "Women's Perfect-T Tri-Blend V-Neck T-Shirt",
     "providerId": 99,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -18772,7 +18772,7 @@
     "providersCount": 2
   },
   "7124": {
-    "title": "Women's Relaxed Vintage Wash Tee",
+    "title": "Women's Relaxed Vintage Wash T-Shirt",
     "providerId": 99,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -18781,7 +18781,7 @@
     "providersCount": 7
   },
   "7125": {
-    "title": "Women's Fine Jersey V-Neck Tee",
+    "title": "Women's Fine Jersey V-Neck T-Shirt",
     "providerId": 99,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -18790,7 +18790,7 @@
     "providersCount": 8
   },
   "7126": {
-    "title": "Women's Fine Jersey Tee",
+    "title": "Women's Fine Jersey T-Shirt",
     "providerId": 99,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -18799,7 +18799,7 @@
     "providersCount": 2
   },
   "7127": {
-    "title": "Women's Boxy Tee",
+    "title": "Women's Boxy T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -18808,7 +18808,7 @@
     "providersCount": 3
   },
   "7128": {
-    "title": "Women's Hi-Lo Tee",
+    "title": "Women's Hi-Lo T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -18817,7 +18817,7 @@
     "providersCount": 4
   },
   "7129": {
-    "title": "Relaxed Crew Tee",
+    "title": "Relaxed Crew T-Shirt",
     "providerId": 99,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -18853,7 +18853,7 @@
     "providersCount": 8
   },
   "7134": {
-    "title": "Women's Football V-Neck Fine Jersey Tee",
+    "title": "Women's Football V-Neck Fine Jersey T-Shirt",
     "providerId": 99,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -18871,7 +18871,7 @@
     "providersCount": 4
   },
   "7138": {
-    "title": "Unisex Vintage Wash Tee",
+    "title": "Unisex Vintage Wash T-Shirt",
     "providerId": 99,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -18880,7 +18880,7 @@
     "providersCount": 7
   },
   "7140": {
-    "title": "Men's Fine Jersey Long Sleeve Tee",
+    "title": "Men's Fine Jersey Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -19159,7 +19159,7 @@
     "providersCount": 7
   },
   "7567": {
-    "title": "Unisex Epic CVC T-Shirt",
+    "title": "Unisex Epic Cotton-Blend T-Shirt",
     "providerId": 99,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -19384,7 +19384,7 @@
     "providersCount": 5
   },
   "7748": {
-    "title": "Unisex CVC Tee",
+    "title": "Unisex Cotton-Blend T-Shirt",
     "providerId": 99,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -19393,7 +19393,7 @@
     "providersCount": 8
   },
   "7751": {
-    "title": "Unisex Super Heavyweight Tee",
+    "title": "Unisex Super Heavyweight T-Shirt",
     "providerId": 99,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -19429,7 +19429,7 @@
     "providersCount": 5
   },
   "8081": {
-    "title": "Unisex Triblend Lightweight Full-Zip Hooded Long Sleeve Tee",
+    "title": "Unisex Tri-Blend Lightweight Full-Zip Hooded Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -19501,7 +19501,7 @@
     "providersCount": 3
   },
   "9039": {
-    "title": "Unisex Hammer™ Maxweight T-Shirt",
+    "title": "Unisex Hammer Maxweight T-Shirt",
     "providerId": 217,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -19555,7 +19555,7 @@
     "providersCount": 1
   },
   "9677": {
-    "title": "Men's Triblend Long Sleeve T-Shirt",
+    "title": "Men's Tri-Blend Long Sleeve T-Shirt",
     "providerId": 99,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -20023,7 +20023,7 @@
     "providersCount": 1
   },
   "10732": {
-    "title": "Men's Staple Stone Wash Tee",
+    "title": "Men's Stone Washed Cotton T-Shirt",
     "providerId": 217,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -20059,7 +20059,7 @@
     "providersCount": 1
   },
   "10742": {
-    "title": "Staple Curve Tank",
+    "title": "Curved Hem Cotton Tank Top",
     "providerId": 217,
     "price": "16.50",
     "premiumPrice": "12.71",
@@ -20068,7 +20068,7 @@
     "providersCount": 1
   },
   "10745": {
-    "title": "Staple L-S Tee",
+    "title": "Classic Everyday Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -20086,7 +20086,7 @@
     "providersCount": 1
   },
   "10749": {
-    "title": "Block Safety Tee",
+    "title": "Block Safety T-Shirt",
     "providerId": 217,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -20131,7 +20131,7 @@
     "providersCount": 1
   },
   "10756": {
-    "title": "Classic Pocket Tee",
+    "title": "Classic Pocket T-Shirt",
     "providerId": 217,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -20140,7 +20140,7 @@
     "providersCount": 1
   },
   "10758": {
-    "title": "Women's Mali L-S Tee",
+    "title": "Women's Soft Long Sleeve Crewneck T-Shirt",
     "providerId": 217,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -20149,7 +20149,7 @@
     "providersCount": 1
   },
   "10759": {
-    "title": "Women's Maple Organic Tee",
+    "title": "Women's Maple Organic T-Shirt",
     "providerId": 217,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -20167,7 +20167,7 @@
     "providersCount": 1
   },
   "10761": {
-    "title": "Women's Heavy Faded Tee",
+    "title": "Women's Vintage Washed Heavyweight Cotton T-Shirt",
     "providerId": 217,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -20194,7 +20194,7 @@
     "providersCount": 1
   },
   "10768": {
-    "title": "Women's Heavy Faded Tank",
+    "title": "Women's Vintage Washed Heavyweight Tank Top",
     "providerId": 217,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -20212,7 +20212,7 @@
     "providersCount": 1
   },
   "10771": {
-    "title": "Women's Martina Tee",
+    "title": "Women's Martina T-Shirt",
     "providerId": 217,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -20230,7 +20230,7 @@
     "providersCount": 1
   },
   "10774": {
-    "title": "Women's Maple Faded Tee",
+    "title": "Women's Maple Faded T-Shirt",
     "providerId": 217,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -20257,7 +20257,7 @@
     "providersCount": 1
   },
   "10777": {
-    "title": "Women's Classic Crop Tee",
+    "title": "Women's Classic Crop T-Shirt",
     "providerId": 217,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -20293,7 +20293,7 @@
     "providersCount": 1
   },
   "10783": {
-    "title": "Women's Heavy Tee",
+    "title": "Women's Heavy T-Shirt",
     "providerId": 217,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -20329,7 +20329,7 @@
     "providersCount": 1
   },
   "10787": {
-    "title": "Women's Maple Curve L-S Tee",
+    "title": "Women's Maple Curve Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -20356,7 +20356,7 @@
     "providersCount": 1
   },
   "10795": {
-    "title": "Women's Classic Tee",
+    "title": "Women's Classic T-Shirt",
     "providerId": 217,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -20401,7 +20401,7 @@
     "providersCount": 1
   },
   "10800": {
-    "title": "Classic L-S Tee",
+    "title": "Classic Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -20437,7 +20437,7 @@
     "providersCount": 1
   },
   "10807": {
-    "title": "Women's Maple Active Blend Tee",
+    "title": "Women's Maple Active Blend T-Shirt",
     "providerId": 217,
     "price": "9.23",
     "premiumPrice": "7.11",
@@ -20473,7 +20473,7 @@
     "providersCount": 1
   },
   "10820": {
-    "title": "Staple Camo Tee",
+    "title": "Camo Pattern Cotton T-Shirt",
     "providerId": 217,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -20518,7 +20518,7 @@
     "providersCount": 1
   },
   "10832": {
-    "title": "Women's Maple Curve Tee",
+    "title": "Women's Maple Curve T-Shirt",
     "providerId": 217,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -20536,7 +20536,7 @@
     "providersCount": 1
   },
   "10835": {
-    "title": "Staple Tear Out Tee",
+    "title": "Everyday Soft Cotton T-Shirt",
     "providerId": 217,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -20545,7 +20545,7 @@
     "providersCount": 1
   },
   "10836": {
-    "title": "Block Safety L-S Tee",
+    "title": "Block Safety Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -20554,7 +20554,7 @@
     "providersCount": 1
   },
   "10837": {
-    "title": "Women's Martina Crop Tee",
+    "title": "Women's Martina Crop T-Shirt",
     "providerId": 217,
     "price": "11.23",
     "premiumPrice": "8.65",
@@ -20599,7 +20599,7 @@
     "providersCount": 1
   },
   "10843": {
-    "title": "General L-S Tee",
+    "title": "Heavyweight Workwear Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -20653,7 +20653,7 @@
     "providersCount": 1
   },
   "10851": {
-    "title": "Raglan Tee",
+    "title": "Raglan T-Shirt",
     "providerId": 217,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -20680,7 +20680,7 @@
     "providersCount": 1
   },
   "10856": {
-    "title": "Staple Tank",
+    "title": "Classic Everyday Cotton Tank Top",
     "providerId": 217,
     "price": "14.50",
     "premiumPrice": "11.17",
@@ -20725,7 +20725,7 @@
     "providersCount": 1
   },
   "10862": {
-    "title": "Heavy L-S Tee",
+    "title": "Heavy Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -20743,7 +20743,7 @@
     "providersCount": 1
   },
   "10864": {
-    "title": "Staple Active Tee",
+    "title": "Active Performance Athletic T-Shirt",
     "providerId": 217,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -20752,7 +20752,7 @@
     "providersCount": 1
   },
   "10865": {
-    "title": "Staple Active L-S Tee",
+    "title": "Active Performance Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "11.46",
     "premiumPrice": "8.82",
@@ -20797,7 +20797,7 @@
     "providersCount": 1
   },
   "10876": {
-    "title": "Staple Minus Tee [-2\"]",
+    "title": "Cropped Fit Cotton T-Shirt",
     "providerId": 217,
     "price": "14.23",
     "premiumPrice": "10.96",
@@ -20815,7 +20815,7 @@
     "providersCount": 1
   },
   "10881": {
-    "title": "Classic Plus Tee [+2\"]",
+    "title": "Classic Plus T-Shirt",
     "providerId": 217,
     "price": "7.00",
     "premiumPrice": "5.39",
@@ -20869,7 +20869,7 @@
     "providersCount": 1
   },
   "10890": {
-    "title": "Classic Pocket L-S Tee",
+    "title": "Classic Pocket Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "12.00",
     "premiumPrice": "9.24",
@@ -20896,7 +20896,7 @@
     "providersCount": 1
   },
   "10893": {
-    "title": "Women's Maple V Neck Tee",
+    "title": "Women's Maple V Neck T-Shirt",
     "providerId": 217,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -20905,7 +20905,7 @@
     "providersCount": 1
   },
   "10894": {
-    "title": "Women's Martina V Neck Tee",
+    "title": "Women's Martina V Neck T-Shirt",
     "providerId": 217,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -20941,7 +20941,7 @@
     "providersCount": 1
   },
   "10898": {
-    "title": "Staple Plus Tee [+2\"]",
+    "title": "Extended Length Cotton T-Shirt",
     "providerId": 217,
     "price": "8.46",
     "premiumPrice": "6.51",
@@ -20950,7 +20950,7 @@
     "providersCount": 1
   },
   "10899": {
-    "title": "Women's Classic Minus Tee [-2\"]",
+    "title": "Women's Classic Minus T-Shirt",
     "providerId": 217,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -20995,7 +20995,7 @@
     "providersCount": 1
   },
   "10906": {
-    "title": "Women's Classic L-S Tee",
+    "title": "Women's Classic Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -21013,7 +21013,7 @@
     "providersCount": 1
   },
   "10908": {
-    "title": "Women's Maple L-S Tee",
+    "title": "Women's Maple Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "10.00",
     "premiumPrice": "7.70",
@@ -21058,7 +21058,7 @@
     "providersCount": 1
   },
   "10918": {
-    "title": "Women's Mali Racerback",
+    "title": "Women's Everyday Racerback Tank Top",
     "providerId": 217,
     "price": "18.25",
     "premiumPrice": "14.05",
@@ -21085,7 +21085,7 @@
     "providersCount": 1
   },
   "10922": {
-    "title": "Classic Oversized Tee",
+    "title": "Classic Oversized T-Shirt",
     "providerId": 217,
     "price": "8.46",
     "premiumPrice": "6.51",
@@ -21094,7 +21094,7 @@
     "providersCount": 1
   },
   "10923": {
-    "title": "Staple Organic L-S Tee",
+    "title": "Organic Long Sleeve Cotton T-Shirt",
     "providerId": 217,
     "price": "13.00",
     "premiumPrice": "10.01",
@@ -21130,7 +21130,7 @@
     "providersCount": 1
   },
   "10930": {
-    "title": "Staple Active Blend Tee",
+    "title": "Active Performance Athletic T-Shirt",
     "providerId": 217,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -21148,7 +21148,7 @@
     "providersCount": 1
   },
   "10934": {
-    "title": "Block L-S Tee",
+    "title": "Relaxed Fit Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "8.46",
     "premiumPrice": "6.51",
@@ -21193,7 +21193,7 @@
     "providersCount": 1
   },
   "10945": {
-    "title": "Staple Heather Tee",
+    "title": "Heathered Cotton Crewneck T-Shirt",
     "providerId": 217,
     "price": "7.23",
     "premiumPrice": "5.57",
@@ -21202,7 +21202,7 @@
     "providersCount": 1
   },
   "10946": {
-    "title": "Classic Minus Tee [-2\"]",
+    "title": "Classic Minus T-Shirt",
     "providerId": 217,
     "price": "12.46",
     "premiumPrice": "9.59",
@@ -21220,7 +21220,7 @@
     "providersCount": 1
   },
   "10950": {
-    "title": "Block Oversized Tee",
+    "title": "Relaxed Oversized Cotton T-Shirt",
     "providerId": 217,
     "price": "8.00",
     "premiumPrice": "6.16",
@@ -21256,7 +21256,7 @@
     "providersCount": 1
   },
   "10954": {
-    "title": "Women's Basic Tee",
+    "title": "Women's Basic T-Shirt",
     "providerId": 217,
     "price": "8.23",
     "premiumPrice": "6.34",
@@ -21274,7 +21274,7 @@
     "providersCount": 1
   },
   "10959": {
-    "title": "Women's Maple Minus Tee [-3\"]",
+    "title": "Women's Maple Minus T-Shirt [-3\"]",
     "providerId": 217,
     "price": "9.00",
     "premiumPrice": "6.93",
@@ -21283,7 +21283,7 @@
     "providersCount": 1
   },
   "10960": {
-    "title": "Women's Crop L-S Tee",
+    "title": "Women's Crop Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "10.23",
     "premiumPrice": "7.88",
@@ -21301,7 +21301,7 @@
     "providersCount": 1
   },
   "10963": {
-    "title": "Staple Stripe Tee",
+    "title": "Striped Everyday Cotton T-Shirt",
     "providerId": 217,
     "price": "13.23",
     "premiumPrice": "10.19",
@@ -21310,7 +21310,7 @@
     "providersCount": 1
   },
   "10964": {
-    "title": "Women's Heavy Faded L-S Tee",
+    "title": "Women's Vintage Washed Heavyweight Long Sleeve T-Shirt",
     "providerId": 217,
     "price": "10.46",
     "premiumPrice": "8.05",
@@ -21319,7 +21319,7 @@
     "providersCount": 1
   },
   "10965": {
-    "title": "Classic Organic Tee",
+    "title": "Classic Organic T-Shirt",
     "providerId": 217,
     "price": "11.00",
     "premiumPrice": "8.47",
@@ -21328,7 +21328,7 @@
     "providersCount": 1
   },
   "10967": {
-    "title": "Heavy Faded Minus Tee [-2\"]",
+    "title": "Cropped Vintage Washed Heavyweight T-Shirt",
     "providerId": 217,
     "price": "13.46",
     "premiumPrice": "10.36",
@@ -21337,7 +21337,7 @@
     "providersCount": 1
   },
   "10973": {
-    "title": "Women's Maple Ringer Tee",
+    "title": "Women's Maple Ringer T-Shirt",
     "providerId": 217,
     "price": "7.46",
     "premiumPrice": "5.74",
@@ -21364,7 +21364,7 @@
     "providersCount": 1
   },
   "10976": {
-    "title": "Women's Stone Wash Heavy Tee",
+    "title": "Women's Stone Wash Heavy T-Shirt",
     "providerId": 217,
     "price": "14.46",
     "premiumPrice": "11.13",
@@ -21373,7 +21373,7 @@
     "providersCount": 1
   },
   "10979": {
-    "title": "Stone Wash Heavy Tee",
+    "title": "Stone Wash Heavy T-Shirt",
     "providerId": 217,
     "price": "9.46",
     "premiumPrice": "7.28",
@@ -21419,7 +21419,7 @@
     "providersCount": 1
   },
   "10990": {
-    "title": "Staple Curve Tee",
+    "title": "Curved Hem Cotton T-Shirt",
     "providerId": 217,
     "price": "12.23",
     "premiumPrice": "9.42",
@@ -21536,7 +21536,7 @@
     "providersCount": 1
   },
   "11016": {
-    "title": "Women's Box Tee",
+    "title": "Women's Box T-Shirt",
     "providerId": 217,
     "price": "14.00",
     "premiumPrice": "10.78",
@@ -21545,7 +21545,7 @@
     "providersCount": 1
   },
   "11023": {
-    "title": "Box L S Tee",
+    "title": "Box L S T-Shirt",
     "providerId": 217,
     "price": "13.23",
     "premiumPrice": "10.19",

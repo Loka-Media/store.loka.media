@@ -22,6 +22,7 @@ import type {
   PrintifyShop,
 } from '@/types/printify';
 import { HIDDEN_BLUEPRINT_IDS } from '@/config/hiddenBlueprints';
+import { sanitizeProductTitle, sanitizeBrand, sanitizeProductDescription } from '@/lib/productSanitizer';
 
 const PRINTIFY_BASE_URL = 'https://api.printify.com/v1';
 
@@ -129,12 +130,31 @@ export const printifyCatalogAPI = {
   /** List all available blueprints (product templates) */
   getBlueprints: (): Promise<PrintifyBlueprint[]> =>
     printifyFetch<PrintifyBlueprint[]>('/catalog/blueprints.json').then(blueprints =>
-      Array.isArray(blueprints) ? blueprints.filter(bp => !HIDDEN_BLUEPRINT_IDS.has(Number(bp.id))) : blueprints
+      Array.isArray(blueprints)
+        ? blueprints
+            .filter(bp => !HIDDEN_BLUEPRINT_IDS.has(Number(bp.id)))
+            .map(bp => ({
+              ...bp,
+              title: sanitizeProductTitle(bp.title),
+              brand: sanitizeBrand(bp.brand),
+              model: sanitizeProductTitle(bp.model),
+              description: sanitizeProductDescription(bp.description),
+            }))
+        : blueprints
     ),
 
   /** Get blueprint details */
   getBlueprint: (blueprintId: number): Promise<PrintifyBlueprintDetail> =>
-    printifyFetch<PrintifyBlueprintDetail>(`/catalog/blueprints/${blueprintId}.json`),
+    printifyFetch<PrintifyBlueprintDetail>(`/catalog/blueprints/${blueprintId}.json`).then(bp => {
+      if (!bp) return bp;
+      return {
+        ...bp,
+        title: sanitizeProductTitle(bp.title),
+        brand: sanitizeBrand(bp.brand),
+        model: sanitizeProductTitle(bp.model),
+        description: sanitizeProductDescription(bp.description),
+      };
+    }),
 
   /** Get print providers for a blueprint */
   getPrintProviders: (blueprintId: number): Promise<PrintifyPrintProvider[]> =>

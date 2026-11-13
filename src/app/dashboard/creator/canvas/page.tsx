@@ -17,6 +17,7 @@ import { useDebouncePreview } from "@/hooks/useDebouncePreview";
 
 import UnifiedCanvasPDP from "@/components/canvas/UnifiedCanvasPDP";
 import CreativeLoader from "@/components/CreativeLoader";
+import { sanitizeProductTitle, sanitizeProductDescription, sanitizeBrand } from "@/lib/productSanitizer";
 
 import {
   DesignFile,
@@ -278,6 +279,9 @@ function CanvasContent() {
         if (saved) {
           const parsed = JSON.parse(saved);
           if (String(parsed.id) === String(urlBlueprintId) && parsed.variants?.length > 0) {
+            parsed.title = sanitizeProductTitle(parsed.title || parsed.model);
+            parsed.brand = sanitizeBrand(parsed.brand);
+            if (parsed.name) parsed.name = sanitizeProductTitle(parsed.name);
             return parsed;
           }
         }
@@ -525,7 +529,13 @@ function CanvasContent() {
               console.log(`📊 Variant filtering: ${filteredCount}/${originalCount} variants available (${filteredOut} filtered out)`);
             }
 
-            const productWithVariants = { ...product, variants: availableVariants };
+            const productWithVariants = {
+              ...product,
+              title: sanitizeProductTitle(product.title || product.model),
+              name: sanitizeProductTitle(product.name || product.title || product.model),
+              brand: sanitizeBrand(product.brand),
+              variants: availableVariants
+            };
             setSelectedProduct(productWithVariants);
 
             // Compute printFiles from Printify variant placeholders
@@ -611,8 +621,8 @@ function CanvasContent() {
 
                 // Initialize with default Printful product data
                 setProductForm({
-                  name: `Custom ${product.title || product.model}`,
-                  description: product.description || '',
+                  name: `Custom ${sanitizeProductTitle(product.title || product.model)}`,
+                  description: sanitizeProductDescription(product.description || ''),
                   markupPercentage: '30',
                   category: sourceCategoryTitle || product.type_name || product.type || '',
                   tags: []
@@ -682,6 +692,9 @@ function CanvasContent() {
         localStorage.getItem('selectedPrintfulProduct'); // legacy key
       if (savedProduct) {
         const product = JSON.parse(savedProduct);
+        product.title = sanitizeProductTitle(product.title || product.model);
+        product.brand = sanitizeBrand(product.brand);
+        if (product.name) product.name = sanitizeProductTitle(product.name);
         let currentVariants = product.variants || [];
         if (!currentVariants.length || !currentVariants.some((v: any) => v.placeholders && v.placeholders.length > 0)) {
           const detailed = await printifyAPI.getBlueprintDetails(product.id);
@@ -717,8 +730,8 @@ function CanvasContent() {
         } catch (e) { /* ignore parse errors */ }
 
         setProductForm({
-          name: `Custom ${product.title || product.model}`,
-          description: product.description || "",
+          name: `Custom ${sanitizeProductTitle(product.title || product.model)}`,
+          description: sanitizeProductDescription(product.description || ""),
           markupPercentage: "30",
           category: sourceCategoryTitle || product.type_name || product.type,
           tags: []
@@ -1006,8 +1019,8 @@ function CanvasContent() {
 
       const productData = {
         id: selectedProduct?.id,
-        name: productForm.name.trim() || `Custom ${selectedProduct.title || selectedProduct.model}`,
-        description: productForm.description.trim(),
+        name: sanitizeProductTitle(productForm.name.trim()) || `Custom ${sanitizeProductTitle(selectedProduct.title || selectedProduct.model)}`,
+        description: sanitizeProductDescription(productForm.description.trim()),
         category: productForm.category,
         markupPercentage: parseFloat(productForm.markupPercentage),
         variants: variantIds,

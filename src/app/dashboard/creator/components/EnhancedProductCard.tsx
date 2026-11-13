@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { productAPI } from '@/lib/api';
 import { createProductSlug, getValidImageUrl } from '@/lib/utils';
+import { sanitizeProductTitle } from '@/lib/productSanitizer';
 import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
@@ -231,7 +232,7 @@ export default function EnhancedProductCard({ product, onDelete }: { product: Cr
             </span>
           )}
           <h3 className="font-extrabold text-center text-sm text-white truncate mb-2 group-hover:text-primary transition-colors line-clamp-2 tracking-tight">
-            {product.name}
+            {sanitizeProductTitle(product.name)}
           </h3>
           <div className="flex items-center justify-center mb-3 flex-wrap gap-2">
             <span className="text-sm sm:text-base font-bold text-cyan-400">

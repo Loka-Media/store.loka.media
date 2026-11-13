@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { printifyCatalogAPI, HIDDEN_BLUEPRINT_IDS } from '@/services/printify/PrintifyClient';
 import { printifyPricingService } from '@/services/printify/PrintifyPricingService';
+import { sanitizeProductTitle, sanitizeBrand, sanitizeTypeName, sanitizeProductDescription } from '@/lib/productSanitizer';
 import fs from 'fs';
 import path from 'path';
 import blueprintCategories from '@/config/blueprint_categories.json';
@@ -528,13 +529,17 @@ const SEARCH_SYNONYMS: Record<string, RegExp> = {
           premiumVal = fallback.premiumPrice || fallback.cost || fallback.premium || priceVal;
         }
 
+        const cleanTitle = sanitizeProductTitle(bp.title);
+        const cleanBrand = sanitizeBrand(bp.brand);
+        const cleanTypeName = sanitizeTypeName(bp.type_name || bp.type, cleanTitle);
+
         return {
           id: bp.id,
-          title: bp.title,
-          brand: bp.brand,
-          model: bp.model,
+          title: cleanTitle,
+          brand: cleanBrand,
+          model: sanitizeProductTitle(bp.model),
           image: defaultImage,
-          type_name: bp.brand || 'Apparel',
+          type_name: cleanTypeName,
           variant_count: bp.variant_count || ((fallback.sizesCount || fallback.sizes || 4) * (fallback.colorsCount || fallback.colors || 5)),
           is_discontinued: false,
           price: typeof priceVal === 'number' ? priceVal.toFixed(2) : String(priceVal),
@@ -700,10 +705,18 @@ const SEARCH_SYNONYMS: Record<string, RegExp> = {
       ? minVariantCost.toFixed(2)
       : (fallbackCost !== null ? fallbackCost.toFixed(2) : (cachedMeta.price ? String(cachedMeta.price) : 'N/A'));
 
+    const cleanTitle = sanitizeProductTitle(blueprint.title);
+    const cleanBrand = sanitizeBrand(blueprint.brand);
+    const cleanTypeName = sanitizeTypeName((blueprint as any).type_name || (blueprint as any).type, cleanTitle);
+
     const mergedBlueprint = {
       ...blueprint,
+      title: cleanTitle,
+      brand: cleanBrand,
+      model: sanitizeProductTitle(blueprint.model),
+      description: sanitizeProductDescription(blueprint.description),
       image: blueprint.images?.[0] || '/placeholder-product.png',
-      type_name: blueprint.brand || 'Apparel',
+      type_name: cleanTypeName,
       price: formattedPrice,
       premiumPrice: formattedPrice,
       cost: formattedPrice,

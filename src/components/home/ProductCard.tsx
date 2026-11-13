@@ -15,6 +15,7 @@ import { ExtendedProduct } from "@/lib/api";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { getProductPriceRange } from "@/lib/pricing";
 import { createProductSlug, getValidImageUrl } from "@/lib/utils";
+import { sanitizeProductTitle } from "@/lib/productSanitizer";
 import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 
@@ -84,7 +85,7 @@ export function ProductCard({
 
           <Image
             src={imageUrl}
-            alt={product.name}
+            alt={sanitizeProductTitle(product.name)}
             fill
             className={`object-cover transition-all duration-700 ${
               imageLoaded ? "opacity-100" : "opacity-0"
@@ -142,8 +143,8 @@ export function ProductCard({
 
       <div className="p-6 relative z-10">
         <Link href={`/products/${createProductSlug(product.name, product.id)}`}>
-          <h3 className="font-normal text-white hover:text-orange-400 transition-colors text-lg leading-tight line-clamp-2 mb-3 group-hover:text-orange-300">
-            {product.name}
+          <h3 className="font-normal text-white hover:text-primary transition-colors text-lg leading-tight line-clamp-2 mb-3 group-hover:text-primary">
+            {sanitizeProductTitle(product.name)}
           </h3>
         </Link>
 

@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { productAPI, ProductVariant } from '@/lib/api';
 import { parseProductSlug, createProductSlug, isVariantAvailable as checkVariantAvailable } from '@/lib/utils';
+import { sanitizeProductTitle, sanitizeProductDescription } from '@/lib/productSanitizer';
 import toast from 'react-hot-toast';
 
 export interface ProductDetails {
@@ -75,6 +76,11 @@ export const useProductData = (slug: string) => {
           const parsed = JSON.parse(response.thumbnail_url);
           if (parsed.length) response.thumbnail_url = parsed[0];
         } catch (e) {}
+      }
+
+      if (response) {
+        if (response.name) response.name = sanitizeProductTitle(response.name);
+        if (response.description) response.description = sanitizeProductDescription(response.description);
       }
 
       setProduct(response);

@@ -20,6 +20,7 @@ import GradientTitle from "@/components/ui/GradientTitle";
 import { GradientText } from "@/components/ui/GradientText";
 import { Button } from "@/components/ui/button";
 import CreativeLoader from "@/components/CreativeLoader";
+import { sanitizeProductTitle, sanitizeBrand, sanitizeTypeName } from "@/lib/productSanitizer";
 
 interface Category {
   id: number;
@@ -337,10 +338,21 @@ export default function CreatorCatalogPage() {
     }
 
     // Store selected product in localStorage and navigate to design workflow
-    console.log("Storing product and navigating:", printfulProduct);
+    const sanitizedProduct = {
+      ...printfulProduct,
+      title: sanitizeProductTitle(printfulProduct.title || printfulProduct.model),
+      brand: sanitizeBrand(printfulProduct.brand),
+      model: sanitizeProductTitle(printfulProduct.model),
+      type_name: sanitizeTypeName(printfulProduct.type_name || printfulProduct.type, printfulProduct.title)
+    };
+    console.log("Storing sanitized product and navigating:", sanitizedProduct);
     localStorage.setItem(
       "selectedPrintfulProduct",
-      JSON.stringify(printfulProduct)
+      JSON.stringify(sanitizedProduct)
+    );
+    localStorage.setItem(
+      "selectedPrintifyProduct",
+      JSON.stringify(sanitizedProduct)
     );
 
     // Store the source category so canvas can auto-select it in Marketplace Category dropdown
@@ -784,12 +796,12 @@ function GlobalCatalogSearch({
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-white font-semibold text-sm truncate group-hover:text-orange-400 transition-colors">
-                              {product.title || product.model}
+                            <span className="text-white font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                              {sanitizeProductTitle(product.title || product.model)}
                             </span>
                             {product.brand && (
                               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-gray-300 border border-white/10 flex-shrink-0">
-                                {product.brand}
+                                {sanitizeBrand(product.brand)}
                               </span>
                             )}
                           </div>
@@ -1262,14 +1274,14 @@ function PrintfulProductCard({
         {/* Brand Badge - Top Right */}
         <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-2 sm:px-3 py-1">
           <span className="text-xs sm:text-sm font-bold text-black truncate max-w-[100px] sm:max-w-[120px] block">
-            {product.brand}
+            {sanitizeBrand(product.brand)}
           </span>
         </div>
 
         {/* Button - Bottom Left */}
         <button
           onClick={() => onCreateProduct(product)}
-          className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 p-1.5 sm:p-2.5 rounded-full bg-black border border-orange-400 text-white hover:bg-orange-500 transition-all duration-300 transform hover:scale-110 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
+          className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 p-1.5 sm:p-2.5 rounded-full bg-black border border-primary text-white hover:bg-primary hover:text-black transition-all duration-300 transform hover:scale-110 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
           title="Create Product"
         >
           <Plus className="w-3 h-3 sm:w-5 sm:h-5" />
@@ -1280,12 +1292,12 @@ function PrintfulProductCard({
       <div className="p-3 sm:p-4 flex flex-col gap-2.5 flex-grow text-center bg-black border-t border-white/10">
         {/* Product Type Label */}
         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-          {product.type_name || product.type}
+          {sanitizeTypeName(product.type_name || product.type)}
         </span>
 
         {/* Product Title */}
-        <span className="font-bold text-white text-sm sm:text-base leading-snug group-hover:text-orange-400 transition-colors block line-clamp-2 min-h-[40px]">
-          {product.title || product.model}
+        <span className="font-bold text-white text-sm sm:text-base leading-snug group-hover:text-primary transition-colors block line-clamp-2 min-h-[40px]">
+          {sanitizeProductTitle(product.title || product.model)}
         </span>
 
         {/* Details Row (Sizes, Colors, Providers) */}
@@ -1343,9 +1355,9 @@ function ProductDetailsModal({
           <div className="flex justify-between items-start mb-6">
             <div>
               <span className="text-3xl font-bold text-white block">
-                {product.title || product.model}
+                {sanitizeProductTitle(product.title || product.model)}
               </span>
-              <p className="text-gray-400 font-bold mt-1">by {product.brand}</p>
+              <p className="text-gray-400 font-bold mt-1">by {sanitizeBrand(product.brand)}</p>
             </div>
             <button
               onClick={onClose}
@@ -1372,7 +1384,7 @@ function ProductDetailsModal({
             <div className="aspect-square relative bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
               <Image
                 src={product.image || "/placeholder-product.png"}
-                alt={product.title || product.model}
+                alt={sanitizeProductTitle(product.title || product.model)}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
@@ -1389,12 +1401,12 @@ function ProductDetailsModal({
                     <div className="flex justify-between">
                       <span className="text-gray-400">Type:</span>{" "}
                       <span className="text-white">
-                        {product.type_name || product.type}
+                        {sanitizeTypeName(product.type_name || product.type)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Brand:</span>{" "}
-                      <span className="text-white">{product.brand}</span>
+                      <span className="text-white">{sanitizeBrand(product.brand)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Variants:</span>{" "}

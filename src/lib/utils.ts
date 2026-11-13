@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { sanitizeProductTitle, sanitizeProductDescription } from "./productSanitizer"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -29,7 +30,8 @@ export function extractIdFromSlug(slug: string): string | null {
 }
 
 export function createProductSlug(name: string, id: number): string {
-  const slug = createSlug(name);
+  const cleanName = sanitizeProductTitle(name || "");
+  const slug = createSlug(cleanName);
   return `${slug}-${id}`;
 }
 
@@ -37,8 +39,8 @@ export function parseProductSlug(slug: string): { name: string; id: string } | n
   const id = extractIdFromSlug(slug);
   if (!id) return null;
   
-  const name = slug.replace(/-\d+$/, '').replace(/-/g, ' ');
-  return { name, id };
+  const rawName = slug.replace(/-\d+$/, '').replace(/-/g, ' ');
+  return { name: sanitizeProductTitle(rawName), id };
 }
 
 const STATIC_BLUEPRINT_IMAGES: Record<number, string> = {
@@ -340,5 +342,6 @@ export function cleanDescription(text?: string): string {
   // 8. Fix punctuation spacing (e.g. "outfit.Please" -> "outfit. Please")
   clean = clean.replace(/([.!?])([A-Z])/g, '$1 $2');
 
-  return clean.replace(/\s+/g, ' ').trim();
+  const normalized = clean.replace(/\s+/g, ' ').trim();
+  return sanitizeProductDescription(normalized);
 }

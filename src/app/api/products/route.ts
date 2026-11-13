@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryDb } from '@/lib/db';
 import { ensure99Pricing } from '@/lib/pricing-utils';
+import { sanitizeProductTitle, sanitizeProductDescription } from '@/lib/productSanitizer';
 
 const BACKEND_URL = (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
 
@@ -177,8 +178,8 @@ export async function GET(request: NextRequest) {
 
         return {
           id: row.id,
-          name: row.name,
-          description: row.description || '',
+          name: sanitizeProductTitle(row.name),
+          description: sanitizeProductDescription(row.description || ''),
           base_price: finalBase,
           markup_percentage: markupNum,
           min_price: minPrice,
@@ -238,6 +239,13 @@ export async function GET(request: NextRequest) {
       }
 
       const backendData = await backendRes.json();
+      if (backendData && Array.isArray(backendData.products)) {
+        backendData.products = backendData.products.map((p: any) => ({
+          ...p,
+          name: sanitizeProductTitle(p.name || p.title),
+          description: sanitizeProductDescription(p.description),
+        }));
+      }
       return NextResponse.json(backendData);
     }
   } catch (error: any) {
@@ -256,6 +264,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
+    let sanitizedBody = body;
+    try {
+      const parsed = JSON.parse(body);
+      if (parsed.name) parsed.name = sanitizeProductTitle(parsed.name);
+      if (parsed.description) parsed.description = sanitizeProductDescription(parsed.description);
+      sanitizedBody = JSON.stringify(parsed);
+    } catch {}
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Origin: 'https://store-loka-ui-v2-glksz.ondigitalocean.app',
@@ -268,7 +284,7 @@ export async function POST(request: NextRequest) {
     const res = await fetch(`${BACKEND_URL}/api/products`, {
       method: 'POST',
       headers,
-      body,
+      body: sanitizedBody,
     });
 
     const data = await res.text();

@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { ExtendedProduct } from "@/lib/api";
 import { createProductSlug, getValidImageUrl } from "@/lib/utils";
+import { sanitizeProductTitle } from "@/lib/productSanitizer";
 import { useWishlist, addPendingWishlistItem } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
@@ -168,7 +169,7 @@ export function ProductCard({ product }: ProductCardProps) {
               <Image
                 key={currentImgUrl}
                 src={currentImgUrl}
-                alt={product.name}
+                alt={sanitizeProductTitle(product.name)}
                 fill
                 className="object-cover transition-all duration-700 group-hover:scale-110"
                 unoptimized={true}
@@ -225,8 +226,8 @@ export function ProductCard({ product }: ProductCardProps) {
           </p>
 
           {/* Product Title */}
-          <div className="font-normal text-xs text-center sm:text-sm text-white mb-auto line-clamp-1 group-hover:text-orange-300 transition-colors duration-300 tracking-tight leading-snug">
-            {product.name}
+          <div className="font-normal text-xs text-center sm:text-sm text-white mb-auto line-clamp-1 group-hover:text-primary transition-colors duration-300 tracking-tight leading-snug">
+            {sanitizeProductTitle(product.name)}
           </div>
 
           {/* Price Section with gradient background */}

@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import GradientTitle from '@/components/ui/GradientTitle';
 import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
+import { sanitizeProductTitle } from '@/lib/productSanitizer';
 
 export default function CartPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -227,11 +228,11 @@ export default function CartPage() {
                             {/* Image */}
                             <Link
                               href={productHref}
-                              className="flex-shrink-0 w-20 h-20 sm:w-28 sm:h-28 border border-white/10 rounded-xl overflow-hidden bg-gray-900 group hover:border-orange-500/50 transition-colors relative"
+                              className="flex-shrink-0 w-20 h-20 sm:w-28 sm:h-28 border border-white/10 rounded-xl overflow-hidden bg-gray-900 group hover:border-primary/50 transition-colors relative"
                             >
                               <Image
                                 src={itemImageSrc}
-                                alt={item.product_name}
+                                alt={sanitizeProductTitle(item.product_name)}
                                 fill
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 unoptimized={true}
@@ -247,11 +248,11 @@ export default function CartPage() {
                                 <div className="flex items-start justify-between gap-2">
                                   <Link
                                     href={productHref}
-                                    className="text-sm sm:text-base font-bold text-white hover:text-orange-400 transition-colors line-clamp-2 leading-snug"
+                                    className="text-sm sm:text-base font-bold text-white hover:text-primary transition-colors line-clamp-2 leading-snug"
                                   >
-                                    {item.product_name}
+                                    {sanitizeProductTitle(item.product_name)}
                                   </Link>
-                                  <p className="text-sm sm:text-base text-orange-400 font-extrabold shrink-0">
+                                  <p className="text-sm sm:text-base text-primary font-extrabold shrink-0">
                                     {formatPrice(item.total_price)}
                                   </p>
                                 </div>
