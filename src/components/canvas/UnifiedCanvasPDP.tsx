@@ -55,6 +55,7 @@ import {
 import { printifyAPI } from "@/lib/api";
 import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { CATEGORIES_MAP } from "@/config/categories";
 import { resolveProductCategoryName } from "@/lib/pricing";
 import { calculateFinalRetailPrice, calculateRetailPriceFromMarkup, ensure99Pricing } from "@/lib/pricing-utils";
@@ -933,6 +934,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
   const router = useRouter();
   const { globalMarkup, categoryMarkup, calculateSellingPrice } = useGlobalMarkup();
   const { user } = useAuth();
+  const { formatPrice } = useCurrency();
 
   const handleBack = () => {
     if (isPublishing) {
@@ -4200,7 +4202,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="border border-white/10 bg-black/40 rounded-2xl p-3.5 space-y-1">
                     <span className="text-xs text-gray-400 font-medium block">Base Cost</span>
                     <span className="text-sm sm:text-base font-bold text-white block">
-                      {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} – $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
+                      {hasPriceRange ? `${formatPrice(platformMinSellingPrice)} – ${formatPrice(platformMaxSellingPrice)}` : formatPrice(platformMinSellingPrice)}
                     </span>
                   </div>
 
@@ -4209,8 +4211,8 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     <span className="text-xs text-emerald-400 font-medium block">Your Profit ({creatorMarkup}%)</span>
                     <span className="text-sm sm:text-base font-bold text-emerald-300 block">
                       +{hasPriceRange
-                        ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} – $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
-                        : `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)}`}
+                        ? `${formatPrice(minSellingPrice - platformMinSellingPrice)} – ${formatPrice(maxSellingPrice - platformMaxSellingPrice)}`
+                        : formatPrice(minSellingPrice - platformMinSellingPrice)}
                     </span>
                   </div>
 
@@ -4218,7 +4220,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="border border-white/10 bg-black/40 rounded-2xl p-3.5 space-y-1">
                     <span className="text-xs text-gray-400 font-medium block">Customer Retail Price</span>
                     <span className="text-sm sm:text-base font-bold text-white block">
-                      {hasPriceRange ? `$${minSellingPrice.toFixed(2)} – $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
+                      {hasPriceRange ? `${formatPrice(minSellingPrice)} – ${formatPrice(maxSellingPrice)}` : formatPrice(minSellingPrice)}
                     </span>
                   </div>
                 </div>
@@ -4496,7 +4498,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="text-right">
                     <div className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">YOUR PRICE</div>
                     <div className="text-xl sm:text-2xl font-black text-white">
-                      {hasPriceRange ? `$${minSellingPrice.toFixed(2)} - $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
+                      {hasPriceRange ? `${formatPrice(minSellingPrice)} - ${formatPrice(maxSellingPrice)}` : formatPrice(minSellingPrice)}
                     </div>
                   </div>
                 </div>
@@ -4626,7 +4628,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400">Loka Base Cost</span>
                     <span className="text-primary font-bold">
-                      {hasPriceRange ? `$${platformMinSellingPrice.toFixed(2)} – $${platformMaxSellingPrice.toFixed(2)}` : `$${platformMinSellingPrice.toFixed(2)}`}
+                      {hasPriceRange ? `${formatPrice(platformMinSellingPrice)} – ${formatPrice(platformMaxSellingPrice)}` : formatPrice(platformMinSellingPrice)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -4636,14 +4638,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                     </span>
                     <span className="text-emerald-400 font-bold">
                       +{hasPriceRange
-                        ? `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)} – $${(maxSellingPrice - platformMaxSellingPrice).toFixed(2)}`
-                        : `$${(minSellingPrice - platformMinSellingPrice).toFixed(2)}`}
+                        ? `${formatPrice(minSellingPrice - platformMinSellingPrice)} – ${formatPrice(maxSellingPrice - platformMaxSellingPrice)}`
+                        : formatPrice(minSellingPrice - platformMinSellingPrice)}
                     </span>
                   </div>
                   <div className="border-t border-white/10 pt-2 flex justify-between items-center">
                     <span className="text-gray-200 font-semibold">Final Product Price</span>
                     <span className="text-white font-extrabold text-sm">
-                      {hasPriceRange ? `$${minSellingPrice.toFixed(2)} – $${maxSellingPrice.toFixed(2)}` : `$${minSellingPrice.toFixed(2)}`}
+                      {hasPriceRange ? `${formatPrice(minSellingPrice)} – ${formatPrice(maxSellingPrice)}` : formatPrice(minSellingPrice)}
                     </span>
                   </div>
                 </div>
@@ -4690,7 +4692,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
               Step {activeStep}/4 • {activeStep === 1 ? "Colors" : activeStep === 2 ? "Artwork" : activeStep === 3 ? "Pricing" : "Review"}
             </div>
             <div className="text-xs font-bold text-primary truncate">
-              {hasPriceRange ? `${minSellingPrice.toFixed(2)} - ${maxSellingPrice.toFixed(2)}` : `${minSellingPrice.toFixed(2)}`}
+              {hasPriceRange ? `${formatPrice(minSellingPrice)} - ${formatPrice(maxSellingPrice)}` : formatPrice(minSellingPrice)}
             </div>
           </div>
         </div>

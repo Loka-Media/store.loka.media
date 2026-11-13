@@ -268,7 +268,7 @@ const RETAIL_NAME_REPLACEMENTS: [RegExp, string][] = [
   [/\bAccent\s+Coffee\s+Mug\b/gi, 'Two-Tone Ceramic Coffee Mug'],
   [/\bAccent\s+Mug(s)?\b/gi, 'Two-Tone Ceramic Mug'],
   [/\bDesk\s+Mat\b/gi, 'Extended Gaming & Workspace Mat'],
-  [/\bMouse\s+Pad\b/gi, 'Precision Ergonomic Mouse Pad'],
+  [/\b(Precision Ergonomic\s+)?Mouse\s+Pad\b/gi, 'Precision Ergonomic Mouse Pad'],
   [/\bKiss\s+Cut\s+Stickers\b/gi, 'Precision Vinyl Decal Sheet'],
   [/\bDie\s+Cut\s+Stickers\b/gi, 'Precision Cut Vinyl Decal'],
   [/\bPostcards\b/gi, 'Fine Art Collector Postcards'],
@@ -288,16 +288,16 @@ const RETAIL_NAME_REPLACEMENTS: [RegExp, string][] = [
   [/\bTrucker\s+Cap\b/gi, 'Classic Mesh Back Retro Trucker Hat'],
   [/\bDad\s+Hat\b/gi, 'Vintage Washed Low-Profile Dad Cap'],
   [/\bSnapback\s+Hat\b/gi, 'Structured Pro-Fit Flat Bill Snapback'],
-  [/\bYoga\s+Mat\b/gi, 'Non-Slip Eco Performance Yoga Mat'],
+  [/\b(Non-Slip Eco Performance\s+)?Yoga\s+Mat\b/gi, 'Non-Slip Eco Performance Yoga Mat'],
   [/\bThrow\s+Blanket\b/gi, 'Plush Cozy Velvet Fleece Blanket'],
   [/\bTote\s+Bag\b/gi, 'Heavyweight Everyday Canvas Tote'],
   [/\b(Acrylic|Ceramic|Glass|Wooden|Metal)\s+Ornaments?.*$/gi, 'Signature Decorative Holiday Ornament'],
-  [/\bFlat\s+Bill\s+Cap\b/gi, 'Structured Pro-Fit Flat Bill Cap'],
+  [/\b(Structured Pro-Fit\s+)?Flat\s+Bill\s+Cap\b/gi, 'Structured Pro-Fit Flat Bill Cap'],
 
   // Drinkware & Accessories
-  [/\bMug\s+11oz\b/gi, 'Classic Ceramic Coffee Mug (11oz)'],
-  [/\bMug\s+15oz\b/gi, 'Large Ceramic Coffee Mug (15oz)'],
-  [/\bAccent\s+Coffee\s+Mug,\s*11oz\b/gi, 'Two-Tone Ceramic Mug (11oz)'],
+  [/\b(Classic Ceramic Coffee\s+)?Mug\s+11oz\b/gi, 'Classic Ceramic Coffee Mug (11oz)'],
+  [/\b(Large Ceramic Coffee\s+)?Mug\s+15oz\b/gi, 'Large Ceramic Coffee Mug (15oz)'],
+  [/\b(Two-Tone Ceramic Mug \(11oz\)|Accent\s+Coffee\s+Mug,\s*11oz)\b/gi, 'Two-Tone Ceramic Mug (11oz)'],
   [/\bCamelBak\s+Eddy\b/gi, 'Insulated Sport'],
   [/\bKensington\s+Tritan\b/gi, 'Tritan'],
 ];
@@ -400,7 +400,10 @@ export function sanitizeProductTitle(rawTitle: string | null | undefined): strin
     title = 'Signature ' + title;
   }
 
-  // Deduplicate again if any prefix replacement created duplicate words
+  // Deduplicate multi-word phrases and words if repeated
+  title = title.replace(/\b(Non-Slip Eco Performance\s+)+/gi, 'Non-Slip Eco Performance ');
+  title = title.replace(/\b(Precision Ergonomic\s+)+/gi, 'Precision Ergonomic ');
+  title = title.replace(/\b(Structured Pro-Fit\s+)+/gi, 'Structured Pro-Fit ');
   title = title.replace(/\b(\w+)\s+\1\b/gi, '$1');
   title = title.trim();
 

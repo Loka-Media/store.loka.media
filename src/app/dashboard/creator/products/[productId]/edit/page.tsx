@@ -25,6 +25,7 @@ import {
   validateMarkupPercentage
 } from '@/lib/validators/product';
 import { useGlobalMarkup } from '@/contexts/GlobalMarkupContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { calculateRetailPriceFromMarkup } from '@/lib/pricing-utils';
 
 interface Product {
@@ -63,6 +64,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
   const { user } = useAuth();
   const router = useRouter();
   const { calculateSellingPrice: getLokaBaseCost } = useGlobalMarkup();
+  const { formatPrice } = useCurrency();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -435,7 +437,7 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                 </label>
                 <input
                   type="text"
-                  value={`$${parseFloat(formData.basePrice || '0').toFixed(2)}`}
+                  value={formatPrice(formData.basePrice || '0')}
                   readOnly
                   className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white/70 cursor-not-allowed"
                   title="This is the standard wholesale catalog cost"
@@ -474,16 +476,16 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                       <div>
                         <p className="text-sm text-white/70 mb-1">Calculated Selling Price</p>
                         <p className="text-2xl font-bold text-white">
-                          ${(parseFloat(formData.basePrice) * (1 + parseFloat(formData.markupPercentage) / 100)).toFixed(2)}
+                          {formatPrice(parseFloat(formData.basePrice) * (1 + parseFloat(formData.markupPercentage) / 100))}
                         </p>
                         <p className="text-xs text-white/50 mt-1">
-                          ${parseFloat(formData.basePrice).toFixed(2)} + {formData.markupPercentage}% markup
+                          {formatPrice(formData.basePrice)} + {formData.markupPercentage}% markup
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-white/70 mb-1">Your Profit</p>
                         <p className="text-xl font-bold text-green-400">
-                          ${(parseFloat(formData.basePrice) * (parseFloat(formData.markupPercentage) / 100)).toFixed(2)}
+                          +{formatPrice(parseFloat(formData.basePrice) * (parseFloat(formData.markupPercentage) / 100))}
                         </p>
                         <p className="text-xs text-white/50 mt-1">per sale</p>
                       </div>
@@ -807,10 +809,10 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                       return (
                         <tr key={variant.id} className="border-b border-white/10">
                           <td className="py-2 sm:py-3 text-white">{variant.title}</td>
-                          <td className="py-2 sm:py-3 text-white/60">${baseCost.toFixed(2)}</td>
-                          <td className="py-2 sm:py-3 text-orange-400 font-medium">${lokaBaseCost.toFixed(2)}</td>
-                          <td className="py-2 sm:py-3 text-white font-semibold">${sellingPrice.toFixed(2)}</td>
-                          <td className="py-2 sm:py-3 text-green-400 font-bold">+${profit.toFixed(2)}</td>
+                          <td className="py-2 sm:py-3 text-white/60">{formatPrice(baseCost)}</td>
+                          <td className="py-2 sm:py-3 text-orange-400 font-medium">{formatPrice(lokaBaseCost)}</td>
+                          <td className="py-2 sm:py-3 text-white font-semibold">{formatPrice(sellingPrice)}</td>
+                          <td className="py-2 sm:py-3 text-green-400 font-bold">+{formatPrice(profit)}</td>
                         </tr>
                       );
                     })}
