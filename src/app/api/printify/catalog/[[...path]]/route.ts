@@ -487,22 +487,81 @@ const SEARCH_SYNONYMS: Record<string, RegExp> = {
 
       if (search) {
         const searchNorm = search.trim().toLowerCase();
-        const synRegex = SEARCH_SYNONYMS[searchNorm];
-        filtered = filtered.filter(bp => {
-          const title = bp.title.toLowerCase();
-          const brand = (bp.brand || '').toLowerCase();
-          const model = (bp.model || '').toLowerCase();
+        const searchWithoutBrand = searchNorm
+          .replace(/\b(signature|loka signature|loka)\b/gi, '')
+          .replace(/[-_&]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        const tokens = searchNorm
+          .replace(/[-_&]/g, ' ')
+          .split(/\s+/)
+          .filter(w => w.length > 1);
+        const nonBrandTokens = tokens.filter(t => t !== 'signature' && t !== 'loka');
+        const synRegex = SEARCH_SYNONYMS[searchNorm] || (searchWithoutBrand ? SEARCH_SYNONYMS[searchWithoutBrand] : undefined);
 
-          if (title.includes(searchNorm) || brand.includes(searchNorm) || model.includes(searchNorm)) {
+        filtered = filtered.filter(bp => {
+          const rawTitle = (bp.title || '').toLowerCase();
+          const rawBrand = (bp.brand || '').toLowerCase();
+          const rawModel = (bp.model || '').toLowerCase();
+          const cleanTitle = sanitizeProductTitle(bp.title).toLowerCase();
+          const sigCleanTitle = cleanTitle.startsWith('signature ') ? cleanTitle : ('signature ' + cleanTitle);
+          const cleanBrand = sanitizeBrand(bp.brand).toLowerCase();
+          const cleanTypeName = sanitizeTypeName(bp.type_name || bp.type, cleanTitle).toLowerCase();
+
+          const cleanTitleNorm = cleanTitle.replace(/[-_&]/g, ' ').replace(/\s+/g, ' ');
+          const sigTitleNorm = sigCleanTitle.replace(/[-_&]/g, ' ').replace(/\s+/g, ' ');
+          const rawTitleNorm = rawTitle.replace(/[-_&]/g, ' ').replace(/\s+/g, ' ');
+          const searchNormClean = searchNorm.replace(/[-_&]/g, ' ').replace(/\s+/g, ' ');
+
+          // 1. Direct whole phrase substring match (sanitized or raw)
+          if (
+            cleanTitle.includes(searchNorm) ||
+            sigCleanTitle.includes(searchNorm) ||
+            cleanTitleNorm.includes(searchNormClean) ||
+            sigTitleNorm.includes(searchNormClean) ||
+            cleanBrand.includes(searchNorm) ||
+            cleanTypeName.includes(searchNorm) ||
+            rawTitle.includes(searchNorm) ||
+            rawBrand.includes(searchNorm) ||
+            rawModel.includes(searchNorm)
+          ) {
             return true;
           }
 
+          // 2. Query without brand terms (e.g. searching with "Signature" matches products with/without that prefix)
+          if (searchWithoutBrand && searchWithoutBrand.length >= 2) {
+            if (
+              cleanTitle.includes(searchWithoutBrand) ||
+              cleanTitleNorm.includes(searchWithoutBrand) ||
+              rawTitle.includes(searchWithoutBrand) ||
+              rawTitleNorm.includes(searchWithoutBrand) ||
+              rawModel.includes(searchWithoutBrand)
+            ) {
+              return true;
+            }
+          }
+
+          // 3. Multi-token match (all tokens or non-brand tokens appear in title/brand/model)
+          if (tokens.length > 1) {
+            const allInSigClean = tokens.every(tok => sigTitleNorm.includes(tok) || cleanBrand.includes(tok) || cleanTypeName.includes(tok));
+            if (allInSigClean) return true;
+
+            if (nonBrandTokens.length > 0) {
+              const allInRawOrClean = nonBrandTokens.every(tok => 
+                cleanTitleNorm.includes(tok) || rawTitleNorm.includes(tok) || rawModel.includes(tok) || cleanTypeName.includes(tok)
+              );
+              if (allInRawOrClean) return true;
+            }
+          }
+
+          // 4. Synonym match
           if (synRegex) {
             if (searchNorm === 'underwear' || searchNorm === 'boxer' || searchNorm === 'brief' || searchNorm === 'bra') {
-              if (/bracelet|necklace|ring|pen|ballpoint|chambray|hoodie/i.test(title)) return false;
+              if (/bracelet|necklace|ring|pen|ballpoint|chambray|hoodie/i.test(rawTitle)) return false;
             }
-            return synRegex.test(title);
+            return synRegex.test(rawTitle) || synRegex.test(cleanTitle) || synRegex.test(cleanTypeName);
           }
+
           return false;
         });
       }

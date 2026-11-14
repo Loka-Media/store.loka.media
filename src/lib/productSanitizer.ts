@@ -397,7 +397,9 @@ export function sanitizeProductTitle(rawTitle: string | null | undefined): strin
     title = title.replace(/^Infant\s+/i, 'Baby Everyday ');
   } else if (title.toLowerCase() === original.toLowerCase()) {
     // If title was untouched by any brand or model rules, brand it systematically:
-    title = 'Signature ' + title;
+    if (!/^Signature\s+/i.test(title)) {
+      title = 'Signature ' + title;
+    }
   }
 
   // Deduplicate multi-word phrases and words if repeated
