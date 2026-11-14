@@ -16,9 +16,9 @@ interface GlobalMarkupContextType {
   updateGlobalMarkup: (newMarkup: number) => Promise<boolean>;
   updateCategoryMarkup: (newCategoryMarkup: Record<string, number>) => Promise<boolean>;
   updatePricingSettings: (globalMarkup: number, categoryMarkup: Record<string, number>) => Promise<boolean>;
-  calculateSellingPrice: (baseCost: number, category?: string) => number;
-  getProductPriceRange: (product: any, category?: string) => { minPrice: number; maxPrice: number };
-  getVariantSellingPrice: (variant: any, product: any, category?: string) => number;
+  calculateSellingPrice: (baseCost: number, category?: string | any) => number;
+  getProductPriceRange: (product: any, category?: string | any) => { minPrice: number; maxPrice: number };
+  getVariantSellingPrice: (variant: any, product: any, category?: string | any) => number;
 }
 
 const GlobalMarkupContext = createContext<GlobalMarkupContextType | undefined>(undefined);
@@ -189,15 +189,15 @@ export function GlobalMarkupProvider({ children }: { children: React.ReactNode }
   };
 
   // Pure functions bound to the current context markup
-  const boundCalculateSellingPrice = useCallback((baseCost: number, category?: string) => {
+  const boundCalculateSellingPrice = useCallback((baseCost: number, category?: string | any) => {
     return calculateSellingPrice(baseCost, category, categoryMarkup, globalMarkup);
   }, [globalMarkup, categoryMarkup]);
 
-  const boundGetProductPriceRange = useCallback((product: any, category?: string) => {
+  const boundGetProductPriceRange = useCallback((product: any, category?: string | any) => {
     return getProductPriceRange(product, category, categoryMarkup, globalMarkup);
   }, [globalMarkup, categoryMarkup]);
 
-  const boundGetVariantSellingPrice = useCallback((variant: any, product: any, category?: string) => {
+  const boundGetVariantSellingPrice = useCallback((variant: any, product: any, category?: string | any) => {
     return getVariantSellingPrice(variant, product, category, categoryMarkup, globalMarkup);
   }, [globalMarkup, categoryMarkup]);
 

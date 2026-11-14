@@ -141,7 +141,7 @@ export default function AdminPricingSettings() {
         <div className="mb-8">
           <Link
             href="/dashboard/admin"
-            className="inline-flex items-center text-sm font-semibold text-gray-400 hover:text-orange-400 transition-colors"
+            className="inline-flex items-center text-sm font-semibold text-gray-400 hover:text-primary transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
@@ -166,11 +166,11 @@ export default function AdminPricingSettings() {
 
             {/* Global Platform Markup Card */}
             <div className="relative p-6 bg-gradient-to-br from-gray-950 to-gray-900 rounded-3xl border border-white/8 shadow-2xl overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-                  <Percent className="w-5 h-5 text-orange-400" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                  <Percent className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-white">Global Platform Markup</h2>
@@ -181,7 +181,7 @@ export default function AdminPricingSettings() {
               <div className="space-y-5 py-2">
                 <div className="flex justify-between items-baseline">
                   <span className="text-sm font-semibold text-gray-400">Current Value</span>
-                  <span className="text-5xl font-extrabold text-orange-400 tabular-nums">
+                  <span className="text-5xl font-extrabold text-primary tabular-nums">
                     {sliderValue}%
                   </span>
                 </div>
@@ -205,8 +205,8 @@ export default function AdminPricingSettings() {
                         key={preset}
                         onClick={() => handlePresetClick(preset)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${sliderValue === preset
-                            ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_15px_rgba(255,109,31,0.4)]'
-                            : 'bg-gray-900 text-gray-300 border-white/10 hover:border-orange-500/30 hover:text-orange-300'
+                            ? 'bg-primary text-black border-primary shadow-[0_0_15px_rgba(5,223,114,0.4)]'
+                            : 'bg-gray-900 text-gray-300 border-white/10 hover:border-primary/30 hover:text-primary'
                           }`}
                       >
                         {preset}%
@@ -219,8 +219,8 @@ export default function AdminPricingSettings() {
 
             {/* Category Markups Section Header */}
             <div className="flex items-center gap-3 pt-2">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 flex-shrink-0">
-                <Tag className="w-5 h-5 text-orange-400" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 flex-shrink-0">
+                <Tag className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <h2 className="text-lg font-bold text-white">Category Markups</h2>
@@ -231,7 +231,7 @@ export default function AdminPricingSettings() {
             {/* Category Cards Grid — no fixed height, full page scroll via Lenis */}
             {loadingCategories ? (
               <div className="py-16 flex flex-col justify-center items-center gap-3">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-500" />
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary" />
                 <span className="text-xs text-gray-500 font-semibold tracking-wider uppercase">Loading categories…</span>
               </div>
             ) : (
@@ -244,20 +244,20 @@ export default function AdminPricingSettings() {
                   return (
                     <div
                       key={category}
-                      className="relative p-5 bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl border border-white/8 shadow-xl overflow-hidden transition-all hover:border-orange-500/20 group"
+                      className="relative p-5 bg-gradient-to-br from-gray-950 to-gray-900 rounded-2xl border border-white/8 shadow-xl overflow-hidden transition-all hover:border-primary/20 group"
                     >
                       {/* Subtle glow on hover */}
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-orange-500/0 group-hover:bg-orange-500/5 rounded-full blur-2xl pointer-events-none transition-all duration-500" />
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-primary/0 group-hover:bg-primary/5 rounded-full blur-2xl pointer-events-none transition-all duration-500" />
 
                       {/* Category name + value */}
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-2">
                           {isChanged && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse flex-shrink-0 mt-0.5" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse flex-shrink-0 mt-0.5" />
                           )}
                           <span className="text-sm font-bold text-white">{category}</span>
                         </div>
-                        <span className="text-2xl font-extrabold bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent tabular-nums leading-none">
+                        <span className="text-2xl font-extrabold text-primary tabular-nums leading-none">
                           {currentVal}%
                         </span>
                       </div>
@@ -281,8 +281,8 @@ export default function AdminPricingSettings() {
                             key={preset}
                             onClick={() => handleCategoryPresetClick(category, preset)}
                             className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${currentVal === preset
-                                ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_8px_rgba(255,109,31,0.35)]'
-                                : 'bg-gray-900 text-gray-400 border-white/5 hover:border-orange-500/25 hover:text-gray-200'
+                                ? 'bg-primary text-black border-primary shadow-[0_0_8px_rgba(5,223,114,0.35)]'
+                                : 'bg-gray-900 text-gray-400 border-white/5 hover:border-primary/25 hover:text-gray-200'
                               }`}
                           >
                             {preset}%
@@ -300,7 +300,7 @@ export default function AdminPricingSettings() {
               <Button
                 onClick={handleSave}
                 disabled={isSaveDisabled}
-                className="px-10 py-4 h-12 text-sm font-bold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl shadow-lg shadow-orange-500/20 hover:shadow-orange-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-10 py-4 h-12 text-sm font-extrabold bg-primary hover:bg-primary-hover text-black rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/35 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Sparkles className="w-4 h-4" />
                 {saving ? 'Saving Changes…' : 'Apply Markup Configuration'}
@@ -308,10 +308,10 @@ export default function AdminPricingSettings() {
             </div>
 
             {/* Warning Banner */}
-            <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex gap-3 items-start">
-              <ShieldAlert className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+            <div className="p-4 bg-primary/10 border border-primary/20 rounded-2xl flex gap-3 items-start">
+              <ShieldAlert className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-sm font-bold text-orange-400">Critical Pricing Policy Note</h4>
+                <h4 className="text-sm font-bold text-primary">Critical Pricing Policy Note</h4>
                 <p className="text-xs text-gray-300 leading-relaxed mt-1">
                   Adjusting the platform markup instantly affects checkout calculations and storefront product pricing globally. Because pricing is determined dynamically, no background product database updates are triggered, preserving database efficiency.
                 </p>

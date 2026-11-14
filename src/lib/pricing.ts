@@ -21,11 +21,212 @@ export function calculatePremiumPrice(regularPrice: number): number {
 }
 
 /**
+ * Clean and normalize a category string for reliable comparison.
+ */
+function cleanCategory(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, 'and')
+    .replace(/[-_]/g, ' ')
+    .replace(/['"]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function isWomenTarget(text: string): boolean {
+  return /\b(women|womens|female|ladies|lady)\b/i.test(text);
+}
+
+function isMenTarget(text: string): boolean {
+  if (isWomenTarget(text)) return false;
+  return /\b(men|mens|male|guys)\b/i.test(text);
+}
+
+function isUnisexTarget(text: string): boolean {
+  return /\bunisex\b/i.test(text);
+}
+
+function isKidsTarget(text: string): boolean {
+  return /\b(kid|kids|youth|toddler|baby|infant|child|children)\b/i.test(text);
+}
+
+/**
+ * Checks if a candidate label matches a configured category key.
+ * Strictly prevents cross-gender leakage (e.g. "Men" matching "Women" or vice-versa).
+ */
+export function isCategoryMatch(candidate: string, categoryKey: string): boolean {
+  if (!candidate || !categoryKey) return false;
+
+  const targetClean = cleanCategory(candidate);
+  const keyClean = cleanCategory(categoryKey);
+
+  // Exact normalized match (e.g. "women" === "women", "men" === "men", "accessories" === "accessories")
+  if (targetClean === keyClean) {
+    return true;
+  }
+
+  // Strict Gender / Department Boundaries
+  if (keyClean === 'women' || keyClean === 'womens') {
+    return isWomenTarget(targetClean);
+  }
+
+  if (keyClean === 'men' || keyClean === 'mens') {
+    return isMenTarget(targetClean);
+  }
+
+  if (keyClean === 'unisex') {
+    return isUnisexTarget(targetClean);
+  }
+
+  if (keyClean === 'kids' || keyClean === 'kid') {
+    return isKidsTarget(targetClean);
+  }
+
+  // Accessories & Home & Drinkware exact boundaries
+  if (keyClean === 'accessories') {
+    return targetClean === 'accessories' || /\baccessories\b/i.test(targetClean);
+  }
+
+  if (keyClean === 'home and living' || keyClean === 'home living') {
+    return targetClean.includes('home') && targetClean.includes('living');
+  }
+
+  if (keyClean === 'mugs and drinkware' || keyClean === 'mugs drinkware') {
+    return targetClean.includes('mug') || targetClean.includes('drinkware');
+  }
+
+  if (keyClean === 'shoes and socks' || keyClean === 'shoes socks') {
+    return (targetClean.includes('shoe') && targetClean.includes('sock')) || targetClean === 'shoes and socks';
+  }
+
+  // Specific subcategories (T-Shirts, Hoodies, Phone Cases, etc.)
+  const escaped = keyClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const wordRegex = new RegExp(`(^|\\s)${escaped}(\\s|$)`, 'i');
+  return wordRegex.test(targetClean);
+}
+
+/**
+ * Resolves specific product subcategory from a string.
+ */
+function resolveSubcategoryFromString(str: string): string | undefined {
+  const t = str.toLowerCase();
+  if (t.includes('sock')) return 'Socks';
+  if (t.includes('shoe') || t.includes('sneaker') || t.includes('boot') || t.includes('slipper') || t.includes('slide') || t.includes('clog')) return 'Shoes';
+  if (t.includes('hoodie')) return 'Hoodies';
+  if (t.includes('sweatshirt')) return 'Sweatshirts';
+  if (t.includes('tank') || t.includes('racerback')) return 'Tank Tops';
+  if (t.includes('long sleeve') || t.includes('long-sleeve')) return 'Long Sleeves';
+  if (t.includes('tee') || t.includes('t-shirt') || t.includes('t shirt')) return 'T-Shirts';
+  if (t.includes('sport') || t.includes('active') || t.includes('athletic')) return 'Sportswear';
+  if (t.includes('hat') || t.includes('cap') || t.includes('beanie')) return 'Hats & Caps';
+  if (t.includes('jogger') || t.includes('pant') || t.includes('legging')) return 'Bottoms & Leggings';
+  if (t.includes('swim') || t.includes('bikini') || t.includes('trunks')) return 'Swimwear';
+  if (t.includes('boxer') || t.includes('brief') || t.includes('underwear')) return 'Underwear';
+  if (t.includes('jacket') || t.includes('coat') || t.includes('windbreaker')) return 'Jackets & Outerwear';
+  if (t.includes('phone') || (t.includes('case') && !t.includes('pillow') && !t.includes('cushion'))) return 'Phone Cases';
+  if (t.includes('bag') || t.includes('tote') || t.includes('backpack')) return 'Bags';
+  if (t.includes('sticker') || t.includes('decal')) return 'Stickers';
+  if (t.includes('poster')) return 'Posters';
+  if (t.includes('canvas')) return 'Canvas';
+  if (t.includes('blanket')) return 'Blankets';
+  if (t.includes('pillow') || t.includes('cushion')) return 'Pillows';
+  if (t.includes('mug')) return 'Mugs';
+  if (t.includes('bottle') || t.includes('tumbler') || t.includes('drinkware')) return 'Drinkware';
+  return undefined;
+}
+
+/**
+ * Extracts all matching category labels for an input, ordered from specific to general.
+ */
+export function getProductCategoryHierarchy(input: any): { subcategory?: string; department?: string; candidates: string[] } {
+  if (!input) return { candidates: [] };
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (!trimmed) return { candidates: [] };
+
+    let department: string | undefined;
+    if (isWomenTarget(trimmed)) department = 'Women';
+    else if (isMenTarget(trimmed)) department = 'Men';
+    else if (isUnisexTarget(trimmed)) department = 'Unisex';
+    else if (isKidsTarget(trimmed)) department = 'Kids';
+    else if (cleanCategory(trimmed) === 'accessories') department = 'Accessories';
+    else if (cleanCategory(trimmed).includes('home') && cleanCategory(trimmed).includes('living')) department = 'Home & Living';
+    else if (cleanCategory(trimmed).includes('mug') || cleanCategory(trimmed).includes('drinkware')) department = 'Mugs & Drinkware';
+    else if (cleanCategory(trimmed).includes('shoe') || cleanCategory(trimmed).includes('sock')) department = 'Shoes & Socks';
+
+    const subcategory = resolveSubcategoryFromString(trimmed);
+    const candidates: string[] = [trimmed];
+    if (subcategory && subcategory.toLowerCase() !== trimmed.toLowerCase()) candidates.unshift(subcategory);
+    if (department && !candidates.includes(department)) candidates.push(department);
+
+    return { subcategory, department, candidates };
+  }
+
+  if (typeof input === 'object') {
+    const candidates: string[] = [];
+    let department: string | undefined;
+    let subcategory: string | undefined;
+
+    // 1. Check categoryIds (highest authority on gender/department)
+    if (Array.isArray(input.categoryIds) && input.categoryIds.length > 0) {
+      if (input.categoryIds.includes(1) && input.categoryIds.includes(2)) department = 'Unisex';
+      else if (input.categoryIds.includes(8)) department = 'Unisex';
+      else if (input.categoryIds.includes(2)) department = 'Women';
+      else if (input.categoryIds.includes(1)) department = 'Men';
+      else if (input.categoryIds.includes(3)) department = 'Kids';
+      else if (input.categoryIds.includes(4)) department = 'Accessories';
+      else if (input.categoryIds.includes(5)) department = 'Home & Living';
+      else if (input.categoryIds.includes(6)) department = 'Mugs & Drinkware';
+      else if (input.categoryIds.includes(7)) department = 'Shoes & Socks';
+    }
+
+    const title = (input.title || input.name || '').trim();
+    const catStr = (input.category || input.sourceCategory || '').trim();
+
+    if (!department) {
+      if (isWomenTarget(catStr) || isWomenTarget(title)) department = 'Women';
+      else if (isMenTarget(catStr) || isMenTarget(title)) department = 'Men';
+      else if (isUnisexTarget(catStr) || isUnisexTarget(title)) department = 'Unisex';
+      else if (isKidsTarget(catStr) || isKidsTarget(title)) department = 'Kids';
+      else if (cleanCategory(catStr) === 'accessories') department = 'Accessories';
+      else if (cleanCategory(catStr).includes('home') && cleanCategory(catStr).includes('living')) department = 'Home & Living';
+      else if (cleanCategory(catStr).includes('mug') || cleanCategory(catStr).includes('drinkware')) department = 'Mugs & Drinkware';
+      else if (cleanCategory(catStr).includes('shoe') || cleanCategory(catStr).includes('sock')) department = 'Shoes & Socks';
+    }
+
+    const typeName = (input.type_name || input.type || '').trim();
+    if (typeName) {
+      subcategory = resolveSubcategoryFromString(typeName);
+    }
+    if (!subcategory) {
+      subcategory = resolveSubcategoryFromString(title) || resolveSubcategoryFromString(catStr);
+    }
+
+    if (subcategory) candidates.push(subcategory);
+    if (department && !candidates.includes(department)) candidates.push(department);
+    if (catStr && !candidates.includes(catStr)) candidates.push(catStr);
+    if (title && !candidates.includes(title)) candidates.push(title);
+
+    return { subcategory, department, candidates };
+  }
+
+  return { candidates: [] };
+}
+
+/**
  * Determines the effective markup percentage to apply.
  * 
  * STRICT PRIORITY RULES:
- * 1. Category Markups have FIRST PRIORITY. If a category markup is configured (> 0%), it always wins.
- * 2. If no category markup is found or it is 0%, falls back to the Global Platform Markup.
+ * 1. Specific Category / Subcategory Markup (> 0%):
+ *    - If configured for the specific subcategory (e.g. "T-Shirts": 30%), it applies.
+ *    - If subcategory is 0% or not configured, it checks the primary department (e.g. "Women": 60% or "Men": 40%).
+ * 2. Exact match rules ALWAYS prevent cross-gender leakage:
+ *    - "Women" rule NEVER applies to Men's products or "Men" category.
+ *    - "Men" rule NEVER applies to Women's products or "Women" category.
+ *    - "Accessories", "Home & Living", etc. ONLY apply to their respective items.
+ * 3. Fallback:
+ *    - If no category rule is configured (> 0%), falls back to Global Platform Markup.
  */
 export function getEffectiveMarkupRate(
   categoryOrProductOrMarkup: any,
@@ -43,7 +244,7 @@ export function getEffectiveMarkupRate(
       ? globalMarkup
       : defaultSettings?.globalMarkup !== undefined
       ? (defaultSettings.globalMarkup as number)
-      : 35;
+      : 50;
 
   // Merge category markups with defaults
   const mergedCategoryMarkups: Record<string, number> = {
@@ -51,60 +252,18 @@ export function getEffectiveMarkupRate(
     ...(categoryMarkups || {})
   };
 
-  // Collect candidate category/product strings to test
-  const candidates: string[] = [];
+  const { candidates } = getProductCategoryHierarchy(categoryOrProductOrMarkup);
 
-  if (typeof categoryOrProductOrMarkup === 'string') {
-    const trimmed = categoryOrProductOrMarkup.trim();
-    if (trimmed) candidates.push(trimmed);
-  } else if (categoryOrProductOrMarkup && typeof categoryOrProductOrMarkup === 'object') {
-    const obj = categoryOrProductOrMarkup;
-    if (typeof obj.category === 'string' && obj.category.trim()) candidates.push(obj.category.trim());
-    if (typeof obj.sourceCategory === 'string' && obj.sourceCategory.trim()) candidates.push(obj.sourceCategory.trim());
-    if (typeof obj.type_name === 'string' && obj.type_name.trim()) candidates.push(obj.type_name.trim());
-    if (typeof obj.type === 'string' && obj.type.trim()) candidates.push(obj.type.trim());
-    if (Array.isArray(obj.categoryIds)) {
-      for (const id of obj.categoryIds) {
-        const found = CATEGORIES_MAP.find((c) => c.id === id);
-        if (found) candidates.push(found.title);
-      }
-    }
-    const resolved = resolveProductCategoryName(obj);
-    if (resolved && resolved !== 'Other') candidates.push(resolved);
-    if (typeof obj.title === 'string' && obj.title.trim()) candidates.push(obj.title.trim());
-    if (typeof obj.name === 'string' && obj.name.trim()) candidates.push(obj.name.trim());
-  }
-
-  const clean = (s: string) => s.toLowerCase().trim().replace(/[-_&]/g, ' ');
-
-  // PRIORITY 1: Exact / Normalized Match on Category Markups (val > 0)
+  // 1. Try candidates in order (Subcategory first, then Department)
   for (const candidate of candidates) {
-    const targetClean = clean(candidate);
     for (const [key, val] of Object.entries(mergedCategoryMarkups)) {
-      if (typeof val === 'number' && val > 0 && clean(key) === targetClean) {
+      if (typeof val === 'number' && val > 0 && isCategoryMatch(candidate, key)) {
         return val;
       }
     }
   }
 
-  // PRIORITY 1 (Step 2): Word boundary / Substring Match on Category Markups (val > 0)
-  for (const candidate of candidates) {
-    const targetClean = clean(candidate);
-    for (const [key, val] of Object.entries(mergedCategoryMarkups)) {
-      if (typeof val !== 'number' || val <= 0) continue;
-      const keyClean = clean(key);
-      // Guard against false positive: "men" inside "women"
-      if (keyClean === 'men' && (targetClean === 'women' || targetClean.includes('women'))) {
-        continue;
-      }
-      const wordRegex = new RegExp(`(^|\\s)${keyClean}(\\s|$)`, 'i');
-      if (wordRegex.test(targetClean) || targetClean.includes(keyClean) || keyClean.includes(targetClean)) {
-        return val;
-      }
-    }
-  }
-
-  // PRIORITY 2: Fallback to Global Platform Markup
+  // Fallback to Global Platform Markup
   return fallbackGlobal;
 }
 

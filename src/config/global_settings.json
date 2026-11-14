@@ -1,10 +1,10 @@
 {
-  "globalMarkup": 50,
+  "globalMarkup": 10,
   "categoryMarkup": {
     "Men": 0,
-    "Women": 0,
+    "Women": 50,
     "Kids": 0,
-    "Unisex": 0,
+    "Unisex": 50,
     "Shoes & Socks": 0,
     "Accessories": 0,
     "Home & Living": 0,

@@ -772,7 +772,7 @@ function GlobalCatalogSearch({
                       product.title;
                     const lokaPrice = calculateSellingPrice(
                       parseFloat(pppPrice),
-                      resolvedCategory
+                      { ...product, category: resolvedCategory }
                     ).toFixed(2);
 
                     return (
@@ -1255,7 +1255,7 @@ function PrintfulProductCard({
     if (resolved && resolved !== 'Other') return resolved;
     return product.title;
   }, [categoryName, product]);
-  const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), effectiveCategory).toFixed(2);
+  const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), { ...product, category: effectiveCategory }).toFixed(2);
 
   return (
     <div className="bg-black border border-white/15 hover:border-primary/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(5,223,114,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 flex flex-col">
@@ -1424,7 +1424,7 @@ function ProductDetailsModal({
                     </div>
                     <div className="flex justify-between items-center pt-2">
                       <span className="text-gray-400">Estimated Retail Price:</span>{" "}
-                      <span className="text-orange-400 font-extrabold text-base">${calculateSellingPrice(parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0'), effectiveCategory).toFixed(2)}</span>
+                      <span className="text-primary font-extrabold text-base">${calculateSellingPrice(parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0'), { ...product, category: effectiveCategory }).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
