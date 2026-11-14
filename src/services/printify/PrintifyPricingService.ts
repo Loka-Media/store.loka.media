@@ -47,14 +47,17 @@ class PrintifyPricingService {
         const raw = fs.readFileSync(providerCachePath, 'utf8');
         const data = JSON.parse(raw);
         let count = 0;
+        const verifiedBpMinCost = new Map<number, number>();
+
         for (const [key, item] of Object.entries(data as Record<string, any>)) {
           if (!item || !item.blueprintId || !item.providerId) continue;
           const provKey = `${item.blueprintId}_${item.providerId}`;
           if (item.minCost != null && !isNaN(Number(item.minCost))) {
-            this.providerMinCostMap.set(provKey, Number(item.minCost));
-            const currentBpMin = this.blueprintMinCostMap.get(item.blueprintId);
-            if (currentBpMin === undefined || Number(item.minCost) < currentBpMin) {
-              this.blueprintMinCostMap.set(item.blueprintId, Number(item.minCost));
+            const cost = Number(item.minCost);
+            this.providerMinCostMap.set(provKey, cost);
+            const existingBpMin = verifiedBpMinCost.get(item.blueprintId);
+            if (existingBpMin === undefined || cost < existingBpMin) {
+              verifiedBpMinCost.set(item.blueprintId, cost);
             }
           }
           if (item.variants && typeof item.variants === 'object') {
@@ -72,7 +75,13 @@ class PrintifyPricingService {
             this.providerUpdatedMap.set(provKey, Date.now());
           }
         }
-        console.log(`[PrintifyPricingService] Loaded ${count} verified provider variant prices from provider_pricing_cache.json`);
+
+        // Verified provider pricing takes strict precedence over static metadata cache
+        for (const [bpId, minCost] of verifiedBpMinCost.entries()) {
+          this.blueprintMinCostMap.set(bpId, minCost);
+        }
+
+        console.log(`[PrintifyPricingService] Loaded ${count} verified provider variant prices across ${verifiedBpMinCost.size} blueprints from provider_pricing_cache.json`);
       }
     } catch (e) {
       console.warn('[PrintifyPricingService] Could not load provider_pricing_cache.json:', e);
@@ -120,6 +129,31 @@ class PrintifyPricingService {
         fs.mkdirSync(dir, { recursive: true });
       }
       fs.writeFileSync(providerCachePath, JSON.stringify(data, null, 2), 'utf8');
+
+      // Update in-memory blueprint min cost
+      const currentBpMin = this.blueprintMinCostMap.get(blueprintId);
+      if (currentBpMin === undefined || minCost < currentBpMin) {
+        this.blueprintMinCostMap.set(blueprintId, minCost);
+      }
+
+      // Also keep blueprint_metadata_cache.json in sync with verified minimum cost
+      try {
+        const metaPath = path.join(process.cwd(), 'src/config/blueprint_metadata_cache.json');
+        if (fs.existsSync(metaPath)) {
+          const metaData = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+          const bpIdStr = String(blueprintId);
+          if (metaData[bpIdStr]) {
+            const currentCost = metaData[bpIdStr].cost || metaData[bpIdStr].premiumPrice;
+            if (!currentCost || minCost < Number(currentCost) || Number(currentCost) === 5.57) {
+              metaData[bpIdStr].cost = minCost;
+              metaData[bpIdStr].premiumPrice = minCost.toFixed(2);
+              metaData[bpIdStr].price = minCost.toFixed(2);
+              fs.writeFileSync(metaPath, JSON.stringify(metaData, null, 2), 'utf8');
+            }
+          }
+        }
+      } catch (_) {}
+
       console.log(`[PrintifyPricingService] Saved pricing for blueprint ${blueprintId} / provider ${providerId} to disk (updatedAt: ${new Date(now).toISOString()})`);
     } catch (e) {
       console.warn('[PrintifyPricingService] Failed to save provider pricing to disk:', e);
@@ -274,6 +308,11 @@ class PrintifyPricingService {
           const existing = newProviderMinCostMap.get(provKey);
           if (existing === undefined || minCost < existing) {
             newProviderMinCostMap.set(provKey, minCost);
+          }
+        }
+        for (const [bpId, minCost] of this.blueprintMinCostMap.entries()) {
+          if (!newBlueprintMinCostMap.has(bpId)) {
+            newBlueprintMinCostMap.set(bpId, minCost);
           }
         }
 

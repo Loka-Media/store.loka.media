@@ -7,6 +7,7 @@ import {
   getProductPriceRange, 
   getVariantSellingPrice 
 } from '@/lib/pricing';
+import defaultSettings from '@/config/global_settings.json';
 
 interface GlobalMarkupContextType {
   globalMarkup: number;
@@ -22,31 +23,63 @@ interface GlobalMarkupContextType {
 
 const GlobalMarkupContext = createContext<GlobalMarkupContextType | undefined>(undefined);
 
+const getInitialGlobalMarkup = (): number => {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('loka_global_markup');
+      if (saved !== null) {
+        const parsed = Number(saved);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+    } catch (_) {}
+  }
+  return (defaultSettings?.globalMarkup as number) ?? 50;
+};
+
+const getInitialCategoryMarkup = (): Record<string, number> => {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('loka_category_markup');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (_) {}
+  }
+  return (defaultSettings?.categoryMarkup as Record<string, number>) || {};
+};
+
 export function GlobalMarkupProvider({ children }: { children: React.ReactNode }) {
-  const [globalMarkup, setGlobalMarkup] = useState<number>(35);
-  const [categoryMarkup, setCategoryMarkup] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState<boolean>(true);
+  const [globalMarkup, setGlobalMarkup] = useState<number>(getInitialGlobalMarkup);
+  const [categoryMarkup, setCategoryMarkup] = useState<Record<string, number>>(getInitialCategoryMarkup);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // Fetch the current markup from our local settings API
   const fetchMarkup = useCallback(async () => {
     try {
-      setLoading(true);
       console.log('[Pricing] Fetching pricing settings from DB...');
       const res = await fetch('/api/admin/settings/pricing');
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          const loadedGlobal = data.globalMarkup !== undefined ? data.globalMarkup : 35;
-          const loadedCategories: Record<string, number> = data.categoryMarkup || {};
+          const loadedGlobal = data.globalMarkup !== undefined ? data.globalMarkup : ((defaultSettings?.globalMarkup as number) ?? 50);
+          const loadedCategories: Record<string, number> = data.categoryMarkup || (defaultSettings?.categoryMarkup as Record<string, number>) || {};
 
           console.log(`[Pricing] Loaded Global Markup: ${loadedGlobal}`);
-          Object.entries(loadedCategories).forEach(([cat, val]) => {
-            console.log(`[Pricing] Loaded ${cat}: ${val}`);
+          setGlobalMarkup((prev) => (prev !== loadedGlobal ? loadedGlobal : prev));
+          setCategoryMarkup((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(loadedCategories)) {
+              return loadedCategories;
+            }
+            return prev;
           });
-          console.log('[Pricing] DB Load Status: success');
 
-          setGlobalMarkup(loadedGlobal);
-          setCategoryMarkup(loadedCategories);
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('loka_global_markup', String(loadedGlobal));
+              localStorage.setItem('loka_category_markup', JSON.stringify(loadedCategories));
+            } catch (_) {}
+          }
         }
       } else {
         console.warn('[Pricing] DB Load Status: failed —', res.status, res.statusText);
@@ -59,6 +92,24 @@ export function GlobalMarkupProvider({ children }: { children: React.ReactNode }
   }, []);
 
   useEffect(() => {
+    // If in browser, make sure localStorage is read immediately upon mounting
+    try {
+      const savedGlobal = localStorage.getItem('loka_global_markup');
+      if (savedGlobal !== null) {
+        const parsed = Number(savedGlobal);
+        if (!isNaN(parsed) && parsed > 0) {
+          setGlobalMarkup((prev) => (prev !== parsed ? parsed : prev));
+        }
+      }
+      const savedCats = localStorage.getItem('loka_category_markup');
+      if (savedCats) {
+        const parsed = JSON.parse(savedCats);
+        if (parsed && typeof parsed === 'object') {
+          setCategoryMarkup((prev) => (JSON.stringify(prev) !== JSON.stringify(parsed) ? parsed : prev));
+        }
+      }
+    } catch (_) {}
+
     fetchMarkup();
   }, [fetchMarkup]);
 
@@ -80,6 +131,13 @@ export function GlobalMarkupProvider({ children }: { children: React.ReactNode }
         console.log('[Pricing] DB Save Status: Saved Successfully');
         setGlobalMarkup(markup);
         setCategoryMarkup(catMarkup);
+
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('loka_global_markup', String(markup));
+            localStorage.setItem('loka_category_markup', JSON.stringify(catMarkup));
+          } catch (_) {}
+        }
         return true;
       } else {
         console.error('[Pricing] DB Save Status: failed —', data.error || res.statusText);

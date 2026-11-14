@@ -1040,7 +1040,7 @@ function CategorySelection({
               <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
 
               {/* Glowing Icon Badge */}
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-orange-500/20 via-orange-500/10 to-transparent border border-orange-500/30 flex items-center justify-center mx-auto mb-5 shadow-[0_0_30px_rgba(255,109,31,0.2)]">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/30 flex items-center justify-center mx-auto mb-5 shadow-[0_0_30px_rgba(5,223,114,0.2)]">
                 <Package className="h-8 w-8 sm:h-10 sm:w-10 text-orange-400" />
               </div>
 
@@ -1094,7 +1094,7 @@ function CategorySelection({
 function CategoryCard({ category, onSelect }: any) {
   return (
     <div
-      className="bg-black border border-white/15 hover:border-orange-500/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,109,31,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 cursor-pointer"
+      className="bg-black border border-white/15 hover:border-primary/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(5,223,114,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 cursor-pointer"
       onClick={() => onSelect(category)}
     >
       <div className="aspect-square relative overflow-hidden bg-black">
@@ -1258,7 +1258,7 @@ function PrintfulProductCard({
   const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), effectiveCategory).toFixed(2);
 
   return (
-    <div className="bg-black border border-white/15 hover:border-orange-500/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,109,31,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 flex flex-col">
+    <div className="bg-black border border-white/15 hover:border-primary/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(5,223,114,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 flex flex-col">
       {/* Image Section with Brand and Buttons */}
       <div className="aspect-square relative overflow-hidden rounded-t-2xl bg-black">
         <ImageWithFallback
@@ -1461,7 +1461,7 @@ function ProductDetailsModal({
 
               <button
                 onClick={() => onCreateProduct(product)}
-                className="w-full flex items-center justify-center px-6 py-4 text-lg font-bold rounded-lg text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)]"
+                className="w-full flex items-center justify-center px-6 py-4 text-lg font-bold rounded-lg text-white bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary transition-all duration-300 hover:shadow-[0_10px_30px_rgba(5,223,114,0.3)]"
               >
                 <Plus className="w-6 h-6 mr-3" />
                 Create Product with This Model
@@ -1524,7 +1524,7 @@ function SubcategorySelection({ category, products, loading, onSelectSubcategory
             return (
               <div
                 key={subcat.id}
-                className="bg-black border border-white/15 hover:border-orange-500/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(255,109,31,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 cursor-pointer"
+                className="bg-black border border-white/15 hover:border-primary/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(5,223,114,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 cursor-pointer"
                 onClick={() => onSelectSubcategory(subcat)}
               >
                 <div className="aspect-square relative overflow-hidden bg-black">

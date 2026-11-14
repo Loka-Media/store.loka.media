@@ -1,13 +1,13 @@
 {
   "5": {
     "title": "Classic Cotton Crewneck T-Shirt",
-    "providerId": 41,
-    "price": "19.89",
-    "premiumPrice": "15.14",
+    "providerId": 99,
+    "price": "8.92",
+    "premiumPrice": "8.92",
     "sizesCount": 6,
     "colorsCount": 3,
     "providersCount": 8,
-    "cost": "15.14"
+    "cost": 8.92
   },
   "6": {
     "title": "Classic Heavyweight Cotton T-Shirt",
@@ -21,23 +21,23 @@
   },
   "9": {
     "title": "Women's Everyday Fitted Cotton T-Shirt",
-    "providerId": 6,
-    "price": "17.07",
-    "premiumPrice": "12.64",
+    "providerId": 3,
+    "price": "8.83",
+    "premiumPrice": "8.83",
     "sizesCount": 7,
     "colorsCount": 14,
     "providersCount": 4,
-    "cost": "12.64"
+    "cost": 8.83
   },
   "10": {
     "title": "Women's Drape Fit Racerback Tank Top",
-    "providerId": 61,
-    "price": "20.27",
-    "premiumPrice": "23.17",
+    "providerId": 3,
+    "price": "12.89",
+    "premiumPrice": "12.89",
     "sizesCount": 5,
     "colorsCount": 28,
     "providersCount": 6,
-    "cost": "23.17"
+    "cost": 12.89
   },
   "11": {
     "title": "Women's Everyday Deep V-Neck Soft Cotton T-Shirt",
@@ -52,11 +52,12 @@
   "12": {
     "title": "Classic Premium Soft Cotton T-Shirt",
     "providerId": 99,
-    "price": "10.53",
-    "premiumPrice": "8.11",
+    "price": "9.03",
+    "premiumPrice": "9.03",
     "sizesCount": 8,
     "colorsCount": 54,
-    "providersCount": 14
+    "providersCount": 14,
+    "cost": 9.03
   },
   "14": {
     "title": "Women's Relaxed Fit T-Shirt",
@@ -69,13 +70,13 @@
   },
   "15": {
     "title": "Men's Everyday Essential Crewneck T-Shirt",
-    "providerId": 61,
-    "price": "12.56",
-    "premiumPrice": "17.12",
+    "providerId": 3,
+    "price": "8.84",
+    "premiumPrice": "8.84",
     "sizesCount": 7,
     "colorsCount": 20,
     "providersCount": 3,
-    "cost": "17.12"
+    "cost": 8.84
   },
   "18": {
     "title": "Women's Classic Racerback Tank Top",
@@ -88,22 +89,23 @@
   },
   "26": {
     "title": "Men's Everyday Lightweight Fashion T-Shirt",
-    "providerId": 217,
-    "price": "12.79",
-    "premiumPrice": "9.56",
+    "providerId": 3,
+    "price": "12.65",
+    "premiumPrice": "12.65",
     "sizesCount": 6,
     "colorsCount": 31,
     "providersCount": 7,
-    "cost": "9.56"
+    "cost": 12.65
   },
   "31": {
     "title": "Baby Comfort Long Sleeve Bodysuit",
-    "providerId": 99,
-    "price": "9.25",
-    "premiumPrice": "7.12",
+    "providerId": 39,
+    "price": "12.39",
+    "premiumPrice": "12.39",
     "sizesCount": 5,
     "colorsCount": 36,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": 12.39
   },
   "32": {
     "title": "Toddler Everyday Soft Cotton T-Shirt",
@@ -143,22 +145,23 @@
   },
   "39": {
     "title": "Classic Everyday Jersey Tank Top",
-    "providerId": 99,
-    "price": "15.00",
-    "premiumPrice": "11.55",
+    "providerId": 72,
+    "price": "11.53",
+    "premiumPrice": "11.53",
     "sizesCount": 7,
     "colorsCount": 9,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": 11.53
   },
   "41": {
     "title": "Classic Everyday Long Sleeve Cotton T-Shirt",
-    "providerId": 41,
-    "price": "20.43",
-    "premiumPrice": "25.00",
+    "providerId": 72,
+    "price": "13.68",
+    "premiumPrice": "13.68",
     "sizesCount": 9,
     "colorsCount": 11,
     "providersCount": 8,
-    "cost": "25.00"
+    "cost": 13.68
   },
   "45": {
     "title": "Men's Everyday Long Sleeve Crew T-Shirt",
@@ -180,22 +183,23 @@
   },
   "48": {
     "title": "Classic V-Neck Cotton T-Shirt",
-    "providerId": 99,
-    "price": "14.00",
-    "premiumPrice": "10.78",
+    "providerId": 41,
+    "price": "16.41",
+    "premiumPrice": "16.41",
     "sizesCount": 4,
     "colorsCount": 18,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": 16.41
   },
   "49": {
     "title": "Classic Crewneck Fleece Sweatshirt",
-    "providerId": 34,
-    "price": "11.06",
-    "premiumPrice": "11.45",
+    "providerId": 99,
+    "price": "12.55",
+    "premiumPrice": "12.55",
     "sizesCount": 5,
     "colorsCount": 19,
     "providersCount": 2,
-    "cost": "11.45"
+    "cost": 12.55
   },
   "65": {
     "title": "Youth Cozy Crewneck Fleece Sweatshirt",
@@ -209,13 +213,13 @@
   },
   "66": {
     "title": "Classic Full-Zip Fleece Hoodie",
-    "providerId": 39,
-    "price": "36.49",
-    "premiumPrice": "26.68",
+    "providerId": 34,
+    "price": "21.96",
+    "premiumPrice": "21.96",
     "sizesCount": 4,
     "colorsCount": 36,
     "providersCount": 5,
-    "cost": "26.68"
+    "cost": 21.96
   },
   "67": {
     "title": "Youth Cozy Fleece Pullover Hoodie",
@@ -229,12 +233,12 @@
   "68": {
     "title": "Classic Ceramic Coffee Mug (11oz)",
     "providerId": 1,
-    "price": "19.50",
+    "price": "4.81",
     "premiumPrice": "4.81",
     "sizesCount": 6,
     "colorsCount": 38,
     "providersCount": 7,
-    "cost": "4.81"
+    "cost": 4.81
   },
   "70": {
     "title": "Insulated Thermal Travel Mug",
@@ -258,12 +262,12 @@
   "75": {
     "title": "Hardcover Lined Journal",
     "providerId": 1,
-    "price": "20.27",
+    "price": "10.73",
     "premiumPrice": "10.73",
     "sizesCount": 7,
     "colorsCount": 10,
     "providersCount": 7,
-    "cost": "10.73"
+    "cost": 10.73
   },
   "76": {
     "title": "Hardcover Sketch Journal",
@@ -277,11 +281,12 @@
   "77": {
     "title": "Classic Heavyweight Pullover Hoodie",
     "providerId": 99,
-    "price": "20.18",
-    "premiumPrice": "15.54",
+    "price": "15.75",
+    "premiumPrice": "15.75",
     "sizesCount": 6,
     "colorsCount": 41,
-    "providersCount": 11
+    "providersCount": 11,
+    "cost": 15.75
   },
   "78": {
     "title": "Classic Crewneck Fleece Sweatshirt",
@@ -303,13 +308,13 @@
   },
   "80": {
     "title": "Classic Ultra Cotton Long Sleeve T-Shirt",
-    "providerId": 3,
-    "price": "13.60",
-    "premiumPrice": "15.16",
+    "providerId": 26,
+    "price": "14.48",
+    "premiumPrice": "14.48",
     "sizesCount": 6,
     "colorsCount": 15,
     "providersCount": 5,
-    "cost": "15.16"
+    "cost": 14.48
   },
   "81": {
     "title": "Youth Everyday Soft-Spun Cotton T-Shirt",
@@ -397,21 +402,23 @@
   },
   "114": {
     "title": "Men's Classic Soft-Cozy Fleece Pullover Hoodie",
-    "providerId": 99,
-    "price": "19.00",
-    "premiumPrice": "14.63",
+    "providerId": 39,
+    "price": "20.22",
+    "premiumPrice": "20.22",
     "sizesCount": 4,
     "colorsCount": 14,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": 20.22
   },
   "139": {
     "title": "Classic Tri-Blend Crew T-Shirt",
-    "providerId": 99,
-    "price": "13.23",
-    "premiumPrice": "10.19",
+    "providerId": 29,
+    "price": "13.96",
+    "premiumPrice": "13.96",
     "sizesCount": 5,
     "colorsCount": 39,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": 13.96
   },
   "141": {
     "title": "Women's Everyday Tri-Blend Racerback Tank",
@@ -424,21 +431,23 @@
   },
   "142": {
     "title": "Men's Everyday Fitted V-Neck Short Sleeve T-Shirt",
-    "providerId": 99,
-    "price": "12.23",
-    "premiumPrice": "9.42",
+    "providerId": 30,
+    "price": "9.93",
+    "premiumPrice": "9.93",
     "sizesCount": 8,
     "colorsCount": 7,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": 9.93
   },
   "145": {
     "title": "Classic Soft-Spun Cotton T-Shirt",
     "providerId": 99,
-    "price": "7.23",
-    "premiumPrice": "5.57",
+    "price": "8.04",
+    "premiumPrice": "8.04",
     "sizesCount": 5,
     "colorsCount": 10,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": 8.04
   },
   "146": {
     "title": "Youth Ultra-Soft Cotton T-Shirt",
@@ -884,12 +893,13 @@
   },
   "371": {
     "title": "Signature Snap Cases",
-    "providerId": 99,
-    "price": "7.55",
-    "premiumPrice": "5.81",
+    "providerId": 23,
+    "price": "9.76",
+    "premiumPrice": "9.76",
     "sizesCount": 9,
     "colorsCount": 26,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": 9.76
   },
   "372": {
     "title": "Signature Duffel Bag",
@@ -968,11 +978,12 @@
   "411": {
     "title": "Women's Everyday Crop Top",
     "providerId": 99,
-    "price": "9.00",
-    "premiumPrice": "6.93",
+    "price": "11.26",
+    "premiumPrice": "11.26",
     "sizesCount": 7,
     "colorsCount": 31,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": 11.26
   },
   "413": {
     "title": "Signature Backpack",
@@ -1112,12 +1123,12 @@
   "433": {
     "title": "Men's Everyday Bomber Jacket - All-Over Print",
     "providerId": 14,
-    "price": "20.27",
+    "price": "44.40",
     "premiumPrice": "44.40",
     "sizesCount": 5,
     "colorsCount": 18,
     "providersCount": 8,
-    "cost": "44.40"
+    "cost": 44.4
   },
   "438": {
     "title": "Signature Area Rugs",
@@ -1130,23 +1141,23 @@
   },
   "439": {
     "title": "Signature Three-Panel Fleece Hoodie",
-    "providerId": 27,
-    "price": "20.27",
-    "premiumPrice": "21.68",
+    "providerId": 29,
+    "price": "18.03",
+    "premiumPrice": "18.03",
     "sizesCount": 5,
     "colorsCount": 24,
     "providersCount": 7,
-    "cost": "21.68"
+    "cost": 18.03
   },
   "440": {
     "title": "Everyday Cotton Crewneck T-Shirt",
-    "providerId": 29,
-    "price": "16.28",
-    "premiumPrice": "18.06",
+    "providerId": 66,
+    "price": "12.06",
+    "premiumPrice": "12.06",
     "sizesCount": 6,
     "colorsCount": 25,
     "providersCount": 8,
-    "cost": "18.06"
+    "cost": 12.06
   },
   "441": {
     "title": "Signature Ceramic Mug (EU)",
@@ -1160,12 +1171,13 @@
   },
   "442": {
     "title": "Precision Ergonomic Mouse Pad (EU)",
-    "providerId": 99,
-    "price": "16.25",
-    "premiumPrice": "12.51",
+    "providerId": 30,
+    "price": "6.17",
+    "premiumPrice": "6.17",
     "sizesCount": 8,
     "colorsCount": 27,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": 6.17
   },
   "443": {
     "title": "Signature Posters (EU)",
@@ -1241,13 +1253,13 @@
   },
   "454": {
     "title": "Signature Single Jersey Men's T-shirt",
-    "providerId": 26,
-    "price": "13.96",
-    "premiumPrice": "10.42",
+    "providerId": 30,
+    "price": "9.14",
+    "premiumPrice": "9.14",
     "sizesCount": 8,
     "colorsCount": 39,
     "providersCount": 8,
-    "cost": "10.42"
+    "cost": 9.14
   },
   "455": {
     "title": "Classic Hooded Zip Sweatshirt",
@@ -1305,12 +1317,13 @@
   },
   "464": {
     "title": "Men's Everyday Modern-fit T-Shirt",
-    "providerId": 99,
-    "price": "10.46",
-    "premiumPrice": "8.05",
+    "providerId": 30,
+    "price": "9.73",
+    "premiumPrice": "9.73",
     "sizesCount": 6,
     "colorsCount": 14,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": 9.73
   },
   "466": {
     "title": "Women's Everyday Midweight Cotton T-Shirt",
@@ -1405,12 +1418,12 @@
   "482": {
     "title": "Signature 20oz Insulated Bottle",
     "providerId": 28,
-    "price": "22.91",
+    "price": "17.00",
     "premiumPrice": "17.00",
     "sizesCount": 6,
     "colorsCount": 32,
     "providersCount": 8,
-    "cost": "17.00"
+    "cost": 17
   },
   "483": {
     "title": "Signature Enamel Camping Mug",
@@ -1423,12 +1436,13 @@
   },
   "485": {
     "title": "Signature Hardcover Journal Matte",
-    "providerId": 99,
-    "price": "17.50",
-    "premiumPrice": "13.47",
+    "providerId": 28,
+    "price": "7.68",
+    "premiumPrice": "7.68",
     "sizesCount": 9,
     "colorsCount": 35,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": 7.68
   },
   "486": {
     "title": "Signature Spiral Bound Journal",
@@ -1686,11 +1700,12 @@
   "526": {
     "title": "T-Shirt",
     "providerId": 99,
-    "price": "8.23",
-    "premiumPrice": "6.34",
+    "price": "11.49",
+    "premiumPrice": "11.49",
     "sizesCount": 8,
     "colorsCount": 6,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": 11.49
   },
   "527": {
     "title": "Classic Crewneck Sweatshirt",
@@ -1893,12 +1908,13 @@
   },
   "565": {
     "title": "Organic Everyday Cotton Crewneck T-Shirt",
-    "providerId": 99,
-    "price": "11.23",
-    "premiumPrice": "8.65",
+    "providerId": 34,
+    "price": "15.20",
+    "premiumPrice": "15.20",
     "sizesCount": 5,
     "colorsCount": 10,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": 15.2
   },
   "566": {
     "title": "Signature Pet Tag",
@@ -2066,13 +2082,13 @@
   },
   "588": {
     "title": "Foam Non-Slip Eco Performance Mat",
-    "providerId": 80,
-    "price": "20.27",
-    "premiumPrice": "39.50",
+    "providerId": 99,
+    "price": "39.47",
+    "premiumPrice": "39.47",
     "sizesCount": 4,
     "colorsCount": 33,
     "providersCount": 2,
-    "cost": "39.50"
+    "cost": 39.47
   },
   "589": {
     "title": "Swim Trunks - All-Over Print",
@@ -2306,20 +2322,22 @@
   "624": {
     "title": "Signature Suitcase",
     "providerId": 81,
-    "price": "147.76",
+    "price": "107.14",
     "premiumPrice": "107.14",
     "sizesCount": 3,
     "colorsCount": 1,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": 107.14
   },
   "627": {
     "title": "Crop T-Shirt - All-Over Print",
-    "providerId": 99,
-    "price": "9.00",
-    "premiumPrice": "6.93",
+    "providerId": 10,
+    "price": "18.28",
+    "premiumPrice": "18.28",
     "sizesCount": 7,
     "colorsCount": 37,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": 18.28
   },
   "628": {
     "title": "Signature Black Coffee Mug, 11oz",
@@ -2407,12 +2425,12 @@
   "642": {
     "title": "Women's Everyday Cropped Sweatshirt",
     "providerId": 39,
-    "price": "25.68",
-    "premiumPrice": "33.41",
+    "price": "28.35",
+    "premiumPrice": "28.35",
     "sizesCount": 4,
     "colorsCount": 17,
     "providersCount": 7,
-    "cost": "33.41"
+    "cost": 28.35
   },
   "643": {
     "title": "Signature Cutting Board",
@@ -2515,12 +2533,13 @@
   },
   "670": {
     "title": "Signature Kid's Face Mask",
-    "providerId": 99,
-    "price": "12.25",
-    "premiumPrice": "9.43",
+    "providerId": 70,
+    "price": "11.34",
+    "premiumPrice": "11.34",
     "sizesCount": 8,
     "colorsCount": 10,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": 11.34
   },
   "672": {
     "title": "Women's Everyday Heritage Cropped T-Shirt",
@@ -2886,12 +2905,13 @@
   },
   "740": {
     "title": "Men's Everyday Pajama Pants - All-Over Print",
-    "providerId": 99,
-    "price": "12.50",
-    "premiumPrice": "9.63",
+    "providerId": 10,
+    "price": "25.63",
+    "premiumPrice": "25.63",
     "sizesCount": 6,
     "colorsCount": 10,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": 25.63
   },
   "741": {
     "title": "Classic Faded Shirt",
@@ -2985,12 +3005,13 @@
   },
   "757": {
     "title": "Men's Everyday Jogger Shorts - All-Over Print",
-    "providerId": 99,
-    "price": "11.25",
-    "premiumPrice": "8.66",
+    "providerId": 85,
+    "price": "19.73",
+    "premiumPrice": "19.73",
     "sizesCount": 5,
     "colorsCount": 27,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": 19.73
   },
   "758": {
     "title": "Signature UV Phone Sanitizer and Wireless Charging Pad",
@@ -3040,11 +3061,12 @@
   "765": {
     "title": "Signature Bookmark",
     "providerId": 99,
-    "price": "17.00",
-    "premiumPrice": "13.09",
+    "price": "4.53",
+    "premiumPrice": "4.53",
     "sizesCount": 7,
     "colorsCount": 35,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": 4.53
   },
   "767": {
     "title": "Men's Everyday Low Top Sneakers",
@@ -3175,12 +3197,13 @@
   },
   "788": {
     "title": "Rubber Non-Slip Eco Performance Mat",
-    "providerId": 99,
-    "price": "18.50",
-    "premiumPrice": "14.25",
+    "providerId": 1,
+    "price": "30.67",
+    "premiumPrice": "30.67",
     "sizesCount": 6,
     "colorsCount": 23,
-    "providersCount": 6
+    "providersCount": 6,
+    "cost": 30.67
   },
   "789": {
     "title": "Signature Square Magnet",
@@ -4215,12 +4238,13 @@
   },
   "960": {
     "title": "Girls' Sleeveless Sundress - All-Over Print",
-    "providerId": 99,
-    "price": "12.00",
-    "premiumPrice": "9.24",
+    "providerId": 14,
+    "price": "19.12",
+    "premiumPrice": "19.12",
     "sizesCount": 4,
     "colorsCount": 20,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": 19.12
   },
   "961": {
     "title": "Acrylic Prints (3-Piece Set)",
@@ -4667,12 +4691,13 @@
   },
   "1032": {
     "title": "Men's Everyday Loose T-shirt - All-Over Print",
-    "providerId": 99,
-    "price": "10.00",
-    "premiumPrice": "7.70",
+    "providerId": 90,
+    "price": "8.58",
+    "premiumPrice": "8.58",
     "sizesCount": 4,
     "colorsCount": 22,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": 8.58
   },
   "1033": {
     "title": "Signature Photopaper Posters",
@@ -4829,12 +4854,13 @@
   },
   "1062": {
     "title": "Classic Tank Top - All-Over Print",
-    "providerId": 99,
-    "price": "16.00",
-    "premiumPrice": "12.32",
+    "providerId": 83,
+    "price": "18.38",
+    "premiumPrice": "18.38",
     "sizesCount": 4,
     "colorsCount": 17,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": 18.38
   },
   "1064": {
     "title": "Signature Luggage Cover",
@@ -5261,12 +5287,13 @@
   },
   "1129": {
     "title": "Men's Everyday Sport Polo Shirt",
-    "providerId": 99,
-    "price": "7.23",
-    "premiumPrice": "5.57",
+    "providerId": 217,
+    "price": "24.98",
+    "premiumPrice": "24.98",
     "sizesCount": 5,
     "colorsCount": 14,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": 24.98
   },
   "1130": {
     "title": "Signature Framed Posters, Matte",
@@ -5362,11 +5389,12 @@
   "1141": {
     "title": "Youth Long Sleeve Competitor T-Shirt",
     "providerId": 99,
-    "price": "11.23",
-    "premiumPrice": "8.65",
+    "price": "12.51",
+    "premiumPrice": "12.51",
     "sizesCount": 5,
     "colorsCount": 26,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": 12.51
   },
   "1142": {
     "title": "Youth Competitor T-Shirt",
@@ -5623,12 +5651,13 @@
   },
   "1192": {
     "title": "Classic Lightweight Long Sleeve T-Shirt",
-    "providerId": 99,
-    "price": "14.23",
-    "premiumPrice": "10.96",
+    "providerId": 217,
+    "price": "14.26",
+    "premiumPrice": "14.26",
     "sizesCount": 8,
     "colorsCount": 7,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": 14.26
   },
   "1193": {
     "title": "Signature Wirobound Softcover Notebook, A5",
@@ -5884,12 +5913,13 @@
   },
   "1242": {
     "title": "Men's Everyday Polyester T-Shirt - All-Over Print",
-    "providerId": 99,
-    "price": "12.00",
-    "premiumPrice": "9.24",
+    "providerId": 47,
+    "price": "19.94",
+    "premiumPrice": "19.94",
     "sizesCount": 4,
     "colorsCount": 22,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": 19.94
   },
   "1244": {
     "title": "Signature White Ceramic Mug, 11oz",
@@ -5974,12 +6004,13 @@
   },
   "1255": {
     "title": "Women's Everyday Long Sleeve V-neck Shirt - All-Over Print",
-    "providerId": 99,
-    "price": "9.23",
-    "premiumPrice": "7.11",
+    "providerId": 47,
+    "price": "23.16",
+    "premiumPrice": "23.16",
     "sizesCount": 5,
     "colorsCount": 35,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": 23.16
   },
   "1256": {
     "title": "Signature Youth Crewneck Sweatshirt",
@@ -6011,12 +6042,12 @@
   "1261": {
     "title": "Men's Everyday Long Sleeve Shirt - All-Over Print",
     "providerId": 47,
-    "price": "20.27",
+    "price": "22.55",
     "premiumPrice": "22.55",
     "sizesCount": 5,
     "colorsCount": 6,
     "providersCount": 3,
-    "cost": "22.55"
+    "cost": 22.55
   },
   "1262": {
     "title": "Women's Everyday Skater Dress - All-Over Print",
@@ -6029,12 +6060,13 @@
   },
   "1263": {
     "title": "Women's Everyday Long Sleeve Dance Dress - All-Over Print",
-    "providerId": 99,
-    "price": "13.00",
-    "premiumPrice": "10.01",
+    "providerId": 90,
+    "price": "13.10",
+    "premiumPrice": "13.10",
     "sizesCount": 7,
     "colorsCount": 8,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": 13.1
   },
   "1266": {
     "title": "Signature Stemless Wine Glass, 11.75oz",
@@ -6489,11 +6521,12 @@
   "1338": {
     "title": "Men's Everyday Sports Warmup Hoodie - All-Over Print",
     "providerId": 99,
-    "price": "33.00",
-    "premiumPrice": "25.41",
+    "price": "28.80",
+    "premiumPrice": "28.80",
     "sizesCount": 4,
     "colorsCount": 13,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": 28.8
   },
   "1340": {
     "title": "Signature Maars Maker Skinny Matte Tumbler, 20oz",
@@ -7130,12 +7163,12 @@
   "1485": {
     "title": "Men's Everyday Crewneck Sweatshirt - All-Over Print",
     "providerId": 14,
-    "price": "36.91",
+    "price": "19.52",
     "premiumPrice": "19.52",
     "sizesCount": 7,
     "colorsCount": 20,
     "providersCount": 3,
-    "cost": "19.52"
+    "cost": 19.52
   },
   "1486": {
     "title": "Women's Everyday Crewneck Sweatshirt - All-Over Print",
@@ -8608,12 +8641,12 @@
   "1700": {
     "title": "Men's Everyday Crewneck Long Sleeve Sweatshirt - All-Over Print",
     "providerId": 332,
-    "price": "21.05",
+    "price": "4.89",
     "premiumPrice": "4.89",
     "sizesCount": 6,
     "colorsCount": 25,
     "providersCount": 8,
-    "cost": "4.89"
+    "cost": 4.89
   },
   "1701": {
     "title": "Men's Everyday Short Sleeve T-Shirt",
@@ -9203,11 +9236,12 @@
   "1928": {
     "title": "Men's Everyday Crewneck Sweatshirt",
     "providerId": 99,
-    "price": "21.70",
-    "premiumPrice": "16.71",
+    "price": "51.18",
+    "premiumPrice": "51.18",
     "sizesCount": 6,
     "colorsCount": 8,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": 51.18
   },
   "1930": {
     "title": "Signature Large Eco Tote",
@@ -9266,11 +9300,12 @@
   "1942": {
     "title": "Men's Everyday Vintage Washed Heavyweight Tank Top",
     "providerId": 99,
-    "price": "16.25",
-    "premiumPrice": "12.51",
+    "price": "19.07",
+    "premiumPrice": "19.07",
     "sizesCount": 8,
     "colorsCount": 22,
-    "providersCount": 5
+    "providersCount": 5,
+    "cost": 19.07
   },
   "1943": {
     "title": "Signature Scented Soy Candles with Black Lid, (4 and 9oz)",
@@ -9311,11 +9346,12 @@
   "1953": {
     "title": "Women's Everyday Alma Organic Crew Neck Sweatshirt",
     "providerId": 99,
-    "price": "18.00",
-    "premiumPrice": "13.86",
+    "price": "28.00",
+    "premiumPrice": "28.00",
     "sizesCount": 7,
     "colorsCount": 33,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": 28
   },
   "1954": {
     "title": "Classic Crafter Organic Mid-Light T-Shirt",
@@ -10588,12 +10624,13 @@
   },
   "2752": {
     "title": "Signature Car Steering Wheel Cover",
-    "providerId": 99,
-    "price": "14.23",
-    "premiumPrice": "10.96",
+    "providerId": 332,
+    "price": "4.73",
+    "premiumPrice": "4.73",
     "sizesCount": 8,
     "colorsCount": 27,
-    "providersCount": 3
+    "providersCount": 3,
+    "cost": 4.73
   },
   "2753": {
     "title": "Signature Double-Sided Keychain Charm",
@@ -11409,11 +11446,12 @@
   "2984": {
     "title": "Compression Muscle T-Shirt",
     "providerId": 217,
-    "price": "10.46",
-    "premiumPrice": "8.05",
+    "price": "22.51",
+    "premiumPrice": "22.51",
     "sizesCount": 6,
     "colorsCount": 2,
-    "providersCount": 1
+    "providersCount": 1,
+    "cost": 22.51
   },
   "2985": {
     "title": "Sprint Performance T-Shirt",
@@ -11490,11 +11528,12 @@
   "2995": {
     "title": "Compression Short Sleeve T-Shirt",
     "providerId": 217,
-    "price": "13.23",
-    "premiumPrice": "10.19",
+    "price": "22.51",
+    "premiumPrice": "22.51",
     "sizesCount": 6,
     "colorsCount": 2,
-    "providersCount": 1
+    "providersCount": 1,
+    "cost": 22.51
   },
   "2998": {
     "title": "Cooling Performance Long Sleeve Hooded T-Shirt",
@@ -11724,11 +11763,12 @@
   "3066": {
     "title": "Women's Everyday Perfect Tri Midi Long Sleeve T-Shirt",
     "providerId": 217,
-    "price": "12.00",
-    "premiumPrice": "9.24",
+    "price": "12.50",
+    "premiumPrice": "12.50",
     "sizesCount": 8,
     "colorsCount": 7,
-    "providersCount": 1
+    "providersCount": 1,
+    "cost": 12.5
   },
   "3067": {
     "title": "Women's Everyday Perfect Tri Relaxed Tank",
@@ -13181,12 +13221,13 @@
   },
   "3452": {
     "title": "Signature Duck Cloth Hooded Work Jacket",
-    "providerId": 217,
-    "price": "16.50",
-    "premiumPrice": "12.71",
+    "providerId": 99,
+    "price": "58.46",
+    "premiumPrice": "58.46",
     "sizesCount": 8,
     "colorsCount": 4,
-    "providersCount": 1
+    "providersCount": 1,
+    "cost": 58.46
   },
   "3453": {
     "title": "Signature Lightweight Fleece Hoodie",
@@ -16604,12 +16645,13 @@
   },
   "5481": {
     "title": "Men's Everyday Cotton Polyester Crewneck Sweatshirt",
-    "providerId": 99,
-    "price": "18.00",
-    "premiumPrice": "13.86",
+    "providerId": 217,
+    "price": "22.21",
+    "premiumPrice": "22.21",
     "sizesCount": 7,
     "colorsCount": 26,
-    "providersCount": 2
+    "providersCount": 2,
+    "cost": 22.21
   },
   "5483": {
     "title": "Insulated Stainless Steel Thermal Bottle, 17oz",
@@ -16686,11 +16728,12 @@
   "5508": {
     "title": "Men's Everyday Polyester Tank Top",
     "providerId": 217,
-    "price": "18.00",
-    "premiumPrice": "13.86",
+    "price": "12.08",
+    "premiumPrice": "12.08",
     "sizesCount": 8,
     "colorsCount": 7,
-    "providersCount": 1
+    "providersCount": 1,
+    "cost": 12.08
   },
   "5513": {
     "title": "Classic Relaxed Fit Sweatshirt",
@@ -17037,11 +17080,12 @@
   "5634": {
     "title": "Signature Spiral Notebook - Dotted",
     "providerId": 99,
-    "price": "10.00",
-    "premiumPrice": "7.70",
+    "price": "10.81",
+    "premiumPrice": "10.81",
     "sizesCount": 4,
     "colorsCount": 39,
-    "providersCount": 8
+    "providersCount": 8,
+    "cost": 10.81
   },
   "5635": {
     "title": "Signature Cotton Bed Set",

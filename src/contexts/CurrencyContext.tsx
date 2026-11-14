@@ -25,11 +25,43 @@ interface CurrencyContextType {
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
+const DEFAULT_FALLBACK_RATES: Record<string, number> = {
+  USD: 1,
+  GBP: 0.79,
+  EUR: 0.92,
+  CAD: 1.36,
+  AUD: 1.52,
+  INR: 91.9,
+};
+
+const getInitialCurrency = (): string => {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('user_currency');
+      if (saved) return saved;
+    } catch (_) {}
+  }
+  return 'USD';
+};
+
+const getInitialRates = (): Record<string, number> => {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('currency_rates');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (_) {}
+  }
+  return DEFAULT_FALLBACK_RATES;
+};
+
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currency, setCurrencyState] = useState<string>('USD');
+  const [currency, setCurrencyState] = useState<string>(getInitialCurrency);
   const [baseCurrency, setBaseCurrency] = useState<string>('USD');
-  const [rates, setRates] = useState<Record<string, number>>({ USD: 1 });
-  const [loading, setLoading] = useState<boolean>(true);
+  const [rates, setRates] = useState<Record<string, number>>(getInitialRates);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const selectedCurrency = availableCurrencies.find(c => c.code === currency) || availableCurrencies[0];
   const currencySymbol = selectedCurrency.symbol;
