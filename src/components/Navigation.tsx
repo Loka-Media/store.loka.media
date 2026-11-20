@@ -167,11 +167,11 @@ export default function Navigation() {
               <div className="flex-shrink-0">
                 <Link href="/">
                   <Image
-                    src="/loka-logo/loka-main-white.png"
+                    src="/Glossy_Green_Loka_Logo-removebg-preview.png"
                     alt="Loka"
-                    width={120}
-                    height={40}
-                    className="h-8 md:h-10 w-auto"
+                    width={140}
+                    height={48}
+                    className="h-8 md:h-10 w-auto object-contain"
                     priority
                   />
                 </Link>
