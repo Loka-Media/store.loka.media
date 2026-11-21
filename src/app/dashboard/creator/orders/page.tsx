@@ -114,6 +114,10 @@ const getOrderStatusBadge = (status: string) => {
     shipped:          'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     cancelled:        'bg-red-500/10 text-red-400 border-red-500/20',
     completed:        'bg-green-500/10 text-green-400 border-green-500/20',
+    on_hold:          'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    'on hold':        'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    hold:             'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    failed:           'bg-red-500/10 text-red-400 border-red-500/20',
   };
   const base = map[status] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20';
   return `inline-block px-2.5 py-1 rounded-full text-xs font-semibold border ${base} capitalize`;

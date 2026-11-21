@@ -88,6 +88,22 @@ export const useProductCart = (
 
       const resolvedColorImage = getResolvedColorImage();
 
+      // Extract availability_regions
+      const availabilityRegions = (product as any).availability_regions 
+        || (product as any).printify_availability_regions 
+        || selectedVariant.availability_regions 
+        || (selectedVariant as any).printify_availability_regions;
+
+      // Determine product source
+      const isPrintifyProduct = (product as any).source === 'printify' 
+        || Boolean((product as any).blueprint_id) 
+        || Boolean((product as any).printify_blueprint_id)
+        || Boolean(selectedVariant.printify_variant_id)
+        || Boolean((product as any).printify_id)
+        || Boolean((product as any).printify_product_id);
+
+      const resolvedSource = isPrintifyProduct ? 'printify' : (product.source || 'unknown');
+
       // Cache variant data for cart before adding to cart
       const variantCacheData = {
         product_id: product.id,
@@ -100,13 +116,15 @@ export const useProductCart = (
         image_url: resolvedColorImage,
         thumbnail_url: resolvedColorImage,
         creator_name: product.creator?.name || product.creator_name || 'Unknown',
-        source: product.source || 'unknown',
+        source: resolvedSource,
+        availability_regions: availabilityRegions,
+        printify_availability_regions: availabilityRegions,
         shopify_variant_id: selectedVariant.shopify_variant_id,
         printify_variant_id: selectedVariant.printify_variant_id,
         printful_variant_id: (selectedVariant as any).printful_variant_id || (product.source === 'printful' ? selectedVariant.id : undefined),
         printify_product_id: (product as any).printify_id || (product as any).printify_product_id,
-        blueprint_id: (product as any).blueprint_id,
-        print_provider_id: (product as any).print_provider_id
+        blueprint_id: (product as any).blueprint_id || (product as any).printify_blueprint_id,
+        print_provider_id: (product as any).print_provider_id || (product as any).printify_print_provider_id
       };
 
       // Store in localStorage for cart image resolution

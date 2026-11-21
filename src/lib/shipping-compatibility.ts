@@ -1,9 +1,10 @@
 export interface CartItem {
   id: number;
   product_name: string;
-  availability_regions?: string[];
-  printify_availability_regions?: string[];
+  availability_regions?: string[] | string | any;
+  printify_availability_regions?: string[] | string | any;
   source?: string;
+  [key: string]: any;
 }
 
 export interface IncompatibleItem {
@@ -19,39 +20,64 @@ export interface ShippingCountry {
   states: any[] | null;
 }
 
-
 export const checkShippingCompatibility = (
   items: CartItem[],
   countryCode: string,
   countries: ShippingCountry[]
 ): IncompatibleItem[] => {
-  if (!countryCode || !countries) return [];
+  if (!countryCode || !countries || !Array.isArray(items) || items.length === 0) return [];
 
-  const selectedCountry = countries.find(c => c.code === countryCode);
-  if (!selectedCountry) return [];
+  const targetCountry = countryCode.toUpperCase().trim();
+  const selectedCountry = countries.find(c => c.code.toUpperCase() === targetCountry);
+  const countryRegion = selectedCountry?.region || '';
 
   const incompatibleItems: IncompatibleItem[] = [];
 
   for (const item of items) {
-    if (item.source !== 'printify') {
+    // Only skip Printful items (which have their own regional routing)
+    if (item.source === 'printful' || (item as any).printful_variant_id) {
       continue;
     }
 
-    const availabilityRegions = item.printify_availability_regions || item.availability_regions;
+    let regions: string[] = [];
+    const rawRegions = item.printify_availability_regions 
+      || item.availability_regions 
+      || (item as any).regions;
 
-    if (availabilityRegions && Array.isArray(availabilityRegions)) {
+    if (rawRegions) {
+      if (Array.isArray(rawRegions)) {
+        regions = rawRegions.map(r => String(r).toUpperCase().trim());
+      } else if (typeof rawRegions === 'string') {
+        try {
+          const parsed = JSON.parse(rawRegions);
+          if (Array.isArray(parsed)) {
+            regions = parsed.map(r => String(r).toUpperCase().trim());
+          } else if (typeof parsed === 'object' && parsed !== null) {
+            regions = Object.keys(parsed).map(k => k.toUpperCase().trim());
+          } else {
+            regions = [rawRegions.toUpperCase().trim()];
+          }
+        } catch {
+          regions = rawRegions.split(',').map(r => r.toUpperCase().trim()).filter(Boolean);
+        }
+      } else if (typeof rawRegions === 'object' && rawRegions !== null) {
+        regions = Object.keys(rawRegions).map(k => k.toUpperCase().trim());
+      }
+    }
+
+    if (regions.length > 0) {
       const isCompatible = checkRegionCompatibility(
-        availabilityRegions,
-        countryCode,
-        selectedCountry.region,
+        regions,
+        targetCountry,
+        countryRegion,
         countries
       );
 
       if (!isCompatible) {
         incompatibleItems.push({
           item,
-          availableRegions: availabilityRegions,
-          requestedRegion: countryCode,
+          availableRegions: regions,
+          requestedRegion: targetCountry,
         });
       }
     }
@@ -66,41 +92,53 @@ const checkRegionCompatibility = (
   countryRegion: string,
   countries: ShippingCountry[]
 ): boolean => {
-  if (availableRegions.includes(countryCode)) {
-    return true;
-  }
+  const norm = availableRegions.map(r => r.toUpperCase().trim());
+  const cc = countryCode.toUpperCase().trim();
 
-  if (availableRegions.includes('worldwide')) {
-    return true;
-  }
-
-  if (availableRegions.includes('EU') && countryRegion === 'europe') {
-    return true;
-  }
-
-  if (availableRegions.includes('UK') && countryCode === 'GB') {
-    return true;
-  }
+  if (norm.includes(cc)) return true;
+  if (norm.includes('WORLDWIDE') || norm.includes('GLOBAL') || norm.includes('REST_OF_THE_WORLD') || norm.includes('ALL')) return true;
+  if ((norm.includes('EU') || norm.includes('EUROPE')) && (countryRegion.toLowerCase() === 'europe' || countryRegion.toUpperCase() === 'EU')) return true;
+  if ((norm.includes('UK') || norm.includes('GB')) && (cc === 'GB' || cc === 'UK')) return true;
+  if ((norm.includes('US') || norm.includes('USA')) && (cc === 'US' || cc === 'USA')) return true;
+  if ((norm.includes('CA') || norm.includes('CAN')) && (cc === 'CA' || cc === 'CAN')) return true;
+  if ((norm.includes('AU') || norm.includes('AUS')) && (cc === 'AU' || cc === 'AUS')) return true;
+  if (norm.includes('IN') && cc === 'IN') return true;
 
   return false;
 };
 
 export const getRegionName = (regionCode: string, countries: ShippingCountry[]): string => {
-  const country = countries.find(c => c.code === regionCode);
+  const normalized = regionCode.toUpperCase().trim();
+  const country = countries.find(c => c.code.toUpperCase() === normalized);
   if (country) {
     return country.name;
   }
 
-  if (regionCode === 'UK') {
-    const uk = countries.find(c => c.code === 'GB');
-    if (uk) return uk.name;
+  if (normalized === 'UK' || normalized === 'GB') {
+    return 'United Kingdom';
   }
 
-  if (regionCode === 'EU') {
-    return 'Europe';
+  if (normalized === 'US' || normalized === 'USA') {
+    return 'United States';
   }
 
-  if (regionCode === 'worldwide') {
+  if (normalized === 'CA' || normalized === 'CAN') {
+    return 'Canada';
+  }
+
+  if (normalized === 'AU' || normalized === 'AUS') {
+    return 'Australia';
+  }
+
+  if (normalized === 'IN') {
+    return 'India';
+  }
+
+  if (normalized === 'EU' || normalized === 'EUROPE') {
+    return 'European Union';
+  }
+
+  if (normalized === 'WORLDWIDE' || normalized === 'GLOBAL' || normalized === 'REST_OF_THE_WORLD') {
     return 'Worldwide';
   }
 
@@ -118,8 +156,9 @@ export const formatIncompatibilityMessage = (
     const regions = item.availableRegions
       .map(r => getRegionName(r, countries))
       .join(', ');
-    return `"${item.item.product_name}" can only ship to: ${regions}`;
+    const reqCountry = getRegionName(item.requestedRegion, countries) || item.requestedRegion;
+    return `"${item.item.product_name}" is only available for shipping to: ${regions}. Delivery to ${reqCountry} is not available.`;
   }
 
-  return `${incompatibleItems.length} items in your cart cannot ship to the selected region. Please remove them to continue.`;
+  return `${incompatibleItems.length} items in your cart cannot be shipped to the selected country. Please remove them to proceed.`;
 };

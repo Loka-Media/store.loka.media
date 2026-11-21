@@ -139,21 +139,33 @@ export async function GET(request: NextRequest) {
 
 const BACKEND_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/$/, '');
 
-async function calculateDynamicRates(lineItems: any[], countryCode: string): Promise<{ totalCents: number; itemized: any[] }> {
+async function calculateDynamicRates(lineItems: any[], countryCode: string): Promise<{
+  deliverable: boolean;
+  unsupportedItems: any[];
+  totalCents: number;
+  itemized: any[];
+  error?: string;
+}> {
   const calculatedItems: any[] = [];
+  const unsupportedItems: any[] = [];
+  const targetCountry = (countryCode || 'US').toUpperCase().trim();
 
   for (const item of lineItems) {
     let blueprintId = item.blueprint_id || item.printify_blueprint_id;
     let printProviderId = item.print_provider_id || item.printify_print_provider_id;
     let printifyVariantId = item.printify_variant_id || item.variant_id;
+    let itemName = item.product_name || item.name || '';
 
-    if (!blueprintId || !printProviderId) {
+    if (!blueprintId || !printProviderId || !itemName) {
       try {
         const lookupId = item.db_product_id || (/^\d+$/.test(String(item.product_id)) ? item.product_id : null);
         if (lookupId) {
           const res = await fetch(`${BACKEND_URL}/api/products/${lookupId}`);
           if (res.ok) {
             const productData = await res.json();
+            if (!itemName) {
+              itemName = productData.name || productData.title || '';
+            }
             blueprintId = productData.printify_blueprint_id
               || productData.blueprint_id
               || (typeof productData.printify_product_id === 'number' ? productData.printify_product_id : null)
@@ -195,18 +207,39 @@ async function calculateDynamicRates(lineItems: any[], countryCode: string): Pro
         matchingProfiles = profiles;
       }
 
+      // Collect all supported countries across matching profiles
+      const supportedCountriesSet = new Set<string>();
+      matchingProfiles.forEach((p: any) => {
+        if (Array.isArray(p.countries)) {
+          p.countries.forEach((c: string) => supportedCountriesSet.add(String(c).toUpperCase().trim()));
+        }
+      });
+
       let matchedProfile = matchingProfiles.find((p: any) => 
-        p.countries && p.countries.some((c: string) => c.toUpperCase() === countryCode.toUpperCase())
+        p.countries && p.countries.some((c: string) => String(c).toUpperCase().trim() === targetCountry)
       );
 
       if (!matchedProfile) {
         matchedProfile = matchingProfiles.find((p: any) => 
-          p.countries && p.countries.some((c: string) => c.toUpperCase() === 'REST_OF_THE_WORLD')
+          p.countries && p.countries.some((c: string) => {
+            const code = String(c).toUpperCase().trim();
+            return code === 'REST_OF_THE_WORLD' || code === 'WORLDWIDE' || code === 'GLOBAL';
+          })
         );
       }
 
-      if (!matchedProfile && matchingProfiles.length > 0) {
-        matchedProfile = matchingProfiles[0];
+      // If profiles were returned and none match target country or worldwide, item cannot ship to this country
+      if (!matchedProfile) {
+        if (matchingProfiles.length > 0) {
+          console.warn(`[Shipping Rate] Destination ${countryCode} not supported for item ${itemName || item.product_id}. Available:`, Array.from(supportedCountriesSet));
+          unsupportedItems.push({
+            product_id: item.product_id || item.db_product_id || blueprintId,
+            name: itemName || 'Selected Product',
+            requestedCountry: targetCountry,
+            supportedCountries: Array.from(supportedCountriesSet)
+          });
+          continue; // Do NOT push fake rate or fallback to matchingProfiles[0]!
+        }
       }
 
       if (matchedProfile) {
@@ -221,31 +254,33 @@ async function calculateDynamicRates(lineItems: any[], countryCode: string): Pro
           additional_items: addCost,
           variant_id: Number(item.variant_id || printifyVariantId)
         });
-      } else {
-        calculatedItems.push({
-          print_provider_id: Number(printProviderId),
-          blueprint_id: Number(blueprintId),
-          quantity: Number(item.quantity || 1),
-          first_item: 599,
-          additional_items: 200,
-          variant_id: Number(item.variant_id || printifyVariantId)
-        });
       }
     } catch (err: any) {
       console.error(`Failed to fetch shipping profile for blueprint ${blueprintId}, provider ${printProviderId}:`, err.message);
-      calculatedItems.push({
-        print_provider_id: Number(printProviderId) || 0,
-        blueprint_id: Number(blueprintId) || 0,
-        quantity: Number(item.quantity || 1),
-        first_item: 599,
-        additional_items: 200,
-        variant_id: Number(item.variant_id || printifyVariantId)
-      });
     }
   }
 
+  if (unsupportedItems.length > 0) {
+    const names = unsupportedItems.map(i => `"${i.name}"`).join(', ');
+    const firstSupported = unsupportedItems[0].supportedCountries.filter((c: string) => c !== 'REST_OF_THE_WORLD' && c !== 'WORLDWIDE').slice(0, 5).join(', ');
+    const note = firstSupported ? ` (Available for: ${firstSupported})` : '';
+    return {
+      deliverable: false,
+      unsupportedItems,
+      totalCents: 0,
+      itemized: [],
+      error: `Delivery to ${countryCode} is not available for ${names}${note}.`
+    };
+  }
+
   if (calculatedItems.length === 0) {
-    return { totalCents: 599, itemized: [] };
+    return {
+      deliverable: false,
+      unsupportedItems: [],
+      totalCents: 0,
+      itemized: [],
+      error: `No shipping profiles found for destination ${countryCode}.`
+    };
   }
 
   const providerGroups: Record<number, any[]> = {};
@@ -280,6 +315,8 @@ async function calculateDynamicRates(lineItems: any[], countryCode: string): Pro
   }
 
   return {
+    deliverable: true,
+    unsupportedItems: [],
     totalCents: totalShippingCents,
     itemized: calculatedItems.map(x => ({
       variant_id: x.variant_id,
@@ -436,35 +473,39 @@ export async function POST(request: NextRequest) {
 
     // 2. Fallback to blueprint catalog shipping profiles if official shop calculation was not applicable
     if (!rates) {
-      if (!printifyPayload.line_items || printifyPayload.line_items.length === 0) {
-        console.log('Calculating dynamic shipping rates for fallback items list...');
-        const fallbackItems = (body.items && body.items.length > 0) ? body.items : (body.line_items || []);
-        const countryCode = printifyPayload.address_to?.country || body.recipient?.country_code || 'US';
-        const resultObj = await calculateDynamicRates(fallbackItems, countryCode);
+      const countryCode = printifyPayload.address_to?.country || body.recipient?.country_code || 'US';
+      const itemsToCalculate = (!printifyPayload.line_items || printifyPayload.line_items.length === 0)
+        ? ((body.items && body.items.length > 0) ? body.items : (body.line_items || []))
+        : printifyPayload.line_items;
+
+      try {
+        console.log(`Calculating dynamic shipping rates using blueprint profiles for country: ${countryCode}`);
+        const resultObj = await calculateDynamicRates(itemsToCalculate, countryCode);
+
+        if (!resultObj.deliverable) {
+          console.warn(`[Shipping API] Delivery blocked for country ${countryCode}:`, resultObj.error);
+          return NextResponse.json({
+            success: false,
+            deliverable: false,
+            unsupportedItems: resultObj.unsupportedItems,
+            result: [],
+            error: resultObj.error || `Delivery to ${countryCode} is not available.`
+          });
+        }
+
         rates = {
           standard: resultObj.totalCents,
           itemized: resultObj.itemized
         };
-      } else {
-        try {
-          const countryCode = printifyPayload.address_to?.country || 'US';
-          console.log(`Calculating dynamic shipping rates using blueprint profiles for country: ${countryCode}`);
-          const resultObj = await calculateDynamicRates(printifyPayload.line_items, countryCode);
-          rates = {
-            standard: resultObj.totalCents,
-            itemized: resultObj.itemized
-          };
-          console.log(`✅ Calculated dynamic shipping total: ${resultObj.totalCents} cents ($${(resultObj.totalCents/100).toFixed(2)})`);
-        } catch (error: any) {
-          console.error(
-            '❌ DYNAMIC SHIPPING CALCULATION ERROR',
-            error.message
-          );
-          rates = {
-            standard: 599, // $5.99 fallback
-            itemized: []
-          };
-        }
+        console.log(`✅ Calculated dynamic shipping total: ${resultObj.totalCents} cents ($${(resultObj.totalCents/100).toFixed(2)})`);
+      } catch (error: any) {
+        console.error('❌ DYNAMIC SHIPPING CALCULATION ERROR', error.message);
+        return NextResponse.json({
+          success: false,
+          deliverable: false,
+          result: [],
+          error: `Shipping calculation failed for destination ${countryCode}: ${error.message}`
+        });
       }
     }
 
@@ -599,7 +640,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, result: allRates });
+    if (allRates.length === 0) {
+      const destCountry = printifyPayload.address_to?.country || body.recipient?.country_code || 'the selected address';
+      return NextResponse.json({
+        success: false,
+        deliverable: false,
+        result: [],
+        error: `No shipping options available for ${destCountry}. Delivery is not supported for this destination.`
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      deliverable: true,
+      result: allRates
+    });
 
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Shipping calculation failed';

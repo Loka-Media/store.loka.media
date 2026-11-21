@@ -43,6 +43,9 @@ interface OrderSummaryProps {
   checkingAvailability?: boolean;
   countryCode: string;
   isFetchingShippingRates?: boolean;
+  isDeliverable?: boolean;
+  shippingError?: string | null;
+  incompatibleItems?: any[];
 }
 
 export const OrderSummary = ({
@@ -61,6 +64,9 @@ export const OrderSummary = ({
   checkingAvailability = false,
   countryCode,
   isFetchingShippingRates = false,
+  isDeliverable = true,
+  shippingError = null,
+  incompatibleItems = [],
 }: OrderSummaryProps) => {
   const { formatPrice } = useCurrency();
   const subtotalAmount = parseFloat(summary.subtotal.replace("$", ""));
@@ -151,6 +157,21 @@ export const OrderSummary = ({
         </div>
       </div>
 
+      {/* Undeliverable / Shipping Error Alert */}
+      {(shippingError || isDeliverable === false || (incompatibleItems && incompatibleItems.length > 0)) && (
+        <div className="mt-5 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs sm:text-sm flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="font-bold block text-red-200">Delivery Unavailable</span>
+            <p className="text-red-300 leading-relaxed text-xs sm:text-sm">
+              {shippingError || (incompatibleItems && incompatibleItems.length > 0
+                ? "One or more items in your cart cannot be delivered to this country. Please remove them or change your shipping address."
+                : "Shipping is not available for this delivery address.")}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Availability Check Section */}
       {hasPrintfulItems && onCheckAvailability && (
         <div className="mt-6">
@@ -209,13 +230,33 @@ export const OrderSummary = ({
         </div>
       )}
 
-      <button
-        onClick={onCreateOrder}
-        disabled={loading}
-        className="w-full mt-6 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 px-4 rounded-lg font-bold transition-all duration-300 hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] disabled:opacity-50"
-      >
-        {loading ? "Creating Order..." : "Continue to Payment"}
-      </button>
+      {(() => {
+        const hasIncompatible = incompatibleItems && incompatibleItems.length > 0;
+        const isDeliveryBlocked = isDeliverable === false 
+          || hasIncompatible 
+          || Boolean(shippingError)
+          || (!isFetchingShippingRates && shippingRates.length === 0);
+
+        return (
+          <button
+            onClick={onCreateOrder}
+            disabled={loading || isDeliveryBlocked}
+            className={`w-full mt-6 py-3.5 px-4 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ${
+              isDeliveryBlocked
+                ? "bg-red-500/15 text-red-300 border border-red-500/30 cursor-not-allowed opacity-90 shadow-none"
+                : loading
+                ? "bg-orange-500 text-white opacity-50 cursor-wait"
+                : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white hover:shadow-[0_10px_30px_rgba(255,133,27,0.3)] active:scale-[0.99]"
+            }`}
+          >
+            {loading
+              ? "Creating Order..."
+              : isDeliveryBlocked
+              ? "Delivery Unavailable for this Address"
+              : "Continue to Payment"}
+          </button>
+        );
+      })()}
     </div>
   );
 };

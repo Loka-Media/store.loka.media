@@ -28,6 +28,7 @@ interface GuestCartItem {
   printful_catalog_variant_id?: string;
   printful_availability_regions?: string[];
   availability_regions?: string[];
+  printify_availability_regions?: string[];
   printify_product_id?: string | number | null;
   printify_variant_id?: string | number | null;
   blueprint_id?: string | number | null;
@@ -313,13 +314,14 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
         const response = await cartAPI.getCart();
         const guestCartItems: GuestCartItem[] = response.items.map((item: CartItem) => {
           let resolvedImage = item.image_url || item.thumbnail_url;
+          let cachedData: any = null;
           if (typeof window !== 'undefined') {
             try {
               const cached = localStorage.getItem(`product_variant_${item.variant_id}`);
               if (cached) {
-                const parsed = JSON.parse(cached);
-                if (parsed.image_url && !parsed.image_url.includes('placeholder')) {
-                  resolvedImage = parsed.image_url;
+                cachedData = JSON.parse(cached);
+                if (cachedData.image_url && !cachedData.image_url.includes('placeholder')) {
+                  resolvedImage = cachedData.image_url;
                 }
               }
             } catch (e) {
@@ -331,13 +333,29 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
           const normPrice = ensure99Pricing(rawPrice);
           const normTotalPrice = normPrice * item.quantity;
 
+          const itemSource = item.source || cachedData?.source || (
+            (item as any).printify_variant_id || (item as any).printify_blueprint_id || cachedData?.blueprint_id ? 'printify' : 'unknown'
+          );
+
+          const availabilityRegions = (item as any).availability_regions
+            || (item as any).printify_availability_regions
+            || cachedData?.availability_regions
+            || cachedData?.printify_availability_regions;
+
           return {
             ...item,
             image_url: resolvedImage,
             thumbnail_url: resolvedImage,
             price: normPrice.toFixed(2),
             total_price: normTotalPrice.toFixed(2),
-            cost: (item as any).cost || normPrice / 1.35
+            cost: (item as any).cost || normPrice / 1.35,
+            source: itemSource,
+            availability_regions: availabilityRegions,
+            printify_availability_regions: availabilityRegions,
+            blueprint_id: (item as any).blueprint_id || (item as any).printify_blueprint_id || cachedData?.blueprint_id,
+            print_provider_id: (item as any).print_provider_id || (item as any).printify_print_provider_id || cachedData?.print_provider_id,
+            printify_variant_id: (item as any).printify_variant_id || cachedData?.printify_variant_id,
+            printify_product_id: (item as any).printify_product_id || cachedData?.printify_product_id,
           };
         });
 
@@ -460,7 +478,9 @@ export function GuestCartProvider({ children }: { children: React.ReactNode }) {
               image_url: cachedData.image_url || cachedData.thumbnail_url,
               thumbnail_url: cachedData.thumbnail_url,
               creator_name: cachedData.creator_name || 'Creator',
-              source: cachedData.source || 'unknown',
+              source: cachedData.source || (cachedData.blueprint_id || cachedData.printify_variant_id ? 'printify' : 'unknown'),
+              availability_regions: cachedData.availability_regions,
+              printify_availability_regions: cachedData.printify_availability_regions || cachedData.availability_regions,
               shopify_variant_id: cachedData.shopify_variant_id,
               printful_variant_id: cachedData.printful_variant_id,
               printify_product_id: cachedData.printify_product_id,

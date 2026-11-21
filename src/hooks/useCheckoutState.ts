@@ -33,6 +33,8 @@ export const useCheckoutState = () => {
   const [selectedShippingRate, setSelectedShippingRate] = useState<any>(null);
   const [isFetchingShippingRates, setIsFetchingShippingRates] = useState(false);
   const [taxAmount, setTaxAmount] = useState<number>(0);
+  const [shippingError, setShippingError] = useState<string | null>(null);
+  const [isDeliverable, setIsDeliverable] = useState<boolean>(true);
 
   const updateCustomerInfo = (updates: Partial<CustomerInfo>) => {
     setCustomerInfo(prev => ({ ...prev, ...updates }));
@@ -113,17 +115,23 @@ export const useCheckoutState = () => {
       }
 
       setIsFetchingShippingRates(true);
+      setShippingError(null);
       try {
         const rates = await getShippingRates(customerInfo, items);
 
-        if (!rates.result || rates.result.length === 0) {
-          if (!silent) {
-            toast.error('No shipping options available for this address');
-          }
+        if (!rates || rates.success === false || rates.deliverable === false || !rates.result || rates.result.length === 0) {
+          const errMsg = rates?.error || 'No shipping options available for this address. Delivery is not supported for this destination.';
+          setShippingError(errMsg);
+          setIsDeliverable(false);
           setShippingRates([]);
           setSelectedShippingRate(null);
+          if (!silent) {
+            toast.error(errMsg);
+          }
           return null;
         } else {
+          setIsDeliverable(true);
+          setShippingError(null);
           setShippingRates(rates.result);
           const firstRate = rates.result[0];
           setSelectedShippingRate(firstRate); // Auto-select the first rate
@@ -139,12 +147,14 @@ export const useCheckoutState = () => {
         }
       } catch (error: any) {
         console.error("Failed to fetch shipping rates:", error);
-        if (!silent) {
-          const errorMessage = error.response?.data?.result || error.message || 'Failed to fetch shipping rates';
-          toast.error(errorMessage);
-        }
+        const errorMessage = error.response?.data?.error || error.response?.data?.result || error.message || 'Failed to fetch shipping rates';
+        setShippingError(errorMessage);
+        setIsDeliverable(false);
         setShippingRates([]);
         setSelectedShippingRate(null);
+        if (!silent) {
+          toast.error(errorMessage);
+        }
         return null;
       } finally {
         setIsFetchingShippingRates(false);
@@ -179,6 +189,8 @@ export const useCheckoutState = () => {
     setShippingRates([]);
     setSelectedShippingRate(null);
     setIsFetchingShippingRates(false);
+    setShippingError(null);
+    setIsDeliverable(true);
   };
 
   return {
@@ -203,6 +215,10 @@ export const useCheckoutState = () => {
     setSelectedShippingRate,
     isFetchingShippingRates,
     setIsFetchingShippingRates,
+    shippingError,
+    setShippingError,
+    isDeliverable,
+    setIsDeliverable,
     taxAmount,
     setTaxAmount,
     fetchShippingRates,

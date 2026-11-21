@@ -185,6 +185,19 @@ export default function UnifiedCheckoutPage() {
         return;
       }
 
+      // Check if delivery is blocked by shipping rate validation
+      if (!checkoutState.isDeliverable || checkoutState.shippingError) {
+        toast.error(checkoutState.shippingError || "Cannot proceed: Delivery is not available for this address.");
+        setLoading(false);
+        return;
+      }
+
+      if (!checkoutState.selectedShippingRate && checkoutState.shippingRates.length === 0) {
+        toast.error("No valid shipping options available for this address. Please update your address or remove unsupported items.");
+        setLoading(false);
+        return;
+      }
+
       // Validate all required fields
       if (
         !customerInfo.name ||
@@ -682,6 +695,9 @@ export default function UnifiedCheckoutPage() {
               checkingAvailability={inventoryCheck.checking}
               countryCode={checkoutState.customerInfo.country || 'US'}
               isFetchingShippingRates={checkoutState.isFetchingShippingRates}
+              isDeliverable={checkoutState.isDeliverable}
+              shippingError={checkoutState.shippingError}
+              incompatibleItems={incompatibleItems}
             />
           </div>
         </div>
