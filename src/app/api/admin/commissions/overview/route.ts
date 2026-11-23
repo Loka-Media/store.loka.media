@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         processingCommissions = parseInt(commStats[0].processing_count || '0', 10);
         paidCommissions = parseInt(commStats[0].paid_count || '0', 10);
         refundedCommissions = parseInt(commStats[0].refunded_count || '0', 10);
-        if (totalCommissionsTracked > 0) dbSuccess = true;
+        dbSuccess = true;
       }
 
       // 2. Query withdrawal requests
@@ -65,8 +65,8 @@ export async function GET(request: NextRequest) {
       console.warn('[Admin Commissions Overview] Direct DB query error:', dbErr);
     }
 
-    // 3. Fallback to backend / earnings query if DB commission tracking was empty
-    if (!dbSuccess || totalCommissionsAmount === 0) {
+    // 3. Fallback to backend / earnings query only if DB query completely failed
+    if (!dbSuccess) {
       const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
       const authHeader = request.headers.get('authorization') || '';
       try {

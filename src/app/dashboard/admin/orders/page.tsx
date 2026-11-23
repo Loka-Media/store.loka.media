@@ -37,7 +37,10 @@ import { resolveProductCategoryName, calculateSellingPrice } from '@/lib/pricing
 const adminAPI = {
   getDashboardStats: async () => {
     try {
-      const res = await fetch('/api/admin/orders/stats');
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : '';
+      const res = await fetch('/api/admin/orders/stats', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (res.ok) {
         const data = await res.json();
         if (data?.stats) return data;
