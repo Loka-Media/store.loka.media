@@ -17,7 +17,6 @@ export default function CartPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
   const { formatPrice } = useCurrency();
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   // Use GuestCart for both authenticated and guest users (handles both cases)
   const { items, summary, loading, updateCartItem, removeFromCart, clearCart, refreshCart } = useGuestCart();
@@ -33,13 +32,6 @@ export default function CartPage() {
     productName: ''
   });
   const [clearCartConfirmOpen, setClearCartConfirmOpen] = useState(false);
-
-  // Check authentication and redirect if not logged in
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      setShowLoginPrompt(true);
-    }
-  }, [isAuthenticated, authLoading]);
 
   // Context handles data fetching - removed redundant effect
 
@@ -121,16 +113,46 @@ export default function CartPage() {
     setDeleteConfirm({ show: false, itemId: null, productName: '' });
   };
 
+  // Stable skeleton while auth is resolving or cart is loading
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen bg-black text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 md:pt-20 pb-12">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+            <div>
+              <GradientTitle text="Shopping Cart" size="sm" />
+              <div className="h-4 w-32 bg-white/10 rounded animate-pulse mt-2" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            <div className="lg:col-span-8 space-y-4">
+              {[1, 2].map((i) => (
+                <div key={i} className="p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex gap-4 animate-pulse">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/10 rounded-xl flex-shrink-0" />
+                  <div className="flex-1 space-y-2 py-1">
+                    <div className="h-4 bg-white/10 rounded w-3/4" />
+                    <div className="h-3 bg-white/10 rounded w-1/3" />
+                    <div className="h-4 bg-white/10 rounded w-1/4 mt-4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="lg:col-span-4">
+              <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4 animate-pulse">
+                <div className="h-5 bg-white/10 rounded w-1/2" />
+                <div className="h-4 bg-white/10 rounded w-full" />
+                <div className="h-4 bg-white/10 rounded w-4/5" />
+                <div className="h-10 bg-primary/30 rounded-xl w-full mt-4" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Show login prompt if user is not authenticated
-  if (showLoginPrompt) {
+  // Show login prompt only after auth check finishes and user is confirmed not authenticated
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <div className="text-center max-w-md">

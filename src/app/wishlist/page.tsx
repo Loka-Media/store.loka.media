@@ -18,7 +18,7 @@ import { sanitizeProductTitle } from "@/lib/productSanitizer";
 export default function WishlistPage() {
   const { items, loading, removeFromWishlist, clearWishlist, wishlistCount } = useWishlist();
   const { addToCart } = useGuestCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { formatPrice } = useCurrency();
   const router = useRouter();
 
@@ -65,12 +65,39 @@ export default function WishlistPage() {
     }
   }];
 
+  // Stable skeleton while auth is resolving or wishlist is loading
+  if (authLoading || (isAuthenticated && loading)) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12 sm:pt-16 md:pt-20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 pt-2 sm:pt-3">
+            <div>
+              <GradientTitle text="My Wishlist" size="sm" />
+              <div className="h-4 w-32 bg-white/10 rounded animate-pulse mt-2" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white/[0.03] border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-4 space-y-3 animate-pulse">
+                <div className="aspect-square bg-white/10 rounded-xl" />
+                <div className="h-3 bg-white/10 rounded w-1/2" />
+                <div className="h-4 bg-white/10 rounded w-3/4" />
+                <div className="h-4 bg-white/10 rounded w-1/3" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt only after auth check finishes and user is confirmed not authenticated
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <div className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl inline-flex items-center justify-center mb-6">
-            <Heart className="h-8 w-8 text-white" />
+          <div className="p-4 bg-primary/20 border border-primary/30 rounded-2xl inline-flex items-center justify-center mb-6">
+            <Heart className="h-8 w-8 text-primary" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">
             {wishlistCount > 0
@@ -103,14 +130,6 @@ export default function WishlistPage() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black text-white">
       <style>{`
@@ -129,8 +148,7 @@ export default function WishlistPage() {
           100% { background-position: 1000px 0; }
         }
         .wishlist-card-animate {
-          animation: fadeInUp 0.6s ease-out forwards;
-          opacity: 0;
+          animation: fadeInUp 0.4s ease-out forwards;
         }
         .card-shimmer {
           background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);

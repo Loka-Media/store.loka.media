@@ -71,26 +71,10 @@ export default function SmoothScroll() {
 
   // 3. Reset scroll position to top on every route/pathname change
   useEffect(() => {
-    const resetScrollToTop = () => {
-      window.scrollTo(0, 0);
-      if (lenisRef.current) {
-        lenisRef.current.scrollTo(0, { immediate: true });
-        lenisRef.current.resize();
-      }
-    };
-
-    resetScrollToTop();
-    const t1 = setTimeout(resetScrollToTop, 50);
-    const t2 = setTimeout(resetScrollToTop, 150);
-    const t3 = setTimeout(resetScrollToTop, 350);
-    const t4 = setTimeout(resetScrollToTop, 600);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
-    };
+    window.scrollTo(0, 0);
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { immediate: true });
+    }
   }, [pathname]);
 
   return null;
