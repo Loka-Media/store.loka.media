@@ -587,9 +587,10 @@ export default function Navigation() {
                       onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
                       className="flex items-center space-x-1 text-white text-sm font-semibold hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
                       style={{ color: "var(--nav-text)" }}
+                      suppressHydrationWarning
                     >
-                      <span className="text-[14px] font-bold text-orange-400 leading-none">{activeCurrency.symbol}</span>
-                      <span className="uppercase text-[13px]">{activeCurrency.code}</span>
+                      <span className="text-[14px] font-bold text-orange-400 leading-none" suppressHydrationWarning>{activeCurrency.symbol}</span>
+                      <span className="uppercase text-[13px]" suppressHydrationWarning>{activeCurrency.code}</span>
                       <svg
                         className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isCurrencyOpen ? 'rotate-180' : ''}`}
                         fill="none"
@@ -974,13 +975,14 @@ export default function Navigation() {
                     <button
                       key={item.code}
                       onClick={() => setCurrency(item.code)}
+                      suppressHydrationWarning
                       className={`flex items-center justify-center space-x-1 py-2 px-3 rounded-lg border text-[11px] font-semibold transition-colors cursor-pointer ${currency === item.code
                         ? 'border-orange-500 text-orange-500 bg-orange-500/10'
                         : 'border-white/10 text-white/70 hover:bg-white/5 hover:text-white'
                         }`}
                     >
-                      <span className="text-[12px] font-bold text-orange-400">{item.symbol}</span>
-                      <span>{item.code}</span>
+                      <span className="text-[12px] font-bold text-orange-400" suppressHydrationWarning>{item.symbol}</span>
+                      <span suppressHydrationWarning>{item.code}</span>
                     </button>
                   ))}
                 </div>

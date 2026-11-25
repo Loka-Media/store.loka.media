@@ -34,34 +34,29 @@ const DEFAULT_FALLBACK_RATES: Record<string, number> = {
   INR: 91.9,
 };
 
-const getInitialCurrency = (): string => {
-  if (typeof window !== 'undefined') {
+export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Always initialize with USD and fallback rates on initial render to prevent SSR hydration mismatches
+  const [currency, setCurrencyState] = useState<string>('USD');
+  const [baseCurrency, setBaseCurrency] = useState<string>('USD');
+  const [rates, setRates] = useState<Record<string, number>>(DEFAULT_FALLBACK_RATES);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Sync saved client preferences from localStorage immediately on mount
+  useEffect(() => {
     try {
       const saved = localStorage.getItem('user_currency');
-      if (saved) return saved;
-    } catch (_) {}
-  }
-  return 'USD';
-};
-
-const getInitialRates = (): Record<string, number> => {
-  if (typeof window !== 'undefined') {
-    try {
-      const saved = localStorage.getItem('currency_rates');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object') return parsed;
+      if (saved && availableCurrencies.some(c => c.code === saved)) {
+        setCurrencyState(saved);
+      }
+      const savedRates = localStorage.getItem('currency_rates');
+      if (savedRates) {
+        const parsed = JSON.parse(savedRates);
+        if (parsed && typeof parsed === 'object') {
+          setRates(parsed);
+        }
       }
     } catch (_) {}
-  }
-  return DEFAULT_FALLBACK_RATES;
-};
-
-export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currency, setCurrencyState] = useState<string>(getInitialCurrency);
-  const [baseCurrency, setBaseCurrency] = useState<string>('USD');
-  const [rates, setRates] = useState<Record<string, number>>(getInitialRates);
-  const [loading, setLoading] = useState<boolean>(false);
+  }, []);
 
   const selectedCurrency = availableCurrencies.find(c => c.code === currency) || availableCurrencies[0];
   const currencySymbol = selectedCurrency.symbol;
