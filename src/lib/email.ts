@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 /**
  * Nodemailer Email Service for Loka Media
  */
-const BRAND_COLOR = '#2ECC71'; // Brand color matching globals.css
+const BRAND_COLOR = '#D8BC65'; // Brand color matching globals.css
 
 // Helper to get transporter instance
 export const getMailTransporter = () => {

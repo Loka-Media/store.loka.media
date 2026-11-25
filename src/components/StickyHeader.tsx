@@ -106,10 +106,10 @@ export default function StickyHeader() {
             <div className="flex items-center">
               <Link href="/" className="flex-shrink-0 flex items-center group">
                 <Image
-                  src="/Glossy_Green_Loka_Logo-removebg-preview.png"
+                  src="/loka-coin-logo.png"
                   alt="Logo"
-                  width={140}
-                  height={48}
+                  width={130}
+                  height={44}
                   className="h-8 md:h-10 w-auto object-contain"
                 />
               </Link>

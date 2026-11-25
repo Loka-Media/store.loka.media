@@ -7,23 +7,36 @@
   --foreground: #ffffff;
 
   /* ==========================================================================
-     GLOBAL THEME & BRAND COLOR SYSTEM (EMERALD GRADIENT / GREEN #2ECC71)
-     To change the entire website color theme, just update these variables:
+     BRAND COLOR PALETTE (CENTRAL THEME CONTROLLER)
+     To change the entire website color in the future, simply change these values:
      ========================================================================== */
-  --primary: #2ECC71;             /* Main Brand Color */
-  --primary-hover: #16BB5C;       /* Hover state */
-  --primary-active: #139B4B;      /* Active state */
-  --primary-light: #58D68D;       /* Bright / Accent Green */
-  --primary-tint: #BCFDD8;        /* Soft Tinted Mint / Highlight */
-  --primary-dark: #3DA86A;        /* Gradient Dark Accent */
-  --primary-deep: #0A3818;        /* Deep Border / Shadow */
+  --primary: #D8BC65;                    /* Main Brand Color */
+  --primary-hover: #E0CA86;              /* Hover & Highlight Color */
+  --primary-light: #E5D4A0;              /* Top shimmer / gradient start */
+  --primary-rich: #D6B54D;               /* Mid-tone */
+  --primary-dark: #C4A032;               /* Deep shadow / gradient end */
+  --primary-rgb: 216, 188, 101;          /* RGB components for transparency & glows */
+
+  /* Active & Tint variables */
+  --primary-active: #C4A032;             /* Active state */
+  --primary-tint: #F5ECD0;               /* Soft Tinted Gold / Highlight */
+  --primary-deep: #3A2E07;               /* Deep Border / Shadow */
+
+  /* Dynamic Brand Gradients (Matching Loka.next central theme) */
+  --primary-gradient: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 45%, var(--primary-dark) 100%);
+  --primary-gradient-hover: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-light) 45%, var(--primary) 100%);
+  --primary-gradient-h: linear-gradient(90deg, var(--primary-hover) 0%, var(--primary) 45%, var(--primary-dark) 100%);
+  --primary-gradient-text: linear-gradient(180deg, #FFFFFF 0%, var(--primary-light) 35%, var(--primary) 70%, var(--primary-dark) 100%);
 
   /* RGB Channels for dynamic opacity e.g. rgba(var(--primary-rgb), 0.2) */
-  --primary-rgb: 46, 204, 113;
-  --primary-hover-rgb: 22, 187, 92;
-  --primary-dark-rgb: 61, 168, 106;
+  --primary-hover-rgb: 224, 202, 134;
+  --primary-dark-rgb: 196, 160, 50;
 
-  /* Legacy references mapped to primary */
+  /* Named & Legacy Aliases */
+  --primary-gold: var(--primary);
+  --gold-hover: var(--primary-hover);
+  --gold-light: var(--primary-light);
+  --gold-dark: var(--primary-dark);
   --primary-orange: var(--primary);
   --orange-hover: var(--primary-hover);
   --accent: var(--primary);
@@ -56,17 +69,23 @@
   --color-card-bg: var(--card-bg);
   --color-gray-text: var(--gray-text);
 
-  /* Override Tailwind orange-* utilities across all pages to match emerald green theme */
-  --color-orange-50: #EEFDF5;
-  --color-orange-100: #D8FBE7;
-  --color-orange-200: #BCFDD8;
-  --color-orange-300: #7FEFB1;
-  --color-orange-400: #4DE28D;
+  /* Gold Theme Utilities */
+  --color-gold: var(--primary);
+  --color-gold-hover: var(--primary-hover);
+  --color-gold-light: var(--primary-light);
+  --color-gold-dark: var(--primary-dark);
+
+  /* Override Tailwind orange-* utilities across all pages to match gold theme */
+  --color-orange-50: #FCF9F0;
+  --color-orange-100: #F7F1DD;
+  --color-orange-200: #EFE4BF;
+  --color-orange-300: #E5D4A0;
+  --color-orange-400: #DEC782;
   --color-orange-500: var(--primary);
   --color-orange-600: var(--primary-hover);
-  --color-orange-700: #139B4B;
+  --color-orange-700: #D6B54D;
   --color-orange-800: var(--primary-dark);
-  --color-orange-900: #0D4E26;
+  --color-orange-900: #8E731F;
   --color-orange-950: var(--primary-deep);
 
   /* Font Family */
@@ -289,13 +308,23 @@ h6 {
   letter-spacing: -0.01em;
 }
 
-/* Gradient Text - For titles and headings */
+/* Gradient Text - Matching Loka logo metallic gold */
 .gradient-text-primary {
-  background: linear-gradient(180deg, #FFFFFF 0%, var(--primary-dark) 100%) !important;
+  background: var(--primary-gradient-text) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
   color: transparent !important;
+}
+
+/* Gold Gradient Button Utility matching logo */
+.btn-gold-gradient {
+  background: var(--primary-gradient) !important;
+  color: #000000 !important;
+}
+.btn-gold-gradient:hover {
+  background: var(--primary-gradient-hover) !important;
+  box-shadow: 0 0 35px rgba(var(--primary-rgb), 0.5) !important;
 }
 
 .gradient-title-accent {
