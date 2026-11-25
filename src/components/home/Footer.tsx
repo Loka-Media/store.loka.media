@@ -67,7 +67,7 @@ export default function Footer() {
         {/* Logo - Top on mobile, hidden on desktop */}
         <div className="lg:hidden w-full flex justify-start mb-4">
           <Image
-            src="/Glossy_Green_Loka_Logo-removebg-preview.png"
+            src="/footer-logo.png"
             alt="Loka Logo"
             width={180}
             height={60}
@@ -158,7 +158,7 @@ export default function Footer() {
         }}
       >
         <Image
-          src="/Glossy_Green_Loka_Logo-removebg-preview.png"
+          src="/footer-logo.png"
           alt="Loka Logo"
           width={220}
           height={74}

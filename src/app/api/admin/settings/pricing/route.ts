@@ -12,45 +12,45 @@ let categoriesCache: { data: string[]; timestamp: number } | null = null;
 const CACHE_TTL = 300000; // 5 minutes in milliseconds
 
 const STANDARD_CATEGORIES = [
-  // Primary Categories (from CATEGORIES_MAP)
-  "Men",
-  "Women",
-  "Kids",
-  "Unisex",
-  "Shoes & Socks",
-  "Accessories",
-  "Home & Living",
-  "Mugs & Drinkware",
+  // Primary Distinct Categories (from CATEGORIES_MAP)
+  "Menswear",
+  "Womenswear",
+  "Everyday Fits",
+  "Kids & Youth",
+  "Everyday Essentials",
+  "Home & Studio",
+  "Drinkware Studio",
+  "Footwear & Kicks",
 
-  // Footwear
+  // Footwear & Foot Accessories
   "Shoes",
   "Socks",
 
   // Apparel Subcategories
-  "T-Shirts",
-  "Hoodies",
-  "Sweatshirts",
+  "Graphic Tees & Tops",
+  "Pullovers & Hoodies",
+  "Crewnecks & Sweaters",
   "Long Sleeves",
-  "Tank Tops",
+  "Sleeveless & Tanks",
   "Sportswear",
-  "Bottoms & Leggings",
-  "Swimwear",
+  "Joggers & Bottoms",
+  "Beach & Swimwear",
   "Underwear",
   "Jackets & Outerwear",
 
-  // Accessories Subcategories
-  "Phone Cases",
-  "Bags",
-  "Hats & Caps",
+  // Everyday Essentials Subcategories
+  "Tech & Phone Cases",
+  "Backpacks & Totes",
+  "Headwear & Caps",
   "Stickers",
 
-  // Home & Living Subcategories
-  "Posters",
+  // Home & Studio Subcategories
+  "Wall Art & Prints",
   "Canvas",
   "Blankets",
   "Pillows",
 
-  // Drinkware Subcategories
+  // Drinkware Studio Subcategories
   "Drinkware",
   "Mugs",
 ];

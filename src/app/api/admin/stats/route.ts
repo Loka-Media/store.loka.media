@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
             COALESCE(SUM(CAST(customer_payment_amount AS numeric)), 0) as total_revenue,
             COALESCE(SUM(CAST(admin_fee AS numeric)), 0) as admin_earnings
           FROM marketplace_orders 
-          WHERE payment_status IN ('escrowed', 'released') OR order_status IN ('processing', 'completed', 'fulfilled')`
+          WHERE payment_status IN ('escrowed', 'released') OR order_status IN ('processing', 'completed', 'fulfilled', 'delivered')`
         ),
         queryDb<{ published_products: string }>(
           `SELECT COUNT(*) as published_products FROM products WHERE status = 'active'`
@@ -55,33 +55,8 @@ export async function GET(request: NextRequest) {
       console.warn('Direct database admin stats query failed, falling back:', dbErr);
     }
 
-    // 2. Fallbacks if database query was incomplete or failed
-    if (!dbSuccess || publishedProductsCount === 0) {
-      try {
-        const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
-        const productsRes = await fetch(`${backendUrl}/api/products?limit=1`).catch(() => null);
-        if (productsRes && productsRes.ok) {
-          const prodsData = await productsRes.json();
-          if (prodsData?.pagination?.total) {
-            publishedProductsCount = parseInt(prodsData.pagination.total, 10);
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to fetch store products count for admin stats:', e);
-      }
-
-      if (publishedProductsCount === 0) {
-        try {
-          const blueprints = await printifyCatalogAPI.getBlueprints();
-          publishedProductsCount = Array.isArray(blueprints) ? blueprints.length : publishedProductsCount || 122;
-        } catch (e) {
-          console.warn('Failed to fetch catalog blueprints for admin stats:', e);
-          if (publishedProductsCount === 0) publishedProductsCount = 122;
-        }
-      }
-    }
-
-    if (!dbSuccess || totalOrdersCount === 0 || activeCreatorsCount === 0) {
+    // 2. Fallbacks if database query completely failed
+    if (!dbSuccess) {
       const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://catalog.loka.media').replace(/\/$/, '');
       const authHeader = request.headers.get('authorization') || '';
 

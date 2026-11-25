@@ -5,14 +5,14 @@
 // ============================================================
 
 export const CATEGORIES_MAP = [
-  { id: 1, title: "Men" },
-  { id: 2, title: "Women" },
-  { id: 8, title: "Unisex" },
-  { id: 3, title: "Kids" },
-  { id: 4, title: "Accessories" },
-  { id: 5, title: "Home & Living" },
-  { id: 6, title: "Mugs & Drinkware" },
-  { id: 7, title: "Shoes & Socks" }
+  { id: 1, title: "Menswear" },
+  { id: 2, title: "Womenswear" },
+  { id: 8, title: "Everyday Fits" },
+  { id: 3, title: "Kids & Youth" },
+  { id: 4, title: "Everyday Essentials" },
+  { id: 5, title: "Home & Studio" },
+  { id: 6, title: "Drinkware Studio" },
+  { id: 7, title: "Footwear & Kicks" }
 ];
 
 export const CATEGORY_HERO_IMAGES: Record<number, string> = {
@@ -149,7 +149,7 @@ const isBedding         = (t: string) => /\b(duvet|comforter|bedding|sheet|sheet
 export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: string; match: (bp: any) => boolean }>> = {
 
   // ──────────────────────────────────────────────────────────
-  // 1 — MEN
+  // 1 — MENSWEAR
   // ──────────────────────────────────────────────────────────
   1: [
     {
@@ -164,17 +164,17 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "men-sweatshirts",
-      title: "Sweatshirts",
+      title: "Crewnecks & Sweaters",
       match: (bp) => inCategory(bp, 1) && isSweatshirt(bp.title.toLowerCase()) && !isHoodie(bp.title.toLowerCase())
     },
     {
       id: "men-hoodies",
-      title: "Hoodies",
+      title: "Pullovers & Hoodies",
       match: (bp) => inCategory(bp, 1) && isHoodie(bp.title.toLowerCase())
     },
     {
       id: "men-t-shirts",
-      title: "T-Shirts",
+      title: "Graphic Tees & Tops",
       match: (bp) => inCategory(bp, 1) && isTShirt(bp.title.toLowerCase()) && !isLongSleeve(bp.title.toLowerCase())
     },
     {
@@ -184,7 +184,7 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "men-tank-tops",
-      title: "Tank Tops",
+      title: "Sleeveless & Tanks",
       match: (bp) => inCategory(bp, 1) && isTankTop(bp.title.toLowerCase())
     },
     {
@@ -194,17 +194,17 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "men-bottoms",
-      title: "Bottoms",
+      title: "Joggers & Bottoms",
       match: (bp) => inCategory(bp, 1) && isBottoms(bp.title.toLowerCase()) && !isSwimwear(bp.title.toLowerCase())
     },
     {
       id: "men-swimwear",
-      title: "Swimwear",
+      title: "Beach & Swimwear",
       match: (bp) => inCategory(bp, 1) && isSwimwear(bp.title.toLowerCase())
     },
     {
       id: "men-shoes",
-      title: "Shoes",
+      title: "Sneakers & Footwear",
       match: (bp) => inCategory(bp, 1) && isShoe(bp.title.toLowerCase())
     },
     {
@@ -214,13 +214,13 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "men-outerwear",
-      title: "Outerwear",
+      title: "Jackets & Outerwear",
       match: (bp) => inCategory(bp, 1) && isOuterwear(bp.title.toLowerCase())
     },
   ],
 
   // ──────────────────────────────────────────────────────────
-  // 2 — WOMEN
+  // 2 — WOMENSWEAR
   // ──────────────────────────────────────────────────────────
   2: [
     {
@@ -235,17 +235,17 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "women-sweatshirts",
-      title: "Sweatshirts",
+      title: "Crewnecks & Sweaters",
       match: (bp) => inCategory(bp, 2) && isSweatshirt(bp.title.toLowerCase()) && !isHoodie(bp.title.toLowerCase())
     },
     {
       id: "women-t-shirts",
-      title: "T-Shirts",
+      title: "Graphic Tees & Tops",
       match: (bp) => inCategory(bp, 2) && isTShirt(bp.title.toLowerCase()) && !isLongSleeve(bp.title.toLowerCase())
     },
     {
       id: "women-hoodies",
-      title: "Hoodies",
+      title: "Pullovers & Hoodies",
       match: (bp) => inCategory(bp, 2) && isHoodie(bp.title.toLowerCase())
     },
     {
@@ -255,7 +255,7 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "women-tank-tops",
-      title: "Tank Tops",
+      title: "Sleeveless & Tanks",
       match: (bp) => inCategory(bp, 2) && isTankTop(bp.title.toLowerCase())
     },
     {
@@ -270,17 +270,17 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "women-bottoms",
-      title: "Bottoms",
+      title: "Joggers & Bottoms",
       match: (bp) => inCategory(bp, 2) && isBottoms(bp.title.toLowerCase()) && !isDress(bp.title.toLowerCase())
     },
     {
       id: "women-swimwear",
-      title: "Swimwear",
+      title: "Beach & Swimwear",
       match: (bp) => inCategory(bp, 2) && isSwimwear(bp.title.toLowerCase())
     },
     {
       id: "women-shoes",
-      title: "Shoes",
+      title: "Sneakers & Footwear",
       match: (bp) => inCategory(bp, 2) && isShoe(bp.title.toLowerCase())
     },
     {
@@ -290,13 +290,13 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "women-outerwear",
-      title: "Outerwear",
+      title: "Jackets & Outerwear",
       match: (bp) => inCategory(bp, 2) && isOuterwear(bp.title.toLowerCase())
     },
   ],
 
   // ──────────────────────────────────────────────────────────
-  // 8 — UNISEX
+  // 8 — EVERYDAY FITS (UNISEX & LIFESTYLE)
   // ──────────────────────────────────────────────────────────
   8: [
     {
@@ -311,17 +311,17 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "unisex-sweatshirts",
-      title: "Sweatshirts",
+      title: "Crewnecks & Sweaters",
       match: (bp) => inCategory(bp, 8) && isSweatshirt(bp.title.toLowerCase()) && !isHoodie(bp.title.toLowerCase())
     },
     {
       id: "unisex-hoodies",
-      title: "Hoodies",
+      title: "Pullovers & Hoodies",
       match: (bp) => inCategory(bp, 8) && isHoodie(bp.title.toLowerCase())
     },
     {
       id: "unisex-t-shirts",
-      title: "T-Shirts",
+      title: "Graphic Tees & Tops",
       match: (bp) => inCategory(bp, 8) && isTShirt(bp.title.toLowerCase()) && !isLongSleeve(bp.title.toLowerCase())
     },
     {
@@ -331,7 +331,7 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "unisex-tank-tops",
-      title: "Tank Tops",
+      title: "Sleeveless & Tanks",
       match: (bp) => inCategory(bp, 8) && isTankTop(bp.title.toLowerCase())
     },
     {
@@ -341,12 +341,12 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "unisex-bottoms",
-      title: "Bottoms",
+      title: "Joggers & Bottoms",
       match: (bp) => inCategory(bp, 8) && isBottoms(bp.title.toLowerCase())
     },
     {
       id: "unisex-swimwear",
-      title: "Swimwear",
+      title: "Beach & Swimwear",
       match: (bp) => inCategory(bp, 8) && isSwimwear(bp.title.toLowerCase())
     },
     {
@@ -356,18 +356,18 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "unisex-outerwear",
-      title: "Outerwear",
+      title: "Jackets & Outerwear",
       match: (bp) => inCategory(bp, 8) && isOuterwear(bp.title.toLowerCase())
     },
   ],
 
   // ──────────────────────────────────────────────────────────
-  // 3 — KIDS
+  // 3 — KIDS & YOUTH
   // ──────────────────────────────────────────────────────────
   3: [
     {
       id: "kids-t-shirts",
-      title: "T-Shirts",
+      title: "Graphic Tees & Tops",
       match: (bp) => inCategory(bp, 3) && isTShirt(bp.title.toLowerCase()) && !isLongSleeve(bp.title.toLowerCase())
     },
     {
@@ -377,12 +377,12 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "kids-sweatshirts",
-      title: "Sweatshirts & Hoodies",
+      title: "Crewnecks & Hoodies",
       match: (bp) => inCategory(bp, 3) && (isSweatshirt(bp.title.toLowerCase()) || isHoodie(bp.title.toLowerCase()))
     },
     {
       id: "kids-baby-clothing",
-      title: "Baby Clothing",
+      title: "Baby & Toddler",
       match: (bp) => inCategory(bp, 3) && isBabyAcc(bp.title.toLowerCase())
     },
     {
@@ -392,7 +392,7 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "kids-bottoms",
-      title: "Bottoms",
+      title: "Joggers & Bottoms",
       match: (bp) => inCategory(bp, 3) && isBottoms(bp.title.toLowerCase())
     },
     {
@@ -403,12 +403,12 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
   ],
 
   // ──────────────────────────────────────────────────────────
-  // 4 — ACCESSORIES (Exhaustive Printify Categories)
+  // 4 — EVERYDAY ESSENTIALS
   // ──────────────────────────────────────────────────────────
   4: [
     {
       id: "acc-jewelry",
-      title: "Jewelry",
+      title: "Jewelry & Charms",
       match: (bp) => inCategory(bp, 4) && isJewelry(bp.title.toLowerCase())
     },
     {
@@ -418,12 +418,12 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "acc-phone-cases",
-      title: "Phone Cases",
+      title: "Tech & Phone Cases",
       match: (bp) => inCategory(bp, 4) && isPhoneCase(bp.title.toLowerCase())
     },
     {
       id: "acc-bags",
-      title: "Bags",
+      title: "Backpacks & Totes",
       match: (bp) => inCategory(bp, 4) && isBag(bp.title.toLowerCase())
     },
     {
@@ -433,7 +433,7 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "acc-hats",
-      title: "Hats",
+      title: "Headwear & Caps",
       match: (bp) => inCategory(bp, 4) && isHat(bp.title.toLowerCase())
     },
     {
@@ -448,7 +448,7 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "acc-mouse-pads",
-      title: "Mouse Pads",
+      title: "Mouse Pads & Mats",
       match: (bp) => inCategory(bp, 4) && isMousePad(bp.title.toLowerCase())
     },
     {
@@ -458,7 +458,7 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "acc-kitchen",
-      title: "Kitchen Accessories",
+      title: "Kitchen Essentials",
       match: (bp) => inCategory(bp, 4) && isKitchenAcc(bp.title.toLowerCase())
     },
     {
@@ -473,7 +473,7 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "acc-stationery",
-      title: "Stationery Accessories",
+      title: "Stationery & Planners",
       match: (bp) => inCategory(bp, 4) && isStationery(bp.title.toLowerCase()) && !isBook(bp.title.toLowerCase())
     },
     {
@@ -498,17 +498,17 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
   ],
 
   // ──────────────────────────────────────────────────────────
-  // 5 — HOME & LIVING (Exhaustive Printify Categories)
+  // 5 — HOME & STUDIO
   // ──────────────────────────────────────────────────────────
   5: [
     {
       id: "home-mugs",
-      title: "Mugs",
+      title: "Artistic Mugs",
       match: (bp) => inCategory(bp, 5) && isMug(bp.title.toLowerCase())
     },
     {
       id: "home-candles",
-      title: "Candles",
+      title: "Candles & Aromas",
       match: (bp) => inCategory(bp, 5) && isCandle(bp.title.toLowerCase())
     },
     {
@@ -518,32 +518,32 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "home-seasonal",
-      title: "Seasonal Decorations",
+      title: "Seasonal Decor",
       match: (bp) => inCategory(bp, 5) && isSeasonal(bp.title.toLowerCase())
     },
     {
       id: "home-glassware",
-      title: "Glassware",
+      title: "Glassware & Barware",
       match: (bp) => inCategory(bp, 5) && isGlassware(bp.title.toLowerCase())
     },
     {
       id: "home-bottles-tumblers",
-      title: "Bottles & Tumblers",
+      title: "Tumblers & Bottles",
       match: (bp) => inCategory(bp, 5) && isBottleTumbler(bp.title.toLowerCase())
     },
     {
       id: "home-canvas",
-      title: "Canvas",
+      title: "Canvas & Tapestries",
       match: (bp) => inCategory(bp, 5) && isCanvas(bp.title.toLowerCase())
     },
     {
       id: "home-posters",
-      title: "Posters",
+      title: "Wall Art & Posters",
       match: (bp) => inCategory(bp, 5) && isPoster(bp.title.toLowerCase())
     },
     {
       id: "home-postcards",
-      title: "Postcards",
+      title: "Postcards & Cards",
       match: (bp) => inCategory(bp, 5) && isPostcard(bp.title.toLowerCase())
     },
     {
@@ -558,17 +558,17 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
     },
     {
       id: "home-decor",
-      title: "Home Decor",
+      title: "Studio & Home Decor",
       match: (bp) => inCategory(bp, 5) && isHomeDecor(bp.title.toLowerCase())
     },
     {
       id: "home-blankets",
-      title: "Blankets",
+      title: "Throws & Blankets",
       match: (bp) => inCategory(bp, 5) && isBlanket(bp.title.toLowerCase())
     },
     {
       id: "home-pillows-covers",
-      title: "Pillows & Covers",
+      title: "Pillows & Cushions",
       match: (bp) => inCategory(bp, 5) && isPillow(bp.title.toLowerCase())
     },
     {
@@ -603,22 +603,22 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
   ],
 
   // ──────────────────────────────────────────────────────────
-  // 6 — MUGS & DRINKWARE
+  // 6 — DRINKWARE STUDIO
   // ──────────────────────────────────────────────────────────
   6: [
     {
       id: "drink-mugs",
-      title: "Mugs",
+      title: "Artistic Mugs",
       match: (bp) => inCategory(bp, 6) && isMug(bp.title.toLowerCase())
     },
     {
       id: "drink-tumblers",
-      title: "Bottles & Tumblers",
+      title: "Tumblers & Bottles",
       match: (bp) => inCategory(bp, 6) && isBottleTumbler(bp.title.toLowerCase())
     },
     {
       id: "drink-glassware",
-      title: "Glassware",
+      title: "Glassware & Barware",
       match: (bp) => inCategory(bp, 6) && isGlassware(bp.title.toLowerCase())
     },
     {
@@ -629,17 +629,17 @@ export const SUBCATEGORIES_CONFIG: Record<number, Array<{ id: string; title: str
   ],
 
   // ──────────────────────────────────────────────────────────
-  // 7 — SHOES & SOCKS
+  // 7 — FOOTWEAR & KICKS
   // ──────────────────────────────────────────────────────────
   7: [
     {
       id: "shoes-sneakers",
-      title: "Sneakers & Shoes",
+      title: "Custom Kicks & Sneakers",
       match: (bp) => inCategory(bp, 7) && isShoe(bp.title.toLowerCase())
     },
     {
       id: "shoes-socks",
-      title: "Socks",
+      title: "Streetwear Socks",
       match: (bp) => inCategory(bp, 7) && isSock(bp.title.toLowerCase())
     },
     {

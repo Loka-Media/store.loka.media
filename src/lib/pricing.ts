@@ -34,25 +34,25 @@ function cleanCategory(s: string): string {
 }
 
 function isWomenTarget(text: string): boolean {
-  return /\b(women|womens|female|ladies|lady)\b/i.test(text);
+  return /\b(women|womens|womenswear|female|ladies|lady)\b/i.test(text);
 }
 
 function isMenTarget(text: string): boolean {
   if (isWomenTarget(text)) return false;
-  return /\b(men|mens|male|guys)\b/i.test(text);
+  return /\b(men|mens|menswear|male|guys)\b/i.test(text);
 }
 
 function isUnisexTarget(text: string): boolean {
-  return /\bunisex\b/i.test(text);
+  return /\b(unisex|everyday fits|everyday fit|all gender|all-gender)\b/i.test(text);
 }
 
 function isKidsTarget(text: string): boolean {
-  return /\b(kid|kids|youth|toddler|baby|infant|child|children)\b/i.test(text);
+  return /\b(kid|kids|youth|kids & youth|toddler|baby|infant|child|children)\b/i.test(text);
 }
 
 /**
  * Checks if a candidate label matches a configured category key.
- * Strictly prevents cross-gender leakage (e.g. "Men" matching "Women" or vice-versa).
+ * Strictly prevents cross-gender leakage (e.g. "Menswear" matching "Womenswear" or vice-versa).
  */
 export function isCategoryMatch(candidate: string, categoryKey: string): boolean {
   if (!candidate || !categoryKey) return false;
@@ -60,7 +60,7 @@ export function isCategoryMatch(candidate: string, categoryKey: string): boolean
   const targetClean = cleanCategory(candidate);
   const keyClean = cleanCategory(categoryKey);
 
-  // Exact normalized match (e.g. "women" === "women", "men" === "men", "accessories" === "accessories")
+  // Exact normalized match (e.g. "womenswear" === "womenswear", "menswear" === "menswear")
   if (targetClean === keyClean) {
     return true;
   }
@@ -98,32 +98,32 @@ export function isCategoryMatch(candidate: string, categoryKey: string): boolean
     return isMenTarget(targetClean);
   }
 
-  if (keyClean === 'unisex' || keyClean === 'everyday fits') {
+  if (keyClean === 'unisex' || keyClean === 'everyday fits' || keyClean === 'everyday fit') {
     return isUnisexTarget(targetClean) || targetClean === 'everyday fits';
   }
 
-  if (keyClean === 'kids' || keyClean === 'kid' || keyClean === 'kids and youth') {
+  if (keyClean === 'kids' || keyClean === 'kid' || keyClean === 'kids and youth' || keyClean === 'kids youth') {
     return isKidsTarget(targetClean) || targetClean === 'kids and youth';
   }
 
   // Accessories & Home & Drinkware exact boundaries
   if (keyClean === 'accessories' || keyClean === 'everyday essentials') {
-    return targetClean === 'accessories' || targetClean === 'everyday essentials' || /\baccessories\b/i.test(targetClean) || /\bessentials\b/i.test(targetClean);
+    return targetClean.includes('everyday essentials') || targetClean === 'accessories' || /\baccessories\b/i.test(targetClean) || /\bessentials\b/i.test(targetClean);
   }
 
-  if (keyClean === 'home and living' || keyClean === 'home living' || keyClean === 'home and studio') {
+  if (keyClean === 'home and living' || keyClean === 'home living' || keyClean === 'home and studio' || keyClean === 'home studio') {
     return (targetClean.includes('home') && (targetClean.includes('living') || targetClean.includes('studio'))) || targetClean === 'home and studio';
   }
 
-  if (keyClean === 'mugs and drinkware' || keyClean === 'mugs drinkware' || keyClean === 'drinkware studio') {
+  if (keyClean === 'mugs and drinkware' || keyClean === 'mugs drinkware' || keyClean === 'drinkware studio' || keyClean === 'drinkware') {
     return targetClean.includes('mug') || targetClean.includes('drinkware') || targetClean === 'drinkware studio';
   }
 
-  if (keyClean === 'shoes and socks' || keyClean === 'shoes socks' || keyClean === 'footwear and kicks') {
-    return (targetClean.includes('shoe') && targetClean.includes('sock')) || targetClean === 'shoes and socks' || targetClean.includes('footwear') || targetClean.includes('kicks');
+  if (keyClean === 'shoes and socks' || keyClean === 'shoes socks' || keyClean === 'footwear and kicks' || keyClean === 'footwear kicks' || keyClean === 'footwear') {
+    return (targetClean.includes('shoe') && targetClean.includes('sock')) || targetClean === 'shoes and socks' || targetClean.includes('footwear') || targetClean.includes('kicks') || targetClean.includes('kick');
   }
 
-  // Specific subcategories (T-Shirts, Hoodies, Phone Cases, etc.)
+  // Specific subcategories (Graphic Tees, Hoodies, Phone Cases, etc.)
   const escaped = keyClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const wordRegex = new RegExp(`(^|\\s)${escaped}(\\s|$)`, 'i');
   return wordRegex.test(targetClean);
@@ -170,19 +170,28 @@ export function getProductCategoryHierarchy(input: any): { subcategory?: string;
     if (!trimmed) return { candidates: [] };
 
     let department: string | undefined;
-    if (isWomenTarget(trimmed)) department = 'Women';
-    else if (isMenTarget(trimmed)) department = 'Men';
-    else if (isUnisexTarget(trimmed)) department = 'Unisex';
-    else if (isKidsTarget(trimmed)) department = 'Kids';
-    else if (cleanCategory(trimmed) === 'accessories') department = 'Accessories';
-    else if (cleanCategory(trimmed).includes('home') && cleanCategory(trimmed).includes('living')) department = 'Home & Living';
-    else if (cleanCategory(trimmed).includes('mug') || cleanCategory(trimmed).includes('drinkware')) department = 'Mugs & Drinkware';
-    else if (cleanCategory(trimmed).includes('shoe') || cleanCategory(trimmed).includes('sock')) department = 'Shoes & Socks';
+    if (isWomenTarget(trimmed)) department = 'Womenswear';
+    else if (isMenTarget(trimmed)) department = 'Menswear';
+    else if (isUnisexTarget(trimmed)) department = 'Everyday Fits';
+    else if (isKidsTarget(trimmed)) department = 'Kids & Youth';
+    else if (cleanCategory(trimmed) === 'everyday essentials' || cleanCategory(trimmed) === 'accessories') department = 'Everyday Essentials';
+    else if (cleanCategory(trimmed).includes('home') && (cleanCategory(trimmed).includes('studio') || cleanCategory(trimmed).includes('living'))) department = 'Home & Studio';
+    else if (cleanCategory(trimmed).includes('drinkware') || cleanCategory(trimmed).includes('mug')) department = 'Drinkware Studio';
+    else if (cleanCategory(trimmed).includes('footwear') || cleanCategory(trimmed).includes('shoe') || cleanCategory(trimmed).includes('sock')) department = 'Footwear & Kicks';
 
     const subcategory = resolveSubcategoryFromString(trimmed);
     const candidates: string[] = [trimmed];
     if (subcategory && subcategory.toLowerCase() !== trimmed.toLowerCase()) candidates.unshift(subcategory);
     if (department && !candidates.includes(department)) candidates.push(department);
+    // Add legacy aliases for backward compatibility with saved settings
+    if (department === 'Menswear') candidates.push('Men');
+    if (department === 'Womenswear') candidates.push('Women');
+    if (department === 'Everyday Fits') candidates.push('Unisex');
+    if (department === 'Kids & Youth') candidates.push('Kids');
+    if (department === 'Everyday Essentials') candidates.push('Accessories');
+    if (department === 'Home & Studio') candidates.push('Home & Living');
+    if (department === 'Drinkware Studio') candidates.push('Mugs & Drinkware');
+    if (department === 'Footwear & Kicks') candidates.push('Shoes & Socks');
 
     return { subcategory, department, candidates };
   }
@@ -194,29 +203,29 @@ export function getProductCategoryHierarchy(input: any): { subcategory?: string;
 
     // 1. Check categoryIds (highest authority on gender/department)
     if (Array.isArray(input.categoryIds) && input.categoryIds.length > 0) {
-      if (input.categoryIds.includes(1) && input.categoryIds.includes(2)) department = 'Unisex';
-      else if (input.categoryIds.includes(8)) department = 'Unisex';
-      else if (input.categoryIds.includes(2)) department = 'Women';
-      else if (input.categoryIds.includes(1)) department = 'Men';
-      else if (input.categoryIds.includes(3)) department = 'Kids';
-      else if (input.categoryIds.includes(4)) department = 'Accessories';
-      else if (input.categoryIds.includes(5)) department = 'Home & Living';
-      else if (input.categoryIds.includes(6)) department = 'Mugs & Drinkware';
-      else if (input.categoryIds.includes(7)) department = 'Shoes & Socks';
+      if (input.categoryIds.includes(1) && input.categoryIds.includes(2)) department = 'Everyday Fits';
+      else if (input.categoryIds.includes(8)) department = 'Everyday Fits';
+      else if (input.categoryIds.includes(2)) department = 'Womenswear';
+      else if (input.categoryIds.includes(1)) department = 'Menswear';
+      else if (input.categoryIds.includes(3)) department = 'Kids & Youth';
+      else if (input.categoryIds.includes(4)) department = 'Everyday Essentials';
+      else if (input.categoryIds.includes(5)) department = 'Home & Studio';
+      else if (input.categoryIds.includes(6)) department = 'Drinkware Studio';
+      else if (input.categoryIds.includes(7)) department = 'Footwear & Kicks';
     }
 
     const title = (input.title || input.name || '').trim();
     const catStr = (input.category || input.sourceCategory || '').trim();
 
     if (!department) {
-      if (isWomenTarget(catStr) || isWomenTarget(title)) department = 'Women';
-      else if (isMenTarget(catStr) || isMenTarget(title)) department = 'Men';
-      else if (isUnisexTarget(catStr) || isUnisexTarget(title)) department = 'Unisex';
-      else if (isKidsTarget(catStr) || isKidsTarget(title)) department = 'Kids';
-      else if (cleanCategory(catStr) === 'accessories') department = 'Accessories';
-      else if (cleanCategory(catStr).includes('home') && cleanCategory(catStr).includes('living')) department = 'Home & Living';
-      else if (cleanCategory(catStr).includes('mug') || cleanCategory(catStr).includes('drinkware')) department = 'Mugs & Drinkware';
-      else if (cleanCategory(catStr).includes('shoe') || cleanCategory(catStr).includes('sock')) department = 'Shoes & Socks';
+      if (isWomenTarget(catStr) || isWomenTarget(title)) department = 'Womenswear';
+      else if (isMenTarget(catStr) || isMenTarget(title)) department = 'Menswear';
+      else if (isUnisexTarget(catStr) || isUnisexTarget(title)) department = 'Everyday Fits';
+      else if (isKidsTarget(catStr) || isKidsTarget(title)) department = 'Kids & Youth';
+      else if (cleanCategory(catStr) === 'everyday essentials' || cleanCategory(catStr) === 'accessories') department = 'Everyday Essentials';
+      else if (cleanCategory(catStr).includes('home') && (cleanCategory(catStr).includes('studio') || cleanCategory(catStr).includes('living'))) department = 'Home & Studio';
+      else if (cleanCategory(catStr).includes('drinkware') || cleanCategory(catStr).includes('mug')) department = 'Drinkware Studio';
+      else if (cleanCategory(catStr).includes('footwear') || cleanCategory(catStr).includes('shoe') || cleanCategory(catStr).includes('sock')) department = 'Footwear & Kicks';
     }
 
     const typeName = (input.type_name || input.type || '').trim();
@@ -231,6 +240,16 @@ export function getProductCategoryHierarchy(input: any): { subcategory?: string;
     if (department && !candidates.includes(department)) candidates.push(department);
     if (catStr && !candidates.includes(catStr)) candidates.push(catStr);
     if (title && !candidates.includes(title)) candidates.push(title);
+
+    // Add legacy aliases for backward compatibility with saved settings
+    if (department === 'Menswear' && !candidates.includes('Men')) candidates.push('Men');
+    if (department === 'Womenswear' && !candidates.includes('Women')) candidates.push('Women');
+    if (department === 'Everyday Fits' && !candidates.includes('Unisex')) candidates.push('Unisex');
+    if (department === 'Kids & Youth' && !candidates.includes('Kids')) candidates.push('Kids');
+    if (department === 'Everyday Essentials' && !candidates.includes('Accessories')) candidates.push('Accessories');
+    if (department === 'Home & Studio' && !candidates.includes('Home & Living')) candidates.push('Home & Living');
+    if (department === 'Drinkware Studio' && !candidates.includes('Mugs & Drinkware')) candidates.push('Mugs & Drinkware');
+    if (department === 'Footwear & Kicks' && !candidates.includes('Shoes & Socks')) candidates.push('Shoes & Socks');
 
     return { subcategory, department, candidates };
   }
@@ -472,7 +491,7 @@ export function resolveProductCategoryName(product: any): string {
   const title = (product.name || product.title || '').toLowerCase();
   
   // 1. Check for specific footwear subcategories (high priority)
-  if (title.includes('sock')) return 'Socks';
+  if (title.includes('sock')) return 'Streetwear Socks';
   if (
     title.includes('shoe') || 
     title.includes('sneaker') || 
@@ -483,60 +502,61 @@ export function resolveProductCategoryName(product: any): string {
     title.includes('flip flop') || 
     title.includes('clog')
   ) {
-    return 'Shoes';
+    return 'Footwear & Kicks';
   }
 
   // 2. Check for apparel subcategories matching titles
-  if (title.includes('hoodie')) return 'Hoodies';
-  if (title.includes('sweatshirt')) return 'Sweatshirts';
-  if (title.includes('tank') || title.includes('racerback')) return 'Tank Tops';
+  if (title.includes('hoodie')) return 'Pullovers & Hoodies';
+  if (title.includes('sweatshirt')) return 'Crewnecks & Sweaters';
+  if (title.includes('tank') || title.includes('racerback')) return 'Sleeveless & Tanks';
   if (title.includes('long sleeve') || title.includes('long-sleeve')) return 'Long Sleeves';
-  if (title.includes('tee') || title.includes('t-shirt') || title.includes('t shirt')) return 'T-Shirts';
+  if (title.includes('tee') || title.includes('t-shirt') || title.includes('t shirt')) return 'Graphic Tees & Tops';
   if (title.includes('sport') || title.includes('active') || title.includes('jersey') || title.includes('athletic')) return 'Sportswear';
-  if (title.includes('hat') || title.includes('cap') || title.includes('beanie')) return 'Hats & Caps';
-  if (title.includes('jogger') || title.includes('pant') || title.includes('legging') || title.includes('sweatpant')) return 'Bottoms & Leggings';
-  if (title.includes('swim') || title.includes('bikini') || title.includes('trunks')) return 'Swimwear';
+  if (title.includes('hat') || title.includes('cap') || title.includes('beanie')) return 'Headwear & Caps';
+  if (title.includes('jogger') || title.includes('pant') || title.includes('legging') || title.includes('sweatpant')) return 'Joggers & Bottoms';
+  if (title.includes('swim') || title.includes('bikini') || title.includes('trunks')) return 'Beach & Swimwear';
   if (title.includes('boxer') || title.includes('brief') || title.includes('underwear')) return 'Underwear';
   if (title.includes('jacket') || title.includes('windbreaker') || title.includes('vest') || title.includes('coat')) return 'Jackets & Outerwear';
 
   // 3. Check for accessories & home subcategories
-  if (title.includes('phone') || title.includes('case')) return 'Phone Cases';
-  if (title.includes('bag') || title.includes('backpack') || title.includes('tote')) return 'Bags';
+  if (title.includes('phone') || title.includes('case')) return 'Tech & Phone Cases';
+  if (title.includes('bag') || title.includes('backpack') || title.includes('tote')) return 'Backpacks & Totes';
   if (title.includes('sticker') || title.includes('decal')) return 'Stickers';
-  if (title.includes('poster') || (title.includes('print') && !title.includes('all-over') && !title.includes('all over') && !title.includes('sublimat'))) return 'Posters';
+  if (title.includes('poster') || (title.includes('print') && !title.includes('all-over') && !title.includes('all over') && !title.includes('sublimat'))) return 'Wall Art & Prints';
   if (title.includes('canvas')) return 'Canvas';
   if (title.includes('blanket')) return 'Blankets';
   if (title.includes('pillow')) return 'Pillows';
-  if (title.includes('mug')) return 'Mugs';
+  if (title.includes('mug')) return 'Artistic Mugs';
   if (title.includes('bottle') || title.includes('tumbler')) return 'Drinkware';
 
   // 4. Check categoryIds (from blueprint_categories.json or Printify)
   if (Array.isArray(product.categoryIds)) {
-    if (product.categoryIds.includes(7)) return 'Shoes & Socks';
-    if (product.categoryIds.includes(6)) return 'Mugs & Drinkware';
-    if (product.categoryIds.includes(5)) return 'Home & Living';
-    if (product.categoryIds.includes(4)) return 'Accessories';
-    if (product.categoryIds.includes(3)) return 'Kids';
-    if (product.categoryIds.includes(2)) return 'Women';
-    if (product.categoryIds.includes(1)) return 'Men';
-    if (product.categoryIds.includes(8)) return 'Unisex';
+    if (product.categoryIds.includes(7)) return 'Footwear & Kicks';
+    if (product.categoryIds.includes(6)) return 'Drinkware Studio';
+    if (product.categoryIds.includes(5)) return 'Home & Studio';
+    if (product.categoryIds.includes(4)) return 'Everyday Essentials';
+    if (product.categoryIds.includes(3)) return 'Kids & Youth';
+    if (product.categoryIds.includes(2)) return 'Womenswear';
+    if (product.categoryIds.includes(1)) return 'Menswear';
+    if (product.categoryIds.includes(8)) return 'Everyday Fits';
   }
 
   // 5. Check for main category matches in title/tags
-  if (title.includes('kid') || title.includes('youth') || title.includes('toddler') || title.includes('baby') || title.includes('infant')) return 'Kids';
-  if (title.includes('women') || title.includes('lady') || title.includes('girl')) return 'Women';
-  if (title.includes('men') || title.includes('guy') || title.includes('boy')) return 'Men';
-  if (title.includes('unisex')) return 'Unisex';
+  if (title.includes('kid') || title.includes('youth') || title.includes('toddler') || title.includes('baby') || title.includes('infant')) return 'Kids & Youth';
+  if (title.includes('women') || title.includes('lady') || title.includes('girl')) return 'Womenswear';
+  if (title.includes('men') || title.includes('guy') || title.includes('boy')) return 'Menswear';
+  if (title.includes('unisex')) return 'Everyday Fits';
 
   // 6. Fall back to standard product category
   const productCat = (product.category || product.category_name || '').toLowerCase().trim();
-  if (productCat === 'apparel') return 'Apparel';
-  if (productCat === 'accessories') return 'Accessories';
-  if (productCat === 'home-living' || productCat === 'home & living') return 'Home & Living';
-  if (productCat === 'mugs & drinkware' || productCat === 'mugs-drinkware') return 'Mugs & Drinkware';
-  if (productCat === 'shoes & socks' || productCat === 'shoes-socks' || productCat === 'shoes' || productCat === 'socks') return 'Shoes & Socks';
-  if (productCat === 'stationery') return 'Stationery';
-  if (productCat === 'bags') return 'Bags';
+  if (productCat === 'menswear' || productCat === 'men') return 'Menswear';
+  if (productCat === 'womenswear' || productCat === 'women') return 'Womenswear';
+  if (productCat === 'everyday fits' || productCat === 'unisex' || productCat === 'apparel') return 'Everyday Fits';
+  if (productCat === 'kids & youth' || productCat === 'kids') return 'Kids & Youth';
+  if (productCat === 'everyday essentials' || productCat === 'accessories' || productCat === 'bags' || productCat === 'stationery') return 'Everyday Essentials';
+  if (productCat === 'home & studio' || productCat === 'home-living' || productCat === 'home & living') return 'Home & Studio';
+  if (productCat === 'drinkware studio' || productCat === 'mugs & drinkware' || productCat === 'mugs-drinkware') return 'Drinkware Studio';
+  if (productCat === 'footwear & kicks' || productCat === 'shoes & socks' || productCat === 'shoes-socks' || productCat === 'shoes' || productCat === 'socks') return 'Footwear & Kicks';
 
   return product.category || 'Other';
 }

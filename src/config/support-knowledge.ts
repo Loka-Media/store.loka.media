@@ -114,69 +114,71 @@ export const SUPPORT_KNOWLEDGE_BASE: KnowledgeItem[] = [
     id: 'products-overview',
     title: 'Products & Catalog Overview',
     category: 'products',
-    content: `Loka Media offers a diverse catalog of high-quality custom merchandise designed by creators worldwide:
-1. Apparel: Premium unisex t-shirts, heavy blend fleece hoodies, crewnecks, tank tops, crop tops, joggers, and activewear (sizes XS–5XL).
-2. Drinkware: Ceramic coffee mugs (11oz & 15oz, dishwasher & microwave safe), accent mugs, stainless steel tumblers, and water bottles.
-3. Luggage & Bags: Hard-shell polycarbonate suitcases (with 360° spinner wheels & security locks), canvas tote bags, duffel bags, and everyday backpacks.
-4. Accessories: Dual-layer shockproof phone cases, embroidered caps, beanies, socks, and enamel pins.
-5. Home & Living: Gallery canvas wall art, matte posters, fleece throw blankets, and decorative accent pillows.
+    content: `Loka Media offers a diverse catalog of high-quality custom merchandise designed by creators worldwide across our signature collections:
+1. Menswear & Womenswear: Tailored fits, graphic tees, fleece hoodies, crewnecks, tank tops, and activewear (sizes XS–5XL).
+2. Everyday Fits: All-gender streetwear essentials, graphic tees, loungewear, and relaxed hoodies.
+3. Kids & Youth: Creative youth apparel, comfortable tees, and infant bodysuits.
+4. Drinkware Studio: Ceramic coffee mugs (11oz & 15oz, dishwasher & microwave safe), accent mugs, stainless steel tumblers, and water bottles.
+5. Everyday Essentials: Hard-shell polycarbonate suitcases, backpacks, tote bags, dual-layer shockproof phone cases, embroidered caps, and beanies.
+6. Home & Studio: Gallery canvas wall art, matte posters, fleece throw blankets, and decorative accent pillows.
+7. Footwear & Kicks: Custom sneakers, slides, and printed streetwear socks.
 All items are custom crafted on demand using professional-grade DTG, sublimation, or UV print technology for lasting durability.`,
     source: '/catalog, /shop',
-    tags: ['products', 'catalog', 'what do you sell', 'kinds of products', 'what products', 'merchandise', 'tell me about your products', 'all products', 'items', 'categories'],
-    lastUpdated: '2026-10-06'
+    tags: ['products', 'catalog', 'what do you sell', 'kinds of products', 'what products', 'merchandise', 'tell me about your products', 'all products', 'items', 'categories', 'everyday fits', 'menswear', 'womenswear', 'home & studio', 'drinkware studio', 'everyday essentials', 'footwear & kicks'],
+    lastUpdated: '2026-11-25'
   },
   {
     id: 'products-apparel',
-    title: 'Apparel Products (T-Shirts, Hoodies, Sweatshirts, Tanks)',
+    title: 'Apparel Collections (Menswear, Womenswear & Everyday Fits)',
     category: 'products',
     content: `We offer a wide collection of premium apparel including:
-- T-Shirts: Unisex heavy cotton tees, premium jersey crewnecks, garment-dyed tees, and relaxed crop tees. Available in sizes XS through 5XL with up to 60+ vibrant colors.
-- Hoodies & Sweatshirts: Heavy blend fleece pullover hoodies, zip-up hooded sweatshirts, and crewneck sweaters with double-needle stitching and ribbed cuffs.
-- Tank Tops & Crop Tops: Flowy racerback tanks, unisex jersey tanks, and athletic tops.
-- Bottoms & Activewear: Joggers, fleece sweatpants, athletic shorts, and compression leggings.
+- Graphic Tees & Tops: Unisex heavy cotton tees, premium jersey crewnecks, garment-dyed tees, and relaxed crop tees. Available in sizes XS through 5XL with up to 60+ vibrant colors.
+- Pullovers & Hoodies: Heavy blend fleece pullover hoodies, zip-up hooded sweatshirts, and crewneck sweaters with double-needle stitching and ribbed cuffs.
+- Sleeveless & Tanks: Flowy racerback tanks, unisex jersey tanks, and athletic tops.
+- Joggers & Bottoms: Joggers, fleece sweatpants, athletic shorts, and compression leggings.
 All apparel uses high-grade DTG (Direct-to-Garment) or dye-sublimation printing for vivid, wash-resistant graphics that won't crack or peel.`,
     source: '/catalog, /shop',
-    tags: ['t-shirt', 'tee', 'hoodie', 'sweatshirt', 'tank top', 'clothing', 'apparel', 'sizes', 'materials', 'cotton'],
-    lastUpdated: '2026-10-06'
+    tags: ['t-shirt', 'tee', 'hoodie', 'sweatshirt', 'tank top', 'clothing', 'apparel', 'sizes', 'materials', 'cotton', 'everyday fits', 'menswear', 'womenswear'],
+    lastUpdated: '2026-11-25'
   },
   {
     id: 'products-drinkware',
-    title: 'Mugs & Drinkware',
+    title: 'Drinkware Studio',
     category: 'products',
-    content: `Our drinkware catalog features:
+    content: `Our Drinkware Studio catalog features:
 - Ceramic Mugs: 11oz and 15oz glossy white ceramic mugs with comfortable C-handles. Microwave and dishwasher safe.
 - Black Ceramic Mugs: 11oz and 15oz sleek black mugs.
 - Accent Mugs: Two-tone mugs with colored handles and interiors.
 - Travel Drinkware: Stainless steel insulated tumblers, water bottles with leak-proof lids, and camping mugs.
 Prints are heat-pressed using dye sublimation for permanent, scratch-proof, high-gloss color.`,
     source: '/catalog',
-    tags: ['mug', 'mugs', 'coffee mug', 'tumbler', 'water bottle', 'drinkware', 'dishwasher safe', 'cup'],
-    lastUpdated: '2026-10-06'
+    tags: ['mug', 'mugs', 'coffee mug', 'tumbler', 'water bottle', 'drinkware', 'dishwasher safe', 'cup', 'drinkware studio'],
+    lastUpdated: '2026-11-25'
   },
   {
     id: 'products-accessories-luggage',
-    title: 'Bags, Luggage & Accessories',
+    title: 'Everyday Essentials & Luggage',
     category: 'products',
-    content: `Our accessories range includes:
+    content: `Our Everyday Essentials range includes:
 - Suitcases & Luggage: Custom hard-shell suitcases featuring 100% durable polycarbonate front, black ABS back, 360-degree swivel wheels, built-in security lock, inner pockets, and expandable storage. Available in Small (carry-on), Medium, and Large.
-- Bags & Backpacks: Everyday zip backpacks, cotton canvas tote bags, duffel bags, and accessory pouches.
-- Phone Cases: Tough dual-layer shockproof cases and slim snap cases for popular iPhone and Samsung Galaxy models.
-- Accessories: Ribbed beanies, trucker hats, embroidered caps, socks, and enamel pins.`,
+- Backpacks & Totes: Everyday zip backpacks, cotton canvas tote bags, duffel bags, and accessory pouches.
+- Tech & Phone Cases: Tough dual-layer shockproof cases and slim snap cases for popular iPhone and Samsung Galaxy models.
+- Headwear & Gear: Ribbed beanies, trucker hats, embroidered caps, socks, and enamel pins.`,
     source: '/catalog',
-    tags: ['suitcase', 'luggage', 'bag', 'backpack', 'tote bag', 'phone case', 'hat', 'cap', 'beanie', 'socks', 'accessories'],
-    lastUpdated: '2026-10-06'
+    tags: ['suitcase', 'luggage', 'bag', 'backpack', 'tote bag', 'phone case', 'hat', 'cap', 'beanie', 'socks', 'accessories', 'everyday essentials'],
+    lastUpdated: '2026-11-25'
   },
   {
     id: 'products-home-living',
-    title: 'Home & Living Products',
+    title: 'Home & Studio Products',
     category: 'products',
-    content: `Home decor products include:
-- Wall Art: Gallery-wrapped canvas prints (pine frame with protective coating) and museum-grade matte vertical/horizontal posters.
+    content: `Home & Studio decor products include:
+- Wall Art & Prints: Gallery-wrapped canvas prints (pine frame with protective coating) and museum-grade matte vertical/horizontal posters.
 - Comfort Items: Plush fleece throw blankets, sherpa blankets, and spun polyester square indoor accent pillows with hidden zippers.
-- Living Essentials: Ceramic scented soy candles, absorbent beach/bath towels, and desk mousepads.`,
+- Studio Essentials: Ceramic scented soy candles, absorbent beach/bath towels, and desk mousepads.`,
     source: '/catalog',
-    tags: ['canvas', 'poster', 'wall art', 'pillow', 'blanket', 'candle', 'towel', 'home', 'living', 'decor'],
-    lastUpdated: '2026-10-06'
+    tags: ['canvas', 'poster', 'wall art', 'pillow', 'blanket', 'candle', 'towel', 'home', 'living', 'studio', 'decor', 'home & studio'],
+    lastUpdated: '2026-11-25'
   },
   {
     id: 'products-sizing',
