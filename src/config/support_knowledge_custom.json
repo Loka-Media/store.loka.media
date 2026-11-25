@@ -160,7 +160,7 @@
     "id": "products-overview",
     "title": "Products & Catalog Overview",
     "category": "products",
-    "content": "Loka Media offers a diverse catalog of high-quality custom merchandise designed by creators worldwide:\n1. Apparel: Premium unisex t-shirts, heavy blend fleece hoodies, crewnecks, tank tops, crop tops, joggers, and activewear (sizes XS–5XL).\n2. Drinkware: Ceramic coffee mugs (11oz & 15oz, dishwasher & microwave safe), accent mugs, stainless steel tumblers, and water bottles.\n3. Luggage & Bags: Hard-shell polycarbonate suitcases (with 360° spinner wheels & security locks), canvas tote bags, duffel bags, and everyday backpacks.\n4. Accessories: Dual-layer shockproof phone cases, embroidered caps, beanies, socks, and enamel pins.\n5. Home & Living: Gallery canvas wall art, matte posters, fleece throw blankets, and decorative accent pillows.\nAll items are custom crafted on demand using professional-grade DTG, sublimation, or UV print technology for lasting durability.",
+    "content": "Loka Media offers a curated catalog of high-quality custom merchandise designed by creators worldwide across 8 signature categories:\n1. Menswear & Womenswear: Tailored streetwear, graphic tees, hoodies, crewnecks, crop tops, joggers, and seasonal collections.\n2. Everyday Fits: Unisex relaxed-fit tees, heavy blend pullovers, hoodies, and casual staples (sizes XS–5XL).\n3. Kids & Youth: Soft-spun cotton tees, youth hoodies, and playful everyday essentials.\n4. Everyday Essentials: Dual-layer shockproof phone cases, backpacks, tote bags, hard-shell suitcases, caps, and beanies.\n5. Home & Studio: Gallery canvas wall art, matte posters, fleece throw blankets, and accent pillows.\n6. Drinkware Studio: Ceramic coffee mugs (11oz & 15oz, dishwasher & microwave safe), accent mugs, tumblers, and water bottles.\n7. Footwear & Kicks: All-over print sneakers, comfort slides, and cushioned crew socks.\nAll items are custom crafted on demand using professional-grade DTG, sublimation, or UV print technology for lasting durability.",
     "source": "/catalog, /shop",
     "tags": [
       "products",
@@ -172,7 +172,15 @@
       "tell me about your products",
       "all products",
       "items",
-      "categories"
+      "categories",
+      "menswear",
+      "womenswear",
+      "everyday fits",
+      "everyday essentials",
+      "home & studio",
+      "drinkware studio",
+      "footwear & kicks",
+      "kids & youth"
     ],
     "lastUpdated": "2026-10-06",
     "enabled": true
@@ -200,9 +208,9 @@
   },
   {
     "id": "products-drinkware",
-    "title": "Mugs & Drinkware",
+    "title": "Drinkware Studio (Mugs & Tumblers)",
     "category": "products",
-    "content": "Our drinkware catalog features:\n- Ceramic Mugs: 11oz and 15oz glossy white ceramic mugs with comfortable C-handles. Microwave and dishwasher safe.\n- Black Ceramic Mugs: 11oz and 15oz sleek black mugs.\n- Accent Mugs: Two-tone mugs with colored handles and interiors.\n- Travel Drinkware: Stainless steel insulated tumblers, water bottles with leak-proof lids, and camping mugs.\nPrints are heat-pressed using dye sublimation for permanent, scratch-proof, high-gloss color.",
+    "content": "Our Drinkware Studio collection features:\n- Ceramic Mugs: 11oz and 15oz glossy white ceramic mugs with comfortable C-handles. Microwave and dishwasher safe.\n- Black Ceramic Mugs: 11oz and 15oz sleek black mugs.\n- Accent Mugs: Two-tone mugs with colored handles and interiors.\n- Travel Drinkware: Stainless steel insulated tumblers, water bottles with leak-proof lids, and camping mugs.\nPrints are heat-pressed using dye sublimation for permanent, scratch-proof, high-gloss color.",
     "source": "/catalog",
     "tags": [
       "mug",
@@ -211,6 +219,7 @@
       "tumbler",
       "water bottle",
       "drinkware",
+      "drinkware studio",
       "dishwasher safe",
       "cup"
     ],
@@ -219,11 +228,12 @@
   },
   {
     "id": "products-accessories-luggage",
-    "title": "Bags, Luggage & Accessories",
+    "title": "Everyday Essentials (Bags, Luggage, Tech & Headwear)",
     "category": "products",
-    "content": "Our accessories range includes:\n- Suitcases & Luggage: Custom hard-shell suitcases featuring 100% durable polycarbonate front, black ABS back, 360-degree swivel wheels, built-in security lock, inner pockets, and expandable storage. Available in Small (carry-on), Medium, and Large.\n- Bags & Backpacks: Everyday zip backpacks, cotton canvas tote bags, duffel bags, and accessory pouches.\n- Phone Cases: Tough dual-layer shockproof cases and slim snap cases for popular iPhone and Samsung Galaxy models.\n- Accessories: Ribbed beanies, trucker hats, embroidered caps, socks, and enamel pins.",
+    "content": "Our Everyday Essentials range includes:\n- Suitcases & Luggage: Custom hard-shell suitcases featuring 100% durable polycarbonate front, black ABS back, 360-degree swivel wheels, built-in security lock, inner pockets, and expandable storage. Available in Small (carry-on), Medium, and Large.\n- Bags & Backpacks: Everyday zip backpacks, cotton canvas tote bags, duffel bags, and accessory pouches.\n- Phone Cases: Tough dual-layer shockproof cases and slim snap cases for popular iPhone and Samsung Galaxy models.\n- Headwear & Accessories: Ribbed beanies, trucker hats, embroidered caps, socks, and enamel pins.",
     "source": "/catalog",
     "tags": [
+      "everyday essentials",
       "suitcase",
       "luggage",
       "bag",
@@ -241,11 +251,12 @@
   },
   {
     "id": "products-home-living",
-    "title": "Home & Living Products",
+    "title": "Home & Studio Products",
     "category": "products",
-    "content": "Home decor products include:\n- Wall Art: Gallery-wrapped canvas prints (pine frame with protective coating) and museum-grade matte vertical/horizontal posters.\n- Comfort Items: Plush fleece throw blankets, sherpa blankets, and spun polyester square indoor accent pillows with hidden zippers.\n- Living Essentials: Ceramic scented soy candles, absorbent beach/bath towels, and desk mousepads.",
+    "content": "Home & Studio decor products include:\n- Wall Art: Gallery-wrapped canvas prints (pine frame with protective coating) and museum-grade matte vertical/horizontal posters.\n- Comfort Items: Plush fleece throw blankets, sherpa blankets, and spun polyester square indoor accent pillows with hidden zippers.\n- Living Essentials: Ceramic scented soy candles, absorbent beach/bath towels, and desk mousepads.",
     "source": "/catalog",
     "tags": [
+      "home & studio",
       "canvas",
       "poster",
       "wall art",

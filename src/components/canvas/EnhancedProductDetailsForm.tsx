@@ -78,7 +78,7 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
     name: initialData.name || '',
     description: initialData.description || '',
     markupPercentage: initialData.markupPercentage || '30',
-    category: initialData.category || 'apparel',
+    category: initialData.category || 'Everyday Fits',
     tags: [] as string[]
   });
 
@@ -444,12 +444,14 @@ const EnhancedProductDetailsForm: React.FC<ProductDetailsFormProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="placeholder" disabled>Select a category</SelectItem>
-                    <SelectItem value="apparel">Apparel</SelectItem>
-                    <SelectItem value="accessories">Accessories</SelectItem>
-                    <SelectItem value="home-living">Home & Living</SelectItem>
-                    <SelectItem value="stationery">Stationery</SelectItem>
-                    <SelectItem value="bags">Bags</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="Everyday Fits">Everyday Fits</SelectItem>
+                    <SelectItem value="Menswear">Menswear</SelectItem>
+                    <SelectItem value="Womenswear">Womenswear</SelectItem>
+                    <SelectItem value="Everyday Essentials">Everyday Essentials</SelectItem>
+                    <SelectItem value="Drinkware Studio">Drinkware Studio</SelectItem>
+                    <SelectItem value="Home & Studio">Home & Studio</SelectItem>
+                    <SelectItem value="Footwear & Kicks">Footwear & Kicks</SelectItem>
+                    <SelectItem value="Kids & Youth">Kids & Youth</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.category && (
