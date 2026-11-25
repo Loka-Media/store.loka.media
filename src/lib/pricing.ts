@@ -65,38 +65,62 @@ export function isCategoryMatch(candidate: string, categoryKey: string): boolean
     return true;
   }
 
+  // Cross-mapping between Loka distinct category names and legacy/Printify category names
+  const ALIAS_MAP: Record<string, string[]> = {
+    'menswear': ['men', 'mens', 'menswear', 'male'],
+    'men': ['men', 'mens', 'menswear', 'male'],
+    'womenswear': ['women', 'womens', 'womenswear', 'female', 'ladies'],
+    'women': ['women', 'womens', 'womenswear', 'female', 'ladies'],
+    'everyday fits': ['unisex', 'everyday fits'],
+    'unisex': ['unisex', 'everyday fits'],
+    'kids and youth': ['kids', 'kid', 'kids and youth', 'youth'],
+    'kids': ['kids', 'kid', 'kids and youth', 'youth'],
+    'everyday essentials': ['accessories', 'everyday essentials'],
+    'accessories': ['accessories', 'everyday essentials'],
+    'home and studio': ['home and living', 'home living', 'home and studio', 'home'],
+    'home and living': ['home and living', 'home living', 'home and studio', 'home'],
+    'drinkware studio': ['mugs and drinkware', 'mugs drinkware', 'drinkware studio', 'mugs', 'drinkware'],
+    'mugs and drinkware': ['mugs and drinkware', 'mugs drinkware', 'drinkware studio', 'mugs', 'drinkware'],
+    'footwear and kicks': ['shoes and socks', 'shoes socks', 'footwear and kicks', 'shoes', 'socks', 'footwear'],
+    'shoes and socks': ['shoes and socks', 'shoes socks', 'footwear and kicks', 'shoes', 'socks', 'footwear'],
+  };
+
+  if (ALIAS_MAP[keyClean]?.includes(targetClean) || ALIAS_MAP[targetClean]?.includes(keyClean)) {
+    return true;
+  }
+
   // Strict Gender / Department Boundaries
-  if (keyClean === 'women' || keyClean === 'womens') {
+  if (keyClean === 'women' || keyClean === 'womens' || keyClean === 'womenswear') {
     return isWomenTarget(targetClean);
   }
 
-  if (keyClean === 'men' || keyClean === 'mens') {
+  if (keyClean === 'men' || keyClean === 'mens' || keyClean === 'menswear') {
     return isMenTarget(targetClean);
   }
 
-  if (keyClean === 'unisex') {
-    return isUnisexTarget(targetClean);
+  if (keyClean === 'unisex' || keyClean === 'everyday fits') {
+    return isUnisexTarget(targetClean) || targetClean === 'everyday fits';
   }
 
-  if (keyClean === 'kids' || keyClean === 'kid') {
-    return isKidsTarget(targetClean);
+  if (keyClean === 'kids' || keyClean === 'kid' || keyClean === 'kids and youth') {
+    return isKidsTarget(targetClean) || targetClean === 'kids and youth';
   }
 
   // Accessories & Home & Drinkware exact boundaries
-  if (keyClean === 'accessories') {
-    return targetClean === 'accessories' || /\baccessories\b/i.test(targetClean);
+  if (keyClean === 'accessories' || keyClean === 'everyday essentials') {
+    return targetClean === 'accessories' || targetClean === 'everyday essentials' || /\baccessories\b/i.test(targetClean) || /\bessentials\b/i.test(targetClean);
   }
 
-  if (keyClean === 'home and living' || keyClean === 'home living') {
-    return targetClean.includes('home') && targetClean.includes('living');
+  if (keyClean === 'home and living' || keyClean === 'home living' || keyClean === 'home and studio') {
+    return (targetClean.includes('home') && (targetClean.includes('living') || targetClean.includes('studio'))) || targetClean === 'home and studio';
   }
 
-  if (keyClean === 'mugs and drinkware' || keyClean === 'mugs drinkware') {
-    return targetClean.includes('mug') || targetClean.includes('drinkware');
+  if (keyClean === 'mugs and drinkware' || keyClean === 'mugs drinkware' || keyClean === 'drinkware studio') {
+    return targetClean.includes('mug') || targetClean.includes('drinkware') || targetClean === 'drinkware studio';
   }
 
-  if (keyClean === 'shoes and socks' || keyClean === 'shoes socks') {
-    return (targetClean.includes('shoe') && targetClean.includes('sock')) || targetClean === 'shoes and socks';
+  if (keyClean === 'shoes and socks' || keyClean === 'shoes socks' || keyClean === 'footwear and kicks') {
+    return (targetClean.includes('shoe') && targetClean.includes('sock')) || targetClean === 'shoes and socks' || targetClean.includes('footwear') || targetClean.includes('kicks');
   }
 
   // Specific subcategories (T-Shirts, Hoodies, Phone Cases, etc.)
