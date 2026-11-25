@@ -15,6 +15,17 @@ export const CATEGORIES_MAP = [
   { id: 7, title: "Shoes & Socks" }
 ];
 
+export const CATEGORY_HERO_IMAGES: Record<number, string> = {
+  1: "https://images.printify.com/6ab60bd2fa55b2125d0b7bf0", // Men: Men's Very Important Tee (clean male model with cap)
+  2: "https://images.printify.com/66c337cac5b2200c200af152", // Women: Women's Favorite Tee (clean female model)
+  8: "https://images.printify.com/6ab60f5370612d3e330c1230", // Unisex: Unisex Heavy Blend Hoodie (distinct grey hoodie)
+  3: "https://images.printify.com/66d95b43b75886ad800456e2", // Kids: Kids Heavy Cotton Tee (smiling kid model)
+  4: "https://images.printify.com/66d824496c2346293e0162c3", // Accessories: Spiral Notebook
+  5: "https://images.printify.com/66c44156f0147a606a0fc682", // Home & Living: Satin Posters / Wall Art
+  6: "https://images.printify.com/66c42e5361b2691da8085442", // Mugs & Drinkware: White Ceramic Mug
+  7: "https://images.printify.com/66d710c18803b780c6023c52"  // Shoes & Socks: Classic Canvas Sneakers
+};
+
 // ============================================================
 // CATEGORY-AWARE MATCH HELPER
 // ============================================================

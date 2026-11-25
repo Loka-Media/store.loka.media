@@ -15,18 +15,7 @@ import fs from 'fs';
 import path from 'path';
 import blueprintCategories from '@/config/blueprint_categories.json';
 
-import { CATEGORIES_MAP, getFlatCategoryNames } from '@/config/categories';
-
-const STATIC_FALLBACK_IMAGES: Record<number, string> = {
-  1: "https://images.printify.com/66d82988a65761e5f9096537",
-  2: "https://images.printify.com/66dedd239da894140e0af9e2",
-  3: "https://images.printify.com/66d81786ae1f0775ec0aef82",
-  4: "https://images.printify.com/66d824496c2346293e0162c3",
-  5: "https://images.printify.com/66c44156f0147a606a0fc682",
-  6: "https://images.printify.com/66c42e5361b2691da8085442",
-  7: "https://images.printify.com/66d710c18803b780c6023c7f",
-  8: "https://images.printify.com/66d82988a65761e5f9096537"
-};
+import { CATEGORIES_MAP, CATEGORY_HERO_IMAGES, getFlatCategoryNames } from '@/config/categories';
 
 function getBlueprintCategoryIds(blueprintId: number, title: string): number[] {
   // Check static mapping first for maximum accuracy matching official Printify catalog
@@ -368,7 +357,7 @@ export async function GET(
           id: cat.id,
           parent_id: 0,
           title: cat.title,
-          image_url: categoryCoverImages.get(cat.id) || STATIC_FALLBACK_IMAGES[cat.id] || "/placeholder-product.png"
+          image_url: CATEGORY_HERO_IMAGES[cat.id] || categoryCoverImages.get(cat.id) || "/placeholder-product.png"
         };
       }).filter(Boolean);
 
@@ -378,7 +367,7 @@ export async function GET(
           id: cat.id,
           parent_id: 0,
           title: cat.title,
-          image_url: STATIC_FALLBACK_IMAGES[cat.id] || "/placeholder-product.png"
+          image_url: CATEGORY_HERO_IMAGES[cat.id] || "/placeholder-product.png"
         }));
       }
 

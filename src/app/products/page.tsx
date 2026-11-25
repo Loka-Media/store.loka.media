@@ -70,22 +70,28 @@ function ProductsContent() {
     searchParams.get("maxPrice") || ""
   );
 
-  const [filters, setFilters] = useState(() => ({
-    category: searchParams.get("category") || "",
-    search: searchParams.get("search") || "",
-    creator: searchParams.get("creator") || "",
-    sortBy: "created_at",
-    sortOrder: "DESC",
-    source: (searchParams.get("source") as "printful" | "shopify" | "all") || "all",
-    minPrice: searchParams.get("minPrice") ? parseFloat(searchParams.get("minPrice")!) : undefined,
-    maxPrice: searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined,
-  }));
+  const [filters, setFilters] = useState(() => {
+    const minParam = searchParams.get("minPrice");
+    const maxParam = searchParams.get("maxPrice");
+    return {
+      category: searchParams.get("category") || "",
+      search: searchParams.get("search") || "",
+      creator: searchParams.get("creator") || "",
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      source: (searchParams.get("source") as "printful" | "shopify" | "all") || "all",
+      minPrice: minParam !== null && minParam !== "" && !isNaN(parseFloat(minParam)) ? parseFloat(minParam) : undefined,
+      maxPrice: maxParam !== null && maxParam !== "" && !isNaN(parseFloat(maxParam)) ? parseFloat(maxParam) : undefined,
+    };
+  });
 
   // Debounce local price input state changes to prevent focus loss & router stutter while typing
   useEffect(() => {
     const timer = setTimeout(() => {
-      const minNum = minPriceInput.trim() !== "" ? parseFloat(minPriceInput) : undefined;
-      const maxNum = maxPriceInput.trim() !== "" ? parseFloat(maxPriceInput) : undefined;
+      const minTrimmed = minPriceInput.trim();
+      const maxTrimmed = maxPriceInput.trim();
+      const minNum = minTrimmed !== "" && !isNaN(parseFloat(minTrimmed)) ? parseFloat(minTrimmed) : undefined;
+      const maxNum = maxTrimmed !== "" && !isNaN(parseFloat(maxTrimmed)) ? parseFloat(maxTrimmed) : undefined;
 
       setFilters((prev) => {
         if (prev.minPrice === minNum && prev.maxPrice === maxNum) return prev;
@@ -172,10 +178,15 @@ function ProductsContent() {
       if (filters.creator) params.set("creator", filters.creator);
       if (filters.source && filters.source !== "all")
         params.set("source", filters.source);
-      if (filters.minPrice) params.set("minPrice", filters.minPrice.toString());
-      if (filters.maxPrice) params.set("maxPrice", filters.maxPrice.toString());
+      if (filters.minPrice !== undefined && filters.minPrice !== null && !isNaN(filters.minPrice)) {
+        params.set("minPrice", filters.minPrice.toString());
+      }
+      if (filters.maxPrice !== undefined && filters.maxPrice !== null && !isNaN(filters.maxPrice)) {
+        params.set("maxPrice", filters.maxPrice.toString());
+      }
 
-      const newUrl = searchInput || filters.category || filters.creator ? `/products?${params.toString()}` : '/products';
+      const queryString = params.toString();
+      const newUrl = queryString ? `/products?${queryString}` : '/products';
       router.replace(newUrl, { scroll: false });
     }, 300);
 
@@ -192,8 +203,10 @@ function ProductsContent() {
     const currentSearch = searchParams.get("search") || "";
     const currentCreator = searchParams.get("creator") || "";
     const currentSource = (searchParams.get("source") as "printful" | "shopify" | "all") || "all";
-    const currentMinPrice = searchParams.get("minPrice") ? parseFloat(searchParams.get("minPrice")!) : undefined;
-    const currentMaxPrice = searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined;
+    const minParam = searchParams.get("minPrice");
+    const maxParam = searchParams.get("maxPrice");
+    const currentMinPrice = minParam !== null && minParam !== "" && !isNaN(parseFloat(minParam)) ? parseFloat(minParam) : undefined;
+    const currentMaxPrice = maxParam !== null && maxParam !== "" && !isNaN(parseFloat(maxParam)) ? parseFloat(maxParam) : undefined;
 
     setFilters(prev => {
       if (
@@ -487,6 +500,10 @@ function ProductsContent() {
 
 
   const updateURL = (updatedFilters: typeof filters) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
     const params = new URLSearchParams();
     if (updatedFilters.category) params.set("category", updatedFilters.category);
     const searchVal = searchInput.trim() || updatedFilters.search;
@@ -494,10 +511,15 @@ function ProductsContent() {
     if (updatedFilters.creator) params.set("creator", updatedFilters.creator);
     if (updatedFilters.source && updatedFilters.source !== "all")
       params.set("source", updatedFilters.source);
-    if (updatedFilters.minPrice) params.set("minPrice", updatedFilters.minPrice.toString());
-    if (updatedFilters.maxPrice) params.set("maxPrice", updatedFilters.maxPrice.toString());
+    if (updatedFilters.minPrice !== undefined && updatedFilters.minPrice !== null && !isNaN(updatedFilters.minPrice)) {
+      params.set("minPrice", updatedFilters.minPrice.toString());
+    }
+    if (updatedFilters.maxPrice !== undefined && updatedFilters.maxPrice !== null && !isNaN(updatedFilters.maxPrice)) {
+      params.set("maxPrice", updatedFilters.maxPrice.toString());
+    }
 
-    const newUrl = params.toString() ? `/products?${params.toString()}` : '/products';
+    const queryString = params.toString();
+    const newUrl = queryString ? `/products?${queryString}` : '/products';
     router.replace(newUrl, { scroll: false });
   };
 

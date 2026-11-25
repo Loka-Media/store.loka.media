@@ -9,7 +9,7 @@ import { useGlobalMarkup } from "@/contexts/GlobalMarkupContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Search, Package, Plus, ArrowLeft, X, Loader2, Folder, Tag, ArrowRight, RotateCcw } from "lucide-react";
 import Image from "next/image";
-import { SUBCATEGORIES_CONFIG, CATEGORIES_MAP } from "@/config/categories";
+import { SUBCATEGORIES_CONFIG, CATEGORIES_MAP, CATEGORY_HERO_IMAGES } from "@/config/categories";
 import { resolveProductCategoryName } from "@/lib/pricing";
 
 import { ImageWithFallback } from "@/components/ImageWithFallback";
@@ -30,6 +30,13 @@ interface Category {
   catalog_position?: number;
   size?: string;
 }
+
+const DEFAULT_CATEGORIES: Category[] = CATEGORIES_MAP.map((cat) => ({
+  id: cat.id,
+  title: cat.title,
+  parent_id: 0,
+  image_url: CATEGORY_HERO_IMAGES[cat.id] || "/placeholder-product.png",
+}));
 
 interface PrintfulProduct {
   id: number;
@@ -100,11 +107,14 @@ export default function CreatorCatalogPage() {
   const [categories, setCategories] = useState<Category[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const saved = sessionStorage.getItem("cached_printify_categories");
-        if (saved) return JSON.parse(saved);
+        const saved = sessionStorage.getItem("cached_printify_categories_v2");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
       } catch (_) {}
     }
-    return [];
+    return DEFAULT_CATEGORIES;
   });
   const [loading, setLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] =
@@ -247,13 +257,14 @@ export default function CreatorCatalogPage() {
     try {
       const response = await printifyAPI.getCategories();
       const cats = response.result?.categories || [];
-      setCategories(cats);
+      const finalCats = cats.length > 0 ? cats : DEFAULT_CATEGORIES;
+      setCategories(finalCats);
       if (typeof window !== "undefined") {
         try {
-          sessionStorage.setItem("cached_printify_categories", JSON.stringify(cats));
+          sessionStorage.setItem("cached_printify_categories_v2", JSON.stringify(finalCats));
         } catch (_) {}
       }
-      restoreCatalogState(cats);
+      restoreCatalogState(finalCats);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     }
