@@ -70,8 +70,8 @@ export default function Footer() {
             src="/footer-logo.png"
             alt="Loka Logo"
             width={180}
-            height={60}
-            className="h-10 md:h-12 w-auto object-contain"
+            height={96}
+            className="h-12 sm:h-14 w-auto object-contain"
           />
         </div>
 
@@ -153,7 +153,7 @@ export default function Footer() {
         style={{
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '60px 0',
+          padding: '40px 0',
           maxWidth: '100%',
         }}
       >
@@ -161,8 +161,9 @@ export default function Footer() {
           src="/footer-logo.png"
           alt="Loka Logo"
           width={220}
-          height={74}
-          className="h-12 md:h-14 w-auto object-contain"
+          height={118}
+          className="w-[220px] h-[118px] object-contain"
+          style={{ width: '220px', height: '118px' }}
         />
       </div>
 
