@@ -200,6 +200,12 @@ export function ProductCard({ product }: ProductCardProps) {
                     await removeFromWishlist(product.id);
                     setIsWishlisted(false);
                   } else {
+                    if (!isAuthenticated) {
+                      addPendingWishlistItem(product.id);
+                      toast.success(`${product.name || 'Product'} added! Please sign in to view your wishlist.`);
+                      router.push('/auth/login?redirect=/wishlist');
+                      return;
+                    }
                     await addToWishlist(product.id);
                     setIsWishlisted(true);
                   }

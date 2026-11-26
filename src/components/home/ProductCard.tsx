@@ -16,6 +16,8 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { getProductPriceRange } from "@/lib/pricing";
 import { createProductSlug, getValidImageUrl } from "@/lib/utils";
 import { sanitizeProductTitle } from "@/lib/productSanitizer";
+import { addPendingWishlistItem } from "@/contexts/WishlistContext";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 
@@ -30,6 +32,7 @@ export function ProductCard({
   isAuthenticated,
   onAddToWishlist,
 }: ProductCardProps) {
+  const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -43,7 +46,11 @@ export function ProductCard({
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error("Please login to add items to wishlist");
+      if (product.id) {
+        addPendingWishlistItem(Number(product.id));
+      }
+      toast.success(`${product.name || 'Product'} added! Please sign in to view your wishlist.`);
+      router.push('/auth/login?redirect=/wishlist');
       return;
     }
 

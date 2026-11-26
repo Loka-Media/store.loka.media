@@ -8,6 +8,8 @@ import { ExtendedProduct } from "@/lib/api";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { getProductPriceRange } from "@/lib/pricing";
 import { createProductSlug, cleanDescription } from "@/lib/utils";
+import { addPendingWishlistItem } from "@/contexts/WishlistContext";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface ProductListItemProps {
@@ -21,6 +23,7 @@ export function ProductListItem({
   isAuthenticated,
   onAddToWishlist,
 }: ProductListItemProps) {
+  const router = useRouter();
   const { formatPrice } = useCurrency();
   const { minPrice, maxPrice } = getProductPriceRange(product, product.category);
   const imageUrl =
@@ -28,7 +31,11 @@ export function ProductListItem({
 
   const handleWishlistClick = () => {
     if (!isAuthenticated) {
-      toast.error("Please login to add items to wishlist");
+      if (product.id) {
+        addPendingWishlistItem(Number(product.id));
+      }
+      toast.success(`${product.name || 'Product'} added! Please sign in to view your wishlist.`);
+      router.push('/auth/login?redirect=/wishlist');
       return;
     }
     onAddToWishlist(product.id?.toString());

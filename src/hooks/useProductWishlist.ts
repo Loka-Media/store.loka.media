@@ -30,12 +30,9 @@ export const useProductWishlist = (product: ProductDetails | null) => {
       if (!isWishlisted) {
         addPendingWishlistItem(product.id);
         setIsWishlisted(true);
-        toast.success('Added to wishlist! Redirecting to sign in...');
+        toast.success(`${product.name || 'Product'} added! Please sign in to view your wishlist.`);
       }
-      const currentUrl = typeof window !== 'undefined'
-        ? `${window.location.pathname}${window.location.search}`
-        : `/products/${product.id}`;
-      router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
+      router.push('/auth/login?redirect=/wishlist');
       return;
     }
 

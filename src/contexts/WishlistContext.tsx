@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { wishlistAPI } from '@/lib/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
@@ -34,7 +35,7 @@ interface WishlistContextType {
   items: WishlistItem[];
   wishlistCount: number;
   loading: boolean;
-  addToWishlist: (productId: number) => Promise<boolean>;
+  addToWishlist: (productId: number, redirectUrl?: string) => Promise<boolean>;
   removeFromWishlist: (productId: number) => Promise<boolean>;
   clearWishlist: () => Promise<boolean>;
   isInWishlist: (productId: number) => boolean; // Changed to synchronous
@@ -91,6 +92,7 @@ export const clearPendingWishlist = () => {
 };
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -207,11 +209,12 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     };
   }, [isAuthenticated, user, refreshWishlist]);
 
-  const addToWishlist = async (productId: number): Promise<boolean> => {
+  const addToWishlist = async (productId: number, redirectUrl = '/wishlist'): Promise<boolean> => {
     if (!isAuthenticated) {
       addPendingWishlistItem(productId);
       setWishlistCount(getPendingWishlist().length);
-      toast.success('Added to wishlist!');
+      toast.success('Added to wishlist! Please sign in to view your wishlist.');
+      router.push(`/auth/login?redirect=${encodeURIComponent(redirectUrl)}`);
       return true;
     }
 
