@@ -4052,7 +4052,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                   <input
                     id="input-product-name"
                     type="text"
-                    value={productForm.name}
+                    value={productForm.name || ""}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     placeholder="Custom Suitcase"
                     className={`w-full px-4 py-3 bg-black/60 border rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all ${formErrors.name ? "border-red-500 bg-red-500/10 ring-1 ring-red-500" : "border-white/10"
@@ -4068,14 +4068,14 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
                       Product Description <span className="text-primary">*</span>
                     </label>
                     <span className="text-[11px] text-gray-500">
-                      {productForm.description ? cleanDescription(productForm.description).length : 0}/1500 Minium Character Check
+                      {(productForm.description || "").length}/1500 Minimum Character Check
                     </span>
                   </div>
                   <textarea
                     id="input-product-description"
                     data-lenis-prevent
                     rows={4}
-                    value={cleanDescription(productForm.description)}
+                    value={productForm.description || ""}
                     onChange={(e) => handleInputChange("description", e.target.value)}
                     onWheel={(e) => e.stopPropagation()}
                     placeholder="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966 dummy text of the printing and typesetting industry Lorem Ipsum has been the industry's...."
