@@ -31,7 +31,7 @@ interface Category {
   size?: string;
 }
 
-export const LOKA_CATEGORY_TITLES: Record<number, string> = {
+const LOKA_CATEGORY_TITLES: Record<number, string> = {
   1: "Menswear",
   2: "Womenswear",
   8: "Everyday Fits",
@@ -42,7 +42,7 @@ export const LOKA_CATEGORY_TITLES: Record<number, string> = {
   7: "Footwear & Kicks",
 };
 
-export const normalizeCategory = (cat: any): Category => {
+const normalizeCategory = (cat: any): Category => {
   const id = Number(cat.id);
   const lokaTitle = LOKA_CATEGORY_TITLES[id] || cat.title;
   return {
@@ -55,7 +55,7 @@ export const normalizeCategory = (cat: any): Category => {
   };
 };
 
-export const normalizeCategories = (rawCats: any[]): Category[] => {
+const normalizeCategories = (rawCats: any[]): Category[] => {
   if (!Array.isArray(rawCats) || rawCats.length === 0) return DEFAULT_CATEGORIES;
   return rawCats.map(normalizeCategory);
 };
