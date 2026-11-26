@@ -56,6 +56,20 @@ const categories: Category[] = [
     gradient: "from-indigo-500 to-purple-600",
     image: "/images/categories/accessories.jpg",
   },
+  {
+    name: "Kids & Youth",
+    description: "Apparel & fun styles for younger fans",
+    icon: "🧸",
+    gradient: "from-yellow-500 to-amber-600",
+    image: "/images/categories/apparel.jpg",
+  },
+  {
+    name: "Footwear & Kicks",
+    description: "Canvas sneakers, socks & street footwear",
+    icon: "👟",
+    gradient: "from-violet-500 to-fuchsia-600",
+    image: "/images/categories/apparel.jpg",
+  },
 ];
 
 export function ProductCategoriesSection() {

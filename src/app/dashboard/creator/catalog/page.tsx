@@ -31,10 +31,40 @@ interface Category {
   size?: string;
 }
 
+export const LOKA_CATEGORY_TITLES: Record<number, string> = {
+  1: "Menswear",
+  2: "Womenswear",
+  8: "Everyday Fits",
+  3: "Kids & Youth",
+  4: "Everyday Essentials",
+  5: "Home & Studio",
+  6: "Drinkware Studio",
+  7: "Footwear & Kicks",
+};
+
+export const normalizeCategory = (cat: any): Category => {
+  const id = Number(cat.id);
+  const lokaTitle = LOKA_CATEGORY_TITLES[id] || cat.title;
+  return {
+    ...cat,
+    id,
+    title: lokaTitle,
+    parent_id: cat.parent_id !== undefined ? Number(cat.parent_id) : 0,
+    main_category_id: id,
+    image_url: CATEGORY_HERO_IMAGES[id] || cat.image_url || cat.image || "/placeholder-product.png",
+  };
+};
+
+export const normalizeCategories = (rawCats: any[]): Category[] => {
+  if (!Array.isArray(rawCats) || rawCats.length === 0) return DEFAULT_CATEGORIES;
+  return rawCats.map(normalizeCategory);
+};
+
 const DEFAULT_CATEGORIES: Category[] = CATEGORIES_MAP.map((cat) => ({
   id: cat.id,
-  title: cat.title,
+  title: LOKA_CATEGORY_TITLES[cat.id] || cat.title,
   parent_id: 0,
+  main_category_id: cat.id,
   image_url: CATEGORY_HERO_IMAGES[cat.id] || "/placeholder-product.png",
 }));
 
@@ -107,10 +137,16 @@ export default function CreatorCatalogPage() {
   const [categories, setCategories] = useState<Category[]>(() => {
     if (typeof window !== "undefined") {
       try {
-        const saved = sessionStorage.getItem("cached_printify_categories_v2");
+        // Clear all older caches that retained legacy Printify category names
+        sessionStorage.removeItem("cached_printify_categories");
+        sessionStorage.removeItem("cached_printify_categories_v2");
+        sessionStorage.removeItem("cached_printify_categories_v3");
+        sessionStorage.removeItem("cached_printify_categories_v4");
+
+        const saved = sessionStorage.getItem("cached_printify_categories_v5");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) return normalizeCategories(parsed);
         }
       } catch (_) {}
     }
@@ -257,11 +293,11 @@ export default function CreatorCatalogPage() {
     try {
       const response = await printifyAPI.getCategories();
       const cats = response.result?.categories || [];
-      const finalCats = cats.length > 0 ? cats : DEFAULT_CATEGORIES;
+      const finalCats = normalizeCategories(cats.length > 0 ? cats : DEFAULT_CATEGORIES);
       setCategories(finalCats);
       if (typeof window !== "undefined") {
         try {
-          sessionStorage.setItem("cached_printify_categories_v2", JSON.stringify(finalCats));
+          sessionStorage.setItem("cached_printify_categories_v5", JSON.stringify(finalCats));
         } catch (_) {}
       }
       restoreCatalogState(finalCats);
@@ -582,9 +618,22 @@ function GlobalCatalogSearch({
   const matchingCategories = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return [];
-    return categories.filter(
-      (c) => c.parent_id === 0 && c.title.toLowerCase().includes(q)
-    );
+    return categories.filter((c) => {
+      const isRoot = (c.parent_id ?? 0) === 0;
+      if (!isRoot) return false;
+      const title = (LOKA_CATEGORY_TITLES[c.id] || c.title).toLowerCase();
+      const titleMatch = title.includes(q);
+      const aliasMatch =
+        (c.id === 8 && (q.startsWith("uni") || "unisex".includes(q) || "everyday fits".includes(q) || "fits".includes(q))) ||
+        (c.id === 1 && (q.startsWith("men") || "menswear".includes(q) || "men's".includes(q))) ||
+        (c.id === 2 && (q.startsWith("wom") || "womenswear".includes(q) || "women's".includes(q))) ||
+        (c.id === 3 && (q.startsWith("kid") || q.startsWith("youth") || "kids & youth".includes(q))) ||
+        (c.id === 4 && (q.startsWith("acc") || q.startsWith("essent") || "everyday essentials".includes(q))) ||
+        (c.id === 5 && (q.startsWith("hom") || q.startsWith("liv") || q.startsWith("studio") || "home & studio".includes(q))) ||
+        (c.id === 6 && (q.startsWith("mug") || q.startsWith("drink") || "drinkware studio".includes(q))) ||
+        (c.id === 7 && (q.startsWith("shoe") || q.startsWith("sock") || q.startsWith("foot") || q.startsWith("kick") || "footwear & kicks".includes(q)));
+      return titleMatch || aliasMatch;
+    });
   }, [searchQuery, categories]);
 
   // Matching subcategories across all categories
@@ -600,12 +649,13 @@ function GlobalCatalogSearch({
 
     categories.forEach((cat) => {
       const subcats = SUBCATEGORIES_CONFIG[cat.id] || [];
+      const catTitle = LOKA_CATEGORY_TITLES[cat.id] || cat.title;
       subcats.forEach((sub) => {
         if (sub.title.toLowerCase().includes(q)) {
           matches.push({
             id: `${cat.id}-${sub.id}`,
-            title: `${sub.title} (${cat.title})`,
-            category: cat,
+            title: `${sub.title} (${catTitle})`,
+            category: { ...cat, title: catTitle },
             subcat: sub,
           });
         }
@@ -710,20 +760,23 @@ function GlobalCatalogSearch({
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {matchingCategories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setIsOpen(false);
-                        onSelectCategory(cat);
-                      }}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/25 border border-orange-500/30 hover:border-orange-500/60 text-white text-xs sm:text-sm font-semibold transition-all group"
-                    >
-                      <span className="text-orange-400">📁</span>
-                      <span>{cat.title}</span>
-                      <ArrowRight className="w-3 h-3 text-orange-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-                    </button>
-                  ))}
+                  {matchingCategories.map((cat) => {
+                    const displayTitle = LOKA_CATEGORY_TITLES[cat.id] || cat.title;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          setIsOpen(false);
+                          onSelectCategory({ ...cat, title: displayTitle });
+                        }}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/25 border border-orange-500/30 hover:border-orange-500/60 text-white text-xs sm:text-sm font-semibold transition-all group"
+                      >
+                        <span className="text-orange-400">📁</span>
+                        <span>{displayTitle}</span>
+                        <ArrowRight className="w-3 h-3 text-orange-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                      </button>
+                    );
+                  })}
 
                   {matchingSubcategories.map((item) => (
                     <button
@@ -916,11 +969,22 @@ function CategorySelection({
 
   const matchingCategories = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return categories.filter((c: { parent_id: number }) => c.parent_id === 0);
-    return categories.filter(
-      (c: { parent_id: number; title: string }) =>
-        c.parent_id === 0 && c.title.toLowerCase().includes(q)
-    );
+    const rootCats = categories.filter((c: { parent_id?: number }) => (c.parent_id ?? 0) === 0);
+    if (!q) return rootCats;
+    return rootCats.filter((c: { id: number; parent_id?: number; title: string }) => {
+      const title = (LOKA_CATEGORY_TITLES[c.id] || c.title).toLowerCase();
+      const titleMatch = title.includes(q);
+      const aliasMatch =
+        (c.id === 8 && (q.startsWith("uni") || "unisex".includes(q) || "everyday fits".includes(q) || "fits".includes(q))) ||
+        (c.id === 1 && (q.startsWith("men") || "menswear".includes(q) || "men's".includes(q))) ||
+        (c.id === 2 && (q.startsWith("wom") || "womenswear".includes(q) || "women's".includes(q))) ||
+        (c.id === 3 && (q.startsWith("kid") || q.startsWith("youth") || "kids & youth".includes(q))) ||
+        (c.id === 4 && (q.startsWith("acc") || q.startsWith("essent") || "everyday essentials".includes(q))) ||
+        (c.id === 5 && (q.startsWith("hom") || q.startsWith("liv") || q.startsWith("studio") || "home & studio".includes(q))) ||
+        (c.id === 6 && (q.startsWith("mug") || q.startsWith("drink") || "drinkware studio".includes(q))) ||
+        (c.id === 7 && (q.startsWith("shoe") || q.startsWith("sock") || q.startsWith("foot") || q.startsWith("kick") || "footwear & kicks".includes(q)));
+      return titleMatch || aliasMatch;
+    });
   }, [searchQuery, categories]);
 
   const isSearchActive = searchQuery.trim().length > 0;
@@ -1103,16 +1167,19 @@ function CategorySelection({
 }
 
 function CategoryCard({ category, onSelect }: any) {
+  const displayTitle = LOKA_CATEGORY_TITLES[Number(category.id)] || category.title;
+  const coverImage = CATEGORY_HERO_IMAGES[Number(category.id)] || category.image_url || category.image || '/placeholder-product.png';
+
   return (
     <div
       className="bg-black border border-white/15 hover:border-primary/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(5,223,114,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 cursor-pointer"
-      onClick={() => onSelect(category)}
+      onClick={() => onSelect({ ...category, title: displayTitle, image_url: coverImage })}
     >
       <div className="aspect-square relative overflow-hidden bg-black">
         {/* Image with fallback */}
         <ImageWithFallback
-          src={category.image_url || category.image || '/placeholder-product.png'}
-          alt={category.title}
+          src={coverImage}
+          alt={displayTitle}
           fill
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -1122,7 +1189,7 @@ function CategoryCard({ category, onSelect }: any) {
       </div>
       <div className="p-3 sm:p-4 bg-black border-t border-white/10">
         <span className="font-bold text-white text-sm sm:text-lg text-center group-hover:text-orange-400 transition-colors block">
-          {category.title}
+          {displayTitle}
         </span>
       </div>
     </div>
@@ -1507,7 +1574,7 @@ function SubcategorySelection({ category, products, loading, onSelectSubcategory
         </Button>
         <div className="text-left">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
-            {category.title} Catalog
+            {LOKA_CATEGORY_TITLES[Number(category.id)] || category.title} Catalog
           </h2>
           <p className="text-xs sm:text-sm text-gray-400 font-bold">
             Select a subcategory to browse products
