@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
-import { TrendingUp, Zap, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { TrendingUp, Zap, Heart, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import { CreatorHero } from "@/components/products/CreatorHero";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
@@ -378,9 +378,28 @@ function CreatorShopContent() {
   };
 
   const clearFilters = useCallback(() => {
-    handleFilterChange("category", "");
+    const cleared = {
+      category: "",
+      search: "",
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      source: "all" as const,
+      minPrice: undefined,
+      maxPrice: undefined,
+    };
+    setFilters(cleared);
     setActiveView(null);
-  }, []);
+    updateURL(cleared);
+  }, [creatorSlug]);
+
+  const hasActiveFilters = Boolean(
+    filters.category ||
+    activeView !== null ||
+    filters.search ||
+    filters.source !== "all" ||
+    filters.minPrice !== undefined ||
+    filters.maxPrice !== undefined
+  );
 
   const handleViewChange = (view: ViewType) => {
     if (activeView === view) {
@@ -452,21 +471,37 @@ function CreatorShopContent() {
     if (prodCat === target) return true;
 
     // Specific gender/target rules to prevent cross-contamination (e.g. Men vs Women)
-    if (target === "men") {
+    if (target === "men" || target === "menswear") {
       if (prodCat.includes("women") || prodCat.includes("woman")) return false;
-      return prodCat.includes("men") || prodCat.includes("man") || prodCat.startsWith("men");
+      return prodCat.includes("men") || prodCat.includes("man") || prodCat.startsWith("men") || prodCat.includes("menswear");
     }
 
-    if (target === "women") {
-      return prodCat.includes("women") || prodCat.includes("woman") || prodCat.includes("womens");
+    if (target === "women" || target === "womenswear") {
+      return prodCat.includes("women") || prodCat.includes("woman") || prodCat.includes("womens") || prodCat.includes("womenswear");
     }
 
-    if (target === "kids") {
+    if (target === "kids" || target === "kids & youth" || target === "youth") {
       return prodCat.includes("kid") || prodCat.includes("child") || prodCat.includes("youth") || prodCat.includes("baby") || prodCat.includes("toddler");
     }
 
-    if (target === "unisex") {
-      return prodCat.includes("unisex");
+    if (target === "unisex" || target === "everyday fits" || target === "fits") {
+      return prodCat.includes("unisex") || prodCat.includes("everyday fits") || prodCat.includes("apparel") || prodCat.includes("fits");
+    }
+
+    if (target === "everyday essentials" || target === "accessories") {
+      return prodCat.includes("access") || prodCat.includes("essential") || prodCat.includes("bag") || prodCat.includes("case") || prodCat.includes("hat") || prodCat.includes("sticker");
+    }
+
+    if (target === "home & studio" || target === "home & living" || target === "home") {
+      return prodCat.includes("home") || prodCat.includes("living") || prodCat.includes("studio") || prodCat.includes("decor") || prodCat.includes("poster");
+    }
+
+    if (target === "drinkware studio" || target === "mugs & drinkware" || target === "mugs") {
+      return prodCat.includes("mug") || prodCat.includes("drink") || prodCat.includes("bottle") || prodCat.includes("tumbler") || prodCat.includes("cup");
+    }
+
+    if (target === "footwear & kicks" || target === "shoes & socks" || target === "shoes" || target === "socks") {
+      return prodCat.includes("shoe") || prodCat.includes("sock") || prodCat.includes("footwear") || prodCat.includes("kick");
     }
 
     // Exact or substring match on product category or tags
@@ -490,9 +525,20 @@ function CreatorShopContent() {
       if (p.status === 'deleted' || p.is_active === false || (p as any).deleted === true) return;
       const cat = p.category?.trim();
       if (!cat) return;
-      const key = cleanCat(cat);
+      let displayCatName = cat;
+      const lower = cat.toLowerCase();
+      if (lower === "men") displayCatName = "Menswear";
+      else if (lower === "women") displayCatName = "Womenswear";
+      else if (lower === "unisex") displayCatName = "Everyday Fits";
+      else if (lower === "kids") displayCatName = "Kids & Youth";
+      else if (lower === "accessories") displayCatName = "Everyday Essentials";
+      else if (lower === "home & living") displayCatName = "Home & Studio";
+      else if (lower === "mugs & drinkware") displayCatName = "Drinkware Studio";
+      else if (lower === "shoes & socks") displayCatName = "Footwear & Kicks";
+
+      const key = cleanCat(displayCatName);
       if (!counts[key]) {
-        counts[key] = { category: cat, count: 0 };
+        counts[key] = { category: displayCatName, count: 0 };
       }
       counts[key].count += 1;
     });
@@ -659,6 +705,17 @@ function CreatorShopContent() {
           {/* View Type Buttons */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center sm:justify-end mb-4">
             <div className="flex gap-2 sm:gap-3 items-center overflow-x-auto overflow-y-visible scrollbar-hide pb-2 xs:pb-0 -mx-4 xs:mx-0 px-4 xs:px-0">
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-1.5 flex-shrink-0 bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-400 hover:text-red-300 cursor-pointer shadow-sm"
+                  title="Clear all filters"
+                >
+                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span>Clear Filter</span>
+                </button>
+              )}
               <button
                 onClick={() => handleViewChange("trending")}
                 className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "trending"

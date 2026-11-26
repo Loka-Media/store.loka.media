@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { productAPI, ExtendedProduct } from "@/lib/api";
-import { TrendingUp, Zap, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { TrendingUp, Zap, Heart, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import { CreatorHero } from "@/components/products/CreatorHero";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
@@ -327,9 +327,28 @@ function CreatorShopContent() {
   };
 
   const clearFilters = useCallback(() => {
-    handleFilterChange("category", "");
+    const cleared = {
+      category: "",
+      search: "",
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      source: "all" as const,
+      minPrice: undefined,
+      maxPrice: undefined,
+    };
+    setFilters(cleared);
     setActiveView(null);
-  }, []);
+    updateURL(cleared);
+  }, [username]);
+
+  const hasActiveFilters = Boolean(
+    filters.category ||
+    activeView !== null ||
+    filters.search ||
+    filters.source !== "all" ||
+    filters.minPrice !== undefined ||
+    filters.maxPrice !== undefined
+  );
 
   const handleViewChange = (view: ViewType) => {
     if (activeView === view) {
@@ -512,6 +531,17 @@ function CreatorShopContent() {
           {/* View Type Buttons */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center sm:justify-end mb-4">
             <div className="flex gap-2 sm:gap-3 items-center overflow-x-auto overflow-y-visible scrollbar-hide pb-2 xs:pb-0 -mx-4 xs:mx-0 px-4 xs:px-0">
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-1.5 flex-shrink-0 bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-400 hover:text-red-300 cursor-pointer shadow-sm"
+                  title="Clear all filters"
+                >
+                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span>Clear Filter</span>
+                </button>
+              )}
               <button
                 onClick={() => handleViewChange("trending")}
                 className={`px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 flex-shrink-0 ${activeView === "trending"
