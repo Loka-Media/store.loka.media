@@ -821,12 +821,15 @@ function GlobalCatalogSearch({
 
                 <div className="space-y-1.5">
                   {productResults.slice(0, 8).map((product) => {
-                    const pppPrice = parseFloat(
+                    const rawPpp = parseFloat(
                       (product as any).premiumPrice ||
                         (product as any).cost ||
                         product.price ||
                         '0'
-                    ).toFixed(2);
+                    );
+                    const titleLower = (product.title || product.model || '').toLowerCase();
+                    const isApparelTop = titleLower.includes('t-shirt') || titleLower.includes('tee') || titleLower.includes('polo') || titleLower.includes('shirt') || titleLower.includes('top');
+                    const effectiveCost = (isApparelTop && rawPpp < 12) ? 19.94 : (rawPpp > 0 ? rawPpp : 19.94);
                     const resolvedCategory =
                       (Array.isArray(product.categoryIds) && product.categoryIds.length > 0
                         ? CATEGORIES_MAP.find((c) => c.id === product.categoryIds![0])?.title
@@ -835,7 +838,7 @@ function GlobalCatalogSearch({
                       resolveProductCategoryName(product) ||
                       product.title;
                     const lokaPrice = calculateSellingPrice(
-                      parseFloat(pppPrice),
+                      effectiveCost,
                       { ...product, category: resolvedCategory }
                     ).toFixed(2);
 
@@ -1321,7 +1324,17 @@ function PrintfulProductCard({
 }) {
   const { calculateSellingPrice } = useGlobalMarkup();
   const { formatPrice } = useCurrency();
-  const pppPrice = parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0').toFixed(2);
+  const rawPpp = parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0');
+  const effectiveBaseCost = useMemo(() => {
+    if (isNaN(rawPpp) || rawPpp <= 0) return 19.94;
+    const titleLower = (product.title || product.model || '').toLowerCase();
+    const isApparelTop = titleLower.includes('t-shirt') || titleLower.includes('tee') || titleLower.includes('polo') || titleLower.includes('shirt') || titleLower.includes('top');
+    if (isApparelTop && rawPpp < 12) {
+      return 19.94;
+    }
+    return rawPpp;
+  }, [rawPpp, product.title, product.model]);
+
   const effectiveCategory = useMemo(() => {
     if (categoryName && categoryName.trim() !== '') return categoryName;
     if (product.category && typeof product.category === 'string') return product.category;
@@ -1333,7 +1346,7 @@ function PrintfulProductCard({
     if (resolved && resolved !== 'Other') return resolved;
     return product.title;
   }, [categoryName, product]);
-  const lokaPrice = calculateSellingPrice(parseFloat(pppPrice), { ...product, category: effectiveCategory }).toFixed(2);
+  const lokaPrice = calculateSellingPrice(effectiveBaseCost, { ...product, category: effectiveCategory }).toFixed(2);
 
   return (
     <div className="bg-black border border-white/15 hover:border-primary/60 rounded-2xl overflow-hidden group hover:shadow-[0_15px_35px_rgba(5,223,114,0.25)] hover:translate-y-[-4px] transition-transform transition-shadow duration-300 flex flex-col">
@@ -1496,14 +1509,25 @@ function ProductDetailsModal({
                       <span className="text-gray-400">Standard Catalog Price (PBC):</span>{" "}
                       <span className="text-gray-400 line-through font-semibold">${parseFloat(product.price || '0').toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg">
-                      <span className="text-emerald-300 font-bold">Base Wholesale Price (PPP):</span>{" "}
-                      <span className="text-emerald-400 font-extrabold text-base">${parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0').toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="text-gray-400">Estimated Retail Price:</span>{" "}
-                      <span className="text-primary font-extrabold text-base">${calculateSellingPrice(parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0'), { ...product, category: effectiveCategory }).toFixed(2)}</span>
-                    </div>
+                    {(() => {
+                      const rawPpp = parseFloat((product as any).premiumPrice || (product as any).cost || product.price || '0');
+                      const titleLower = (product.title || product.model || '').toLowerCase();
+                      const isApparelTop = titleLower.includes('t-shirt') || titleLower.includes('tee') || titleLower.includes('polo') || titleLower.includes('shirt') || titleLower.includes('top');
+                      const effectiveBaseCost = (isApparelTop && rawPpp < 12) ? 19.94 : (rawPpp > 0 ? rawPpp : 19.94);
+                      const estimatedPrice = calculateSellingPrice(effectiveBaseCost, { ...product, category: effectiveCategory }).toFixed(2);
+                      return (
+                        <>
+                          <div className="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg">
+                            <span className="text-emerald-300 font-bold">Base Wholesale Price (PPP):</span>{" "}
+                            <span className="text-emerald-400 font-extrabold text-base">${effectiveBaseCost.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between items-center pt-2">
+                            <span className="text-gray-400">Estimated Retail Price:</span>{" "}
+                            <span className="text-primary font-extrabold text-base">${estimatedPrice}</span>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
 

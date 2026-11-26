@@ -144,7 +144,8 @@ class PrintifyPricingService {
           const bpIdStr = String(blueprintId);
           if (metaData[bpIdStr]) {
             const currentCost = metaData[bpIdStr].cost || metaData[bpIdStr].premiumPrice;
-            if (!currentCost || minCost < Number(currentCost) || Number(currentCost) === 5.57) {
+            const isBlankOnlyCost = currentCost && Number(currentCost) < 12;
+            if (!currentCost || isBlankOnlyCost || minCost < Number(currentCost) || Number(currentCost) === 5.57) {
               metaData[bpIdStr].cost = minCost;
               metaData[bpIdStr].premiumPrice = minCost.toFixed(2);
               metaData[bpIdStr].price = minCost.toFixed(2);

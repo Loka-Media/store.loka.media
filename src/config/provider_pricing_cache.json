@@ -7904,5 +7904,19 @@
       "63245": 50.87
     },
     "updatedAt": 1794667835072
+  },
+  "1349_99": {
+    "blueprintId": 1349,
+    "providerId": 99,
+    "minCost": 19.94,
+    "maxCost": 25.5,
+    "updatedAt": 1795694010380
+  },
+  "1402_99": {
+    "blueprintId": 1402,
+    "providerId": 99,
+    "minCost": 22.5,
+    "maxCost": 28.5,
+    "updatedAt": 1795694010380
   }
 }

@@ -6558,11 +6558,12 @@
   "1349": {
     "title": "Men's Everyday Heavy Oversized T-Shirt",
     "providerId": 99,
-    "price": "7.46",
-    "premiumPrice": "5.74",
+    "price": "19.94",
+    "premiumPrice": "19.94",
     "sizesCount": 9,
     "colorsCount": 24,
-    "providersCount": 7
+    "providersCount": 7,
+    "cost": 19.94
   },
   "1350": {
     "title": "Classic Heavy Cotton Pocket T-Shirt",
@@ -6838,11 +6839,12 @@
   "1402": {
     "title": "Men's Everyday Piqué Polo",
     "providerId": 99,
-    "price": "16.25",
-    "premiumPrice": "12.51",
+    "price": "22.50",
+    "premiumPrice": "22.50",
     "sizesCount": 8,
     "colorsCount": 7,
-    "providersCount": 4
+    "providersCount": 4,
+    "cost": 22.5
   },
   "1404": {
     "title": "Signature Softcover Journal (with Inside Prints)",

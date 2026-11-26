@@ -159,6 +159,9 @@ const BLUEPRINT_PRICE_DEFAULTS: Record<number, { price: number; premium: number;
   18: { price: 7.42, premium: 5.71, sizes: 6, colors: 24, providers: 5 },    // Next Level 1533 Ideal Racerback Tank
   706: { price: 12.39, premium: 9.54, sizes: 6, colors: 58, providers: 12 }, // Comfort Colors 1717 Unisex Garment Dyed Tee
   1296: { price: 31.00, premium: 23.85, sizes: 6, colors: 20, providers: 5 }, // Comfort Colors 1566 Garment Dyed Sweatshirt
+  1242: { price: 19.94, premium: 19.94, sizes: 4, colors: 22, providers: 5 }, // Men's Everyday Polyester T-Shirt - All-Over Print
+  1349: { price: 19.94, premium: 19.94, sizes: 9, colors: 24, providers: 7 }, // Men's Everyday Heavy Oversized T-Shirt
+  1402: { price: 22.50, premium: 22.50, sizes: 8, colors: 7, providers: 4 },  // Men's Everyday Piqué Polo
   1405: { price: 28.44, premium: 21.90, sizes: 6, colors: 14, providers: 2 }, // Comfort Colors 1466 Lightweight Sweatshirt
   1436: { price: 19.44, premium: 14.97, sizes: 7, colors: 16, providers: 4 }, // Gildan SF000 Midweight Sweatshirt
   1485: { price: 36.35, premium: 27.99, sizes: 7, colors: 20, providers: 3 }, // Men's Crewneck Sweatshirt (AOP)
