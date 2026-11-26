@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
         mime_type,
         created_at
       FROM user_artwork_library
-      WHERE user_id = $1
+      WHERE user_id = $1 AND (printify_file_id IS NULL OR printify_file_id NOT LIKE 'custom_%')
       ORDER BY created_at DESC`,
       [userId]
     );
@@ -130,6 +130,13 @@ export async function POST(request: NextRequest) {
     } = body;
 
     const effectiveFileId = String(printify_file_id || id || '').trim() || null;
+    if (effectiveFileId && effectiveFileId.startsWith('custom_')) {
+      return NextResponse.json({
+        success: true,
+        message: 'Custom product mockup is scoped to product and ignored from global artwork library',
+        data: null,
+      });
+    }
     const effectiveUrl = String(file_url || preview_url || thumbnail_url || '').trim();
     const effectiveFilename = String(filename || file_name || 'Artwork').trim();
 

@@ -147,7 +147,11 @@ function FilesPageContent() {
         if (saved) {
           const filesFromLS: any[] = JSON.parse(saved);
           if (Array.isArray(filesFromLS) && filesFromLS.length > 0) {
-            setFiles(filesFromLS.map(formatFile));
+            const validFiles = filesFromLS.filter((f: any) => {
+              const fId = String(f?.id || f?.printify_file_id || f?.file_id || '');
+              return !fId.startsWith('custom_') && !f?.isCustomUpload && f?.placement !== 'custom';
+            });
+            setFiles(validFiles.map(formatFile));
           }
         }
       } catch (_) {}
@@ -161,8 +165,12 @@ function FilesPageContent() {
       if (res.ok) {
         const json = await res.json();
         const dbFiles: any[] = Array.isArray(json?.data) ? json.data : [];
-        localStorage.setItem(userStorageKey, JSON.stringify(dbFiles));
-        setFiles(dbFiles.map(formatFile));
+        const validDbFiles = dbFiles.filter((f: any) => {
+          const fId = String(f?.id || f?.printify_file_id || f?.file_id || '');
+          return !fId.startsWith('custom_') && !f?.isCustomUpload && f?.placement !== 'custom';
+        });
+        localStorage.setItem(userStorageKey, JSON.stringify(validDbFiles));
+        setFiles(validDbFiles.map(formatFile));
       }
     } catch (error) {
       console.error('Failed to fetch files from database:', error);

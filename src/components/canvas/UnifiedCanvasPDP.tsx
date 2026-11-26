@@ -2891,28 +2891,7 @@ const UnifiedCanvasPDP: React.FC<UnifiedCanvasPDPProps> = ({
           console.warn("Direct image upload warning, using local preview:", err);
         }
 
-        // Save to user's artwork library in PostgreSQL so it also persists in their uploaded files
-        try {
-          await fetch("/api/creator/artworks", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({
-              printify_file_id: printifyUploadId,
-              file_url: finalUrl,
-              preview_url: finalUrl,
-              thumbnail_url: finalUrl,
-              filename: file.name,
-              size: file.size,
-              mime_type: file.type || "image/png",
-            }),
-          });
-        } catch (artErr) {
-          console.warn("Artwork library sync notice:", artErr);
-        }
-
+        // Custom image is saved specifically for this product mockup gallery, not added to global Artwork Library
         newItems.push({
           url: finalUrl,
           src: finalUrl,

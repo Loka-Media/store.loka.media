@@ -767,9 +767,13 @@ function CanvasContent() {
         if (saved) {
           const userFiles: any[] = JSON.parse(saved);
           if (Array.isArray(userFiles) && userFiles.length > 0) {
-            const paginated = userFiles.slice((page - 1) * 12, page * 12);
+            const validArtworks = userFiles.filter((f: any) => {
+              const fId = String(f?.id || f?.printify_file_id || f?.file_id || '');
+              return !fId.startsWith('custom_') && !f?.isCustomUpload && f?.placement !== 'custom';
+            });
+            const paginated = validArtworks.slice((page - 1) * 12, page * 12);
             setUploadedFiles(paginated);
-            setTotalPages(Math.ceil(userFiles.length / 12) || 1);
+            setTotalPages(Math.ceil(validArtworks.length / 12) || 1);
           }
         }
       } catch (_) {}
@@ -783,14 +787,18 @@ function CanvasContent() {
       if (res.ok) {
         const json = await res.json();
         const dbFiles: any[] = Array.isArray(json?.data) ? json.data : [];
+        const validDbFiles = dbFiles.filter((f: any) => {
+          const fId = String(f?.id || f?.printify_file_id || f?.file_id || '');
+          return !fId.startsWith('custom_') && !f?.isCustomUpload && f?.placement !== 'custom';
+        });
 
         // Save fresh database records to user-scoped cache
-        localStorage.setItem(userStorageKey, JSON.stringify(dbFiles));
+        localStorage.setItem(userStorageKey, JSON.stringify(validDbFiles));
 
-        const paginated = dbFiles.slice((page - 1) * 12, page * 12);
+        const paginated = validDbFiles.slice((page - 1) * 12, page * 12);
         setUploadedFiles(paginated);
         setCurrentPage(page);
-        setTotalPages(Math.ceil(dbFiles.length / 12) || 1);
+        setTotalPages(Math.ceil(validDbFiles.length / 12) || 1);
       }
     } catch (error) {
       console.error("Failed to load user files from database:", error);
